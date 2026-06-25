@@ -1,0 +1,23 @@
+{
+	"name": "@repo/api-client",
+	"version": "0.0.0",
+	"private": true,
+	"exports": {
+		".": "./src/index.ts"
+	},
+	"scripts": {
+		"lint": "eslint . --max-warnings 0",
+		"check-types": "tsc --noEmit",
+		"gen:api": "openapi-typescript ./openapi.json -o src/generated/schema.d.ts"
+	},
+	"devDependencies": {
+		"@repo/eslint-config": "workspace:*",
+		"@repo/typescript-config": "workspace:*",
+		"eslint": "^9.39.1",
+		"openapi-typescript": "^7.13.0",
+		"typescript": "5.9.2"
+	},
+	"dependencies": {
+		"axios": "^1.18.1"
+	}
+}
