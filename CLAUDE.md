@@ -90,7 +90,20 @@ one that diverges.
 - **Testing:** Vitest + React Testing Library + MSW; Playwright for critical E2E
 - **Quality:** ESLint (flat config) + Prettier + `prettier-plugin-tailwindcss`, husky +
   lint-staged
-- **Package manager:** **pnpm** (use `pnpm`, not `npm`/`yarn`) · **Node:** see `.nvmrc`
+
+---
+
+## UI Design System
+
+- Use shadcn/ui for ALL components. Never write raw HTML buttons, inputs, etc.
+- Theme tokens live in `tailwind.config.ts` and `globals.css` (CSS variables)
+- Forms: always use `FieldGroup` + React Hook Form + Zod
+- Icons: use `lucide-react` only
+
+## Component Rules
+- Buttons: use `<Button variant="...">` — variants: default, outline, ghost, destructive
+- Layout: use `Card`, `Separator`, `Sheet` for structure
+- No inline styles. No hardcoded hex colors.
 
 ---
 
@@ -99,27 +112,7 @@ one that diverges.
 > These are the standard scripts. They run through Turbo at the repo root and scope to the
 > affected packages. (Scaffolding of the toolchain itself is a separate, approved step.)
 
-```bash
-pnpm install                  # install all workspace deps
-
-# Develop
-pnpm dev                      # run the staff app in dev (Vite, HMR)
-pnpm --filter staff dev       # run a specific app
-
-# Quality (run before every PR)
-pnpm lint                     # eslint across the workspace
-pnpm typecheck                # tsc --noEmit across the workspace
-pnpm test                     # unit/component tests (Vitest)
-pnpm test:watch               # vitest in watch mode
-pnpm test:e2e                 # Playwright E2E (critical flows)
-pnpm format                   # prettier --write
-
-# Build
-pnpm build                    # build all apps/packages (Turbo, cached)
-
-# API types
-pnpm gen:api                  # regenerate OpenAPI types from the backend spec
-```
+Package manager is **pnpm**; See @package.json for available npm commands.
 
 A pre-commit hook (husky + lint-staged) runs prettier/eslint on staged files. See
 [docs/contributing.md](docs/contributing.md).
@@ -174,5 +167,4 @@ users carry a `branchScope`; the active branch is a client-state value injected 
 queries. See [docs/auth-and-rbac.md](docs/auth-and-rbac.md).
 
 **Authorization in the UI is cosmetic.** The server is the source of truth for permissions.
-Gate navigation and actions with `<Can>` / `usePermissions()` for UX, but never rely on
-client gating for security.
+Gate navigation and actions with `<Can>` / `usePermissions()` for UX, but never rely on client gating for security.
