@@ -1,0 +1,17 @@
+{
+	"printWidth": 90,
+	"useTabs": true,
+	"tabWidth": 4,
+	"semi": true,
+	"singleQuote": true,
+	"quoteProps": "consistent",
+	"bracketSpacing": true,
+	"trailingComma": "all",
+	"arrowParens": "always",
+	"endOfLine": "lf",
+	"overrides": [{ "files": ["*.yml", "*.yaml"], "options": { "tabWidth": 2 } }],
+	"importOrder": ["^~(.*)$", "^[./*]", ".css"],
+	"importOrderSeparation": true,
+	"importOrderSortSpecifiers": true,
+	"importOrderCaseInsensitive": true
+}
