@@ -1,13 +1,14 @@
 import { useState } from 'react';
 import { Link, useRouterState } from '@tanstack/react-router';
 import {
-	Activity,
 	Building2,
 	ChevronLeft,
 	ChevronRight,
 	CreditCard,
 	LayoutDashboard,
+	Receipt,
 	ScrollText,
+	Settings,
 	Shield,
 	Users,
 } from 'lucide-react';
@@ -23,18 +24,59 @@ type NavItemDef = {
 	match: string;
 };
 
-const PLATFORM_ITEMS: NavItemDef[] = [
-	{ id: 'dashboard', label: 'Dashboard', Icon: LayoutDashboard, href: '/', match: '/' },
-	{ id: 'tenants', label: 'Tenants', Icon: Building2, href: '/tenants', match: '/tenants' },
-	// TODO: href → '/plans' once route exists
-	{ id: 'plans', label: 'Plans', Icon: CreditCard, href: '/', match: '/plans' },
+const OVERVIEW_ITEMS: NavItemDef[] = [
+	{
+		id: 'dashboard',
+		label: 'Platform Dashboard',
+		Icon: LayoutDashboard,
+		href: '/',
+		match: '/',
+	},
 ];
 
-const SYSTEM_ITEMS: NavItemDef[] = [
-	// TODO: href → '/users' once route exists
-	{ id: 'users', label: 'Users', Icon: Users, href: '/', match: '/users' },
+const CUSTOMERS_ITEMS: NavItemDef[] = [
+	{
+		id: 'tenants',
+		label: 'Tenants',
+		Icon: Building2,
+		href: '/tenants',
+		match: '/tenants',
+	},
+	{
+		id: 'users',
+		label: 'User Directory',
+		Icon: Users,
+		href: '/users',
+		match: '/users',
+	},
+];
+
+const REVENUE_ITEMS: NavItemDef[] = [
+	{
+		id: 'subscription-plans',
+		label: 'Subscription Plans',
+		Icon: CreditCard,
+		href: '/subscription-plans',
+		match: '/subscription-plans',
+	},
+	{
+		id: 'subscriptions',
+		label: 'Subscriptions',
+		Icon: Receipt,
+		href: '/subscriptions',
+		match: '/subscriptions',
+	},
+];
+
+const PLATFORM_ITEMS: NavItemDef[] = [
 	// TODO: href → '/roles' once route exists
-	{ id: 'roles', label: 'Roles', Icon: Shield, href: '/', match: '/roles' },
+	{
+		id: 'roles',
+		label: 'Role Templates',
+		Icon: Shield,
+		href: '/',
+		match: '/roles',
+	},
 	// TODO: href → '/audit-log' once route exists
 	{
 		id: 'audit-log',
@@ -43,11 +85,14 @@ const SYSTEM_ITEMS: NavItemDef[] = [
 		href: '/',
 		match: '/audit-log',
 	},
-];
-
-const BOTTOM_ITEMS: NavItemDef[] = [
-	// TODO: href → '/health' once route exists
-	{ id: 'health', label: 'System Health', Icon: Activity, href: '/', match: '/health' },
+	// TODO: href → '/settings' once route exists
+	{
+		id: 'settings',
+		label: 'Settings',
+		Icon: Settings,
+		href: '/',
+		match: '/settings',
+	},
 ];
 
 function NavItemLink({
@@ -147,28 +192,31 @@ export function ConsoleSidebar() {
 		>
 			<nav className="flex flex-1 flex-col gap-4 overflow-y-auto p-3">
 				<NavGroup
-					label="Platform"
-					items={PLATFORM_ITEMS}
+					label="Overview"
+					items={OVERVIEW_ITEMS}
 					collapsed={collapsed}
 					pathname={pathname}
 				/>
 				<NavGroup
-					label="System"
-					items={SYSTEM_ITEMS}
+					label="Customers"
+					items={CUSTOMERS_ITEMS}
 					collapsed={collapsed}
 					pathname={pathname}
 				/>
-
-				<div className="mt-auto flex flex-col gap-0.5">
-					<Separator className="mb-3 bg-(--console-line)" />
-					{BOTTOM_ITEMS.map((item) => (
-						<NavItem
-							key={item.id}
-							item={item}
-							collapsed={collapsed}
-							pathname={pathname}
-						/>
-					))}
+				<NavGroup
+					label="Revenue"
+					items={REVENUE_ITEMS}
+					collapsed={collapsed}
+					pathname={pathname}
+				/>
+				<div className="mt-auto flex flex-col gap-4">
+					<Separator className="bg-(--console-line)" />
+					<NavGroup
+						label="Platform"
+						items={PLATFORM_ITEMS}
+						collapsed={collapsed}
+						pathname={pathname}
+					/>
 				</div>
 			</nav>
 

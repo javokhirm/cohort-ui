@@ -15,6 +15,11 @@ import { DashboardPage } from '../routes/dashboard';
 import { TenantsPage } from '../routes/tenants/index';
 import { TenantDetailPage } from '../routes/tenants/$tenantId/index';
 import { OnboardTenantPage } from '../routes/tenants/onboard';
+import { SubscriptionPlansPage } from '../routes/subscription-plans/index';
+import { SubscriptionsPage } from '../routes/subscriptions/index';
+import { UserDirectoryPage } from '../routes/users/index';
+import { UserDetailPage } from '../routes/users/$userId/index';
+import { ProfilePage } from '../routes/profile/index';
 import { ForbiddenPage } from '../routes/forbidden';
 
 const rootRoute = createRootRoute({
@@ -84,6 +89,36 @@ const tenantOnboardRoute = createRoute({
 	component: OnboardTenantPage,
 });
 
+const subscriptionPlansRoute = createRoute({
+	getParentRoute: () => authedRoute,
+	path: '/subscription-plans',
+	component: SubscriptionPlansPage,
+});
+
+const subscriptionsRoute = createRoute({
+	getParentRoute: () => authedRoute,
+	path: '/subscriptions',
+	component: SubscriptionsPage,
+});
+
+const userIndexRoute = createRoute({
+	getParentRoute: () => authedRoute,
+	path: '/users',
+	component: UserDirectoryPage,
+});
+
+const userDetailRoute = createRoute({
+	getParentRoute: () => authedRoute,
+	path: '/users/$userId',
+	component: UserDetailPage,
+});
+
+const profileRoute = createRoute({
+	getParentRoute: () => authedRoute,
+	path: '/profile',
+	component: ProfilePage,
+});
+
 const routeTree = rootRoute.addChildren([
 	loginRoute,
 	forbiddenRoute,
@@ -92,6 +127,11 @@ const routeTree = rootRoute.addChildren([
 		tenantIndexRoute,
 		tenantOnboardRoute,
 		tenantDetailRoute,
+		subscriptionPlansRoute,
+		subscriptionsRoute,
+		userIndexRoute,
+		userDetailRoute,
+		profileRoute,
 	]),
 ]);
 
