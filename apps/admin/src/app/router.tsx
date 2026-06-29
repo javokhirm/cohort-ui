@@ -14,6 +14,7 @@ import { AuthedLayout } from '../routes/authed-layout';
 import { DashboardPage } from '../routes/dashboard';
 import { TenantsPage } from '../routes/tenants/index';
 import { TenantDetailPage } from '../routes/tenants/$tenantId/index';
+import { OnboardTenantPage } from '../routes/tenants/onboard';
 import { ForbiddenPage } from '../routes/forbidden';
 
 const rootRoute = createRootRoute({
@@ -77,10 +78,21 @@ const tenantDetailRoute = createRoute({
 	component: TenantDetailPage,
 });
 
+const tenantOnboardRoute = createRoute({
+	getParentRoute: () => authedRoute,
+	path: '/tenants/onboard',
+	component: OnboardTenantPage,
+});
+
 const routeTree = rootRoute.addChildren([
 	loginRoute,
 	forbiddenRoute,
-	authedRoute.addChildren([dashboardRoute, tenantIndexRoute, tenantDetailRoute]),
+	authedRoute.addChildren([
+		dashboardRoute,
+		tenantIndexRoute,
+		tenantOnboardRoute,
+		tenantDetailRoute,
+	]),
 ]);
 
 export const router = createRouter({

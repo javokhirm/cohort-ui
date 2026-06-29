@@ -171,7 +171,11 @@ export function TenantsPage() {
 						total
 					</p>
 				</div>
-				<Button disabled>+ Onboard center</Button>
+				<Button
+					onClick={() => void navigate({ to: '/tenants/onboard' as never })}
+				>
+					+ Onboard center
+				</Button>
 			</div>
 
 			{/* ── KPI strip ────────────────────────────────────────────────── */}

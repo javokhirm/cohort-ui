@@ -18,7 +18,6 @@ import {
 	UserPlus,
 	Users,
 	Wallet,
-	XCircle,
 } from 'lucide-react';
 
 import {
