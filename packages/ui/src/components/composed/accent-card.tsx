@@ -1,4 +1,4 @@
-import { StatusTone } from '@repo/ui/lib/status';
+import type { StatusTone } from '@repo/ui/lib/status';
 import { cn } from '@repo/ui/lib/utils';
 import * as React from 'react';
 

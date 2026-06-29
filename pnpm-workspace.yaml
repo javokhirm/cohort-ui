@@ -1,3 +1,11 @@
 packages:
   - "apps/*"
   - "packages/*"
+
+# Force a single copy of React (and its types) across the workspace so apps and
+# packages share one instance — avoids duplicate react/react-hook-form trees.
+overrides:
+  react: 19.2.7
+  react-dom: 19.2.7
+  "@types/react": 19.2.17
+  "@types/react-dom": 19.2.3

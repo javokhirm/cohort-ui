@@ -1,6 +1,6 @@
 import * as React from 'react';
 import { BookOpen, MapPin, Users } from 'lucide-react';
-import { StatusKind } from '@repo/ui/lib/status';
+import type { StatusKind } from '@repo/ui/lib/status';
 import { cn } from '@repo/ui/lib/utils';
 import { StatusBadge } from '../status-badge';
 import { Button } from '../button';
