@@ -12,6 +12,8 @@ import { useSessionStore } from '../lib/auth/session-store';
 import { LoginRoute } from '../routes/login';
 import { AuthedLayout } from '../routes/authed-layout';
 import { DashboardPage } from '../routes/dashboard';
+import { TenantsPage } from '../routes/tenants/index';
+import { TenantDetailPage } from '../routes/tenants/$tenantId/index';
 import { ForbiddenPage } from '../routes/forbidden';
 
 const rootRoute = createRootRoute({
@@ -29,7 +31,8 @@ const loginRoute = createRoute({
 	validateSearch: (search: Record<string, unknown>): { next?: string } => {
 		const next = typeof search.next === 'string' ? search.next : undefined;
 		// Same-origin path only — defends against open redirects via `next`.
-		const safe = next && next.startsWith('/') && !next.startsWith('//') ? next : undefined;
+		const safe =
+			next && next.startsWith('/') && !next.startsWith('//') ? next : undefined;
 		return { next: safe };
 	},
 	beforeLoad: () => {
@@ -62,10 +65,22 @@ const dashboardRoute = createRoute({
 	component: DashboardPage,
 });
 
+const tenantIndexRoute = createRoute({
+	getParentRoute: () => authedRoute,
+	path: '/tenants',
+	component: TenantsPage,
+});
+
+const tenantDetailRoute = createRoute({
+	getParentRoute: () => authedRoute,
+	path: '/tenants/$tenantId',
+	component: TenantDetailPage,
+});
+
 const routeTree = rootRoute.addChildren([
 	loginRoute,
 	forbiddenRoute,
-	authedRoute.addChildren([dashboardRoute]),
+	authedRoute.addChildren([dashboardRoute, tenantIndexRoute, tenantDetailRoute]),
 ]);
 
 export const router = createRouter({
