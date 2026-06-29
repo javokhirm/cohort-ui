@@ -1,4 +1,4 @@
-// Primitives
+// ─── shadcn/ui primitives ────────────────────────────────────────────────────
 export * from './components/alert';
 export * from './components/avatar';
 export * from './components/badge';
@@ -26,12 +26,31 @@ export * from './components/tabs';
 export * from './components/textarea';
 export * from './components/tooltip';
 
-// Composed
+// ─── Composed — EduCore domain components ────────────────────────────────────
 export * from './components/empty-state';
 export * from './components/page-header';
 export * from './components/stat-card';
 export * from './components/status-badge';
+// Data display
+export * from './components/composed/detail-rows';
+export * from './components/composed/progress-bar';
+export * from './components/composed/session-card';
+export * from './components/composed/week-strip';
+// Inputs & controls
+export * from './components/composed/confirm-dialog';
+export * from './components/composed/locale-switcher';
+export * from './components/composed/otp-input';
+export * from './components/composed/search-filter-bar';
+// Layout utilities
+export * from './components/composed/accent-card';
 
-// Utilities
+// ─── Shell — app layout components ───────────────────────────────────────────
+export * from './components/shell/app-sidebar';
+export * from './components/shell/app-topbar';
+export * from './components/shell/bottom-tab-bar';
+export * from './components/shell/notification-bell';
+export * from './components/shell/sticky-action-bar';
+
+// ─── Utilities ────────────────────────────────────────────────────────────────
 export { cn } from './lib/utils';
 export * from './lib/status';

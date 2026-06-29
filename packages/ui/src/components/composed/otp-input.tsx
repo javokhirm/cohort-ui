@@ -1,0 +1,85 @@
+import { cn } from '@repo/ui/lib/utils';
+import * as React from 'react';
+
+interface OtpInputProps extends Omit<React.ComponentProps<'div'>, 'onChange'> {
+	/** Number of digit cells. Default: 6. */
+	length?: number;
+	value?: string;
+	onChange?: (value: string) => void;
+	autoFocus?: boolean;
+	error?: boolean;
+}
+
+/**
+ * 6-digit (or N-digit) OTP code entry used in the forgot-password flow (TEACH,
+ * PORTAL) and the 2FA step (ADMIN). Handles paste, auto-advance, and backspace.
+ */
+function OtpInput({
+	className,
+	length = 6,
+	value = '',
+	onChange,
+	autoFocus,
+	error,
+	...props
+}: OtpInputProps) {
+	const refs = React.useRef<(HTMLInputElement | null)[]>([]);
+	const digits = Array.from({ length }, (_, i) => value[i] ?? '');
+
+	function update(index: number, char: string) {
+		const digit = char.replace(/\D/g, '').slice(-1);
+		const next = digits.map((d, i) => (i === index ? digit : d)).join('');
+		onChange?.(next);
+		if (digit && index < length - 1) refs.current[index + 1]?.focus();
+	}
+
+	function handleKeyDown(index: number, e: React.KeyboardEvent<HTMLInputElement>) {
+		if (e.key === 'Backspace' && !digits[index] && index > 0) {
+			refs.current[index - 1]?.focus();
+		}
+	}
+
+	function handlePaste(e: React.ClipboardEvent) {
+		e.preventDefault();
+		const pasted = e.clipboardData
+			.getData('text')
+			.replace(/\D/g, '')
+			.slice(0, length);
+		onChange?.(pasted.padEnd(length, '').slice(0, length));
+		refs.current[Math.min(pasted.length, length - 1)]?.focus();
+	}
+
+	return (
+		<div
+			data-slot="otp-input"
+			className={cn('flex justify-between gap-2', className)}
+			{...props}
+		>
+			{digits.map((digit, i) => (
+				<input
+					key={i}
+					ref={(el) => {
+						refs.current[i] = el;
+					}}
+					type="text"
+					inputMode="numeric"
+					maxLength={1}
+					value={digit}
+					autoFocus={autoFocus && i === 0}
+					onChange={(e) => update(i, e.target.value)}
+					onKeyDown={(e) => handleKeyDown(i, e)}
+					onPaste={i === 0 ? handlePaste : undefined}
+					className={cn(
+						'h-14 w-12 rounded-xl border bg-background text-center text-[22px] font-bold tabular-nums text-foreground transition-colors focus:outline-none focus:ring-2',
+						error
+							? 'border-destructive focus:border-destructive focus:ring-destructive/20'
+							: 'border-input focus:border-primary focus:ring-primary/20',
+					)}
+				/>
+			))}
+		</div>
+	);
+}
+
+export { OtpInput };
+export type { OtpInputProps };

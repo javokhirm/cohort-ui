@@ -6,7 +6,9 @@
 		".": "./src/index.ts",
 		"./globals.css": "./src/globals.css",
 		"./lib/utils": "./src/lib/utils.ts",
-		"./components/*": "./src/components/*.tsx"
+		"./components/*": "./src/components/*.tsx",
+		"./composed/*": "./src/components/composed/*.tsx",
+		"./shell/*": "./src/components/shell/*.tsx"
 	},
 	"scripts": {
 		"lint": "eslint . --max-warnings 0",
