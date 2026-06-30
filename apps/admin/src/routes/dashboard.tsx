@@ -44,10 +44,15 @@ import {
 	StatusBadge,
 } from '@repo/ui';
 
-import { formatPriceCompact, formatPriceAxis } from '@/lib/formatters/currency';
+import {
+	formatPercent,
+	formatPriceAxis,
+	formatPriceCompact,
+} from '@/lib/formatters/currency';
 import type { DashboardKpis } from '@/api/dashboard/types';
 import { dashboardKeys } from '@/api/dashboard/keys';
 import { getDashboard } from '@/api/dashboard/dashboard.queries';
+import { formatNumber } from '@/lib/formatters/amount';
 
 // ─── Constants ────────────────────────────────────────────────────────────────
 
@@ -90,7 +95,6 @@ function TrendChip({ value, upIsGood = true }: { value: number; upIsGood?: boole
 	const isUp = value >= 0;
 	const isGood = upIsGood ? isUp : !isUp;
 	const Icon = isUp ? TrendingUp : TrendingDown;
-	const abs = Math.abs(value).toFixed(1);
 	return (
 		<span
 			className={`inline-flex items-center gap-1 text-xs font-semibold tabular-nums ${
@@ -98,7 +102,7 @@ function TrendChip({ value, upIsGood = true }: { value: number; upIsGood?: boole
 			}`}
 		>
 			<Icon className="size-3" />
-			{abs}%
+			{formatPercent(Math.abs(value))}
 		</span>
 	);
 }
@@ -185,7 +189,7 @@ function DashboardContent({ data }: { data: DashboardKpis }) {
 				/>
 				<StatCard
 					label="Total Students"
-					value={data.students.active.toLocaleString()}
+					value={formatNumber(data.students.active)}
 					icon={<Users />}
 				/>
 				<StatCard
@@ -196,7 +200,7 @@ function DashboardContent({ data }: { data: DashboardKpis }) {
 				/>
 				<StatCard
 					label="Churn Rate"
-					value={`${data.mrr.churnRate.toFixed(1)}%`}
+					value={formatPercent(data.mrr.churnRate)}
 					icon={<Activity />}
 					delta={{
 						value: <TrendChip value={data.mrr.churnRate} upIsGood={false} />,
@@ -409,7 +413,7 @@ function DashboardContent({ data }: { data: DashboardKpis }) {
 								label: 'MRR growth',
 								value:
 									data.mrr.growth != null
-										? `${data.mrr.growth > 0 ? '+' : ''}${data.mrr.growth.toFixed(1)}%`
+										? `${data.mrr.growth > 0 ? '+' : ''}${formatPercent(data.mrr.growth)}`
 										: '—',
 								tone:
 									(data.mrr.growth ?? 0) >= 0

@@ -3,6 +3,7 @@ import { GraduationCap, MapPin, Users, Wallet } from 'lucide-react';
 import { Card, CardContent, CardHeader, CardTitle } from '@repo/ui';
 
 import type { TenantDetailView } from '@/api/tenants/types';
+import { formatPrice } from '@/lib/formatters/currency';
 
 export function OverviewTab({ tenant }: { tenant: TenantDetailView }) {
 	const { stats } = tenant;
@@ -54,9 +55,7 @@ export function OverviewTab({ tenant }: { tenant: TenantDetailView }) {
 						<p className="mt-2 text-2xl font-bold tabular-nums">
 							{(stats.monthlyRevenue ?? 0) === 0
 								? '—'
-								: new Intl.NumberFormat('ru-RU').format(
-										stats.monthlyRevenue!,
-									)}
+								: formatPrice(stats.monthlyRevenue!)}
 						</p>
 						<p className="text-xs text-muted-foreground">
 							{stats.currency ?? tenant.defaultCurrency}

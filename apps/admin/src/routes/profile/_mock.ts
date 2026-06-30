@@ -3,7 +3,7 @@
 export const MOCK_SECURITY = {
 	twoFactor: {
 		enabled: true,
-		method: 'Authenticator app',
+		method: 'Email OTP',
 		enforced: true,
 	},
 	sessions: {

@@ -1,4 +1,5 @@
 import type { PlanView } from '@/api/plans/types';
+import { formatNumber } from '@/lib/formatters/amount';
 
 export type OnboardStep = 1 | 2 | 3 | 4 | 5 | 6;
 
@@ -40,6 +41,6 @@ export function planLimits(plan: PlanView): string {
 	const students =
 		plan.maxStudents === null
 			? 'Unlimited students'
-			: `${plan.maxStudents.toLocaleString('ru-RU')} students`;
+			: `${formatNumber(plan.maxStudents)} students`;
 	return `${branches} · ${students}`;
 }

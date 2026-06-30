@@ -26,6 +26,8 @@ import { tenantsKeys } from '@/api/tenants/keys';
 import { listTenants, getTenantSummary } from '@/api/tenants/tenants.queries';
 import type { SubscriptionStatus, TenantStatus } from '@/api/tenants/types';
 import { avatarClass, getInitials } from '@/features/tenants/utils';
+import { formatPrice, formatPriceAxis } from '@/lib/formatters/currency';
+import { formatNumber } from '@/lib/formatters/amount';
 
 // ─── Status maps ──────────────────────────────────────────────────────────────
 
@@ -72,17 +74,6 @@ const STATUS_TABS: { value: StatusTab; label: string }[] = [
 ];
 
 // ─── Helpers ──────────────────────────────────────────────────────────────────
-
-function formatMrrKpi(uzs: number): string {
-	if (uzs >= 1_000_000_000) return `${(uzs / 1_000_000_000).toFixed(1)}B`;
-	if (uzs >= 1_000_000) return `${(uzs / 1_000_000).toFixed(1)}M`;
-	return `${(uzs / 1_000).toFixed(0)}K`;
-}
-
-function formatMrrRow(uzs: number): string {
-	if (uzs === 0) return '—';
-	return new Intl.NumberFormat('ru-RU').format(uzs);
-}
 
 // ─── Screen ───────────────────────────────────────────────────────────────────
 
@@ -211,7 +202,7 @@ export function TenantsScreen() {
 						<p className="text-xs text-muted-foreground">Total MRR</p>
 						{summary ? (
 							<p className="mt-1 text-2xl font-bold">
-								{formatMrrKpi(summary.totalMrr)}
+								{formatPriceAxis(summary.totalMrr)}
 							</p>
 						) : (
 							<Skeleton className="mt-2 h-7 w-20" />
@@ -397,11 +388,11 @@ export function TenantsScreen() {
 									</TableCell>
 
 									<TableCell className="text-right tabular-nums">
-										{tenant.students.toLocaleString('ru-RU')}
+										{formatNumber(tenant.students)}
 									</TableCell>
 
 									<TableCell className="text-right tabular-nums text-sm">
-										{formatMrrRow(tenant.mrr)}
+										{tenant.mrr === 0 ? '—' : formatPrice(tenant.mrr)}
 									</TableCell>
 								</TableRow>
 							))

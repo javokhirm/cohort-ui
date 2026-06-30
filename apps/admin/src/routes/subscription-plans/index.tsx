@@ -34,6 +34,7 @@ import { plansKeys } from '@/api/plans/keys';
 import { listPlans } from '@/api/plans/plans.queries';
 import { createPlan, updatePlan } from '@/api/plans/plans.mutations';
 import type { PlanView } from '@/api/plans/types';
+import { formatNumber } from '@/lib/formatters/amount';
 
 // ─── Constants ────────────────────────────────────────────────────────────────
 
@@ -65,7 +66,7 @@ const ALL_FEATURES = Object.keys(FEATURE_LABELS) as FeatureKey[];
 
 function limitLabel(value: number | null, unit: string): string {
 	if (value === null) return `Unlimited ${unit}`;
-	return `${new Intl.NumberFormat('ru-RU').format(value)} ${unit}`;
+	return `${formatNumber(value)} ${unit}`;
 }
 
 function planFeatures(plan: PlanView): FeatureKey[] {

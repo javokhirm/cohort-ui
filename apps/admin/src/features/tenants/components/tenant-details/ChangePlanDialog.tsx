@@ -23,6 +23,7 @@ import type { PlanView } from '@/api/plans/types';
 import { tenantsKeys } from '@/api/tenants/keys';
 import { changeTenantPlan } from '@/api/tenants/tenants.mutations';
 import type { BillingInterval } from '@/api/tenants/types';
+import { formatPrice } from '@/lib/formatters/currency';
 
 function planLimitLabel(plan: PlanView): string {
 	const students =
@@ -202,7 +203,7 @@ export function ChangePlanDialog({
 													<p className="text-sm font-semibold tabular-nums">
 														{price === 0
 															? 'Custom'
-															: `${new Intl.NumberFormat('ru-RU').format(price)} UZS`}
+															: `${formatPrice(price)} UZS`}
 													</p>
 													{price > 0 && (
 														<p className="text-xs text-muted-foreground">
@@ -294,7 +295,7 @@ export function ChangePlanDialog({
 									<span className="text-base font-bold tabular-nums">
 										{priceFor(selectedPlan) === 0
 											? 'Custom pricing'
-											: `${new Intl.NumberFormat('ru-RU').format(priceFor(selectedPlan))} UZS${priceSuffix}`}
+											: `${formatPrice(priceFor(selectedPlan))} UZS${priceSuffix}`}
 									</span>
 								</div>
 							)}
