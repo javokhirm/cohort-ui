@@ -44,7 +44,7 @@ import {
 	StatusBadge,
 } from '@repo/ui';
 
-import { formatUzsCompact, formatUzsAxis } from '@/lib/formatters/currency';
+import { formatPriceCompact, formatPriceAxis } from '@/lib/formatters/currency';
 import type { DashboardKpis } from '@/api/dashboard/types';
 import { dashboardKeys } from '@/api/dashboard/keys';
 import { getDashboard } from '@/api/dashboard/dashboard.queries';
@@ -173,7 +173,7 @@ function DashboardContent({ data }: { data: DashboardKpis }) {
 				/>
 				<StatCard
 					label="MRR"
-					value={formatUzsCompact(data.mrr.current)}
+					value={formatPriceCompact(data.mrr.current)}
 					icon={<Wallet />}
 					delta={{
 						value:
@@ -231,7 +231,7 @@ function DashboardContent({ data }: { data: DashboardKpis }) {
 									tick={{ fill: '#64748b', fontSize: 11 }}
 									axisLine={false}
 									tickLine={false}
-									tickFormatter={(v: number) => formatUzsAxis(v)}
+									tickFormatter={(v: number) => formatPriceAxis(v)}
 									width={36}
 								/>
 								<Tooltip contentStyle={TOOLTIP_STYLE} />
@@ -420,7 +420,7 @@ function DashboardContent({ data }: { data: DashboardKpis }) {
 								label: 'Revenue collected',
 								value:
 									data.revenue.processedThisMonth > 0
-										? formatUzsCompact(
+										? formatPriceCompact(
 												data.revenue.processedThisMonth,
 											)
 										: '—',

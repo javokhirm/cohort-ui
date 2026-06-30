@@ -29,7 +29,7 @@ import {
 	cn,
 } from '@repo/ui';
 
-import { formatUzs } from '@/lib/formatters/currency';
+import { formatPrice } from '@/lib/formatters/currency';
 import { plansKeys } from '@/api/plans/keys';
 import { listPlans } from '@/api/plans/plans.queries';
 import { createPlan, updatePlan } from '@/api/plans/plans.mutations';
@@ -179,7 +179,7 @@ function PlanCard({
 						</p>
 					) : (
 						<p className="text-2xl font-bold tabular-nums leading-none">
-							{formatUzs(plan.priceMonthly)}{' '}
+							{formatPrice(plan.priceMonthly)}{' '}
 							<span className="text-sm font-normal text-muted-foreground">
 								UZS / month
 							</span>

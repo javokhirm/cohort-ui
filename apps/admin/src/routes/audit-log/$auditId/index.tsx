@@ -6,16 +6,7 @@ import { isApiError } from '@repo/api-client';
 
 import { auditKeys } from '@/api/audit/keys';
 import { getAuditLog } from '@/api/audit/audit-logs';
-
-// ─── Helpers ──────────────────────────────────────────────────────────────────
-
-function formatTimestamp(ts: string): string {
-	return new Intl.DateTimeFormat('ru-RU', {
-		dateStyle: 'long',
-		timeStyle: 'medium',
-		timeZone: 'Asia/Tashkent',
-	}).format(new Date(ts));
-}
+import { formatDateTimeLong as formatTimestamp } from '@/lib/formatters/date';
 
 // ─── Sub-components ───────────────────────────────────────────────────────────
 

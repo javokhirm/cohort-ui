@@ -4,11 +4,7 @@ import type { PlanView } from '@/api/plans/types';
 
 import type { OnboardFormData } from './types';
 import { planLimits } from './types';
-
-function formatUZS(amount: number): string {
-	if (amount === 0) return 'Custom pricing';
-	return new Intl.NumberFormat('ru-RU').format(amount) + ' UZS';
-}
+import { formatPrice } from '@/lib/formatters/currency';
 
 export function PlanStep({
 	data,
@@ -70,7 +66,7 @@ export function PlanStep({
 									</div>
 									<div className="flex items-center gap-3">
 										<span className="text-sm font-semibold tabular-nums">
-											{formatUZS(plan.priceMonthly)}
+											{formatPrice(plan.priceMonthly)}
 											{plan.priceMonthly > 0 && (
 												<span className="text-xs font-normal text-muted-foreground">
 													{' '}

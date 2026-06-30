@@ -14,7 +14,8 @@ import {
 import type { StatusTone } from '@repo/ui';
 
 import type { TenantMemberView } from '@/api/tenants/types';
-import { avatarClass, formatDate, getInitials } from '@/features/tenants/utils';
+import { formatDate } from '@/lib/formatters/date';
+import { avatarClass, getInitials } from '@/features/tenants/utils';
 
 const MEMBER_STATUS_TONE: Record<string, StatusTone> = {
 	ACTIVE: 'green',

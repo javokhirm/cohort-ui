@@ -18,20 +18,11 @@ import {
 import { auditKeys } from '@/api/audit/keys';
 import type { AuditLogFilters } from '@/api/audit/types';
 import { listAuditLogs } from '@/api/audit/audit-logs';
+import { formatDateTime as formatTimestamp } from '@/lib/formatters/date';
 
 // ─── Constants ────────────────────────────────────────────────────────────────
 
 const PAGE_SIZE = 20;
-
-// ─── Helpers ──────────────────────────────────────────────────────────────────
-
-function formatTimestamp(ts: string): string {
-	return new Intl.DateTimeFormat('ru-RU', {
-		dateStyle: 'medium',
-		timeStyle: 'short',
-		timeZone: 'Asia/Tashkent',
-	}).format(new Date(ts));
-}
 
 // ─── Page ─────────────────────────────────────────────────────────────────────
 

@@ -19,7 +19,8 @@ import {
 	cn,
 } from '@repo/ui';
 
-import { formatUzs, formatUzsCompact } from '@/lib/formatters/currency';
+import { formatPrice, formatPriceCompact } from '@/lib/formatters/currency';
+import { formatDate } from '@/lib/formatters/date';
 import { subscriptionsKeys } from '@/api/subscriptions/keys';
 import {
 	getSubscriptionAnalytics,
@@ -65,14 +66,6 @@ function getInitials(name: string): string {
 		.map((w) => w[0])
 		.join('')
 		.toUpperCase();
-}
-
-function formatDate(iso: string): string {
-	return new Intl.DateTimeFormat('en-GB', {
-		day: '2-digit',
-		month: 'short',
-		year: 'numeric',
-	}).format(new Date(iso));
 }
 
 // ─── BillingDateCell ──────────────────────────────────────────────────────────
@@ -243,7 +236,7 @@ export function SubscriptionsPage() {
 						) : (
 							<p className="mt-1 text-2xl font-bold">
 								{analytics
-									? formatUzsCompact(analytics.current.mrr)
+									? formatPriceCompact(analytics.current.mrr)
 									: '—'}
 							</p>
 						)}
@@ -359,7 +352,7 @@ export function SubscriptionsPage() {
 
 									{/* MRR */}
 									<TableCell className="text-right tabular-nums text-sm font-medium">
-										{formatUzs(sub.monthlyValue)}
+										{formatPrice(sub.monthlyValue)}
 									</TableCell>
 
 									{/* Period start */}

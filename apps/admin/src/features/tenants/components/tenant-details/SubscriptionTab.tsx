@@ -6,8 +6,8 @@ import type { StatusTone } from '@repo/ui';
 import { plansKeys } from '@/api/plans/keys';
 import { listPlans } from '@/api/plans/plans.queries';
 import type { TenantDetailView } from '@/api/tenants/types';
-import { formatDate } from '@/features/tenants/utils';
-import { formatUzs } from '@/lib/formatters/currency';
+import { formatDate } from '@/lib/formatters/date';
+import { formatPrice } from '@/lib/formatters/currency';
 
 const SUB_STATUS_TONE: Record<string, StatusTone> = {
 	TRIALING: 'blue',
@@ -54,7 +54,7 @@ export function SubscriptionTab({
 							<p className="text-2xl font-bold">{plan?.name ?? '—'}</p>
 							{plan && (
 								<p className="text-sm text-muted-foreground">
-									{formatUzs(plan.priceMonthly)}/mo
+									{formatPrice(plan.priceMonthly)}/mo
 								</p>
 							)}
 						</div>
@@ -78,7 +78,7 @@ export function SubscriptionTab({
 									},
 									{
 										label: 'MRR',
-										value: formatUzs(stats.monthlyRevenue),
+										value: formatPrice(stats.monthlyRevenue),
 									},
 									{
 										label: 'Period start',

@@ -24,10 +24,3 @@ export function avatarClass(id: number): string {
 	return AVATAR_PALETTE[id % AVATAR_PALETTE.length];
 }
 
-export function formatDate(iso: string): string {
-	return new Intl.DateTimeFormat('en-GB', {
-		day: '2-digit',
-		month: 'short',
-		year: 'numeric',
-	}).format(new Date(iso));
-}
