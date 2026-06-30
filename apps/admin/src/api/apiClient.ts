@@ -30,7 +30,7 @@ export async function runRefresh(): Promise<boolean> {
 		return false;
 	}
 	try {
-		const result = await publicApi.post<AuthResult>('/auth/refresh', {
+		const result = await publicApi.post<AuthResult>('/admin/auth/refresh', {
 			refreshToken,
 		});
 		useSessionStore.getState().setSession(result);
