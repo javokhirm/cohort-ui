@@ -1,16 +1,15 @@
-// TODO: replace mock data + local state with useQuery(usersQuery()) once
-//       GET /admin/users is ready.
-
-import { useMemo, useState } from 'react';
-import { useNavigate } from '@tanstack/react-router';
+import { useEffect, useState } from 'react';
+import { useNavigate, useSearch } from '@tanstack/react-router';
+import { useQuery } from '@tanstack/react-query';
 import { ChevronLeft, ChevronRight, Search } from 'lucide-react';
 
 import {
 	Avatar,
 	AvatarFallback,
+	Badge,
 	Button,
 	Card,
-	StatusBadge,
+	Skeleton,
 	Table,
 	TableBody,
 	TableCell,
@@ -19,15 +18,13 @@ import {
 	TableRow,
 	cn,
 } from '@repo/ui';
-import type { StatusTone } from '@repo/ui';
 
-import { MOCK_USERS } from './_mock';
-import type { UserRole } from './_mock';
+import { usersKeys } from '@/features/users/api/keys';
+import { listUsers } from '@/features/users/api/users.queries';
 
 // ─── Constants ────────────────────────────────────────────────────────────────
 
-const ALL = MOCK_USERS;
-const PAGE_SIZE = 6;
+const PAGE_SIZE = 10;
 
 const AVATAR_PALETTE = [
 	'bg-tone-green-bg text-tone-green-fg',
@@ -42,57 +39,94 @@ const AVATAR_PALETTE = [
 	'bg-tone-slate-bg text-tone-slate-fg',
 ];
 
-const AVATAR_INDEX = new Map(ALL.map((u, i) => [u.id, i]));
-
-const ROLE_TONES: Record<UserRole, StatusTone> = {
-	OWNER: 'violet',
-	ADMIN: 'blue',
-	MANAGER: 'cyan',
-	TEACHER: 'slate',
-};
-
 // ─── Helpers ──────────────────────────────────────────────────────────────────
 
-function avatarClass(id: string) {
-	return AVATAR_PALETTE[(AVATAR_INDEX.get(id) ?? 0) % AVATAR_PALETTE.length];
+function avatarClass(id: number): string {
+	return AVATAR_PALETTE[id % AVATAR_PALETTE.length];
 }
 
-function getInitials(name: string): string {
-	return name
-		.split(' ')
-		.slice(0, 2)
-		.map((w) => w[0])
-		.join('')
-		.toUpperCase();
+function getInitials(firstName: string, lastName: string): string {
+	return `${firstName[0] ?? ''}${lastName[0] ?? ''}`.toUpperCase();
+}
+
+// ─── Table skeleton ───────────────────────────────────────────────────────────
+
+function TableSkeleton() {
+	return (
+		<>
+			{Array.from({ length: PAGE_SIZE }, (_, i) => (
+				<TableRow key={i}>
+					<TableCell>
+						<div className="flex items-center gap-3">
+							<Skeleton className="size-8 rounded-full" />
+							<div className="flex flex-col gap-1">
+								<Skeleton className="h-4 w-32" />
+								<Skeleton className="h-3 w-40" />
+							</div>
+						</div>
+					</TableCell>
+					<TableCell>
+						<Skeleton className="h-4 w-28" />
+					</TableCell>
+					<TableCell>
+						<div className="flex gap-1.5">
+							<Skeleton className="h-5 w-20" />
+							<Skeleton className="h-5 w-16" />
+						</div>
+					</TableCell>
+					<TableCell className="text-right">
+						<Skeleton className="ml-auto h-4 w-6" />
+					</TableCell>
+				</TableRow>
+			))}
+		</>
+	);
 }
 
 // ─── Page ─────────────────────────────────────────────────────────────────────
 
 export function UserDirectoryPage() {
 	const navigate = useNavigate();
-	const [search, setSearch] = useState('');
-	const [page, setPage] = useState(0);
+	const { page = 1, search: searchParam } = useSearch({ from: '/_authed/users' });
 
-	const filtered = useMemo(() => {
-		const q = search.trim().toLowerCase();
-		if (!q) return ALL;
-		return ALL.filter(
-			(u) =>
-				u.name.toLowerCase().includes(q) ||
-				u.email.toLowerCase().includes(q) ||
-				u.phone.includes(q),
-		);
-	}, [search]);
+	// Local state drives the input; URL is the debounced source of truth.
+	const [inputValue, setInputValue] = useState(searchParam ?? '');
 
-	const pageCount = Math.max(1, Math.ceil(filtered.length / PAGE_SIZE));
-	const safePage = Math.min(page, pageCount - 1);
-	const rows = filtered.slice(safePage * PAGE_SIZE, (safePage + 1) * PAGE_SIZE);
-	const rangeStart = filtered.length === 0 ? 0 : safePage * PAGE_SIZE + 1;
-	const rangeEnd = Math.min((safePage + 1) * PAGE_SIZE, filtered.length);
+	// Sync input when URL search param changes (e.g. back navigation).
+	useEffect(() => {
+		setInputValue(searchParam ?? '');
+	}, [searchParam]);
 
-	function handleSearch(value: string) {
-		setSearch(value);
-		setPage(0);
+	// Debounce: update URL 350ms after the user stops typing.
+	useEffect(() => {
+		const timer = setTimeout(() => {
+			const trimmed = inputValue.trim() || undefined;
+			if (trimmed === (searchParam || undefined)) return;
+			void navigate({
+				search: () => ({ search: trimmed, page: undefined }),
+			});
+		}, 350);
+		return () => clearTimeout(timer);
+	}, [inputValue]); // eslint-disable-line react-hooks/exhaustive-deps
+
+	const filters = { page, limit: PAGE_SIZE, search: searchParam || undefined };
+
+	const {
+		data: list,
+		isLoading,
+		isError,
+	} = useQuery({
+		queryKey: usersKeys.list(filters),
+		queryFn: () => listUsers(filters),
+	});
+
+	const totalPages = list ? Math.max(1, list.totalPages) : 1;
+	const total = list?.total ?? 0;
+	const rangeStart = total === 0 ? 0 : (page - 1) * PAGE_SIZE + 1;
+	const rangeEnd = Math.min(page * PAGE_SIZE, total);
+
+	function handlePage(newPage: number) {
+		void navigate({ search: (prev) => ({ ...prev, page: newPage }) });
 	}
 
 	return (
@@ -112,16 +146,25 @@ export function UserDirectoryPage() {
 					<Search className="absolute top-1/2 left-3 size-4 -translate-y-1/2 text-muted-foreground" />
 					<input
 						type="text"
-						value={search}
-						onChange={(e) => handleSearch(e.target.value)}
+						value={inputValue}
+						onChange={(e) => setInputValue(e.target.value)}
 						placeholder="Search name, phone or email..."
 						className="flex h-9 w-full rounded-md border border-input bg-transparent px-3 py-1 pl-9 text-sm shadow-sm transition-colors placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring"
 					/>
 				</div>
-				<span className="text-sm text-muted-foreground">
-					{filtered.length} {filtered.length === 1 ? 'user' : 'users'}
-				</span>
+				{!isLoading && (
+					<span className="text-sm text-muted-foreground">
+						{total} {total === 1 ? 'user' : 'users'}
+					</span>
+				)}
 			</div>
+
+			{/* ── Error state ──────────────────────────────────────────────── */}
+			{isError && (
+				<div className="rounded-lg border border-destructive/30 bg-destructive/5 px-4 py-3 text-sm text-destructive">
+					Failed to load users. Please refresh.
+				</div>
+			)}
 
 			{/* ── Table ────────────────────────────────────────────────────── */}
 			<Card className="gap-0 overflow-hidden py-0">
@@ -130,12 +173,14 @@ export function UserDirectoryPage() {
 						<TableRow>
 							<TableHead className="w-72">User</TableHead>
 							<TableHead>Phone</TableHead>
-							<TableHead>Memberships</TableHead>
-							<TableHead className="text-right">Tenants</TableHead>
+							<TableHead>Tenants</TableHead>
+							<TableHead className="text-right">Count</TableHead>
 						</TableRow>
 					</TableHeader>
 					<TableBody>
-						{rows.length === 0 ? (
+						{isLoading ? (
+							<TableSkeleton />
+						) : !list || list.rows.length === 0 ? (
 							<TableRow>
 								<TableCell
 									colSpan={4}
@@ -145,12 +190,16 @@ export function UserDirectoryPage() {
 								</TableCell>
 							</TableRow>
 						) : (
-							rows.map((user) => (
+							list.rows.map((user) => (
 								<TableRow
 									key={user.id}
 									className="cursor-pointer"
-									// eslint-disable-next-line @typescript-eslint/no-explicit-any
-									onClick={() => navigate({ to: '/users/$userId', params: { userId: user.id } as any })}
+									onClick={() =>
+										void navigate({
+											to: '/users/$userId',
+											params: { userId: String(user.id) },
+										})
+									}
 								>
 									{/* User */}
 									<TableCell>
@@ -162,16 +211,21 @@ export function UserDirectoryPage() {
 														avatarClass(user.id),
 													)}
 												>
-													{getInitials(user.name)}
+													{getInitials(
+														user.firstName,
+														user.lastName,
+													)}
 												</AvatarFallback>
 											</Avatar>
 											<div className="flex flex-col">
 												<span className="text-sm font-medium">
-													{user.name}
+													{user.firstName} {user.lastName}
 												</span>
-												<span className="text-xs text-muted-foreground">
-													{user.email}
-												</span>
+												{user.email && (
+													<span className="text-xs text-muted-foreground">
+														{user.email}
+													</span>
+												)}
 											</div>
 										</div>
 									</TableCell>
@@ -181,23 +235,32 @@ export function UserDirectoryPage() {
 										{user.phone}
 									</TableCell>
 
-									{/* Memberships */}
+									{/* Tenants */}
 									<TableCell>
 										<div className="flex flex-wrap gap-1.5">
-											{user.memberships.map((m) => (
-												<StatusBadge
-													key={m.tenantId}
-													tone={ROLE_TONES[m.role]}
+											{user.tenants.slice(0, 3).map((t) => (
+												<Badge
+													key={t.tenantId}
+													variant="secondary"
+													className="text-xs"
 												>
-													{m.role}
-												</StatusBadge>
+													{t.name}
+												</Badge>
 											))}
+											{user.tenants.length > 3 && (
+												<Badge
+													variant="outline"
+													className="text-xs"
+												>
+													+{user.tenants.length - 3}
+												</Badge>
+											)}
 										</div>
 									</TableCell>
 
-									{/* Tenant count */}
+									{/* Count */}
 									<TableCell className="text-right text-sm font-medium tabular-nums">
-										{user.memberships.length}
+										{user.membershipCount}
 									</TableCell>
 								</TableRow>
 							))
@@ -208,29 +271,31 @@ export function UserDirectoryPage() {
 				{/* ── Pagination footer ─────────────────────────────────────── */}
 				<div className="flex items-center justify-between border-t border-border px-4 py-3">
 					<p className="text-xs text-muted-foreground">
-						{filtered.length === 0
-							? 'No results'
-							: `Showing ${rangeStart}–${rangeEnd} of ${filtered.length} users`}
+						{isLoading
+							? 'Loading…'
+							: total === 0
+								? 'No results'
+								: `Showing ${rangeStart}–${rangeEnd} of ${total} users`}
 					</p>
 
-					{pageCount > 1 && (
+					{totalPages > 1 && (
 						<div className="flex items-center gap-0.5">
 							<Button
 								variant="ghost"
 								size="icon"
 								className="size-8"
-								disabled={safePage === 0}
-								onClick={() => setPage((p) => p - 1)}
+								disabled={page <= 1}
+								onClick={() => handlePage(page - 1)}
 							>
 								<ChevronLeft className="size-4" />
 							</Button>
-							{Array.from({ length: pageCount }, (_, i) => (
+							{Array.from({ length: totalPages }, (_, i) => (
 								<Button
 									key={i}
-									variant={i === safePage ? 'default' : 'ghost'}
+									variant={i + 1 === page ? 'default' : 'ghost'}
 									size="icon"
 									className="size-8 text-xs"
-									onClick={() => setPage(i)}
+									onClick={() => handlePage(i + 1)}
 								>
 									{i + 1}
 								</Button>
@@ -239,8 +304,8 @@ export function UserDirectoryPage() {
 								variant="ghost"
 								size="icon"
 								className="size-8"
-								disabled={safePage >= pageCount - 1}
-								onClick={() => setPage((p) => p + 1)}
+								disabled={page >= totalPages}
+								onClick={() => handlePage(page + 1)}
 							>
 								<ChevronRight className="size-4" />
 							</Button>

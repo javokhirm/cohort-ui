@@ -1,5 +1,6 @@
 import {
 	Activity,
+	ArrowUpRight,
 	Building2,
 	CreditCard,
 	Database,
@@ -16,6 +17,7 @@ import {
 	Bar,
 	BarChart,
 	CartesianGrid,
+	Cell,
 	Legend,
 	Line,
 	LineChart,
@@ -26,6 +28,7 @@ import {
 	XAxis,
 	YAxis,
 } from 'recharts';
+import { useQuery } from '@tanstack/react-query';
 
 import {
 	Avatar,
@@ -36,17 +39,18 @@ import {
 	CardHeader,
 	CardTitle,
 	Separator,
+	Skeleton,
 	StatCard,
 	StatusBadge,
 } from '@repo/ui';
-import type { StatusTone } from '@repo/ui';
-import { MOCK_DASHBOARD } from './_mock';
-import type { PlanId } from './_mock';
 
-// TODO: replace with useDashboardStats() TanStack Query hook once GET /admin/stats is live
-const data = MOCK_DASHBOARD;
+import { dashboardKeys } from '@/features/dashboard/api/keys';
+import { getDashboard } from '@/features/dashboard/api/dashboard.queries';
+import type { DashboardKpis } from '@/features/dashboard/api/types';
+import { formatUzsCompact, formatUzsAxis } from '@/lib/formatters/currency';
 
-// Dark-mode recharts tooltip style (mirrors --card / --border tokens in dark mode)
+// ─── Constants ────────────────────────────────────────────────────────────────
+
 const TOOLTIP_STYLE: React.CSSProperties = {
 	backgroundColor: '#131c30',
 	border: '1px solid #1e293b',
@@ -55,16 +59,11 @@ const TOOLTIP_STYLE: React.CSSProperties = {
 	fontSize: 12,
 };
 
-const PLAN_LABELS: Record<PlanId, string> = {
-	starter: 'Starter',
-	growth: 'Growth',
-	enterprise: 'Enterprise',
-};
-
-const PLAN_TONES: Record<PlanId, StatusTone> = {
-	starter: 'slate',
-	growth: 'blue',
-	enterprise: 'violet',
+const TENANT_STATUS_COLORS: Record<string, string> = {
+	ACTIVE: '#22c55e',
+	PENDING: '#60a5fa',
+	SUSPENDED: '#f97316',
+	CANCELLED: '#94a3b8',
 };
 
 const SERVICES = [
@@ -76,18 +75,15 @@ const SERVICES = [
 	{ name: 'Payments', icon: CreditCard },
 ];
 
-/** TODO: use shared i18n money formatter once @repo/i18n ships */
-function formatMrr(uzs: number): string {
-	if (uzs >= 1_000_000) return `${(uzs / 1_000_000).toFixed(1)}M UZS`;
-	return `${(uzs / 1_000).toFixed(0)}K UZS`;
-}
+// ─── Helpers ──────────────────────────────────────────────────────────────────
 
-function formatDate(iso: string): string {
-	return new Intl.DateTimeFormat('en-GB', {
-		day: '2-digit',
-		month: 'short',
-		year: 'numeric',
-	}).format(new Date(iso));
+function getInitials(name: string): string {
+	return name
+		.split(' ')
+		.slice(0, 2)
+		.map((w) => w[0])
+		.join('')
+		.toUpperCase();
 }
 
 function TrendChip({ value, upIsGood = true }: { value: number; upIsGood?: boolean }) {
@@ -107,91 +103,109 @@ function TrendChip({ value, upIsGood = true }: { value: number; upIsGood?: boole
 	);
 }
 
-export function DashboardPage() {
-	const kpi = data.kpi;
+// ─── Skeleton states ──────────────────────────────────────────────────────────
 
-	const attentionTenants = data.tenants.filter(
-		(t) => t.status === 'past_due' || t.status === 'suspended',
+function KpiSkeleton() {
+	return (
+		<div className="grid grid-cols-2 gap-4 md:grid-cols-3 xl:grid-cols-6">
+			{Array.from({ length: 6 }, (_, i) => (
+				<Card key={i} className="py-0">
+					<CardContent className="px-5 py-4">
+						<Skeleton className="h-3 w-20" />
+						<Skeleton className="mt-2 h-8 w-16" />
+					</CardContent>
+				</Card>
+			))}
+		</div>
 	);
+}
 
-	const recentSignups = [...data.tenants]
-		.sort((a, b) => new Date(b.joinedAt).getTime() - new Date(a.joinedAt).getTime())
-		.slice(0, 5);
+function ChartSkeleton() {
+	return (
+		<div className="grid grid-cols-1 gap-4 md:grid-cols-3">
+			{Array.from({ length: 3 }, (_, i) => (
+				<Card key={i} className="gap-0 py-0">
+					<CardHeader className="border-b border-border px-5 py-4">
+						<Skeleton className="h-4 w-28" />
+					</CardHeader>
+					<CardContent className="flex items-center justify-center px-2 py-4">
+						<Skeleton className="h-45 w-full" />
+					</CardContent>
+				</Card>
+			))}
+		</div>
+	);
+}
+
+// ─── Dashboard content ────────────────────────────────────────────────────────
+
+function DashboardContent({ data }: { data: DashboardKpis }) {
+	const trendData = data.mrr.trend.slice(-6).map((p) => ({
+		month: p.periodMonth.slice(5),
+		revenue: p.mrr,
+		signups: p.signups,
+	}));
+
+	const tenantStatusData = (Object.entries(data.tenants.byStatus) as [string, number][])
+		.filter(([, count]) => count > 0)
+		.map(([status, count]) => ({
+			name: status.charAt(0) + status.slice(1).toLowerCase(),
+			count,
+			fill: TENANT_STATUS_COLORS[status] ?? '#94a3b8',
+		}));
 
 	return (
-		<div className="mx-auto flex max-w-7xl flex-col gap-6">
-			{/* Page header */}
-			<div>
-				<h1 className="text-xl font-semibold">Dashboard</h1>
-				<p className="text-sm text-muted-foreground">
-					Platform overview and health
-				</p>
-			</div>
-
+		<>
 			{/* ── Section A: KPI strip ─────────────────────────────────── */}
 			<div className="grid grid-cols-2 gap-4 md:grid-cols-3 xl:grid-cols-6">
 				<StatCard
 					label="Total Tenants"
-					value={kpi.totalTenants}
+					value={data.tenants.total}
 					icon={<Building2 />}
-					delta={{
-						value: <TrendChip value={kpi.trends.totalTenants} />,
-					}}
-					hint="vs last month"
+					delta={{ value: `+${data.tenants.newThisMonth} this month` }}
+					hint="all time"
 				/>
 				<StatCard
 					label="Active Tenants"
-					value={kpi.activeTenants}
+					value={data.tenants.active}
 					icon={<Building2 />}
-					delta={{
-						value: <TrendChip value={kpi.trends.activeTenants} />,
-					}}
-					hint="vs last month"
+					hint={`of ${data.tenants.total} total`}
 				/>
 				<StatCard
 					label="MRR"
-					value={formatMrr(kpi.mrr)}
+					value={formatUzsCompact(data.mrr.current)}
 					icon={<Wallet />}
 					delta={{
-						value: <TrendChip value={kpi.trends.mrr} />,
+						value:
+							data.mrr.growth != null ? (
+								<TrendChip value={data.mrr.growth} />
+							) : undefined,
 					}}
 					hint="vs last month"
 				/>
 				<StatCard
 					label="Total Students"
-					value={kpi.totalStudents.toLocaleString()}
+					value={data.students.active.toLocaleString()}
 					icon={<Users />}
-					delta={{
-						value: <TrendChip value={kpi.trends.totalStudents} />,
-					}}
-					hint="vs last month"
 				/>
 				<StatCard
-					label="Storage Used"
-					value={`${kpi.storageTb} TB`}
-					icon={<HardDrive />}
-					delta={{
-						value: (
-							<TrendChip value={kpi.trends.storageTb} upIsGood={false} />
-						),
-					}}
-					hint="vs last month"
+					label="New This Month"
+					value={data.tenants.newThisMonth}
+					icon={<ArrowUpRight />}
+					hint="tenant sign-ups"
 				/>
 				<StatCard
 					label="Churn Rate"
-					value={`${kpi.churnRate}%`}
+					value={`${data.mrr.churnRate.toFixed(1)}%`}
 					icon={<Activity />}
 					delta={{
-						value: (
-							<TrendChip value={kpi.trends.churnRate} upIsGood={false} />
-						),
+						value: <TrendChip value={data.mrr.churnRate} upIsGood={false} />,
 					}}
-					hint="vs last month"
+					hint="this period"
 				/>
 			</div>
 
 			{/* ── Section B: Charts ─────────────────────────────────────── */}
-			{/* TODO: replace mock arrays with useRevenueChart() / useSignupChart() / usePlanDist() */}
 			<div className="grid grid-cols-1 gap-4 md:grid-cols-3">
 				{/* Revenue trend */}
 				<Card className="gap-0 py-0">
@@ -205,10 +219,7 @@ export function DashboardPage() {
 					</CardHeader>
 					<CardContent className="px-2 py-4">
 						<ResponsiveContainer width="100%" height={180}>
-							<LineChart
-								data={data.revenueByMonth}
-								margin={{ left: 0, right: 8 }}
-							>
+							<LineChart data={trendData} margin={{ left: 0, right: 8 }}>
 								<CartesianGrid strokeDasharray="3 3" stroke="#1e293b" />
 								<XAxis
 									dataKey="month"
@@ -220,9 +231,7 @@ export function DashboardPage() {
 									tick={{ fill: '#64748b', fontSize: 11 }}
 									axisLine={false}
 									tickLine={false}
-									tickFormatter={(v: number) =>
-										`${(v / 1_000_000).toFixed(0)}M`
-									}
+									tickFormatter={(v: number) => formatUzsAxis(v)}
 									width={36}
 								/>
 								<Tooltip contentStyle={TOOLTIP_STYLE} />
@@ -249,10 +258,7 @@ export function DashboardPage() {
 					</CardHeader>
 					<CardContent className="px-2 py-4">
 						<ResponsiveContainer width="100%" height={180}>
-							<BarChart
-								data={data.signupsByMonth}
-								margin={{ left: 0, right: 8 }}
-							>
+							<BarChart data={trendData} margin={{ left: 0, right: 8 }}>
 								<CartesianGrid strokeDasharray="3 3" stroke="#1e293b" />
 								<XAxis
 									dataKey="month"
@@ -278,22 +284,21 @@ export function DashboardPage() {
 					</CardContent>
 				</Card>
 
-				{/* Plan distribution */}
+				{/* Tenant status distribution */}
 				<Card className="gap-0 py-0">
 					<CardHeader className="border-b border-border px-5 py-4">
 						<CardTitle className="text-sm font-semibold">
-							Plan Distribution
+							Tenant Status
 						</CardTitle>
-						<p className="text-xs text-muted-foreground">Active tenant mix</p>
+						<p className="text-xs text-muted-foreground">
+							Lifecycle breakdown
+						</p>
 					</CardHeader>
 					<CardContent className="flex items-center justify-center px-2 py-4">
 						<ResponsiveContainer width="100%" height={180}>
 							<PieChart>
 								<Pie
-									data={data.planDistribution.map((s) => ({
-										...s,
-										fill: s.color,
-									}))}
+									data={tenantStatusData}
 									dataKey="count"
 									nameKey="name"
 									cx="50%"
@@ -302,7 +307,11 @@ export function DashboardPage() {
 									outerRadius={72}
 									paddingAngle={2}
 									stroke="transparent"
-								/>
+								>
+									{tenantStatusData.map((entry) => (
+										<Cell key={entry.name} fill={entry.fill} />
+									))}
+								</Pie>
 								<Tooltip contentStyle={TOOLTIP_STYLE} />
 								<Legend
 									iconType="circle"
@@ -315,8 +324,7 @@ export function DashboardPage() {
 				</Card>
 			</div>
 
-			{/* ── Section C: Attention + Recent Signups ─────────────────── */}
-			{/* TODO: replace with useTenants({ status: ['past_due','suspended'] }) and useRecentTenants() */}
+			{/* ── Section C: Attention + Monthly Highlights ─────────────── */}
 			<div className="grid grid-cols-1 gap-4 lg:grid-cols-2">
 				{/* Needs Attention */}
 				<Card className="gap-0 py-0">
@@ -325,23 +333,23 @@ export function DashboardPage() {
 							Needs Attention
 						</CardTitle>
 						<p className="text-xs text-muted-foreground">
-							Past due or suspended tenants
+							Suspended or at-risk tenants
 						</p>
 					</CardHeader>
 					<CardContent className="px-0 py-0">
-						{attentionTenants.length === 0 ? (
+						{data.atRisk.tenants.length === 0 ? (
 							<p className="px-5 py-6 text-sm text-tone-green-fg">
 								All tenants healthy ✓
 							</p>
 						) : (
 							<ul>
-								{attentionTenants.map((tenant, i) => (
-									<li key={tenant.id}>
+								{data.atRisk.tenants.map((tenant, i) => (
+									<li key={tenant.tenantId}>
 										{i > 0 && <Separator />}
 										<div className="flex items-center gap-3 px-5 py-3">
 											<Avatar className="size-8">
 												<AvatarFallback className="bg-tone-indigo-bg text-xs font-semibold text-tone-indigo-fg">
-													{tenant.initials}
+													{getInitials(tenant.name)}
 												</AvatarFallback>
 											</Avatar>
 											<span className="flex-1 truncate text-sm font-medium">
@@ -356,7 +364,6 @@ export function DashboardPage() {
 												size="sm"
 												className="shrink-0 text-xs"
 											>
-												{/* TODO: link to /tenants/:id */}
 												View
 											</Button>
 										</div>
@@ -367,52 +374,78 @@ export function DashboardPage() {
 					</CardContent>
 				</Card>
 
-				{/* Recent Signups */}
+				{/* Monthly Highlights */}
 				<Card className="gap-0 py-0">
 					<CardHeader className="border-b border-border px-5 py-4">
 						<CardTitle className="text-sm font-semibold">
-							Recent Signups
+							Monthly Highlights
 						</CardTitle>
 						<p className="text-xs text-muted-foreground">
-							Last 5 onboarded tenants
+							Current period at a glance
 						</p>
 					</CardHeader>
 					<CardContent className="px-0 py-0">
-						<ul>
-							{recentSignups.map((tenant, i) => (
-								<li key={tenant.id}>
-									{i > 0 && <Separator />}
-									<div className="flex items-center gap-3 px-5 py-3">
-										<span className="flex-1 truncate text-sm font-medium">
-											{tenant.name}
-										</span>
-										<StatusBadge tone={PLAN_TONES[tenant.plan]}>
-											{PLAN_LABELS[tenant.plan]}
-										</StatusBadge>
-										<span className="shrink-0 text-xs text-muted-foreground">
-											{formatDate(tenant.joinedAt)}
-										</span>
-									</div>
-								</li>
-							))}
-						</ul>
-						<Separator />
-						<div className="px-5 py-3">
-							<Button
-								variant="ghost"
-								size="sm"
-								className="text-xs text-muted-foreground"
-							>
-								{/* TODO: link to /tenants once route exists */}
-								View all →
-							</Button>
-						</div>
+						{[
+							{
+								label: 'New tenants',
+								value: `+${data.tenants.newThisMonth}`,
+								tone: 'text-tone-green-fg',
+							},
+							{
+								label: 'New subscriptions',
+								value: `+${data.mrr.signups}`,
+								tone: 'text-tone-blue-fg',
+							},
+							{
+								label: 'Churned',
+								value:
+									data.mrr.churned > 0 ? `-${data.mrr.churned}` : '0',
+								tone:
+									data.mrr.churned > 0
+										? 'text-tone-red-fg'
+										: 'text-muted-foreground',
+							},
+							{
+								label: 'MRR growth',
+								value:
+									data.mrr.growth != null
+										? `${data.mrr.growth > 0 ? '+' : ''}${data.mrr.growth.toFixed(1)}%`
+										: '—',
+								tone:
+									(data.mrr.growth ?? 0) >= 0
+										? 'text-tone-green-fg'
+										: 'text-tone-red-fg',
+							},
+							{
+								label: 'Revenue collected',
+								value:
+									data.revenue.processedThisMonth > 0
+										? formatUzsCompact(
+												data.revenue.processedThisMonth,
+											)
+										: '—',
+								tone: 'text-foreground',
+							},
+						].map((item, i, arr) => (
+							<div key={item.label}>
+								<div className="flex items-center justify-between px-5 py-3">
+									<span className="text-sm text-muted-foreground">
+										{item.label}
+									</span>
+									<span
+										className={`text-sm font-semibold tabular-nums ${item.tone}`}
+									>
+										{item.value}
+									</span>
+								</div>
+								{i < arr.length - 1 && <Separator />}
+							</div>
+						))}
 					</CardContent>
 				</Card>
 			</div>
 
 			{/* ── Section D: System Services ────────────────────────────── */}
-			{/* TODO: replace hard-coded "Operational" with useSystemHealth() once GET /admin/health is live */}
 			<Card className="gap-0 py-0">
 				<CardHeader className="border-b border-border px-5 py-4">
 					<CardTitle className="text-sm font-semibold">
@@ -439,6 +472,41 @@ export function DashboardPage() {
 					</div>
 				</CardContent>
 			</Card>
+		</>
+	);
+}
+
+// ─── Page ─────────────────────────────────────────────────────────────────────
+
+export function DashboardPage() {
+	const { data, isLoading, isError, error } = useQuery({
+		queryKey: dashboardKeys.overview(),
+		queryFn: getDashboard,
+	});
+
+	return (
+		<div className="mx-auto flex max-w-7xl flex-col gap-6">
+			{/* Page header */}
+			<div>
+				<h1 className="text-xl font-semibold">Dashboard</h1>
+				<p className="text-sm text-muted-foreground">
+					Platform overview and health
+				</p>
+			</div>
+
+			{isLoading ? (
+				<>
+					<KpiSkeleton />
+					<ChartSkeleton />
+				</>
+			) : isError ? (
+				<div className="rounded-lg border border-destructive/30 bg-destructive/5 px-4 py-3 text-sm text-destructive">
+					Failed to load dashboard data
+					{error instanceof Error ? `: ${error.message}` : '.'}
+				</div>
+			) : data ? (
+				<DashboardContent data={data} />
+			) : null}
 		</div>
 	);
 }

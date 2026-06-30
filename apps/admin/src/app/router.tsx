@@ -20,6 +20,8 @@ import { SubscriptionsPage } from '../routes/subscriptions/index';
 import { UserDirectoryPage } from '../routes/users/index';
 import { UserDetailPage } from '../routes/users/$userId/index';
 import { ProfilePage } from '../routes/profile/index';
+import { AuditLogPage } from '../routes/audit-log/index';
+import { AuditLogDetailPage } from '../routes/audit-log/$auditId/index';
 import { ForbiddenPage } from '../routes/forbidden';
 
 const rootRoute = createRootRoute({
@@ -98,12 +100,43 @@ const subscriptionPlansRoute = createRoute({
 const subscriptionsRoute = createRoute({
 	getParentRoute: () => authedRoute,
 	path: '/subscriptions',
+	validateSearch: (
+		search: Record<string, unknown>,
+	): { page?: number; status?: 'TRIALING' | 'ACTIVE' | 'PAST_DUE' | 'CANCELLED' } => {
+		const VALID = ['TRIALING', 'ACTIVE', 'PAST_DUE', 'CANCELLED'] as const;
+		type S = (typeof VALID)[number];
+		const status = VALID.includes(search.status as S)
+			? (search.status as S)
+			: undefined;
+		const page =
+			typeof search.page === 'number' &&
+			Number.isFinite(search.page) &&
+			search.page >= 1
+				? Math.floor(search.page)
+				: undefined;
+		return { status, page };
+	},
 	component: SubscriptionsPage,
 });
 
 const userIndexRoute = createRoute({
 	getParentRoute: () => authedRoute,
 	path: '/users',
+	validateSearch: (
+		search: Record<string, unknown>,
+	): { page?: number; search?: string } => {
+		const page =
+			typeof search.page === 'number' &&
+			Number.isFinite(search.page) &&
+			search.page >= 1
+				? Math.floor(search.page)
+				: undefined;
+		const q =
+			typeof search.search === 'string' && search.search.trim()
+				? search.search.trim()
+				: undefined;
+		return { page, search: q };
+	},
 	component: UserDirectoryPage,
 });
 
@@ -119,6 +152,18 @@ const profileRoute = createRoute({
 	component: ProfilePage,
 });
 
+const auditLogRoute = createRoute({
+	getParentRoute: () => authedRoute,
+	path: '/audit-log',
+	component: AuditLogPage,
+});
+
+const auditLogDetailRoute = createRoute({
+	getParentRoute: () => authedRoute,
+	path: '/audit-log/$auditId',
+	component: AuditLogDetailPage,
+});
+
 const routeTree = rootRoute.addChildren([
 	loginRoute,
 	forbiddenRoute,
@@ -132,6 +177,8 @@ const routeTree = rootRoute.addChildren([
 		userIndexRoute,
 		userDetailRoute,
 		profileRoute,
+		auditLogRoute,
+		auditLogDetailRoute,
 	]),
 ]);
 

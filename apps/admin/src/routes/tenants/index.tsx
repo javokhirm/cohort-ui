@@ -1,6 +1,7 @@
-import { useMemo, useState } from 'react';
+import { useState } from 'react';
 import { Link, useNavigate } from '@tanstack/react-router';
-import { ChevronLeft, ChevronRight, Download, Search } from 'lucide-react';
+import { keepPreviousData, useQuery } from '@tanstack/react-query';
+import { ChevronLeft, ChevronRight, Search } from 'lucide-react';
 
 import {
 	Avatar,
@@ -8,6 +9,7 @@ import {
 	Button,
 	Card,
 	CardContent,
+	Skeleton,
 	StatusBadge,
 	Table,
 	TableBody,
@@ -17,29 +19,57 @@ import {
 	TableRow,
 	cn,
 } from '@repo/ui';
-import { MOCK_TENANTS } from './_mock';
-import type { PlanId, TenantStatus } from './_mock';
 
-// TODO: replace with useQuery(tenantsQuery()) once GET /admin/tenants is ready.
-const ALL = MOCK_TENANTS;
-const PAGE_SIZE = 20;
+import { tenantsKeys } from '@/features/tenants/api/keys';
+import { listTenants, getTenantSummary } from '@/features/tenants/api/tenants.queries';
+import type { SubscriptionStatus, TenantStatus } from '@/features/tenants/api/types';
 
-const PLAN_LABELS: Record<PlanId, string> = {
-	starter: 'Starter',
-	growth: 'Growth',
-	enterprise: 'Enterprise',
+// ─── Status helpers ───────────────────────────────────────────────────────────
+
+type StatusTone = 'green' | 'red' | 'blue' | 'amber' | 'slate';
+
+const TENANT_STATUS_TONE: Record<TenantStatus, StatusTone> = {
+	ACTIVE: 'green',
+	PENDING: 'blue',
+	SUSPENDED: 'red',
+	CANCELLED: 'slate',
 };
 
-const STATUS_TABS: { value: TenantStatus | 'all'; label: string }[] = [
+const TENANT_STATUS_LABEL: Record<TenantStatus, string> = {
+	ACTIVE: 'Active',
+	PENDING: 'Pending',
+	SUSPENDED: 'Suspended',
+	CANCELLED: 'Cancelled',
+};
+
+const SUB_STATUS_TONE: Record<SubscriptionStatus, StatusTone> = {
+	TRIALING: 'blue',
+	ACTIVE: 'green',
+	PAST_DUE: 'amber',
+	CANCELLED: 'slate',
+};
+
+const SUB_STATUS_LABEL: Record<SubscriptionStatus, string> = {
+	TRIALING: 'Trialing',
+	ACTIVE: 'Active',
+	PAST_DUE: 'Past due',
+	CANCELLED: 'Cancelled',
+};
+
+// ─── Constants ────────────────────────────────────────────────────────────────
+
+const PAGE_SIZE = 20;
+
+type StatusTab = TenantStatus | 'all';
+
+const STATUS_TABS: { value: StatusTab; label: string }[] = [
 	{ value: 'all', label: 'All' },
-	{ value: 'active', label: 'Active' },
-	{ value: 'trialing', label: 'Trialing' },
-	{ value: 'past_due', label: 'Past due' },
-	{ value: 'suspended', label: 'Suspended' },
-	{ value: 'cancelled', label: 'Cancelled' },
+	{ value: 'ACTIVE', label: 'Active' },
+	{ value: 'PENDING', label: 'Pending' },
+	{ value: 'SUSPENDED', label: 'Suspended' },
+	{ value: 'CANCELLED', label: 'Cancelled' },
 ];
 
-/** Deterministic avatar colour per tenant, cycles through tone palette. */
 const AVATAR_PALETTE = [
 	'bg-tone-indigo-bg text-tone-indigo-fg',
 	'bg-tone-violet-bg text-tone-violet-fg',
@@ -53,10 +83,10 @@ const AVATAR_PALETTE = [
 	'bg-tone-slate-bg text-tone-slate-fg',
 ];
 
-const AVATAR_INDEX = new Map(ALL.map((t, i) => [t.id, i]));
+// ─── Helpers ──────────────────────────────────────────────────────────────────
 
-function avatarClass(id: string) {
-	return AVATAR_PALETTE[(AVATAR_INDEX.get(id) ?? 0) % AVATAR_PALETTE.length];
+function avatarClass(id: number): string {
+	return AVATAR_PALETTE[id % AVATAR_PALETTE.length];
 }
 
 function getInitials(name: string): string {
@@ -68,96 +98,72 @@ function getInitials(name: string): string {
 		.toUpperCase();
 }
 
-/** Compact MRR for KPI strip (e.g. "48.6M"). */
 function formatMrrKpi(uzs: number): string {
 	if (uzs >= 1_000_000_000) return `${(uzs / 1_000_000_000).toFixed(1)}B`;
 	if (uzs >= 1_000_000) return `${(uzs / 1_000_000).toFixed(1)}M`;
 	return `${(uzs / 1_000).toFixed(0)}K`;
 }
 
-/** Full UZS amount in Uzbek/Russian number format (space-separated thousands). */
 function formatMrrRow(uzs: number): string {
 	if (uzs === 0) return '—';
 	return new Intl.NumberFormat('ru-RU').format(uzs);
 }
 
-function timeAgo(iso: string): string {
-	const diff = Date.now() - new Date(iso).getTime();
-	const mins = Math.floor(diff / 60_000);
-	if (mins < 60) return `${mins}m ago`;
-	const hrs = Math.floor(mins / 60);
-	if (hrs < 24) return `${hrs}h ago`;
-	const days = Math.floor(hrs / 24);
-	if (days < 30) return `${days}d ago`;
-	return `${Math.floor(days / 30)}mo ago`;
-}
+// ─── Page ─────────────────────────────────────────────────────────────────────
 
 export function TenantsPage() {
 	const navigate = useNavigate();
 	const [search, setSearch] = useState('');
-	const [statusTab, setStatusTab] = useState<TenantStatus | 'all'>('all');
-	const [page, setPage] = useState(0);
+	const [debouncedSearch, setDebouncedSearch] = useState('');
+	const [statusTab, setStatusTab] = useState<StatusTab>('all');
+	const [page, setPage] = useState(1);
 
-	// Global KPI stats from all tenants (not affected by filters)
-	const kpi = useMemo(() => {
-		let active = 0,
-			trialing = 0,
-			past_due = 0,
-			suspended = 0,
-			mrr = 0;
-		for (const t of ALL) {
-			if (t.status === 'active') active++;
-			else if (t.status === 'trialing') trialing++;
-			else if (t.status === 'past_due') past_due++;
-			else if (t.status === 'suspended') suspended++;
-			mrr += t.mrr;
-		}
-		return { active, trialing, past_due, suspended, mrr };
-	}, []);
+	const filters = {
+		status: statusTab === 'all' ? undefined : statusTab,
+		search: debouncedSearch || undefined,
+		page,
+		limit: PAGE_SIZE,
+	};
 
-	// Filter by search query; drives both tab counts and the table
-	const searchFiltered = useMemo(() => {
-		const q = search.toLowerCase().trim();
-		if (!q) return ALL;
-		return ALL.filter(
-			(t) =>
-				t.name.toLowerCase().includes(q) || t.subdomain.toLowerCase().includes(q),
-		);
-	}, [search]);
+	const {
+		data: tenantsPage,
+		isLoading,
+		isError,
+	} = useQuery({
+		queryKey: tenantsKeys.list(filters),
+		queryFn: () => listTenants(filters),
+		placeholderData: keepPreviousData,
+	});
 
-	// Per-status counts within current search results (shown in tabs)
-	const tabCounts = useMemo(() => {
-		const c: Partial<Record<TenantStatus | 'all', number>> = {
-			all: searchFiltered.length,
-		};
-		for (const t of searchFiltered) {
-			c[t.status] = (c[t.status] ?? 0) + 1;
-		}
-		return c;
-	}, [searchFiltered]);
-
-	const filtered = useMemo(
-		() =>
-			statusTab === 'all'
-				? searchFiltered
-				: searchFiltered.filter((t) => t.status === statusTab),
-		[searchFiltered, statusTab],
-	);
-
-	const pageCount = Math.max(1, Math.ceil(filtered.length / PAGE_SIZE));
-	const safePage = Math.min(page, pageCount - 1);
-	const rows = filtered.slice(safePage * PAGE_SIZE, (safePage + 1) * PAGE_SIZE);
-	const rangeStart = filtered.length === 0 ? 0 : safePage * PAGE_SIZE + 1;
-	const rangeEnd = Math.min((safePage + 1) * PAGE_SIZE, filtered.length);
+	const { data: summary } = useQuery({
+		queryKey: tenantsKeys.summary(),
+		queryFn: getTenantSummary,
+	});
 
 	function handleSearch(e: React.ChangeEvent<HTMLInputElement>) {
-		setSearch(e.target.value);
-		setPage(0);
+		const val = e.target.value;
+		setSearch(val);
+		setPage(1);
+		// Simple debounce via state — avoids adding a dep
+		const timer = setTimeout(() => setDebouncedSearch(val), 300);
+		return () => clearTimeout(timer);
 	}
 
-	function handleTab(value: TenantStatus | 'all') {
+	function handleTab(value: StatusTab) {
 		setStatusTab(value);
-		setPage(0);
+		setPage(1);
+	}
+
+	const rows = tenantsPage?.rows ?? [];
+	const totalPages = tenantsPage?.totalPages ?? 1;
+	const total = tenantsPage?.total ?? 0;
+	const rangeStart = total === 0 ? 0 : (page - 1) * PAGE_SIZE + 1;
+	const rangeEnd = Math.min(page * PAGE_SIZE, total);
+
+	function tabCount(tab: StatusTab): number {
+		if (!summary) return 0;
+		if (tab === 'all') return summary.total;
+		return summary.byStatus[tab] ?? 0;
 	}
 
 	return (
@@ -167,8 +173,8 @@ export function TenantsPage() {
 				<div>
 					<h1 className="text-xl font-semibold tracking-tight">Tenants</h1>
 					<p className="text-sm text-muted-foreground">
-						Every education center on the EduCore platform · {ALL.length}{' '}
-						total
+						Every education center on the EduCore platform
+						{summary ? ` · ${summary.total} total` : ''}
 					</p>
 				</div>
 				<Button
@@ -183,39 +189,61 @@ export function TenantsPage() {
 				<Card className="py-0">
 					<CardContent className="px-5 py-4">
 						<p className="text-xs text-muted-foreground">Active</p>
-						<p className="mt-1 text-3xl font-bold text-tone-green-fg">
-							{kpi.active}
-						</p>
+						{summary ? (
+							<p className="mt-1 text-3xl font-bold text-tone-green-fg">
+								{summary.bySubscription.ACTIVE}
+							</p>
+						) : (
+							<Skeleton className="mt-2 h-8 w-16" />
+						)}
 					</CardContent>
 				</Card>
 				<Card className="py-0">
 					<CardContent className="px-5 py-4">
 						<p className="text-xs text-muted-foreground">Trialing</p>
-						<p className="mt-1 text-3xl font-bold text-tone-blue-fg">
-							{kpi.trialing}
-						</p>
+						{summary ? (
+							<p className="mt-1 text-3xl font-bold text-tone-blue-fg">
+								{summary.bySubscription.TRIALING}
+							</p>
+						) : (
+							<Skeleton className="mt-2 h-8 w-16" />
+						)}
 					</CardContent>
 				</Card>
 				<Card className="py-0">
 					<CardContent className="px-5 py-4">
 						<p className="text-xs text-muted-foreground">Past due</p>
-						<p className="mt-1 text-3xl font-bold text-tone-amber-fg">
-							{kpi.past_due}
-						</p>
+						{summary ? (
+							<p className="mt-1 text-3xl font-bold text-tone-amber-fg">
+								{summary.bySubscription.PAST_DUE}
+							</p>
+						) : (
+							<Skeleton className="mt-2 h-8 w-16" />
+						)}
 					</CardContent>
 				</Card>
 				<Card className="py-0">
 					<CardContent className="px-5 py-4">
 						<p className="text-xs text-muted-foreground">Suspended</p>
-						<p className="mt-1 text-3xl font-bold text-tone-red-fg">
-							{kpi.suspended}
-						</p>
+						{summary ? (
+							<p className="mt-1 text-3xl font-bold text-tone-red-fg">
+								{summary.byStatus.SUSPENDED}
+							</p>
+						) : (
+							<Skeleton className="mt-2 h-8 w-16" />
+						)}
 					</CardContent>
 				</Card>
 				<Card className="py-0">
 					<CardContent className="px-5 py-4">
 						<p className="text-xs text-muted-foreground">Total MRR</p>
-						<p className="mt-1 text-2xl font-bold">{formatMrrKpi(kpi.mrr)}</p>
+						{summary ? (
+							<p className="mt-1 text-2xl font-bold">
+								{formatMrrKpi(summary.totalMrr)}
+							</p>
+						) : (
+							<Skeleton className="mt-2 h-7 w-20" />
+						)}
 					</CardContent>
 				</Card>
 			</div>
@@ -238,7 +266,7 @@ export function TenantsPage() {
 				<div className="flex items-center gap-0.5 overflow-x-auto">
 					{STATUS_TABS.map((tab) => {
 						const active = statusTab === tab.value;
-						const count = tabCounts[tab.value] ?? 0;
+						const count = tabCount(tab.value);
 						return (
 							<button
 								key={tab.value}
@@ -252,27 +280,30 @@ export function TenantsPage() {
 								)}
 							>
 								{tab.label}
-								<span
-									className={cn(
-										'min-w-5 rounded px-1 text-center text-xs font-semibold tabular-nums',
-										active
-											? 'bg-white/20 text-primary-foreground'
-											: 'bg-muted text-muted-foreground',
-									)}
-								>
-									{count}
-								</span>
+								{summary && (
+									<span
+										className={cn(
+											'min-w-5 rounded px-1 text-center text-xs font-semibold tabular-nums',
+											active
+												? 'bg-white/20 text-primary-foreground'
+												: 'bg-muted text-muted-foreground',
+										)}
+									>
+										{count}
+									</span>
+								)}
 							</button>
 						);
 					})}
 				</div>
-
-				{/* Export */}
-				<Button variant="outline" size="sm" className="ml-auto gap-1.5">
-					<Download className="size-3.5" />
-					Export
-				</Button>
 			</div>
+
+			{/* ── Error state ──────────────────────────────────────────────── */}
+			{isError && (
+				<div className="rounded-lg border border-destructive/30 bg-destructive/5 px-4 py-3 text-sm text-destructive">
+					Failed to load tenants. Please refresh.
+				</div>
+			)}
 
 			{/* ── Table ────────────────────────────────────────────────────── */}
 			<Card className="gap-0 overflow-hidden py-0">
@@ -285,15 +316,42 @@ export function TenantsPage() {
 							<TableHead className="text-right">Branches</TableHead>
 							<TableHead className="text-right">Students</TableHead>
 							<TableHead className="text-right">MRR</TableHead>
-							<TableHead className="text-right">Last active</TableHead>
-							<TableHead className="w-10" />
 						</TableRow>
 					</TableHeader>
 					<TableBody>
-						{rows.length === 0 ? (
+						{isLoading ? (
+							Array.from({ length: 6 }, (_, i) => (
+								<TableRow key={i}>
+									<TableCell>
+										<div className="flex items-center gap-3">
+											<Skeleton className="size-8 rounded-full" />
+											<div className="flex flex-col gap-1">
+												<Skeleton className="h-4 w-36" />
+												<Skeleton className="h-3 w-24" />
+											</div>
+										</div>
+									</TableCell>
+									<TableCell>
+										<Skeleton className="h-4 w-16" />
+									</TableCell>
+									<TableCell>
+										<Skeleton className="h-5 w-20 rounded-full" />
+									</TableCell>
+									<TableCell className="text-right">
+										<Skeleton className="ml-auto h-4 w-6" />
+									</TableCell>
+									<TableCell className="text-right">
+										<Skeleton className="ml-auto h-4 w-12" />
+									</TableCell>
+									<TableCell className="text-right">
+										<Skeleton className="ml-auto h-4 w-20" />
+									</TableCell>
+								</TableRow>
+							))
+						) : rows.length === 0 ? (
 							<TableRow>
 								<TableCell
-									colSpan={8}
+									colSpan={6}
 									className="py-16 text-center text-sm text-muted-foreground"
 								>
 									No tenants match your filters.
@@ -339,17 +397,35 @@ export function TenantsPage() {
 										</div>
 									</TableCell>
 
-									{/* Plan — plain text, no badge */}
+									{/* Plan */}
 									<TableCell className="text-sm text-muted-foreground">
-										{PLAN_LABELS[tenant.plan]}
+										{tenant.plan?.name ?? '—'}
 									</TableCell>
 
 									{/* Status */}
 									<TableCell>
-										<StatusBadge
-											kind="tenant"
-											status={tenant.status}
-										/>
+										<div className="flex flex-col gap-1">
+											<StatusBadge
+												tone={TENANT_STATUS_TONE[tenant.status]}
+											>
+												{TENANT_STATUS_LABEL[tenant.status]}
+											</StatusBadge>
+											{tenant.subscriptionStatus && (
+												<StatusBadge
+													tone={
+														SUB_STATUS_TONE[
+															tenant.subscriptionStatus
+														]
+													}
+												>
+													{
+														SUB_STATUS_LABEL[
+															tenant.subscriptionStatus
+														]
+													}
+												</StatusBadge>
+											)}
+										</div>
 									</TableCell>
 
 									{/* Branches */}
@@ -366,11 +442,6 @@ export function TenantsPage() {
 									<TableCell className="text-right tabular-nums text-sm">
 										{formatMrrRow(tenant.mrr)}
 									</TableCell>
-
-									{/* Last active */}
-									<TableCell className="text-right text-sm text-muted-foreground">
-										{timeAgo(tenant.lastActiveAt)}
-									</TableCell>
 								</TableRow>
 							))
 						)}
@@ -380,38 +451,41 @@ export function TenantsPage() {
 				{/* ── Pagination footer ─────────────────────────────────────── */}
 				<div className="flex items-center justify-between border-t border-border px-4 py-3">
 					<p className="text-xs text-muted-foreground">
-						{filtered.length === 0
+						{total === 0
 							? 'No results'
-							: `Showing ${rangeStart}–${rangeEnd} of ${filtered.length} tenants`}
+							: `Showing ${rangeStart}–${rangeEnd} of ${total} tenants`}
 					</p>
 
-					{pageCount > 1 && (
+					{totalPages > 1 && (
 						<div className="flex items-center gap-0.5">
 							<Button
 								variant="ghost"
 								size="icon"
 								className="size-8"
-								disabled={safePage === 0}
+								disabled={page <= 1}
 								onClick={() => setPage((p) => p - 1)}
 							>
 								<ChevronLeft className="size-4" />
 							</Button>
-							{Array.from({ length: pageCount }, (_, i) => (
-								<Button
-									key={i}
-									variant={i === safePage ? 'default' : 'ghost'}
-									size="icon"
-									className="size-8 text-xs"
-									onClick={() => setPage(i)}
-								>
-									{i + 1}
-								</Button>
-							))}
+							{Array.from({ length: Math.min(totalPages, 7) }, (_, i) => {
+								const p = i + 1;
+								return (
+									<Button
+										key={p}
+										variant={p === page ? 'default' : 'ghost'}
+										size="icon"
+										className="size-8 text-xs"
+										onClick={() => setPage(p)}
+									>
+										{p}
+									</Button>
+								);
+							})}
 							<Button
 								variant="ghost"
 								size="icon"
 								className="size-8"
-								disabled={safePage >= pageCount - 1}
+								disabled={page >= totalPages}
 								onClick={() => setPage((p) => p + 1)}
 							>
 								<ChevronRight className="size-4" />

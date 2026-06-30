@@ -1,7 +1,5 @@
-// TODO: replace mock data + local state with useQuery(subscriptionsQuery()) once
-//       GET /admin/subscriptions is ready.
-
-import { useMemo, useState } from 'react';
+import { useNavigate, useSearch } from '@tanstack/react-router';
+import { useQuery } from '@tanstack/react-query';
 import { ChevronLeft, ChevronRight } from 'lucide-react';
 
 import {
@@ -10,6 +8,7 @@ import {
 	Button,
 	Card,
 	CardContent,
+	Skeleton,
 	StatusBadge,
 	Table,
 	TableBody,
@@ -19,21 +18,25 @@ import {
 	TableRow,
 	cn,
 } from '@repo/ui';
-import { MOCK_SUBSCRIPTIONS } from './_mock';
-import type { SubscriptionStatus } from './_mock';
+
+import { formatUzs, formatUzsCompact } from '@/lib/formatters/currency';
+import { subscriptionsKeys } from '@/features/subscriptions/api/keys';
+import {
+	getSubscriptionAnalytics,
+	listSubscriptions,
+} from '@/features/subscriptions/api/subscriptions.queries';
+import type { SubscriptionStatus } from '@/features/subscriptions/api/types';
 
 // ─── Constants ────────────────────────────────────────────────────────────────
 
-const ALL = MOCK_SUBSCRIPTIONS;
-const PAGE_SIZE = 6;
+const PAGE_SIZE = 10;
 
 const STATUS_TABS: { value: SubscriptionStatus | 'all'; label: string }[] = [
 	{ value: 'all', label: 'All' },
-	{ value: 'active', label: 'Active' },
-	{ value: 'trialing', label: 'Trialing' },
-	{ value: 'past_due', label: 'Past due' },
-	{ value: 'suspended', label: 'Suspended' },
-	{ value: 'cancelled', label: 'Cancelled' },
+	{ value: 'ACTIVE', label: 'Active' },
+	{ value: 'TRIALING', label: 'Trialing' },
+	{ value: 'PAST_DUE', label: 'Past due' },
+	{ value: 'CANCELLED', label: 'Cancelled' },
 ];
 
 const AVATAR_PALETTE = [
@@ -49,12 +52,10 @@ const AVATAR_PALETTE = [
 	'bg-tone-slate-bg text-tone-slate-fg',
 ];
 
-const AVATAR_INDEX = new Map(ALL.map((s, i) => [s.id, i]));
-
 // ─── Helpers ──────────────────────────────────────────────────────────────────
 
-function avatarClass(id: string) {
-	return AVATAR_PALETTE[(AVATAR_INDEX.get(id) ?? 0) % AVATAR_PALETTE.length];
+function avatarClass(id: number): string {
+	return AVATAR_PALETTE[id % AVATAR_PALETTE.length];
 }
 
 function getInitials(name: string): string {
@@ -66,17 +67,6 @@ function getInitials(name: string): string {
 		.toUpperCase();
 }
 
-function formatMrr(uzs: number): string {
-	if (uzs === 0) return '—';
-	return new Intl.NumberFormat('ru-RU').format(uzs);
-}
-
-function formatMrrKpi(uzs: number): string {
-	if (uzs >= 1_000_000_000) return `${(uzs / 1_000_000_000).toFixed(1)}B`;
-	if (uzs >= 1_000_000) return `${(uzs / 1_000_000).toFixed(1)}M`;
-	return `${(uzs / 1_000).toFixed(0)}K`;
-}
-
 function formatDate(iso: string): string {
 	return new Intl.DateTimeFormat('en-GB', {
 		day: '2-digit',
@@ -85,97 +75,116 @@ function formatDate(iso: string): string {
 	}).format(new Date(iso));
 }
 
-function daysDiff(isoA: string, isoB: string): number {
-	return Math.round((new Date(isoA).getTime() - new Date(isoB).getTime()) / 86_400_000);
-}
+// ─── BillingDateCell ──────────────────────────────────────────────────────────
 
-// ─── NextBillCell ─────────────────────────────────────────────────────────────
-
-function NextBillCell({
+function BillingDateCell({
 	status,
-	nextBillAt,
-	trialEndsAt,
-	today,
+	currentPeriodEnd,
+	cancelledAt,
 }: {
 	status: SubscriptionStatus;
-	nextBillAt: string;
-	trialEndsAt?: string;
-	today: string;
+	currentPeriodEnd: string;
+	cancelledAt: string | null;
 }) {
-	if (status === 'trialing' && trialEndsAt) {
-		const daysLeft = daysDiff(trialEndsAt, today);
-		return (
-			<span className="text-sm font-medium text-tone-blue-fg">
-				Trial · {daysLeft}d left
-			</span>
-		);
+	if (status === 'TRIALING') {
+		return <span className="text-sm font-medium text-tone-blue-fg">In trial</span>;
 	}
 
-	if (status === 'past_due') {
-		const daysOver = daysDiff(today, nextBillAt);
+	if (status === 'PAST_DUE') {
 		return (
 			<span className="text-sm font-medium text-tone-red-fg">
-				{daysOver}d overdue
+				Overdue · {formatDate(currentPeriodEnd)}
 			</span>
 		);
 	}
 
-	if (status === 'cancelled') {
-		return <span className="text-sm text-muted-foreground">—</span>;
+	if (status === 'CANCELLED') {
+		return (
+			<span className="text-sm text-muted-foreground">
+				{cancelledAt ? formatDate(cancelledAt) : '—'}
+			</span>
+		);
 	}
 
-	return <span className="text-sm">{formatDate(nextBillAt)}</span>;
+	return <span className="text-sm">{formatDate(currentPeriodEnd)}</span>;
+}
+
+// ─── Table skeleton ───────────────────────────────────────────────────────────
+
+function TableSkeleton() {
+	return (
+		<>
+			{Array.from({ length: PAGE_SIZE }, (_, i) => (
+				<TableRow key={i}>
+					<TableCell>
+						<div className="flex items-center gap-3">
+							<Skeleton className="size-8 rounded-full" />
+							<Skeleton className="h-4 w-36" />
+						</div>
+					</TableCell>
+					<TableCell>
+						<Skeleton className="h-4 w-20" />
+					</TableCell>
+					<TableCell>
+						<Skeleton className="h-5 w-16" />
+					</TableCell>
+					<TableCell className="text-right">
+						<Skeleton className="ml-auto h-4 w-20" />
+					</TableCell>
+					<TableCell className="text-right">
+						<Skeleton className="ml-auto h-4 w-20" />
+					</TableCell>
+					<TableCell className="text-right">
+						<Skeleton className="ml-auto h-4 w-24" />
+					</TableCell>
+				</TableRow>
+			))}
+		</>
+	);
 }
 
 // ─── Page ─────────────────────────────────────────────────────────────────────
 
 export function SubscriptionsPage() {
-	const [statusTab, setStatusTab] = useState<SubscriptionStatus | 'all'>('all');
-	const [page, setPage] = useState(0);
+	const navigate = useNavigate();
+	const { page = 1, status } = useSearch({ from: '/_authed/subscriptions' });
 
-	// Fixed reference date (matches mock data); replace with new Date().toISOString().slice(0, 10) once live.
-	const today = '2026-06-29';
+	const analyticsQuery = useQuery({
+		queryKey: subscriptionsKeys.analytics(),
+		queryFn: getSubscriptionAnalytics,
+	});
 
-	// Global KPI stats — not affected by filters
-	const kpi = useMemo(() => {
-		let active = 0,
-			trialing = 0,
-			past_due = 0,
-			mrr = 0;
-		for (const s of ALL) {
-			if (s.status === 'active') active++;
-			else if (s.status === 'trialing') trialing++;
-			else if (s.status === 'past_due') past_due++;
-			mrr += s.mrr;
-		}
-		return { active, trialing, past_due, mrr };
-	}, []);
+	const listQuery = useQuery({
+		queryKey: subscriptionsKeys.list({ page, limit: PAGE_SIZE, status }),
+		queryFn: () => listSubscriptions({ page, limit: PAGE_SIZE, status }),
+	});
 
-	// Per-status counts for tab badges
-	const tabCounts = useMemo(() => {
-		const c: Partial<Record<SubscriptionStatus | 'all', number>> = {
-			all: ALL.length,
-		};
-		for (const s of ALL) {
-			c[s.status] = (c[s.status] ?? 0) + 1;
-		}
-		return c;
-	}, []);
+	const analytics = analyticsQuery.data;
+	const list = listQuery.data;
 
-	const filtered = useMemo(
-		() => (statusTab === 'all' ? ALL : ALL.filter((s) => s.status === statusTab)),
-		[statusTab],
-	);
-
-	const pageCount = Math.max(1, Math.ceil(filtered.length / PAGE_SIZE));
-	const safePage = Math.min(page, pageCount - 1);
-	const rows = filtered.slice(safePage * PAGE_SIZE, (safePage + 1) * PAGE_SIZE);
-	const rangeStart = filtered.length === 0 ? 0 : safePage * PAGE_SIZE + 1;
-	const rangeEnd = Math.min((safePage + 1) * PAGE_SIZE, filtered.length);
+	const totalPages = list ? Math.max(1, list.totalPages) : 1;
+	const total = list?.total ?? 0;
+	const rangeStart = total === 0 ? 0 : (page - 1) * PAGE_SIZE + 1;
+	const rangeEnd = Math.min(page * PAGE_SIZE, total);
 
 	function handleTab(value: SubscriptionStatus | 'all') {
-		setStatusTab(value);
-		setPage(0);
+		void navigate({
+			search: () => ({
+				status: value === 'all' ? undefined : value,
+				page: undefined,
+			}),
+		});
+	}
+
+	function handlePage(newPage: number) {
+		void navigate({ search: (prev) => ({ ...prev, page: newPage }) });
+	}
+
+	const tabCounts: Partial<Record<SubscriptionStatus | 'all', number>> = {};
+	if (analytics) {
+		tabCounts['ACTIVE'] = analytics.current.activeCount;
+		tabCounts['TRIALING'] = analytics.current.trialingCount;
+		tabCounts['PAST_DUE'] = analytics.current.pastDueCount;
 	}
 
 	return (
@@ -193,33 +202,51 @@ export function SubscriptionsPage() {
 				<Card className="py-0">
 					<CardContent className="px-5 py-4">
 						<p className="text-xs text-muted-foreground">Active</p>
-						<p className="mt-1 text-3xl font-bold text-tone-green-fg">
-							{kpi.active}
-						</p>
+						{analyticsQuery.isLoading ? (
+							<Skeleton className="mt-1 h-8 w-12" />
+						) : (
+							<p className="mt-1 text-3xl font-bold text-tone-green-fg">
+								{analytics?.current.activeCount ?? '—'}
+							</p>
+						)}
 					</CardContent>
 				</Card>
 				<Card className="py-0">
 					<CardContent className="px-5 py-4">
 						<p className="text-xs text-muted-foreground">Trialing</p>
-						<p className="mt-1 text-3xl font-bold text-tone-blue-fg">
-							{kpi.trialing}
-						</p>
+						{analyticsQuery.isLoading ? (
+							<Skeleton className="mt-1 h-8 w-12" />
+						) : (
+							<p className="mt-1 text-3xl font-bold text-tone-blue-fg">
+								{analytics?.current.trialingCount ?? '—'}
+							</p>
+						)}
 					</CardContent>
 				</Card>
 				<Card className="py-0">
 					<CardContent className="px-5 py-4">
 						<p className="text-xs text-muted-foreground">Past due</p>
-						<p className="mt-1 text-3xl font-bold text-tone-amber-fg">
-							{kpi.past_due}
-						</p>
+						{analyticsQuery.isLoading ? (
+							<Skeleton className="mt-1 h-8 w-12" />
+						) : (
+							<p className="mt-1 text-3xl font-bold text-tone-amber-fg">
+								{analytics?.current.pastDueCount ?? '—'}
+							</p>
+						)}
 					</CardContent>
 				</Card>
 				<Card className="py-0">
 					<CardContent className="px-5 py-4">
 						<p className="text-xs text-muted-foreground">Total MRR</p>
-						<p className="mt-1 text-2xl font-bold">
-							{formatMrrKpi(kpi.mrr)} UZS
-						</p>
+						{analyticsQuery.isLoading ? (
+							<Skeleton className="mt-1 h-7 w-24" />
+						) : (
+							<p className="mt-1 text-2xl font-bold">
+								{analytics
+									? formatUzsCompact(analytics.current.mrr)
+									: '—'}
+							</p>
+						)}
 					</CardContent>
 				</Card>
 			</div>
@@ -227,8 +254,8 @@ export function SubscriptionsPage() {
 			{/* ── Status filter tabs ───────────────────────────────────────── */}
 			<div className="flex items-center gap-0.5 overflow-x-auto">
 				{STATUS_TABS.map((tab) => {
-					const active = statusTab === tab.value;
-					const count = tabCounts[tab.value] ?? 0;
+					const isActive = (status ?? 'all') === tab.value;
+					const count = tabCounts[tab.value];
 					return (
 						<button
 							key={tab.value}
@@ -236,26 +263,35 @@ export function SubscriptionsPage() {
 							onClick={() => handleTab(tab.value)}
 							className={cn(
 								'cursor-pointer inline-flex h-8 shrink-0 items-center gap-1.5 rounded-md px-3 text-sm font-medium transition-colors',
-								active
+								isActive
 									? 'bg-primary text-primary-foreground'
 									: 'text-muted-foreground hover:bg-muted hover:text-foreground',
 							)}
 						>
 							{tab.label}
-							<span
-								className={cn(
-									'min-w-5 rounded px-1 text-center text-xs font-semibold tabular-nums',
-									active
-										? 'bg-white/20 text-primary-foreground'
-										: 'bg-muted text-muted-foreground',
-								)}
-							>
-								{count}
-							</span>
+							{count != null && (
+								<span
+									className={cn(
+										'min-w-5 rounded px-1 text-center text-xs font-semibold tabular-nums',
+										isActive
+											? 'bg-white/20 text-primary-foreground'
+											: 'bg-muted text-muted-foreground',
+									)}
+								>
+									{count}
+								</span>
+							)}
 						</button>
 					);
 				})}
 			</div>
+
+			{/* ── Error state ──────────────────────────────────────────────── */}
+			{listQuery.isError && (
+				<div className="rounded-lg border border-destructive/30 bg-destructive/5 px-4 py-3 text-sm text-destructive">
+					Failed to load subscriptions. Please refresh.
+				</div>
+			)}
 
 			{/* ── Table ────────────────────────────────────────────────────── */}
 			<Card className="gap-0 overflow-hidden py-0">
@@ -266,12 +302,14 @@ export function SubscriptionsPage() {
 							<TableHead>Plan</TableHead>
 							<TableHead>Status</TableHead>
 							<TableHead className="text-right">MRR</TableHead>
-							<TableHead className="text-right">Started</TableHead>
+							<TableHead className="text-right">Period start</TableHead>
 							<TableHead className="text-right">Next bill</TableHead>
 						</TableRow>
 					</TableHeader>
 					<TableBody>
-						{rows.length === 0 ? (
+						{listQuery.isLoading ? (
+							<TableSkeleton />
+						) : !list || list.rows.length === 0 ? (
 							<TableRow>
 								<TableCell
 									colSpan={6}
@@ -281,7 +319,7 @@ export function SubscriptionsPage() {
 								</TableCell>
 							</TableRow>
 						) : (
-							rows.map((sub) => (
+							list.rows.map((sub) => (
 								<TableRow key={sub.id}>
 									{/* Tenant */}
 									<TableCell>
@@ -290,21 +328,28 @@ export function SubscriptionsPage() {
 												<AvatarFallback
 													className={cn(
 														'text-xs font-bold',
-														avatarClass(sub.id),
+														avatarClass(sub.tenantId),
 													)}
 												>
-													{getInitials(sub.tenantName)}
+													{getInitials(
+														sub.tenantName ??
+															sub.tenantSubdomain ??
+															'?',
+													)}
 												</AvatarFallback>
 											</Avatar>
 											<span className="truncate text-sm font-medium">
-												{sub.tenantName}
+												{sub.tenantName ??
+													sub.tenantSubdomain ??
+													`Tenant #${sub.tenantId}`}
 											</span>
 										</div>
 									</TableCell>
 
 									{/* Plan */}
 									<TableCell className="text-sm text-muted-foreground">
-										{sub.plan}
+										{sub.tierName ??
+											`Tier #${sub.subscriptionTierId}`}
 									</TableCell>
 
 									{/* Status */}
@@ -314,21 +359,20 @@ export function SubscriptionsPage() {
 
 									{/* MRR */}
 									<TableCell className="text-right tabular-nums text-sm font-medium">
-										{formatMrr(sub.mrr)}
+										{formatUzs(sub.monthlyValue)}
 									</TableCell>
 
-									{/* Started */}
+									{/* Period start */}
 									<TableCell className="text-right text-sm text-muted-foreground">
-										{formatDate(sub.startedAt)}
+										{formatDate(sub.currentPeriodStart)}
 									</TableCell>
 
 									{/* Next bill */}
 									<TableCell className="text-right">
-										<NextBillCell
+										<BillingDateCell
 											status={sub.status}
-											nextBillAt={sub.nextBillAt}
-											trialEndsAt={sub.trialEndsAt}
-											today={today}
+											currentPeriodEnd={sub.currentPeriodEnd}
+											cancelledAt={sub.cancelledAt}
 										/>
 									</TableCell>
 								</TableRow>
@@ -340,29 +384,31 @@ export function SubscriptionsPage() {
 				{/* ── Pagination footer ─────────────────────────────────────── */}
 				<div className="flex items-center justify-between border-t border-border px-4 py-3">
 					<p className="text-xs text-muted-foreground">
-						{filtered.length === 0
-							? 'No results'
-							: `Showing ${rangeStart}–${rangeEnd} of ${filtered.length} subscriptions`}
+						{listQuery.isLoading
+							? 'Loading…'
+							: total === 0
+								? 'No results'
+								: `Showing ${rangeStart}–${rangeEnd} of ${total} subscriptions`}
 					</p>
 
-					{pageCount > 1 && (
+					{totalPages > 1 && (
 						<div className="flex items-center gap-0.5">
 							<Button
 								variant="ghost"
 								size="icon"
 								className="size-8"
-								disabled={safePage === 0}
-								onClick={() => setPage((p) => p - 1)}
+								disabled={page <= 1}
+								onClick={() => handlePage(page - 1)}
 							>
 								<ChevronLeft className="size-4" />
 							</Button>
-							{Array.from({ length: pageCount }, (_, i) => (
+							{Array.from({ length: totalPages }, (_, i) => (
 								<Button
 									key={i}
-									variant={i === safePage ? 'default' : 'ghost'}
+									variant={i + 1 === page ? 'default' : 'ghost'}
 									size="icon"
 									className="size-8 text-xs"
-									onClick={() => setPage(i)}
+									onClick={() => handlePage(i + 1)}
 								>
 									{i + 1}
 								</Button>
@@ -371,8 +417,8 @@ export function SubscriptionsPage() {
 								variant="ghost"
 								size="icon"
 								className="size-8"
-								disabled={safePage >= pageCount - 1}
-								onClick={() => setPage((p) => p + 1)}
+								disabled={page >= totalPages}
+								onClick={() => handlePage(page + 1)}
 							>
 								<ChevronRight className="size-4" />
 							</Button>

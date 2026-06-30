@@ -38,6 +38,40 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/v1/public/admin/auth/login": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Step 1: verify operator email + password and email an OTP */
+        post: operations["AdminAuthController_login"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/public/admin/auth/verify-otp": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Step 2: verify the OTP and issue a JWT pair */
+        post: operations["AdminAuthController_verifyOtp"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/api/v1/public/health": {
         parameters: {
             query?: never;
@@ -47,6 +81,434 @@ export interface paths {
         };
         /** Health check — DB and Redis connectivity */
         get: operations["HealthController_health"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/webhooks/click": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Click payment-gateway webhook (signature-verified, no JWT) */
+        post: operations["WebhooksController_click"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/admin/me": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** The authenticated platform operator's profile */
+        get: operations["MeController_me"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/admin/tenants": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Onboard a new education center (tenant + branch + owner + plan) */
+        post: operations["TenantsController_onboard"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/admin/tenants/{id}/suspend": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Suspend a tenant (blocks all tenant access) */
+        post: operations["TenantsController_suspend"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/admin/tenants/{id}/unsuspend": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Lift a suspension (restore a tenant to ACTIVE) */
+        post: operations["TenantsController_unsuspend"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/admin/tenants/{id}/cancel": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Cancel a tenant (data retained per retention policy) */
+        post: operations["TenantsController_cancel"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/admin/tenants/{id}/change-plan": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Change a tenant subscription plan (immediate, no proration) */
+        post: operations["TenantsController_changePlan"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/admin/tenants/{id}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        /** Update tenant settings/branding */
+        patch: operations["TenantsController_update"];
+        trace?: never;
+    };
+    "/api/v1/admin/tenants/{tenantId}/members": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Add a user to a tenant with a role */
+        post: operations["TenantMembersController_add"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/admin/tenants/{tenantId}/members/{userId}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        post?: never;
+        /** Remove a member from a tenant */
+        delete: operations["TenantMembersController_remove"];
+        options?: never;
+        head?: never;
+        /** Change a member's role in a tenant */
+        patch: operations["TenantMembersController_changeRole"];
+        trace?: never;
+    };
+    "/api/v1/admin/users": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Platform-wide user directory (search/filter, paginated) */
+        get: operations["UsersController_list"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/admin/users/{id}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** User detail with cross-tenant memberships and roles */
+        get: operations["UsersController_detail"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/admin/users/{id}/reset-password": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Set a new password for a user (operator-supplied) */
+        post: operations["UsersController_resetPassword"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/admin/users/{id}/deactivate": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Globally deactivate a user (blocks login + refresh) */
+        post: operations["UsersController_deactivate"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/admin/roles": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** System role templates with their permission matrix */
+        get: operations["RolesController_list"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/admin/roles/{role}/permissions": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        /** Replace a system role template's permission set (applies to all tenants) */
+        patch: operations["RolesController_updatePermissions"];
+        trace?: never;
+    };
+    "/api/v1/admin/permissions": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** The system-defined permission catalog (grouped by domain) */
+        get: operations["PermissionsController_list"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/admin/plans": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** List subscription plans (paginated, filterable) */
+        get: operations["PlansController_list"];
+        put?: never;
+        /** Create a subscription plan */
+        post: operations["PlansController_create"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/admin/plans/{id}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Get a subscription plan by id */
+        get: operations["PlansController_get"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        /** Edit a plan price / feature matrix / caps */
+        patch: operations["PlansController_update"];
+        trace?: never;
+    };
+    "/api/v1/admin/subscriptions/analytics": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** MRR / ARR, signups, churn and the MRR trend */
+        get: operations["SubscriptionsController_analytics"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/admin/subscriptions": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** List subscriptions across tenants (status/tier filters) */
+        get: operations["SubscriptionsController_list"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/admin/audit-logs": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Cross-tenant platform audit trail (filter, paginated, newest first) */
+        get: operations["AuditLogsController_list"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/admin/audit-logs/{id}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Full audit-log entry detail */
+        get: operations["AuditLogsController_detail"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/admin/dashboard": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Network-wide platform KPIs */
+        get: operations["DashboardController_overview"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/admin/dashboard/mrr-trend": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** MRR trend time series (6m / 12m / 24m) */
+        get: operations["DashboardController_mrrTrend"];
         put?: never;
         post?: never;
         delete?: never;
@@ -496,6 +958,478 @@ export interface paths {
         patch: operations["EnrollmentsController_update"];
         trace?: never;
     };
+    "/api/v1/manage/fee-plans": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** List fee plans (paginated, filterable) */
+        get: operations["FeePlansController_list"];
+        put?: never;
+        /** Create a fee plan */
+        post: operations["FeePlansController_create"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/manage/fee-plans/{id}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        /** Update a fee plan */
+        patch: operations["FeePlansController_update"];
+        trace?: never;
+    };
+    "/api/v1/manage/invoices": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** List invoices (paginated, filterable) */
+        get: operations["InvoicesController_list"];
+        put?: never;
+        /** Create an invoice (DRAFT) */
+        post: operations["InvoicesController_create"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/manage/invoices/{id}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Get full invoice detail */
+        get: operations["InvoicesController_findOne"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        /** Update an invoice (dueDate while DRAFT, notes, status). Voiding requires invoice.void. */
+        patch: operations["InvoicesController_update"];
+        trace?: never;
+    };
+    "/api/v1/manage/invoices/{id}/line-items": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** List an invoice's line items */
+        get: operations["InvoicesController_listLineItems"];
+        put?: never;
+        /** Add a line item to a DRAFT invoice (recalculates totals) */
+        post: operations["InvoicesController_addLineItem"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/manage/invoices/{id}/payments": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** List payments applied to an invoice */
+        get: operations["InvoicesController_listPayments"];
+        put?: never;
+        /** Record a manual (cash/card/bank-transfer) payment. For online payments use the Portal/webhooks, not this endpoint. */
+        post: operations["InvoicesController_recordPayment"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/manage/invoices/{id}/discounts": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Apply a discount to an invoice (recalculates totals) */
+        post: operations["InvoicesController_applyDiscount"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/manage/payments": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** List payments (paginated, filterable) */
+        get: operations["PaymentsController_list"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/manage/payments/{id}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Get full payment detail */
+        get: operations["PaymentsController_findOne"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/manage/discounts": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** List discounts (paginated, filterable) */
+        get: operations["DiscountsController_list"];
+        put?: never;
+        /** Create a discount */
+        post: operations["DiscountsController_create"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/manage/discounts/{id}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        /** Update a discount */
+        patch: operations["DiscountsController_update"];
+        trace?: never;
+    };
+    "/api/v1/teach/sessions": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** My calendar: sessions I teach (default teacher or substitute) in a date window (from + to required, max 90 days) */
+        get: operations["MySessionsController_calendar"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/teach/sessions/{id}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Session detail + enrolled roster (must be a session I teach) */
+        get: operations["MySessionsController_findOne"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/teach/groups": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** List the groups I teach (paginated, optional status filter) */
+        get: operations["MyGroupsController_list"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/teach/groups/{id}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Group detail with full roster (must be a group I teach) */
+        get: operations["MyGroupsController_findOne"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/teach/groups/{id}/students": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Enriched roster: student contact + per-group attendance rate (must be a group I teach) */
+        get: operations["MyGroupsController_students"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/teach/sessions/{id}/attendances": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Current attendance state for a session I teach */
+        get: operations["AttendanceController_list"];
+        put?: never;
+        /** Batch submit attendance for a session I teach (rejects cancelled sessions, non-enrolled or duplicate students) */
+        post: operations["AttendanceController_submit"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        /** Batch update previously-submitted attendance for a session I teach */
+        patch: operations["AttendanceController_update"];
+        trace?: never;
+    };
+    "/api/v1/teach/assessments": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** List assessments across my groups (optionally narrowed to one group I teach) */
+        get: operations["AssessmentsController_list"];
+        put?: never;
+        /** Create an assessment in a group I teach */
+        post: operations["AssessmentsController_create"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/teach/assessments/{id}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Get an assessment (must be in a group I teach) */
+        get: operations["AssessmentsController_findOne"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        /** Update an assessment (must be in a group I teach) */
+        patch: operations["AssessmentsController_update"];
+        trace?: never;
+    };
+    "/api/v1/teach/assessments/{id}/results": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** List results for an assessment (must be in a group I teach) */
+        get: operations["AssessmentsController_listResults"];
+        put?: never;
+        /** Batch submit grades; grade label + percentile are derived by the domain */
+        post: operations["AssessmentsController_submitResults"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        /** Batch update grades (matched by assessment + student) */
+        patch: operations["AssessmentsController_updateResults"];
+        trace?: never;
+    };
+    "/api/v1/teach/assessments/{id}/publish": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Publish results to students/parents (idempotent; emits ResultsPublishedEvent) */
+        post: operations["AssessmentsController_publish"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/teach/materials": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** List materials for my groups (optionally narrowed to one group) */
+        get: operations["MaterialsController_list"];
+        put?: never;
+        /** Upload a material to a group I teach (branchId auto-set from the group) */
+        post: operations["MaterialsController_create"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/teach/materials/{id}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        post?: never;
+        /** Delete a material I uploaded myself */
+        delete: operations["MaterialsController_remove"];
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/teach/students/{id}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Limited profile of a student in one of my groups */
+        get: operations["StudentProfilesController_findOne"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/teach/students/{id}/attendances": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** A student's attendance across my groups (optional date window) */
+        get: operations["StudentProfilesController_attendances"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/teach/students/{id}/results": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** A student's assessment results across my groups */
+        get: operations["StudentProfilesController_results"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/teach/grading-scales": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** List the tenant grading scales */
+        get: operations["GradingScalesController_list"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
 }
 export type webhooks = Record<string, never>;
 export interface components {
@@ -512,6 +1446,170 @@ export interface components {
         RefreshTokenDto: {
             /** @description A valid refresh token previously issued by login or refresh. */
             refreshToken: string;
+        };
+        AdminLoginDto: {
+            /** @example operator@educore.uz */
+            email: string;
+            /** @example S3cret-pass */
+            password: string;
+        };
+        AdminVerifyOtpDto: {
+            /** @example operator@educore.uz */
+            email: string;
+            /**
+             * @description 6-digit one-time code
+             * @example 123456
+             */
+            code: string;
+        };
+        OnboardBranchDto: {
+            name: string;
+            code: string;
+            address?: string;
+            /**
+             * @description E.164 phone number
+             * @example +998901234567
+             */
+            phone?: string;
+            email?: string;
+            timezone?: string;
+        };
+        OnboardOwnerDto: {
+            /**
+             * @description E.164 phone number
+             * @example +998901234567
+             */
+            phone: string;
+            email?: string;
+            firstName: string;
+            lastName: string;
+            password: string;
+        };
+        OnboardTenantDto: {
+            name: string;
+            /**
+             * @description Unique, lowercase, alphanumeric + hyphens
+             * @example zabon
+             */
+            subdomain: string;
+            city?: string;
+            /**
+             * @description E.164 phone number
+             * @example +998901234567
+             */
+            phone?: string;
+            /** @example Asia/Tashkent */
+            timezone?: string;
+            /** @enum {string} */
+            locale?: "uz" | "ru" | "en";
+            /**
+             * @description ISO-4217 currency code
+             * @example UZS
+             */
+            currency?: string;
+            /** @description Plan to start on; a TRIALING subscription is created */
+            subscriptionTierId: number;
+            mainBranch: components["schemas"]["OnboardBranchDto"];
+            ownerUser: components["schemas"]["OnboardOwnerDto"];
+        };
+        TenantActionDto: {
+            /** @description Must be true to confirm this destructive action */
+            confirm: boolean;
+            reason?: string;
+        };
+        UnsuspendTenantDto: {
+            reason?: string;
+        };
+        ChangePlanDto: {
+            /** @description Target plan (subscription tier) id */
+            subscriptionTierId: number;
+            /** @enum {string} */
+            billingInterval?: "MONTHLY" | "ANNUAL";
+        };
+        UpdateTenantDto: {
+            /** @example Asia/Tashkent */
+            timezone?: string;
+            /** @enum {string} */
+            locale?: "uz" | "ru" | "en";
+            /**
+             * @description ISO-4217 currency code
+             * @example UZS
+             */
+            currency?: string;
+            /** @example #1D4ED8 */
+            brandColor?: string | null;
+            /** @example +998901234567 */
+            phone?: string | null;
+            city?: string | null;
+        };
+        AddMemberDto: {
+            /** @description Global user id to add to the tenant */
+            userId: number;
+            /** @description Role to assign (system role or a role of this tenant) */
+            roleId: number;
+            /** @description Branch to scope the role to; omit/null = all branches */
+            branchId?: number | null;
+        };
+        ChangeMemberRoleDto: {
+            /** @description New role to assign (system role or a role of this tenant) */
+            roleId: number;
+            /** @description Branch to scope the role to; omit/null = all branches */
+            branchId?: number | null;
+        };
+        ResetPasswordDto: {
+            newPassword: string;
+        };
+        UpdateRolePermissionsDto: {
+            /**
+             * @description Full replacement set of permission codes for the role. Empty array clears all permissions.
+             * @example [
+             *       "student.read",
+             *       "student.create"
+             *     ]
+             */
+            permissionCodes: string[];
+        };
+        CreatePlanDto: {
+            /** @example Professional */
+            name: string;
+            /**
+             * @description Monthly price in UZS
+             * @example 500000
+             */
+            priceMonthly: number;
+            /**
+             * @description Annual price in UZS
+             * @example 5000000
+             */
+            priceAnnual: number;
+            /** @description Hard cap; null = unlimited */
+            maxStudents?: number | null;
+            /** @description Hard cap; null = unlimited */
+            maxBranches?: number | null;
+            /** @description Capability matrix, e.g. { "mockExams": true } */
+            features?: Record<string, never>;
+            /** @default true */
+            isActive: boolean;
+        };
+        UpdatePlanDto: {
+            /** @example Professional */
+            name?: string;
+            /**
+             * @description Monthly price in UZS
+             * @example 500000
+             */
+            priceMonthly?: number;
+            /**
+             * @description Annual price in UZS
+             * @example 5000000
+             */
+            priceAnnual?: number;
+            /** @description Hard cap; null = unlimited */
+            maxStudents?: number | null;
+            /** @description Hard cap; null = unlimited */
+            maxBranches?: number | null;
+            features?: Record<string, never>;
+            isActive?: boolean;
         };
         EmergencyContactDto: {
             name: string;
@@ -760,6 +1858,211 @@ export interface components {
             /** @description Required when status = DROPPED */
             dropReason?: string | null;
         };
+        CreateFeePlanDto: {
+            /** @description Null = applies across branches */
+            branchId?: number | null;
+            courseId?: number | null;
+            /** @example Monthly Tuition — IELTS */
+            name: string;
+            /** @example 500000 */
+            amount: number;
+            /** @default UZS */
+            currency: string;
+            /** @enum {string} */
+            billingCycle: "MONTHLY" | "QUARTERLY" | "ONE_TIME" | "PER_SESSION";
+            /** @default 1 */
+            dueDay: number;
+            /** @default 0 */
+            lateFeeAmount: number;
+            /** @default 3 */
+            gracePeriodDays: number;
+        };
+        UpdateFeePlanDto: {
+            branchId?: number | null;
+            courseId?: number | null;
+            name?: string;
+            amount?: number;
+            currency?: string;
+            /** @enum {string} */
+            billingCycle?: "MONTHLY" | "QUARTERLY" | "ONE_TIME" | "PER_SESSION";
+            dueDay?: number;
+            lateFeeAmount?: number;
+            gracePeriodDays?: number;
+            isActive?: boolean;
+        };
+        InvoiceLineItemInputDto: {
+            description: string;
+            /** @example 1 */
+            quantity: number;
+            /** @example 500000 */
+            unitAmount: number;
+        };
+        CreateInvoiceDto: {
+            branchId: number;
+            studentId: number;
+            enrollmentId?: number | null;
+            /** @description Auto-populates line items from the fee plan */
+            feePlanId?: number | null;
+            /**
+             * @description YYYY-MM-DD
+             * @example 2026-01-01
+             */
+            periodStart?: string | null;
+            /**
+             * @description YYYY-MM-DD
+             * @example 2026-01-31
+             */
+            periodEnd?: string | null;
+            /**
+             * @description YYYY-MM-DD
+             * @example 2026-01-15
+             */
+            dueDate: string;
+            /** @description Required when no feePlanId is given */
+            lineItems?: components["schemas"]["InvoiceLineItemInputDto"][];
+            notes?: string | null;
+        };
+        UpdateInvoiceDto: {
+            /**
+             * @description YYYY-MM-DD (DRAFT only)
+             * @example 2026-01-20
+             */
+            dueDate?: string;
+            notes?: string | null;
+            /**
+             * @description Allowed transitions: DRAFT → UNPAID, any → VOID
+             * @enum {string}
+             */
+            status?: "DRAFT" | "UNPAID" | "PARTIAL" | "PAID" | "OVERDUE" | "VOID" | "REFUNDED";
+        };
+        CreateLineItemDto: {
+            description: string;
+            /** @example 1 */
+            quantity: number;
+            /** @example 500000 */
+            unitAmount: number;
+        };
+        RecordPaymentDto: {
+            /** @example 500000 */
+            amount: number;
+            /** @enum {string} */
+            method: "CASH" | "CARD" | "BANK_TRANSFER";
+            /**
+             * Format: date-time
+             * @description Default: now
+             */
+            paidAt?: string;
+            notes?: string | null;
+        };
+        ApplyDiscountDto: {
+            discountId: number;
+        };
+        CreateDiscountDto: {
+            name: string;
+            /** @enum {string} */
+            type: "PERCENTAGE" | "FIXED_AMOUNT";
+            /** @description Percentage (0–100) or fixed amount in currency */
+            value: number;
+            /** @default invoice */
+            applicableTo: string;
+            /** @description Promo code (unique per tenant) */
+            code?: string | null;
+            /** @description Null = unlimited */
+            maxUses?: number | null;
+            /**
+             * @description YYYY-MM-DD
+             * @example 2026-01-01
+             */
+            validFrom?: string | null;
+            /**
+             * @description YYYY-MM-DD
+             * @example 2026-12-31
+             */
+            validUntil?: string | null;
+        };
+        UpdateDiscountDto: {
+            name?: string;
+            /** @enum {string} */
+            type?: "PERCENTAGE" | "FIXED_AMOUNT";
+            value?: number;
+            applicableTo?: string;
+            code?: string | null;
+            maxUses?: number | null;
+            /**
+             * @description YYYY-MM-DD
+             * @example 2026-01-01
+             */
+            validFrom?: string | null;
+            /**
+             * @description YYYY-MM-DD
+             * @example 2026-12-31
+             */
+            validUntil?: string | null;
+            isActive?: boolean;
+        };
+        AttendanceRecordDto: {
+            studentId: number;
+            /** @enum {string} */
+            status: "PRESENT" | "ABSENT" | "LATE" | "EXCUSED";
+            note?: string | null;
+        };
+        BatchAttendanceDto: {
+            records: components["schemas"]["AttendanceRecordDto"][];
+        };
+        CreateAssessmentDto: {
+            /** @description Must be a group the teacher teaches. */
+            groupId: number;
+            gradingScaleId?: number | null;
+            /** @example Unit 3 Quiz */
+            title: string;
+            /** @enum {string} */
+            type: "QUIZ" | "MIDTERM" | "FINAL" | "MOCK" | "HOMEWORK";
+            /** @example 2025-04-15 */
+            examDate?: string | null;
+            /** @default 100 */
+            maxScore: number;
+            /** @default 1 */
+            weight: number;
+        };
+        UpdateAssessmentDto: {
+            title?: string;
+            /** @enum {string} */
+            type?: "QUIZ" | "MIDTERM" | "FINAL" | "MOCK" | "HOMEWORK";
+            /** @example 2025-04-15 */
+            examDate?: string | null;
+            maxScore?: number;
+            weight?: number;
+            gradingScaleId?: number | null;
+        };
+        AssessmentResultDto: {
+            studentId: number;
+            /** @example 87.5 */
+            score?: number | null;
+            feedback?: string | null;
+        };
+        BatchResultsDto: {
+            results: components["schemas"]["AssessmentResultDto"][];
+        };
+        CreateMaterialDto: {
+            /** @description Must be a group the teacher teaches. */
+            groupId: number;
+            courseId?: number | null;
+            /** @example Week 3 homework */
+            title: string;
+            description?: string | null;
+            /** @example https://files.example.com/hw3.pdf */
+            fileUrl: string;
+            /**
+             * @default PDF
+             * @enum {string}
+             */
+            materialType: "PDF" | "VIDEO" | "HOMEWORK" | "LINK";
+            /**
+             * @default GROUP
+             * @enum {string}
+             */
+            visibility: "GROUP" | "BRANCH" | "TENANT";
+        };
     };
     responses: never;
     parameters: never;
@@ -815,9 +2118,641 @@ export interface operations {
             };
         };
     };
+    AdminAuthController_login: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["AdminLoginDto"];
+            };
+        };
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    AdminAuthController_verifyOtp: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["AdminVerifyOtpDto"];
+            };
+        };
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
     HealthController_health: {
         parameters: {
             query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    WebhooksController_click: {
+        parameters: {
+            query?: never;
+            header: {
+                "x-click-signature": string;
+            };
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    MeController_me: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    TenantsController_onboard: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["OnboardTenantDto"];
+            };
+        };
+        responses: {
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    TenantsController_suspend: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: number;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["TenantActionDto"];
+            };
+        };
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    TenantsController_unsuspend: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: number;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["UnsuspendTenantDto"];
+            };
+        };
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    TenantsController_cancel: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: number;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["TenantActionDto"];
+            };
+        };
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    TenantsController_changePlan: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: number;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["ChangePlanDto"];
+            };
+        };
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    TenantsController_update: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: number;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["UpdateTenantDto"];
+            };
+        };
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    TenantMembersController_add: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                tenantId: number;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["AddMemberDto"];
+            };
+        };
+        responses: {
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    TenantMembersController_remove: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                tenantId: number;
+                userId: number;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    TenantMembersController_changeRole: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                tenantId: number;
+                userId: number;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["ChangeMemberRoleDto"];
+            };
+        };
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    UsersController_list: {
+        parameters: {
+            query?: {
+                page?: number;
+                limit?: number;
+                /** @description Matches name, email or phone (case-insensitive) */
+                search?: string;
+                status?: "active" | "invited" | "inactive";
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    UsersController_detail: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: number;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    UsersController_resetPassword: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: number;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["ResetPasswordDto"];
+            };
+        };
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    UsersController_deactivate: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: number;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    RolesController_list: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    RolesController_updatePermissions: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                role: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["UpdateRolePermissionsDto"];
+            };
+        };
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    PermissionsController_list: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    PlansController_list: {
+        parameters: {
+            query?: {
+                page?: number;
+                limit?: number;
+                isActive?: boolean;
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    PlansController_create: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["CreatePlanDto"];
+            };
+        };
+        responses: {
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    PlansController_get: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: number;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    PlansController_update: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: number;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["UpdatePlanDto"];
+            };
+        };
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    SubscriptionsController_analytics: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    SubscriptionsController_list: {
+        parameters: {
+            query?: {
+                page?: number;
+                limit?: number;
+                status?: "TRIALING" | "ACTIVE" | "PAST_DUE" | "CANCELLED";
+                tierId?: number;
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    AuditLogsController_list: {
+        parameters: {
+            query?: {
+                page?: number;
+                limit?: number;
+                /** @description Only entries owned by this tenant */
+                tenantId?: number;
+                /** @description Only entries by this acting user (actor) */
+                actorUserId?: number;
+                /** @description Exact action match */
+                action?: "TENANT_CREATED" | "TENANT_UPDATED" | "TENANT_SUSPENDED" | "TENANT_REACTIVATED" | "TENANT_CANCELLED" | "TENANT_DELETED" | "PLAN_CREATED" | "PLAN_UPDATED" | "SUBSCRIPTION_CHANGED" | "SUBSCRIPTION_CANCELLED" | "SUBSCRIPTION_INVOICE_PAID" | "SUPER_ADMIN_LOGIN" | "ROLE_PERMISSIONS_UPDATED" | "USER_PASSWORD_RESET" | "USER_DEACTIVATED" | "MEMBER_ADDED" | "MEMBER_ROLE_CHANGED" | "MEMBER_REMOVED";
+                /** @description Inclusive lower bound on timestamp (ISO 8601) */
+                from?: string;
+                /** @description Inclusive upper bound on timestamp (ISO 8601) */
+                to?: string;
+                /** @description Free-text over actor name, action, entity type and IP address */
+                search?: string;
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    AuditLogsController_detail: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: number;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    DashboardController_overview: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    DashboardController_mrrTrend: {
+        parameters: {
+            query?: {
+                period?: "6m" | "12m" | "24m";
+            };
             header?: never;
             path?: never;
             cookie?: never;
@@ -1687,6 +3622,869 @@ export interface operations {
                 "application/json": components["schemas"]["UpdateEnrollmentDto"];
             };
         };
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    FeePlansController_list: {
+        parameters: {
+            query?: {
+                page?: number;
+                limit?: number;
+                branchId?: number;
+                courseId?: number;
+                isActive?: boolean;
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    FeePlansController_create: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["CreateFeePlanDto"];
+            };
+        };
+        responses: {
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    FeePlansController_update: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: number;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["UpdateFeePlanDto"];
+            };
+        };
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    InvoicesController_list: {
+        parameters: {
+            query?: {
+                page?: number;
+                limit?: number;
+                branchId?: number;
+                studentId?: number;
+                status?: "DRAFT" | "UNPAID" | "PARTIAL" | "PAID" | "OVERDUE" | "VOID" | "REFUNDED";
+                /** @description Issue-date range start (YYYY-MM-DD) */
+                from?: string;
+                /** @description Issue-date range end (YYYY-MM-DD) */
+                to?: string;
+                /** @description Find invoices due before this date (YYYY-MM-DD) */
+                dueBefore?: string;
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    InvoicesController_create: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["CreateInvoiceDto"];
+            };
+        };
+        responses: {
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    InvoicesController_findOne: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: number;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    InvoicesController_update: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: number;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["UpdateInvoiceDto"];
+            };
+        };
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    InvoicesController_listLineItems: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: number;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    InvoicesController_addLineItem: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: number;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["CreateLineItemDto"];
+            };
+        };
+        responses: {
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    InvoicesController_listPayments: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: number;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    InvoicesController_recordPayment: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: number;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["RecordPaymentDto"];
+            };
+        };
+        responses: {
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    InvoicesController_applyDiscount: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: number;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["ApplyDiscountDto"];
+            };
+        };
+        responses: {
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    PaymentsController_list: {
+        parameters: {
+            query?: {
+                page?: number;
+                limit?: number;
+                branchId?: number;
+                studentId?: number;
+                invoiceId?: number;
+                method?: "CASH" | "CLICK" | "PAYME" | "UZUM" | "CARD" | "BANK_TRANSFER";
+                status?: "PENDING" | "SUCCEEDED" | "FAILED" | "REFUNDED";
+                /** @description paidAt range start (YYYY-MM-DD) */
+                from?: string;
+                /** @description paidAt range end (YYYY-MM-DD) */
+                to?: string;
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    PaymentsController_findOne: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: number;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    DiscountsController_list: {
+        parameters: {
+            query?: {
+                page?: number;
+                limit?: number;
+                isActive?: boolean;
+                /** @description Matches name or code */
+                search?: string;
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    DiscountsController_create: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["CreateDiscountDto"];
+            };
+        };
+        responses: {
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    DiscountsController_update: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: number;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["UpdateDiscountDto"];
+            };
+        };
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    MySessionsController_calendar: {
+        parameters: {
+            query: {
+                /** @description Required. Start of window. */
+                from: string;
+                /** @description Required. End of window (max 90 days). */
+                to: string;
+                status?: "SCHEDULED" | "COMPLETED" | "CANCELLED";
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    MySessionsController_findOne: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: number;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    MyGroupsController_list: {
+        parameters: {
+            query?: {
+                page?: number;
+                limit?: number;
+                status?: "PLANNED" | "ACTIVE" | "COMPLETED" | "CANCELLED";
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    MyGroupsController_findOne: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: number;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    MyGroupsController_students: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: number;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    AttendanceController_list: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: number;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    AttendanceController_submit: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: number;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["BatchAttendanceDto"];
+            };
+        };
+        responses: {
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    AttendanceController_update: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: number;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["BatchAttendanceDto"];
+            };
+        };
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    AssessmentsController_list: {
+        parameters: {
+            query?: {
+                page?: number;
+                limit?: number;
+                /** @description Narrow to one group I teach. */
+                groupId?: number;
+                type?: "QUIZ" | "MIDTERM" | "FINAL" | "MOCK" | "HOMEWORK";
+                /** @description Inclusive examDate lower bound. */
+                from?: string;
+                /** @description Inclusive examDate upper bound. */
+                to?: string;
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    AssessmentsController_create: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["CreateAssessmentDto"];
+            };
+        };
+        responses: {
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    AssessmentsController_findOne: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: number;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    AssessmentsController_update: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: number;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["UpdateAssessmentDto"];
+            };
+        };
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    AssessmentsController_listResults: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: number;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    AssessmentsController_submitResults: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: number;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["BatchResultsDto"];
+            };
+        };
+        responses: {
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    AssessmentsController_updateResults: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: number;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["BatchResultsDto"];
+            };
+        };
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    AssessmentsController_publish: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: number;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    MaterialsController_list: {
+        parameters: {
+            query?: {
+                page?: number;
+                limit?: number;
+                /** @description Narrow to one group I teach. */
+                groupId?: number;
+                materialType?: "PDF" | "VIDEO" | "HOMEWORK" | "LINK";
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    MaterialsController_create: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["CreateMaterialDto"];
+            };
+        };
+        responses: {
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    MaterialsController_remove: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: number;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            204: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    StudentProfilesController_findOne: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: number;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    StudentProfilesController_attendances: {
+        parameters: {
+            query?: {
+                /** @description Inclusive lower bound. */
+                from?: string;
+                /** @description Inclusive upper bound. */
+                to?: string;
+            };
+            header?: never;
+            path: {
+                id: number;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    StudentProfilesController_results: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: number;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    GradingScalesController_list: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
         responses: {
             200: {
                 headers: {

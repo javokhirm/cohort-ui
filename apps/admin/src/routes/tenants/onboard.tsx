@@ -1,71 +1,69 @@
-// TODO: wire to POST /admin/tenants once the backend onboarding endpoint is ready.
-
 import { useState } from 'react';
 import { Link, useNavigate } from '@tanstack/react-router';
+import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { Check, Info } from 'lucide-react';
 
-import { Button, Card, CardContent, Input, Label, cn } from '@repo/ui';
+import { Button, Card, CardContent, Input, Label, Skeleton, cn } from '@repo/ui';
+
+import { plansKeys } from '@/features/plans/api/keys';
+import { listPlans } from '@/features/plans/api/plans.queries';
+import type { PlanView } from '@/features/plans/api/types';
+import { tenantsKeys } from '@/features/tenants/api/keys';
+import { onboardTenant } from '@/features/tenants/api/tenants.mutations';
 
 // ─── Types ────────────────────────────────────────────────────────────────────
 
 type Step = 1 | 2 | 3 | 4 | 5 | 6;
-type PlanId = 'starter' | 'growth' | 'scale';
 
 type FormData = {
 	centerName: string;
 	city: string;
 	subdomain: string;
-	ownerName: string;
+	ownerFirstName: string;
+	ownerLastName: string;
 	ownerPhone: string;
-	planId: PlanId | '';
+	ownerEmail: string;
+	ownerPassword: string;
+	planId: number | null;
 	branchName: string;
+	branchCode: string;
 };
 
 // ─── Constants ────────────────────────────────────────────────────────────────
 
 const STEP_LABELS = ['Business', 'Subdomain', 'Owner', 'Plan', 'Branch', 'Review'];
 
-type PlanOption = { id: PlanId; label: string; limits: string; price: number };
-
-const PLANS: PlanOption[] = [
-	{
-		id: 'starter',
-		label: 'Starter',
-		limits: '1 branch · 300 students',
-		price: 900_000,
-	},
-	{
-		id: 'growth',
-		label: 'Growth',
-		limits: '5 branches · 1,500 students',
-		price: 2_400_000,
-	},
-	{
-		id: 'scale',
-		label: 'Scale',
-		limits: 'Unlimited branches · Unlimited students',
-		price: 4_800_000,
-	},
-];
-
 const EMPTY_FORM: FormData = {
 	centerName: '',
 	city: 'Tashkent',
 	subdomain: '',
-	ownerName: '',
+	ownerFirstName: '',
+	ownerLastName: '',
 	ownerPhone: '',
-	planId: '',
+	ownerEmail: '',
+	ownerPassword: '',
+	planId: null,
 	branchName: '',
+	branchCode: '',
 };
 
 // ─── Helpers ──────────────────────────────────────────────────────────────────
 
 function formatUZS(amount: number): string {
+	if (amount === 0) return 'Custom pricing';
 	return new Intl.NumberFormat('ru-RU').format(amount) + ' UZS';
 }
 
-function planOption(id: PlanId): PlanOption {
-	return PLANS.find((p) => p.id === id)!;
+function planLimits(plan: PlanView): string {
+	const branches =
+		plan.maxBranches === null
+			? 'Unlimited branches'
+			: `${plan.maxBranches} branch${plan.maxBranches === 1 ? '' : 'es'}`;
+	const students =
+		plan.maxStudents === null
+			? 'Unlimited students'
+			: `${plan.maxStudents.toLocaleString('ru-RU')} students`;
+	return `${branches} · ${students}`;
 }
 
 // ─── StepIndicator ────────────────────────────────────────────────────────────
@@ -245,6 +243,12 @@ function OwnerStep({
 	onBack: () => void;
 	onNext: () => void;
 }) {
+	const canProceed =
+		data.ownerFirstName.trim() &&
+		data.ownerLastName.trim() &&
+		data.ownerPhone.trim() &&
+		data.ownerPassword.length >= 8;
+
 	return (
 		<Card>
 			<CardContent className="flex flex-col gap-6 pt-6">
@@ -256,14 +260,29 @@ function OwnerStep({
 				</div>
 
 				<div className="flex flex-col gap-4">
-					<div className="flex flex-col gap-1.5">
-						<Label htmlFor="owner-name">Full name</Label>
-						<Input
-							id="owner-name"
-							value={data.ownerName}
-							onChange={(e) => onChange({ ownerName: e.target.value })}
-							placeholder="e.g. Aziz Yusupov"
-						/>
+					<div className="grid grid-cols-2 gap-3">
+						<div className="flex flex-col gap-1.5">
+							<Label htmlFor="owner-first-name">First name</Label>
+							<Input
+								id="owner-first-name"
+								value={data.ownerFirstName}
+								onChange={(e) =>
+									onChange({ ownerFirstName: e.target.value })
+								}
+								placeholder="Aziz"
+							/>
+						</div>
+						<div className="flex flex-col gap-1.5">
+							<Label htmlFor="owner-last-name">Last name</Label>
+							<Input
+								id="owner-last-name"
+								value={data.ownerLastName}
+								onChange={(e) =>
+									onChange({ ownerLastName: e.target.value })
+								}
+								placeholder="Yusupov"
+							/>
+						</div>
 					</div>
 					<div className="flex flex-col gap-1.5">
 						<Label htmlFor="owner-phone">Phone number</Label>
@@ -274,9 +293,31 @@ function OwnerStep({
 							onChange={(e) => onChange({ ownerPhone: e.target.value })}
 							placeholder="+998 90 123 45 67"
 						/>
+					</div>
+					<div className="flex flex-col gap-1.5">
+						<Label htmlFor="owner-email">
+							Email{' '}
+							<span className="text-muted-foreground">(optional)</span>
+						</Label>
+						<Input
+							id="owner-email"
+							type="email"
+							value={data.ownerEmail}
+							onChange={(e) => onChange({ ownerEmail: e.target.value })}
+							placeholder="aziz@zabon.uz"
+						/>
+					</div>
+					<div className="flex flex-col gap-1.5">
+						<Label htmlFor="owner-password">Temporary password</Label>
+						<Input
+							id="owner-password"
+							type="password"
+							value={data.ownerPassword}
+							onChange={(e) => onChange({ ownerPassword: e.target.value })}
+							placeholder="Min. 8 characters"
+						/>
 						<p className="text-xs text-muted-foreground">
-							An SMS invite with a temporary password will be sent on
-							creation.
+							The owner should change this on first login.
 						</p>
 					</div>
 				</div>
@@ -285,10 +326,7 @@ function OwnerStep({
 					<Button variant="outline" onClick={onBack}>
 						Back
 					</Button>
-					<Button
-						onClick={onNext}
-						disabled={!data.ownerName.trim() || !data.ownerPhone.trim()}
-					>
+					<Button onClick={onNext} disabled={!canProceed}>
 						Continue
 					</Button>
 				</div>
@@ -304,11 +342,15 @@ function PlanStep({
 	onChange,
 	onBack,
 	onNext,
+	plans,
+	plansLoading,
 }: {
 	data: FormData;
 	onChange: (patch: Partial<FormData>) => void;
 	onBack: () => void;
 	onNext: () => void;
+	plans: PlanView[];
+	plansLoading: boolean;
 }) {
 	return (
 		<Card>
@@ -321,53 +363,72 @@ function PlanStep({
 				</div>
 
 				<div className="flex flex-col gap-3">
-					{PLANS.map((plan) => {
-						const selected = data.planId === plan.id;
-						return (
-							<button
-								key={plan.id}
-								type="button"
-								onClick={() => onChange({ planId: plan.id })}
-								className={cn(
-									'flex w-full items-center justify-between rounded-lg border px-4 py-3.5 text-left transition-colors',
-									selected
-										? 'border-primary bg-primary/5'
-										: 'border-border hover:border-muted-foreground/50',
-								)}
-							>
-								<div>
-									<p className="text-sm font-semibold">{plan.label}</p>
-									<p className="text-xs text-muted-foreground">
-										{plan.limits}
-									</p>
-								</div>
-								<div className="flex items-center gap-3">
-									<span className="text-sm font-semibold tabular-nums">
-										{formatUZS(plan.price)}
-									</span>
-									<div
-										className={cn(
-											'flex size-4 items-center justify-center rounded-full border-2 transition-colors',
-											selected
-												? 'border-primary bg-primary'
-												: 'border-muted-foreground/40',
-										)}
-									>
-										{selected && (
-											<div className="size-1.5 rounded-full bg-primary-foreground" />
-										)}
+					{plansLoading ? (
+						Array.from({ length: 3 }, (_, i) => (
+							<Skeleton key={i} className="h-16 w-full rounded-lg" />
+						))
+					) : plans.length === 0 ? (
+						<p className="text-sm text-muted-foreground">
+							No active plans available. Create one first in Subscription
+							Plans.
+						</p>
+					) : (
+						plans.map((plan) => {
+							const selected = data.planId === plan.id;
+							return (
+								<button
+									key={plan.id}
+									type="button"
+									onClick={() => onChange({ planId: plan.id })}
+									className={cn(
+										'flex w-full items-center justify-between rounded-lg border px-4 py-3.5 text-left transition-colors',
+										selected
+											? 'border-primary bg-primary/5'
+											: 'border-border hover:border-muted-foreground/50',
+									)}
+								>
+									<div>
+										<p className="text-sm font-semibold">
+											{plan.name}
+										</p>
+										<p className="text-xs text-muted-foreground">
+											{planLimits(plan)}
+										</p>
 									</div>
-								</div>
-							</button>
-						);
-					})}
+									<div className="flex items-center gap-3">
+										<span className="text-sm font-semibold tabular-nums">
+											{formatUZS(plan.priceMonthly)}
+											{plan.priceMonthly > 0 && (
+												<span className="text-xs font-normal text-muted-foreground">
+													{' '}
+													/ mo
+												</span>
+											)}
+										</span>
+										<div
+											className={cn(
+												'flex size-4 items-center justify-center rounded-full border-2 transition-colors',
+												selected
+													? 'border-primary bg-primary'
+													: 'border-muted-foreground/40',
+											)}
+										>
+											{selected && (
+												<div className="size-1.5 rounded-full bg-primary-foreground" />
+											)}
+										</div>
+									</div>
+								</button>
+							);
+						})
+					)}
 				</div>
 
 				<div className="flex justify-between">
 					<Button variant="outline" onClick={onBack}>
 						Back
 					</Button>
-					<Button onClick={onNext} disabled={!data.planId}>
+					<Button onClick={onNext} disabled={data.planId === null}>
 						Continue
 					</Button>
 				</div>
@@ -399,21 +460,44 @@ function BranchStep({
 					</p>
 				</div>
 
-				<div className="flex flex-col gap-1.5">
-					<Label htmlFor="branch-name">Branch name</Label>
-					<Input
-						id="branch-name"
-						value={data.branchName}
-						onChange={(e) => onChange({ branchName: e.target.value })}
-						placeholder="e.g. Main Campus"
-					/>
+				<div className="flex flex-col gap-4">
+					<div className="flex flex-col gap-1.5">
+						<Label htmlFor="branch-name">Branch name</Label>
+						<Input
+							id="branch-name"
+							value={data.branchName}
+							onChange={(e) => onChange({ branchName: e.target.value })}
+							placeholder="e.g. Main Campus"
+						/>
+					</div>
+					<div className="flex flex-col gap-1.5">
+						<Label htmlFor="branch-code">Branch code</Label>
+						<Input
+							id="branch-code"
+							value={data.branchCode}
+							onChange={(e) =>
+								onChange({
+									branchCode: e.target.value
+										.toUpperCase()
+										.replace(/[^A-Z0-9-]/g, ''),
+								})
+							}
+							placeholder="e.g. BR-001"
+						/>
+						<p className="text-xs text-muted-foreground">
+							Short unique identifier used in reports.
+						</p>
+					</div>
 				</div>
 
 				<div className="flex justify-between">
 					<Button variant="outline" onClick={onBack}>
 						Back
 					</Button>
-					<Button onClick={onNext} disabled={!data.branchName.trim()}>
+					<Button
+						onClick={onNext}
+						disabled={!data.branchName.trim() || !data.branchCode.trim()}
+					>
 						Continue
 					</Button>
 				</div>
@@ -428,23 +512,27 @@ function ReviewStep({
 	data,
 	onBack,
 	onSubmit,
+	submitting,
+	plans,
 }: {
 	data: FormData;
 	onBack: () => void;
 	onSubmit: () => void;
+	submitting: boolean;
+	plans: PlanView[];
 }) {
-	const plan = planOption(data.planId as PlanId);
+	const plan = plans.find((p) => p.id === data.planId);
 
 	const rows: { label: string; value: string }[] = [
 		{ label: 'Center name', value: data.centerName },
+		{ label: 'City', value: data.city },
 		{ label: 'Subdomain', value: `${data.subdomain}.educore.uz` },
-		{ label: 'Owner', value: data.ownerName },
+		{ label: 'Owner', value: `${data.ownerFirstName} ${data.ownerLastName}` },
 		{ label: 'Owner phone', value: data.ownerPhone },
-		{
-			label: 'Plan',
-			value: `${plan.label} (14-day trial)`,
-		},
+		...(data.ownerEmail ? [{ label: 'Owner email', value: data.ownerEmail }] : []),
+		{ label: 'Plan', value: plan ? `${plan.name} (14-day trial)` : '—' },
 		{ label: 'Initial branch', value: data.branchName },
+		{ label: 'Branch code', value: data.branchCode },
 	];
 
 	return (
@@ -481,14 +569,15 @@ function ReviewStep({
 				</div>
 
 				<div className="flex justify-between">
-					<Button variant="outline" onClick={onBack}>
+					<Button variant="outline" onClick={onBack} disabled={submitting}>
 						Back
 					</Button>
 					<Button
 						className="bg-green-600 text-white hover:bg-green-700"
 						onClick={onSubmit}
+						disabled={submitting}
 					>
-						Create tenant
+						{submitting ? 'Creating…' : 'Create tenant'}
 					</Button>
 				</div>
 			</CardContent>
@@ -500,8 +589,41 @@ function ReviewStep({
 
 export function OnboardTenantPage() {
 	const navigate = useNavigate();
+	const queryClient = useQueryClient();
 	const [step, setStep] = useState<Step>(1);
 	const [form, setForm] = useState<FormData>(EMPTY_FORM);
+
+	const { data: plansPage, isLoading: plansLoading } = useQuery({
+		queryKey: plansKeys.list({ isActive: true }),
+		queryFn: () => listPlans({ isActive: true, limit: 100 }),
+	});
+
+	const activePlans = plansPage?.rows ?? [];
+
+	const mutation = useMutation({
+		mutationFn: () =>
+			onboardTenant({
+				name: form.centerName,
+				subdomain: form.subdomain,
+				city: form.city || undefined,
+				subscriptionTierId: form.planId!,
+				mainBranch: {
+					name: form.branchName,
+					code: form.branchCode,
+				},
+				ownerUser: {
+					firstName: form.ownerFirstName,
+					lastName: form.ownerLastName,
+					phone: form.ownerPhone,
+					email: form.ownerEmail || undefined,
+					password: form.ownerPassword,
+				},
+			}),
+		onSuccess: () => {
+			void queryClient.invalidateQueries({ queryKey: tenantsKeys.all });
+			void navigate({ to: '/tenants' });
+		},
+	});
 
 	function patch(update: Partial<FormData>) {
 		setForm((prev) => ({ ...prev, ...update }));
@@ -513,11 +635,6 @@ export function OnboardTenantPage() {
 
 	function back() {
 		setStep((s) => Math.max(s - 1, 1) as Step);
-	}
-
-	function handleSubmit() {
-		// TODO: call POST /admin/tenants mutation and redirect on success
-		void navigate({ to: '/tenants' });
 	}
 
 	return (
@@ -552,13 +669,35 @@ export function OnboardTenantPage() {
 				<OwnerStep data={form} onChange={patch} onBack={back} onNext={next} />
 			)}
 			{step === 4 && (
-				<PlanStep data={form} onChange={patch} onBack={back} onNext={next} />
+				<PlanStep
+					data={form}
+					onChange={patch}
+					onBack={back}
+					onNext={next}
+					plans={activePlans}
+					plansLoading={plansLoading}
+				/>
 			)}
 			{step === 5 && (
 				<BranchStep data={form} onChange={patch} onBack={back} onNext={next} />
 			)}
 			{step === 6 && (
-				<ReviewStep data={form} onBack={back} onSubmit={handleSubmit} />
+				<ReviewStep
+					data={form}
+					onBack={back}
+					onSubmit={() => mutation.mutate()}
+					submitting={mutation.isPending}
+					plans={activePlans}
+				/>
+			)}
+
+			{/* Mutation error */}
+			{mutation.isError && (
+				<div className="rounded-lg border border-destructive/30 bg-destructive/5 px-4 py-3 text-sm text-destructive">
+					{mutation.error instanceof Error
+						? mutation.error.message
+						: 'Failed to create tenant. Please try again.'}
+				</div>
 			)}
 		</div>
 	);

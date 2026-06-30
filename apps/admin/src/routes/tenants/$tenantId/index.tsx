@@ -1,21 +1,15 @@
-// TODO: replace with useQuery(tenantDetailQuery(tenantId)) once GET /admin/tenants/:id is ready.
-
-import React, { useState } from 'react';
+import { useState } from 'react';
 import { Link, useParams } from '@tanstack/react-router';
+import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
+
 import {
 	Ban,
-	Building2,
-	Calendar,
-	CreditCard,
-	Download,
 	Eye,
-	FileText,
 	Globe,
 	GraduationCap,
 	MapPin,
 	PauseCircle,
-	Settings as SettingsIcon,
-	UserPlus,
+	PlayCircle,
 	Users,
 	Wallet,
 } from 'lucide-react';
@@ -36,12 +30,14 @@ import {
 	DialogTitle,
 	Input,
 	Label,
+	RadioGroup,
+	RadioGroupItem,
 	Select,
 	SelectContent,
 	SelectItem,
 	SelectTrigger,
 	SelectValue,
-	Separator,
+	Skeleton,
 	StatusBadge,
 	Table,
 	TableBody,
@@ -57,16 +53,29 @@ import {
 } from '@repo/ui';
 import type { StatusTone } from '@repo/ui';
 
-import { MOCK_TENANTS } from '../_mock';
-import type { MockTenantRow, PlanId } from '../_mock';
+import { plansKeys } from '@/features/plans/api/keys';
+import { listPlans } from '@/features/plans/api/plans.queries';
+import type { PlanView } from '@/features/plans/api/types';
+import { tenantsKeys } from '@/features/tenants/api/keys';
+import {
+	cancelTenant,
+	changeTenantPlan,
+	suspendTenant,
+	unsuspendTenant,
+	updateTenant,
+} from '@/features/tenants/api/tenants.mutations';
+import { getTenant } from '@/features/tenants/api/tenants.queries';
+import type {
+	BillingInterval,
+	TenantBranchView,
+	TenantDetailView,
+	TenantMemberView,
+	TenantStatus,
+	UpdateTenantInput,
+} from '@/features/tenants/api/types';
+import { formatUzs } from '@/lib/formatters/currency';
 
 // ─── Constants ────────────────────────────────────────────────────────────────
-
-const PLAN_LABELS: Record<PlanId, string> = {
-	starter: 'Starter',
-	growth: 'Growth',
-	enterprise: 'Enterprise',
-};
 
 const AVATAR_PALETTE = [
 	'bg-tone-indigo-bg text-tone-indigo-fg',
@@ -81,39 +90,30 @@ const AVATAR_PALETTE = [
 	'bg-tone-slate-bg text-tone-slate-fg',
 ];
 
-const ROLE_TONES: Record<string, StatusTone> = {
-	OWNER: 'violet',
-	ADMIN: 'blue',
-	MANAGER: 'cyan',
-	TEACHER: 'slate',
+const SUB_STATUS_TONE: Record<string, StatusTone> = {
+	TRIALING: 'blue',
+	ACTIVE: 'green',
+	PAST_DUE: 'amber',
+	CANCELLED: 'slate',
 };
 
-const UZ_CITIES = [
-	'Tashkent',
-	'Samarkand',
-	'Bukhara',
-	'Namangan',
-	'Andijan',
-	'Fergana',
-	'Nukus',
-	'Urgench',
-];
+const SUB_STATUS_LABEL: Record<string, string> = {
+	TRIALING: 'Trialing',
+	ACTIVE: 'Active',
+	PAST_DUE: 'Past due',
+	CANCELLED: 'Cancelled',
+};
 
-const BRANCH_NAMES = [
-	'Main Campus',
-	'Chilanzar Branch',
-	'Yunusobod Branch',
-	'Mirzo Ulugbek Branch',
-	'Sergeli Branch',
-	'Samarkand Branch',
-	'Bukhara Branch',
-	'Namangan Branch',
-];
+const MEMBER_STATUS_TONE: Record<string, StatusTone> = {
+	ACTIVE: 'green',
+	INVITED: 'blue',
+	INACTIVE: 'slate',
+};
 
-const PLAN_BASE_PRICES: Record<PlanId, number> = {
-	starter: 1_200_000,
-	growth: 2_400_000,
-	enterprise: 6_000_000,
+const MEMBER_STATUS_LABEL: Record<string, string> = {
+	ACTIVE: 'Active',
+	INVITED: 'Invited',
+	INACTIVE: 'Inactive',
 };
 
 // ─── Helpers ──────────────────────────────────────────────────────────────────
@@ -127,13 +127,8 @@ function getInitials(name: string): string {
 		.toUpperCase();
 }
 
-function avatarClass(id: string): string {
-	const idx = MOCK_TENANTS.findIndex((t) => t.id === id);
-	return AVATAR_PALETTE[(idx >= 0 ? idx : 0) % AVATAR_PALETTE.length];
-}
-
-function formatUZS(amount: number): string {
-	return new Intl.NumberFormat('ru-RU').format(amount) + ' UZS';
+function avatarClass(id: number): string {
+	return AVATAR_PALETTE[id % AVATAR_PALETTE.length];
 }
 
 function formatDate(iso: string): string {
@@ -142,206 +137,6 @@ function formatDate(iso: string): string {
 		month: 'short',
 		year: 'numeric',
 	}).format(new Date(iso));
-}
-
-// ─── Mock detail types & builder ──────────────────────────────────────────────
-
-type MockBranch = {
-	id: string;
-	name: string;
-	city: string;
-	students: number;
-	staff: number;
-	status: 'active' | 'inactive';
-	createdAt: string;
-};
-
-type MockUser = {
-	id: string;
-	name: string;
-	email: string;
-	role: string;
-	status: 'active' | 'cancelled';
-	lastLoginAt: string | null;
-};
-
-type InvoiceStatus = 'paid' | 'open' | 'overdue';
-
-type MockInvoice = {
-	id: string;
-	period: string;
-	amount: number;
-	status: InvoiceStatus;
-};
-
-type AuditResourceKind = 'settings' | 'branch' | 'invoice' | 'subscription';
-
-type MockAuditEvent = {
-	id: string;
-	actor: string;
-	action: string;
-	resource: AuditResourceKind;
-	ip: string;
-	time: string;
-};
-
-type TenantDetail = {
-	city: string;
-	contactEmail: string;
-	staffCount: number;
-	branches: MockBranch[];
-	users: MockUser[];
-	subscription: {
-		pricePerMonth: number;
-		billingCycle: string;
-		renewsAt: string;
-		subscriptionStatus: string;
-		invoices: MockInvoice[];
-		history: Array<{ date: string; from: string; to: string }>;
-	};
-	activity: Array<{ id: string; text: string; time: string }>;
-	auditEvents: MockAuditEvent[];
-};
-
-function buildDetail(tenant: MockTenantRow): TenantDetail {
-	const idx = MOCK_TENANTS.indexOf(tenant);
-	const city = UZ_CITIES[idx % UZ_CITIES.length];
-	const price = PLAN_BASE_PRICES[tenant.plan];
-
-	const branches: MockBranch[] = Array.from({ length: tenant.branches }, (_, i) => ({
-		id: `${tenant.id}-br-${i + 1}`,
-		name: BRANCH_NAMES[i % BRANCH_NAMES.length],
-		city: UZ_CITIES[(idx + i) % UZ_CITIES.length],
-		students: Math.floor(tenant.students / Math.max(1, tenant.branches)),
-		staff: Math.max(3, Math.ceil(12 / Math.max(1, tenant.branches))),
-		status: 'active' as const,
-		createdAt: tenant.joinedAt,
-	}));
-
-	const users: MockUser[] = [
-		{
-			id: `${tenant.id}-u1`,
-			name: 'Aziz Yusupov',
-			email: `aziz@${tenant.subdomain}.uz`,
-			role: 'OWNER',
-			status: 'active',
-			lastLoginAt: '2026-06-29T07:00:00Z',
-		},
-		{
-			id: `${tenant.id}-u2`,
-			name: 'Dilnoza Karimova',
-			email: `dilnoza@${tenant.subdomain}.uz`,
-			role: 'ADMIN',
-			status: 'active',
-			lastLoginAt: '2026-06-28T15:30:00Z',
-		},
-		{
-			id: `${tenant.id}-u3`,
-			name: 'Jasur Rakhimov',
-			email: `jasur@${tenant.subdomain}.uz`,
-			role: 'MANAGER',
-			status: 'active',
-			lastLoginAt: '2026-06-27T10:15:00Z',
-		},
-		{
-			id: `${tenant.id}-u4`,
-			name: 'Nodira Saidova',
-			email: `nodira@${tenant.subdomain}.uz`,
-			role: 'TEACHER',
-			status: 'active',
-			lastLoginAt: '2026-06-26T08:45:00Z',
-		},
-		{
-			id: `${tenant.id}-u5`,
-			name: 'Bekzod Tursunov',
-			email: `bekzod@${tenant.subdomain}.uz`,
-			role: 'TEACHER',
-			status: 'cancelled',
-			lastLoginAt: null,
-		},
-	];
-
-	return {
-		city,
-		contactEmail: `info@${tenant.subdomain}.uz`,
-		staffCount: Math.max(5, Math.floor(tenant.students / 20)),
-		branches,
-		users,
-		subscription: {
-			pricePerMonth: price,
-			billingCycle: 'Monthly',
-			renewsAt: '01 Jul 2026',
-			subscriptionStatus: tenant.status === 'active' ? 'Active' : 'Inactive',
-			invoices: [
-				{
-					id: 'INV-2026-0612',
-					period: '01 Jun 2026',
-					amount: price,
-					status: 'open',
-				},
-				{
-					id: 'INV-2026-0511',
-					period: '01 May 2026',
-					amount: price,
-					status: 'paid',
-				},
-				{
-					id: 'INV-2026-0410',
-					period: '01 Apr 2026',
-					amount: price,
-					status: 'paid',
-				},
-			],
-			history: [
-				{ date: 'Jan 2025', from: 'Starter', to: PLAN_LABELS[tenant.plan] },
-			],
-		},
-		activity: [
-			{ id: 'a1', text: `Payment of ${formatUZS(price)} recorded`, time: '2h ago' },
-			{ id: 'a2', text: '42 new students enrolled this week', time: 'Yesterday' },
-			{ id: 'a3', text: 'Owner updated branding settings', time: '3 days ago' },
-			{ id: 'a4', text: 'New branch "Yunusobod" created', time: '1 week ago' },
-			{
-				id: 'a5',
-				text: `Plan changed to ${PLAN_LABELS[tenant.plan]}`,
-				time: '2 weeks ago',
-			},
-		],
-		auditEvents: [
-			{
-				id: 'ev1',
-				actor: 'Aziz Yusupov',
-				action: 'updated payment settings',
-				resource: 'settings',
-				ip: '213.230.64.12',
-				time: '2h ago',
-			},
-			{
-				id: 'ev2',
-				actor: 'Aziz Yusupov',
-				action: 'created branch "Yunusobod"',
-				resource: 'branch',
-				ip: '213.230.64.12',
-				time: '1d ago',
-			},
-			{
-				id: 'ev3',
-				actor: 'Dilnoza Karimova',
-				action: 'voided invoice INV-2026-0418',
-				resource: 'invoice',
-				ip: '84.54.92.7',
-				time: '3d ago',
-			},
-			{
-				id: 'ev4',
-				actor: `S. Alimov (Platform)`,
-				action: `changed plan to ${PLAN_LABELS[tenant.plan]}`,
-				resource: 'subscription',
-				ip: '10.0.0.4',
-				time: '2w ago',
-			},
-		],
-	};
 }
 
 // ─── TypeToConfirmDialog ──────────────────────────────────────────────────────
@@ -354,6 +149,7 @@ interface TypeToConfirmDialogProps {
 	confirmLabel: string;
 	tenantName: string;
 	onConfirm: () => void;
+	loading?: boolean;
 	variant?: 'default' | 'destructive';
 }
 
@@ -365,6 +161,7 @@ function TypeToConfirmDialog({
 	confirmLabel,
 	tenantName,
 	onConfirm,
+	loading = false,
 	variant = 'default',
 }: TypeToConfirmDialogProps) {
 	const [value, setValue] = useState('');
@@ -398,13 +195,10 @@ function TypeToConfirmDialog({
 					</Button>
 					<Button
 						variant={variant === 'destructive' ? 'destructive' : 'default'}
-						disabled={value !== tenantName}
-						onClick={() => {
-							onConfirm();
-							handleOpenChange(false);
-						}}
+						disabled={value !== tenantName || loading}
+						onClick={onConfirm}
 					>
-						{confirmLabel}
+						{loading ? 'Processing…' : confirmLabel}
 					</Button>
 				</DialogFooter>
 			</DialogContent>
@@ -412,15 +206,325 @@ function TypeToConfirmDialog({
 	);
 }
 
+// ─── ChangePlanDialog ─────────────────────────────────────────────────────────
+
+function planLimitLabel(plan: PlanView): string {
+	const students =
+		plan.maxStudents != null ? `${plan.maxStudents} students` : 'Unlimited students';
+	const branches =
+		plan.maxBranches != null ? `${plan.maxBranches} branches` : 'Unlimited branches';
+	return `${students} · ${branches}`;
+}
+
+function annualSavingsPct(plan: PlanView): number | null {
+	if (plan.priceMonthly === 0 || plan.priceAnnual === 0) return null;
+	const pct = Math.round(
+		((plan.priceMonthly * 12 - plan.priceAnnual) / (plan.priceMonthly * 12)) * 100,
+	);
+	return pct > 0 ? pct : null;
+}
+
+function ChangePlanDialog({
+	open,
+	onOpenChange,
+	tenantId,
+	currentTierId,
+	currentBillingInterval,
+}: {
+	open: boolean;
+	onOpenChange: (open: boolean) => void;
+	tenantId: number;
+	currentTierId: number | null;
+	currentBillingInterval: BillingInterval | null;
+}) {
+	const [step, setStep] = useState<'select' | 'confirm'>('select');
+	const [billingInterval, setBillingInterval] = useState<BillingInterval>(
+		currentBillingInterval ?? 'MONTHLY',
+	);
+	const [selectedPlanId, setSelectedPlanId] = useState<number | null>(currentTierId);
+
+	const queryClient = useQueryClient();
+
+	const { data: plansPage, isLoading: plansLoading } = useQuery({
+		queryKey: plansKeys.list({ isActive: true }),
+		queryFn: () => listPlans({ isActive: true, limit: 100 }),
+		enabled: open,
+	});
+	const plans = plansPage?.rows ?? [];
+
+	const mutation = useMutation({
+		mutationFn: () =>
+			changeTenantPlan(tenantId, {
+				subscriptionTierId: selectedPlanId!,
+				billingInterval,
+			}),
+		onSuccess: () => {
+			void queryClient.invalidateQueries({
+				queryKey: tenantsKeys.detail(tenantId),
+			});
+			onOpenChange(false);
+		},
+	});
+
+	function handleOpenChange(next: boolean) {
+		if (!next) {
+			setStep('select');
+			mutation.reset();
+		}
+		onOpenChange(next);
+	}
+
+	const selectedPlan = plans.find((p) => p.id === selectedPlanId) ?? null;
+	const currentPlan = plans.find((p) => p.id === currentTierId) ?? null;
+
+	const isUnchanged =
+		selectedPlanId === currentTierId &&
+		billingInterval === (currentBillingInterval ?? 'MONTHLY');
+
+	function priceFor(plan: PlanView) {
+		return billingInterval === 'ANNUAL' ? plan.priceAnnual : plan.priceMonthly;
+	}
+
+	const priceSuffix = billingInterval === 'ANNUAL' ? '/yr' : '/mo';
+
+	return (
+		<Dialog open={open} onOpenChange={handleOpenChange}>
+			<DialogContent className="sm:max-w-[560px]">
+				{step === 'select' ? (
+					<>
+						<DialogHeader>
+							<DialogTitle>Change subscription plan</DialogTitle>
+							<DialogDescription>
+								Choose a plan and billing interval for this tenant.
+							</DialogDescription>
+						</DialogHeader>
+
+						{/* Billing interval toggle */}
+						<div className="flex justify-center">
+							<div className="inline-flex items-center rounded-lg border border-border bg-muted/40 p-1">
+								{(['MONTHLY', 'ANNUAL'] as const).map((interval) => (
+									<button
+										key={interval}
+										type="button"
+										onClick={() => setBillingInterval(interval)}
+										className={cn(
+											'rounded-md px-5 py-1.5 text-sm font-medium transition-all',
+											billingInterval === interval
+												? 'bg-background text-foreground shadow-sm'
+												: 'text-muted-foreground hover:text-foreground',
+										)}
+									>
+										{interval === 'MONTHLY' ? 'Monthly' : 'Annual'}
+									</button>
+								))}
+							</div>
+						</div>
+
+						{/* Plan list */}
+						<RadioGroup
+							value={selectedPlanId != null ? String(selectedPlanId) : ''}
+							onValueChange={(v) => setSelectedPlanId(Number(v))}
+							className="gap-2.5"
+						>
+							{plansLoading ? (
+								Array.from({ length: 3 }).map((_, i) => (
+									<Skeleton
+										key={i}
+										className="h-[72px] w-full rounded-lg"
+									/>
+								))
+							) : plans.length === 0 ? (
+								<p className="py-6 text-center text-sm text-muted-foreground">
+									No active plans available.
+								</p>
+							) : (
+								plans.map((plan) => {
+									const selected = selectedPlanId === plan.id;
+									const isCurrent = plan.id === currentTierId;
+									const price = priceFor(plan);
+									const savings =
+										billingInterval === 'ANNUAL'
+											? annualSavingsPct(plan)
+											: null;
+
+									return (
+										<Label
+											key={plan.id}
+											className={cn(
+												'flex cursor-pointer items-center justify-between rounded-lg border px-4 py-3.5 transition-colors',
+												selected
+													? 'border-primary bg-primary/5'
+													: 'border-border hover:border-muted-foreground/40',
+											)}
+										>
+											<RadioGroupItem
+												value={String(plan.id)}
+												className="sr-only"
+											/>
+											<div className="flex flex-col gap-0.5">
+												<div className="flex items-center gap-2">
+													<span className="text-sm font-semibold">
+														{plan.name}
+													</span>
+													{isCurrent && (
+														<span className="rounded-full bg-muted px-2 py-0.5 text-[11px] text-muted-foreground">
+															Current
+														</span>
+													)}
+													{savings != null && (
+														<span className="rounded-full bg-tone-green-bg px-2 py-0.5 text-[11px] font-medium text-tone-green-fg">
+															Save {savings}%
+														</span>
+													)}
+												</div>
+												<p className="text-xs text-muted-foreground">
+													{planLimitLabel(plan)}
+												</p>
+											</div>
+											<div className="flex items-center gap-3">
+												<div className="text-right">
+													<p className="text-sm font-semibold tabular-nums">
+														{price === 0
+															? 'Custom'
+															: `${new Intl.NumberFormat('ru-RU').format(price)} UZS`}
+													</p>
+													{price > 0 && (
+														<p className="text-xs text-muted-foreground">
+															{priceSuffix}
+														</p>
+													)}
+												</div>
+												<div
+													className={cn(
+														'flex size-4 shrink-0 items-center justify-center rounded-full border-2 transition-colors',
+														selected
+															? 'border-primary bg-primary'
+															: 'border-muted-foreground/40',
+													)}
+												>
+													{selected && (
+														<div className="size-1.5 rounded-full bg-primary-foreground" />
+													)}
+												</div>
+											</div>
+										</Label>
+									);
+								})
+							)}
+						</RadioGroup>
+
+						<DialogFooter>
+							<Button
+								variant="outline"
+								onClick={() => handleOpenChange(false)}
+							>
+								Cancel
+							</Button>
+							<Button
+								disabled={
+									selectedPlanId === null || plansLoading || isUnchanged
+								}
+								onClick={() => setStep('confirm')}
+							>
+								Continue
+							</Button>
+						</DialogFooter>
+					</>
+				) : (
+					<>
+						<DialogHeader>
+							<DialogTitle>Confirm plan change</DialogTitle>
+							<DialogDescription>
+								Review the details before applying this change.
+							</DialogDescription>
+						</DialogHeader>
+
+						<div className="flex flex-col gap-4">
+							{/* From → To */}
+							<div className="grid grid-cols-[1fr_auto_1fr] items-center gap-3 rounded-lg border border-border bg-muted/30 px-5 py-4">
+								<div className="text-center">
+									<p className="mb-1 text-[11px] font-medium uppercase tracking-wider text-muted-foreground">
+										From
+									</p>
+									<p className="text-sm font-semibold">
+										{currentPlan?.name ?? 'No plan'}
+									</p>
+									<p className="mt-0.5 text-xs text-muted-foreground">
+										{currentBillingInterval === 'ANNUAL'
+											? 'Annual billing'
+											: 'Monthly billing'}
+									</p>
+								</div>
+								<div className="text-lg text-muted-foreground">→</div>
+								<div className="text-center">
+									<p className="mb-1 text-[11px] font-medium uppercase tracking-wider text-muted-foreground">
+										To
+									</p>
+									<p className="text-sm font-semibold text-primary">
+										{selectedPlan?.name}
+									</p>
+									<p className="mt-0.5 text-xs text-muted-foreground">
+										{billingInterval === 'ANNUAL'
+											? 'Annual billing'
+											: 'Monthly billing'}
+									</p>
+								</div>
+							</div>
+
+							{/* New charge */}
+							{selectedPlan && (
+								<div className="flex items-center justify-between rounded-lg border border-primary/20 bg-primary/5 px-4 py-3">
+									<span className="text-sm text-muted-foreground">
+										New charge
+									</span>
+									<span className="text-base font-bold tabular-nums">
+										{priceFor(selectedPlan) === 0
+											? 'Custom pricing'
+											: `${new Intl.NumberFormat('ru-RU').format(priceFor(selectedPlan))} UZS${priceSuffix}`}
+									</span>
+								</div>
+							)}
+
+							<p className="text-xs text-muted-foreground">
+								This change takes effect immediately. Billing adjustments
+								will be prorated for the current period.
+							</p>
+						</div>
+
+						{mutation.isError && (
+							<p className="text-sm text-destructive">
+								{mutation.error instanceof Error
+									? mutation.error.message
+									: 'Failed to apply the plan change. Please try again.'}
+							</p>
+						)}
+
+						<DialogFooter>
+							<Button
+								variant="outline"
+								onClick={() => setStep('select')}
+								disabled={mutation.isPending}
+							>
+								Back
+							</Button>
+							<Button
+								disabled={mutation.isPending}
+								onClick={() => mutation.mutate()}
+							>
+								{mutation.isPending ? 'Applying…' : 'Confirm change'}
+							</Button>
+						</DialogFooter>
+					</>
+				)}
+			</DialogContent>
+		</Dialog>
+	);
+}
+
 // ─── Overview tab ─────────────────────────────────────────────────────────────
 
-function OverviewTab({
-	tenant,
-	detail,
-}: {
-	tenant: MockTenantRow;
-	detail: TenantDetail;
-}) {
+function OverviewTab({ tenant }: { tenant: TenantDetailView }) {
+	const { stats } = tenant;
 	return (
 		<div className="flex flex-col gap-6">
 			<div className="grid grid-cols-2 gap-4 md:grid-cols-4">
@@ -431,7 +535,7 @@ function OverviewTab({
 							<p className="text-xs">Active Students</p>
 						</div>
 						<p className="mt-2 text-2xl font-bold tabular-nums">
-							{tenant.students.toLocaleString('ru-RU')}
+							{stats.activeStudents ?? 0}
 						</p>
 						<p className="text-xs text-muted-foreground">enrolled</p>
 					</CardContent>
@@ -443,7 +547,7 @@ function OverviewTab({
 							<p className="text-xs">Active Staff</p>
 						</div>
 						<p className="mt-2 text-2xl font-bold tabular-nums">
-							{detail.staffCount}
+							{stats.activeStaff ?? 0}
 						</p>
 						<p className="text-xs text-muted-foreground">teachers & admins</p>
 					</CardContent>
@@ -455,7 +559,7 @@ function OverviewTab({
 							<p className="text-xs">Branches</p>
 						</div>
 						<p className="mt-2 text-2xl font-bold tabular-nums">
-							{tenant.branches}
+							{stats.branches}
 						</p>
 						<p className="text-xs text-muted-foreground">active</p>
 					</CardContent>
@@ -467,11 +571,15 @@ function OverviewTab({
 							<p className="text-xs">Monthly Revenue</p>
 						</div>
 						<p className="mt-2 text-2xl font-bold tabular-nums">
-							{tenant.mrr === 0
+							{(stats.monthlyRevenue ?? 0) === 0
 								? '—'
-								: new Intl.NumberFormat('ru-RU').format(tenant.mrr)}
+								: new Intl.NumberFormat('ru-RU').format(
+										stats.monthlyRevenue!,
+									)}
 						</p>
-						<p className="text-xs text-muted-foreground">UZS</p>
+						<p className="text-xs text-muted-foreground">
+							{stats.currency ?? tenant.defaultCurrency}
+						</p>
 					</CardContent>
 				</Card>
 			</div>
@@ -484,12 +592,14 @@ function OverviewTab({
 					<CardContent className="px-5 py-4">
 						<dl className="flex flex-col gap-3 text-sm">
 							{[
-								{ label: 'Founded', value: formatDate(tenant.joinedAt) },
-								{ label: 'City', value: detail.city },
+								{ label: 'City', value: tenant.city ?? '—' },
 								{ label: 'Country', value: 'Uzbekistan' },
-								{ label: 'Timezone', value: 'Asia/Tashkent (UTC+5)' },
-								{ label: 'Language', value: 'Uzbek (Latin)' },
-								{ label: 'Contact email', value: detail.contactEmail },
+								{ label: 'Timezone', value: tenant.timezone },
+								{ label: 'Language', value: tenant.locale },
+								{ label: 'Currency', value: tenant.defaultCurrency },
+								...(tenant.phone
+									? [{ label: 'Phone', value: tenant.phone }]
+									: []),
 							].map(({ label, value }) => (
 								<div key={label} className="flex justify-between gap-4">
 									<dt className="text-muted-foreground">{label}</dt>
@@ -499,29 +609,6 @@ function OverviewTab({
 						</dl>
 					</CardContent>
 				</Card>
-
-				<Card className="gap-0 py-0">
-					<CardHeader className="border-b border-border px-5 py-4">
-						<CardTitle className="text-sm font-semibold">
-							Recent Activity
-						</CardTitle>
-					</CardHeader>
-					<CardContent className="px-0 py-0">
-						<ul>
-							{detail.activity.map((event, i) => (
-								<li key={event.id}>
-									{i > 0 && <Separator />}
-									<div className="flex items-start justify-between gap-4 px-5 py-3">
-										<p className="text-sm">{event.text}</p>
-										<span className="shrink-0 text-xs text-muted-foreground">
-											{event.time}
-										</span>
-									</div>
-								</li>
-							))}
-						</ul>
-					</CardContent>
-				</Card>
 			</div>
 		</div>
 	);
@@ -529,34 +616,22 @@ function OverviewTab({
 
 // ─── Subscription tab ─────────────────────────────────────────────────────────
 
-function invoiceStatusTone(status: InvoiceStatus): StatusTone {
-	const map: Record<InvoiceStatus, StatusTone> = {
-		paid: 'green',
-		open: 'cyan',
-		overdue: 'red',
-	};
-	return map[status] ?? 'slate';
-}
-
-function invoiceStatusLabel(status: InvoiceStatus): string {
-	const map: Record<InvoiceStatus, string> = {
-		paid: 'Paid',
-		open: 'Active',
-		overdue: 'Overdue',
-	};
-	return map[status] ?? status;
-}
-
 function SubscriptionTab({
 	tenant,
-	detail,
+	subscriptionTierId,
 	onChangePlan,
 }: {
-	tenant: MockTenantRow;
-	detail: TenantDetail;
+	tenant: TenantDetailView;
+	subscriptionTierId: number | null;
 	onChangePlan: () => void;
 }) {
-	const { subscription } = detail;
+	const { data: plansPage } = useQuery({
+		queryKey: plansKeys.list({ isActive: true }),
+		queryFn: () => listPlans({ isActive: true, limit: 100 }),
+	});
+	const plan = (plansPage?.rows ?? []).find((p) => p.id === subscriptionTierId) ?? null;
+
+	const { subscription, stats } = tenant;
 
 	return (
 		<div className="flex flex-col gap-6">
@@ -569,50 +644,60 @@ function SubscriptionTab({
 					</CardHeader>
 					<CardContent className="flex flex-col gap-4 px-5 pt-3 pb-5">
 						<div>
-							<p className="text-2xl font-bold">
-								{PLAN_LABELS[tenant.plan]}
-							</p>
-							<p className="text-sm text-muted-foreground">
-								{formatUZS(subscription.pricePerMonth)}/mo
-							</p>
+							<p className="text-2xl font-bold">{plan?.name ?? '—'}</p>
+							{plan && (
+								<p className="text-sm text-muted-foreground">
+									{formatUzs(plan.priceMonthly)}/mo
+								</p>
+							)}
 						</div>
-						<dl className="flex flex-col gap-2 text-sm">
-							{[
-								{
-									label: 'Status',
-									value: (
-										<StatusBadge
-											tone={
-												tenant.status === 'active'
-													? 'green'
-													: 'amber'
-											}
-										>
-											{subscription.subscriptionStatus}
-										</StatusBadge>
-									),
-								},
-								{
-									label: 'MRR',
-									value: formatUZS(
-										tenant.mrr || subscription.pricePerMonth,
-									),
-								},
-								{
-									label: 'Billing cycle',
-									value: subscription.billingCycle,
-								},
-								{ label: 'Renews', value: subscription.renewsAt },
-							].map(({ label, value }) => (
-								<div
-									key={label}
-									className="flex items-center justify-between gap-4"
-								>
-									<dt className="text-muted-foreground">{label}</dt>
-									<dd className="font-medium">{value}</dd>
-								</div>
-							))}
-						</dl>
+						{subscription ? (
+							<dl className="flex flex-col gap-2 text-sm">
+								{[
+									{
+										label: 'Status',
+										value: (
+											<StatusBadge
+												tone={
+													SUB_STATUS_TONE[
+														subscription.status
+													] ?? 'slate'
+												}
+											>
+												{SUB_STATUS_LABEL[subscription.status] ??
+													subscription.status}
+											</StatusBadge>
+										),
+									},
+									{
+										label: 'MRR',
+										value: formatUzs(stats.monthlyRevenue),
+									},
+									{
+										label: 'Period start',
+										value: formatDate(
+											subscription.currentPeriodStart,
+										),
+									},
+									{
+										label: 'Renews',
+										value: formatDate(subscription.currentPeriodEnd),
+									},
+								].map(({ label, value }) => (
+									<div
+										key={label}
+										className="flex items-center justify-between gap-4"
+									>
+										<dt className="text-muted-foreground">{label}</dt>
+										<dd className="font-medium">{value}</dd>
+									</div>
+								))}
+							</dl>
+						) : (
+							<p className="text-sm text-muted-foreground">
+								No subscription on record.
+							</p>
+						)}
 						<Button className="w-full" onClick={onChangePlan}>
 							Change plan
 						</Button>
@@ -625,54 +710,8 @@ function SubscriptionTab({
 							Recent Invoices
 						</CardTitle>
 					</CardHeader>
-					<CardContent className="px-0 py-0">
-						<Table>
-							<TableHeader>
-								<TableRow>
-									<TableHead>Invoice</TableHead>
-									<TableHead className="text-right">Amount</TableHead>
-									<TableHead>Status</TableHead>
-									<TableHead className="w-10" />
-								</TableRow>
-							</TableHeader>
-							<TableBody>
-								{subscription.invoices.map((inv) => (
-									<TableRow key={inv.id}>
-										<TableCell>
-											<p className="text-sm font-medium">
-												{inv.id}
-											</p>
-											<p className="text-xs text-muted-foreground">
-												{inv.period}
-											</p>
-										</TableCell>
-										<TableCell className="text-right tabular-nums text-sm">
-											{new Intl.NumberFormat('ru-RU').format(
-												inv.amount,
-											)}{' '}
-											UZS
-										</TableCell>
-										<TableCell>
-											<StatusBadge
-												tone={invoiceStatusTone(inv.status)}
-											>
-												{invoiceStatusLabel(inv.status)}
-											</StatusBadge>
-										</TableCell>
-										<TableCell>
-											<Button
-												variant="ghost"
-												size="icon"
-												className="size-7 text-muted-foreground"
-											>
-												<Download className="size-3.5" />
-												<span className="sr-only">Download</span>
-											</Button>
-										</TableCell>
-									</TableRow>
-								))}
-							</TableBody>
-						</Table>
+					<CardContent className="py-10 text-center text-sm text-muted-foreground">
+						Invoice history coming soon.
 					</CardContent>
 				</Card>
 			</div>
@@ -681,19 +720,8 @@ function SubscriptionTab({
 				<CardHeader className="border-b border-border px-5 py-4">
 					<CardTitle className="text-sm font-semibold">Plan History</CardTitle>
 				</CardHeader>
-				<CardContent className="px-5 py-4">
-					<ul className="flex flex-col gap-3">
-						{subscription.history.map((h, i) => (
-							<li key={i} className="flex items-center gap-2 text-sm">
-								<span className="text-muted-foreground">{h.date}</span>
-								<span className="text-muted-foreground">·</span>
-								<span>
-									Changed from <strong>{h.from}</strong> to{' '}
-									<strong>{h.to}</strong>
-								</span>
-							</li>
-						))}
-					</ul>
+				<CardContent className="py-10 text-center text-sm text-muted-foreground">
+					Plan history coming soon.
 				</CardContent>
 			</Card>
 		</div>
@@ -702,231 +730,315 @@ function SubscriptionTab({
 
 // ─── Branches tab ─────────────────────────────────────────────────────────────
 
-function BranchesTab({ detail }: { detail: TenantDetail }) {
+function BranchesTab({ branches }: { branches: TenantBranchView[] }) {
 	return (
 		<div className="flex flex-col gap-4">
 			<div className="flex justify-end">
-				{/* TODO: open add-branch modal once POST /admin/branches is ready */}
 				<Button size="sm" disabled>
 					+ Add branch
 				</Button>
 			</div>
 			<Card className="gap-0 overflow-hidden py-0">
-				<Table>
-					<TableHeader>
-						<TableRow>
-							<TableHead>Branch</TableHead>
-							<TableHead>City</TableHead>
-							<TableHead className="text-right">Students</TableHead>
-							<TableHead className="text-right">Staff</TableHead>
-							<TableHead>Status</TableHead>
-							<TableHead>Created</TableHead>
-						</TableRow>
-					</TableHeader>
-					<TableBody>
-						{detail.branches.map((branch) => (
-							// TODO: link to /tenants/:id/branches/:branchId once stub route is added
-							<TableRow key={branch.id}>
-								<TableCell className="font-medium">
-									{branch.name}
-								</TableCell>
-								<TableCell className="text-muted-foreground">
-									{branch.city}
-								</TableCell>
-								<TableCell className="text-right tabular-nums">
-									{branch.students.toLocaleString('ru-RU')}
-								</TableCell>
-								<TableCell className="text-right tabular-nums">
-									{branch.staff}
-								</TableCell>
-								<TableCell>
-									<StatusBadge tone="green">Active</StatusBadge>
-								</TableCell>
-								<TableCell className="text-sm text-muted-foreground">
-									{formatDate(branch.createdAt)}
-								</TableCell>
+				{branches.length === 0 ? (
+					<div className="py-16 text-center text-sm text-muted-foreground">
+						No branches found.
+					</div>
+				) : (
+					<Table>
+						<TableHeader>
+							<TableRow>
+								<TableHead>Branch</TableHead>
+								<TableHead>Code</TableHead>
+								<TableHead>Contact</TableHead>
+								<TableHead>Status</TableHead>
 							</TableRow>
-						))}
-					</TableBody>
-				</Table>
+						</TableHeader>
+						<TableBody>
+							{branches.map((branch) => (
+								<TableRow key={branch.id}>
+									<TableCell>
+										<div className="flex items-center gap-1.5">
+											<span className="font-medium">
+												{branch.name}
+											</span>
+											{branch.isMain && (
+												<span className="rounded bg-muted px-1.5 py-0.5 text-xs text-muted-foreground">
+													Main
+												</span>
+											)}
+										</div>
+										{branch.address && (
+											<p className="text-xs text-muted-foreground">
+												{branch.address}
+											</p>
+										)}
+									</TableCell>
+									<TableCell className="font-mono text-sm text-muted-foreground">
+										{branch.code}
+									</TableCell>
+									<TableCell className="text-sm text-muted-foreground">
+										{branch.phone ?? branch.email ?? '—'}
+									</TableCell>
+									<TableCell>
+										<StatusBadge
+											tone={branch.isActive ? 'green' : 'slate'}
+										>
+											{branch.isActive ? 'Active' : 'Inactive'}
+										</StatusBadge>
+									</TableCell>
+								</TableRow>
+							))}
+						</TableBody>
+					</Table>
+				)}
 			</Card>
 		</div>
 	);
 }
 
-// ─── Members tab ────────────────────────────────────────────────────────────────
+// ─── Members tab ──────────────────────────────────────────────────────────────
 
-function MembersTab({
-	detail,
-	onInvite,
-}: {
-	detail: TenantDetail;
-	onInvite: () => void;
-}) {
+function MembersTab({ members }: { members: TenantMemberView[] }) {
 	return (
-		<div className="flex flex-col gap-4">
-			<div className="flex justify-end">
-				<Button size="sm" onClick={onInvite}>
-					<UserPlus className="size-4" />
-					Invite user
-				</Button>
-			</div>
-			<Card className="gap-0 overflow-hidden py-0">
+		<Card className="gap-0 overflow-hidden py-0">
+			{members.length === 0 ? (
+				<div className="py-16 text-center text-sm text-muted-foreground">
+					No members found.
+				</div>
+			) : (
 				<Table>
 					<TableHeader>
 						<TableRow>
-							<TableHead>Name</TableHead>
-							<TableHead>Email</TableHead>
-							<TableHead>Role</TableHead>
+							<TableHead>User</TableHead>
+							<TableHead>Contact</TableHead>
 							<TableHead>Status</TableHead>
 							<TableHead>Last login</TableHead>
 						</TableRow>
 					</TableHeader>
 					<TableBody>
-						{detail.users.map((user) => (
-							<TableRow key={user.id}>
+						{members.map((member) => (
+							<TableRow key={member.userId}>
 								<TableCell>
-									<div className="flex items-center gap-2">
-										<Avatar className="size-7">
-											<AvatarFallback className="bg-tone-slate-bg text-tone-slate-fg text-xs font-semibold">
-												{getInitials(user.name)}
+									<div className="flex items-center gap-2.5">
+										<Avatar className="size-7 shrink-0">
+											<AvatarFallback
+												className={cn(
+													'text-xs font-semibold',
+													avatarClass(member.user.id),
+												)}
+											>
+												{getInitials(
+													`${member.user.firstName} ${member.user.lastName}`,
+												)}
 											</AvatarFallback>
 										</Avatar>
-										<span className="text-sm font-medium">
-											{user.name}
+										<span className="font-medium">
+											{member.user.firstName} {member.user.lastName}
 										</span>
 									</div>
 								</TableCell>
 								<TableCell className="text-sm text-muted-foreground">
-									{user.email}
-								</TableCell>
-								<TableCell>
-									<StatusBadge tone={ROLE_TONES[user.role] ?? 'slate'}>
-										{user.role}
-									</StatusBadge>
+									{member.user.phone}
+									{member.user.email && (
+										<span className="ml-1 text-xs">
+											· {member.user.email}
+										</span>
+									)}
 								</TableCell>
 								<TableCell>
 									<StatusBadge
-										tone={user.status === 'active' ? 'green' : 'red'}
+										tone={
+											MEMBER_STATUS_TONE[member.status] ?? 'slate'
+										}
 									>
-										{user.status === 'active'
-											? 'Active'
-											: 'Cancelled'}
+										{MEMBER_STATUS_LABEL[member.status] ??
+											member.status}
 									</StatusBadge>
 								</TableCell>
 								<TableCell className="text-sm text-muted-foreground">
-									{user.lastLoginAt
-										? formatDate(user.lastLoginAt)
+									{member.user.lastLoginAt
+										? formatDate(member.user.lastLoginAt)
 										: '—'}
 								</TableCell>
 							</TableRow>
 						))}
 					</TableBody>
 				</Table>
-			</Card>
-		</div>
+			)}
+		</Card>
 	);
 }
 
 // ─── Audit tab ────────────────────────────────────────────────────────────────
 
-const AUDIT_RESOURCE_META: Record<
-	AuditResourceKind,
-	{ label: string; icon: React.ElementType; iconClass: string }
-> = {
-	settings: {
-		label: 'Settings',
-		icon: SettingsIcon,
-		iconClass: 'bg-tone-slate-bg text-tone-slate-fg',
-	},
-	branch: {
-		label: 'Branch',
-		icon: Building2,
-		iconClass: 'bg-tone-green-bg text-tone-green-fg',
-	},
-	invoice: {
-		label: 'Invoice',
-		icon: FileText,
-		iconClass: 'bg-tone-amber-bg text-tone-amber-fg',
-	},
-	subscription: {
-		label: 'Subscription',
-		icon: CreditCard,
-		iconClass: 'bg-tone-blue-bg text-tone-blue-fg',
-	},
-};
-
-function AuditTab({ detail }: { detail: TenantDetail }) {
+function AuditTab() {
 	return (
-		<Card className="gap-0 py-0">
-			<ul>
-				{detail.auditEvents.map((event, i) => {
-					const meta = AUDIT_RESOURCE_META[event.resource];
-					const Icon = meta.icon;
-					return (
-						<li key={event.id}>
-							{i > 0 && <Separator />}
-							<div className="flex items-center gap-4 px-5 py-4">
-								<span
-									className={cn(
-										'flex size-8 shrink-0 items-center justify-center rounded-lg',
-										meta.iconClass,
-									)}
-								>
-									<Icon className="size-4" />
-								</span>
-								<div className="min-w-0 flex-1">
-									<p className="text-sm">
-										<strong>{event.actor}</strong> {event.action}
-									</p>
-									<p className="mt-0.5 text-xs text-muted-foreground">
-										{meta.label} · {event.ip}
-									</p>
-								</div>
-								<span className="shrink-0 text-xs text-muted-foreground">
-									{event.time}
-								</span>
-							</div>
-						</li>
-					);
-				})}
-			</ul>
+		<Card>
+			<CardContent className="py-12 text-center text-sm text-muted-foreground">
+				Per-tenant audit log coming soon.
+			</CardContent>
 		</Card>
+	);
+}
+
+// ─── Settings tab ─────────────────────────────────────────────────────────────
+
+function SettingsTab({
+	tenant,
+	onSave,
+	saving,
+}: {
+	tenant: TenantDetailView;
+	onSave: (data: UpdateTenantInput) => void;
+	saving: boolean;
+}) {
+	const [timezone, setTimezone] = useState(tenant.timezone);
+	const [locale, setLocale] = useState(tenant.locale);
+	const [phone, setPhone] = useState(tenant.phone ?? '');
+	const [city, setCity] = useState(tenant.city ?? '');
+
+	return (
+		<div className="flex max-w-lg flex-col gap-6">
+			<Card className="gap-0 py-0">
+				<CardHeader className="border-b border-border px-5 py-4">
+					<CardTitle className="text-sm font-semibold">General</CardTitle>
+				</CardHeader>
+				<CardContent className="flex flex-col gap-4 px-5 py-5">
+					<div className="flex flex-col gap-1.5">
+						<Label>Display name</Label>
+						<Input value={tenant.name} disabled />
+						<p className="text-xs text-muted-foreground">
+							Tenant name cannot be changed from the platform console.
+						</p>
+					</div>
+					<div className="flex flex-col gap-1.5">
+						<Label htmlFor="settings-phone">Phone</Label>
+						<Input
+							id="settings-phone"
+							type="tel"
+							value={phone}
+							onChange={(e) => setPhone(e.target.value)}
+							placeholder="+998 90 000 00 00"
+						/>
+					</div>
+					<div className="flex flex-col gap-1.5">
+						<Label htmlFor="settings-city">City</Label>
+						<Input
+							id="settings-city"
+							value={city}
+							onChange={(e) => setCity(e.target.value)}
+							placeholder="Tashkent"
+						/>
+					</div>
+					<div className="flex flex-col gap-1.5">
+						<Label>Timezone</Label>
+						<Select value={timezone} onValueChange={setTimezone}>
+							<SelectTrigger>
+								<SelectValue />
+							</SelectTrigger>
+							<SelectContent>
+								<SelectItem value="Asia/Tashkent">
+									Asia/Tashkent (UTC+5)
+								</SelectItem>
+								<SelectItem value="Europe/Moscow">
+									Europe/Moscow (UTC+3)
+								</SelectItem>
+								<SelectItem value="UTC">UTC</SelectItem>
+							</SelectContent>
+						</Select>
+					</div>
+					<div className="flex flex-col gap-1.5">
+						<Label>Language</Label>
+						<Select value={locale} onValueChange={setLocale}>
+							<SelectTrigger>
+								<SelectValue />
+							</SelectTrigger>
+							<SelectContent>
+								<SelectItem value="uz">Uzbek (Latin)</SelectItem>
+								<SelectItem value="ru">Russian</SelectItem>
+								<SelectItem value="en">English</SelectItem>
+							</SelectContent>
+						</Select>
+					</div>
+					<div className="pt-1">
+						<Button
+							disabled={saving}
+							onClick={() =>
+								onSave({
+									timezone,
+									locale,
+									phone: phone || null,
+									city: city || null,
+								})
+							}
+						>
+							{saving ? 'Saving…' : 'Save changes'}
+						</Button>
+					</div>
+				</CardContent>
+			</Card>
+		</div>
 	);
 }
 
 // ─── Danger zone tab ──────────────────────────────────────────────────────────
 
 function DangerZoneTab({
+	status,
 	onSuspend,
+	onUnsuspend,
 	onCancel,
 }: {
+	status: TenantStatus;
 	onSuspend: () => void;
+	onUnsuspend: () => void;
 	onCancel: () => void;
 }) {
 	return (
 		<div className="flex max-w-lg flex-col gap-4">
-			<div className="flex items-start justify-between gap-4 rounded-lg border border-amber-500/40 bg-amber-500/5 px-5 py-4">
-				<div className="flex-1">
-					<p className="flex items-center gap-1.5 text-sm font-semibold text-amber-600 dark:text-amber-400">
-						<PauseCircle className="size-4" />
-						Suspend tenant
-					</p>
-					<p className="mt-1 text-xs text-muted-foreground">
-						Immediately locks out all staff, teachers, students and parents.
-						Data is retained. This is reversible — you can reactivate at any
-						time.
-					</p>
+			{status === 'SUSPENDED' ? (
+				<div className="flex items-start justify-between gap-4 rounded-lg border border-green-500/40 bg-green-500/5 px-5 py-4">
+					<div className="flex-1">
+						<p className="flex items-center gap-1.5 text-sm font-semibold text-green-600 dark:text-green-400">
+							<PlayCircle className="size-4" />
+							Unsuspend tenant
+						</p>
+						<p className="mt-1 text-xs text-muted-foreground">
+							Restores access for all staff, teachers, students and parents.
+						</p>
+					</div>
+					<Button
+						variant="outline"
+						size="sm"
+						className="shrink-0 border-green-500 text-green-600 hover:bg-green-500/10 dark:text-green-400"
+						onClick={onUnsuspend}
+					>
+						Unsuspend
+					</Button>
 				</div>
-				<Button
-					variant="outline"
-					size="sm"
-					className="shrink-0 border-amber-500 text-amber-600 hover:bg-amber-500/10 dark:text-amber-400"
-					onClick={onSuspend}
-				>
-					Suspend
-				</Button>
-			</div>
+			) : (
+				<div className="flex items-start justify-between gap-4 rounded-lg border border-amber-500/40 bg-amber-500/5 px-5 py-4">
+					<div className="flex-1">
+						<p className="flex items-center gap-1.5 text-sm font-semibold text-amber-600 dark:text-amber-400">
+							<PauseCircle className="size-4" />
+							Suspend tenant
+						</p>
+						<p className="mt-1 text-xs text-muted-foreground">
+							Immediately locks out all staff, teachers, students and
+							parents. Data is retained. This is reversible — you can
+							reactivate at any time.
+						</p>
+					</div>
+					<Button
+						variant="outline"
+						size="sm"
+						className="shrink-0 border-amber-500 text-amber-600 hover:bg-amber-500/10 dark:text-amber-400"
+						onClick={onSuspend}
+					>
+						Suspend
+					</Button>
+				</div>
+			)}
 
 			<div className="flex items-start justify-between gap-4 rounded-lg border border-destructive/40 bg-destructive/5 px-5 py-4">
 				<div className="flex-1">
@@ -953,105 +1065,79 @@ function DangerZoneTab({
 	);
 }
 
-// ─── Settings tab ─────────────────────────────────────────────────────────────
-
-function SettingsTab({
-	tenant,
-	detail,
-}: {
-	tenant: MockTenantRow;
-	detail: TenantDetail;
-}) {
-	const [displayName, setDisplayName] = useState(tenant.name);
-	const [contactEmail, setContactEmail] = useState(detail.contactEmail);
-	const [timezone, setTimezone] = useState('Asia/Tashkent');
-	const [language, setLanguage] = useState('uz');
-
-	return (
-		<div className="flex max-w-lg flex-col gap-6">
-			<Card className="gap-0 py-0">
-				<CardHeader className="border-b border-border px-5 py-4">
-					<CardTitle className="text-sm font-semibold">General</CardTitle>
-				</CardHeader>
-				<CardContent className="flex flex-col gap-4 px-5 py-5">
-					<div className="flex flex-col gap-1.5">
-						<Label htmlFor="display-name">Display name</Label>
-						<Input
-							id="display-name"
-							value={displayName}
-							onChange={(e) => setDisplayName(e.target.value)}
-						/>
-					</div>
-					<div className="flex flex-col gap-1.5">
-						<Label htmlFor="contact-email">Contact email</Label>
-						<Input
-							id="contact-email"
-							type="email"
-							value={contactEmail}
-							onChange={(e) => setContactEmail(e.target.value)}
-						/>
-					</div>
-					<div className="flex flex-col gap-1.5">
-						<Label>Timezone</Label>
-						<Select value={timezone} onValueChange={setTimezone}>
-							<SelectTrigger>
-								<SelectValue />
-							</SelectTrigger>
-							<SelectContent>
-								<SelectItem value="Asia/Tashkent">
-									Asia/Tashkent (UTC+5)
-								</SelectItem>
-								<SelectItem value="Europe/Moscow">
-									Europe/Moscow (UTC+3)
-								</SelectItem>
-								<SelectItem value="UTC">UTC</SelectItem>
-							</SelectContent>
-						</Select>
-					</div>
-					<div className="flex flex-col gap-1.5">
-						<Label>Language</Label>
-						<Select value={language} onValueChange={setLanguage}>
-							<SelectTrigger>
-								<SelectValue />
-							</SelectTrigger>
-							<SelectContent>
-								<SelectItem value="uz">Uzbek (Latin)</SelectItem>
-								<SelectItem value="ru">Russian</SelectItem>
-								<SelectItem value="en">English</SelectItem>
-							</SelectContent>
-						</Select>
-					</div>
-					<div className="pt-1">
-						{/* TODO: wire to PATCH /admin/tenants/:id once mutation is ready */}
-						<Button disabled>Save changes</Button>
-					</div>
-				</CardContent>
-			</Card>
-		</div>
-	);
-}
-
 // ─── Tab trigger style ────────────────────────────────────────────────────────
 
 const TAB_TRIGGER_CLASS = cn(
-	'-mb-px rounded-none border-b-2 border-transparent px-4 pb-3 pt-2',
+	'cursor-pointer -mb-px rounded-none border-b-2 border-b-transparent px-4 pb-3 pt-2',
 	'text-sm font-medium text-muted-foreground transition-colors hover:text-foreground',
-	'data-[state=active]:border-primary data-[state=active]:bg-transparent',
-	'data-[state=active]:text-foreground data-[state=active]:shadow-none',
+	'data-[state=active]:border-b-primary data-[state=active]:bg-transparent',
+	'data-[state=active]:text-primary data-[state=active]:shadow-none',
 );
 
 // ─── Page ─────────────────────────────────────────────────────────────────────
 
 export function TenantDetailPage() {
 	const { tenantId } = useParams({ strict: false }) as { tenantId?: string };
-	const tenant = MOCK_TENANTS.find((t) => t.id === tenantId) ?? null;
+	const numericId = tenantId ? parseInt(tenantId, 10) : NaN;
+	const isValidId = !isNaN(numericId);
+
+	const queryClient = useQueryClient();
+
+	const {
+		data: tenant,
+		isLoading,
+		isError,
+	} = useQuery({
+		queryKey: tenantsKeys.detail(numericId),
+		queryFn: () => getTenant(numericId),
+		enabled: isValidId,
+	});
+
+	const suspendMutation = useMutation({
+		mutationFn: (reason?: string) => suspendTenant(numericId, { reason }),
+		onSuccess: () => {
+			void queryClient.invalidateQueries({
+				queryKey: tenantsKeys.detail(numericId),
+			});
+			setSuspendOpen(false);
+		},
+	});
+
+	const unsuspendMutation = useMutation({
+		mutationFn: (reason?: string) => unsuspendTenant(numericId, { reason }),
+		onSuccess: () => {
+			void queryClient.invalidateQueries({
+				queryKey: tenantsKeys.detail(numericId),
+			});
+			setUnsuspendOpen(false);
+		},
+	});
+
+	const cancelMutation = useMutation({
+		mutationFn: (reason?: string) => cancelTenant(numericId, { reason }),
+		onSuccess: () => {
+			void queryClient.invalidateQueries({
+				queryKey: tenantsKeys.detail(numericId),
+			});
+			setCancelOpen(false);
+		},
+	});
+
+	const updateMutation = useMutation({
+		mutationFn: (data: UpdateTenantInput) => updateTenant(numericId, data),
+		onSuccess: () => {
+			void queryClient.invalidateQueries({
+				queryKey: tenantsKeys.detail(numericId),
+			});
+		},
+	});
 
 	const [suspendOpen, setSuspendOpen] = useState(false);
+	const [unsuspendOpen, setUnsuspendOpen] = useState(false);
 	const [cancelOpen, setCancelOpen] = useState(false);
 	const [changePlanOpen, setChangePlanOpen] = useState(false);
-	const [inviteOpen, setInviteOpen] = useState(false);
 
-	if (!tenant) {
+	if (!isValidId || isError) {
 		return (
 			<div className="flex flex-col items-center gap-4 py-24 text-center">
 				<p className="text-muted-foreground">Tenant not found.</p>
@@ -1062,7 +1148,15 @@ export function TenantDetailPage() {
 		);
 	}
 
-	const detail = buildDetail(tenant);
+	if (isLoading || !tenant) {
+		return (
+			<div className="flex flex-col gap-6">
+				<Skeleton className="h-4 w-24" />
+				<Skeleton className="h-16 w-full" />
+				<Skeleton className="h-96 w-full" />
+			</div>
+		);
+	}
 
 	return (
 		<div className="flex flex-col gap-6">
@@ -1095,22 +1189,17 @@ export function TenantDetailPage() {
 								<Globe className="size-3.5" />
 								{tenant.subdomain}.educore.uz
 							</span>
-							<span className="flex items-center gap-1">
-								<Calendar className="size-3.5" />
-								{PLAN_LABELS[tenant.plan]} plan
-							</span>
-							<span>Since {formatDate(tenant.joinedAt)}</span>
 						</div>
 					</div>
 				</div>
 
-				<Button variant="outline" size="sm" className="gap-1.5">
+				<Button variant="outline" size="sm" className="gap-1.5" disabled>
 					<Eye className="size-4" />
 					Impersonate
 				</Button>
 			</div>
 
-			{/* Tab navigation + content */}
+			{/* Tabs */}
 			<Tabs defaultValue="overview" className="gap-0">
 				<TabsList className="h-auto w-full justify-start rounded-none border-b border-border bg-transparent p-0">
 					<TabsTrigger value="overview" className={TAB_TRIGGER_CLASS}>
@@ -1135,7 +1224,7 @@ export function TenantDetailPage() {
 						value="danger"
 						className={cn(
 							TAB_TRIGGER_CLASS,
-							'text-destructive data-[state=active]:border-destructive data-[state=active]:text-destructive',
+							'text-destructive data-[state=active]:border-b-destructive data-[state=active]:text-destructive',
 						)}
 					>
 						Danger zone
@@ -1145,77 +1234,50 @@ export function TenantDetailPage() {
 
 				<div className="mt-6">
 					<TabsContent value="overview">
-						<OverviewTab tenant={tenant} detail={detail} />
+						<OverviewTab tenant={tenant} />
 					</TabsContent>
 					<TabsContent value="subscription">
 						<SubscriptionTab
 							tenant={tenant}
-							detail={detail}
+							subscriptionTierId={tenant.subscriptionTierId}
 							onChangePlan={() => setChangePlanOpen(true)}
 						/>
 					</TabsContent>
 					<TabsContent value="branches">
-						<BranchesTab detail={detail} />
+						<BranchesTab branches={tenant.branches ?? []} />
 					</TabsContent>
 					<TabsContent value="members">
-						<MembersTab
-							detail={detail}
-							onInvite={() => setInviteOpen(true)}
-						/>
+						<MembersTab members={tenant.members ?? []} />
 					</TabsContent>
 					<TabsContent value="settings">
-						<SettingsTab tenant={tenant} detail={detail} />
+						<SettingsTab
+							tenant={tenant}
+							onSave={(data) => updateMutation.mutate(data)}
+							saving={updateMutation.isPending}
+						/>
 					</TabsContent>
 					<TabsContent value="audit">
-						<AuditTab detail={detail} />
+						<AuditTab />
 					</TabsContent>
 					<TabsContent value="danger">
 						<DangerZoneTab
+							status={tenant.status}
 							onSuspend={() => setSuspendOpen(true)}
+							onUnsuspend={() => setUnsuspendOpen(true)}
 							onCancel={() => setCancelOpen(true)}
 						/>
 					</TabsContent>
 				</div>
 			</Tabs>
 
-			{/* Change plan placeholder modal */}
-			<Dialog open={changePlanOpen} onOpenChange={setChangePlanOpen}>
-				<DialogContent className="max-w-sm">
-					<DialogHeader>
-						<DialogTitle>Change plan</DialogTitle>
-						<DialogDescription>
-							Plan management will be available once the billing API is
-							ready.
-						</DialogDescription>
-					</DialogHeader>
-					<DialogFooter>
-						<Button
-							variant="outline"
-							onClick={() => setChangePlanOpen(false)}
-						>
-							Close
-						</Button>
-					</DialogFooter>
-				</DialogContent>
-			</Dialog>
-
-			{/* Invite user placeholder modal */}
-			<Dialog open={inviteOpen} onOpenChange={setInviteOpen}>
-				<DialogContent className="max-w-sm">
-					<DialogHeader>
-						<DialogTitle>Invite user</DialogTitle>
-						<DialogDescription>
-							User invitation will be available once the members API is
-							ready.
-						</DialogDescription>
-					</DialogHeader>
-					<DialogFooter>
-						<Button variant="outline" onClick={() => setInviteOpen(false)}>
-							Close
-						</Button>
-					</DialogFooter>
-				</DialogContent>
-			</Dialog>
+			{/* Change plan dialog */}
+			<ChangePlanDialog
+				open={changePlanOpen}
+				onOpenChange={setChangePlanOpen}
+				tenantId={numericId}
+				currentTierId={tenant.subscriptionTierId}
+				currentBillingInterval={tenant.subscription?.billingInterval ?? null}
+			/>
 
 			{/* Suspend confirm */}
 			<TypeToConfirmDialog
@@ -1225,9 +1287,20 @@ export function TenantDetailPage() {
 				description="This will immediately lock out all staff, teachers, students and parents. You can reactivate at any time."
 				confirmLabel="Suspend tenant"
 				tenantName={tenant.name}
-				onConfirm={() => {
-					// TODO: call suspend mutation
-				}}
+				loading={suspendMutation.isPending}
+				onConfirm={() => suspendMutation.mutate(undefined)}
+			/>
+
+			{/* Unsuspend confirm */}
+			<TypeToConfirmDialog
+				open={unsuspendOpen}
+				onOpenChange={setUnsuspendOpen}
+				title="Unsuspend tenant"
+				description="This will restore access for all staff, teachers, students and parents."
+				confirmLabel="Unsuspend tenant"
+				tenantName={tenant.name}
+				loading={unsuspendMutation.isPending}
+				onConfirm={() => unsuspendMutation.mutate(undefined)}
 			/>
 
 			{/* Cancel account confirm */}
@@ -1238,9 +1311,8 @@ export function TenantDetailPage() {
 				description="This will terminate the subscription and schedule all tenant data for deletion after 30 days. This action is permanent and cannot be undone."
 				confirmLabel="Cancel account"
 				tenantName={tenant.name}
-				onConfirm={() => {
-					// TODO: call cancel mutation
-				}}
+				loading={cancelMutation.isPending}
+				onConfirm={() => cancelMutation.mutate(undefined)}
 				variant="destructive"
 			/>
 		</div>

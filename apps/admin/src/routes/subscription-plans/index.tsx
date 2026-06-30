@@ -1,11 +1,9 @@
-// TODO: replace CRUD with useMutation(createPlanMutation()) / useMutation(updatePlanMutation()) /
-//       useMutation(archivePlanMutation()) and useQuery(plansQuery()) once API endpoints are ready.
-
 import { useState } from 'react';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
+import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { z } from 'zod/v4';
-import { Check, Pencil, Plus, Zap } from 'lucide-react';
+import { Check, Pencil, Plus } from 'lucide-react';
 
 import {
 	Badge,
@@ -27,18 +25,21 @@ import {
 	SheetFooter,
 	SheetHeader,
 	SheetTitle,
+	Skeleton,
 	cn,
 } from '@repo/ui';
-import { MOCK_PLANS } from './_mock';
-import type { MockPlan, PlanFeature } from './_mock';
 
-// ─── Types ────────────────────────────────────────────────────────────────────
-
-type DrawerMode = { kind: 'create' } | { kind: 'edit'; plan: MockPlan };
+import { formatUzs } from '@/lib/formatters/currency';
+import { plansKeys } from '@/features/plans/api/keys';
+import { listPlans } from '@/features/plans/api/plans.queries';
+import { createPlan, updatePlan } from '@/features/plans/api/plans.mutations';
+import type { PlanView } from '@/features/plans/api/types';
 
 // ─── Constants ────────────────────────────────────────────────────────────────
 
-const FEATURE_LABELS: Record<PlanFeature, { label: string; description: string }> = {
+type FeatureKey = 'billing' | 'payroll' | 'assessments' | 'telegram_bot' | 'api_access';
+
+const FEATURE_LABELS: Record<FeatureKey, { label: string; description: string }> = {
 	billing: {
 		label: 'Billing module',
 		description: 'Invoices, payments & revenue tracking',
@@ -58,98 +59,116 @@ const FEATURE_LABELS: Record<PlanFeature, { label: string; description: string }
 	api_access: { label: 'API access', description: 'REST API key for integrations' },
 };
 
-const ALL_FEATURES = Object.keys(FEATURE_LABELS) as PlanFeature[];
+const ALL_FEATURES = Object.keys(FEATURE_LABELS) as FeatureKey[];
 
 // ─── Helpers ──────────────────────────────────────────────────────────────────
-
-function formatUzs(amount: number): string {
-	if (amount === 0) return 'Custom pricing';
-	return new Intl.NumberFormat('ru-RU').format(amount);
-}
 
 function limitLabel(value: number | null, unit: string): string {
 	if (value === null) return `Unlimited ${unit}`;
 	return `${new Intl.NumberFormat('ru-RU').format(value)} ${unit}`;
 }
 
+function planFeatures(plan: PlanView): FeatureKey[] {
+	return ALL_FEATURES.filter((f) => Boolean(plan.features[f]));
+}
+
 // ─── Zod schema ───────────────────────────────────────────────────────────────
 
 const planSchema = z.object({
 	name: z.string().min(1, 'Name is required').max(64),
-	priceUzs: z.number().min(0, 'Price must be 0 or more'),
-	studentLimit: z.number().int().min(0),
-	branchLimit: z.number().int().min(0),
-	storageGb: z.number().int().min(1, 'Storage must be at least 1 GB'),
+	priceMonthly: z.number().min(0, 'Price must be 0 or more'),
+	priceAnnual: z.number().min(0, 'Price must be 0 or more'),
+	maxStudents: z.number().int().min(0),
+	maxBranches: z.number().int().min(0),
+	storageGb: z.number().int().min(1, 'Storage must be at least 1 GB').optional(),
 	billing: z.boolean(),
 	payroll: z.boolean(),
 	assessments: z.boolean(),
 	telegram_bot: z.boolean(),
 	api_access: z.boolean(),
+	isActive: z.boolean(),
 });
 
 type PlanFormValues = z.infer<typeof planSchema>;
 
-function planToFormValues(plan: MockPlan): PlanFormValues {
+function planToFormValues(plan: PlanView): PlanFormValues {
 	return {
 		name: plan.name,
-		priceUzs: plan.priceUzs,
-		studentLimit: plan.studentLimit ?? 0,
-		branchLimit: plan.branchLimit ?? 0,
-		storageGb: plan.storageGb,
-		billing: plan.features.includes('billing'),
-		payroll: plan.features.includes('payroll'),
-		assessments: plan.features.includes('assessments'),
-		telegram_bot: plan.features.includes('telegram_bot'),
-		api_access: plan.features.includes('api_access'),
+		priceMonthly: plan.priceMonthly,
+		priceAnnual: plan.priceAnnual,
+		maxStudents: plan.maxStudents ?? 0,
+		maxBranches: plan.maxBranches ?? 0,
+		billing: Boolean(plan.features['billing']),
+		payroll: Boolean(plan.features['payroll']),
+		assessments: Boolean(plan.features['assessments']),
+		telegram_bot: Boolean(plan.features['telegram_bot']),
+		api_access: Boolean(plan.features['api_access']),
+		isActive: plan.isActive,
 	};
 }
 
 const EMPTY_FORM: PlanFormValues = {
 	name: '',
-	priceUzs: 0,
-	studentLimit: 300,
-	branchLimit: 1,
-	storageGb: 5,
+	priceMonthly: 0,
+	priceAnnual: 0,
+	maxStudents: 300,
+	maxBranches: 1,
 	billing: false,
 	payroll: false,
 	assessments: false,
 	telegram_bot: false,
 	api_access: false,
+	isActive: true,
 };
+
+function formValuesToInput(values: PlanFormValues) {
+	const features: Record<string, boolean> = {};
+	for (const f of ALL_FEATURES) {
+		features[f] = values[f];
+	}
+	return {
+		name: values.name,
+		priceMonthly: values.priceMonthly,
+		priceAnnual: values.priceAnnual,
+		maxStudents: values.maxStudents === 0 ? null : values.maxStudents,
+		maxBranches: values.maxBranches === 0 ? null : values.maxBranches,
+		features,
+		isActive: values.isActive,
+	};
+}
 
 // ─── PlanCard ─────────────────────────────────────────────────────────────────
 
 function PlanCard({
 	plan,
 	onEdit,
-	onArchive,
+	onDeactivate,
 }: {
-	plan: MockPlan;
-	onEdit: (plan: MockPlan) => void;
-	onArchive: (plan: MockPlan) => void;
+	plan: PlanView;
+	onEdit: (plan: PlanView) => void;
+	onDeactivate: (plan: PlanView) => void;
 }) {
-	const isCustom = plan.priceUzs === 0;
+	const isCustom = plan.priceMonthly === 0;
+	const features = planFeatures(plan);
 
 	return (
 		<Card
 			className={cn(
 				'relative flex flex-col gap-0 py-0 transition-shadow hover:shadow-md',
-				plan.isPopular && 'ring-2 ring-primary',
 			)}
 		>
-			{plan.isPopular && (
-				<div className="absolute -top-3 left-1/2 -translate-x-1/2">
-					<Badge className="gap-1 bg-primary px-2.5 py-0.5 text-primary-foreground">
-						<Zap className="size-3" />
-						Most Popular
-					</Badge>
-				</div>
-			)}
-
 			<CardContent className="flex flex-1 flex-col gap-5 px-6 pt-8 pb-6">
 				{/* Plan name */}
 				<div>
 					<p className="text-lg font-bold tracking-tight">{plan.name}</p>
+					{!plan.isActive && (
+						<Badge
+							variant="outline"
+							className="mt-1 text-xs text-muted-foreground"
+						>
+							Inactive
+						</Badge>
+					)}
 				</div>
 
 				{/* Price */}
@@ -160,7 +179,7 @@ function PlanCard({
 						</p>
 					) : (
 						<p className="text-2xl font-bold tabular-nums leading-none">
-							{formatUzs(plan.priceUzs)}{' '}
+							{formatUzs(plan.priceMonthly)}{' '}
 							<span className="text-sm font-normal text-muted-foreground">
 								UZS / month
 							</span>
@@ -172,17 +191,13 @@ function PlanCard({
 				<ul className="flex flex-col gap-2">
 					<li className="flex items-center gap-2 text-sm">
 						<Check className="size-4 shrink-0 text-green-600" />
-						{limitLabel(plan.branchLimit, 'branches')}
+						{limitLabel(plan.maxBranches, 'branches')}
 					</li>
 					<li className="flex items-center gap-2 text-sm">
 						<Check className="size-4 shrink-0 text-green-600" />
-						{limitLabel(plan.studentLimit, 'students')}
+						{limitLabel(plan.maxStudents, 'students')}
 					</li>
-					<li className="flex items-center gap-2 text-sm">
-						<Check className="size-4 shrink-0 text-green-600" />
-						{plan.storageGb} GB storage
-					</li>
-					{plan.features.map((f) => (
+					{features.map((f) => (
 						<li key={f} className="flex items-center gap-2 text-sm">
 							<Check className="size-4 shrink-0 text-green-600" />
 							{FEATURE_LABELS[f].label}
@@ -192,12 +207,6 @@ function PlanCard({
 
 				<div className="mt-auto flex flex-col gap-3 pt-2">
 					<Separator />
-
-					{/* Tenant count */}
-					<p className="text-sm text-muted-foreground">
-						{plan.tenantCount} tenant{plan.tenantCount !== 1 ? 's' : ''} on
-						this plan
-					</p>
 
 					{/* Actions */}
 					<div className="flex gap-2">
@@ -214,9 +223,10 @@ function PlanCard({
 							variant="ghost"
 							size="sm"
 							className="flex-1 text-destructive hover:bg-destructive/10 hover:text-destructive"
-							onClick={() => onArchive(plan)}
+							onClick={() => onDeactivate(plan)}
+							disabled={!plan.isActive}
 						>
-							Archive
+							Deactivate
 						</Button>
 					</div>
 				</div>
@@ -225,18 +235,41 @@ function PlanCard({
 	);
 }
 
+// ─── PlanSkeleton ─────────────────────────────────────────────────────────────
+
+function PlanSkeleton() {
+	return (
+		<Card className="py-0">
+			<CardContent className="flex flex-col gap-5 px-6 pt-8 pb-6">
+				<Skeleton className="h-6 w-28" />
+				<Skeleton className="h-8 w-40" />
+				<div className="flex flex-col gap-2">
+					<Skeleton className="h-4 w-32" />
+					<Skeleton className="h-4 w-36" />
+					<Skeleton className="h-4 w-28" />
+				</div>
+				<Skeleton className="mt-auto h-9 w-full" />
+			</CardContent>
+		</Card>
+	);
+}
+
 // ─── PlanDrawer ───────────────────────────────────────────────────────────────
+
+type DrawerMode = { kind: 'create' } | { kind: 'edit'; plan: PlanView };
 
 function PlanDrawer({
 	mode,
 	open,
 	onOpenChange,
 	onSave,
+	saving,
 }: {
 	mode: DrawerMode;
 	open: boolean;
 	onOpenChange: (open: boolean) => void;
 	onSave: (values: PlanFormValues) => void;
+	saving: boolean;
 }) {
 	const isEdit = mode.kind === 'edit';
 	const defaultValues = isEdit ? planToFormValues(mode.plan) : EMPTY_FORM;
@@ -248,7 +281,6 @@ function PlanDrawer({
 
 	function handleSubmit(values: PlanFormValues) {
 		onSave(values);
-		onOpenChange(false);
 	}
 
 	return (
@@ -281,37 +313,57 @@ function PlanDrawer({
 							)}
 						/>
 
-						{/* Price */}
-						<FormField
-							control={form.control}
-							name="priceUzs"
-							render={({ field }) => (
-								<FormItem>
-									<FormLabel>Monthly price (UZS)</FormLabel>
-									<FormControl>
-										<Input
-											type="number"
-											min={0}
-											placeholder="2400000"
-											{...field}
-											onChange={(e) =>
-												field.onChange(Number(e.target.value))
-											}
-										/>
-									</FormControl>
-									<p className="text-xs text-muted-foreground">
-										Set to 0 for custom / negotiated pricing.
-									</p>
-									<FormMessage />
-								</FormItem>
-							)}
-						/>
+						{/* Prices row */}
+						<div className="grid grid-cols-2 gap-4">
+							<FormField
+								control={form.control}
+								name="priceMonthly"
+								render={({ field }) => (
+									<FormItem>
+										<FormLabel>Monthly price (UZS)</FormLabel>
+										<FormControl>
+											<Input
+												type="number"
+												min={0}
+												placeholder="2400000"
+												{...field}
+												onChange={(e) =>
+													field.onChange(Number(e.target.value))
+												}
+											/>
+										</FormControl>
+										<FormMessage />
+									</FormItem>
+								)}
+							/>
+							<FormField
+								control={form.control}
+								name="priceAnnual"
+								render={({ field }) => (
+									<FormItem>
+										<FormLabel>Annual price (UZS)</FormLabel>
+										<FormControl>
+											<Input
+												type="number"
+												min={0}
+												placeholder="24000000"
+												{...field}
+												onChange={(e) =>
+													field.onChange(Number(e.target.value))
+												}
+											/>
+										</FormControl>
+										<FormMessage />
+									</FormItem>
+								)}
+							/>
+						</div>
 
 						{/* Limits row */}
 						<div className="grid grid-cols-2 gap-4">
 							<FormField
 								control={form.control}
-								name="studentLimit"
+								name="maxStudents"
 								render={({ field }) => (
 									<FormItem>
 										<FormLabel>Student limit</FormLabel>
@@ -335,7 +387,7 @@ function PlanDrawer({
 							/>
 							<FormField
 								control={form.control}
-								name="branchLimit"
+								name="maxBranches"
 								render={({ field }) => (
 									<FormItem>
 										<FormLabel>Branch limit</FormLabel>
@@ -358,29 +410,6 @@ function PlanDrawer({
 								)}
 							/>
 						</div>
-
-						{/* Storage */}
-						<FormField
-							control={form.control}
-							name="storageGb"
-							render={({ field }) => (
-								<FormItem>
-									<FormLabel>Storage (GB)</FormLabel>
-									<FormControl>
-										<Input
-											type="number"
-											min={1}
-											placeholder="25"
-											{...field}
-											onChange={(e) =>
-												field.onChange(Number(e.target.value))
-											}
-										/>
-									</FormControl>
-									<FormMessage />
-								</FormItem>
-							)}
-						/>
 
 						{/* Feature toggles */}
 						<div className="flex flex-col gap-3">
@@ -424,8 +453,14 @@ function PlanDrawer({
 							>
 								Cancel
 							</Button>
-							<Button type="submit" className="flex-1">
-								{isEdit ? 'Save changes' : 'Create plan'}
+							<Button type="submit" className="flex-1" disabled={saving}>
+								{saving
+									? isEdit
+										? 'Saving…'
+										: 'Creating…'
+									: isEdit
+										? 'Save changes'
+										: 'Create plan'}
 							</Button>
 						</SheetFooter>
 					</form>
@@ -438,68 +473,67 @@ function PlanDrawer({
 // ─── Page ─────────────────────────────────────────────────────────────────────
 
 export function SubscriptionPlansPage() {
-	const [plans, setPlans] = useState(MOCK_PLANS);
+	const queryClient = useQueryClient();
 	const [drawerOpen, setDrawerOpen] = useState(false);
 	const [drawerMode, setDrawerMode] = useState<DrawerMode>({ kind: 'create' });
+
+	const {
+		data: plansPage,
+		isLoading,
+		isError,
+		error,
+	} = useQuery({
+		queryKey: plansKeys.list(),
+		queryFn: () => listPlans({ limit: 100 }),
+	});
+
+	const createMutation = useMutation({
+		mutationFn: createPlan,
+		onSuccess: () => {
+			void queryClient.invalidateQueries({ queryKey: plansKeys.all });
+			setDrawerOpen(false);
+		},
+	});
+
+	const updateMutation = useMutation({
+		mutationFn: ({
+			id,
+			input,
+		}: {
+			id: number;
+			input: Parameters<typeof updatePlan>[1];
+		}) => updatePlan(id, input),
+		onSuccess: () => {
+			void queryClient.invalidateQueries({ queryKey: plansKeys.all });
+			setDrawerOpen(false);
+		},
+	});
 
 	function openCreate() {
 		setDrawerMode({ kind: 'create' });
 		setDrawerOpen(true);
 	}
 
-	function openEdit(plan: MockPlan) {
+	function openEdit(plan: PlanView) {
 		setDrawerMode({ kind: 'edit', plan });
 		setDrawerOpen(true);
 	}
 
-	function handleArchive(plan: MockPlan) {
-		// TODO: call useMutation(archivePlanMutation()) once API is ready.
-		setPlans((prev) =>
-			prev.map((p) => (p.id === plan.id ? { ...p, archived: true } : p)),
-		);
+	function handleDeactivate(plan: PlanView) {
+		updateMutation.mutate({ id: plan.id, input: { isActive: false } });
 	}
 
 	function handleSave(values: PlanFormValues) {
-		// TODO: call useMutation(createPlanMutation()) or useMutation(updatePlanMutation()) once API is ready.
-		const features = ALL_FEATURES.filter((f) => values[f]);
+		const input = formValuesToInput(values);
 		if (drawerMode.kind === 'create') {
-			const newPlan: MockPlan = {
-				id: `plan-${Date.now()}`,
-				name: values.name,
-				priceUzs: values.priceUzs,
-				studentLimit: values.studentLimit === 0 ? null : values.studentLimit,
-				branchLimit: values.branchLimit === 0 ? null : values.branchLimit,
-				storageGb: values.storageGb,
-				features,
-				isPopular: false,
-				tenantCount: 0,
-				archived: false,
-			};
-			setPlans((prev) => [...prev, newPlan]);
+			createMutation.mutate(input);
 		} else {
-			setPlans((prev) =>
-				prev.map((p) =>
-					p.id === drawerMode.plan.id
-						? {
-								...p,
-								name: values.name,
-								priceUzs: values.priceUzs,
-								studentLimit:
-									values.studentLimit === 0
-										? null
-										: values.studentLimit,
-								branchLimit:
-									values.branchLimit === 0 ? null : values.branchLimit,
-								storageGb: values.storageGb,
-								features,
-							}
-						: p,
-				),
-			);
+			updateMutation.mutate({ id: drawerMode.plan.id, input });
 		}
 	}
 
-	const visiblePlans = plans.filter((p) => !p.archived);
+	const saving = createMutation.isPending || updateMutation.isPending;
+	const activePlans = plansPage?.rows.filter((p) => p.isActive) ?? [];
 
 	return (
 		<div className="flex flex-col gap-6">
@@ -513,7 +547,7 @@ export function SubscriptionPlansPage() {
 						Tiers, pricing and feature flags applied across every tenant.
 					</p>
 				</div>
-				<Button onClick={openCreate} className="gap-1.5">
+				<Button onClick={openCreate} className="gap-1.5" disabled={isLoading}>
 					<Plus className="size-4" />
 					Create plan
 				</Button>
@@ -528,19 +562,33 @@ export function SubscriptionPlansPage() {
 				</p>
 			</div>
 
+			{/* ── Error state ──────────────────────────────────────────────── */}
+			{isError && (
+				<div className="rounded-lg border border-destructive/30 bg-destructive/5 px-4 py-3 text-sm text-destructive">
+					Failed to load plans
+					{error instanceof Error ? `: ${error.message}` : '.'} Please refresh.
+				</div>
+			)}
+
 			{/* ── Plan cards grid ──────────────────────────────────────────── */}
-			{visiblePlans.length === 0 ? (
+			{isLoading ? (
+				<div className="grid grid-cols-1 gap-6 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
+					{Array.from({ length: 3 }, (_, i) => (
+						<PlanSkeleton key={i} />
+					))}
+				</div>
+			) : activePlans.length === 0 ? (
 				<p className="py-16 text-center text-sm text-muted-foreground">
 					No active plans. Create one above.
 				</p>
 			) : (
 				<div className="grid grid-cols-1 gap-6 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
-					{visiblePlans.map((plan) => (
+					{activePlans.map((plan) => (
 						<PlanCard
 							key={plan.id}
 							plan={plan}
 							onEdit={openEdit}
-							onArchive={handleArchive}
+							onDeactivate={handleDeactivate}
 						/>
 					))}
 				</div>
@@ -552,6 +600,7 @@ export function SubscriptionPlansPage() {
 				open={drawerOpen}
 				onOpenChange={setDrawerOpen}
 				onSave={handleSave}
+				saving={saving}
 			/>
 		</div>
 	);
