@@ -19,8 +19,8 @@ import {
 	cn,
 } from '@repo/ui';
 
-import { usersKeys } from '@/features/users/api/keys';
-import { listUsers } from '@/features/users/api/users.queries';
+import { usersKeys } from '@/api/users/keys';
+import { listUsers } from '@/api/users/users.queries';
 
 // ─── Constants ────────────────────────────────────────────────────────────────
 

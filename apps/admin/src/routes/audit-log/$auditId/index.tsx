@@ -4,8 +4,8 @@ import { useQuery } from '@tanstack/react-query';
 import { Button, Card, CardContent, Skeleton } from '@repo/ui';
 import { isApiError } from '@repo/api-client';
 
-import { auditKeys } from '@/features/audit/api/keys';
-import { getAuditLog } from '@/features/audit/api/audit.queries';
+import { auditKeys } from '@/api/audit/keys';
+import { getAuditLog } from '@/api/audit/audit-logs';
 
 // ─── Helpers ──────────────────────────────────────────────────────────────────
 

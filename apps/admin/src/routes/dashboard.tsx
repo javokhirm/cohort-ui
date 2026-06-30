@@ -44,10 +44,10 @@ import {
 	StatusBadge,
 } from '@repo/ui';
 
-import { dashboardKeys } from '@/features/dashboard/api/keys';
-import { getDashboard } from '@/features/dashboard/api/dashboard.queries';
-import type { DashboardKpis } from '@/features/dashboard/api/types';
 import { formatUzsCompact, formatUzsAxis } from '@/lib/formatters/currency';
+import type { DashboardKpis } from '@/api/dashboard/types';
+import { dashboardKeys } from '@/api/dashboard/keys';
+import { getDashboard } from '@/api/dashboard/dashboard.queries';
 
 // ─── Constants ────────────────────────────────────────────────────────────────
 

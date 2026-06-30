@@ -15,9 +15,9 @@ import {
 	TableRow,
 } from '@repo/ui';
 
-import { auditKeys } from '@/features/audit/api/keys';
-import { listAuditLogs } from '@/features/audit/api/audit.queries';
-import type { AuditLogFilters } from '@/features/audit/api/types';
+import { auditKeys } from '@/api/audit/keys';
+import type { AuditLogFilters } from '@/api/audit/types';
+import { listAuditLogs } from '@/api/audit/audit-logs';
 
 // ─── Constants ────────────────────────────────────────────────────────────────
 

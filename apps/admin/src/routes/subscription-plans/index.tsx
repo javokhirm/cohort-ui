@@ -30,10 +30,10 @@ import {
 } from '@repo/ui';
 
 import { formatUzs } from '@/lib/formatters/currency';
-import { plansKeys } from '@/features/plans/api/keys';
-import { listPlans } from '@/features/plans/api/plans.queries';
-import { createPlan, updatePlan } from '@/features/plans/api/plans.mutations';
-import type { PlanView } from '@/features/plans/api/types';
+import { plansKeys } from '@/api/plans/keys';
+import { listPlans } from '@/api/plans/plans.queries';
+import { createPlan, updatePlan } from '@/api/plans/plans.mutations';
+import type { PlanView } from '@/api/plans/types';
 
 // ─── Constants ────────────────────────────────────────────────────────────────
 

@@ -1,5 +1,4 @@
 import { adminApi } from '@/lib/api';
-import type { SubscriptionView } from '../../subscriptions/api/types';
 import type {
 	AddMemberInput,
 	ChangeMemberRoleInput,
@@ -10,6 +9,7 @@ import type {
 	TenantSummaryView,
 	UpdateTenantInput,
 } from './types';
+import type { SubscriptionView } from '../subscriptions/types';
 
 export function onboardTenant(input: OnboardTenantInput): Promise<TenantDetailView> {
 	return adminApi.post<TenantDetailView>('/tenants', input);

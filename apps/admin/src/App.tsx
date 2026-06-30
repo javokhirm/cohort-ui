@@ -2,8 +2,8 @@ import { useEffect, useState } from 'react';
 import { RouterProvider } from '@tanstack/react-router';
 
 import { Spinner } from '@repo/ui';
-import { runRefresh } from '../lib/api';
-import { useSessionStore } from '../lib/auth/session-store';
+import { runRefresh } from './lib/api';
+import { useSessionStore } from './lib/auth/session-store';
 import { router } from './router';
 
 // Resolve the session once, at module load — survives React StrictMode's

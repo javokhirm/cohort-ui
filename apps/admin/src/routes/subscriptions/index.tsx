@@ -20,12 +20,12 @@ import {
 } from '@repo/ui';
 
 import { formatUzs, formatUzsCompact } from '@/lib/formatters/currency';
-import { subscriptionsKeys } from '@/features/subscriptions/api/keys';
+import { subscriptionsKeys } from '@/api/subscriptions/keys';
 import {
 	getSubscriptionAnalytics,
 	listSubscriptions,
-} from '@/features/subscriptions/api/subscriptions.queries';
-import type { SubscriptionStatus } from '@/features/subscriptions/api/types';
+} from '@/api/subscriptions/subscriptions.queries';
+import type { SubscriptionStatus } from '@/api/subscriptions/types';
 
 // ─── Constants ────────────────────────────────────────────────────────────────
 

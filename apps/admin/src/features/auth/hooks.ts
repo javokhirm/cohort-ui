@@ -2,9 +2,9 @@ import { useMutation, useQuery } from '@tanstack/react-query';
 import { useNavigate } from '@tanstack/react-router';
 
 import { useSessionStore } from '@/lib/auth/session-store';
-import { requestOtp, verifyOtp } from './api/auth.mutations';
-import { getOperator } from './api/auth.queries';
-import { authKeys } from './api/keys';
+import { requestOtp, verifyOtp } from '@/api/auth/auth.mutations';
+import { authKeys } from '@/api/auth/keys';
+import { getOperator } from '@/api/auth/auth.queries';
 
 /** Session-aware view of the current operator + auth actions. */
 export function useAuth() {

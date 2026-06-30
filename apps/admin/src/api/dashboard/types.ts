@@ -1,4 +1,4 @@
-import type { MrrTrendPoint } from '../../subscriptions/api/types';
+import type { MrrTrendPoint } from '../subscriptions/types';
 
 export type TenantStatus = 'ACTIVE' | 'SUSPENDED' | 'PENDING' | 'CANCELLED';
 export type AtRiskReason = 'SUSPENDED' | 'PAST_DUE' | 'TRIAL_ENDING';

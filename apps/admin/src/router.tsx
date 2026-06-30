@@ -7,22 +7,22 @@ import {
 } from '@tanstack/react-router';
 
 import { Toaster } from '@repo/ui';
-import { requireAuth, requireRole } from '../lib/auth/guards';
-import { useSessionStore } from '../lib/auth/session-store';
-import { LoginRoute } from '../routes/login';
-import { AuthedLayout } from '../routes/authed-layout';
-import { DashboardPage } from '../routes/dashboard';
-import { TenantsPage } from '../routes/tenants/index';
-import { TenantDetailPage } from '../routes/tenants/$tenantId/index';
-import { OnboardTenantPage } from '../routes/tenants/onboard';
-import { SubscriptionPlansPage } from '../routes/subscription-plans/index';
-import { SubscriptionsPage } from '../routes/subscriptions/index';
-import { UserDirectoryPage } from '../routes/users/index';
-import { UserDetailPage } from '../routes/users/$userId/index';
-import { ProfilePage } from '../routes/profile/index';
-import { AuditLogPage } from '../routes/audit-log/index';
-import { AuditLogDetailPage } from '../routes/audit-log/$auditId/index';
-import { ForbiddenPage } from '../routes/forbidden';
+import { requireAuth, requireRole } from './lib/auth/guards';
+import { useSessionStore } from './lib/auth/session-store';
+import { LoginRoute } from './routes/login';
+import { AuthedLayout } from './routes/authed-layout';
+import { DashboardPage } from './routes/dashboard';
+import { TenantsPage } from './routes/tenants/index';
+import { TenantDetailPage } from './routes/tenants/$tenantId/index';
+import { OnboardTenantPage } from './routes/tenants/onboard';
+import { SubscriptionPlansPage } from './routes/subscription-plans/index';
+import { SubscriptionsPage } from './routes/subscriptions/index';
+import { UserDirectoryPage } from './routes/users/index';
+import { UserDetailPage } from './routes/users/$userId/index';
+import { ProfilePage } from './routes/profile/index';
+import { AuditLogPage } from './routes/audit-log/index';
+import { AuditLogDetailPage } from './routes/audit-log/$auditId/index';
+import { ForbiddenPage } from './routes/forbidden';
 
 const rootRoute = createRootRoute({
 	component: () => (

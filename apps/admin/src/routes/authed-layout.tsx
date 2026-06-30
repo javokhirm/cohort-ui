@@ -2,7 +2,8 @@ import { useEffect } from 'react';
 import { Outlet, useNavigate } from '@tanstack/react-router';
 
 import { useSessionStore } from '@/lib/auth/session-store';
-import { ConsoleShell } from '@/components/console-shell';
+import { Sidebar } from '@/layouts/Sidebar';
+import { Header } from '@/layouts/Header';
 
 /**
  * Layout for the authenticated console. `beforeLoad` guards the initial entry;
@@ -22,8 +23,15 @@ export function AuthedLayout() {
 	if (status !== 'authenticated') return null;
 
 	return (
-		<ConsoleShell>
-			<Outlet />
-		</ConsoleShell>
+		<div className="flex h-svh flex-col overflow-hidden bg-background text-foreground">
+			<Header />
+
+			<div className="flex flex-1 overflow-hidden">
+				<Sidebar />
+				<main className="flex-1 overflow-y-auto px-6 py-8">
+					<Outlet />
+				</main>
+			</div>
+		</div>
 	);
 }

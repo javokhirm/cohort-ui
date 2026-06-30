@@ -178,7 +178,7 @@ function NavGroup({
 	);
 }
 
-export function ConsoleSidebar() {
+export function Sidebar() {
 	const [collapsed, setCollapsed] = useState(false);
 	const pathname = useRouterState({ select: (s) => s.location.pathname });
 

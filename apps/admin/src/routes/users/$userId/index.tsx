@@ -32,9 +32,9 @@ import {
 import type { StatusTone } from '@repo/ui';
 import { isApiError } from '@repo/api-client';
 
-import { usersKeys } from '@/features/users/api/keys';
-import { getUser } from '@/features/users/api/users.queries';
-import { deactivateUser, resetUserPassword } from '@/features/users/api/users.mutations';
+import { usersKeys } from '@/api/users/keys';
+import { getUser } from '@/api/users/users.queries';
+import { deactivateUser, resetUserPassword } from '@/api/users/users.mutations';
 
 // ─── Constants ────────────────────────────────────────────────────────────────
 

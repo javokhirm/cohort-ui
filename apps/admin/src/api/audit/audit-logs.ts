@@ -1,7 +1,7 @@
 import type { PaginatedResult } from '@repo/api-client';
 
 import { adminApi } from '@/lib/api';
-import type { AuditLogFilters, AuditLogView } from './types';
+import type { AuditLogFilters, AuditLogView } from '@/api/audit/types';
 
 export function listAuditLogs(
 	filters?: AuditLogFilters,
