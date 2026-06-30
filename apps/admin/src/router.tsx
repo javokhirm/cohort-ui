@@ -21,6 +21,7 @@ import { UserDetailPage } from './routes/users/$userId/index';
 import { ProfilePage } from './routes/profile/index';
 import { AuditLogPage } from './routes/audit-log/index';
 import { AuditLogDetailPage } from './routes/audit-log/$auditId/index';
+import { RoleTemplatesPage } from './routes/roles/index';
 import { ForbiddenPage } from './routes/forbidden';
 import { useSessionStore } from './store/sessionStore';
 
@@ -164,6 +165,12 @@ const auditLogDetailRoute = createRoute({
 	component: AuditLogDetailPage,
 });
 
+const roleTemplatesRoute = createRoute({
+	getParentRoute: () => authedRoute,
+	path: '/roles',
+	component: RoleTemplatesPage,
+});
+
 const routeTree = rootRoute.addChildren([
 	loginRoute,
 	forbiddenRoute,
@@ -179,6 +186,7 @@ const routeTree = rootRoute.addChildren([
 		profileRoute,
 		auditLogRoute,
 		auditLogDetailRoute,
+		roleTemplatesRoute,
 	]),
 ]);
 

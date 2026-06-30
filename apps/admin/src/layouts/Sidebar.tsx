@@ -69,12 +69,11 @@ const REVENUE_ITEMS: NavItemDef[] = [
 ];
 
 const PLATFORM_ITEMS: NavItemDef[] = [
-	// TODO: href → '/roles' once route exists
 	{
 		id: 'roles',
 		label: 'Role Templates',
 		Icon: Shield,
-		href: '/',
+		href: '/roles',
 		match: '/roles',
 	},
 	{

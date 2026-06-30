@@ -545,6 +545,112 @@ export const MOCK_TENANT_STATS = {
 	currency: 'UZS',
 };
 
+// ─── Roles & permissions fixtures ────────────────────────────────────────────
+
+export const MOCK_ROLES = [
+	{
+		id: 1,
+		name: 'OWNER',
+		description: 'Full access to all tenant resources',
+		isSystem: true,
+		editable: false,
+		permissions: [
+			'student.view', 'student.create', 'student.delete',
+			'invoice.create', 'invoice.void', 'payroll.approve',
+			'attendance.mark', 'grade.enter', 'group.manage',
+			'settings.edit', 'role.manage', 'report.view',
+		],
+	},
+	{
+		id: 2,
+		name: 'ADMIN',
+		description: 'Manage center operations and staff',
+		isSystem: true,
+		editable: true,
+		permissions: [
+			'student.view', 'student.create', 'student.delete',
+			'invoice.create', 'invoice.void',
+			'attendance.mark', 'group.manage',
+			'settings.edit', 'report.view',
+		],
+	},
+	{
+		id: 3,
+		name: 'MANAGER',
+		description: 'Day-to-day operations',
+		isSystem: true,
+		editable: true,
+		permissions: [
+			'student.view', 'student.create',
+			'invoice.create',
+			'attendance.mark', 'group.manage',
+			'report.view',
+		],
+	},
+	{
+		id: 4,
+		name: 'TEACHER',
+		description: 'Teaching and grading',
+		isSystem: true,
+		editable: true,
+		permissions: ['student.view', 'attendance.mark', 'grade.enter'],
+	},
+	{
+		id: 5,
+		name: 'STUDENT',
+		description: 'Student portal access',
+		isSystem: true,
+		editable: false,
+		permissions: [],
+	},
+	{
+		id: 6,
+		name: 'PARENT',
+		description: 'Parent portal access',
+		isSystem: true,
+		editable: false,
+		permissions: [],
+	},
+];
+
+export const MOCK_PERMISSIONS = {
+	groups: [
+		{
+			domain: 'Students',
+			permissions: [
+				{ id: 1, code: 'student.view', description: 'View students' },
+				{ id: 2, code: 'student.create', description: 'Create student' },
+				{ id: 3, code: 'student.delete', description: 'Delete student' },
+			],
+		},
+		{
+			domain: 'Finance',
+			permissions: [
+				{ id: 4, code: 'invoice.create', description: 'Create invoice' },
+				{ id: 5, code: 'invoice.void', description: 'Void invoice' },
+				{ id: 6, code: 'payroll.approve', description: 'Approve payroll' },
+			],
+		},
+		{
+			domain: 'Academics',
+			permissions: [
+				{ id: 7, code: 'attendance.mark', description: 'Mark attendance' },
+				{ id: 8, code: 'grade.enter', description: 'Enter grades' },
+				{ id: 9, code: 'group.manage', description: 'Manage groups' },
+			],
+		},
+		{
+			domain: 'Administration',
+			permissions: [
+				{ id: 10, code: 'settings.edit', description: 'Edit settings' },
+				{ id: 11, code: 'role.manage', description: 'Manage roles' },
+				{ id: 12, code: 'report.view', description: 'View reports' },
+			],
+		},
+	],
+	total: 12,
+};
+
 // ─── Main handlers (happy path defaults) ─────────────────────────────────────
 
 export const handlers = [
@@ -646,6 +752,20 @@ export const handlers = [
 		const log = MOCK_AUDIT_LOGS.find((l) => l.id === Number(params['id']));
 		if (!log) return fail(404, 'NOT_FOUND', 'Audit log not found.');
 		return ok(log);
+	}),
+
+	// ── Roles & permissions ────────────────────────────────────────────────────
+
+	http.get(`${BASE}/admin/roles`, () => ok(MOCK_ROLES)),
+
+	http.get(`${BASE}/admin/permissions`, () => ok(MOCK_PERMISSIONS)),
+
+	http.patch(`${BASE}/admin/roles/:role/permissions`, async ({ params, request }) => {
+		const role = MOCK_ROLES.find((r) => r.name === params['role']);
+		if (!role) return fail(404, 'ROLE_NOT_FOUND', 'Role not found.');
+		if (!role.editable) return fail(400, 'ROLE_NOT_EDITABLE', 'This role cannot be modified.');
+		const body = (await request.json()) as { permissionCodes: string[] };
+		return ok({ ...role, permissions: body.permissionCodes });
 	}),
 
 	// ── Dashboard ──────────────────────────────────────────────────────────────
@@ -861,6 +981,16 @@ export const dashboardHandlers = {
 		fail(403, 'FORBIDDEN', 'You do not have permission.'),
 	),
 	serverError: http.get(`${BASE}/admin/dashboard`, () =>
+		fail(500, 'INTERNAL_ERROR', 'Unexpected server error.'),
+	),
+};
+
+export const roleHandlers = {
+	empty: http.get(`${BASE}/admin/roles`, () => ok([])),
+	forbidden: http.get(`${BASE}/admin/roles`, () =>
+		fail(403, 'FORBIDDEN', 'You do not have permission.'),
+	),
+	serverError: http.get(`${BASE}/admin/roles`, () =>
 		fail(500, 'INTERNAL_ERROR', 'Unexpected server error.'),
 	),
 };
