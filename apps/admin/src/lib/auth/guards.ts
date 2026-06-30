@@ -1,6 +1,5 @@
+import { hasRole, useSessionStore } from '@/store/session-store';
 import { redirect } from '@tanstack/react-router';
-
-import { hasRole, useSessionStore } from './session-store';
 
 /**
  * Route guards (docs/auth-and-rbac.md §7). UI gating is cosmetic — the backend

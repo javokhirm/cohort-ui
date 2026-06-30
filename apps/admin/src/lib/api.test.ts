@@ -2,7 +2,7 @@ import { http, HttpResponse } from 'msw';
 import { beforeEach, describe, expect, it } from 'vitest';
 
 import { runRefresh } from './api';
-import { useSessionStore } from './auth/session-store';
+import { useSessionStore } from '../store/session-store';
 import { getStoredRefreshToken, setStoredRefreshToken } from './auth/token-storage';
 import { authResult } from '@/test/handlers';
 import { server } from '@/test/server';
@@ -39,7 +39,11 @@ describe('runRefresh', () => {
 		server.use(
 			http.post('http://localhost:5050/api/v1/public/auth/refresh', () =>
 				HttpResponse.json(
-					{ success: false, error: { code: 'INVALID_TOKEN', message: 'expired' }, meta: {} },
+					{
+						success: false,
+						error: { code: 'INVALID_TOKEN', message: 'expired' },
+						meta: {},
+					},
 					{ status: 401 },
 				),
 			),

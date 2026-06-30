@@ -3,7 +3,7 @@ import { render, screen, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { describe, expect, it, vi } from 'vitest';
 
-import { useSessionStore } from '@/lib/auth/session-store';
+import { useSessionStore } from '@/store/session-store';
 import { VALID } from '@/test/handlers';
 import { LoginForm } from './login-form';
 

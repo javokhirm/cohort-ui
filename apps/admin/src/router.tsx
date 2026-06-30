@@ -8,7 +8,6 @@ import {
 
 import { Toaster } from '@repo/ui';
 import { requireAuth, requireRole } from './lib/auth/guards';
-import { useSessionStore } from './lib/auth/session-store';
 import { LoginRoute } from './routes/login';
 import { AuthedLayout } from './routes/authed-layout';
 import { DashboardPage } from './routes/dashboard';
@@ -23,6 +22,7 @@ import { ProfilePage } from './routes/profile/index';
 import { AuditLogPage } from './routes/audit-log/index';
 import { AuditLogDetailPage } from './routes/audit-log/$auditId/index';
 import { ForbiddenPage } from './routes/forbidden';
+import { useSessionStore } from './store/session-store';
 
 const rootRoute = createRootRoute({
 	component: () => (

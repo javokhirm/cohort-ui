@@ -1,7 +1,7 @@
 import { useEffect } from 'react';
 import { Outlet, useNavigate } from '@tanstack/react-router';
 
-import { useSessionStore } from '@/lib/auth/session-store';
+import { useSessionStore } from '@/store/session-store';
 import { Sidebar } from '@/layouts/Sidebar';
 import { Header } from '@/layouts/Header';
 

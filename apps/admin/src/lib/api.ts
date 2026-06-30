@@ -1,7 +1,7 @@
 import { createApiClient } from '@repo/api-client';
 
 import { env } from './env';
-import { getAccessToken, useSessionStore } from './auth/session-store';
+import { getAccessToken, useSessionStore } from '../store/session-store';
 import type { AuthResult } from './auth/types';
 import { getStoredRefreshToken } from './auth/token-storage';
 

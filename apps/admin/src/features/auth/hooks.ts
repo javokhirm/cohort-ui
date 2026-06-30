@@ -1,7 +1,7 @@
 import { useMutation, useQuery } from '@tanstack/react-query';
 import { useNavigate } from '@tanstack/react-router';
 
-import { useSessionStore } from '@/lib/auth/session-store';
+import { useSessionStore } from '@/store/session-store';
 import { requestOtp, verifyOtp } from '@/api/auth/auth.mutations';
 import { authKeys } from '@/api/auth/keys';
 import { getOperator } from '@/api/auth/auth.queries';
