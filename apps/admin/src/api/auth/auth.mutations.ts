@@ -1,4 +1,4 @@
-import { publicApi } from '@/lib/api';
+import { publicApi } from '@/api/apiClient';
 import type { AuthResult, OtpChallenge } from '@/lib/auth/types';
 
 /** Step 1 — verify email + password; the backend emails a 6-digit OTP. */
@@ -10,9 +10,6 @@ export function requestOtp(input: {
 }
 
 /** Step 2 — verify the OTP; returns the JWT pair + operator summary. */
-export function verifyOtp(input: {
-	email: string;
-	code: string;
-}): Promise<AuthResult> {
+export function verifyOtp(input: { email: string; code: string }): Promise<AuthResult> {
 	return publicApi.post<AuthResult>('/admin/auth/verify-otp', input);
 }

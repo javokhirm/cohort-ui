@@ -1,10 +1,7 @@
 import { create } from 'zustand';
 
 import type { AuthResult, AuthUserSummary } from '../lib/auth/types';
-import {
-	clearStoredRefreshToken,
-	setStoredRefreshToken,
-} from '../lib/auth/token-storage';
+import { clearStoredRefreshToken, setStoredRefreshToken } from '../lib/auth/tokenStorage';
 
 /** `unknown` until the boot refresh resolves — the router waits for this. */
 export type SessionStatus = 'unknown' | 'authenticated' | 'anonymous';

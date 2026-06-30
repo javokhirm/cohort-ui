@@ -1,4 +1,4 @@
-import { adminApi } from '@/lib/api';
+import { adminApi } from '@/api/apiClient';
 import type { CreatePlanInput, PlanView, UpdatePlanInput } from './types';
 
 export function createPlan(input: CreatePlanInput): Promise<PlanView> {

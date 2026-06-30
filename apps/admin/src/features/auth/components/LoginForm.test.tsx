@@ -3,9 +3,9 @@ import { render, screen, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { describe, expect, it, vi } from 'vitest';
 
-import { useSessionStore } from '@/store/session-store';
+import { useSessionStore } from '@/store/sessionStore';
 import { VALID } from '@/test/handlers';
-import { LoginForm } from './login-form';
+import { LoginForm } from './LoginForm';
 
 function renderForm() {
 	const onAuthenticated = vi.fn();

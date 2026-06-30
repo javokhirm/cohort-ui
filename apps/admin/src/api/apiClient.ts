@@ -1,9 +1,9 @@
 import { createApiClient } from '@repo/api-client';
 
-import { env } from './env';
-import { getAccessToken, useSessionStore } from '../store/session-store';
-import type { AuthResult } from './auth/types';
-import { getStoredRefreshToken } from './auth/token-storage';
+import { env } from '../lib/env';
+import { getAccessToken, useSessionStore } from '../store/sessionStore';
+import type { AuthResult } from '../lib/auth/types';
+import { getStoredRefreshToken } from '../lib/auth/tokenStorage';
 
 const apiBase = `${env.VITE_API_ORIGIN}/api/v1`;
 

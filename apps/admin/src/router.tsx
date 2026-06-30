@@ -22,7 +22,7 @@ import { ProfilePage } from './routes/profile/index';
 import { AuditLogPage } from './routes/audit-log/index';
 import { AuditLogDetailPage } from './routes/audit-log/$auditId/index';
 import { ForbiddenPage } from './routes/forbidden';
-import { useSessionStore } from './store/session-store';
+import { useSessionStore } from './store/sessionStore';
 
 const rootRoute = createRootRoute({
 	component: () => (

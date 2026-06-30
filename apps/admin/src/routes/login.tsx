@@ -1,6 +1,6 @@
 import { useRouter, useSearch } from '@tanstack/react-router';
 
-import { LoginForm } from '@/features/auth/components/login-form';
+import { LoginForm } from '@/features/auth/components/LoginForm';
 
 /**
  * `/login` route wrapper. Reads the `next` search param (set by `requireAuth`)

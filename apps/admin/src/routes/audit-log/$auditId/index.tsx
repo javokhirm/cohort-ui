@@ -5,7 +5,7 @@ import { Button, Card, CardContent, Skeleton } from '@repo/ui';
 import { isApiError } from '@repo/api-client';
 
 import { auditKeys } from '@/api/audit/keys';
-import { getAuditLog } from '@/api/audit/audit-logs';
+import { getAuditLog } from '@/api/audit/auditLog.queries';
 import { formatDateTimeLong as formatTimestamp } from '@/lib/formatters/date';
 
 // ─── Sub-components ───────────────────────────────────────────────────────────

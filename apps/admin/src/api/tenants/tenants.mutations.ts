@@ -1,4 +1,4 @@
-import { adminApi } from '@/lib/api';
+import { adminApi } from '@/api/apiClient';
 import type {
 	AddMemberInput,
 	ChangeMemberRoleInput,

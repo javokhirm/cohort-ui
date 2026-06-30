@@ -1,4 +1,4 @@
-import { adminApi } from '@/lib/api';
+import { adminApi } from '@/api/apiClient';
 import type { ResetPasswordInput } from './types';
 
 export function deactivateUser(id: number): Promise<void> {

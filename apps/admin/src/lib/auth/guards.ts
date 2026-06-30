@@ -1,4 +1,4 @@
-import { hasRole, useSessionStore } from '@/store/session-store';
+import { hasRole, useSessionStore } from '@/store/sessionStore';
 import { redirect } from '@tanstack/react-router';
 
 /**

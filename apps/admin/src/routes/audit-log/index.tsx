@@ -17,7 +17,7 @@ import {
 
 import { auditKeys } from '@/api/audit/keys';
 import type { AuditLogFilters } from '@/api/audit/types';
-import { listAuditLogs } from '@/api/audit/audit-logs';
+import { listAuditLogs } from '@/api/audit/auditLog.queries';
 import { formatDateTime as formatTimestamp } from '@/lib/formatters/date';
 
 // ─── Constants ────────────────────────────────────────────────────────────────

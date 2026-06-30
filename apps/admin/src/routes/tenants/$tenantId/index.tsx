@@ -26,15 +26,15 @@ import {
 } from '@/api/tenants/tenants.mutations';
 import { getTenant } from '@/api/tenants/tenants.queries';
 import type { UpdateTenantInput } from '@/api/tenants/types';
-import { AuditTab } from '@/features/tenants/components/tenant-details/AuditTab';
-import { BranchesTab } from '@/features/tenants/components/tenant-details/BranchesTab';
-import { ChangePlanDialog } from '@/features/tenants/components/tenant-details/ChangePlanDialog';
-import { DangerZoneTab } from '@/features/tenants/components/tenant-details/DangerZoneTab';
-import { MembersTab } from '@/features/tenants/components/tenant-details/MembersTab';
-import { OverviewTab } from '@/features/tenants/components/tenant-details/OverviewTab';
-import { SettingsTab } from '@/features/tenants/components/tenant-details/SettingsTab';
-import { SubscriptionTab } from '@/features/tenants/components/tenant-details/SubscriptionTab';
-import { TypeToConfirmDialog } from '@/features/tenants/components/tenant-details/TypeToConfirmDialog';
+import { AuditTab } from '@/features/tenants/components/tenantDetails/AuditTab';
+import { BranchesTab } from '@/features/tenants/components/tenantDetails/BranchesTab';
+import { ChangePlanDialog } from '@/features/tenants/components/tenantDetails/ChangePlanDialog';
+import { DangerZoneTab } from '@/features/tenants/components/tenantDetails/DangerZoneTab';
+import { MembersTab } from '@/features/tenants/components/tenantDetails/MembersTab';
+import { OverviewTab } from '@/features/tenants/components/tenantDetails/OverviewTab';
+import { SettingsTab } from '@/features/tenants/components/tenantDetails/SettingsTab';
+import { SubscriptionTab } from '@/features/tenants/components/tenantDetails/SubscriptionTab';
+import { TypeToConfirmDialog } from '@/features/tenants/components/tenantDetails/TypeToConfirmDialog';
 import { avatarClass, getInitials } from '@/features/tenants/utils';
 
 const TAB_TRIGGER_CLASS = cn(
