@@ -1,0 +1,216 @@
+import { useForm } from 'react-hook-form';
+import { zodResolver } from '@hookform/resolvers/zod';
+
+import {
+	Button,
+	Checkbox,
+	Form,
+	FormControl,
+	FormField,
+	FormItem,
+	FormLabel,
+	FormMessage,
+	Input,
+	Label,
+	Sheet,
+	SheetContent,
+	SheetFooter,
+	SheetHeader,
+	SheetTitle,
+} from '@repo/ui';
+
+import { ALL_FEATURES, FEATURE_LABELS } from '../constants';
+import {
+	EMPTY_FORM,
+	planSchema,
+	planToFormValues,
+	type DrawerMode,
+	type PlanFormValues,
+} from '../schemas';
+
+export function PlanDrawer({
+	mode,
+	open,
+	onOpenChange,
+	onSave,
+	saving,
+}: {
+	mode: DrawerMode;
+	open: boolean;
+	onOpenChange: (open: boolean) => void;
+	onSave: (values: PlanFormValues) => void;
+	saving: boolean;
+}) {
+	const isEdit = mode.kind === 'edit';
+	const defaultValues = isEdit ? planToFormValues(mode.plan) : EMPTY_FORM;
+
+	const form = useForm<PlanFormValues>({
+		resolver: zodResolver(planSchema),
+		defaultValues,
+	});
+
+	return (
+		<Sheet open={open} onOpenChange={onOpenChange}>
+			<SheetContent side="right" className="w-[480px] sm:max-w-[480px] overflow-y-auto">
+				<SheetHeader className="pb-2">
+					<SheetTitle>{isEdit ? 'Edit plan' : 'Create plan'}</SheetTitle>
+				</SheetHeader>
+
+				<Form {...form}>
+					<form
+						onSubmit={form.handleSubmit(onSave)}
+						className="flex flex-1 flex-col gap-5 px-4 py-2"
+					>
+						<FormField
+							control={form.control}
+							name="name"
+							render={({ field }) => (
+								<FormItem>
+									<FormLabel>Plan name</FormLabel>
+									<FormControl>
+										<Input placeholder="e.g. Growth" {...field} />
+									</FormControl>
+									<FormMessage />
+								</FormItem>
+							)}
+						/>
+
+						<div className="grid grid-cols-2 gap-4">
+							<FormField
+								control={form.control}
+								name="priceMonthly"
+								render={({ field }) => (
+									<FormItem>
+										<FormLabel>Monthly price (UZS)</FormLabel>
+										<FormControl>
+											<Input
+												type="number"
+												min={0}
+												placeholder="2400000"
+												{...field}
+												onChange={(e) => field.onChange(Number(e.target.value))}
+											/>
+										</FormControl>
+										<FormMessage />
+									</FormItem>
+								)}
+							/>
+							<FormField
+								control={form.control}
+								name="priceAnnual"
+								render={({ field }) => (
+									<FormItem>
+										<FormLabel>Annual price (UZS)</FormLabel>
+										<FormControl>
+											<Input
+												type="number"
+												min={0}
+												placeholder="24000000"
+												{...field}
+												onChange={(e) => field.onChange(Number(e.target.value))}
+											/>
+										</FormControl>
+										<FormMessage />
+									</FormItem>
+								)}
+							/>
+						</div>
+
+						<div className="grid grid-cols-2 gap-4">
+							<FormField
+								control={form.control}
+								name="maxStudents"
+								render={({ field }) => (
+									<FormItem>
+										<FormLabel>Student limit</FormLabel>
+										<FormControl>
+											<Input
+												type="number"
+												min={0}
+												placeholder="300"
+												{...field}
+												onChange={(e) => field.onChange(Number(e.target.value))}
+											/>
+										</FormControl>
+										<p className="text-xs text-muted-foreground">0 = unlimited</p>
+										<FormMessage />
+									</FormItem>
+								)}
+							/>
+							<FormField
+								control={form.control}
+								name="maxBranches"
+								render={({ field }) => (
+									<FormItem>
+										<FormLabel>Branch limit</FormLabel>
+										<FormControl>
+											<Input
+												type="number"
+												min={0}
+												placeholder="5"
+												{...field}
+												onChange={(e) => field.onChange(Number(e.target.value))}
+											/>
+										</FormControl>
+										<p className="text-xs text-muted-foreground">0 = unlimited</p>
+										<FormMessage />
+									</FormItem>
+								)}
+							/>
+						</div>
+
+						<div className="flex flex-col gap-3">
+							<Label className="text-sm font-medium">Features included</Label>
+							{ALL_FEATURES.map((feature) => (
+								<FormField
+									key={feature}
+									control={form.control}
+									name={feature}
+									render={({ field }) => (
+										<FormItem className="flex items-start gap-3 space-y-0">
+											<FormControl>
+												<Checkbox
+													checked={field.value as boolean}
+													onCheckedChange={field.onChange}
+													className="mt-0.5"
+												/>
+											</FormControl>
+											<div>
+												<FormLabel className="text-sm font-medium leading-none">
+													{FEATURE_LABELS[feature].label}
+												</FormLabel>
+												<p className="mt-0.5 text-xs text-muted-foreground">
+													{FEATURE_LABELS[feature].description}
+												</p>
+											</div>
+										</FormItem>
+									)}
+								/>
+							))}
+						</div>
+
+						<SheetFooter className="mt-auto flex flex-row gap-2 px-0 pb-0">
+							<Button
+								type="button"
+								variant="outline"
+								className="flex-1"
+								onClick={() => onOpenChange(false)}
+							>
+								Cancel
+							</Button>
+							<Button type="submit" className="flex-1" disabled={saving}>
+								{saving
+									? isEdit
+										? 'Saving…'
+										: 'Creating…'
+									: isEdit
+										? 'Save changes'
+										: 'Create plan'}
+							</Button>
+						</SheetFooter>
+					</form>
+				</Form>
+			</SheetContent>
+		</Sheet>
+	);
+}
