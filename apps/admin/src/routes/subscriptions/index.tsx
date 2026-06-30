@@ -1,5 +1,4 @@
 import { useNavigate, useSearch } from '@tanstack/react-router';
-import { useQuery } from '@tanstack/react-query';
 import { ChevronLeft, ChevronRight } from 'lucide-react';
 
 import {
@@ -21,136 +20,22 @@ import {
 
 import { formatPrice, formatPriceCompact } from '@/lib/formatters/currency';
 import { formatDate } from '@/lib/formatters/date';
-import { subscriptionsKeys } from '@/api/subscriptions/keys';
 import {
-	getSubscriptionAnalytics,
-	listSubscriptions,
-} from '@/api/subscriptions/subscriptions.queries';
+	useSubscriptionAnalytics,
+	useSubscriptionList,
+} from '@/features/subscriptions/hooks';
+import { PAGE_SIZE, STATUS_TABS } from '@/features/subscriptions/constants';
+import { avatarClass, getInitials } from '@/features/subscriptions/utils';
+import { BillingDateCell } from '@/features/subscriptions/components/BillingDateCell';
+import { TableSkeleton } from '@/features/subscriptions/components/TableSkeleton';
 import type { SubscriptionStatus } from '@/api/subscriptions/types';
-
-// ─── Constants ────────────────────────────────────────────────────────────────
-
-const PAGE_SIZE = 10;
-
-const STATUS_TABS: { value: SubscriptionStatus | 'all'; label: string }[] = [
-	{ value: 'all', label: 'All' },
-	{ value: 'ACTIVE', label: 'Active' },
-	{ value: 'TRIALING', label: 'Trialing' },
-	{ value: 'PAST_DUE', label: 'Past due' },
-	{ value: 'CANCELLED', label: 'Cancelled' },
-];
-
-const AVATAR_PALETTE = [
-	'bg-tone-green-bg text-tone-green-fg',
-	'bg-tone-indigo-bg text-tone-indigo-fg',
-	'bg-tone-violet-bg text-tone-violet-fg',
-	'bg-tone-blue-bg text-tone-blue-fg',
-	'bg-tone-cyan-bg text-tone-cyan-fg',
-	'bg-tone-pink-bg text-tone-pink-fg',
-	'bg-tone-amber-bg text-tone-amber-fg',
-	'bg-tone-orange-bg text-tone-orange-fg',
-	'bg-tone-red-bg text-tone-red-fg',
-	'bg-tone-slate-bg text-tone-slate-fg',
-];
-
-// ─── Helpers ──────────────────────────────────────────────────────────────────
-
-function avatarClass(id: number): string {
-	return AVATAR_PALETTE[id % AVATAR_PALETTE.length];
-}
-
-function getInitials(name: string): string {
-	return name
-		.split(' ')
-		.slice(0, 2)
-		.map((w) => w[0])
-		.join('')
-		.toUpperCase();
-}
-
-// ─── BillingDateCell ──────────────────────────────────────────────────────────
-
-function BillingDateCell({
-	status,
-	currentPeriodEnd,
-	cancelledAt,
-}: {
-	status: SubscriptionStatus;
-	currentPeriodEnd: string;
-	cancelledAt: string | null;
-}) {
-	if (status === 'TRIALING') {
-		return <span className="text-sm font-medium text-tone-blue-fg">In trial</span>;
-	}
-
-	if (status === 'PAST_DUE') {
-		return (
-			<span className="text-sm font-medium text-tone-red-fg">
-				Overdue · {formatDate(currentPeriodEnd)}
-			</span>
-		);
-	}
-
-	if (status === 'CANCELLED') {
-		return (
-			<span className="text-sm text-muted-foreground">
-				{cancelledAt ? formatDate(cancelledAt) : '—'}
-			</span>
-		);
-	}
-
-	return <span className="text-sm">{formatDate(currentPeriodEnd)}</span>;
-}
-
-// ─── Table skeleton ───────────────────────────────────────────────────────────
-
-function TableSkeleton() {
-	return (
-		<>
-			{Array.from({ length: PAGE_SIZE }, (_, i) => (
-				<TableRow key={i}>
-					<TableCell>
-						<div className="flex items-center gap-3">
-							<Skeleton className="size-8 rounded-full" />
-							<Skeleton className="h-4 w-36" />
-						</div>
-					</TableCell>
-					<TableCell>
-						<Skeleton className="h-4 w-20" />
-					</TableCell>
-					<TableCell>
-						<Skeleton className="h-5 w-16" />
-					</TableCell>
-					<TableCell className="text-right">
-						<Skeleton className="ml-auto h-4 w-20" />
-					</TableCell>
-					<TableCell className="text-right">
-						<Skeleton className="ml-auto h-4 w-20" />
-					</TableCell>
-					<TableCell className="text-right">
-						<Skeleton className="ml-auto h-4 w-24" />
-					</TableCell>
-				</TableRow>
-			))}
-		</>
-	);
-}
-
-// ─── Page ─────────────────────────────────────────────────────────────────────
 
 export function SubscriptionsPage() {
 	const navigate = useNavigate();
 	const { page = 1, status } = useSearch({ from: '/_authed/subscriptions' });
 
-	const analyticsQuery = useQuery({
-		queryKey: subscriptionsKeys.analytics(),
-		queryFn: getSubscriptionAnalytics,
-	});
-
-	const listQuery = useQuery({
-		queryKey: subscriptionsKeys.list({ page, limit: PAGE_SIZE, status }),
-		queryFn: () => listSubscriptions({ page, limit: PAGE_SIZE, status }),
-	});
+	const analyticsQuery = useSubscriptionAnalytics();
+	const listQuery = useSubscriptionList({ page, status });
 
 	const analytics = analyticsQuery.data;
 	const list = listQuery.data;
@@ -182,7 +67,6 @@ export function SubscriptionsPage() {
 
 	return (
 		<div className="flex flex-col gap-6">
-			{/* ── Page header ──────────────────────────────────────────────── */}
 			<div>
 				<h1 className="text-xl font-semibold tracking-tight">Subscriptions</h1>
 				<p className="text-sm text-muted-foreground">
@@ -279,14 +163,12 @@ export function SubscriptionsPage() {
 				})}
 			</div>
 
-			{/* ── Error state ──────────────────────────────────────────────── */}
 			{listQuery.isError && (
 				<div className="rounded-lg border border-destructive/30 bg-destructive/5 px-4 py-3 text-sm text-destructive">
 					Failed to load subscriptions. Please refresh.
 				</div>
 			)}
 
-			{/* ── Table ────────────────────────────────────────────────────── */}
 			<Card className="gap-0 overflow-hidden py-0">
 				<Table>
 					<TableHeader>
@@ -314,7 +196,6 @@ export function SubscriptionsPage() {
 						) : (
 							list.rows.map((sub) => (
 								<TableRow key={sub.id}>
-									{/* Tenant */}
 									<TableCell>
 										<div className="flex items-center gap-3">
 											<Avatar className="size-8 shrink-0">
@@ -339,28 +220,23 @@ export function SubscriptionsPage() {
 										</div>
 									</TableCell>
 
-									{/* Plan */}
 									<TableCell className="text-sm text-muted-foreground">
 										{sub.tierName ??
 											`Tier #${sub.subscriptionTierId}`}
 									</TableCell>
 
-									{/* Status */}
 									<TableCell>
 										<StatusBadge kind="tenant" status={sub.status} />
 									</TableCell>
 
-									{/* MRR */}
 									<TableCell className="text-right tabular-nums text-sm font-medium">
 										{formatPrice(sub.monthlyValue)}
 									</TableCell>
 
-									{/* Period start */}
 									<TableCell className="text-right text-sm text-muted-foreground">
 										{formatDate(sub.currentPeriodStart)}
 									</TableCell>
 
-									{/* Next bill */}
 									<TableCell className="text-right">
 										<BillingDateCell
 											status={sub.status}
@@ -374,7 +250,6 @@ export function SubscriptionsPage() {
 					</TableBody>
 				</Table>
 
-				{/* ── Pagination footer ─────────────────────────────────────── */}
 				<div className="flex items-center justify-between border-t border-border px-4 py-3">
 					<p className="text-xs text-muted-foreground">
 						{listQuery.isLoading

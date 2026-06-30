@@ -1,6 +1,5 @@
 import { useEffect, useState } from 'react';
 import { useNavigate, useSearch } from '@tanstack/react-router';
-import { useQuery } from '@tanstack/react-query';
 import { ChevronLeft, ChevronRight, Search } from 'lucide-react';
 
 import {
@@ -9,7 +8,6 @@ import {
 	Badge,
 	Button,
 	Card,
-	Skeleton,
 	Table,
 	TableBody,
 	TableCell,
@@ -19,85 +17,21 @@ import {
 	cn,
 } from '@repo/ui';
 
-import { usersKeys } from '@/api/users/keys';
-import { listUsers } from '@/api/users/users.queries';
-
-// ─── Constants ────────────────────────────────────────────────────────────────
-
-const PAGE_SIZE = 10;
-
-const AVATAR_PALETTE = [
-	'bg-tone-green-bg text-tone-green-fg',
-	'bg-tone-indigo-bg text-tone-indigo-fg',
-	'bg-tone-violet-bg text-tone-violet-fg',
-	'bg-tone-blue-bg text-tone-blue-fg',
-	'bg-tone-cyan-bg text-tone-cyan-fg',
-	'bg-tone-pink-bg text-tone-pink-fg',
-	'bg-tone-amber-bg text-tone-amber-fg',
-	'bg-tone-orange-bg text-tone-orange-fg',
-	'bg-tone-red-bg text-tone-red-fg',
-	'bg-tone-slate-bg text-tone-slate-fg',
-];
-
-// ─── Helpers ──────────────────────────────────────────────────────────────────
-
-function avatarClass(id: number): string {
-	return AVATAR_PALETTE[id % AVATAR_PALETTE.length];
-}
-
-function getInitials(firstName: string, lastName: string): string {
-	return `${firstName[0] ?? ''}${lastName[0] ?? ''}`.toUpperCase();
-}
-
-// ─── Table skeleton ───────────────────────────────────────────────────────────
-
-function TableSkeleton() {
-	return (
-		<>
-			{Array.from({ length: PAGE_SIZE }, (_, i) => (
-				<TableRow key={i}>
-					<TableCell>
-						<div className="flex items-center gap-3">
-							<Skeleton className="size-8 rounded-full" />
-							<div className="flex flex-col gap-1">
-								<Skeleton className="h-4 w-32" />
-								<Skeleton className="h-3 w-40" />
-							</div>
-						</div>
-					</TableCell>
-					<TableCell>
-						<Skeleton className="h-4 w-28" />
-					</TableCell>
-					<TableCell>
-						<div className="flex gap-1.5">
-							<Skeleton className="h-5 w-20" />
-							<Skeleton className="h-5 w-16" />
-						</div>
-					</TableCell>
-					<TableCell className="text-right">
-						<Skeleton className="ml-auto h-4 w-6" />
-					</TableCell>
-				</TableRow>
-			))}
-		</>
-	);
-}
-
-// ─── Page ─────────────────────────────────────────────────────────────────────
+import { useUserList } from '@/features/users/hooks';
+import { avatarClass, getInitials } from '@/features/users/utils';
+import { TableSkeleton } from '@/features/users/components/TableSkeleton';
+import { PAGE_SIZE } from '@/features/users/constants';
 
 export function UserDirectoryPage() {
 	const navigate = useNavigate();
 	const { page = 1, search: searchParam } = useSearch({ from: '/_authed/users' });
 
-	// Local state drives the input; URL is the debounced source of truth.
 	const [inputValue, setInputValue] = useState(searchParam ?? '');
 
-	// Sync input when URL search param changes (e.g. back navigation).
 	useEffect(() => {
 		setInputValue(searchParam ?? '');
 	}, [searchParam]);
 
-	// Debounce: update URL 350ms after the user stops typing.
 	useEffect(() => {
 		const timer = setTimeout(() => {
 			const trimmed = inputValue.trim() || undefined;
@@ -109,16 +43,7 @@ export function UserDirectoryPage() {
 		return () => clearTimeout(timer);
 	}, [inputValue]); // eslint-disable-line react-hooks/exhaustive-deps
 
-	const filters = { page, limit: PAGE_SIZE, search: searchParam || undefined };
-
-	const {
-		data: list,
-		isLoading,
-		isError,
-	} = useQuery({
-		queryKey: usersKeys.list(filters),
-		queryFn: () => listUsers(filters),
-	});
+	const { data: list, isLoading, isError } = useUserList({ page, search: searchParam });
 
 	const totalPages = list ? Math.max(1, list.totalPages) : 1;
 	const total = list?.total ?? 0;
@@ -131,7 +56,6 @@ export function UserDirectoryPage() {
 
 	return (
 		<div className="flex flex-col gap-6">
-			{/* ── Page header ──────────────────────────────────────────────── */}
 			<div>
 				<h1 className="text-xl font-semibold tracking-tight">User Directory</h1>
 				<p className="text-sm text-muted-foreground">
@@ -140,7 +64,6 @@ export function UserDirectoryPage() {
 				</p>
 			</div>
 
-			{/* ── Search bar ───────────────────────────────────────────────── */}
 			<div className="flex items-center gap-3">
 				<div className="relative w-80">
 					<Search className="absolute top-1/2 left-3 size-4 -translate-y-1/2 text-muted-foreground" />
@@ -159,14 +82,12 @@ export function UserDirectoryPage() {
 				)}
 			</div>
 
-			{/* ── Error state ──────────────────────────────────────────────── */}
 			{isError && (
 				<div className="rounded-lg border border-destructive/30 bg-destructive/5 px-4 py-3 text-sm text-destructive">
 					Failed to load users. Please refresh.
 				</div>
 			)}
 
-			{/* ── Table ────────────────────────────────────────────────────── */}
 			<Card className="gap-0 overflow-hidden py-0">
 				<Table>
 					<TableHeader>
@@ -201,7 +122,6 @@ export function UserDirectoryPage() {
 										})
 									}
 								>
-									{/* User */}
 									<TableCell>
 										<div className="flex items-center gap-3">
 											<Avatar className="size-8 shrink-0">
@@ -230,12 +150,10 @@ export function UserDirectoryPage() {
 										</div>
 									</TableCell>
 
-									{/* Phone */}
 									<TableCell className="text-sm tabular-nums text-muted-foreground">
 										{user.phone}
 									</TableCell>
 
-									{/* Tenants */}
 									<TableCell>
 										<div className="flex flex-wrap gap-1.5">
 											{user.tenants.slice(0, 3).map((t) => (
@@ -258,7 +176,6 @@ export function UserDirectoryPage() {
 										</div>
 									</TableCell>
 
-									{/* Count */}
 									<TableCell className="text-right text-sm font-medium tabular-nums">
 										{user.membershipCount}
 									</TableCell>
@@ -268,7 +185,6 @@ export function UserDirectoryPage() {
 					</TableBody>
 				</Table>
 
-				{/* ── Pagination footer ─────────────────────────────────────── */}
 				<div className="flex items-center justify-between border-t border-border px-4 py-3">
 					<p className="text-xs text-muted-foreground">
 						{isLoading

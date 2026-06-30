@@ -1,79 +1,21 @@
 import { Link, useParams } from '@tanstack/react-router';
-import { useQuery } from '@tanstack/react-query';
-
-import { Button, Card, CardContent, Skeleton } from '@repo/ui';
 import { isApiError } from '@repo/api-client';
 
-import { auditKeys } from '@/api/audit/keys';
-import { getAuditLog } from '@/api/audit/auditLog.queries';
+import { Card, CardContent } from '@repo/ui';
+
 import { formatDateTimeLong as formatTimestamp } from '@/lib/formatters/date';
-
-// ─── Sub-components ───────────────────────────────────────────────────────────
-
-function CenteredNotice({ message }: { message: string }) {
-	return (
-		<div className="flex flex-col items-center gap-4 py-24 text-center">
-			<p className="text-muted-foreground">{message}</p>
-			<Link
-				// eslint-disable-next-line @typescript-eslint/no-explicit-any
-				to={'/audit-log' as any}
-			>
-				<Button variant="outline">← Audit Log</Button>
-			</Link>
-		</div>
-	);
-}
-
-function DetailSkeleton() {
-	return (
-		<div className="flex flex-col gap-6">
-			<Skeleton className="h-4 w-24" />
-			<div className="flex flex-col gap-2">
-				{Array.from({ length: 5 }, (_, i) => (
-					<Skeleton key={i} className="h-10 w-full rounded-lg" />
-				))}
-			</div>
-		</div>
-	);
-}
-
-function JsonBlock({ value }: { value: Record<string, unknown> | null }) {
-	if (!value) {
-		return <span className="text-sm text-muted-foreground">—</span>;
-	}
-	return (
-		<pre className="overflow-x-auto rounded-md bg-muted px-4 py-3 text-xs leading-relaxed">
-			{JSON.stringify(value, null, 2)}
-		</pre>
-	);
-}
-
-function FieldRow({ label, children }: { label: string; children: React.ReactNode }) {
-	return (
-		<div className="flex gap-4 border-b border-border py-3 last:border-0">
-			<dt className="w-36 shrink-0 text-sm text-muted-foreground">{label}</dt>
-			<dd className="flex-1 text-sm">{children}</dd>
-		</div>
-	);
-}
-
-// ─── Page ─────────────────────────────────────────────────────────────────────
+import { useAuditLogEntry } from '@/features/audit-log/hooks';
+import { CenteredNotice } from '@/features/audit-log/components/CenteredNotice';
+import { DetailSkeleton } from '@/features/audit-log/components/DetailSkeleton';
+import { FieldRow } from '@/features/audit-log/components/FieldRow';
+import { JsonBlock } from '@/features/audit-log/components/JsonBlock';
 
 export function AuditLogDetailPage() {
 	const { auditId } = useParams({ strict: false }) as { auditId?: string };
 	const id = Number(auditId);
 	const validId = auditId != null && Number.isInteger(id) && id > 0;
 
-	const {
-		data: entry,
-		isLoading,
-		isError,
-		error,
-	} = useQuery({
-		queryKey: auditKeys.detail(id),
-		queryFn: () => getAuditLog(id),
-		enabled: validId,
-	});
+	const { data: entry, isLoading, isError, error } = useAuditLogEntry(id, validId);
 
 	if (!validId || (isError && isApiError(error) && error.status === 404)) {
 		return <CenteredNotice message="Audit log entry not found." />;
@@ -87,7 +29,6 @@ export function AuditLogDetailPage() {
 
 	return (
 		<div className="flex flex-col gap-6">
-			{/* ── Back link ────────────────────────────────────────────────── */}
 			<Link
 				// eslint-disable-next-line @typescript-eslint/no-explicit-any
 				to={'/audit-log' as any}
@@ -96,7 +37,6 @@ export function AuditLogDetailPage() {
 				← Audit Log
 			</Link>
 
-			{/* ── Header ───────────────────────────────────────────────────── */}
 			<div>
 				<h1 className="text-xl font-semibold tracking-tight">
 					Audit Entry #{entry.id}
@@ -106,7 +46,6 @@ export function AuditLogDetailPage() {
 				</p>
 			</div>
 
-			{/* ── Fields ───────────────────────────────────────────────────── */}
 			<Card className="py-0">
 				<CardContent className="px-6 py-0">
 					<dl>
@@ -161,7 +100,6 @@ export function AuditLogDetailPage() {
 				</CardContent>
 			</Card>
 
-			{/* ── Before / After diff ──────────────────────────────────────── */}
 			<div className="flex flex-col gap-3">
 				<h2 className="text-xs font-semibold uppercase tracking-widest text-muted-foreground">
 					Before / After

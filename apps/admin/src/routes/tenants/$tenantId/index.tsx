@@ -1,7 +1,5 @@
 import { useState } from 'react';
-
 import { Link, useParams } from '@tanstack/react-router';
-import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { Eye, Globe } from 'lucide-react';
 
 import {
@@ -17,15 +15,6 @@ import {
 	cn,
 } from '@repo/ui';
 
-import { tenantsKeys } from '@/api/tenants/keys';
-import {
-	cancelTenant,
-	suspendTenant,
-	unsuspendTenant,
-	updateTenant,
-} from '@/api/tenants/tenants.mutations';
-import { getTenant } from '@/api/tenants/tenants.queries';
-import type { UpdateTenantInput } from '@/api/tenants/types';
 import { AuditTab } from '@/features/tenants/components/tenantDetails/AuditTab';
 import { BranchesTab } from '@/features/tenants/components/tenantDetails/BranchesTab';
 import { ChangePlanDialog } from '@/features/tenants/components/tenantDetails/ChangePlanDialog';
@@ -36,74 +25,37 @@ import { SettingsTab } from '@/features/tenants/components/tenantDetails/Setting
 import { SubscriptionTab } from '@/features/tenants/components/tenantDetails/SubscriptionTab';
 import { TypeToConfirmDialog } from '@/features/tenants/components/tenantDetails/TypeToConfirmDialog';
 import { avatarClass, getInitials } from '@/features/tenants/utils';
-
-const TAB_TRIGGER_CLASS = cn(
-	'cursor-pointer -mb-px rounded-none border-b-2 border-b-transparent px-4 pb-3 pt-2',
-	'text-sm font-medium text-muted-foreground transition-colors hover:text-foreground',
-	'data-[state=active]:border-b-primary data-[state=active]:bg-transparent',
-	'data-[state=active]:text-primary data-[state=active]:shadow-none',
-);
+import { TAB_TRIGGER_CLASS } from '@/features/tenants/constants';
+import {
+	useCancelTenant,
+	useSuspendTenant,
+	useTenant,
+	useUnsuspendTenant,
+	useUpdateTenant,
+} from '@/features/tenants/hooks';
 
 export function TenantDetailPage() {
 	const { tenantId } = useParams({ strict: false }) as { tenantId?: string };
 	const numericId = tenantId ? parseInt(tenantId, 10) : NaN;
 	const isValidId = !isNaN(numericId);
 
-	const queryClient = useQueryClient();
-
-	const {
-		data: tenant,
-		isLoading,
-		isError,
-	} = useQuery({
-		queryKey: tenantsKeys.detail(numericId),
-		queryFn: () => getTenant(numericId),
-		enabled: isValidId,
-	});
-
-	const suspendMutation = useMutation({
-		mutationFn: (reason?: string) => suspendTenant(numericId, { reason }),
-		onSuccess: () => {
-			void queryClient.invalidateQueries({
-				queryKey: tenantsKeys.detail(numericId),
-			});
-			setSuspendOpen(false);
-		},
-	});
-
-	const unsuspendMutation = useMutation({
-		mutationFn: (reason?: string) => unsuspendTenant(numericId, { reason }),
-		onSuccess: () => {
-			void queryClient.invalidateQueries({
-				queryKey: tenantsKeys.detail(numericId),
-			});
-			setUnsuspendOpen(false);
-		},
-	});
-
-	const cancelMutation = useMutation({
-		mutationFn: (reason?: string) => cancelTenant(numericId, { reason }),
-		onSuccess: () => {
-			void queryClient.invalidateQueries({
-				queryKey: tenantsKeys.detail(numericId),
-			});
-			setCancelOpen(false);
-		},
-	});
-
-	const updateMutation = useMutation({
-		mutationFn: (data: UpdateTenantInput) => updateTenant(numericId, data),
-		onSuccess: () => {
-			void queryClient.invalidateQueries({
-				queryKey: tenantsKeys.detail(numericId),
-			});
-		},
-	});
-
 	const [suspendOpen, setSuspendOpen] = useState(false);
 	const [unsuspendOpen, setUnsuspendOpen] = useState(false);
 	const [cancelOpen, setCancelOpen] = useState(false);
 	const [changePlanOpen, setChangePlanOpen] = useState(false);
+
+	const { data: tenant, isLoading, isError } = useTenant(numericId, isValidId);
+
+	const suspendMutation = useSuspendTenant(numericId, {
+		onSuccess: () => setSuspendOpen(false),
+	});
+	const unsuspendMutation = useUnsuspendTenant(numericId, {
+		onSuccess: () => setUnsuspendOpen(false),
+	});
+	const cancelMutation = useCancelTenant(numericId, {
+		onSuccess: () => setCancelOpen(false),
+	});
+	const updateMutation = useUpdateTenant(numericId);
 
 	if (!isValidId || isError) {
 		return (

@@ -1,7 +1,5 @@
 import { useState } from 'react';
-
 import { Link, useNavigate } from '@tanstack/react-router';
-import { keepPreviousData, useQuery } from '@tanstack/react-query';
 import { ChevronLeft, ChevronRight, Search } from 'lucide-react';
 
 import {
@@ -20,58 +18,20 @@ import {
 	TableRow,
 	cn,
 } from '@repo/ui';
-import type { StatusTone } from '@repo/ui';
 
-import { tenantsKeys } from '@/api/tenants/keys';
-import { listTenants, getTenantSummary } from '@/api/tenants/tenants.queries';
-import type { SubscriptionStatus, TenantStatus } from '@/api/tenants/types';
-import { avatarClass, getInitials } from '@/features/tenants/utils';
 import { formatPrice, formatPriceAxis } from '@/lib/formatters/currency';
 import { formatNumber } from '@/lib/formatters/amount';
-
-// ─── Status maps ──────────────────────────────────────────────────────────────
-
-const TENANT_STATUS_TONE: Record<TenantStatus, StatusTone> = {
-	ACTIVE: 'green',
-	PENDING: 'blue',
-	SUSPENDED: 'red',
-	CANCELLED: 'slate',
-};
-
-const TENANT_STATUS_LABEL: Record<TenantStatus, string> = {
-	ACTIVE: 'Active',
-	PENDING: 'Pending',
-	SUSPENDED: 'Suspended',
-	CANCELLED: 'Cancelled',
-};
-
-const SUB_STATUS_TONE: Record<SubscriptionStatus, StatusTone> = {
-	TRIALING: 'blue',
-	ACTIVE: 'green',
-	PAST_DUE: 'amber',
-	CANCELLED: 'slate',
-};
-
-const SUB_STATUS_LABEL: Record<SubscriptionStatus, string> = {
-	TRIALING: 'Trialing',
-	ACTIVE: 'Active',
-	PAST_DUE: 'Past due',
-	CANCELLED: 'Cancelled',
-};
-
-// ─── Constants ────────────────────────────────────────────────────────────────
-
-const PAGE_SIZE = 20;
-
-type StatusTab = TenantStatus | 'all';
-
-const STATUS_TABS: { value: StatusTab; label: string }[] = [
-	{ value: 'all', label: 'All' },
-	{ value: 'ACTIVE', label: 'Active' },
-	{ value: 'PENDING', label: 'Pending' },
-	{ value: 'SUSPENDED', label: 'Suspended' },
-	{ value: 'CANCELLED', label: 'Cancelled' },
-];
+import { avatarClass, getInitials } from '@/features/tenants/utils';
+import {
+	PAGE_SIZE,
+	STATUS_TABS,
+	SUB_STATUS_LABEL,
+	SUB_STATUS_TONE,
+	TENANT_STATUS_LABEL,
+	TENANT_STATUS_TONE,
+	type StatusTab,
+} from '@/features/tenants/constants';
+import { useTenantsPage, useTenantSummary } from '@/features/tenants/hooks';
 
 export function TenantsPage() {
 	const navigate = useNavigate();
@@ -80,27 +40,17 @@ export function TenantsPage() {
 	const [statusTab, setStatusTab] = useState<StatusTab>('all');
 	const [page, setPage] = useState(1);
 
-	const filters = {
-		status: statusTab === 'all' ? undefined : statusTab,
-		search: debouncedSearch || undefined,
-		page,
-		limit: PAGE_SIZE,
-	};
-
 	const {
 		data: tenantsPage,
 		isLoading,
 		isError,
-	} = useQuery({
-		queryKey: tenantsKeys.list(filters),
-		queryFn: () => listTenants(filters),
-		placeholderData: keepPreviousData,
+	} = useTenantsPage({
+		statusTab,
+		search: debouncedSearch,
+		page,
 	});
 
-	const { data: summary } = useQuery({
-		queryKey: tenantsKeys.summary(),
-		queryFn: getTenantSummary,
-	});
+	const { data: summary } = useTenantSummary();
 
 	function handleSearch(e: React.ChangeEvent<HTMLInputElement>) {
 		const val = e.target.value;

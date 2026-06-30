@@ -1,6 +1,5 @@
 import { useState } from 'react';
 import { useNavigate } from '@tanstack/react-router';
-import { keepPreviousData, useQuery } from '@tanstack/react-query';
 import { ChevronLeft, ChevronRight, Search } from 'lucide-react';
 
 import {
@@ -15,16 +14,9 @@ import {
 	TableRow,
 } from '@repo/ui';
 
-import { auditKeys } from '@/api/audit/keys';
-import type { AuditLogFilters } from '@/api/audit/types';
-import { listAuditLogs } from '@/api/audit/auditLog.queries';
 import { formatDateTime as formatTimestamp } from '@/lib/formatters/date';
-
-// ─── Constants ────────────────────────────────────────────────────────────────
-
-const PAGE_SIZE = 20;
-
-// ─── Page ─────────────────────────────────────────────────────────────────────
+import { useAuditLogs } from '@/features/audit-log/hooks';
+import { PAGE_SIZE } from '@/features/audit-log/constants';
 
 export function AuditLogPage() {
 	const navigate = useNavigate();
@@ -32,17 +24,13 @@ export function AuditLogPage() {
 	const [debouncedSearch, setDebouncedSearch] = useState('');
 	const [page, setPage] = useState(1);
 
-	const filters: AuditLogFilters = {
+	const filters = {
 		search: debouncedSearch || undefined,
 		page,
 		limit: PAGE_SIZE,
 	};
 
-	const { data, isLoading, isError } = useQuery({
-		queryKey: auditKeys.list(filters),
-		queryFn: () => listAuditLogs(filters),
-		placeholderData: keepPreviousData,
-	});
+	const { data, isLoading, isError } = useAuditLogs(filters);
 
 	function handleSearch(e: React.ChangeEvent<HTMLInputElement>) {
 		const val = e.target.value;
@@ -60,7 +48,6 @@ export function AuditLogPage() {
 
 	return (
 		<div className="flex flex-col gap-6">
-			{/* ── Page header ──────────────────────────────────────────────── */}
 			<div>
 				<h1 className="text-xl font-semibold tracking-tight">Audit Log</h1>
 				<p className="text-sm text-muted-foreground">
@@ -69,7 +56,6 @@ export function AuditLogPage() {
 				</p>
 			</div>
 
-			{/* ── Filter bar ───────────────────────────────────────────────── */}
 			<div className="flex flex-wrap items-center gap-3">
 				<div className="relative">
 					<Search className="pointer-events-none absolute left-2.5 top-1/2 size-4 -translate-y-1/2 text-muted-foreground" />
@@ -83,14 +69,12 @@ export function AuditLogPage() {
 				</div>
 			</div>
 
-			{/* ── Error state ──────────────────────────────────────────────── */}
 			{isError && (
 				<div className="rounded-lg border border-destructive/30 bg-destructive/5 px-4 py-3 text-sm text-destructive">
 					Failed to load audit logs. Please refresh.
 				</div>
 			)}
 
-			{/* ── Table ────────────────────────────────────────────────────── */}
 			<Card className="gap-0 overflow-hidden py-0">
 				<Table>
 					<TableHeader>
@@ -140,9 +124,7 @@ export function AuditLogPage() {
 									</TableCell>
 
 									<TableCell className="text-sm">
-										<div className="font-medium">
-											{entry.actor.name ?? '—'}
-										</div>
+										<div className="font-medium">{entry.actor.name ?? '—'}</div>
 										{entry.actor.role && (
 											<div className="text-xs text-muted-foreground">
 												{entry.actor.role}
@@ -179,7 +161,6 @@ export function AuditLogPage() {
 					</TableBody>
 				</Table>
 
-				{/* ── Pagination footer ─────────────────────────────────────── */}
 				<div className="flex items-center justify-between border-t border-border px-4 py-3">
 					<p className="text-xs text-muted-foreground">
 						{total === 0
