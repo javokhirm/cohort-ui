@@ -1,0 +1,5 @@
+/* Staff app styles. The design system (Tailwind v4 + EduCore tokens, light & dark)
+   lives in @repo/ui. The staff app runs in the standard light palette. */
+@import '@repo/ui/globals.css';
+
+@source '../**/*.{ts,tsx}';

@@ -1,17 +1,34 @@
-import { Button } from '@repo/ui';
+import { useEffect, useState } from 'react';
+import { RouterProvider } from '@tanstack/react-router';
 
-function App() {
-	return (
-		<div className="flex min-h-svh flex-col items-center justify-center gap-4 p-8">
-			<h1 className="text-3xl font-semibold tracking-tight">EduCore Staff</h1>
-			<div className="flex gap-2">
-				<Button>Default</Button>
-				<Button variant="secondary">Secondary</Button>
-				<Button variant="outline">Outline</Button>
-				<Button variant="destructive">Destructive</Button>
+import { Spinner } from '@repo/ui';
+import { runRefresh } from '@/api/apiClient';
+import { useSessionStore } from '@/store/sessionStore';
+import { router } from './router';
+
+// Resolve the session once at module load — survives React StrictMode's
+// double-invoked effects (single in-flight refresh, no double network call).
+const bootPromise = runRefresh();
+
+/**
+ * Boot gate: hold the router until the silent refresh settles so route guards
+ * see `authenticated` or `anonymous` — never the transient `unknown`.
+ */
+export function App() {
+	const status = useSessionStore((s) => s.status);
+	const [booted, setBooted] = useState(status !== 'unknown');
+
+	useEffect(() => {
+		void bootPromise.finally(() => setBooted(true));
+	}, []);
+
+	if (!booted || status === 'unknown') {
+		return (
+			<div className="flex min-h-svh items-center justify-center bg-background">
+				<Spinner className="size-6" />
 			</div>
-		</div>
-	);
-}
+		);
+	}
 
-export default App;
+	return <RouterProvider router={router} />;
+}
