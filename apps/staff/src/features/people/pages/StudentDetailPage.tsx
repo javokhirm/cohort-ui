@@ -17,6 +17,7 @@ import {
 	toast,
 	type ColumnDef,
 } from '@repo/ui';
+import { formatDate, formatMoney } from '@repo/utils';
 
 import {
 	useStudent,
@@ -37,23 +38,7 @@ import type {
 import { useRemoveGuardian } from '../api/students.mutations';
 import { StudentForm } from '../components/StudentForm';
 
-// ─── Helpers ──────────────────────────────────────────────────────────────────
-
-function formatDate(iso?: string): string {
-	if (!iso) return '—';
-	const d = new Date(iso);
-	return d.toLocaleDateString('en-GB', {
-		day: '2-digit',
-		month: 'short',
-		year: 'numeric',
-	});
-}
-
-function formatMoney(amount: number): string {
-	return new Intl.NumberFormat('ru-RU').format(amount) + ' UZS';
-}
-
-function genderLabel(g?: string) {
+function genderLabel(g?: string | null) {
 	if (g === 'M') return 'Male';
 	if (g === 'F') return 'Female';
 	if (g === 'O') return 'Other';
@@ -142,19 +127,31 @@ function OverviewTab({ studentId }: { studentId: number }) {
 						<div>
 							<p className="text-muted-foreground">Date of birth</p>
 							<p className="mt-0.5 font-medium">
-								{formatDate(student.dateOfBirth ?? undefined)}
+								{student.dateOfBirth
+									? formatDate(student.dateOfBirth)
+									: '—'}
 							</p>
+						</div>
+						<div>
+							<p className="text-muted-foreground">Address</p>
+							<p className="mt-0.5 font-medium">{student.address ?? '—'}</p>
 						</div>
 						<div>
 							<p className="text-muted-foreground">Gender</p>
 							<p className="mt-0.5 font-medium">
-								{genderLabel(student.gender ?? undefined)}
+								{genderLabel(student.gender)}
 							</p>
 						</div>
 						<div>
 							<p className="text-muted-foreground">Enrollment date</p>
 							<p className="mt-0.5 font-medium">
 								{formatDate(student.enrolledAt)}
+							</p>
+						</div>
+						<div>
+							<p className="text-muted-foreground">Emergency contact</p>
+							<p className="mt-0.5 font-medium">
+								{student.emergencyContact?.phone ?? '—'}
 							</p>
 						</div>
 					</div>
@@ -219,7 +216,7 @@ function GuardiansTab({ studentId }: { studentId: number }) {
 									{initials}
 								</div>
 								<div>
-									<div className="flex items-center gap-1.5">
+									<div className="flex items-center gap-3">
 										<span className="text-xs font-semibold text-muted-foreground">
 											{relationLabel}
 										</span>
@@ -238,7 +235,7 @@ function GuardiansTab({ studentId }: { studentId: number }) {
 										)}
 									</div>
 									<div className="mt-0.5 text-sm text-muted-foreground">
-										{relationLabel} · {g.user.phone}
+										{g.user.phone}
 									</div>
 								</div>
 							</div>

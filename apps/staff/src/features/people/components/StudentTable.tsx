@@ -160,7 +160,6 @@ export function StudentTable({ students, isLoading }: StudentTableProps) {
 			getRowId={(row) => String(row.id)}
 			rowSelection={rowSelection}
 			onRowSelectionChange={setRowSelection}
-			// eslint-disable-next-line @typescript-eslint/no-explicit-any
 			onRowClick={(row) => void navigate({ to: `/students/${row.id}` as any })}
 			className="rounded-none border-0"
 		/>

@@ -14,6 +14,9 @@ import { DashboardPage } from '@/routes/dashboard';
 import { ForbiddenPage } from '@/routes/forbidden';
 import { StudentsRoute } from '@/routes/_authed.students';
 import { StudentDetailRoute } from '@/routes/_authed.students.$id';
+import { StaffRoute } from '@/routes/_authed.staff';
+import { StaffDetailRoute } from '@/routes/_authed.staff.$id';
+import { PayrollRoute } from '@/routes/_authed.payroll';
 import { useSessionStore } from '@/store/sessionStore';
 
 const rootRoute = createRootRoute({
@@ -78,10 +81,76 @@ const studentDetailRoute = createRoute({
 	},
 });
 
+type StaffRoleSearch = 'TEACHER' | 'MANAGER' | 'ADMIN';
+
+interface StaffSearch {
+	page?: number;
+	search?: string;
+	role?: StaffRoleSearch;
+}
+
+const staffRoute = createRoute({
+	getParentRoute: () => authedRoute,
+	path: '/staff',
+	validateSearch: (search: Record<string, unknown>): StaffSearch => {
+		const page = Number(search.page);
+		const role = search.role;
+		return {
+			page: Number.isFinite(page) && page > 0 ? page : undefined,
+			search: typeof search.search === 'string' ? search.search : undefined,
+			role:
+				role === 'TEACHER' || role === 'MANAGER' || role === 'ADMIN'
+					? role
+					: undefined,
+		};
+	},
+	component: StaffRoute,
+});
+
+const staffDetailRoute = createRoute({
+	getParentRoute: () => authedRoute,
+	path: '/staff/$staffId',
+	component: () => {
+		const { staffId } = staffDetailRoute.useParams();
+		return <StaffDetailRoute id={staffId} />;
+	},
+});
+
+type PayrollStatusSearch = 'DRAFT' | 'APPROVED' | 'PAID';
+
+interface PayrollSearch {
+	page?: number;
+	status?: PayrollStatusSearch;
+}
+
+const payrollRoute = createRoute({
+	getParentRoute: () => authedRoute,
+	path: '/payroll',
+	validateSearch: (search: Record<string, unknown>): PayrollSearch => {
+		const page = Number(search.page);
+		const status = search.status;
+		return {
+			page: Number.isFinite(page) && page > 0 ? page : undefined,
+			status:
+				status === 'DRAFT' || status === 'APPROVED' || status === 'PAID'
+					? status
+					: undefined,
+		};
+	},
+	component: PayrollRoute,
+});
+
 const routeTree = rootRoute.addChildren([
 	loginRoute,
 	forbiddenRoute,
-	authedRoute.addChildren([dashboardRoute, studentsRoute, studentDetailRoute]),
+	authedRoute.addChildren([
+		dashboardRoute,
+		studentsRoute,
+		studentDetailRoute,
+		staffRoute,
+		staffDetailRoute,
+		payrollRoute,
+	]),
 ]);
 
 export const router = createRouter({
