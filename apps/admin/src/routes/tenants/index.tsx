@@ -16,8 +16,7 @@ import {
 	type ColumnDef,
 } from '@repo/ui';
 
-import { formatPrice, formatPriceAxis } from '@/lib/formatters/currency';
-import { formatNumber } from '@/lib/formatters/amount';
+import { formatNumber, formatPrice, formatPriceAxis } from '@repo/utils';
 import { avatarClass, getInitials } from '@/features/tenants/utils';
 import {
 	PAGE_SIZE,

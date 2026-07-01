@@ -6,8 +6,7 @@ import type { StatusTone } from '@repo/ui';
 import { plansKeys } from '@/api/plans/keys';
 import { listPlans } from '@/api/plans/plans.queries';
 import type { TenantDetailView } from '@/api/tenants/types';
-import { formatDate } from '@/lib/formatters/date';
-import { formatPrice } from '@/lib/formatters/currency';
+import { formatDate, formatPrice } from '@repo/utils';
 
 const SUB_STATUS_TONE: Record<string, StatusTone> = {
 	TRIALING: 'blue',

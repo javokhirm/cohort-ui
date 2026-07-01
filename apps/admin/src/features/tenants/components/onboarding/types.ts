@@ -1,5 +1,5 @@
 import type { PlanView } from '@/api/plans/types';
-import { formatNumber } from '@/lib/formatters/amount';
+import { formatNumber } from '@repo/utils';
 
 export type OnboardStep = 1 | 2 | 3 | 4 | 5 | 6;
 

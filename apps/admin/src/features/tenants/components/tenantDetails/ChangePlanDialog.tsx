@@ -23,7 +23,7 @@ import type { PlanView } from '@/api/plans/types';
 import { tenantsKeys } from '@/api/tenants/keys';
 import { changeTenantPlan } from '@/api/tenants/tenants.mutations';
 import type { BillingInterval } from '@/api/tenants/types';
-import { formatPrice } from '@/lib/formatters/currency';
+import { formatPrice } from '@repo/utils';
 
 function planLimitLabel(plan: PlanView): string {
 	const students =

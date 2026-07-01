@@ -1,31 +1,11 @@
-import { useEffect } from 'react';
+import { useEffect, useState } from 'react';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { toast } from '@repo/ui';
 
-import {
-	Button,
-	FieldGroup,
-	Form,
-	FormControl,
-	FormField,
-	FormItem,
-	FormLabel,
-	FormMessage,
-	Input,
-	Select,
-	SelectContent,
-	SelectItem,
-	SelectTrigger,
-	SelectValue,
-	Separator,
-	Sheet,
-	SheetContent,
-	SheetHeader,
-	SheetTitle,
-	SheetDescription,
-	Spinner,
-} from '@repo/ui';
+import { Button, FieldGroup, Form, FormInput, FormSelect, Spinner } from '@repo/ui';
+
+import { FormSheet } from '@/components/FormSheet';
 
 import {
 	createStudentSchema,
@@ -47,8 +27,6 @@ import {
 	useAddGuardian,
 } from '../api/students.mutations';
 
-// ─── Types ────────────────────────────────────────────────────────────────────
-
 interface CreateProps {
 	mode: 'create';
 	open: boolean;
@@ -64,19 +42,44 @@ interface EditProps {
 
 type StudentFormProps = CreateProps | EditProps;
 
-// ─── Section header ───────────────────────────────────────────────────────────
+const GENDER_OPTIONS = [
+	{ value: 'M', label: 'Male' },
+	{ value: 'F', label: 'Female' },
+];
 
-function SectionHeading({ children }: { children: React.ReactNode }) {
+const GUARDIAN_RELATION_OPTIONS = [
+	{ value: 'father', label: 'Father' },
+	{ value: 'mother', label: 'Mother' },
+	{ value: 'guardian', label: 'Guardian' },
+];
+
+const STUDENT_STATUS_OPTIONS = [
+	{ value: 'ACTIVE', label: 'Active' },
+	{ value: 'INACTIVE', label: 'Inactive' },
+	{ value: 'GRADUATED', label: 'Graduated' },
+	{ value: 'SUSPENDED', label: 'Suspended' },
+];
+
+function Section({ heading, children }: { heading?: string; children: React.ReactNode }) {
 	return (
-		<p className="text-xs font-semibold uppercase tracking-widest text-muted-foreground">
+		<div className="flex flex-col gap-4 rounded-xl bg-white p-4">
+			{heading && (
+				<p className="text-xs font-semibold uppercase tracking-widest text-muted-foreground">
+					{heading}
+				</p>
+			)}
 			{children}
-		</p>
+		</div>
 	);
 }
 
-// ─── Create form ──────────────────────────────────────────────────────────────
-
-function CreateStudentForm({ onSuccess }: { onSuccess: () => void }) {
+function CreateStudentForm({
+	onSuccess,
+	onPendingChange,
+}: {
+	onSuccess: () => void;
+	onPendingChange: (pending: boolean) => void;
+}) {
 	const form = useForm<CreateStudentFormValues>({
 		resolver: zodResolver(createStudentSchema),
 		defaultValues: {
@@ -102,6 +105,13 @@ function CreateStudentForm({ onSuccess }: { onSuccess: () => void }) {
 	const createStudent = useCreateStudent();
 	const addGuardian = useAddGuardian();
 	const enrollStudent = useEnrollStudent();
+
+	const isPending =
+		createStudent.isPending || addGuardian.isPending || enrollStudent.isPending;
+
+	useEffect(() => {
+		onPendingChange(isPending);
+	}, [isPending, onPendingChange]);
 
 	async function onSubmit(values: CreateStudentFormValues) {
 		const { firstName, lastName } = splitFullName(values.fullName);
@@ -145,338 +155,137 @@ function CreateStudentForm({ onSuccess }: { onSuccess: () => void }) {
 		onSuccess();
 	}
 
-	const isPending =
-		createStudent.isPending || addGuardian.isPending || enrollStudent.isPending;
-
 	return (
 		<Form {...form}>
 			<form
+				id="create-student-form"
 				onSubmit={(e) => void form.handleSubmit(onSubmit)(e)}
-				className="flex flex-col gap-6"
+				className="flex flex-col gap-4"
 			>
 				{/* PERSONAL */}
-				<div className="flex flex-col gap-4">
-					<SectionHeading>Personal</SectionHeading>
+				<Section heading="Personal">
 					<FieldGroup>
-						<FormField
+						<FormInput
 							control={form.control}
 							name="fullName"
-							render={({ field }) => (
-								<FormItem>
-									<FormLabel>Full name *</FormLabel>
-									<FormControl>
-										<Input
-											placeholder="e.g. Diyorbek Rustamov"
-											{...field}
-										/>
-									</FormControl>
-									<FormMessage />
-								</FormItem>
-							)}
+							label="Full name *"
+							placeholder="e.g. Diyorbek Rustamov"
 						/>
 						<div className="grid grid-cols-2 gap-3">
-							<FormField
+							<FormInput
 								control={form.control}
 								name="dateOfBirth"
-								render={({ field }) => (
-									<FormItem>
-										<FormLabel>Date of birth</FormLabel>
-										<FormControl>
-											<Input type="date" {...field} />
-										</FormControl>
-										<FormMessage />
-									</FormItem>
-								)}
+								label="Date of birth"
+								type="date"
 							/>
-							<FormField
+							<FormSelect
 								control={form.control}
 								name="gender"
-								render={({ field }) => (
-									<FormItem>
-										<FormLabel>Gender</FormLabel>
-										<Select
-											onValueChange={field.onChange}
-											value={field.value}
-										>
-											<FormControl>
-												<SelectTrigger>
-													<SelectValue placeholder="Select..." />
-												</SelectTrigger>
-											</FormControl>
-											<SelectContent>
-												<SelectItem value="M">Male</SelectItem>
-												<SelectItem value="F">Female</SelectItem>
-												<SelectItem value="O">Other</SelectItem>
-											</SelectContent>
-										</Select>
-										<FormMessage />
-									</FormItem>
-								)}
+								label="Gender"
+								options={GENDER_OPTIONS}
 							/>
 						</div>
 					</FieldGroup>
-				</div>
-
-				<Separator />
+				</Section>
 
 				{/* CONTACT */}
-				<div className="flex flex-col gap-4">
-					<SectionHeading>Contact</SectionHeading>
+				<Section heading="Contact">
 					<FieldGroup>
 						<div className="grid grid-cols-2 gap-3">
-							<FormField
+							<FormInput
 								control={form.control}
 								name="phone"
-								render={({ field }) => (
-									<FormItem>
-										<FormLabel>Phone *</FormLabel>
-										<FormControl>
-											<Input placeholder="+998" {...field} />
-										</FormControl>
-										<FormMessage />
-									</FormItem>
-								)}
+								label="Phone *"
+								placeholder="+998"
 							/>
-							<FormField
+							<FormSelect
 								control={form.control}
 								name="branchId"
-								render={({ field }) => (
-									<FormItem>
-										<FormLabel>Branch *</FormLabel>
-										<Select
-											onValueChange={(v) =>
-												field.onChange(Number(v))
-											}
-											value={field.value ? String(field.value) : ''}
-										>
-											<FormControl>
-												<SelectTrigger>
-													<SelectValue placeholder="Select..." />
-												</SelectTrigger>
-											</FormControl>
-											<SelectContent>
-												{(
-													branches as {
-														id: number;
-														name: string;
-													}[]
-												).map((b) => (
-													<SelectItem
-														key={b.id}
-														value={String(b.id)}
-													>
-														{b.name}
-													</SelectItem>
-												))}
-											</SelectContent>
-										</Select>
-										<FormMessage />
-									</FormItem>
-								)}
+								label="Branch *"
+								valueAsNumber
+								options={branches.map((b) => ({
+									value: String(b.id),
+									label: b.name,
+								}))}
 							/>
 						</div>
-						<FormField
+						<FormInput
 							control={form.control}
 							name="address"
-							render={({ field }) => (
-								<FormItem>
-									<FormLabel>Address</FormLabel>
-									<FormControl>
-										<Input
-											placeholder="Street, district, city"
-											{...field}
-										/>
-									</FormControl>
-									<FormMessage />
-								</FormItem>
-							)}
+							label="Address"
+							placeholder="Street, district, city"
 						/>
 					</FieldGroup>
-				</div>
-
-				<Separator />
+				</Section>
 
 				{/* GUARDIAN */}
-				<div className="flex flex-col gap-4">
-					<SectionHeading>Guardian</SectionHeading>
+				<Section heading="Guardian">
 					<FieldGroup>
 						<div className="grid grid-cols-2 gap-3">
-							<FormField
+							<FormInput
 								control={form.control}
 								name="guardianName"
-								render={({ field }) => (
-									<FormItem>
-										<FormLabel>Guardian name *</FormLabel>
-										<FormControl>
-											<Input
-												placeholder="e.g. Rustam Olimov"
-												{...field}
-											/>
-										</FormControl>
-										<FormMessage />
-									</FormItem>
-								)}
+								label="Guardian name *"
+								placeholder="e.g. Rustam Olimov"
 							/>
-							<FormField
+							<FormSelect
 								control={form.control}
 								name="guardianRelation"
-								render={({ field }) => (
-									<FormItem>
-										<FormLabel>Relation</FormLabel>
-										<Select
-											onValueChange={field.onChange}
-											value={field.value}
-										>
-											<FormControl>
-												<SelectTrigger>
-													<SelectValue />
-												</SelectTrigger>
-											</FormControl>
-											<SelectContent>
-												<SelectItem value="father">
-													Father
-												</SelectItem>
-												<SelectItem value="mother">
-													Mother
-												</SelectItem>
-												<SelectItem value="guardian">
-													Guardian
-												</SelectItem>
-											</SelectContent>
-										</Select>
-										<FormMessage />
-									</FormItem>
-								)}
+								label="Relation"
+								options={GUARDIAN_RELATION_OPTIONS}
 							/>
 						</div>
-						<FormField
+						<FormInput
 							control={form.control}
 							name="guardianPhone"
-							render={({ field }) => (
-								<FormItem>
-									<FormLabel>Guardian phone *</FormLabel>
-									<FormControl>
-										<Input placeholder="+998" {...field} />
-									</FormControl>
-									<FormMessage />
-								</FormItem>
-							)}
+							label="Guardian phone *"
+							placeholder="+998"
 						/>
 					</FieldGroup>
-				</div>
+				</Section>
 
-				{groups.length > 0 || feePlans.length > 0 ? (
-					<>
-						<Separator />
-						{/* INITIAL ENROLLMENT */}
-						<div className="flex flex-col gap-4">
-							<SectionHeading>Initial enrollment</SectionHeading>
-							<FieldGroup>
-								<div className="grid grid-cols-2 gap-3">
-									<FormField
-										control={form.control}
-										name="groupId"
-										render={({ field }) => (
-											<FormItem>
-												<FormLabel>Group</FormLabel>
-												<Select
-													onValueChange={(v) =>
-														field.onChange(
-															v ? Number(v) : undefined,
-														)
-													}
-													value={
-														field.value
-															? String(field.value)
-															: ''
-													}
-												>
-													<FormControl>
-														<SelectTrigger>
-															<SelectValue placeholder="Select..." />
-														</SelectTrigger>
-													</FormControl>
-													<SelectContent>
-														{groups.map((g) => (
-															<SelectItem
-																key={g.id}
-																value={String(g.id)}
-															>
-																{g.code}
-															</SelectItem>
-														))}
-													</SelectContent>
-												</Select>
-												<FormMessage />
-											</FormItem>
-										)}
-									/>
-									<FormField
-										control={form.control}
-										name="feePlanId"
-										render={({ field }) => (
-											<FormItem>
-												<FormLabel>Fee plan</FormLabel>
-												<Select
-													onValueChange={(v) =>
-														field.onChange(
-															v ? Number(v) : undefined,
-														)
-													}
-													value={
-														field.value
-															? String(field.value)
-															: ''
-													}
-												>
-													<FormControl>
-														<SelectTrigger>
-															<SelectValue placeholder="Select..." />
-														</SelectTrigger>
-													</FormControl>
-													<SelectContent>
-														{feePlans.map((fp) => (
-															<SelectItem
-																key={fp.id}
-																value={String(fp.id)}
-															>
-																{fp.name}
-															</SelectItem>
-														))}
-													</SelectContent>
-												</Select>
-												<FormMessage />
-											</FormItem>
-										)}
-									/>
-								</div>
-							</FieldGroup>
-						</div>
-					</>
-				) : null}
-
-				<div className="flex justify-end gap-3 pt-2">
-					<Button type="button" variant="outline" onClick={onSuccess}>
-						Cancel
-					</Button>
-					<Button type="submit" disabled={isPending}>
-						{isPending && <Spinner className="mr-2 size-4" />}
-						Save student
-					</Button>
-				</div>
+				{/* INITIAL ENROLLMENT */}
+				{(groups.length > 0 || feePlans.length > 0) && (
+					<Section heading="Initial enrollment">
+						<FieldGroup>
+							<div className="grid grid-cols-2 gap-3">
+								<FormSelect
+									control={form.control}
+									name="groupId"
+									label="Group"
+									valueAsNumber
+									options={groups.map((g) => ({
+										value: String(g.id),
+										label: g.code,
+									}))}
+								/>
+								<FormSelect
+									control={form.control}
+									name="feePlanId"
+									label="Fee plan"
+									valueAsNumber
+									options={feePlans.map((fp) => ({
+										value: String(fp.id),
+										label: fp.name,
+									}))}
+								/>
+							</div>
+						</FieldGroup>
+					</Section>
+				)}
 			</form>
 		</Form>
 	);
 }
 
-// ─── Edit form ────────────────────────────────────────────────────────────────
-
 function EditStudentForm({
 	student,
 	onSuccess,
+	onPendingChange,
 }: {
 	student: Student;
 	onSuccess: () => void;
+	onPendingChange: (pending: boolean) => void;
 }) {
 	const form = useForm<EditStudentFormValues>({
 		resolver: zodResolver(editStudentSchema),
@@ -506,6 +315,10 @@ function EditStudentForm({
 	const { data: branches = [] } = useBranches();
 	const updateStudent = useUpdateStudent();
 
+	useEffect(() => {
+		onPendingChange(updateStudent.isPending);
+	}, [updateStudent.isPending, onPendingChange]);
+
 	async function onSubmit(values: EditStudentFormValues) {
 		await updateStudent.mutateAsync({
 			id: student.id,
@@ -522,189 +335,75 @@ function EditStudentForm({
 	return (
 		<Form {...form}>
 			<form
+				id="edit-student-form"
 				onSubmit={(e) => void form.handleSubmit(onSubmit)(e)}
-				className="flex flex-col gap-6"
+				className="flex flex-col gap-4"
 			>
 				{/* PERSONAL */}
-				<div className="flex flex-col gap-4">
-					<SectionHeading>Personal</SectionHeading>
+				<Section heading="Personal">
 					<FieldGroup>
-						<FormField
+						<FormInput
 							control={form.control}
 							name="fullName"
-							render={({ field }) => (
-								<FormItem>
-									<FormLabel>Full name</FormLabel>
-									<FormControl>
-										<Input disabled {...field} />
-									</FormControl>
-								</FormItem>
-							)}
+							label="Full name"
+							disabled
 						/>
 						<div className="grid grid-cols-2 gap-3">
-							<FormField
+							<FormInput
 								control={form.control}
 								name="dateOfBirth"
-								render={({ field }) => (
-									<FormItem>
-										<FormLabel>Date of birth</FormLabel>
-										<FormControl>
-											<Input type="date" {...field} />
-										</FormControl>
-										<FormMessage />
-									</FormItem>
-								)}
+								label="Date of birth"
+								type="date"
 							/>
-							<FormField
+							<FormSelect
 								control={form.control}
 								name="gender"
-								render={({ field }) => (
-									<FormItem>
-										<FormLabel>Gender</FormLabel>
-										<Select
-											onValueChange={field.onChange}
-											value={field.value}
-										>
-											<FormControl>
-												<SelectTrigger>
-													<SelectValue placeholder="Select..." />
-												</SelectTrigger>
-											</FormControl>
-											<SelectContent>
-												<SelectItem value="M">Male</SelectItem>
-												<SelectItem value="F">Female</SelectItem>
-											</SelectContent>
-										</Select>
-										<FormMessage />
-									</FormItem>
-								)}
+								label="Gender"
+								options={GENDER_OPTIONS}
 							/>
 						</div>
 					</FieldGroup>
-				</div>
-
-				<Separator />
+				</Section>
 
 				{/* CONTACT */}
-				<div className="flex flex-col gap-4">
-					<SectionHeading>Contact</SectionHeading>
+				<Section heading="Contact">
 					<FieldGroup>
 						<div className="grid grid-cols-2 gap-3">
-							<FormField
+							<FormInput
 								control={form.control}
 								name="phone"
-								render={({ field }) => (
-									<FormItem>
-										<FormLabel>Phone</FormLabel>
-										<FormControl>
-											<Input disabled {...field} />
-										</FormControl>
-									</FormItem>
-								)}
+								label="Phone"
+								disabled
 							/>
-							<FormField
+							<FormSelect
 								control={form.control}
 								name="branchId"
-								render={({ field }) => (
-									<FormItem>
-										<FormLabel>Branch *</FormLabel>
-										<Select
-											onValueChange={(v) =>
-												field.onChange(Number(v))
-											}
-											value={field.value ? String(field.value) : ''}
-										>
-											<FormControl>
-												<SelectTrigger>
-													<SelectValue placeholder="Select..." />
-												</SelectTrigger>
-											</FormControl>
-											<SelectContent>
-												{(
-													branches as {
-														id: number;
-														name: string;
-													}[]
-												).map((b) => (
-													<SelectItem
-														key={b.id}
-														value={String(b.id)}
-													>
-														{b.name}
-													</SelectItem>
-												))}
-											</SelectContent>
-										</Select>
-										<FormMessage />
-									</FormItem>
-								)}
+								label="Branch *"
+								valueAsNumber
+								options={branches.map((b) => ({
+									value: String(b.id),
+									label: b.name,
+								}))}
 							/>
 						</div>
-						<FormField
+						<FormInput
 							control={form.control}
 							name="address"
-							render={({ field }) => (
-								<FormItem>
-									<FormLabel>Address</FormLabel>
-									<FormControl>
-										<Input
-											placeholder="Street, district, city"
-											{...field}
-										/>
-									</FormControl>
-									<FormMessage />
-								</FormItem>
-							)}
+							label="Address"
+							placeholder="Street, district, city"
 						/>
 					</FieldGroup>
-				</div>
-
-				<Separator />
+				</Section>
 
 				{/* STATUS */}
-				<div className="flex flex-col gap-4">
-					<SectionHeading>Status</SectionHeading>
-					<FormField
+				<Section heading="Status">
+					<FormSelect
 						control={form.control}
 						name="status"
-						render={({ field }) => (
-							<FormItem>
-								<FormLabel>Student status</FormLabel>
-								<Select
-									onValueChange={field.onChange}
-									value={field.value}
-								>
-									<FormControl>
-										<SelectTrigger>
-											<SelectValue />
-										</SelectTrigger>
-									</FormControl>
-									<SelectContent>
-										<SelectItem value="ACTIVE">Active</SelectItem>
-										<SelectItem value="INACTIVE">Inactive</SelectItem>
-										<SelectItem value="GRADUATED">
-											Graduated
-										</SelectItem>
-										<SelectItem value="SUSPENDED">
-											Suspended
-										</SelectItem>
-									</SelectContent>
-								</Select>
-								<FormMessage />
-							</FormItem>
-						)}
+						label="Student status"
+						options={STUDENT_STATUS_OPTIONS}
 					/>
-				</div>
-
-				<div className="flex justify-end gap-3 pt-2">
-					<Button type="button" variant="outline" onClick={onSuccess}>
-						Cancel
-					</Button>
-					<Button type="submit" disabled={updateStudent.isPending}>
-						{updateStudent.isPending && <Spinner className="mr-2 size-4" />}
-						Save student
-					</Button>
-				</div>
+				</Section>
 			</form>
 		</Form>
 	);
@@ -714,31 +413,44 @@ function EditStudentForm({
 
 export function StudentForm(props: StudentFormProps) {
 	const { open, onOpenChange, mode } = props;
+	const [isPending, setIsPending] = useState(false);
+
+	const formId = mode === 'create' ? 'create-student-form' : 'edit-student-form';
 
 	function handleSuccess() {
 		onOpenChange(false);
 	}
 
 	return (
-		<Sheet open={open} onOpenChange={onOpenChange}>
-			<SheetContent className="flex flex-col gap-0 overflow-y-auto sm:max-w-md">
-				<SheetHeader className="px-6 pt-6">
-					<SheetTitle>
-						{mode === 'create' ? 'Add student' : 'Edit student'}
-					</SheetTitle>
-					<SheetDescription>Fields marked * are required</SheetDescription>
-				</SheetHeader>
-				<div className="px-6 py-6">
-					{mode === 'create' ? (
-						<CreateStudentForm onSuccess={handleSuccess} />
-					) : (
-						<EditStudentForm
-							student={(props as EditProps).student}
-							onSuccess={handleSuccess}
-						/>
-					)}
-				</div>
-			</SheetContent>
-		</Sheet>
+		<FormSheet
+			open={open}
+			onOpenChange={onOpenChange}
+			title={mode === 'create' ? 'Add student' : 'Edit student'}
+			description="Fields marked * are required"
+			footer={
+				<>
+					<Button type="button" variant="outline" onClick={handleSuccess}>
+						Cancel
+					</Button>
+					<Button type="submit" form={formId} disabled={isPending}>
+						{isPending && <Spinner className="mr-2 size-4" />}
+						Save student
+					</Button>
+				</>
+			}
+		>
+			{mode === 'create' ? (
+				<CreateStudentForm
+					onSuccess={handleSuccess}
+					onPendingChange={setIsPending}
+				/>
+			) : (
+				<EditStudentForm
+					student={(props as EditProps).student}
+					onSuccess={handleSuccess}
+					onPendingChange={setIsPending}
+				/>
+			)}
+		</FormSheet>
 	);
 }

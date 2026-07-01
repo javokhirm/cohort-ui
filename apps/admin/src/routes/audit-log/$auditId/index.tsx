@@ -3,7 +3,7 @@ import { isApiError } from '@repo/api-client';
 
 import { Card, CardContent } from '@repo/ui';
 
-import { formatDateTimeLong as formatTimestamp } from '@/lib/formatters/date';
+import { formatDateTimeLong as formatTimestamp } from '@repo/utils';
 import { useAuditLogEntry } from '@/features/audit-log/hooks';
 import { CenteredNotice } from '@/features/audit-log/components/CenteredNotice';
 import { DetailSkeleton } from '@/features/audit-log/components/DetailSkeleton';

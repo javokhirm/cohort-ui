@@ -1,4 +1,4 @@
-import { formatDate } from '@/lib/formatters/date';
+import { formatDate } from '@repo/utils';
 import type { SubscriptionStatus } from '@/api/subscriptions/types';
 
 export function BillingDateCell({

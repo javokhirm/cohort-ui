@@ -1,8 +1,14 @@
 import { TrendingDown, TrendingUp } from 'lucide-react';
 
-import { formatPercent } from '@/lib/formatters/currency';
+import { formatPercent } from '@repo/utils';
 
-export function TrendChip({ value, upIsGood = true }: { value: number; upIsGood?: boolean }) {
+export function TrendChip({
+	value,
+	upIsGood = true,
+}: {
+	value: number;
+	upIsGood?: boolean;
+}) {
 	const isUp = value >= 0;
 	const isGood = upIsGood ? isUp : !isUp;
 	const Icon = isUp ? TrendingUp : TrendingDown;

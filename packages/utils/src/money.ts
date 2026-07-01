@@ -1,6 +1,31 @@
 const NUMBER_FORMATTER = new Intl.NumberFormat('ru-RU');
 
 /**
+ * Format a monetary amount with an explicit currency symbol.
+ *
+ * The i18n package wraps this with the user's active locale;
+ * call this directly only when locale context is unavailable.
+ * Never use raw `toFixed` or string-concat a currency symbol.
+ */
+export function formatMoney(
+	amount: number,
+	currency = 'UZS',
+	locale = 'uz-UZ',
+): string {
+	return new Intl.NumberFormat(locale, {
+		style: 'currency',
+		currency,
+		minimumFractionDigits: 0,
+		maximumFractionDigits: 2,
+	}).format(amount);
+}
+
+/** Plain integer with thousands separator: "1 234 567". Use for counts (students, branches). */
+export function formatNumber(n: number): string {
+	return NUMBER_FORMATTER.format(n);
+}
+
+/**
  * Full UZS amount with thousands separator: "1 234 567".
  * Use when "UZS" appears in the surrounding UI (column header, label, adjacent span).
  */
@@ -17,7 +42,7 @@ export function formatPercent(n: number, decimals = 1): string {
  * Compact KPI display with UZS suffix: "1.2B UZS", "1.2M UZS", "234K UZS".
  * Use in stat cards and summary totals.
  */
-export function formatPriceCompact(amount: number, currency: string = 'UZS'): string {
+export function formatPriceCompact(amount: number, currency = 'UZS'): string {
 	if (amount >= 1_000_000_000)
 		return `${(amount / 1_000_000_000).toFixed(1)}B ${currency}`;
 	if (amount >= 1_000_000) return `${(amount / 1_000_000).toFixed(1)}M ${currency}`;

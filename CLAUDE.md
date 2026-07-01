@@ -26,8 +26,16 @@ one that diverges.
   regenerate from the spec — do not hand-write it.
 - **Don't build ahead of the API.** Build a feature/screen only once its backend endpoints
   exist. No speculative features, no empty folders for future work.
-- **Respect package boundaries.** Apps import from package _barrels_ only; packages never
-  import apps; dependency direction is enforced (see
+- **Reuse the shared packages before writing anything new.** All cross-cutting code lives
+  in the `@repo/*` packages — `@repo/ui` (components + primitives), `@repo/utils`
+  (formatters, guards, shared types), `@repo/api-client` (generated types, typed client,
+  query-key + pagination helpers), and the rest. Look there **first** and use what fits —
+  never duplicate a component, helper, formatter, or type that already exists, and never
+  hand-roll money/date formatting when `@repo/utils` provides it. If you need something
+  shareable across apps that doesn't exist yet, **stop and ask the engineer** before adding
+  it to a package (see the promotion rule under _Repository structure_).
+- **Respect package boundaries.** Apps import from package _barrels_ (`@repo/*`) only;
+  packages never import apps; dependency direction is enforced (see
   [docs/architecture.md](docs/architecture.md)). No deep imports past a package's public
   entrypoint.
 - **Server state lives in TanStack Query. Client state lives in Zustand.** Do not put
@@ -95,7 +103,7 @@ one that diverges.
 
 ## UI Design System
 
-- Use shadcn/ui for ALL components. Never write raw HTML buttons, inputs, etc.
+- Import every component from `@repo/ui` (shadcn/ui primitives + composed EduCore components). Never write raw HTML buttons, inputs, etc., and never re-create a primitive that the barrel already exports.
 - Theme tokens live in `tailwind.config.ts` and `globals.css` (CSS variables)
 - Forms: always use `FieldGroup` + React Hook Form + Zod
 - Icons: use `lucide-react` only
@@ -104,16 +112,6 @@ one that diverges.
 - Buttons: use `<Button variant="...">` — variants: default, outline, ghost, destructive
 - Layout: use `Card`, `Separator`, `Sheet` for structure
 - No inline styles. No hardcoded hex colors.
-
-## Shared components
-
-- **Always check `packages/ui` first.** Before writing any UI component, look for an
-  existing shared component in `packages/ui`. Use it if it fits — do not duplicate.
-- **Flag candidates for promotion.** If you find yourself building a component that would
-  logically be useful across more than one app (e.g. `staff`, `teacher`, `portal`,
-  `admin`), **stop and ask the engineer** whether it should live in `packages/ui` instead
-  of the app. Do not place it in the app and do not create the shared component yourself —
-  that decision belongs to the engineer.
 
 ---
 
@@ -129,12 +127,16 @@ A pre-commit hook (husky + lint-staged) runs prettier/eslint on staged files. Se
 
 ---
 
-## Repository structure (orientation)
+## Repository structure
+
+- **Always check the shared packages first — for everything, not just UI.** Before writing any component, formatter, helper, guard, shared type, or API-client code, look for it in the `@repo/*` packages: `@repo/ui` (components + primitives), `@repo/utils` (money/date formatters, guards, cross-cutting types), `@repo/api-client` (generated types, typed client, query-key + pagination helpers). Use what fits — do not duplicate.
+- **Flag candidates for promotion.** If you find yourself building anything — a component, helper, formatter, or type — that would logically be useful across more than one app (`staff`, `admin`, and the future `teacher`/`portal`), **stop and ask the engineer** whether it belongs in the relevant `@repo/*` package instead of the app. Do not place it in the app and do not create or expand the shared package yourself — that decision belongs to the engineer.
 
 ```
 educore-fe/
 ├── apps/
-│   └── staff/        # Phase-1 Staff Web App (the only app today)
+│   ├── admin/       # Admin Web App (/api/v1/admin/* surface)
+│   └── staff/       # Staff Web App (/api/v1/manage/* surface)
 ├── packages/
 │   ├── ui/           # shadcn primitives + composed components
 │   ├── api-client/   # generated types, typed HTTP client, query-key + pagination helpers
@@ -151,14 +153,14 @@ Full detail in [docs/folder-structure.md](docs/folder-structure.md).
 
 The backend exposes **four role-gated API surfaces** (plus a shared, unauthenticated
 `/public` surface used by every app for auth). Each role-gated surface becomes its own app
-**when its roadmap phase arrives** — today only `staff` exists:
+**when its roadmap phase arrives** — today `staff` and `admin` exist:
 
-| App (future)    | Backend surface     | Roles                   |
-| --------------- | ------------------- | ----------------------- |
-| `staff` (now)   | `/api/v1/manage/*`  | OWNER, ADMIN, MANAGER   |
-| `teacher`       | `/api/v1/teach/*`   | TEACHER                 |
-| `portal`        | `/api/v1/portal/*`  | STUDENT, PARENT         |
-| `admin`         | `/api/v1/admin/*`   | SUPER_ADMIN             |
+| App                | Backend surface     | Roles                   |
+| ------------------ | ------------------- | ----------------------- |
+| `staff` (now)      | `/api/v1/manage/*`  | OWNER, ADMIN, MANAGER   |
+| `admin` (now)      | `/api/v1/admin/*`   | SUPER_ADMIN             |
+| `teacher` (future) | `/api/v1/teach/*`   | TEACHER                 |
+| `portal` (future)  | `/api/v1/portal/*`  | STUDENT, PARENT         |
 
 Every app also talks to `/api/v1/public/*` for login/refresh. Inside an app, `src/features/*`
 folders mirror the backend domains (`people`, `academics`, `billing`, …) — grouped by what

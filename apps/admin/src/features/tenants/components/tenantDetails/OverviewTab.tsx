@@ -3,7 +3,7 @@ import { GraduationCap, MapPin, Users, Wallet } from 'lucide-react';
 import { Card, CardContent, CardHeader, CardTitle } from '@repo/ui';
 
 import type { TenantDetailView } from '@/api/tenants/types';
-import { formatPrice } from '@/lib/formatters/currency';
+import { formatPrice } from '@repo/utils';
 
 export function OverviewTab({ tenant }: { tenant: TenantDetailView }) {
 	const { stats } = tenant;

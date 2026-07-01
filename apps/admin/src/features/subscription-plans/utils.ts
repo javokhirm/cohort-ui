@@ -1,4 +1,4 @@
-import { formatNumber } from '@/lib/formatters/amount';
+import { formatNumber } from '@repo/utils';
 import type { PlanView } from '@/api/plans/types';
 
 import { ALL_FEATURES, type FeatureKey } from './constants';

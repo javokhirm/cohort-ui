@@ -7,14 +7,7 @@ settings:
 importers:
 
   .:
-    dependencies:
-      luxon:
-        specifier: ^3.7.2
-        version: 3.7.2
     devDependencies:
-      '@types/luxon':
-        specifier: ^3.7.2
-        version: 3.7.2
       prettier:
         specifier: ^3.7.4
         version: 3.7.4
@@ -36,6 +29,9 @@ importers:
       '@repo/ui':
         specifier: workspace:*
         version: link:../../packages/ui
+      '@repo/utils':
+        specifier: workspace:*
+        version: link:../../packages/utils
       '@tanstack/react-query':
         specifier: ^5.101.2
         version: 5.101.2(react@19.2.7)
@@ -136,6 +132,9 @@ importers:
       '@repo/ui':
         specifier: workspace:*
         version: link:../../packages/ui
+      '@repo/utils':
+        specifier: workspace:*
+        version: link:../../packages/utils
       '@tanstack/react-query':
         specifier: ^5.101.2
         version: 5.101.2(react@19.2.7)
@@ -339,6 +338,28 @@ importers:
       tailwindcss:
         specifier: ^4.3.1
         version: 4.3.1
+      typescript:
+        specifier: 5.9.2
+        version: 5.9.2
+
+  packages/utils:
+    dependencies:
+      luxon:
+        specifier: ^3.7.2
+        version: 3.7.2
+    devDependencies:
+      '@repo/eslint-config':
+        specifier: workspace:*
+        version: link:../eslint-config
+      '@repo/typescript-config':
+        specifier: workspace:*
+        version: link:../typescript-config
+      '@types/luxon':
+        specifier: ^3.7.2
+        version: 3.7.2
+      eslint:
+        specifier: ^9.39.1
+        version: 9.39.1(jiti@2.7.0)
       typescript:
         specifier: 5.9.2
         version: 5.9.2

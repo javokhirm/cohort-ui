@@ -8,13 +8,10 @@ import {
 	type ColumnDef,
 	type RowSelectionState,
 } from '@repo/ui';
+import { formatPrice } from '@repo/utils';
 
 import type { Student, StudentUser } from '../api/students.queries';
 import { useBranches } from '../api/students.queries';
-
-function formatUZS(amount: number): string {
-	return new Intl.NumberFormat('ru-RU').format(amount) + ' UZS';
-}
 
 function StudentAvatar({ user }: { user: StudentUser }) {
 	const initials =
@@ -143,7 +140,7 @@ export function StudentTable({ students, isLoading }: StudentTableProps) {
 										: 'text-muted-foreground'
 								}
 							>
-								{formatUZS(balance)}
+								{formatPrice(balance)}
 							</span>
 						) : (
 							<span className="text-muted-foreground">—</span>

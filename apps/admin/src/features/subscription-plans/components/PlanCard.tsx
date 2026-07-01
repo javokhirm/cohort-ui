@@ -1,7 +1,7 @@
 import { Check, Pencil } from 'lucide-react';
 
 import { Badge, Button, Card, CardContent, Separator, cn } from '@repo/ui';
-import { formatPrice } from '@/lib/formatters/currency';
+import { formatPrice } from '@repo/utils';
 import type { PlanView } from '@/api/plans/types';
 
 import { FEATURE_LABELS } from '../constants';
@@ -20,12 +20,19 @@ export function PlanCard({
 	const features = planFeatures(plan);
 
 	return (
-		<Card className={cn('relative flex flex-col gap-0 py-0 transition-shadow hover:shadow-md')}>
+		<Card
+			className={cn(
+				'relative flex flex-col gap-0 py-0 transition-shadow hover:shadow-md',
+			)}
+		>
 			<CardContent className="flex flex-1 flex-col gap-5 px-6 pt-8 pb-6">
 				<div>
 					<p className="text-lg font-bold tracking-tight">{plan.name}</p>
 					{!plan.isActive && (
-						<Badge variant="outline" className="mt-1 text-xs text-muted-foreground">
+						<Badge
+							variant="outline"
+							className="mt-1 text-xs text-muted-foreground"
+						>
 							Inactive
 						</Badge>
 					)}
@@ -33,11 +40,15 @@ export function PlanCard({
 
 				<div>
 					{isCustom ? (
-						<p className="text-base font-semibold text-muted-foreground">Custom pricing</p>
+						<p className="text-base font-semibold text-muted-foreground">
+							Custom pricing
+						</p>
 					) : (
 						<p className="text-2xl font-bold tabular-nums leading-none">
 							{formatPrice(plan.priceMonthly)}{' '}
-							<span className="text-sm font-normal text-muted-foreground">UZS / month</span>
+							<span className="text-sm font-normal text-muted-foreground">
+								UZS / month
+							</span>
 						</p>
 					)}
 				</div>

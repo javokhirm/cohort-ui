@@ -38,6 +38,8 @@ export * from './components/composed/session-card';
 export * from './components/composed/week-strip';
 // Inputs & controls
 export * from './components/composed/confirm-dialog';
+export * from './components/composed/form-input';
+export * from './components/composed/form-select';
 export * from './components/composed/locale-switcher';
 export * from './components/composed/otp-input';
 export * from './components/composed/search-filter-bar';

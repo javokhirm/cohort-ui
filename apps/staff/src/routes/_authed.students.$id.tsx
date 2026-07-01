@@ -1,4 +1,4 @@
-import { StudentDetailScreen } from '@/features/people';
+import { StudentDetailPage } from '@/features/people';
 
 interface StudentDetailRouteProps {
 	id: string;
@@ -6,5 +6,5 @@ interface StudentDetailRouteProps {
 
 export function StudentDetailRoute({ id }: StudentDetailRouteProps) {
 	const studentId = Number(id);
-	return <StudentDetailScreen studentId={studentId} />;
+	return <StudentDetailPage studentId={studentId} />;
 }

@@ -9,7 +9,7 @@ import {
 	type ColumnDef,
 } from '@repo/ui';
 
-import { formatDateTime as formatTimestamp } from '@/lib/formatters/date';
+import { formatDateTime as formatTimestamp } from '@repo/utils';
 import { useAuditLogs } from '@/features/audit-log/hooks';
 import { PAGE_SIZE } from '@/features/audit-log/constants';
 

@@ -10,7 +10,7 @@ import {
 import type { StatusTone } from '@repo/ui';
 
 import type { TenantMemberView } from '@/api/tenants/types';
-import { formatDate } from '@/lib/formatters/date';
+import { formatDate } from '@repo/utils';
 import { avatarClass, getInitials } from '@/features/tenants/utils';
 
 const MEMBER_STATUS_TONE: Record<string, StatusTone> = {

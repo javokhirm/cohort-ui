@@ -1,9 +1,9 @@
 import { DateTime } from 'luxon';
 
-const ZONE = 'Asia/Tashkent';
+export const TASHKENT_TZ = 'Asia/Tashkent';
 
 function fromIso(iso: string): DateTime {
-	return DateTime.fromISO(iso, { zone: ZONE });
+	return DateTime.fromISO(iso, { zone: TASHKENT_TZ });
 }
 
 /** "15 Jun 2024" — date-only columns, subscription periods, member activity */
@@ -28,10 +28,10 @@ export function formatRelative(iso: string): string {
 
 /** "YYYY-MM-DD" — convert a JS Date (e.g. from a date-picker) to an API date string */
 export function toIsoDate(date: Date): string {
-	return DateTime.fromJSDate(date, { zone: ZONE }).toISODate() ?? '';
+	return DateTime.fromJSDate(date, { zone: TASHKENT_TZ }).toISODate() ?? '';
 }
 
 /** Whether the ISO timestamp is before now in Asia/Tashkent */
 export function isExpired(iso: string): boolean {
-	return fromIso(iso) < DateTime.now().setZone(ZONE);
+	return fromIso(iso) < DateTime.now().setZone(TASHKENT_TZ);
 }

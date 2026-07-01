@@ -34,11 +34,11 @@ import {
 	StatusBadge,
 } from '@repo/ui';
 import {
+	formatNumber,
 	formatPercent,
 	formatPriceAxis,
 	formatPriceCompact,
-} from '@/lib/formatters/currency';
-import { formatNumber } from '@/lib/formatters/amount';
+} from '@repo/utils';
 import type { DashboardKpis } from '@/api/dashboard/types';
 
 import { SERVICES, TENANT_STATUS_COLORS, TOOLTIP_STYLE } from '../constants';

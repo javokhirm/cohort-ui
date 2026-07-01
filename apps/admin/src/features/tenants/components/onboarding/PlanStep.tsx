@@ -4,7 +4,7 @@ import type { PlanView } from '@/api/plans/types';
 
 import type { OnboardFormData } from './types';
 import { planLimits } from './types';
-import { formatPrice } from '@/lib/formatters/currency';
+import { formatPrice } from '@repo/utils';
 
 export function PlanStep({
 	data,
