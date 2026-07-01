@@ -190,6 +190,185 @@ export const MOCK_GROUPS: MockGroup[] = [
 	},
 ];
 
+/** Detail projection for a group (adds counts + schedule + timestamps). */
+export function mockGroupDetail(id: number) {
+	const group = MOCK_GROUPS.find((g) => g.id === id);
+	if (!group) return null;
+	return {
+		...group,
+		startDate: '2025-03-03',
+		endDate: '2025-06-30',
+		scheduleRule: {
+			days: ['MON', 'WED', 'FRI'],
+			startTime: '09:00',
+			endTime: '10:30',
+		},
+		activeEnrollmentsCount: MOCK_ENROLLMENTS.filter(
+			(e) => e.groupId === id && e.status === 'ACTIVE',
+		).length,
+		sessionCount: MOCK_SESSIONS.filter((s) => s.groupId === id).length,
+		createdAt: '2025-02-01T00:00:00Z',
+		updatedAt: '2025-02-01T00:00:00Z',
+	};
+}
+
+// ─── Enrollment fixtures ──────────────────────────────────────────────────────
+
+interface MockEnrollment {
+	id: number;
+	groupId: number;
+	studentId: number;
+	studentName: string;
+	studentCode: string;
+	feePlanId: number | null;
+	enrolledAt: string;
+	status: 'ACTIVE' | 'DROPPED' | 'COMPLETED' | 'TRANSFERRED';
+	dropReason: string | null;
+	completedAt: string | null;
+}
+
+export const MOCK_ENROLLMENTS: MockEnrollment[] = [
+	{
+		id: 500,
+		groupId: 10,
+		studentId: 1,
+		studentName: 'Aziz Karimov',
+		studentCode: 'STU-2024-001',
+		feePlanId: null,
+		enrolledAt: '2025-03-01T00:00:00Z',
+		status: 'ACTIVE',
+		dropReason: null,
+		completedAt: null,
+	},
+	{
+		id: 501,
+		groupId: 10,
+		studentId: 2,
+		studentName: 'Malika Yusupova',
+		studentCode: 'STU-2024-002',
+		feePlanId: null,
+		enrolledAt: '2025-03-02T00:00:00Z',
+		status: 'ACTIVE',
+		dropReason: null,
+		completedAt: null,
+	},
+];
+
+// ─── Session fixtures ─────────────────────────────────────────────────────────
+
+interface MockSession {
+	id: number;
+	branchId: number;
+	groupId: number;
+	groupName: string;
+	courseName: string;
+	roomId: number | null;
+	roomName: string | null;
+	teacherId: number | null;
+	teacherName: string | null;
+	sessionDate: string;
+	startTime: string;
+	endTime: string;
+	topic: string | null;
+	status: 'SCHEDULED' | 'COMPLETED' | 'CANCELLED';
+}
+
+export const MOCK_SESSIONS: MockSession[] = [
+	{
+		id: 900,
+		branchId: 1,
+		groupId: 10,
+		groupName: 'IELTS Prep — Morning',
+		courseName: 'IELTS Prep',
+		roomId: 1,
+		roomName: 'Room 204',
+		teacherId: 101,
+		teacherName: 'Nilufar Saidova',
+		sessionDate: '2025-03-03',
+		startTime: '09:00',
+		endTime: '10:30',
+		topic: 'Reading — skimming & scanning',
+		status: 'SCHEDULED',
+	},
+	{
+		id: 901,
+		branchId: 1,
+		groupId: 10,
+		groupName: 'IELTS Prep — Morning',
+		courseName: 'IELTS Prep',
+		roomId: 1,
+		roomName: 'Room 204',
+		teacherId: 101,
+		teacherName: 'Nilufar Saidova',
+		sessionDate: '2025-03-05',
+		startTime: '09:00',
+		endTime: '10:30',
+		topic: null,
+		status: 'SCHEDULED',
+	},
+];
+
+export function mockSessionDetail(id: number) {
+	const session = MOCK_SESSIONS.find((s) => s.id === id);
+	if (!session) return null;
+	return {
+		...session,
+		cancellationReason: null,
+		roster: [
+			{ studentId: 1, studentName: 'Aziz Karimov', enrollmentStatus: 'ACTIVE' },
+			{ studentId: 2, studentName: 'Malika Yusupova', enrollmentStatus: 'ACTIVE' },
+		],
+		createdAt: '2025-02-01T00:00:00Z',
+		updatedAt: '2025-02-01T00:00:00Z',
+	};
+}
+
+// ─── Student fixtures (for the enroll picker) ─────────────────────────────────
+
+export const MOCK_STUDENTS = [
+	{
+		id: 1,
+		studentCode: 'STU-2024-001',
+		branchId: 1,
+		status: 'ACTIVE' as const,
+		enrolledAt: '2024-09-01T00:00:00Z',
+		dateOfBirth: null,
+		gender: null,
+		user: {
+			id: 11,
+			firstName: 'Aziz',
+			lastName: 'Karimov',
+			phone: '+998901112233',
+			email: null,
+			avatarUrl: null,
+		},
+	},
+	{
+		id: 3,
+		studentCode: 'STU-2024-003',
+		branchId: 1,
+		status: 'ACTIVE' as const,
+		enrolledAt: '2024-09-01T00:00:00Z',
+		dateOfBirth: null,
+		gender: null,
+		user: {
+			id: 13,
+			firstName: 'Diyor',
+			lastName: 'Rustamov',
+			phone: '+998901112255',
+			email: null,
+			avatarUrl: null,
+		},
+	},
+];
+
+// ─── Fee plan fixtures ────────────────────────────────────────────────────────
+
+export const MOCK_FEE_PLANS = [
+	{ id: 1, name: 'IELTS Monthly', amount: 850000, cycle: 'monthly' },
+	{ id: 2, name: 'One-time', amount: 2400000, cycle: 'one_time' },
+];
+
 // ─── Staff fixtures ───────────────────────────────────────────────────────────
 
 interface MockStaff {
@@ -510,6 +689,136 @@ export const handlers = [
 		return okPaged(rows.slice(start, start + limit), page, limit, total);
 	}),
 
+	http.post(`${MANAGE}/groups`, async ({ request }) => {
+		const body = (await request.json()) as Record<string, unknown>;
+		return ok({
+			id: 99,
+			branchId: body['branchId'],
+			courseId: body['courseId'],
+			courseName: 'IELTS Prep',
+			defaultTeacherId: body['defaultTeacherId'] ?? null,
+			defaultTeacherName: null,
+			roomId: body['roomId'] ?? null,
+			roomName: null,
+			name: body['name'],
+			capacity: body['capacity'] ?? null,
+			startDate: body['startDate'] ?? null,
+			endDate: body['endDate'] ?? null,
+			scheduleRule: body['scheduleRule'] ?? null,
+			status: 'PLANNED',
+			activeEnrollmentsCount: 0,
+			sessionCount: 0,
+			createdAt: '2026-07-01T00:00:00Z',
+			updatedAt: '2026-07-01T00:00:00Z',
+		});
+	}),
+
+	http.get(`${MANAGE}/groups/:id/enrollments`, ({ params, request }) => {
+		const url = new URL(request.url);
+		const status = url.searchParams.get('status');
+		let rows = MOCK_ENROLLMENTS.filter((e) => e.groupId === Number(params['id']));
+		if (status) rows = rows.filter((e) => e.status === status);
+		return ok(rows);
+	}),
+
+	http.post(`${MANAGE}/groups/:id/enrollments`, async ({ params, request }) => {
+		const body = (await request.json()) as { studentIds: number[] };
+		const created = body.studentIds.map((studentId, i) => ({
+			id: 600 + i,
+			groupId: Number(params['id']),
+			studentId,
+			studentName: 'New Student',
+			studentCode: `STU-2024-${String(studentId).padStart(3, '0')}`,
+			feePlanId: null,
+			enrolledAt: '2026-07-01T00:00:00Z',
+			status: 'ACTIVE' as const,
+			dropReason: null,
+			completedAt: null,
+		}));
+		return HttpResponse.json(
+			{ success: true, data: created, meta: { timestamp: 'test' } },
+			{ status: 201 },
+		);
+	}),
+
+	http.get(`${MANAGE}/groups/:id/sessions`, ({ params }) =>
+		ok(MOCK_SESSIONS.filter((s) => s.groupId === Number(params['id']))),
+	),
+
+	http.get(`${MANAGE}/groups/:id`, ({ params }) => {
+		const detail = mockGroupDetail(Number(params['id']));
+		if (!detail) return fail(404, 'GROUP_NOT_FOUND', 'Group not found.');
+		return ok(detail);
+	}),
+
+	http.patch(`${MANAGE}/groups/:id`, async ({ params, request }) => {
+		const detail = mockGroupDetail(Number(params['id']));
+		if (!detail) return fail(404, 'GROUP_NOT_FOUND', 'Group not found.');
+		const body = (await request.json()) as Record<string, unknown>;
+		return ok({ ...detail, ...body, updatedAt: '2026-07-02T00:00:00Z' });
+	}),
+
+	// ── Sessions ─────────────────────────────────────────────────────────────
+	http.get(`${MANAGE}/sessions`, ({ request }) => {
+		const url = new URL(request.url);
+		const from = url.searchParams.get('from');
+		const to = url.searchParams.get('to');
+		const status = url.searchParams.get('status');
+		const branchId = url.searchParams.get('branchId');
+		let rows = MOCK_SESSIONS;
+		if (from) rows = rows.filter((s) => s.sessionDate >= from);
+		if (to) rows = rows.filter((s) => s.sessionDate <= to);
+		if (status) rows = rows.filter((s) => s.status === status);
+		if (branchId) rows = rows.filter((s) => s.branchId === Number(branchId));
+		return ok(rows);
+	}),
+
+	http.get(`${MANAGE}/sessions/:id`, ({ params }) => {
+		const detail = mockSessionDetail(Number(params['id']));
+		if (!detail) return fail(404, 'SESSION_NOT_FOUND', 'Session not found.');
+		return ok(detail);
+	}),
+
+	http.patch(`${MANAGE}/sessions/:id`, async ({ params, request }) => {
+		const detail = mockSessionDetail(Number(params['id']));
+		if (!detail) return fail(404, 'SESSION_NOT_FOUND', 'Session not found.');
+		const body = (await request.json()) as Record<string, unknown>;
+		return ok({ ...detail, ...body, updatedAt: '2026-07-02T00:00:00Z' });
+	}),
+
+	// ── Enrollments ──────────────────────────────────────────────────────────
+	http.patch(`${MANAGE}/enrollments/:id`, async ({ params, request }) => {
+		const enrollment = MOCK_ENROLLMENTS.find((e) => e.id === Number(params['id']));
+		if (!enrollment)
+			return fail(404, 'ENROLLMENT_NOT_FOUND', 'Enrollment not found.');
+		const body = (await request.json()) as Record<string, unknown>;
+		return ok({ ...enrollment, ...body });
+	}),
+
+	// ── Students (enroll picker) ──────────────────────────────────────────────
+	http.get(`${MANAGE}/students`, ({ request }) => {
+		const url = new URL(request.url);
+		const search = url.searchParams.get('search')?.toLowerCase() ?? '';
+		const page = Number(url.searchParams.get('page') ?? 1);
+		const limit = Number(url.searchParams.get('limit') ?? 20);
+		let rows = MOCK_STUDENTS;
+		if (search)
+			rows = rows.filter(
+				(s) =>
+					`${s.user.firstName} ${s.user.lastName}`
+						.toLowerCase()
+						.includes(search) || s.studentCode.toLowerCase().includes(search),
+			);
+		const total = rows.length;
+		const start = (page - 1) * limit;
+		return okPaged(rows.slice(start, start + limit), page, limit, total);
+	}),
+
+	// ── Fee plans ─────────────────────────────────────────────────────────────
+	http.get(`${MANAGE}/fee-plans`, () =>
+		okPaged(MOCK_FEE_PLANS, 1, 100, MOCK_FEE_PLANS.length),
+	),
+
 	// ── Staff ────────────────────────────────────────────────────────────────
 	http.get(`${MANAGE}/staff`, ({ request }) => {
 		const url = new URL(request.url);
@@ -692,5 +1001,20 @@ export const payrollHandlers = {
 	),
 	approveForbidden: http.post(`${MANAGE}/payrolls/:id/approve`, () =>
 		fail(403, 'FORBIDDEN', 'You do not have permission.'),
+	),
+};
+
+export const groupHandlers = {
+	empty: http.get(`${MANAGE}/groups`, () => okPaged([], 1, 20, 0)),
+	serverError: http.get(`${MANAGE}/groups`, () =>
+		fail(500, 'INTERNAL_ERROR', 'Unexpected server error.'),
+	),
+	// Group at capacity — POST enroll returns 409.
+	enrollFull: http.post(`${MANAGE}/groups/:id/enrollments`, () =>
+		fail(409, 'GROUP_AT_CAPACITY', 'Group is at capacity.'),
+	),
+	// Reschedule/room change collides — PATCH session returns 409.
+	sessionConflict: http.patch(`${MANAGE}/sessions/:id`, () =>
+		fail(409, 'SESSION_CONFLICT', 'Room 204 is double-booked at this time.'),
 	),
 };

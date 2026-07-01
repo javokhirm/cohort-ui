@@ -19,6 +19,9 @@ import { StaffDetailRoute } from '@/routes/_authed.staff.$id';
 import { RoomsRoute } from '@/routes/_authed.rooms';
 import { CoursesRoute } from '@/routes/_authed.courses';
 import { CourseDetailRoute } from '@/routes/_authed.courses.$id';
+import { GroupsRoute } from '@/routes/_authed.groups';
+import { GroupDetailRoute } from '@/routes/_authed.groups.$id';
+import { ScheduleRoute } from '@/routes/_authed.schedule';
 import { PayrollRoute } from '@/routes/_authed.payroll';
 import { useSessionStore } from '@/store/sessionStore';
 
@@ -172,6 +175,82 @@ const courseDetailRoute = createRoute({
 	},
 });
 
+type GroupStatusSearch = 'PLANNED' | 'ACTIVE' | 'COMPLETED' | 'CANCELLED';
+
+interface GroupSearch {
+	page?: number;
+	branchId?: number;
+	courseId?: number;
+	status?: GroupStatusSearch;
+}
+
+const GROUP_STATUSES: GroupStatusSearch[] = [
+	'PLANNED',
+	'ACTIVE',
+	'COMPLETED',
+	'CANCELLED',
+];
+
+const groupsRoute = createRoute({
+	getParentRoute: () => authedRoute,
+	path: '/groups',
+	validateSearch: (search: Record<string, unknown>): GroupSearch => {
+		const page = Number(search.page);
+		const branchId = Number(search.branchId);
+		const courseId = Number(search.courseId);
+		const status = search.status;
+		return {
+			page: Number.isFinite(page) && page > 0 ? page : undefined,
+			branchId: Number.isFinite(branchId) && branchId > 0 ? branchId : undefined,
+			courseId: Number.isFinite(courseId) && courseId > 0 ? courseId : undefined,
+			status: GROUP_STATUSES.includes(status as GroupStatusSearch)
+				? (status as GroupStatusSearch)
+				: undefined,
+		};
+	},
+	component: GroupsRoute,
+});
+
+const groupDetailRoute = createRoute({
+	getParentRoute: () => authedRoute,
+	path: '/groups/$groupId',
+	component: () => {
+		const { groupId } = groupDetailRoute.useParams();
+		return <GroupDetailRoute id={groupId} />;
+	},
+});
+
+type SessionStatusSearch = 'SCHEDULED' | 'COMPLETED' | 'CANCELLED';
+
+interface ScheduleSearch {
+	date?: string;
+	branchId?: number;
+	status?: SessionStatusSearch;
+}
+
+const SESSION_STATUSES: SessionStatusSearch[] = ['SCHEDULED', 'COMPLETED', 'CANCELLED'];
+
+const scheduleRoute = createRoute({
+	getParentRoute: () => authedRoute,
+	path: '/schedule',
+	validateSearch: (search: Record<string, unknown>): ScheduleSearch => {
+		const branchId = Number(search.branchId);
+		const status = search.status;
+		const date =
+			typeof search.date === 'string' && /^\d{4}-\d{2}-\d{2}$/.test(search.date)
+				? search.date
+				: undefined;
+		return {
+			date,
+			branchId: Number.isFinite(branchId) && branchId > 0 ? branchId : undefined,
+			status: SESSION_STATUSES.includes(status as SessionStatusSearch)
+				? (status as SessionStatusSearch)
+				: undefined,
+		};
+	},
+	component: ScheduleRoute,
+});
+
 type PayrollStatusSearch = 'DRAFT' | 'APPROVED' | 'PAID';
 
 interface PayrollSearch {
@@ -208,6 +287,9 @@ const routeTree = rootRoute.addChildren([
 		roomsRoute,
 		coursesRoute,
 		courseDetailRoute,
+		groupsRoute,
+		groupDetailRoute,
+		scheduleRoute,
 		payrollRoute,
 	]),
 ]);
