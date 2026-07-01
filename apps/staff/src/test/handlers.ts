@@ -36,6 +36,52 @@ export const MOCK_BRANCHES = [
 	{ id: 2, name: 'Chilanzar Branch', code: 'BR-002', isMain: false, isActive: true },
 ];
 
+// ─── Room fixtures ────────────────────────────────────────────────────────────
+
+interface MockRoom {
+	id: number;
+	branchId: number;
+	name: string;
+	capacity: number;
+	type: 'classroom' | 'lab' | 'online' | null;
+	isActive: boolean;
+	createdAt: string;
+	updatedAt: string;
+}
+
+export const MOCK_ROOMS: MockRoom[] = [
+	{
+		id: 1,
+		branchId: 1,
+		name: 'Room 204',
+		capacity: 16,
+		type: 'classroom',
+		isActive: true,
+		createdAt: '2025-01-10T00:00:00Z',
+		updatedAt: '2025-01-10T00:00:00Z',
+	},
+	{
+		id: 2,
+		branchId: 1,
+		name: 'Computer Lab',
+		capacity: 24,
+		type: 'lab',
+		isActive: true,
+		createdAt: '2025-01-11T00:00:00Z',
+		updatedAt: '2025-01-11T00:00:00Z',
+	},
+	{
+		id: 3,
+		branchId: 2,
+		name: 'Zoom Room A',
+		capacity: 100,
+		type: 'online',
+		isActive: false,
+		createdAt: '2025-01-12T00:00:00Z',
+		updatedAt: '2025-01-12T00:00:00Z',
+	},
+];
+
 // ─── Staff fixtures ───────────────────────────────────────────────────────────
 
 interface MockStaff {
@@ -247,6 +293,45 @@ export const handlers = [
 	// ── Branches ─────────────────────────────────────────────────────────────
 	http.get(`${MANAGE}/branches`, () => ok(MOCK_BRANCHES)),
 
+	// ── Rooms ────────────────────────────────────────────────────────────────
+	http.get(`${MANAGE}/rooms`, ({ request }) => {
+		const url = new URL(request.url);
+		const branchId = url.searchParams.get('branchId');
+		const isActive = url.searchParams.get('isActive');
+		const page = Number(url.searchParams.get('page') ?? 1);
+		const limit = Number(url.searchParams.get('limit') ?? 20);
+
+		let rows = MOCK_ROOMS;
+		if (branchId) rows = rows.filter((r) => r.branchId === Number(branchId));
+		if (isActive !== null)
+			rows = rows.filter((r) => r.isActive === (isActive === 'true'));
+
+		const total = rows.length;
+		const start = (page - 1) * limit;
+		return okPaged(rows.slice(start, start + limit), page, limit, total);
+	}),
+
+	http.post(`${MANAGE}/rooms`, async ({ request }) => {
+		const body = (await request.json()) as Record<string, unknown>;
+		return ok({
+			id: 99,
+			branchId: body['branchId'],
+			name: body['name'],
+			capacity: body['capacity'],
+			type: body['type'] ?? null,
+			isActive: true,
+			createdAt: '2026-07-01T00:00:00Z',
+			updatedAt: '2026-07-01T00:00:00Z',
+		});
+	}),
+
+	http.patch(`${MANAGE}/rooms/:id`, async ({ params, request }) => {
+		const room = MOCK_ROOMS.find((r) => r.id === Number(params['id']));
+		if (!room) return fail(404, 'ROOM_NOT_FOUND', 'Room not found.');
+		const body = (await request.json()) as Record<string, unknown>;
+		return ok({ ...room, ...body, updatedAt: '2026-07-02T00:00:00Z' });
+	}),
+
 	// ── Staff ────────────────────────────────────────────────────────────────
 	http.get(`${MANAGE}/staff`, ({ request }) => {
 		const url = new URL(request.url);
@@ -398,6 +483,16 @@ export const staffHandlers = {
 		fail(403, 'FORBIDDEN', 'You do not have permission.'),
 	),
 	serverError: http.get(`${MANAGE}/staff`, () =>
+		fail(500, 'INTERNAL_ERROR', 'Unexpected server error.'),
+	),
+};
+
+export const roomHandlers = {
+	empty: http.get(`${MANAGE}/rooms`, () => okPaged([], 1, 20, 0)),
+	forbidden: http.get(`${MANAGE}/rooms`, () =>
+		fail(403, 'FORBIDDEN', 'You do not have permission.'),
+	),
+	serverError: http.get(`${MANAGE}/rooms`, () =>
 		fail(500, 'INTERNAL_ERROR', 'Unexpected server error.'),
 	),
 };

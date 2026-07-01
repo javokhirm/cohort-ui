@@ -16,6 +16,7 @@ import { StudentsRoute } from '@/routes/_authed.students';
 import { StudentDetailRoute } from '@/routes/_authed.students.$id';
 import { StaffRoute } from '@/routes/_authed.staff';
 import { StaffDetailRoute } from '@/routes/_authed.staff.$id';
+import { RoomsRoute } from '@/routes/_authed.rooms';
 import { PayrollRoute } from '@/routes/_authed.payroll';
 import { useSessionStore } from '@/store/sessionStore';
 
@@ -116,6 +117,27 @@ const staffDetailRoute = createRoute({
 	},
 });
 
+type RoomStatusSearch = 'active' | 'inactive';
+
+interface RoomSearch {
+	page?: number;
+	status?: RoomStatusSearch;
+}
+
+const roomsRoute = createRoute({
+	getParentRoute: () => authedRoute,
+	path: '/rooms',
+	validateSearch: (search: Record<string, unknown>): RoomSearch => {
+		const page = Number(search.page);
+		const status = search.status;
+		return {
+			page: Number.isFinite(page) && page > 0 ? page : undefined,
+			status: status === 'active' || status === 'inactive' ? status : undefined,
+		};
+	},
+	component: RoomsRoute,
+});
+
 type PayrollStatusSearch = 'DRAFT' | 'APPROVED' | 'PAID';
 
 interface PayrollSearch {
@@ -149,6 +171,7 @@ const routeTree = rootRoute.addChildren([
 		studentDetailRoute,
 		staffRoute,
 		staffDetailRoute,
+		roomsRoute,
 		payrollRoute,
 	]),
 ]);
