@@ -1,4 +1,4 @@
-import { useEffect } from 'react';
+import { useEffect, useState } from 'react';
 import { Outlet, useNavigate } from '@tanstack/react-router';
 
 import { useSessionStore } from '@/store/sessionStore';
@@ -13,6 +13,7 @@ import { Sidebar } from '@/layouts/Sidebar';
 export function AuthedLayout() {
 	const status = useSessionStore((s) => s.status);
 	const navigate = useNavigate();
+	const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
 
 	useEffect(() => {
 		if (status !== 'authenticated') {
@@ -23,11 +24,14 @@ export function AuthedLayout() {
 	if (status !== 'authenticated') return null;
 
 	return (
-		<div className="flex h-svh flex-col overflow-hidden bg-background text-foreground">
-			<Header />
+		<div className="flex h-svh overflow-hidden bg-background text-foreground">
+			<Sidebar collapsed={sidebarCollapsed} />
 
-			<div className="flex flex-1 overflow-hidden">
-				<Sidebar />
+			<div className="flex flex-1 flex-col overflow-hidden">
+				<Header
+					sidebarCollapsed={sidebarCollapsed}
+					onSidebarToggle={() => setSidebarCollapsed((c) => !c)}
+				/>
 				<main className="flex-1 overflow-y-auto px-6 py-8">
 					<Outlet />
 				</main>

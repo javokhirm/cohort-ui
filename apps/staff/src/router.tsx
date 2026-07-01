@@ -12,6 +12,8 @@ import { LoginRoute } from '@/routes/login';
 import { AuthedLayout } from '@/routes/authed-layout';
 import { DashboardPage } from '@/routes/dashboard';
 import { ForbiddenPage } from '@/routes/forbidden';
+import { StudentsRoute } from '@/routes/_authed.students';
+import { StudentDetailRoute } from '@/routes/_authed.students.$id';
 import { useSessionStore } from '@/store/sessionStore';
 
 const rootRoute = createRootRoute({
@@ -61,10 +63,25 @@ const dashboardRoute = createRoute({
 	component: DashboardPage,
 });
 
+const studentsRoute = createRoute({
+	getParentRoute: () => authedRoute,
+	path: '/students',
+	component: StudentsRoute,
+});
+
+const studentDetailRoute = createRoute({
+	getParentRoute: () => authedRoute,
+	path: '/students/$id',
+	component: () => {
+		const { id } = studentDetailRoute.useParams();
+		return <StudentDetailRoute id={id} />;
+	},
+});
+
 const routeTree = rootRoute.addChildren([
 	loginRoute,
 	forbiddenRoute,
-	authedRoute.addChildren([dashboardRoute]),
+	authedRoute.addChildren([dashboardRoute, studentsRoute, studentDetailRoute]),
 ]);
 
 export const router = createRouter({

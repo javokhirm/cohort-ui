@@ -62,8 +62,8 @@ apps/staff/
     │   ├── __root.tsx              # root route: auth gate, layout
     │   ├── login.tsx               # public route
     │   ├── _authed.tsx             # layout route guarding the authenticated area
-    │   ├── _authed.students.tsx    # → renders features/people StudentListScreen
-    │   └── ...                     # one route module per screen; delegates to a feature
+    │   ├── _authed.students.tsx    # → renders features/people StudentListPage
+    │   └── ...                     # one route module per page; delegates to a feature
     │
     ├── features/                   # ← feature slices, named after backend domains
     │   ├── people/                 # ✅ build now (students, staff, guardians)
@@ -74,9 +74,9 @@ apps/staff/
     │   │   ├── components/         # presentational + composed components for the feature
     │   │   │   ├── StudentTable.tsx
     │   │   │   └── StudentForm.tsx
-    │   │   ├── screens/            # route-level screens (what a route renders)
-    │   │   │   ├── StudentListScreen.tsx
-    │   │   │   └── StudentDetailScreen.tsx
+    │   │   ├── pages/            # route-level pages (what a route renders)
+    │   │   │   ├── StudentListPage.tsx
+    │   │   │   └── StudentDetailPage.tsx
     │   │   ├── schemas/            # zod schemas for this feature's forms
     │   │   │   └── student-form.schema.ts
     │   │   ├── hooks/              # feature-local hooks (non-data)

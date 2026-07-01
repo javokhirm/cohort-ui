@@ -1,22 +1,87 @@
 import { useState } from 'react';
 import { useNavigate } from '@tanstack/react-router';
-import { ChevronLeft, ChevronRight, Search } from 'lucide-react';
+import { Search } from 'lucide-react';
 
 import {
-	Button,
 	Card,
-	Skeleton,
-	Table,
-	TableBody,
-	TableCell,
-	TableHead,
-	TableHeader,
-	TableRow,
+	DataTable,
+	Pagination,
+	type ColumnDef,
 } from '@repo/ui';
 
 import { formatDateTime as formatTimestamp } from '@/lib/formatters/date';
 import { useAuditLogs } from '@/features/audit-log/hooks';
 import { PAGE_SIZE } from '@/features/audit-log/constants';
+
+type AuditLogRow = NonNullable<ReturnType<typeof useAuditLogs>['data']>['rows'][number];
+
+const columns: ColumnDef<AuditLogRow>[] = [
+	{
+		accessorKey: 'timestamp',
+		header: 'Timestamp',
+		cell: ({ getValue }) => (
+			<span className="text-xs text-muted-foreground tabular-nums">
+				{formatTimestamp(getValue<string>())}
+			</span>
+		),
+	},
+	{
+		id: 'actor',
+		header: 'Actor',
+		cell: ({ row }) => (
+			<div className="text-sm">
+				<div className="font-medium">{row.original.actor.name ?? '—'}</div>
+				{row.original.actor.role && (
+					<div className="text-xs text-muted-foreground">
+						{row.original.actor.role}
+					</div>
+				)}
+			</div>
+		),
+	},
+	{
+		id: 'tenant',
+		header: 'Tenant',
+		cell: ({ row }) => (
+			<span className="text-sm text-muted-foreground">
+				{row.original.tenant ? (
+					row.original.tenant.name
+				) : (
+					<span className="italic">Platform</span>
+				)}
+			</span>
+		),
+	},
+	{
+		accessorKey: 'action',
+		header: 'Action',
+		cell: ({ getValue }) => (
+			<code className="rounded bg-muted px-1.5 py-0.5 font-mono text-xs">
+				{getValue<string>()}
+			</code>
+		),
+	},
+	{
+		id: 'entity',
+		header: 'Entity',
+		cell: ({ row }) => (
+			<span className="text-xs text-muted-foreground">
+				{row.original.entityType
+					? `${row.original.entityType}${row.original.entityId != null ? ` #${row.original.entityId}` : ''}`
+					: '—'}
+			</span>
+		),
+	},
+	{
+		accessorKey: 'ipAddress',
+		header: 'IP Address',
+		cell: ({ getValue }) => (
+			<span className="text-xs text-muted-foreground tabular-nums">
+				{getValue<string | null>() ?? '—'}
+			</span>
+		),
+	},
+];
 
 export function AuditLogPage() {
 	const navigate = useNavigate();
@@ -40,11 +105,7 @@ export function AuditLogPage() {
 		return () => clearTimeout(timer);
 	}
 
-	const rows = data?.rows ?? [];
-	const totalPages = data?.totalPages ?? 1;
 	const total = data?.total ?? 0;
-	const rangeStart = total === 0 ? 0 : (page - 1) * PAGE_SIZE + 1;
-	const rangeEnd = Math.min(page * PAGE_SIZE, total);
 
 	return (
 		<div className="flex flex-col gap-6">
@@ -76,134 +137,31 @@ export function AuditLogPage() {
 			)}
 
 			<Card className="gap-0 overflow-hidden py-0">
-				<Table>
-					<TableHeader>
-						<TableRow>
-							<TableHead className="w-44">Timestamp</TableHead>
-							<TableHead>Actor</TableHead>
-							<TableHead>Tenant</TableHead>
-							<TableHead>Action</TableHead>
-							<TableHead>Entity</TableHead>
-							<TableHead>IP Address</TableHead>
-						</TableRow>
-					</TableHeader>
-					<TableBody>
-						{isLoading ? (
-							Array.from({ length: 8 }, (_, i) => (
-								<TableRow key={i}>
-									{Array.from({ length: 6 }, (_, j) => (
-										<TableCell key={j}>
-											<Skeleton className="h-4 w-full" />
-										</TableCell>
-									))}
-								</TableRow>
-							))
-						) : rows.length === 0 ? (
-							<TableRow>
-								<TableCell
-									colSpan={6}
-									className="py-16 text-center text-sm text-muted-foreground"
-								>
-									No audit log entries match your filters.
-								</TableCell>
-							</TableRow>
-						) : (
-							rows.map((entry) => (
-								<TableRow
-									key={entry.id}
-									className="cursor-pointer"
-									onClick={() =>
-										void navigate({
-											// eslint-disable-next-line @typescript-eslint/no-explicit-any
-											to: `/audit-log/${entry.id}` as any,
-										})
-									}
-								>
-									<TableCell className="text-xs text-muted-foreground tabular-nums">
-										{formatTimestamp(entry.timestamp)}
-									</TableCell>
-
-									<TableCell className="text-sm">
-										<div className="font-medium">{entry.actor.name ?? '—'}</div>
-										{entry.actor.role && (
-											<div className="text-xs text-muted-foreground">
-												{entry.actor.role}
-											</div>
-										)}
-									</TableCell>
-
-									<TableCell className="text-sm text-muted-foreground">
-										{entry.tenant ? (
-											entry.tenant.name
-										) : (
-											<span className="italic">Platform</span>
-										)}
-									</TableCell>
-
-									<TableCell>
-										<code className="rounded bg-muted px-1.5 py-0.5 font-mono text-xs">
-											{entry.action}
-										</code>
-									</TableCell>
-
-									<TableCell className="text-xs text-muted-foreground">
-										{entry.entityType
-											? `${entry.entityType}${entry.entityId != null ? ` #${entry.entityId}` : ''}`
-											: '—'}
-									</TableCell>
-
-									<TableCell className="text-xs text-muted-foreground tabular-nums">
-										{entry.ipAddress ?? '—'}
-									</TableCell>
-								</TableRow>
-							))
-						)}
-					</TableBody>
-				</Table>
-
-				<div className="flex items-center justify-between border-t border-border px-4 py-3">
-					<p className="text-xs text-muted-foreground">
-						{total === 0
-							? 'No results'
-							: `Showing ${rangeStart}–${rangeEnd} of ${total} entries`}
-					</p>
-
-					{totalPages > 1 && (
-						<div className="flex items-center gap-0.5">
-							<Button
-								variant="ghost"
-								size="icon"
-								className="size-8"
-								disabled={page <= 1}
-								onClick={() => setPage((p) => p - 1)}
-							>
-								<ChevronLeft className="size-4" />
-							</Button>
-							{Array.from({ length: Math.min(totalPages, 7) }, (_, i) => {
-								const p = i + 1;
-								return (
-									<Button
-										key={p}
-										variant={p === page ? 'default' : 'ghost'}
-										size="icon"
-										className="size-8 text-xs"
-										onClick={() => setPage(p)}
-									>
-										{p}
-									</Button>
-								);
-							})}
-							<Button
-								variant="ghost"
-								size="icon"
-								className="size-8"
-								disabled={page >= totalPages}
-								onClick={() => setPage((p) => p + 1)}
-							>
-								<ChevronRight className="size-4" />
-							</Button>
+				<DataTable
+					columns={columns}
+					data={data?.rows ?? []}
+					isLoading={isLoading}
+					getRowId={(row) => String(row.id)}
+					onRowClick={(row) =>
+						void navigate({
+							// eslint-disable-next-line @typescript-eslint/no-explicit-any
+							to: `/audit-log/${row.id}` as any,
+						})
+					}
+					emptyState={
+						<div className="py-16 text-center text-sm text-muted-foreground">
+							No audit log entries match your filters.
 						</div>
-					)}
+					}
+					className="rounded-none border-0"
+				/>
+				<div className="border-t border-border px-4 py-3">
+					<Pagination
+						page={page}
+						pageSize={PAGE_SIZE}
+						total={total}
+						onPageChange={setPage}
+					/>
 				</div>
 			</Card>
 		</div>

@@ -1,154 +1,375 @@
-import { useState } from 'react';
-import { Link, useRouterState } from '@tanstack/react-router';
-import { ChevronLeft, ChevronRight, LayoutDashboard } from 'lucide-react';
+import { useNavigate, useRouterState } from '@tanstack/react-router';
+import {
+	BookOpen,
+	Briefcase,
+	CalendarDays,
+	CheckSquare,
+	ClipboardList,
+	CreditCard,
+	DoorOpen,
+	FileText,
+	Filter,
+	FolderOpen,
+	GraduationCap,
+	History,
+	LayoutDashboard,
+	Layers,
+	LogOut,
+	MessageSquare,
+	MoreHorizontal,
+	Receipt,
+	ScrollText,
+	Shield,
+	Tag,
+	User,
+	Wallet,
+} from 'lucide-react';
 import type { LucideIcon } from 'lucide-react';
 
-import { cn, Separator, Tooltip, TooltipContent, TooltipTrigger } from '@repo/ui';
+import {
+	cn,
+	DropdownMenu,
+	DropdownMenuContent,
+	DropdownMenuItem,
+	DropdownMenuSeparator,
+	DropdownMenuTrigger,
+	Tooltip,
+	TooltipContent,
+	TooltipTrigger,
+} from '@repo/ui';
+import { useAuth } from '@/features/auth/hooks';
+import { getTenantSlug } from '@/lib/tenant';
 
 type NavItemDef = {
 	id: string;
 	label: string;
 	Icon: LucideIcon;
 	href: string;
-	match: string;
+	badge?: string;
 };
 
-const OVERVIEW_ITEMS: NavItemDef[] = [
+type NavGroupDef = {
+	label: string;
+	items: NavItemDef[];
+};
+
+const NAV_GROUPS: NavGroupDef[] = [
 	{
-		id: 'dashboard',
-		label: 'Dashboard',
-		Icon: LayoutDashboard,
-		href: '/',
-		match: '/',
+		label: 'Overview',
+		items: [
+			{ id: 'dashboard', label: 'Dashboard', Icon: LayoutDashboard, href: '/' },
+		],
+	},
+	{
+		label: 'CRM',
+		items: [{ id: 'leads', label: 'Leads / Pipeline', Icon: Filter, href: '/leads' }],
+	},
+	{
+		label: 'People',
+		items: [
+			{ id: 'students', label: 'Students', Icon: GraduationCap, href: '/students' },
+			{ id: 'staff', label: 'Staff & HR', Icon: Briefcase, href: '/staff' },
+		],
+	},
+	{
+		label: 'Academics',
+		items: [
+			{ id: 'courses', label: 'Courses', Icon: BookOpen, href: '/courses' },
+			{ id: 'rooms', label: 'Rooms', Icon: DoorOpen, href: '/rooms' },
+			{
+				id: 'groups',
+				label: 'Groups & Schedule',
+				Icon: CalendarDays,
+				href: '/groups',
+			},
+			{
+				id: 'attendance',
+				label: 'Attendance',
+				Icon: CheckSquare,
+				href: '/attendance',
+			},
+			{
+				id: 'assessments',
+				label: 'Assessments',
+				Icon: ClipboardList,
+				href: '/assessments',
+			},
+			{
+				id: 'report-cards',
+				label: 'Report Cards',
+				Icon: ScrollText,
+				href: '/report-cards',
+			},
+		],
+	},
+	{
+		label: 'Finance',
+		items: [
+			{ id: 'invoices', label: 'Invoices', Icon: FileText, href: '/invoices' },
+			{ id: 'payments', label: 'Payments', Icon: CreditCard, href: '/payments' },
+			{ id: 'fee-plans', label: 'Fee Plans', Icon: Layers, href: '/fee-plans' },
+			{ id: 'discounts', label: 'Discounts', Icon: Tag, href: '/discounts' },
+			{ id: 'expenses', label: 'Expenses', Icon: Receipt, href: '/expenses' },
+			{
+				id: 'payroll',
+				label: 'Payroll',
+				Icon: Wallet,
+				href: '/payroll',
+				badge: 'OWNER',
+			},
+		],
+	},
+	{
+		label: 'Engagement',
+		items: [
+			{
+				id: 'communication',
+				label: 'Communication',
+				Icon: MessageSquare,
+				href: '/communication',
+			},
+			{
+				id: 'materials',
+				label: 'Learning Materials',
+				Icon: FolderOpen,
+				href: '/materials',
+			},
+		],
+	},
+	{
+		label: 'Administration',
+		items: [
+			{ id: 'roles', label: 'Roles & Permissions', Icon: Shield, href: '/roles' },
+			{ id: 'audit-log', label: 'Audit Log', Icon: History, href: '/audit-log' },
+		],
 	},
 ];
 
-function NavItemLink({
+interface SidebarProps {
+	collapsed: boolean;
+}
+
+function NavButton({
 	item,
-	collapsed,
 	active,
+	collapsed,
 }: {
 	item: NavItemDef;
-	collapsed: boolean;
 	active: boolean;
+	collapsed: boolean;
 }) {
+	const navigate = useNavigate();
 	const { Icon } = item;
-	return (
-		<Link
-			to={item.href}
+
+	const button = (
+		<button
+			type="button"
+			// eslint-disable-next-line @typescript-eslint/no-explicit-any
+			onClick={() => void navigate({ to: item.href as any })}
 			className={cn(
-				'flex h-9 w-full items-center rounded-md text-sm transition-colors',
-				collapsed ? 'justify-center' : 'gap-3 px-3',
+				'flex h-9 w-full items-center overflow-hidden rounded-md text-[13px] transition-colors',
 				active
-					? 'bg-primary/10 font-medium text-primary'
+					? 'bg-sidebar-accent font-semibold text-sidebar-accent-foreground'
 					: 'text-muted-foreground hover:bg-muted hover:text-foreground',
 			)}
 		>
-			<Icon className="size-4 shrink-0" />
-			{!collapsed && <span className="truncate">{item.label}</span>}
-		</Link>
-	);
-}
+			{/* Icon slot — width transitions between centered (collapsed) and left-rail (expanded) */}
+			<span
+				className={cn(
+					'flex shrink-0 items-center justify-center transition-[width] duration-220 ease-in-out',
+					collapsed ? 'w-full' : 'w-9',
+				)}
+			>
+				<Icon
+					className={cn(
+						'size-4 shrink-0',
+						active ? 'text-sidebar-primary' : 'text-muted-foreground',
+					)}
+				/>
+			</span>
 
-function NavItem({
-	item,
-	collapsed,
-	pathname,
-}: {
-	item: NavItemDef;
-	collapsed: boolean;
-	pathname: string;
-}) {
-	const active = pathname === item.match;
+			{/* Text + badge — fades quickly, clipped by button overflow-hidden */}
+			<span
+				style={{ transitionDelay: collapsed ? '0ms' : '80ms' }}
+				className={cn(
+					'flex flex-1 items-center gap-1.5 overflow-hidden whitespace-nowrap pr-2.5',
+					'transition-opacity duration-120',
+					collapsed ? 'opacity-0' : 'opacity-100',
+				)}
+			>
+				<span className="flex-1 truncate text-left">{item.label}</span>
+				{item.badge && (
+					<span className="rounded-md bg-tone-amber-bg px-1.5 py-px text-[9.5px] font-bold uppercase tracking-wide text-tone-amber-fg">
+						{item.badge}
+					</span>
+				)}
+			</span>
+		</button>
+	);
 
 	if (collapsed) {
 		return (
 			<Tooltip>
-				<TooltipTrigger asChild>
-					<NavItemLink item={item} collapsed={collapsed} active={active} />
-				</TooltipTrigger>
+				<TooltipTrigger asChild>{button}</TooltipTrigger>
 				<TooltipContent side="right" sideOffset={8}>
-					{item.label}
+					<span>{item.label}</span>
+					{item.badge && (
+						<span className="ml-1 text-[9px] font-bold text-tone-amber-fg">
+							{item.badge}
+						</span>
+					)}
 				</TooltipContent>
 			</Tooltip>
 		);
 	}
 
-	return <NavItemLink item={item} collapsed={collapsed} active={active} />;
+	return button;
 }
 
-function NavGroup({
-	label,
-	items,
-	collapsed,
-	pathname,
-}: {
-	label: string;
-	items: NavItemDef[];
-	collapsed: boolean;
-	pathname: string;
-}) {
-	return (
-		<div className="flex flex-col gap-0.5">
-			{!collapsed && (
-				<div className="mb-1 px-3 text-[10px] font-semibold uppercase tracking-widest text-muted-foreground">
-					{label}
-				</div>
-			)}
-			{items.map((item) => (
-				<NavItem
-					key={item.id}
-					item={item}
-					collapsed={collapsed}
-					pathname={pathname}
-				/>
-			))}
-		</div>
-	);
-}
-
-export function Sidebar() {
-	const [collapsed, setCollapsed] = useState(false);
+export function Sidebar({ collapsed }: SidebarProps) {
+	const { user, logout } = useAuth();
 	const pathname = useRouterState({ select: (s) => s.location.pathname });
+	const tenantSlug = getTenantSlug();
+
+	const tenantName = tenantSlug
+		? tenantSlug.charAt(0).toUpperCase() + tenantSlug.slice(1)
+		: 'EduCore';
+	const tenantInitial = tenantName[0]?.toUpperCase() ?? 'E';
+
+	const fullName = user ? `${user.firstName} ${user.lastName}`.trim() : '';
+	const initials = user
+		? `${user.firstName?.[0] ?? ''}${user.lastName?.[0] ?? ''}`.toUpperCase()
+		: '?';
+	const primaryRole = user?.roles[0] ?? '';
 
 	return (
 		<aside
 			className={cn(
-				'flex shrink-0 flex-col border-r border-border bg-card transition-[width] duration-200',
-				collapsed ? 'w-14' : 'w-60',
+				'flex shrink-0 flex-col overflow-hidden border-r border-sidebar-border bg-sidebar',
+				'transition-[width] duration-220 ease-in-out',
+				collapsed ? 'w-14.5' : 'w-59',
 			)}
 		>
-			<nav className="flex flex-1 flex-col gap-4 overflow-y-auto p-3">
-				<NavGroup
-					label="Overview"
-					items={OVERVIEW_ITEMS}
-					collapsed={collapsed}
-					pathname={pathname}
-				/>
-				<div className="mt-auto">
-					<Separator className="mb-4" />
+			{/* Tenant header */}
+			<div className="flex h-14.5 shrink-0 items-center gap-2.5 border-b border-sidebar-border px-4">
+				<div className="flex size-8 shrink-0 items-center justify-center rounded-lg bg-primary text-sm font-extrabold text-primary-foreground">
+					{tenantInitial}
 				</div>
-			</nav>
-
-			<div className="shrink-0 border-t border-border p-3">
-				<button
-					type="button"
-					onClick={() => setCollapsed((c) => !c)}
-					aria-label={collapsed ? 'Expand sidebar' : 'Collapse sidebar'}
+				<div
+					style={{ transitionDelay: collapsed ? '0ms' : '80ms' }}
 					className={cn(
-						'flex h-9 w-full items-center rounded-md text-sm text-muted-foreground transition-colors hover:bg-muted hover:text-foreground',
-						collapsed ? 'justify-center' : 'gap-2 px-3',
+						'min-w-0 overflow-hidden whitespace-nowrap transition-opacity duration-120',
+						collapsed ? 'opacity-0' : 'opacity-100',
 					)}
 				>
-					{collapsed ? (
-						<ChevronRight className="size-4 shrink-0" />
-					) : (
-						<>
-							<ChevronLeft className="size-4 shrink-0" />
-							<span>Collapse</span>
-						</>
-					)}
-				</button>
+					<div className="truncate text-[13.5px] font-bold tracking-tight text-sidebar-foreground">
+						{tenantName}
+					</div>
+					<div className="font-mono text-[10px] text-muted-foreground">
+						MANAGE
+					</div>
+				</div>
+			</div>
+
+			{/* Nav */}
+			<nav className="flex flex-1 flex-col gap-3.5 overflow-y-auto p-2.5 py-3">
+				{NAV_GROUPS.map((group) => (
+					<div key={group.label} className="flex flex-col gap-0.5">
+						{/* Group label — collapses via max-height + fades */}
+						<div
+							style={{ transitionDelay: collapsed ? '0ms' : '80ms' }}
+							className={cn(
+								'overflow-hidden whitespace-nowrap px-2',
+								'transition-[max-height,opacity] duration-120',
+								collapsed
+									? 'max-h-0 opacity-0'
+									: 'mb-0.5 max-h-6 opacity-100',
+							)}
+						>
+							<span className="text-[10px] font-semibold uppercase tracking-widest text-muted-foreground">
+								{group.label}
+							</span>
+						</div>
+						{group.items.map((item) => (
+							<NavButton
+								key={item.id}
+								item={item}
+								active={pathname === item.href}
+								collapsed={collapsed}
+							/>
+						))}
+					</div>
+				))}
+			</nav>
+
+			{/* User footer */}
+			<div className="shrink-0 border-t border-sidebar-border p-2.5">
+				<div className="flex items-center gap-2.5 rounded-xl p-2">
+					<Tooltip>
+						<TooltipTrigger asChild>
+							<div className="flex size-8 shrink-0 items-center justify-center rounded-lg bg-primary text-xs font-bold text-primary-foreground">
+								{initials}
+							</div>
+						</TooltipTrigger>
+						{collapsed && (
+							<TooltipContent side="right" sideOffset={8}>
+								<div className="font-semibold">{fullName}</div>
+								{primaryRole && (
+									<div className="text-[10px] text-muted-foreground">
+										{primaryRole}
+									</div>
+								)}
+							</TooltipContent>
+						)}
+					</Tooltip>
+
+					<div
+						style={{ transitionDelay: collapsed ? '0ms' : '80ms' }}
+						className={cn(
+							'flex min-w-0 flex-1 items-center gap-1.5 overflow-hidden whitespace-nowrap',
+							'transition-opacity duration-120',
+							collapsed ? 'opacity-0' : 'opacity-100',
+						)}
+					>
+						<div className="min-w-0 flex-1">
+							<div className="truncate text-[12.5px] font-semibold text-foreground">
+								{fullName}
+							</div>
+							{primaryRole && (
+								<div className="mt-0.5">
+									<span className="rounded-md bg-tone-indigo-bg px-1.5 py-px text-[9.5px] font-semibold uppercase tracking-wide text-tone-indigo-fg">
+										{primaryRole}
+									</span>
+								</div>
+							)}
+						</div>
+
+						<DropdownMenu>
+							<DropdownMenuTrigger asChild>
+								<button
+									type="button"
+									className="flex size-7 shrink-0 items-center justify-center rounded-md text-muted-foreground hover:bg-muted"
+								>
+									<MoreHorizontal className="size-4" />
+								</button>
+							</DropdownMenuTrigger>
+							<DropdownMenuContent side="top" align="end" className="w-40">
+								<DropdownMenuItem>
+									<User className="mr-2 size-4" />
+									Profile
+								</DropdownMenuItem>
+								<DropdownMenuSeparator />
+								<DropdownMenuItem
+									className="text-destructive focus:text-destructive"
+									onClick={logout}
+								>
+									<LogOut className="mr-2 size-4" />
+									Sign out
+								</DropdownMenuItem>
+							</DropdownMenuContent>
+						</DropdownMenu>
+					</div>
+				</div>
 			</div>
 		</aside>
 	);

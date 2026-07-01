@@ -105,6 +105,16 @@ one that diverges.
 - Layout: use `Card`, `Separator`, `Sheet` for structure
 - No inline styles. No hardcoded hex colors.
 
+## Shared components
+
+- **Always check `packages/ui` first.** Before writing any UI component, look for an
+  existing shared component in `packages/ui`. Use it if it fits — do not duplicate.
+- **Flag candidates for promotion.** If you find yourself building a component that would
+  logically be useful across more than one app (e.g. `staff`, `teacher`, `portal`,
+  `admin`), **stop and ask the engineer** whether it should live in `packages/ui` instead
+  of the app. Do not place it in the app and do not create the shared component yourself —
+  that decision belongs to the engineer.
+
 ---
 
 ## Commands

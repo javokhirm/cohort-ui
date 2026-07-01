@@ -1,6 +1,6 @@
 import { useState } from 'react';
-import { Link, useNavigate } from '@tanstack/react-router';
-import { ChevronLeft, ChevronRight, Search } from 'lucide-react';
+import { useNavigate } from '@tanstack/react-router';
+import { Search } from 'lucide-react';
 
 import {
 	Avatar,
@@ -8,15 +8,12 @@ import {
 	Button,
 	Card,
 	CardContent,
+	DataTable,
+	Pagination,
 	Skeleton,
 	StatusBadge,
-	Table,
-	TableBody,
-	TableCell,
-	TableHead,
-	TableHeader,
-	TableRow,
 	cn,
+	type ColumnDef,
 } from '@repo/ui';
 
 import { formatPrice, formatPriceAxis } from '@/lib/formatters/currency';
@@ -32,6 +29,90 @@ import {
 	type StatusTab,
 } from '@/features/tenants/constants';
 import { useTenantsPage, useTenantSummary } from '@/features/tenants/hooks';
+
+type TenantRow = NonNullable<ReturnType<typeof useTenantsPage>['data']>['rows'][number];
+
+const columns: ColumnDef<TenantRow>[] = [
+	{
+		id: 'center',
+		header: 'Center',
+		cell: ({ row }) => {
+			const tenant = row.original;
+			return (
+				<div className="flex items-center gap-3">
+					<Avatar className="size-8 shrink-0">
+						<AvatarFallback
+							className={cn('text-xs font-bold', avatarClass(tenant.id))}
+						>
+							{getInitials(tenant.name)}
+						</AvatarFallback>
+					</Avatar>
+					<div className="min-w-0">
+						<p className="truncate text-sm font-medium leading-tight">
+							{tenant.name}
+						</p>
+						<p className="truncate text-xs text-muted-foreground">
+							{tenant.subdomain}.educore.uz
+						</p>
+					</div>
+				</div>
+			);
+		},
+	},
+	{
+		id: 'plan',
+		header: 'Plan',
+		cell: ({ row }) => (
+			<span className="text-sm text-muted-foreground">
+				{row.original.plan?.name ?? '—'}
+			</span>
+		),
+	},
+	{
+		id: 'status',
+		header: 'Status',
+		cell: ({ row }) => {
+			const tenant = row.original;
+			return (
+				<div className="flex flex-col gap-1">
+					<StatusBadge tone={TENANT_STATUS_TONE[tenant.status]}>
+						{TENANT_STATUS_LABEL[tenant.status]}
+					</StatusBadge>
+					{tenant.subscriptionStatus && (
+						<StatusBadge tone={SUB_STATUS_TONE[tenant.subscriptionStatus]}>
+							{SUB_STATUS_LABEL[tenant.subscriptionStatus]}
+						</StatusBadge>
+					)}
+				</div>
+			);
+		},
+	},
+	{
+		id: 'branches',
+		header: () => <div className="text-right">Branches</div>,
+		cell: ({ row }) => (
+			<div className="text-right tabular-nums">{row.original.branches}</div>
+		),
+	},
+	{
+		id: 'students',
+		header: () => <div className="text-right">Students</div>,
+		cell: ({ row }) => (
+			<div className="text-right tabular-nums">
+				{formatNumber(row.original.students)}
+			</div>
+		),
+	},
+	{
+		id: 'mrr',
+		header: () => <div className="text-right">MRR</div>,
+		cell: ({ row }) => (
+			<div className="text-right tabular-nums text-sm">
+				{row.original.mrr === 0 ? '—' : formatPrice(row.original.mrr)}
+			</div>
+		),
+	},
+];
 
 export function TenantsPage() {
 	const navigate = useNavigate();
@@ -65,11 +146,7 @@ export function TenantsPage() {
 		setPage(1);
 	}
 
-	const rows = tenantsPage?.rows ?? [];
-	const totalPages = tenantsPage?.totalPages ?? 1;
 	const total = tenantsPage?.total ?? 0;
-	const rangeStart = total === 0 ? 0 : (page - 1) * PAGE_SIZE + 1;
-	const rangeEnd = Math.min(page * PAGE_SIZE, total);
 
 	function tabCount(tab: StatusTab): number {
 		if (!summary) return 0;
@@ -211,184 +288,31 @@ export function TenantsPage() {
 			)}
 
 			<Card className="gap-0 overflow-hidden py-0">
-				<Table>
-					<TableHeader>
-						<TableRow>
-							<TableHead className="w-72">Center</TableHead>
-							<TableHead>Plan</TableHead>
-							<TableHead>Status</TableHead>
-							<TableHead className="text-right">Branches</TableHead>
-							<TableHead className="text-right">Students</TableHead>
-							<TableHead className="text-right">MRR</TableHead>
-						</TableRow>
-					</TableHeader>
-					<TableBody>
-						{isLoading ? (
-							Array.from({ length: 6 }, (_, i) => (
-								<TableRow key={i}>
-									<TableCell>
-										<div className="flex items-center gap-3">
-											<Skeleton className="size-8 rounded-full" />
-											<div className="flex flex-col gap-1">
-												<Skeleton className="h-4 w-36" />
-												<Skeleton className="h-3 w-24" />
-											</div>
-										</div>
-									</TableCell>
-									<TableCell>
-										<Skeleton className="h-4 w-16" />
-									</TableCell>
-									<TableCell>
-										<Skeleton className="h-5 w-20 rounded-full" />
-									</TableCell>
-									<TableCell className="text-right">
-										<Skeleton className="ml-auto h-4 w-6" />
-									</TableCell>
-									<TableCell className="text-right">
-										<Skeleton className="ml-auto h-4 w-12" />
-									</TableCell>
-									<TableCell className="text-right">
-										<Skeleton className="ml-auto h-4 w-20" />
-									</TableCell>
-								</TableRow>
-							))
-						) : rows.length === 0 ? (
-							<TableRow>
-								<TableCell
-									colSpan={6}
-									className="py-16 text-center text-sm text-muted-foreground"
-								>
-									No tenants match your filters.
-								</TableCell>
-							</TableRow>
-						) : (
-							rows.map((tenant) => (
-								<TableRow
-									key={tenant.id}
-									className="cursor-pointer"
-									onClick={() =>
-										void navigate({
-											// eslint-disable-next-line @typescript-eslint/no-explicit-any
-											to: `/tenants/${tenant.id}` as any,
-										})
-									}
-								>
-									<TableCell>
-										<div className="flex items-center gap-3">
-											<Avatar className="size-8 shrink-0">
-												<AvatarFallback
-													className={cn(
-														'text-xs font-bold',
-														avatarClass(tenant.id),
-													)}
-												>
-													{getInitials(tenant.name)}
-												</AvatarFallback>
-											</Avatar>
-											<div className="min-w-0">
-												<Link
-													// eslint-disable-next-line @typescript-eslint/no-explicit-any
-													to={`/tenants/${tenant.id}` as any}
-													className="truncate text-sm font-medium leading-tight hover:underline"
-												>
-													{tenant.name}
-												</Link>
-												<p className="truncate text-xs text-muted-foreground">
-													{tenant.subdomain}.educore.uz
-												</p>
-											</div>
-										</div>
-									</TableCell>
-
-									<TableCell className="text-sm text-muted-foreground">
-										{tenant.plan?.name ?? '—'}
-									</TableCell>
-
-									<TableCell>
-										<div className="flex flex-col gap-1">
-											<StatusBadge
-												tone={TENANT_STATUS_TONE[tenant.status]}
-											>
-												{TENANT_STATUS_LABEL[tenant.status]}
-											</StatusBadge>
-											{tenant.subscriptionStatus && (
-												<StatusBadge
-													tone={
-														SUB_STATUS_TONE[
-															tenant.subscriptionStatus
-														]
-													}
-												>
-													{
-														SUB_STATUS_LABEL[
-															tenant.subscriptionStatus
-														]
-													}
-												</StatusBadge>
-											)}
-										</div>
-									</TableCell>
-
-									<TableCell className="text-right tabular-nums">
-										{tenant.branches}
-									</TableCell>
-
-									<TableCell className="text-right tabular-nums">
-										{formatNumber(tenant.students)}
-									</TableCell>
-
-									<TableCell className="text-right tabular-nums text-sm">
-										{tenant.mrr === 0 ? '—' : formatPrice(tenant.mrr)}
-									</TableCell>
-								</TableRow>
-							))
-						)}
-					</TableBody>
-				</Table>
-
-				<div className="flex items-center justify-between border-t border-border px-4 py-3">
-					<p className="text-xs text-muted-foreground">
-						{total === 0
-							? 'No results'
-							: `Showing ${rangeStart}–${rangeEnd} of ${total} tenants`}
-					</p>
-
-					{totalPages > 1 && (
-						<div className="flex items-center gap-0.5">
-							<Button
-								variant="ghost"
-								size="icon"
-								className="size-8"
-								disabled={page <= 1}
-								onClick={() => setPage((p) => p - 1)}
-							>
-								<ChevronLeft className="size-4" />
-							</Button>
-							{Array.from({ length: Math.min(totalPages, 7) }, (_, i) => {
-								const p = i + 1;
-								return (
-									<Button
-										key={p}
-										variant={p === page ? 'default' : 'ghost'}
-										size="icon"
-										className="size-8 text-xs"
-										onClick={() => setPage(p)}
-									>
-										{p}
-									</Button>
-								);
-							})}
-							<Button
-								variant="ghost"
-								size="icon"
-								className="size-8"
-								disabled={page >= totalPages}
-								onClick={() => setPage((p) => p + 1)}
-							>
-								<ChevronRight className="size-4" />
-							</Button>
+				<DataTable
+					columns={columns}
+					data={tenantsPage?.rows ?? []}
+					isLoading={isLoading}
+					getRowId={(row) => String(row.id)}
+					onRowClick={(row) =>
+						void navigate({
+							// eslint-disable-next-line @typescript-eslint/no-explicit-any
+							to: `/tenants/${row.id}` as any,
+						})
+					}
+					emptyState={
+						<div className="py-16 text-center text-sm text-muted-foreground">
+							No tenants match your filters.
 						</div>
-					)}
+					}
+					className="rounded-none border-0"
+				/>
+				<div className="border-t border-border px-4 py-3">
+					<Pagination
+						page={page}
+						pageSize={PAGE_SIZE}
+						total={total}
+						onPageChange={setPage}
+					/>
 				</div>
 			</Card>
 		</div>

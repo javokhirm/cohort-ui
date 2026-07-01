@@ -91,10 +91,8 @@ function Pagination({
 			{...props}
 		>
 			{showRange && (
-				<p className="text-sm text-muted-foreground tabular-nums">
-					Showing <span className="font-medium text-foreground">{from}</span>–
-					<span className="font-medium text-foreground">{to}</span> of{' '}
-					<span className="font-medium text-foreground">{total}</span>
+				<p className="text-xs text-muted-foreground tabular-nums">
+					{total === 0 ? 'No results' : `Showing ${from}–${to} of ${total}`}
 				</p>
 			)}
 

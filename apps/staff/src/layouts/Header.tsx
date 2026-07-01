@@ -1,4 +1,5 @@
-import { Bell, ChevronDown, LogOut, User } from 'lucide-react';
+import { useState } from 'react';
+import { Check, ChevronDown, Globe, PanelLeft, Search, Sun } from 'lucide-react';
 
 import {
 	DropdownMenu,
@@ -7,94 +8,126 @@ import {
 	DropdownMenuLabel,
 	DropdownMenuSeparator,
 	DropdownMenuTrigger,
+	NotificationBell,
 } from '@repo/ui';
-import { useAuth } from '@/features/auth/hooks';
-import { getTenantSlug } from '@/lib/tenant';
 
-export function Header() {
-	const { user, logout } = useAuth();
-	const tenantSlug = getTenantSlug();
+interface HeaderProps {
+	sidebarCollapsed: boolean;
+	onSidebarToggle: () => void;
+}
 
-	const fullName = user ? `${user.firstName} ${user.lastName}`.trim() : '';
-	const initials = user
-		? `${user.firstName?.[0] ?? ''}${user.lastName?.[0] ?? ''}`.toUpperCase()
-		: '?';
+const BRANCHES = [
+	{ id: 'all', name: 'All branches', color: '#64748b' },
+	{ id: '1', name: 'Yunusobod', color: '#6366f1' },
+	{ id: '2', name: 'Chilonzor', color: '#0e7490' },
+	{ id: '3', name: 'Sergeli', color: '#7c3aed' },
+];
+
+export function Header({ sidebarCollapsed, onSidebarToggle }: HeaderProps) {
+	const [activeBranch, setActiveBranch] = useState(BRANCHES[1]);
 
 	return (
-		<header className="z-40 flex h-14 shrink-0 items-center gap-3 border-b border-border bg-card px-4">
-			<div className="flex items-center gap-2.5">
-				<div className="flex size-7.5 shrink-0 items-center justify-center rounded-lg bg-primary text-sm font-extrabold text-primary-foreground">
-					{tenantSlug?.[0]?.toUpperCase() ?? 'E'}
-				</div>
-				<span className="text-sm font-bold text-foreground">
-					{tenantSlug
-						? tenantSlug.charAt(0).toUpperCase() + tenantSlug.slice(1)
-						: 'EduCore'}
-				</span>
-			</div>
-
-			<div className="flex-1" />
-
+		<header className="z-40 flex h-14 shrink-0 items-center gap-2 border-b border-border bg-card px-3">
+			{/* Sidebar toggle */}
 			<button
 				type="button"
-				aria-label="Notifications"
-				className="relative flex size-8.5 items-center justify-center rounded-lg text-muted-foreground hover:bg-muted"
+				onClick={onSidebarToggle}
+				aria-label={sidebarCollapsed ? 'Expand sidebar' : 'Collapse sidebar'}
+				className="flex size-8 items-center justify-center rounded-lg text-muted-foreground hover:bg-muted"
 			>
-				<Bell className="size-4" />
+				<PanelLeft className="size-4" />
 			</button>
 
-			<div className="h-6 w-px bg-border" />
-
+			{/* Branch switcher */}
 			<DropdownMenu>
 				<DropdownMenuTrigger asChild>
 					<button
 						type="button"
-						className="flex cursor-pointer items-center gap-2 rounded-lg px-2 py-1 hover:bg-muted"
+						className="flex h-8 items-center gap-1.5 rounded-lg border border-border px-2.5 text-sm hover:bg-muted"
 					>
-						<div className="flex size-7.5 shrink-0 items-center justify-center rounded-lg bg-primary text-xs font-bold text-primary-foreground">
-							{initials}
-						</div>
-						{fullName && (
-							<div className="hidden leading-tight sm:block">
-								<div className="text-[12.5px] font-semibold text-foreground">
-									{fullName}
-								</div>
-							</div>
-						)}
+						<span
+							className="size-2 rounded-full"
+							style={{ background: activeBranch?.color }}
+						/>
+						<span className="font-medium text-foreground">
+							{activeBranch?.name}
+						</span>
 						<ChevronDown className="size-3.5 text-muted-foreground" />
 					</button>
 				</DropdownMenuTrigger>
-				<DropdownMenuContent align="end" className="w-48">
-					{fullName && (
-						<>
-							<DropdownMenuLabel className="font-normal">
-								<div className="font-semibold">{fullName}</div>
-								{user?.roles.map((r) => (
-									<span
-										key={r}
-										className="mr-1 mt-1 inline-flex rounded-sm bg-primary/10 px-1.5 py-0.5 text-[10px] font-bold tracking-wide text-primary"
-									>
-										{r}
-									</span>
-								))}
-							</DropdownMenuLabel>
-							<DropdownMenuSeparator />
-						</>
-					)}
-					<DropdownMenuItem>
-						<User className="mr-2 size-4" />
-						Profile
-					</DropdownMenuItem>
-					<DropdownMenuSeparator />
-					<DropdownMenuItem
-						className="text-destructive focus:text-destructive"
-						onClick={logout}
-					>
-						<LogOut className="mr-2 size-4" />
-						Sign out
-					</DropdownMenuItem>
+				<DropdownMenuContent align="start" className="w-52">
+					<DropdownMenuLabel className="text-[10px] font-semibold uppercase tracking-wider text-muted-foreground">
+						Switch Branch
+					</DropdownMenuLabel>
+					{BRANCHES.map((branch) => (
+						<DropdownMenuItem
+							key={branch.id}
+							onClick={() => setActiveBranch(branch)}
+							className="gap-2"
+						>
+							<span
+								className="size-2 rounded-full"
+								style={{ background: branch.color }}
+							/>
+							<span className="flex-1">{branch.name}</span>
+							{activeBranch?.id === branch.id && (
+								<Check className="size-3.5 text-primary" />
+							)}
+						</DropdownMenuItem>
+					))}
 				</DropdownMenuContent>
 			</DropdownMenu>
+
+			{/* Search */}
+			<div className="relative flex h-8 max-w-xs flex-1 items-center">
+				<Search className="absolute left-2.5 size-3.5 text-muted-foreground" />
+				<input
+					type="search"
+					placeholder="Search students, invoices, groups..."
+					className="h-full w-full rounded-lg border border-border bg-muted/50 pl-8 pr-10 text-sm placeholder:text-muted-foreground focus:outline-none focus:ring-1 focus:ring-ring"
+				/>
+				<kbd className="pointer-events-none absolute right-2 flex h-5 items-center rounded border border-border bg-background px-1 text-[10px] font-medium text-muted-foreground">
+					⌘K
+				</kbd>
+			</div>
+
+			<div className="flex-1" />
+
+			{/* Language picker */}
+			<DropdownMenu>
+				<DropdownMenuTrigger asChild>
+					<button
+						type="button"
+						className="flex items-center gap-1.5 rounded-lg px-2.5 py-1.5 hover:bg-muted"
+					>
+						<Globe className="size-4 text-muted-foreground" />
+						<span className="text-xs font-semibold text-foreground">EN</span>
+					</button>
+				</DropdownMenuTrigger>
+				<DropdownMenuContent align="end" className="w-44">
+					<DropdownMenuItem className="justify-between">
+						English <Check className="size-3.5 text-primary" />
+					</DropdownMenuItem>
+					<DropdownMenuItem>Русский</DropdownMenuItem>
+					<DropdownMenuItem>O'zbekcha</DropdownMenuItem>
+					<DropdownMenuSeparator />
+					<p className="px-2 py-1 text-[10px] text-muted-foreground">
+						UI copy stays English in preview
+					</p>
+				</DropdownMenuContent>
+			</DropdownMenu>
+
+			{/* Notifications */}
+			<NotificationBell unreadCount={0} />
+
+			{/* Theme toggle */}
+			<button
+				type="button"
+				aria-label="Toggle theme"
+				className="flex size-8 items-center justify-center rounded-lg text-muted-foreground hover:bg-muted"
+			>
+				<Sun className="size-4" />
+			</button>
 		</header>
 	);
 }

@@ -62,7 +62,7 @@ function DataTable<TData, TValue>({
 	const table = useReactTable({
 		data,
 		columns,
-		state: { sorting, rowSelection, columnVisibility },
+		state: { sorting, rowSelection: rowSelection ?? {}, columnVisibility },
 		getRowId,
 		manualSorting,
 		enableRowSelection: !!onRowSelectionChange,

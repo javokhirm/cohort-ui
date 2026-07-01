@@ -1,26 +1,90 @@
 import { useEffect, useState } from 'react';
 import { useNavigate, useSearch } from '@tanstack/react-router';
-import { ChevronLeft, ChevronRight, Search } from 'lucide-react';
+import { Search } from 'lucide-react';
 
 import {
 	Avatar,
 	AvatarFallback,
 	Badge,
-	Button,
 	Card,
-	Table,
-	TableBody,
-	TableCell,
-	TableHead,
-	TableHeader,
-	TableRow,
+	DataTable,
+	Pagination,
 	cn,
+	type ColumnDef,
 } from '@repo/ui';
 
 import { useUserList } from '@/features/users/hooks';
 import { avatarClass, getInitials } from '@/features/users/utils';
-import { TableSkeleton } from '@/features/users/components/TableSkeleton';
 import { PAGE_SIZE } from '@/features/users/constants';
+
+type UserRow = NonNullable<ReturnType<typeof useUserList>['data']>['rows'][number];
+
+const columns: ColumnDef<UserRow>[] = [
+	{
+		id: 'user',
+		header: 'User',
+		cell: ({ row }) => {
+			const user = row.original;
+			return (
+				<div className="flex items-center gap-3">
+					<Avatar className="size-8 shrink-0">
+						<AvatarFallback
+							className={cn('text-xs font-bold', avatarClass(user.id))}
+						>
+							{getInitials(user.firstName, user.lastName)}
+						</AvatarFallback>
+					</Avatar>
+					<div className="flex flex-col">
+						<span className="text-sm font-medium">
+							{user.firstName} {user.lastName}
+						</span>
+						{user.email && (
+							<span className="text-xs text-muted-foreground">
+								{user.email}
+							</span>
+						)}
+					</div>
+				</div>
+			);
+		},
+	},
+	{
+		accessorKey: 'phone',
+		header: 'Phone',
+		cell: ({ getValue }) => (
+			<span className="text-sm tabular-nums text-muted-foreground">
+				{getValue<string>()}
+			</span>
+		),
+	},
+	{
+		id: 'tenants',
+		header: 'Tenants',
+		cell: ({ row }) => (
+			<div className="flex flex-wrap gap-1.5">
+				{row.original.tenants.slice(0, 3).map((t) => (
+					<Badge key={t.tenantId} variant="secondary" className="text-xs">
+						{t.name}
+					</Badge>
+				))}
+				{row.original.tenants.length > 3 && (
+					<Badge variant="outline" className="text-xs">
+						+{row.original.tenants.length - 3}
+					</Badge>
+				)}
+			</div>
+		),
+	},
+	{
+		accessorKey: 'membershipCount',
+		header: () => <div className="text-right">Count</div>,
+		cell: ({ getValue }) => (
+			<div className="text-right text-sm font-medium tabular-nums">
+				{getValue<number>()}
+			</div>
+		),
+	},
+];
 
 export function UserDirectoryPage() {
 	const navigate = useNavigate();
@@ -45,10 +109,7 @@ export function UserDirectoryPage() {
 
 	const { data: list, isLoading, isError } = useUserList({ page, search: searchParam });
 
-	const totalPages = list ? Math.max(1, list.totalPages) : 1;
 	const total = list?.total ?? 0;
-	const rangeStart = total === 0 ? 0 : (page - 1) * PAGE_SIZE + 1;
-	const rangeEnd = Math.min(page * PAGE_SIZE, total);
 
 	function handlePage(newPage: number) {
 		void navigate({ search: (prev) => ({ ...prev, page: newPage }) });
@@ -89,144 +150,31 @@ export function UserDirectoryPage() {
 			)}
 
 			<Card className="gap-0 overflow-hidden py-0">
-				<Table>
-					<TableHeader>
-						<TableRow>
-							<TableHead className="w-72">User</TableHead>
-							<TableHead>Phone</TableHead>
-							<TableHead>Tenants</TableHead>
-							<TableHead className="text-right">Count</TableHead>
-						</TableRow>
-					</TableHeader>
-					<TableBody>
-						{isLoading ? (
-							<TableSkeleton />
-						) : !list || list.rows.length === 0 ? (
-							<TableRow>
-								<TableCell
-									colSpan={4}
-									className="py-16 text-center text-sm text-muted-foreground"
-								>
-									No users match your search.
-								</TableCell>
-							</TableRow>
-						) : (
-							list.rows.map((user) => (
-								<TableRow
-									key={user.id}
-									className="cursor-pointer"
-									onClick={() =>
-										void navigate({
-											to: '/users/$userId',
-											params: { userId: String(user.id) },
-										})
-									}
-								>
-									<TableCell>
-										<div className="flex items-center gap-3">
-											<Avatar className="size-8 shrink-0">
-												<AvatarFallback
-													className={cn(
-														'text-xs font-bold',
-														avatarClass(user.id),
-													)}
-												>
-													{getInitials(
-														user.firstName,
-														user.lastName,
-													)}
-												</AvatarFallback>
-											</Avatar>
-											<div className="flex flex-col">
-												<span className="text-sm font-medium">
-													{user.firstName} {user.lastName}
-												</span>
-												{user.email && (
-													<span className="text-xs text-muted-foreground">
-														{user.email}
-													</span>
-												)}
-											</div>
-										</div>
-									</TableCell>
-
-									<TableCell className="text-sm tabular-nums text-muted-foreground">
-										{user.phone}
-									</TableCell>
-
-									<TableCell>
-										<div className="flex flex-wrap gap-1.5">
-											{user.tenants.slice(0, 3).map((t) => (
-												<Badge
-													key={t.tenantId}
-													variant="secondary"
-													className="text-xs"
-												>
-													{t.name}
-												</Badge>
-											))}
-											{user.tenants.length > 3 && (
-												<Badge
-													variant="outline"
-													className="text-xs"
-												>
-													+{user.tenants.length - 3}
-												</Badge>
-											)}
-										</div>
-									</TableCell>
-
-									<TableCell className="text-right text-sm font-medium tabular-nums">
-										{user.membershipCount}
-									</TableCell>
-								</TableRow>
-							))
-						)}
-					</TableBody>
-				</Table>
-
-				<div className="flex items-center justify-between border-t border-border px-4 py-3">
-					<p className="text-xs text-muted-foreground">
-						{isLoading
-							? 'Loading…'
-							: total === 0
-								? 'No results'
-								: `Showing ${rangeStart}–${rangeEnd} of ${total} users`}
-					</p>
-
-					{totalPages > 1 && (
-						<div className="flex items-center gap-0.5">
-							<Button
-								variant="ghost"
-								size="icon"
-								className="size-8"
-								disabled={page <= 1}
-								onClick={() => handlePage(page - 1)}
-							>
-								<ChevronLeft className="size-4" />
-							</Button>
-							{Array.from({ length: totalPages }, (_, i) => (
-								<Button
-									key={i}
-									variant={i + 1 === page ? 'default' : 'ghost'}
-									size="icon"
-									className="size-8 text-xs"
-									onClick={() => handlePage(i + 1)}
-								>
-									{i + 1}
-								</Button>
-							))}
-							<Button
-								variant="ghost"
-								size="icon"
-								className="size-8"
-								disabled={page >= totalPages}
-								onClick={() => handlePage(page + 1)}
-							>
-								<ChevronRight className="size-4" />
-							</Button>
+				<DataTable
+					columns={columns}
+					data={list?.rows ?? []}
+					isLoading={isLoading}
+					getRowId={(row) => String(row.id)}
+					onRowClick={(row) =>
+						void navigate({
+							to: '/users/$userId',
+							params: { userId: String(row.id) },
+						})
+					}
+					emptyState={
+						<div className="py-16 text-center text-sm text-muted-foreground">
+							No users match your search.
 						</div>
-					)}
+					}
+					className="rounded-none border-0"
+				/>
+				<div className="border-t border-border px-4 py-3">
+					<Pagination
+						page={page}
+						pageSize={PAGE_SIZE}
+						total={total}
+						onPageChange={handlePage}
+					/>
 				</div>
 			</Card>
 		</div>

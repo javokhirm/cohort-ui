@@ -2,14 +2,10 @@ import {
 	Avatar,
 	AvatarFallback,
 	Card,
+	DataTable,
 	StatusBadge,
-	Table,
-	TableBody,
-	TableCell,
-	TableHead,
-	TableHeader,
-	TableRow,
 	cn,
+	type ColumnDef,
 } from '@repo/ui';
 import type { StatusTone } from '@repo/ui';
 
@@ -29,73 +25,84 @@ const MEMBER_STATUS_LABEL: Record<string, string> = {
 	INACTIVE: 'Inactive',
 };
 
+const columns: ColumnDef<TenantMemberView>[] = [
+	{
+		id: 'user',
+		header: 'User',
+		cell: ({ row }) => {
+			const member = row.original;
+			return (
+				<div className="flex items-center gap-2.5">
+					<Avatar className="size-7 shrink-0">
+						<AvatarFallback
+							className={cn(
+								'text-xs font-semibold',
+								avatarClass(member.user.id),
+							)}
+						>
+							{getInitials(
+								`${member.user.firstName} ${member.user.lastName}`,
+							)}
+						</AvatarFallback>
+					</Avatar>
+					<span className="font-medium">
+						{member.user.firstName} {member.user.lastName}
+					</span>
+				</div>
+			);
+		},
+	},
+	{
+		id: 'contact',
+		header: 'Contact',
+		cell: ({ row }) => (
+			<span className="text-sm text-muted-foreground">
+				{row.original.user.phone}
+				{row.original.user.email && (
+					<span className="ml-1 text-xs">· {row.original.user.email}</span>
+				)}
+			</span>
+		),
+	},
+	{
+		accessorKey: 'status',
+		header: 'Status',
+		cell: ({ getValue }) => {
+			const status = getValue<string>();
+			return (
+				<StatusBadge tone={MEMBER_STATUS_TONE[status] ?? 'slate'}>
+					{MEMBER_STATUS_LABEL[status] ?? status}
+				</StatusBadge>
+			);
+		},
+	},
+	{
+		id: 'lastLogin',
+		header: 'Last login',
+		cell: ({ row }) => (
+			<span className="text-sm text-muted-foreground">
+				{row.original.user.lastLoginAt
+					? formatDate(row.original.user.lastLoginAt)
+					: '—'}
+			</span>
+		),
+	},
+];
+
 export function MembersTab({ members }: { members: TenantMemberView[] }) {
 	return (
 		<Card className="gap-0 overflow-hidden py-0">
-			{members.length === 0 ? (
-				<div className="py-16 text-center text-sm text-muted-foreground">
-					No members found.
-				</div>
-			) : (
-				<Table>
-					<TableHeader>
-						<TableRow>
-							<TableHead>User</TableHead>
-							<TableHead>Contact</TableHead>
-							<TableHead>Status</TableHead>
-							<TableHead>Last login</TableHead>
-						</TableRow>
-					</TableHeader>
-					<TableBody>
-						{members.map((member) => (
-							<TableRow key={member.userId}>
-								<TableCell>
-									<div className="flex items-center gap-2.5">
-										<Avatar className="size-7 shrink-0">
-											<AvatarFallback
-												className={cn(
-													'text-xs font-semibold',
-													avatarClass(member.user.id),
-												)}
-											>
-												{getInitials(
-													`${member.user.firstName} ${member.user.lastName}`,
-												)}
-											</AvatarFallback>
-										</Avatar>
-										<span className="font-medium">
-											{member.user.firstName} {member.user.lastName}
-										</span>
-									</div>
-								</TableCell>
-								<TableCell className="text-sm text-muted-foreground">
-									{member.user.phone}
-									{member.user.email && (
-										<span className="ml-1 text-xs">
-											· {member.user.email}
-										</span>
-									)}
-								</TableCell>
-								<TableCell>
-									<StatusBadge
-										tone={
-											MEMBER_STATUS_TONE[member.status] ?? 'slate'
-										}
-									>
-										{MEMBER_STATUS_LABEL[member.status] ??
-											member.status}
-									</StatusBadge>
-								</TableCell>
-								<TableCell className="text-sm text-muted-foreground">
-									{member.user.lastLoginAt
-										? formatDate(member.user.lastLoginAt)
-										: '—'}
-								</TableCell>
-							</TableRow>
-						))}
-					</TableBody>
-				</Table>
-			)}
+			<DataTable
+				columns={columns}
+				data={members}
+				getRowId={(row) => String(row.userId)}
+				emptyState={
+					<div className="py-16 text-center text-sm text-muted-foreground">
+						No members found.
+					</div>
+				}
+				className="rounded-none border-0"
+			/>
 		</Card>
 	);
 }
