@@ -82,6 +82,114 @@ export const MOCK_ROOMS: MockRoom[] = [
 	},
 ];
 
+// ─── Course fixtures ──────────────────────────────────────────────────────────
+
+interface MockCourse {
+	id: number;
+	branchId: number | null;
+	name: string;
+	description: string | null;
+	level: string | null;
+	defaultDurationWeeks: number | null;
+	isActive: boolean;
+	createdAt: string;
+	updatedAt: string;
+}
+
+export const MOCK_COURSES: MockCourse[] = [
+	{
+		id: 1,
+		branchId: null,
+		name: 'IELTS Prep',
+		description: 'Exam-focused academic English',
+		level: 'Upper-Intermediate',
+		defaultDurationWeeks: 12,
+		isActive: true,
+		createdAt: '2025-01-05T00:00:00Z',
+		updatedAt: '2025-01-05T00:00:00Z',
+	},
+	{
+		id: 2,
+		branchId: 1,
+		name: 'General English A2',
+		description: null,
+		level: 'A2',
+		defaultDurationWeeks: 16,
+		isActive: true,
+		createdAt: '2025-01-06T00:00:00Z',
+		updatedAt: '2025-01-06T00:00:00Z',
+	},
+	{
+		id: 3,
+		branchId: 2,
+		name: 'Kids Coding',
+		description: 'Scratch and Python basics',
+		level: 'Beginner',
+		defaultDurationWeeks: null,
+		isActive: false,
+		createdAt: '2025-01-07T00:00:00Z',
+		updatedAt: '2025-01-07T00:00:00Z',
+	},
+];
+
+// ─── Group fixtures (subset of GroupListItemResponseDto) ──────────────────────
+
+interface MockGroup {
+	id: number;
+	name: string;
+	branchId: number;
+	courseId: number;
+	courseName: string;
+	defaultTeacherId: number | null;
+	defaultTeacherName: string | null;
+	roomId: number | null;
+	roomName: string | null;
+	capacity: number | null;
+	status: 'PLANNED' | 'ACTIVE' | 'COMPLETED' | 'CANCELLED';
+}
+
+export const MOCK_GROUPS: MockGroup[] = [
+	{
+		id: 10,
+		name: 'IELTS Prep — Morning',
+		branchId: 1,
+		courseId: 1,
+		courseName: 'IELTS Prep',
+		defaultTeacherId: 101,
+		defaultTeacherName: 'Nilufar Saidova',
+		roomId: 1,
+		roomName: 'Room 204',
+		capacity: 15,
+		status: 'ACTIVE',
+	},
+	{
+		id: 11,
+		name: 'IELTS Prep — Evening',
+		branchId: 1,
+		courseId: 1,
+		courseName: 'IELTS Prep',
+		defaultTeacherId: 101,
+		defaultTeacherName: 'Nilufar Saidova',
+		roomId: 1,
+		roomName: 'Room 204',
+		capacity: 15,
+		status: 'ACTIVE',
+	},
+	{
+		id: 12,
+		name: 'IELTS Prep — Weekend (done)',
+		branchId: 1,
+		courseId: 1,
+		courseName: 'IELTS Prep',
+		defaultTeacherId: 102,
+		defaultTeacherName: 'Jasur Toxtayev',
+		roomId: 2,
+		roomName: 'Computer Lab',
+		capacity: 12,
+		status: 'COMPLETED',
+	},
+];
+
 // ─── Staff fixtures ───────────────────────────────────────────────────────────
 
 interface MockStaff {
@@ -332,6 +440,76 @@ export const handlers = [
 		return ok({ ...room, ...body, updatedAt: '2026-07-02T00:00:00Z' });
 	}),
 
+	// ── Courses ──────────────────────────────────────────────────────────────
+	http.get(`${MANAGE}/courses`, ({ request }) => {
+		const url = new URL(request.url);
+		const branchId = url.searchParams.get('branchId');
+		const isActive = url.searchParams.get('isActive');
+		const search = url.searchParams.get('search')?.toLowerCase() ?? '';
+		const page = Number(url.searchParams.get('page') ?? 1);
+		const limit = Number(url.searchParams.get('limit') ?? 20);
+
+		let rows = MOCK_COURSES;
+		if (branchId) rows = rows.filter((c) => c.branchId === Number(branchId));
+		if (isActive !== null)
+			rows = rows.filter((c) => c.isActive === (isActive === 'true'));
+		if (search)
+			rows = rows.filter(
+				(c) =>
+					c.name.toLowerCase().includes(search) ||
+					(c.level?.toLowerCase().includes(search) ?? false),
+			);
+
+		const total = rows.length;
+		const start = (page - 1) * limit;
+		return okPaged(rows.slice(start, start + limit), page, limit, total);
+	}),
+
+	http.post(`${MANAGE}/courses`, async ({ request }) => {
+		const body = (await request.json()) as Record<string, unknown>;
+		return ok({
+			id: 99,
+			branchId: body['branchId'] ?? null,
+			name: body['name'],
+			description: body['description'] ?? null,
+			level: body['level'] ?? null,
+			defaultDurationWeeks: body['defaultDurationWeeks'] ?? null,
+			isActive: true,
+			createdAt: '2026-07-01T00:00:00Z',
+			updatedAt: '2026-07-01T00:00:00Z',
+		});
+	}),
+
+	http.get(`${MANAGE}/courses/:id`, ({ params }) => {
+		const course = MOCK_COURSES.find((c) => c.id === Number(params['id']));
+		if (!course) return fail(404, 'COURSE_NOT_FOUND', 'Course not found.');
+		return ok(course);
+	}),
+
+	http.patch(`${MANAGE}/courses/:id`, async ({ params, request }) => {
+		const course = MOCK_COURSES.find((c) => c.id === Number(params['id']));
+		if (!course) return fail(404, 'COURSE_NOT_FOUND', 'Course not found.');
+		const body = (await request.json()) as Record<string, unknown>;
+		return ok({ ...course, ...body, updatedAt: '2026-07-02T00:00:00Z' });
+	}),
+
+	// ── Groups ───────────────────────────────────────────────────────────────
+	http.get(`${MANAGE}/groups`, ({ request }) => {
+		const url = new URL(request.url);
+		const courseId = url.searchParams.get('courseId');
+		const status = url.searchParams.get('status');
+		const page = Number(url.searchParams.get('page') ?? 1);
+		const limit = Number(url.searchParams.get('limit') ?? 20);
+
+		let rows = MOCK_GROUPS;
+		if (courseId) rows = rows.filter((g) => g.courseId === Number(courseId));
+		if (status) rows = rows.filter((g) => g.status === status);
+
+		const total = rows.length;
+		const start = (page - 1) * limit;
+		return okPaged(rows.slice(start, start + limit), page, limit, total);
+	}),
+
 	// ── Staff ────────────────────────────────────────────────────────────────
 	http.get(`${MANAGE}/staff`, ({ request }) => {
 		const url = new URL(request.url);
@@ -493,6 +671,16 @@ export const roomHandlers = {
 		fail(403, 'FORBIDDEN', 'You do not have permission.'),
 	),
 	serverError: http.get(`${MANAGE}/rooms`, () =>
+		fail(500, 'INTERNAL_ERROR', 'Unexpected server error.'),
+	),
+};
+
+export const courseHandlers = {
+	empty: http.get(`${MANAGE}/courses`, () => okPaged([], 1, 20, 0)),
+	forbidden: http.get(`${MANAGE}/courses`, () =>
+		fail(403, 'FORBIDDEN', 'You do not have permission.'),
+	),
+	serverError: http.get(`${MANAGE}/courses`, () =>
 		fail(500, 'INTERNAL_ERROR', 'Unexpected server error.'),
 	),
 };

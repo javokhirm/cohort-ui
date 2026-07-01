@@ -17,6 +17,8 @@ import { StudentDetailRoute } from '@/routes/_authed.students.$id';
 import { StaffRoute } from '@/routes/_authed.staff';
 import { StaffDetailRoute } from '@/routes/_authed.staff.$id';
 import { RoomsRoute } from '@/routes/_authed.rooms';
+import { CoursesRoute } from '@/routes/_authed.courses';
+import { CourseDetailRoute } from '@/routes/_authed.courses.$id';
 import { PayrollRoute } from '@/routes/_authed.payroll';
 import { useSessionStore } from '@/store/sessionStore';
 
@@ -138,6 +140,38 @@ const roomsRoute = createRoute({
 	component: RoomsRoute,
 });
 
+type CourseStatusSearch = 'active' | 'inactive';
+
+interface CourseSearch {
+	page?: number;
+	search?: string;
+	status?: CourseStatusSearch;
+}
+
+const coursesRoute = createRoute({
+	getParentRoute: () => authedRoute,
+	path: '/courses',
+	validateSearch: (search: Record<string, unknown>): CourseSearch => {
+		const page = Number(search.page);
+		const status = search.status;
+		return {
+			page: Number.isFinite(page) && page > 0 ? page : undefined,
+			search: typeof search.search === 'string' ? search.search : undefined,
+			status: status === 'active' || status === 'inactive' ? status : undefined,
+		};
+	},
+	component: CoursesRoute,
+});
+
+const courseDetailRoute = createRoute({
+	getParentRoute: () => authedRoute,
+	path: '/courses/$courseId',
+	component: () => {
+		const { courseId } = courseDetailRoute.useParams();
+		return <CourseDetailRoute id={courseId} />;
+	},
+});
+
 type PayrollStatusSearch = 'DRAFT' | 'APPROVED' | 'PAID';
 
 interface PayrollSearch {
@@ -172,6 +206,8 @@ const routeTree = rootRoute.addChildren([
 		staffRoute,
 		staffDetailRoute,
 		roomsRoute,
+		coursesRoute,
+		courseDetailRoute,
 		payrollRoute,
 	]),
 ]);
