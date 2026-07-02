@@ -1,18 +1,10 @@
-import { useState } from 'react';
-import {
-	AlertTriangle,
-	CalendarClock,
-	DoorOpen,
-	GraduationCap,
-	MapPin,
-	Users,
-	UserCog,
-	X,
-} from 'lucide-react';
+import { useState, type ReactNode } from 'react';
+import { AlertTriangle, CalendarClock, UserCog, X } from 'lucide-react';
 
 import {
+	Avatar,
+	AvatarFallback,
 	Button,
-	DetailRows,
 	Label,
 	Select,
 	SelectContent,
@@ -32,13 +24,14 @@ import {
 import { isApiError } from '@repo/api-client';
 import { formatDate } from '@repo/utils';
 
+import { useBranches } from '@/features/people/api/students.queries';
 import { useStaffList } from '@/features/hr/api/staff.queries';
 import { useRoomList } from '@/features/rooms/api/rooms.queries';
 
 import { useSession } from '../api/sessions.queries';
 import { useUpdateSession } from '../api/sessions.mutations';
 import type { SessionDetail } from '../api/groups.queries';
-import { hhmm } from '../lib/group-options';
+import { formatSessionDuration, hhmm } from '../lib/group-options';
 
 type Mode = 'view' | 'reschedule' | 'substitute' | 'cancel';
 
@@ -99,6 +92,27 @@ export function SessionDetailSheet({
 
 // ─── Body ────────────────────────────────────────────────────────────────────
 
+function initials(name: string | null | undefined): string {
+	if (!name) return '?';
+	return name
+		.split(' ')
+		.map((w) => w[0])
+		.slice(0, 2)
+		.join('')
+		.toUpperCase();
+}
+
+function DetailField({ label, value }: { label: string; value: ReactNode }) {
+	return (
+		<div>
+			<div className="text-[10.5px] font-semibold uppercase tracking-widest text-muted-foreground">
+				{label}
+			</div>
+			<div className="mt-0.5 text-sm font-semibold text-foreground">{value}</div>
+		</div>
+	);
+}
+
 function SessionBody({
 	session,
 	groupId,
@@ -113,8 +127,11 @@ function SessionBody({
 	const cancelled = session.status === 'CANCELLED';
 	const completed = session.status === 'COMPLETED';
 
+	const { data: branches = [] } = useBranches();
+	const branchName = branches.find((b) => b.id === session.branchId)?.name ?? '—';
+
 	return (
-		<div className="flex flex-col gap-5">
+		<div className="flex flex-col gap-4">
 			{conflict && (
 				<div className="flex items-start gap-2.5 rounded-lg border border-destructive/30 bg-destructive/5 p-3 text-sm">
 					<AlertTriangle className="mt-0.5 size-4 shrink-0 text-destructive" />
@@ -127,47 +144,30 @@ function SessionBody({
 				</div>
 			)}
 
-			<div className="flex items-center justify-between">
-				<StatusBadge kind="session" status={session.status} />
-				<span className="text-xs text-muted-foreground">
-					{formatDate(session.sessionDate)}
-				</span>
+			{/* Title + status */}
+			<div className="rounded-xl border bg-card p-4">
+				<div className="flex items-start justify-between gap-3">
+					<div className="min-w-0">
+						<div className="truncate text-base font-bold">
+							{session.groupName}
+						</div>
+						<div className="mt-0.5 text-sm text-muted-foreground">
+							{session.courseName}
+						</div>
+					</div>
+					<StatusBadge
+						kind="session"
+						status={session.status}
+						className="shrink-0"
+					/>
+				</div>
+				<div className="mt-3 flex items-center gap-2 border-t pt-3">
+					<CalendarClock className="size-4 text-primary" />
+					<span className="text-sm font-semibold">
+						{formatDate(session.sessionDate)}
+					</span>
+				</div>
 			</div>
-
-			<DetailRows
-				rows={[
-					{
-						label: 'Group',
-						value: session.groupName,
-						icon: <GraduationCap />,
-					},
-					{
-						label: 'Course',
-						value: session.courseName,
-						icon: <Users />,
-					},
-					{
-						label: 'Time',
-						value: `${hhmm(session.startTime)} – ${hhmm(session.endTime)}`,
-						icon: <CalendarClock />,
-					},
-					{
-						label: 'Room',
-						value: session.roomName ?? 'Not set',
-						icon: <MapPin />,
-					},
-					{
-						label: 'Teacher',
-						value: session.teacherName ?? 'Unassigned',
-						icon: <UserCog />,
-					},
-					{
-						label: 'Topic',
-						value: session.topic ?? 'Not set',
-						icon: <DoorOpen />,
-					},
-				]}
-			/>
 
 			{cancelled && session.cancellationReason && (
 				<div className="rounded-lg bg-muted px-3 py-2 text-sm">
@@ -176,29 +176,41 @@ function SessionBody({
 				</div>
 			)}
 
-			{/* Roster */}
-			<div className="flex flex-col gap-2">
-				<span className="text-xs font-semibold uppercase tracking-widest text-muted-foreground">
-					Roster · {session.roster.length}
-				</span>
-				{session.roster.length === 0 ? (
-					<p className="text-sm text-muted-foreground">No students enrolled.</p>
-				) : (
-					<div className="flex flex-col divide-y divide-border rounded-lg border">
-						{session.roster.map((r) => (
-							<div
-								key={r.studentId}
-								className="flex items-center justify-between px-3 py-2 text-sm"
-							>
-								<span>{r.studentName}</span>
-								<StatusBadge
-									kind="enrollment"
-									status={r.enrollmentStatus}
-								/>
-							</div>
-						))}
+			{/* Details */}
+			<div className="rounded-xl border bg-card p-4">
+				<div className="mb-3 text-[10.5px] font-semibold uppercase tracking-widest text-muted-foreground">
+					Details
+				</div>
+				<div className="grid grid-cols-2 gap-x-4 gap-y-3">
+					<DetailField
+						label="Time"
+						value={`${hhmm(session.startTime)} – ${hhmm(session.endTime)}`}
+					/>
+					<DetailField
+						label="Duration"
+						value={formatSessionDuration(session.startTime, session.endTime)}
+					/>
+					<DetailField label="Room" value={session.roomName ?? 'Not set'} />
+					<DetailField label="Branch" value={branchName} />
+					<div className="col-span-2">
+						<div className="mb-1.5 text-[10.5px] font-semibold uppercase tracking-widest text-muted-foreground">
+							Teacher
+						</div>
+						<div className="flex items-center gap-2">
+							<Avatar className="size-7">
+								<AvatarFallback className="text-[11px]">
+									{initials(session.teacherName)}
+								</AvatarFallback>
+							</Avatar>
+							<span className="text-sm font-semibold">
+								{session.teacherName ?? 'Unassigned'}
+							</span>
+						</div>
 					</div>
-				)}
+					<div className="col-span-2">
+						<DetailField label="Topic" value={session.topic ?? 'Not set'} />
+					</div>
+				</div>
 			</div>
 
 			{/* Actions */}
@@ -281,14 +293,16 @@ function SessionActions({
 	if (mode === 'view') {
 		return (
 			<div className="flex flex-col gap-2 border-t pt-4">
-				<Button variant="outline" onClick={() => setMode('reschedule')}>
-					<CalendarClock className="mr-2 size-4" />
-					Reschedule
-				</Button>
-				<Button variant="outline" onClick={() => setMode('substitute')}>
-					<UserCog className="mr-2 size-4" />
-					Assign substitute
-				</Button>
+				<div className="grid grid-cols-2 gap-2">
+					<Button variant="outline" onClick={() => setMode('reschedule')}>
+						<CalendarClock className="mr-2 size-4" />
+						Reschedule
+					</Button>
+					<Button variant="outline" onClick={() => setMode('substitute')}>
+						<UserCog className="mr-2 size-4" />
+						Substitute
+					</Button>
+				</div>
 				<Button
 					variant="outline"
 					className="border-destructive/30 text-destructive hover:bg-destructive/5 hover:text-destructive"

@@ -86,9 +86,21 @@ export function hhmm(time: string): string {
 	return time.slice(0, 5);
 }
 
+/** "1h 30m" — a session's duration, computed from its start/end time. */
+export function formatSessionDuration(startTime: string, endTime: string): string {
+	const [sh = 0, sm = 0] = hhmm(startTime).split(':').map(Number);
+	const [eh = 0, em = 0] = hhmm(endTime).split(':').map(Number);
+	const mins = eh * 60 + em - (sh * 60 + sm);
+	if (mins <= 0) return '—';
+	const h = Math.floor(mins / 60);
+	const m = mins % 60;
+	if (h === 0) return `${m}m`;
+	return m === 0 ? `${h}h` : `${h}h ${m}m`;
+}
+
 /**
  * Local `YYYY-MM-DD` for a JS Date. Built from local calendar parts (not
- * `toISOString`/tz-shifting helpers) so the day the user sees in the week strip
+ * `toISOString`/tz-shifting helpers) so the day the user sees in the calendar
  * matches the day sent to the calendar API.
  */
 export function toYmd(date: Date): string {

@@ -33,9 +33,10 @@ export * from './components/stat-card';
 export * from './components/status-badge';
 // Data display
 export * from './components/composed/detail-rows';
+export * from './components/composed/month-calendar-grid';
 export * from './components/composed/progress-bar';
 export * from './components/composed/session-card';
-export * from './components/composed/week-strip';
+export * from './components/composed/week-calendar-grid';
 // Inputs & controls
 export * from './components/composed/confirm-dialog';
 export * from './components/composed/form-input';

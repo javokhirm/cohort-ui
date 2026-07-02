@@ -192,6 +192,73 @@ export const STATUS_MAPS = {
 
 export type StatusKind = keyof typeof STATUS_MAPS;
 
+/**
+ * Solid-color accent classes per tone — the calendar's legend dots, a session
+ * card's soft background tint, and its left-border accent. Distinct from
+ * `TONE_CLASSES` (which pairs a soft background with a matching *text* color
+ * for badges); `bg` here is meant to sit under normal foreground/muted text.
+ */
+export const TONE_ACCENT_CLASSES: Record<
+	StatusTone,
+	{ dot: string; bg: string; borderLeft: string }
+> = {
+	green: {
+		dot: 'bg-tone-green-fg',
+		bg: 'bg-tone-green-bg',
+		borderLeft: 'border-l-tone-green-fg',
+	},
+	red: {
+		dot: 'bg-tone-red-fg',
+		bg: 'bg-tone-red-bg',
+		borderLeft: 'border-l-tone-red-fg',
+	},
+	amber: {
+		dot: 'bg-tone-amber-fg',
+		bg: 'bg-tone-amber-bg',
+		borderLeft: 'border-l-tone-amber-fg',
+	},
+	blue: {
+		dot: 'bg-tone-blue-fg',
+		bg: 'bg-tone-blue-bg',
+		borderLeft: 'border-l-tone-blue-fg',
+	},
+	violet: {
+		dot: 'bg-tone-violet-fg',
+		bg: 'bg-tone-violet-bg',
+		borderLeft: 'border-l-tone-violet-fg',
+	},
+	slate: {
+		dot: 'bg-tone-slate-fg',
+		bg: 'bg-tone-slate-bg',
+		borderLeft: 'border-l-tone-slate-fg',
+	},
+	indigo: {
+		dot: 'bg-tone-indigo-fg',
+		bg: 'bg-tone-indigo-bg',
+		borderLeft: 'border-l-tone-indigo-fg',
+	},
+	cyan: {
+		dot: 'bg-tone-cyan-fg',
+		bg: 'bg-tone-cyan-bg',
+		borderLeft: 'border-l-tone-cyan-fg',
+	},
+	pink: {
+		dot: 'bg-tone-pink-fg',
+		bg: 'bg-tone-pink-bg',
+		borderLeft: 'border-l-tone-pink-fg',
+	},
+	orange: {
+		dot: 'bg-tone-orange-fg',
+		bg: 'bg-tone-orange-bg',
+		borderLeft: 'border-l-tone-orange-fg',
+	},
+	yellow: {
+		dot: 'bg-tone-yellow-fg',
+		bg: 'bg-tone-yellow-bg',
+		borderLeft: 'border-l-tone-yellow-fg',
+	},
+};
+
 function normalize(status: string): string {
 	return status
 		.trim()

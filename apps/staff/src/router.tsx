@@ -238,14 +238,17 @@ const groupEditRoute = createRoute({
 });
 
 type SessionStatusSearch = 'SCHEDULED' | 'COMPLETED' | 'CANCELLED';
+type ScheduleViewSearch = 'week' | 'month';
 
 interface ScheduleSearch {
 	date?: string;
 	branchId?: number;
 	status?: SessionStatusSearch;
+	view?: ScheduleViewSearch;
 }
 
 const SESSION_STATUSES: SessionStatusSearch[] = ['SCHEDULED', 'COMPLETED', 'CANCELLED'];
+const SCHEDULE_VIEWS: ScheduleViewSearch[] = ['week', 'month'];
 
 const scheduleRoute = createRoute({
 	getParentRoute: () => authedRoute,
@@ -253,6 +256,7 @@ const scheduleRoute = createRoute({
 	validateSearch: (search: Record<string, unknown>): ScheduleSearch => {
 		const branchId = Number(search.branchId);
 		const status = search.status;
+		const view = search.view;
 		const date =
 			typeof search.date === 'string' && /^\d{4}-\d{2}-\d{2}$/.test(search.date)
 				? search.date
@@ -262,6 +266,9 @@ const scheduleRoute = createRoute({
 			branchId: Number.isFinite(branchId) && branchId > 0 ? branchId : undefined,
 			status: SESSION_STATUSES.includes(status as SessionStatusSearch)
 				? (status as SessionStatusSearch)
+				: undefined,
+			view: SCHEDULE_VIEWS.includes(view as ScheduleViewSearch)
+				? (view as ScheduleViewSearch)
 				: undefined,
 		};
 	},
