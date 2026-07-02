@@ -1,5 +1,4 @@
-import { useState } from 'react';
-import { Link } from '@tanstack/react-router';
+import { Link, useNavigate } from '@tanstack/react-router';
 import {
 	ArrowLeft,
 	CalendarClock,
@@ -28,7 +27,6 @@ import { formatDate } from '@repo/utils';
 
 import { useGroup, type GroupDetail } from '../api/groups.queries';
 import { formatScheduleRule, GROUP_STATUS_META } from '../lib/group-options';
-import { GroupForm } from '../components/GroupForm';
 import { RosterSection } from '../components/RosterSection';
 import { GroupSessionsSection } from '../components/GroupSessionsSection';
 
@@ -143,7 +141,7 @@ interface GroupDetailPageProps {
 }
 
 export function GroupDetailPage({ groupId }: GroupDetailPageProps) {
-	const [editOpen, setEditOpen] = useState(false);
+	const navigate = useNavigate();
 	const { data: group, isLoading, isError } = useGroup(groupId);
 
 	return (
@@ -172,7 +170,15 @@ export function GroupDetailPage({ groupId }: GroupDetailPageProps) {
 				</div>
 			) : (
 				<>
-					<GroupHeader group={group} onEdit={() => setEditOpen(true)} />
+					<GroupHeader
+						group={group}
+						onEdit={() =>
+							void navigate({
+								to: '/groups/$groupId/edit',
+								params: { groupId: String(group.id) },
+							})
+						}
+					/>
 
 					<Tabs defaultValue="roster" className="gap-4">
 						<TabsList>
@@ -191,13 +197,6 @@ export function GroupDetailPage({ groupId }: GroupDetailPageProps) {
 							<OverviewTab group={group} />
 						</TabsContent>
 					</Tabs>
-
-					<GroupForm
-						mode="edit"
-						group={group}
-						open={editOpen}
-						onOpenChange={setEditOpen}
-					/>
 				</>
 			)}
 		</div>

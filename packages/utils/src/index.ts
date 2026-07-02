@@ -19,6 +19,7 @@ export {
 	formatRelative,
 	isExpired,
 	toIsoDate,
+	formatShortDate,
 } from './date';
 
 export { parseApiCode } from './codes';

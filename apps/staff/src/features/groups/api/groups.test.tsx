@@ -99,6 +99,34 @@ describe('useCreateGroup', () => {
 		expect(created.name).toBe('IELTS Weekend');
 		expect(created.status).toBe('PLANNED');
 	});
+
+	it('rejects creation when the room is already booked (409)', async () => {
+		server.use(groupHandlers.createConflict);
+		const { result } = renderHook(() => useCreateGroup(), { wrapper: wrapper() });
+
+		let error: unknown;
+		try {
+			await result.current.mutateAsync({
+				branchId: 1,
+				courseId: 1,
+				roomId: 5,
+				name: 'Clashing group',
+				scheduleRule: { days: ['MON'], startTime: '09:00', endTime: '10:30' },
+				startDate: '2025-03-03',
+				endDate: '2025-03-14',
+			});
+		} catch (e) {
+			error = e;
+		}
+
+		expect(isApiError(error)).toBe(true);
+		expect(isApiError(error) && error.status).toBe(409);
+		expect(isApiError(error) && error.code).toBe('GROUP_SCHEDULE_CONFLICT');
+		expect(
+			isApiError(error) &&
+				(error.details?.conflicts as unknown[] | undefined)?.length,
+		).toBe(1);
+	});
 });
 
 describe('roster', () => {

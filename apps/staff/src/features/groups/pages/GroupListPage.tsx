@@ -1,4 +1,3 @@
-import { useState } from 'react';
 import { useNavigate, useSearch } from '@tanstack/react-router';
 import { Plus } from 'lucide-react';
 
@@ -22,7 +21,6 @@ import { useGroupList } from '../api/groups.queries';
 import type { GroupListFilters } from '../api/keys';
 import { GROUP_STATUS_FILTERS } from '../lib/group-options';
 import { GroupTable } from '../components/GroupTable';
-import { GroupForm } from '../components/GroupForm';
 
 const PAGE_SIZE = 20;
 const ALL = 'all';
@@ -35,7 +33,6 @@ export function GroupListPage() {
 		courseId,
 		status,
 	} = useSearch({ from: '/_authed/groups' });
-	const [addOpen, setAddOpen] = useState(false);
 
 	const { data: branches = [] } = useBranches();
 	const { data: courseData } = useCourseList({ limit: 100, isActive: true });
@@ -69,7 +66,7 @@ export function GroupListPage() {
 				title="Groups"
 				description="Class groups — teacher, room, capacity and weekly schedule"
 				actions={
-					<Button onClick={() => setAddOpen(true)}>
+					<Button onClick={() => void navigate({ to: '/groups/new' })}>
 						<Plus className="mr-1.5 size-4" />
 						Create group
 					</Button>
@@ -149,8 +146,6 @@ export function GroupListPage() {
 					</div>
 				</Card>
 			</div>
-
-			<GroupForm mode="create" open={addOpen} onOpenChange={setAddOpen} />
 		</div>
 	);
 }

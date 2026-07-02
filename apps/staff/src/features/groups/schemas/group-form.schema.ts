@@ -36,8 +36,8 @@ const baseGroupSchema = z.object({
 	capacity,
 	startDate: optionalDate,
 	endDate: optionalDate,
-	// Weekly schedule rule (auto-generates sessions when a date range is also set).
-	scheduleEnabled: z.boolean(),
+	// Weekly schedule rule — always required; auto-generates sessions when a
+	// date range is also set.
 	days: z.array(z.enum(SCHEDULE_DAYS)),
 	startTime: z.string(),
 	endTime: z.string(),
@@ -46,7 +46,6 @@ const baseGroupSchema = z.object({
 /** Shared cross-field checks for the schedule rule + date range. */
 function refineGroup(
 	val: {
-		scheduleEnabled: boolean;
 		days: ScheduleDay[];
 		startTime: string;
 		endTime: string;
@@ -55,39 +54,37 @@ function refineGroup(
 	},
 	ctx: z.RefinementCtx,
 ) {
-	if (val.scheduleEnabled) {
-		if (val.days.length === 0) {
-			ctx.addIssue({
-				code: 'custom',
-				path: ['days'],
-				message: 'Pick at least one day',
-			});
-		}
-		if (!TIME_RE.test(val.startTime)) {
-			ctx.addIssue({
-				code: 'custom',
-				path: ['startTime'],
-				message: 'Use HH:mm (24h)',
-			});
-		}
-		if (!TIME_RE.test(val.endTime)) {
-			ctx.addIssue({
-				code: 'custom',
-				path: ['endTime'],
-				message: 'Use HH:mm (24h)',
-			});
-		}
-		if (
-			TIME_RE.test(val.startTime) &&
-			TIME_RE.test(val.endTime) &&
-			val.endTime <= val.startTime
-		) {
-			ctx.addIssue({
-				code: 'custom',
-				path: ['endTime'],
-				message: 'End time must be after start time',
-			});
-		}
+	if (val.days.length === 0) {
+		ctx.addIssue({
+			code: 'custom',
+			path: ['days'],
+			message: 'Pick at least one day',
+		});
+	}
+	if (!TIME_RE.test(val.startTime)) {
+		ctx.addIssue({
+			code: 'custom',
+			path: ['startTime'],
+			message: 'Use HH:mm (24h)',
+		});
+	}
+	if (!TIME_RE.test(val.endTime)) {
+		ctx.addIssue({
+			code: 'custom',
+			path: ['endTime'],
+			message: 'Use HH:mm (24h)',
+		});
+	}
+	if (
+		TIME_RE.test(val.startTime) &&
+		TIME_RE.test(val.endTime) &&
+		val.endTime <= val.startTime
+	) {
+		ctx.addIssue({
+			code: 'custom',
+			path: ['endTime'],
+			message: 'End time must be after start time',
+		});
 	}
 	if (val.startDate && val.endDate && val.endDate < val.startDate) {
 		ctx.addIssue({
@@ -116,8 +113,7 @@ function selectToId(value: string): number | null {
 	return value === NONE_VALUE || value === '' ? null : Number(value);
 }
 
-function toScheduleRule(v: CreateGroupFormValues): ScheduleRule | null {
-	if (!v.scheduleEnabled || v.days.length === 0) return null;
+function toScheduleRule(v: CreateGroupFormValues): ScheduleRule {
 	return { days: v.days, startTime: v.startTime, endTime: v.endTime };
 }
 
@@ -164,7 +160,6 @@ export function groupToFormValues(g: GroupDetail): EditGroupFormValues {
 		capacity: g.capacity ?? undefined,
 		startDate: g.startDate ?? '',
 		endDate: g.endDate ?? '',
-		scheduleEnabled: g.scheduleRule != null,
 		days: g.scheduleRule?.days ?? [],
 		startTime: g.scheduleRule?.startTime ?? '09:00',
 		endTime: g.scheduleRule?.endTime ?? '10:30',

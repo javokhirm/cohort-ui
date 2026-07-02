@@ -5,6 +5,14 @@ import { cleanup } from '@testing-library/react';
 import { useSessionStore } from '@/store/sessionStore';
 import { server } from './server';
 
+// jsdom has no ResizeObserver; Radix's Sheet/Dialog/Select primitives need one.
+class ResizeObserverStub {
+	observe() {}
+	unobserve() {}
+	disconnect() {}
+}
+globalThis.ResizeObserver ??= ResizeObserverStub as unknown as typeof ResizeObserver;
+
 beforeAll(() => server.listen({ onUnhandledRequest: 'error' }));
 
 afterEach(() => {

@@ -20,7 +20,9 @@ import { RoomsRoute } from '@/routes/_authed.rooms';
 import { CoursesRoute } from '@/routes/_authed.courses';
 import { CourseDetailRoute } from '@/routes/_authed.courses.$id';
 import { GroupsRoute } from '@/routes/_authed.groups';
+import { GroupCreateRoute } from '@/routes/_authed.groups.new';
 import { GroupDetailRoute } from '@/routes/_authed.groups.$id';
+import { GroupEditRoute } from '@/routes/_authed.groups.$id.edit';
 import { ScheduleRoute } from '@/routes/_authed.schedule';
 import { PayrollRoute } from '@/routes/_authed.payroll';
 import { useSessionStore } from '@/store/sessionStore';
@@ -211,12 +213,27 @@ const groupsRoute = createRoute({
 	component: GroupsRoute,
 });
 
+const groupNewRoute = createRoute({
+	getParentRoute: () => authedRoute,
+	path: '/groups/new',
+	component: GroupCreateRoute,
+});
+
 const groupDetailRoute = createRoute({
 	getParentRoute: () => authedRoute,
 	path: '/groups/$groupId',
 	component: () => {
 		const { groupId } = groupDetailRoute.useParams();
 		return <GroupDetailRoute id={groupId} />;
+	},
+});
+
+const groupEditRoute = createRoute({
+	getParentRoute: () => authedRoute,
+	path: '/groups/$groupId/edit',
+	component: () => {
+		const { groupId } = groupEditRoute.useParams();
+		return <GroupEditRoute id={groupId} />;
 	},
 });
 
@@ -288,7 +305,9 @@ const routeTree = rootRoute.addChildren([
 		coursesRoute,
 		courseDetailRoute,
 		groupsRoute,
+		groupNewRoute,
 		groupDetailRoute,
+		groupEditRoute,
 		scheduleRoute,
 		payrollRoute,
 	]),

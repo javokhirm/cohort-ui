@@ -35,3 +35,10 @@ export function toIsoDate(date: Date): string {
 export function isExpired(iso: string): boolean {
 	return fromIso(iso) < DateTime.now().setZone(TASHKENT_TZ);
 }
+
+/**
+ * Format a date string as "Mon, 1 Jun"
+ */
+export function formatShortDate(iso: string): string {
+	return fromIso(iso).toFormat('EEE, d MMM');
+}

@@ -32,7 +32,7 @@ export function AuthedLayout() {
 					sidebarCollapsed={sidebarCollapsed}
 					onSidebarToggle={() => setSidebarCollapsed((c) => !c)}
 				/>
-				<main className="flex-1 overflow-y-auto px-6 py-8">
+				<main className="bg-muted flex-1 overflow-y-auto px-6 py-8">
 					<Outlet />
 				</main>
 			</div>

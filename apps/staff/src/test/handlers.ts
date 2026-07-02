@@ -1,5 +1,7 @@
 import { http, HttpResponse } from 'msw';
 
+import type { ScheduleDay } from '@/features/groups/api/groups.queries';
+
 /** Mirrors the backend response envelope for the /manage surface in tests. */
 const BASE = 'http://localhost:5050/api/v1';
 const MANAGE = `${BASE}/manage`;
@@ -22,9 +24,18 @@ function okPaged(data: unknown[], page: number, limit: number, total: number) {
 	});
 }
 
-function fail(status: number, code: string, message: string) {
+function fail(
+	status: number,
+	code: string,
+	message: string,
+	details?: Record<string, unknown>,
+) {
 	return HttpResponse.json(
-		{ success: false, error: { code, message }, meta: { timestamp: 'test' } },
+		{
+			success: false,
+			error: { code, message, ...(details ? { details } : {}) },
+			meta: { timestamp: 'test' },
+		},
 		{ status },
 	);
 }
@@ -199,7 +210,7 @@ export function mockGroupDetail(id: number) {
 		startDate: '2025-03-03',
 		endDate: '2025-06-30',
 		scheduleRule: {
-			days: ['MON', 'WED', 'FRI'],
+			days: ['MON', 'WED', 'FRI'] as ScheduleDay[],
 			startTime: '09:00',
 			endTime: '10:30',
 		},
@@ -1016,5 +1027,26 @@ export const groupHandlers = {
 	// Reschedule/room change collides — PATCH session returns 409.
 	sessionConflict: http.patch(`${MANAGE}/sessions/:id`, () =>
 		fail(409, 'SESSION_CONFLICT', 'Room 204 is double-booked at this time.'),
+	),
+	// The requested room is already booked for a scheduled slot — POST group 409.
+	createConflict: http.post(`${MANAGE}/groups`, () =>
+		fail(
+			409,
+			'GROUP_SCHEDULE_CONFLICT',
+			'The room or teacher is already booked for one or more of the scheduled sessions.',
+			{
+				conflicts: [
+					{
+						type: 'ROOM',
+						resourceId: 5,
+						sessionId: 99,
+						groupId: 77,
+						sessionDate: '2025-03-03',
+						startTime: '09:00:00',
+						endTime: '10:30:00',
+					},
+				],
+			},
+		),
 	),
 };
