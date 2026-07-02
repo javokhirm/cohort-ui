@@ -3,7 +3,7 @@ export type StaffRoleFilter = 'TEACHER' | 'ADMIN' | 'MANAGER';
 export interface StaffListFilters {
 	page?: number;
 	limit?: number;
-	branchId?: number;
+	branchIds?: number[];
 	department?: string;
 	employmentType?: 'FULL_TIME' | 'PART_TIME' | 'CONTRACTOR';
 	status?: 'ACTIVE' | 'ON_LEAVE' | 'TERMINATED';

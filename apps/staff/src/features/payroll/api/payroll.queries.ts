@@ -1,6 +1,7 @@
 import { keepPreviousData, useQuery } from '@tanstack/react-query';
 
 import { manageApi } from '@/api/apiClient';
+import { useActiveBranchIds } from '@/store/branchStore';
 import type { PaginatedResult } from '@repo/api-client';
 
 import { payrollKeys, type PayrollListFilters, type PayrollStatus } from './keys';
@@ -42,11 +43,19 @@ export interface PayrollResponse {
 // ─── Queries ─────────────────────────────────────────────────────────────────
 
 export function usePayrollList(filters: PayrollListFilters) {
+	// The global branch selection is part of the effective filters (and thus the
+	// query key), so changing the selector refetches. An explicit caller value
+	// still wins.
+	const activeBranchIds = useActiveBranchIds();
+	const effectiveFilters: PayrollListFilters = {
+		...filters,
+		branchIds: filters.branchIds ?? activeBranchIds,
+	};
 	return useQuery({
-		queryKey: payrollKeys.list(filters),
+		queryKey: payrollKeys.list(effectiveFilters),
 		queryFn: () =>
 			manageApi.getPaginated<PayrollResponse>('/payrolls', {
-				params: filters,
+				params: effectiveFilters,
 			}) as Promise<PaginatedResult<PayrollResponse>>,
 		placeholderData: keepPreviousData,
 	});

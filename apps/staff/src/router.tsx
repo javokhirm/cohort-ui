@@ -181,7 +181,6 @@ type GroupStatusSearch = 'PLANNED' | 'ACTIVE' | 'COMPLETED' | 'CANCELLED';
 
 interface GroupSearch {
 	page?: number;
-	branchId?: number;
 	courseId?: number;
 	status?: GroupStatusSearch;
 }
@@ -198,12 +197,10 @@ const groupsRoute = createRoute({
 	path: '/groups',
 	validateSearch: (search: Record<string, unknown>): GroupSearch => {
 		const page = Number(search.page);
-		const branchId = Number(search.branchId);
 		const courseId = Number(search.courseId);
 		const status = search.status;
 		return {
 			page: Number.isFinite(page) && page > 0 ? page : undefined,
-			branchId: Number.isFinite(branchId) && branchId > 0 ? branchId : undefined,
 			courseId: Number.isFinite(courseId) && courseId > 0 ? courseId : undefined,
 			status: GROUP_STATUSES.includes(status as GroupStatusSearch)
 				? (status as GroupStatusSearch)
@@ -242,7 +239,6 @@ type ScheduleViewSearch = 'week' | 'month';
 
 interface ScheduleSearch {
 	date?: string;
-	branchId?: number;
 	status?: SessionStatusSearch;
 	view?: ScheduleViewSearch;
 }
@@ -254,7 +250,6 @@ const scheduleRoute = createRoute({
 	getParentRoute: () => authedRoute,
 	path: '/schedule',
 	validateSearch: (search: Record<string, unknown>): ScheduleSearch => {
-		const branchId = Number(search.branchId);
 		const status = search.status;
 		const view = search.view;
 		const date =
@@ -263,7 +258,6 @@ const scheduleRoute = createRoute({
 				: undefined;
 		return {
 			date,
-			branchId: Number.isFinite(branchId) && branchId > 0 ? branchId : undefined,
 			status: SESSION_STATUSES.includes(status as SessionStatusSearch)
 				? (status as SessionStatusSearch)
 				: undefined,

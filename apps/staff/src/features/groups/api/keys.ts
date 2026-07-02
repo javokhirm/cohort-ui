@@ -3,7 +3,7 @@ import type { GroupStatus } from './groups.queries';
 export interface GroupListFilters {
 	page?: number;
 	limit?: number;
-	branchId?: number;
+	branchIds?: number[];
 	courseId?: number;
 	teacherId?: number;
 	status?: GroupStatus;
@@ -12,7 +12,7 @@ export interface GroupListFilters {
 export interface SessionCalendarFilters {
 	from: string;
 	to: string;
-	branchId?: number;
+	branchIds?: number[];
 	teacherId?: number;
 	roomId?: number;
 	status?: string;

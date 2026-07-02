@@ -1,6 +1,7 @@
 import { keepPreviousData, useQuery } from '@tanstack/react-query';
 
 import { manageApi } from '@/api/apiClient';
+import { useActiveBranchIds } from '@/store/branchStore';
 import type { PaginatedResult } from '@repo/api-client';
 
 import { roomsKeys, type RoomListFilters } from './keys';
@@ -28,11 +29,19 @@ export interface RoomResponse {
 // ─── Queries ─────────────────────────────────────────────────────────────────
 
 export function useRoomList(filters: RoomListFilters) {
+	// The global branch selection is part of the effective filters (and thus the
+	// query key), so changing the selector refetches. An explicit caller value
+	// (e.g. the group form's room picker scoped to the form's branch) wins.
+	const activeBranchIds = useActiveBranchIds();
+	const effectiveFilters: RoomListFilters = {
+		...filters,
+		branchIds: filters.branchIds ?? activeBranchIds,
+	};
 	return useQuery({
-		queryKey: roomsKeys.roomList(filters),
+		queryKey: roomsKeys.roomList(effectiveFilters),
 		queryFn: () =>
 			manageApi.getPaginated<RoomResponse>('/rooms', {
-				params: filters,
+				params: effectiveFilters,
 			}) as Promise<PaginatedResult<RoomResponse>>,
 		placeholderData: keepPreviousData,
 	});

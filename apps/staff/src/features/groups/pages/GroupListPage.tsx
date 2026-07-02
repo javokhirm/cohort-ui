@@ -14,7 +14,6 @@ import {
 	SearchFilterBar,
 } from '@repo/ui';
 
-import { useBranches } from '@/features/people/api/students.queries';
 import { useCourseList } from '@/features/courses/api/courses.queries';
 
 import { useGroupList } from '../api/groups.queries';
@@ -27,21 +26,14 @@ const ALL = 'all';
 
 export function GroupListPage() {
 	const navigate = useNavigate();
-	const {
-		page = 1,
-		branchId,
-		courseId,
-		status,
-	} = useSearch({ from: '/_authed/groups' });
+	const { page = 1, courseId, status } = useSearch({ from: '/_authed/groups' });
 
-	const { data: branches = [] } = useBranches();
 	const { data: courseData } = useCourseList({ limit: 100, isActive: true });
 	const courses = courseData?.rows ?? [];
 
 	const filters: GroupListFilters = {
 		page,
 		limit: PAGE_SIZE,
-		branchId,
 		courseId,
 		status,
 	};
@@ -83,27 +75,6 @@ export function GroupListPage() {
 					}))}
 					actions={
 						<div className="flex items-center gap-2">
-							<Select
-								value={branchId ? String(branchId) : ALL}
-								onValueChange={(v) =>
-									setSearch({
-										branchId: v === ALL ? undefined : Number(v),
-									})
-								}
-							>
-								<SelectTrigger className="h-9 w-40" size="sm">
-									<SelectValue placeholder="All branches" />
-								</SelectTrigger>
-								<SelectContent>
-									<SelectItem value={ALL}>All branches</SelectItem>
-									{branches.map((b) => (
-										<SelectItem key={b.id} value={String(b.id)}>
-											{b.name}
-										</SelectItem>
-									))}
-								</SelectContent>
-							</Select>
-
 							<Select
 								value={courseId ? String(courseId) : ALL}
 								onValueChange={(v) =>

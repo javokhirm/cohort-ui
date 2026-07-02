@@ -6,6 +6,12 @@ import type { ScheduleDay } from '@/features/groups/api/groups.queries';
 const BASE = 'http://localhost:5050/api/v1';
 const MANAGE = `${BASE}/manage`;
 
+/** `branchIds` arrives as repeated params (`?branchIds=1&branchIds=2`); `null` = not sent. */
+function readBranchIds(url: URL): number[] | null {
+	const values = url.searchParams.getAll('branchIds');
+	return values.length > 0 ? values.map(Number) : null;
+}
+
 function ok(data: unknown) {
 	return HttpResponse.json({ success: true, data, meta: { timestamp: 'test' } });
 }
@@ -594,13 +600,13 @@ export const handlers = [
 	// ── Rooms ────────────────────────────────────────────────────────────────
 	http.get(`${MANAGE}/rooms`, ({ request }) => {
 		const url = new URL(request.url);
-		const branchId = url.searchParams.get('branchId');
+		const branchIds = readBranchIds(url);
 		const isActive = url.searchParams.get('isActive');
 		const page = Number(url.searchParams.get('page') ?? 1);
 		const limit = Number(url.searchParams.get('limit') ?? 20);
 
 		let rows = MOCK_ROOMS;
-		if (branchId) rows = rows.filter((r) => r.branchId === Number(branchId));
+		if (branchIds) rows = rows.filter((r) => branchIds.includes(r.branchId));
 		if (isActive !== null)
 			rows = rows.filter((r) => r.isActive === (isActive === 'true'));
 
@@ -633,14 +639,18 @@ export const handlers = [
 	// ── Courses ──────────────────────────────────────────────────────────────
 	http.get(`${MANAGE}/courses`, ({ request }) => {
 		const url = new URL(request.url);
-		const branchId = url.searchParams.get('branchId');
+		const branchIds = readBranchIds(url);
 		const isActive = url.searchParams.get('isActive');
 		const search = url.searchParams.get('search')?.toLowerCase() ?? '';
 		const page = Number(url.searchParams.get('page') ?? 1);
 		const limit = Number(url.searchParams.get('limit') ?? 20);
 
 		let rows = MOCK_COURSES;
-		if (branchId) rows = rows.filter((c) => c.branchId === Number(branchId));
+		// Shared courses (null branchId) stay visible under any branch scope.
+		if (branchIds)
+			rows = rows.filter(
+				(c) => c.branchId === null || branchIds.includes(c.branchId),
+			);
 		if (isActive !== null)
 			rows = rows.filter((c) => c.isActive === (isActive === 'true'));
 		if (search)
@@ -686,12 +696,14 @@ export const handlers = [
 	// ── Groups ───────────────────────────────────────────────────────────────
 	http.get(`${MANAGE}/groups`, ({ request }) => {
 		const url = new URL(request.url);
+		const branchIds = readBranchIds(url);
 		const courseId = url.searchParams.get('courseId');
 		const status = url.searchParams.get('status');
 		const page = Number(url.searchParams.get('page') ?? 1);
 		const limit = Number(url.searchParams.get('limit') ?? 20);
 
 		let rows = MOCK_GROUPS;
+		if (branchIds) rows = rows.filter((g) => branchIds.includes(g.branchId));
 		if (courseId) rows = rows.filter((g) => g.courseId === Number(courseId));
 		if (status) rows = rows.filter((g) => g.status === status);
 
@@ -775,12 +787,12 @@ export const handlers = [
 		const from = url.searchParams.get('from');
 		const to = url.searchParams.get('to');
 		const status = url.searchParams.get('status');
-		const branchId = url.searchParams.get('branchId');
+		const branchIds = readBranchIds(url);
 		let rows = MOCK_SESSIONS;
 		if (from) rows = rows.filter((s) => s.sessionDate >= from);
 		if (to) rows = rows.filter((s) => s.sessionDate <= to);
 		if (status) rows = rows.filter((s) => s.status === status);
-		if (branchId) rows = rows.filter((s) => s.branchId === Number(branchId));
+		if (branchIds) rows = rows.filter((s) => branchIds.includes(s.branchId));
 		return ok(rows);
 	}),
 
@@ -809,10 +821,12 @@ export const handlers = [
 	// ── Students (enroll picker) ──────────────────────────────────────────────
 	http.get(`${MANAGE}/students`, ({ request }) => {
 		const url = new URL(request.url);
+		const branchIds = readBranchIds(url);
 		const search = url.searchParams.get('search')?.toLowerCase() ?? '';
 		const page = Number(url.searchParams.get('page') ?? 1);
 		const limit = Number(url.searchParams.get('limit') ?? 20);
 		let rows = MOCK_STUDENTS;
+		if (branchIds) rows = rows.filter((s) => branchIds.includes(s.branchId));
 		if (search)
 			rows = rows.filter(
 				(s) =>
@@ -833,6 +847,7 @@ export const handlers = [
 	// ── Staff ────────────────────────────────────────────────────────────────
 	http.get(`${MANAGE}/staff`, ({ request }) => {
 		const url = new URL(request.url);
+		const branchIds = readBranchIds(url);
 		const role = url.searchParams.get('role');
 		const status = url.searchParams.get('status');
 		const search = url.searchParams.get('search')?.toLowerCase() ?? '';
@@ -840,6 +855,7 @@ export const handlers = [
 		const limit = Number(url.searchParams.get('limit') ?? 20);
 
 		let rows = MOCK_STAFF;
+		if (branchIds) rows = rows.filter((s) => branchIds.includes(s.branchId));
 		if (role) rows = rows.filter((s) => s.roles.includes(role));
 		if (status) rows = rows.filter((s) => s.status === status);
 		if (search)
@@ -905,12 +921,14 @@ export const handlers = [
 	// ── Payroll ──────────────────────────────────────────────────────────────
 	http.get(`${MANAGE}/payrolls`, ({ request }) => {
 		const url = new URL(request.url);
+		const branchIds = readBranchIds(url);
 		const status = url.searchParams.get('status');
 		const staffId = url.searchParams.get('staffId');
 		const page = Number(url.searchParams.get('page') ?? 1);
 		const limit = Number(url.searchParams.get('limit') ?? 20);
 
 		let rows = MOCK_PAYROLLS;
+		if (branchIds) rows = rows.filter((p) => branchIds.includes(p.branchId));
 		if (status) rows = rows.filter((p) => p.status === status);
 		if (staffId) rows = rows.filter((p) => p.staffId === Number(staffId));
 

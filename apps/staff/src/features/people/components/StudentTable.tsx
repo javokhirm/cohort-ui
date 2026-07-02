@@ -10,8 +10,8 @@ import {
 } from '@repo/ui';
 import { formatPrice } from '@repo/utils';
 
+import { useBranches } from '@/api/branches';
 import type { Student, StudentUser } from '../api/students.queries';
-import { useBranches } from '../api/students.queries';
 
 function StudentAvatar({ user }: { user: StudentUser }) {
 	const initials =

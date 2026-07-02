@@ -3,7 +3,7 @@ import { BookOpen } from 'lucide-react';
 
 import { DataTable, StatusBadge, type ColumnDef } from '@repo/ui';
 
-import { useBranches } from '@/features/people/api/students.queries';
+import { useBranches } from '@/api/branches';
 
 import type { CourseResponse } from '../api/courses.queries';
 

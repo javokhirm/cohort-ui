@@ -17,7 +17,8 @@ import {
 } from '@repo/ui';
 import { isApiError } from '@repo/api-client';
 
-import { useBranches } from '@/features/people/api/students.queries';
+import { useBranches } from '@/api/branches';
+import { useBranchStore } from '@/store/branchStore';
 import { useCourseList } from '@/features/courses/api/courses.queries';
 import { useStaffList } from '@/features/hr/api/staff.queries';
 import { useRoomList } from '@/features/rooms/api/rooms.queries';
@@ -49,7 +50,7 @@ function useGroupFormOptions(branchId: string) {
 	const branchNum = branchId && branchId !== '' ? Number(branchId) : undefined;
 	const { data: roomData } = useRoomList({
 		limit: 100,
-		branchId: branchNum,
+		branchIds: branchNum ? [branchNum] : undefined,
 		isActive: true,
 	});
 
@@ -233,11 +234,16 @@ function CreateGroupForm({
 	onSuccess: (groupId: number) => void;
 	onPendingChange: (pending: boolean) => void;
 }) {
+	// When exactly one branch is selected globally, pre-fill it (still editable).
+	const activeBranchIds = useBranchStore((s) => s.activeBranchIds);
+	const defaultBranchId =
+		activeBranchIds?.length === 1 ? String(activeBranchIds[0]) : '';
+
 	const form = useForm<CreateGroupFormValues>({
 		resolver: zodResolver(createGroupSchema),
 		defaultValues: {
 			name: '',
-			branchId: '',
+			branchId: defaultBranchId,
 			courseId: '',
 			teacherId: NONE_VALUE,
 			roomId: NONE_VALUE,

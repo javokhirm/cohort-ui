@@ -14,12 +14,9 @@ import {
 	type CreateStudentFormValues,
 	type EditStudentFormValues,
 } from '../schemas/student-form.schema';
-import {
-	useBranches,
-	useGroups,
-	useFeePlans,
-	type Student,
-} from '../api/students.queries';
+import { useBranches } from '@/api/branches';
+import { useBranchStore } from '@/store/branchStore';
+import { useGroups, useFeePlans, type Student } from '../api/students.queries';
 import {
 	useCreateStudent,
 	useUpdateStudent,
@@ -80,12 +77,18 @@ function CreateStudentForm({
 	onSuccess: () => void;
 	onPendingChange: (pending: boolean) => void;
 }) {
+	// When exactly one branch is selected globally, pre-fill it (still editable).
+	const activeBranchIds = useBranchStore((s) => s.activeBranchIds);
+	const defaultBranchId =
+		activeBranchIds?.length === 1 ? activeBranchIds[0] : undefined;
+
 	const form = useForm<CreateStudentFormValues>({
 		resolver: zodResolver(createStudentSchema),
 		defaultValues: {
 			fullName: '',
 			dateOfBirth: '',
 			phone: '+998',
+			branchId: defaultBranchId,
 			address: '',
 			guardianName: '',
 			guardianPhone: '+998',
@@ -96,7 +99,7 @@ function CreateStudentForm({
 	const { data: branches = [] } = useBranches();
 	const selectedBranchId = form.watch('branchId');
 	const { data: groupsPage } = useGroups(
-		selectedBranchId ? { branchId: selectedBranchId } : undefined,
+		selectedBranchId ? { branchIds: [selectedBranchId] } : undefined,
 	);
 	const groups = groupsPage?.rows ?? [];
 	const { data: feePlansPage } = useFeePlans();

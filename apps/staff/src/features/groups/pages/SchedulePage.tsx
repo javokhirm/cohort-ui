@@ -9,11 +9,6 @@ import {
 	PageHeader,
 	resolveStatus,
 	SearchFilterBar,
-	Select,
-	SelectContent,
-	SelectItem,
-	SelectTrigger,
-	SelectValue,
 	Skeleton,
 	TONE_ACCENT_CLASSES,
 	WeekCalendarGrid,
@@ -22,15 +17,12 @@ import {
 } from '@repo/ui';
 import { formatDate } from '@repo/utils';
 
-import { useBranches } from '@/features/people/api/students.queries';
-
 import { useSessionCalendar } from '../api/sessions.queries';
 import type { SessionCalendarFilters } from '../api/keys';
 import type { SessionStatus } from '../api/groups.queries';
 import { hhmm, SESSION_STATUS_FILTERS, toYmd } from '../lib/group-options';
 import { SessionDetailSheet } from '../components/SessionDetailSheet';
 
-const ALL = 'all';
 type CalendarView = 'week' | 'month';
 const SESSION_STATUS_LEGEND: SessionStatus[] = ['SCHEDULED', 'COMPLETED', 'CANCELLED'];
 
@@ -74,12 +66,7 @@ function parseDate(value: string | undefined): Date {
 
 export function SchedulePage() {
 	const navigate = useNavigate();
-	const {
-		date,
-		branchId,
-		status,
-		view = 'week',
-	} = useSearch({ from: '/_authed/schedule' });
+	const { date, status, view = 'week' } = useSearch({ from: '/_authed/schedule' });
 
 	const selectedDate = parseDate(date);
 	const weekStart = startOfWeek(selectedDate);
@@ -93,12 +80,9 @@ export function SchedulePage() {
 
 	const [openSessionId, setOpenSessionId] = useState<number | null>(null);
 
-	const { data: branches = [] } = useBranches();
-
 	const filters: SessionCalendarFilters = {
 		from: fromYmd,
 		to: toYmdStr,
-		branchId,
 		status,
 	};
 	const { data: sessions = [], isLoading, isError } = useSessionCalendar(filters);
@@ -106,7 +90,6 @@ export function SchedulePage() {
 	function setSearch(
 		patch: Partial<{
 			date: string;
-			branchId?: number;
 			status?: SessionStatus;
 			view: CalendarView;
 		}>,
@@ -189,26 +172,6 @@ export function SchedulePage() {
 						active: status === f.value,
 						onClick: () => setSearch({ status: f.value }),
 					}))}
-					actions={
-						<Select
-							value={branchId ? String(branchId) : ALL}
-							onValueChange={(v) =>
-								setSearch({ branchId: v === ALL ? undefined : Number(v) })
-							}
-						>
-							<SelectTrigger className="h-9 w-40" size="sm">
-								<SelectValue placeholder="All branches" />
-							</SelectTrigger>
-							<SelectContent>
-								<SelectItem value={ALL}>All branches</SelectItem>
-								{branches.map((b) => (
-									<SelectItem key={b.id} value={String(b.id)}>
-										{b.name}
-									</SelectItem>
-								))}
-							</SelectContent>
-						</Select>
-					}
 				/>
 
 				{/* Calendar nav / legend / view toggle */}

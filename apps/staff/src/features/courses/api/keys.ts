@@ -1,7 +1,7 @@
 export interface CourseListFilters {
 	page?: number;
 	limit?: number;
-	branchId?: number;
+	branchIds?: number[];
 	search?: string;
 	isActive?: boolean;
 }

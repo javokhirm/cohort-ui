@@ -1,7 +1,7 @@
 export interface StudentListFilters {
 	page?: number;
 	limit?: number;
-	branchId?: number;
+	branchIds?: number[];
 	status?: 'ACTIVE' | 'INACTIVE' | 'GRADUATED' | 'SUSPENDED';
 	search?: string;
 }
@@ -22,8 +22,7 @@ export const peopleKeys = {
 	studentResults: (id: number) => [...peopleKeys.students(), id, 'results'] as const,
 	studentInvoices: (id: number) => [...peopleKeys.students(), id, 'invoices'] as const,
 
-	branches: () => [...peopleKeys.all, 'branches'] as const,
-	groups: (filters?: { branchId?: number; status?: string }) =>
+	groups: (filters?: { branchIds?: number[]; status?: string }) =>
 		[...peopleKeys.all, 'groups', filters] as const,
 	feePlans: () => [...peopleKeys.all, 'fee-plans'] as const,
 };

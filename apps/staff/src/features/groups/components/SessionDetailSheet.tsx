@@ -24,7 +24,7 @@ import {
 import { isApiError } from '@repo/api-client';
 import { formatDate } from '@repo/utils';
 
-import { useBranches } from '@/features/people/api/students.queries';
+import { useBranches } from '@/api/branches';
 import { useStaffList } from '@/features/hr/api/staff.queries';
 import { useRoomList } from '@/features/rooms/api/rooms.queries';
 
@@ -58,14 +58,6 @@ export function SessionDetailSheet({
 			<SheetContent className="flex w-full flex-col gap-0 p-0 sm:max-w-md">
 				<SheetHeader className="flex-row items-center justify-between border-b px-6 py-4">
 					<SheetTitle>Session details</SheetTitle>
-					<button
-						type="button"
-						onClick={() => onOpenChange(false)}
-						className="text-muted-foreground hover:text-foreground"
-						aria-label="Close"
-					>
-						<X className="size-4" />
-					</button>
 				</SheetHeader>
 
 				<div className="flex-1 overflow-y-auto p-6">
@@ -250,7 +242,7 @@ function SessionActions({
 	const { data: teacherData } = useStaffList({ role: 'TEACHER', limit: 100 });
 	const { data: roomData } = useRoomList({
 		limit: 100,
-		branchId: session.branchId,
+		branchIds: [session.branchId],
 		isActive: true,
 	});
 	const teachers = teacherData?.rows ?? [];

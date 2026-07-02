@@ -13,7 +13,7 @@ import {
 } from '@repo/ui';
 
 import { FormSheet } from '@/components/FormSheet';
-import { useBranches } from '@/features/people/api/students.queries';
+import { useBranches } from '@/api/branches';
 
 import {
 	branchToForm,

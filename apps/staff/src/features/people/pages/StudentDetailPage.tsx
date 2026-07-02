@@ -19,6 +19,7 @@ import {
 } from '@repo/ui';
 import { formatDate, formatMoney } from '@repo/utils';
 
+import { useBranches } from '@/api/branches';
 import {
 	useStudent,
 	useStudentGuardians,
@@ -26,7 +27,6 @@ import {
 	useStudentAttendances,
 	useStudentResults,
 	useStudentInvoices,
-	useBranches,
 } from '../api/students.queries';
 import type {
 	Guardian,

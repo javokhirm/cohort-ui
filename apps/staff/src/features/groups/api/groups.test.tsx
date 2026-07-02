@@ -1,5 +1,5 @@
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
-import { renderHook, waitFor } from '@testing-library/react';
+import { act, renderHook, waitFor } from '@testing-library/react';
 import { describe, expect, it } from 'vitest';
 import type { ReactNode } from 'react';
 
@@ -7,6 +7,7 @@ import { isApiError } from '@repo/api-client';
 
 import { server } from '@/test/server';
 import { groupHandlers } from '@/test/handlers';
+import { useBranchStore } from '@/store/branchStore';
 
 import {
 	useGroup,
@@ -60,6 +61,60 @@ describe('useGroupList', () => {
 		});
 
 		await waitFor(() => expect(result.current.isError).toBe(true));
+	});
+});
+
+describe('useGroupList — global branch selection', () => {
+	it('sends the selection as repeated branchIds params and refetches on change', async () => {
+		const groupListRequests: URL[] = [];
+		const onRequest = ({ request }: { request: Request }) => {
+			const url = new URL(request.url);
+			if (url.pathname.endsWith('/manage/groups')) groupListRequests.push(url);
+		};
+		server.events.on('request:start', onRequest);
+
+		try {
+			act(() => useBranchStore.getState().setActiveBranchIds([1]));
+
+			const { result } = renderHook(() => useGroupList({ page: 1, limit: 20 }), {
+				wrapper: wrapper(),
+			});
+
+			await waitFor(() => expect(result.current.isSuccess).toBe(true));
+			expect(groupListRequests).toHaveLength(1);
+			expect(groupListRequests[0]?.searchParams.getAll('branchIds')).toEqual(['1']);
+			expect(result.current.data?.total).toBe(3);
+
+			// Changing the selection changes the query key → refetch with new params.
+			act(() => useBranchStore.getState().setActiveBranchIds([2]));
+
+			await waitFor(() => expect(groupListRequests).toHaveLength(2));
+			expect(groupListRequests[1]?.searchParams.getAll('branchIds')).toEqual(['2']);
+			// No fixture group lives in branch 2.
+			await waitFor(() => expect(result.current.data?.total).toBe(0));
+		} finally {
+			server.events.removeListener('request:start', onRequest);
+		}
+	});
+
+	it('omits branchIds when the selection is "all branches"', async () => {
+		const groupListRequests: URL[] = [];
+		const onRequest = ({ request }: { request: Request }) => {
+			const url = new URL(request.url);
+			if (url.pathname.endsWith('/manage/groups')) groupListRequests.push(url);
+		};
+		server.events.on('request:start', onRequest);
+
+		try {
+			const { result } = renderHook(() => useGroupList({ page: 1, limit: 20 }), {
+				wrapper: wrapper(),
+			});
+
+			await waitFor(() => expect(result.current.isSuccess).toBe(true));
+			expect(groupListRequests[0]?.searchParams.has('branchIds')).toBe(false);
+		} finally {
+			server.events.removeListener('request:start', onRequest);
+		}
 	});
 });
 

@@ -1,6 +1,7 @@
 import { keepPreviousData, useQuery } from '@tanstack/react-query';
 
 import { manageApi } from '@/api/apiClient';
+import { useActiveBranchIds } from '@/store/branchStore';
 import type { PaginatedResult } from '@repo/api-client';
 
 import { groupsKeys, type GroupListFilters } from './keys';
@@ -109,11 +110,19 @@ export interface SessionDetail extends SessionCalendarItem {
 // ─── Queries ─────────────────────────────────────────────────────────────────
 
 export function useGroupList(filters: GroupListFilters) {
+	// The global branch selection is part of the effective filters (and thus the
+	// query key), so changing the selector refetches. An explicit caller value
+	// still wins.
+	const activeBranchIds = useActiveBranchIds();
+	const effectiveFilters: GroupListFilters = {
+		...filters,
+		branchIds: filters.branchIds ?? activeBranchIds,
+	};
 	return useQuery({
-		queryKey: groupsKeys.groupList(filters),
+		queryKey: groupsKeys.groupList(effectiveFilters),
 		queryFn: () =>
 			manageApi.getPaginated<GroupListItem>('/groups', {
-				params: filters,
+				params: effectiveFilters,
 			}) as Promise<PaginatedResult<GroupListItem>>,
 		placeholderData: keepPreviousData,
 	});

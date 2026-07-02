@@ -13,7 +13,8 @@ import {
 } from '@repo/ui';
 
 import { FormSheet } from '@/components/FormSheet';
-import { useBranches } from '@/features/people/api/students.queries';
+import { useBranches } from '@/api/branches';
+import { useBranchStore } from '@/store/branchStore';
 
 import {
 	createStaffSchema,
@@ -78,12 +79,18 @@ function CreateStaffForm({
 	onSuccess: () => void;
 	onPendingChange: (pending: boolean) => void;
 }) {
+	// When exactly one branch is selected globally, pre-fill it (still editable).
+	const activeBranchIds = useBranchStore((s) => s.activeBranchIds);
+	const defaultBranchId =
+		activeBranchIds?.length === 1 ? activeBranchIds[0] : undefined;
+
 	const form = useForm<CreateStaffFormValues>({
 		resolver: zodResolver(createStaffSchema),
 		defaultValues: {
 			firstName: '',
 			lastName: '',
 			roleName: 'TEACHER',
+			branchId: defaultBranchId,
 			position: '',
 			phone: '+998',
 			email: '',

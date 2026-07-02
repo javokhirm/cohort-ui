@@ -150,11 +150,25 @@ This follows the repo rule: don't build ahead of the API.
 
 ## 6. Branch scope
 
-- Users with `branchScope === null` see all branches; otherwise only their listed branches.
-- The **active branch** is a client-state value (Zustand) shown in a header **branch
-  switcher** for multi-branch users. It is injected into list query filters (so it's part of
-  the query key — changing branch refetches).
-- A single-branch user has no switcher; the active branch is fixed.
+- The backend derives a **surface-specific branch scope** for staff users: `GET
+  /manage/branches` returns only the branches the user can access with a back-office
+  role (OWNER/ADMIN/MANAGER; a tenant-wide assignment grants all). The UI never
+  computes access from the token's `branchScope` claim — the branches endpoint is
+  the source of truth for the selector.
+- The **active branch selection** is a client-state value (Zustand branch store,
+  persisted to `localStorage` under `educore.staff.activeBranchIds`) shown in a
+  global header **branch selector**. It is **multi-select**: the user can view one
+  branch, several, or all accessible branches at once.
+- Every list query injects the selection as `?branchIds=<id>,<id>` through its
+  query filters (so it's part of the query key — changing the selection refetches).
+  Selecting *all* accessible branches sends no `branchIds` param; the backend
+  auto-narrows to the user's scope. An id outside the scope → 403
+  `BRANCH_FORBIDDEN`.
+- A single-branch user has no selector; the active branch is fixed.
+- On boot the persisted selection is reconciled against the freshly fetched
+  branches; ids that are no longer accessible are dropped (falling back to "all").
+- Create/edit forms default their `branchId` field to the active branch when
+  exactly one branch is selected; otherwise the user picks explicitly.
 
 ---
 

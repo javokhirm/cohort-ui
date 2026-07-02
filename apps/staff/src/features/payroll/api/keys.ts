@@ -3,7 +3,7 @@ export type PayrollStatus = 'DRAFT' | 'APPROVED' | 'PAID';
 export interface PayrollListFilters {
 	page?: number;
 	limit?: number;
-	branchId?: number;
+	branchIds?: number[];
 	staffId?: number;
 	status?: PayrollStatus;
 	periodFrom?: string;

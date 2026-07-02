@@ -1,6 +1,7 @@
 import { keepPreviousData, useQuery } from '@tanstack/react-query';
 
 import { manageApi } from '@/api/apiClient';
+import { useActiveBranchIds } from '@/store/branchStore';
 import type { PaginatedResult } from '@repo/api-client';
 
 import { coursesKeys, type CourseListFilters } from './keys';
@@ -46,11 +47,19 @@ export interface CourseResponse {
 // ─── Queries ─────────────────────────────────────────────────────────────────
 
 export function useCourseList(filters: CourseListFilters) {
+	// The global branch selection is part of the effective filters (and thus the
+	// query key), so changing the selector refetches. An explicit caller value
+	// still wins.
+	const activeBranchIds = useActiveBranchIds();
+	const effectiveFilters: CourseListFilters = {
+		...filters,
+		branchIds: filters.branchIds ?? activeBranchIds,
+	};
 	return useQuery({
-		queryKey: coursesKeys.courseList(filters),
+		queryKey: coursesKeys.courseList(effectiveFilters),
 		queryFn: () =>
 			manageApi.getPaginated<CourseResponse>('/courses', {
-				params: filters,
+				params: effectiveFilters,
 			}) as Promise<PaginatedResult<CourseResponse>>,
 		placeholderData: keepPreviousData,
 	});

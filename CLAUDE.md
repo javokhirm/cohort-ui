@@ -175,8 +175,10 @@ EduCore is multi-tenant: one education-center _business_ (tenant) with one or ma
 _branches_. **The tenant is identified by the subdomain** (`zabon.educore.uz`) and resolved
 by the backend from the Host header, cross-checked against the JWT `tenantId`. The frontend
 serves **one build for all tenants** — never bake a tenant into the build. Multi-branch
-users carry a `branchScope`; the active branch is a client-state value injected into list
-queries. See [docs/auth-and-rbac.md](docs/auth-and-rbac.md).
+users pick their view in a global, multi-select **branch selector**; the selection is
+client state injected into list queries as `branchIds` (part of the query key). The
+selectable set comes from `GET /manage/branches`, already scoped per user by the
+backend. See [docs/auth-and-rbac.md](docs/auth-and-rbac.md).
 
 **Authorization in the UI is cosmetic.** The server is the source of truth for permissions.
 Gate navigation and actions with `<Can>` / `usePermissions()` for UX, but never rely on client gating for security.

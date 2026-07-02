@@ -1,19 +1,12 @@
 import { keepPreviousData, useQuery } from '@tanstack/react-query';
 
 import { manageApi } from '@/api/apiClient';
+import { useActiveBranchIds } from '@/store/branchStore';
 import type { PaginatedResult } from '@repo/api-client';
 
 import { peopleKeys, type StudentListFilters } from './keys';
 
 // ─── Domain types ────────────────────────────────────────────────────────────
-
-export interface Branch {
-	id: number;
-	name: string;
-	code: string;
-	isMain: boolean;
-	isActive: boolean;
-}
 
 export interface Group {
 	id: number;
@@ -111,11 +104,19 @@ export interface Invoice {
 // ─── Queries ─────────────────────────────────────────────────────────────────
 
 export function useStudents(filters: StudentListFilters) {
+	// The global branch selection is part of the effective filters (and thus the
+	// query key), so changing the selector refetches. An explicit caller value
+	// still wins.
+	const activeBranchIds = useActiveBranchIds();
+	const effectiveFilters: StudentListFilters = {
+		...filters,
+		branchIds: filters.branchIds ?? activeBranchIds,
+	};
 	return useQuery({
-		queryKey: peopleKeys.studentList(filters),
+		queryKey: peopleKeys.studentList(effectiveFilters),
 		queryFn: () =>
 			manageApi.getPaginated<Student>('/students', {
-				params: filters,
+				params: effectiveFilters,
 			}) as Promise<PaginatedResult<Student>>,
 		placeholderData: keepPreviousData,
 	});
@@ -170,20 +171,19 @@ export function useStudentInvoices(studentId: number) {
 	});
 }
 
-export function useBranches() {
+export function useGroups(filters?: { branchIds?: number[] }) {
+	// Caller-provided branch scope (e.g. the create-student form's chosen branch)
+	// wins over the global selector.
+	const activeBranchIds = useActiveBranchIds();
+	const effectiveFilters = {
+		...filters,
+		branchIds: filters?.branchIds ?? activeBranchIds,
+	};
 	return useQuery({
-		queryKey: peopleKeys.branches(),
-		queryFn: () => manageApi.get<Branch[]>('/branches'),
-		staleTime: 5 * 60 * 1000,
-	});
-}
-
-export function useGroups(filters?: { branchId?: number }) {
-	return useQuery({
-		queryKey: peopleKeys.groups(filters),
+		queryKey: peopleKeys.groups(effectiveFilters),
 		queryFn: () =>
 			manageApi.getPaginated<Group>('/groups', {
-				params: { ...filters, status: 'ACTIVE', limit: 100 },
+				params: { ...effectiveFilters, status: 'ACTIVE', limit: 100 },
 			}) as Promise<PaginatedResult<Group>>,
 		staleTime: 60_000,
 	});

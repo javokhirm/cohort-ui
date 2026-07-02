@@ -1,7 +1,7 @@
 export interface RoomListFilters {
 	page?: number;
 	limit?: number;
-	branchId?: number;
+	branchIds?: number[];
 	isActive?: boolean;
 }
 

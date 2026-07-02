@@ -45,7 +45,13 @@ export interface ApiClientOptions {
 }
 
 export function createApiClient(opts: ApiClientOptions): ApiClient {
-	const http = axios.create({ baseURL: opts.baseUrl });
+	// `indexes: null` serializes array params as repeated keys (`branchIds=1&branchIds=2`)
+	// instead of axios' bracketed default (`branchIds[]=1`), which the backend's query
+	// parser would read as a differently-named key.
+	const http = axios.create({
+		baseURL: opts.baseUrl,
+		paramsSerializer: { indexes: null },
+	});
 
 	http.interceptors.request.use((config) => {
 		const token = opts.getAccessToken();

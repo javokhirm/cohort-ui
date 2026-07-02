@@ -1,6 +1,7 @@
 import { keepPreviousData, useQuery } from '@tanstack/react-query';
 
 import { manageApi } from '@/api/apiClient';
+import { useActiveBranchIds } from '@/store/branchStore';
 
 import { groupsKeys, type SessionCalendarFilters } from './keys';
 import type { SessionCalendarItem, SessionDetail } from './groups.queries';
@@ -12,10 +13,20 @@ import type { SessionCalendarItem, SessionDetail } from './groups.queries';
  * required (max 90-day window) and returned as a flat array, not paginated.
  */
 export function useSessionCalendar(filters: SessionCalendarFilters, enabled = true) {
+	// The global branch selection is part of the effective filters (and thus the
+	// query key), so changing the selector refetches. An explicit caller value
+	// still wins.
+	const activeBranchIds = useActiveBranchIds();
+	const effectiveFilters: SessionCalendarFilters = {
+		...filters,
+		branchIds: filters.branchIds ?? activeBranchIds,
+	};
 	return useQuery({
-		queryKey: groupsKeys.sessionCalendar(filters),
+		queryKey: groupsKeys.sessionCalendar(effectiveFilters),
 		queryFn: () =>
-			manageApi.get<SessionCalendarItem[]>('/sessions', { params: filters }),
+			manageApi.get<SessionCalendarItem[]>('/sessions', {
+				params: effectiveFilters,
+			}),
 		placeholderData: keepPreviousData,
 		enabled,
 	});

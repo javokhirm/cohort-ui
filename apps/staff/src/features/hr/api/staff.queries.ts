@@ -1,6 +1,7 @@
 import { keepPreviousData, useQuery } from '@tanstack/react-query';
 
 import { manageApi } from '@/api/apiClient';
+import { useActiveBranchIds } from '@/store/branchStore';
 import type { PaginatedResult } from '@repo/api-client';
 
 import { hrKeys, type StaffListFilters } from './keys';
@@ -45,11 +46,19 @@ export interface StaffResponse {
 // ─── Queries ─────────────────────────────────────────────────────────────────
 
 export function useStaffList(filters: StaffListFilters) {
+	// The global branch selection is part of the effective filters (and thus the
+	// query key), so changing the selector refetches. An explicit caller value
+	// still wins.
+	const activeBranchIds = useActiveBranchIds();
+	const effectiveFilters: StaffListFilters = {
+		...filters,
+		branchIds: filters.branchIds ?? activeBranchIds,
+	};
 	return useQuery({
-		queryKey: hrKeys.staffList(filters),
+		queryKey: hrKeys.staffList(effectiveFilters),
 		queryFn: () =>
 			manageApi.getPaginated<StaffResponse>('/staff', {
-				params: filters,
+				params: effectiveFilters,
 			}) as Promise<PaginatedResult<StaffResponse>>,
 		placeholderData: keepPreviousData,
 	});
