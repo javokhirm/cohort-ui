@@ -49,8 +49,28 @@ function fail(
 // ─── Branch fixtures ──────────────────────────────────────────────────────────
 
 export const MOCK_BRANCHES = [
-	{ id: 1, name: 'Main Campus', code: 'BR-001', isMain: true, isActive: true },
-	{ id: 2, name: 'Chilanzar Branch', code: 'BR-002', isMain: false, isActive: true },
+	{
+		id: 1,
+		name: 'Main Campus',
+		code: 'BR-001',
+		address: 'Yunusobod 4-kvartal, Tashkent',
+		phone: '+998 71 200 10 10',
+		email: null,
+		timezone: 'Asia/Tashkent',
+		isMain: true,
+		isActive: true,
+	},
+	{
+		id: 2,
+		name: 'Chilanzar Branch',
+		code: 'BR-002',
+		address: 'Chilonzor 9-kvartal, Tashkent',
+		phone: '+998 71 200 20 20',
+		email: null,
+		timezone: 'Asia/Tashkent',
+		isMain: false,
+		isActive: true,
+	},
 ];
 
 // ─── Room fixtures ────────────────────────────────────────────────────────────
@@ -595,7 +615,36 @@ export const handlers = [
 	}),
 
 	// ── Branches ─────────────────────────────────────────────────────────────
-	http.get(`${MANAGE}/branches`, () => ok(MOCK_BRANCHES)),
+	http.get(`${MANAGE}/branches`, ({ request }) => {
+		const url = new URL(request.url);
+		const isActive = url.searchParams.get('isActive');
+		let rows = MOCK_BRANCHES;
+		if (isActive !== null)
+			rows = rows.filter((b) => b.isActive === (isActive === 'true'));
+		return ok(rows);
+	}),
+
+	http.post(`${MANAGE}/branches`, async ({ request }) => {
+		const body = (await request.json()) as Record<string, unknown>;
+		return ok({
+			id: 99,
+			name: body['name'],
+			code: body['code'],
+			address: body['address'] ?? null,
+			phone: body['phone'] ?? null,
+			email: body['email'] ?? null,
+			timezone: body['timezone'] ?? null,
+			isMain: body['isMain'] ?? false,
+			isActive: true,
+		});
+	}),
+
+	http.patch(`${MANAGE}/branches/:id`, async ({ params, request }) => {
+		const branch = MOCK_BRANCHES.find((b) => b.id === Number(params['id']));
+		if (!branch) return fail(404, 'BRANCH_NOT_FOUND', 'Branch not found.');
+		const body = (await request.json()) as Record<string, unknown>;
+		return ok({ ...branch, ...body });
+	}),
 
 	// ── Rooms ────────────────────────────────────────────────────────────────
 	http.get(`${MANAGE}/rooms`, ({ request }) => {
@@ -1000,6 +1049,19 @@ export const staffHandlers = {
 	),
 	serverError: http.get(`${MANAGE}/staff`, () =>
 		fail(500, 'INTERNAL_ERROR', 'Unexpected server error.'),
+	),
+};
+
+export const branchHandlers = {
+	empty: http.get(`${MANAGE}/branches`, () => ok([])),
+	forbidden: http.get(`${MANAGE}/branches`, () =>
+		fail(403, 'FORBIDDEN', 'You do not have permission.'),
+	),
+	serverError: http.get(`${MANAGE}/branches`, () =>
+		fail(500, 'INTERNAL_ERROR', 'Unexpected server error.'),
+	),
+	createConflict: http.post(`${MANAGE}/branches`, () =>
+		fail(409, 'BRANCH_CODE_TAKEN', 'Short code is already in use.'),
 	),
 };
 

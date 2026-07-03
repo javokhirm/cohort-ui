@@ -14,6 +14,10 @@ export interface Branch {
 	id: number;
 	name: string;
 	code: string;
+	address: string | null;
+	phone: string | null;
+	email: string | null;
+	timezone: string | null;
 	isMain: boolean;
 	isActive: boolean;
 }

@@ -17,6 +17,7 @@ import { StudentDetailRoute } from '@/routes/_authed.students.$id';
 import { StaffRoute } from '@/routes/_authed.staff';
 import { StaffDetailRoute } from '@/routes/_authed.staff.$id';
 import { RoomsRoute } from '@/routes/_authed.rooms';
+import { BranchesRoute } from '@/routes/_authed.branches';
 import { CoursesRoute } from '@/routes/_authed.courses';
 import { CourseDetailRoute } from '@/routes/_authed.courses.$id';
 import { GroupsRoute } from '@/routes/_authed.groups';
@@ -152,6 +153,12 @@ interface CourseSearch {
 	search?: string;
 	status?: CourseStatusSearch;
 }
+
+const branchesRoute = createRoute({
+	getParentRoute: () => authedRoute,
+	path: '/branches',
+	component: BranchesRoute,
+});
 
 const coursesRoute = createRoute({
 	getParentRoute: () => authedRoute,
@@ -303,6 +310,7 @@ const routeTree = rootRoute.addChildren([
 		staffRoute,
 		staffDetailRoute,
 		roomsRoute,
+		branchesRoute,
 		coursesRoute,
 		courseDetailRoute,
 		groupsRoute,

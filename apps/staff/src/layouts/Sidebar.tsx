@@ -2,6 +2,7 @@ import { useNavigate, useRouterState } from '@tanstack/react-router';
 import {
 	BookOpen,
 	Briefcase,
+	Building2,
 	CalendarClock,
 	CalendarDays,
 	CheckSquare,
@@ -146,6 +147,7 @@ const NAV_GROUPS: NavGroupDef[] = [
 	{
 		label: 'Administration',
 		items: [
+			{ id: 'branches', label: 'Branches', Icon: Building2, href: '/branches' },
 			{ id: 'roles', label: 'Roles & Permissions', Icon: Shield, href: '/roles' },
 			{ id: 'audit-log', label: 'Audit Log', Icon: History, href: '/audit-log' },
 		],
