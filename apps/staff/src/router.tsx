@@ -19,6 +19,7 @@ import { StaffDetailRoute } from '@/routes/_authed.staff.$id';
 import { StaffEditRoute } from '@/routes/_authed.staff.$id.edit';
 import { RoomsRoute } from '@/routes/_authed.rooms';
 import { FeePlansRoute } from '@/routes/_authed.fee-plans';
+import { DiscountsRoute } from '@/routes/_authed.discounts';
 import { BranchesRoute } from '@/routes/_authed.branches';
 import { CoursesRoute } from '@/routes/_authed.courses';
 import { CourseDetailRoute } from '@/routes/_authed.courses.$id';
@@ -194,6 +195,28 @@ const feePlansRoute = createRoute({
 	component: FeePlansRoute,
 });
 
+type DiscountStatusSearch = 'active' | 'inactive';
+
+interface DiscountSearch {
+	page?: number;
+	status?: DiscountStatusSearch;
+}
+
+const discountsRoute = createRoute({
+	getParentRoute: () => authedRoute,
+	path: '/discounts',
+	beforeLoad: () => requirePermission('discount.manage'),
+	validateSearch: (search: Record<string, unknown>): DiscountSearch => {
+		const page = Number(search.page);
+		const status = search.status;
+		return {
+			page: Number.isFinite(page) && page > 0 ? page : undefined,
+			status: status === 'active' || status === 'inactive' ? status : undefined,
+		};
+	},
+	component: DiscountsRoute,
+});
+
 const branchesRoute = createRoute({
 	getParentRoute: () => authedRoute,
 	path: '/branches',
@@ -361,6 +384,7 @@ const routeTree = rootRoute.addChildren([
 		staffEditRoute,
 		roomsRoute,
 		feePlansRoute,
+		discountsRoute,
 		branchesRoute,
 		coursesRoute,
 		courseDetailRoute,
