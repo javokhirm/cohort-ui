@@ -39,7 +39,8 @@ import {
 	TooltipContent,
 	TooltipTrigger,
 } from '@repo/ui';
-import { useAuth } from '@/features/auth/hooks';
+import { useAuth, usePermissions } from '@/features/auth/hooks';
+import type { PermissionRequirement } from '@/lib/auth/permissions';
 import { getTenantSlug } from '@/lib/tenant';
 
 type NavItemDef = {
@@ -48,6 +49,8 @@ type NavItemDef = {
 	Icon: LucideIcon;
 	href: string;
 	badge?: string;
+	/** Permission(s) that reveal this item — any-of. Mirrors the route guard. */
+	permission: PermissionRequirement;
 };
 
 type NavGroupDef = {
@@ -59,71 +62,145 @@ const NAV_GROUPS: NavGroupDef[] = [
 	{
 		label: 'Overview',
 		items: [
-			{ id: 'dashboard', label: 'Dashboard', Icon: LayoutDashboard, href: '/' },
+			{
+				id: 'dashboard',
+				label: 'Dashboard',
+				Icon: LayoutDashboard,
+				href: '/',
+				permission: 'dashboard.read',
+			},
 		],
 	},
 	{
 		label: 'CRM',
-		items: [{ id: 'leads', label: 'Leads / Pipeline', Icon: Filter, href: '/leads' }],
+		items: [
+			{
+				id: 'leads',
+				label: 'Leads / Pipeline',
+				Icon: Filter,
+				href: '/leads',
+				permission: 'lead.read',
+			},
+		],
 	},
 	{
 		label: 'People',
 		items: [
-			{ id: 'students', label: 'Students', Icon: GraduationCap, href: '/students' },
-			{ id: 'staff', label: 'Staff & HR', Icon: Briefcase, href: '/staff' },
+			{
+				id: 'students',
+				label: 'Students',
+				Icon: GraduationCap,
+				href: '/students',
+				permission: 'student.read',
+			},
+			{
+				id: 'staff',
+				label: 'Staff & HR',
+				Icon: Briefcase,
+				href: '/staff',
+				permission: 'staff.read',
+			},
 		],
 	},
 	{
 		label: 'Academics',
 		items: [
-			{ id: 'courses', label: 'Courses', Icon: BookOpen, href: '/courses' },
-			{ id: 'rooms', label: 'Rooms', Icon: DoorOpen, href: '/rooms' },
+			{
+				id: 'courses',
+				label: 'Courses',
+				Icon: BookOpen,
+				href: '/courses',
+				permission: 'course.read',
+			},
+			{
+				id: 'rooms',
+				label: 'Rooms',
+				Icon: DoorOpen,
+				href: '/rooms',
+				permission: 'room.read',
+			},
 			{
 				id: 'groups',
 				label: 'Groups',
 				Icon: CalendarDays,
 				href: '/groups',
+				permission: 'group.read',
 			},
 			{
 				id: 'schedule',
 				label: 'Schedule',
 				Icon: CalendarClock,
 				href: '/schedule',
+				permission: 'session.read',
 			},
 			{
 				id: 'attendance',
 				label: 'Attendance',
 				Icon: CheckSquare,
 				href: '/attendance',
+				permission: 'attendance.read',
 			},
 			{
 				id: 'assessments',
 				label: 'Assessments',
 				Icon: ClipboardList,
 				href: '/assessments',
+				permission: 'assessment.read',
 			},
 			{
 				id: 'report-cards',
 				label: 'Report Cards',
 				Icon: ScrollText,
 				href: '/report-cards',
+				permission: ['report-card.generate', 'report-card.publish'],
 			},
 		],
 	},
 	{
 		label: 'Finance',
 		items: [
-			{ id: 'invoices', label: 'Invoices', Icon: FileText, href: '/invoices' },
-			{ id: 'payments', label: 'Payments', Icon: CreditCard, href: '/payments' },
-			{ id: 'fee-plans', label: 'Fee Plans', Icon: Layers, href: '/fee-plans' },
-			{ id: 'discounts', label: 'Discounts', Icon: Tag, href: '/discounts' },
-			{ id: 'expenses', label: 'Expenses', Icon: Receipt, href: '/expenses' },
+			{
+				id: 'invoices',
+				label: 'Invoices',
+				Icon: FileText,
+				href: '/invoices',
+				permission: 'invoice.read',
+			},
+			{
+				id: 'payments',
+				label: 'Payments',
+				Icon: CreditCard,
+				href: '/payments',
+				permission: 'payment.read',
+			},
+			{
+				id: 'fee-plans',
+				label: 'Fee Plans',
+				Icon: Layers,
+				href: '/fee-plans',
+				permission: 'fee-plan.manage',
+			},
+			{
+				id: 'discounts',
+				label: 'Discounts',
+				Icon: Tag,
+				href: '/discounts',
+				permission: 'discount.manage',
+			},
+			{
+				id: 'expenses',
+				label: 'Expenses',
+				Icon: Receipt,
+				href: '/expenses',
+				permission: ['expense.create', 'expense.update', 'expense.delete'],
+			},
 			{
 				id: 'payroll',
 				label: 'Payroll',
 				Icon: Wallet,
 				href: '/payroll',
 				badge: 'OWNER',
+				permission: 'payroll.read',
 			},
 		],
 	},
@@ -135,21 +212,45 @@ const NAV_GROUPS: NavGroupDef[] = [
 				label: 'Communication',
 				Icon: MessageSquare,
 				href: '/communication',
+				permission: [
+					'notification.send',
+					'notification-template.manage',
+					'reminder-rule.manage',
+				],
 			},
 			{
 				id: 'materials',
 				label: 'Learning Materials',
 				Icon: FolderOpen,
 				href: '/materials',
+				permission: 'material.read',
 			},
 		],
 	},
 	{
 		label: 'Administration',
 		items: [
-			{ id: 'branches', label: 'Branches', Icon: Building2, href: '/branches' },
-			{ id: 'roles', label: 'Roles & Permissions', Icon: Shield, href: '/roles' },
-			{ id: 'audit-log', label: 'Audit Log', Icon: History, href: '/audit-log' },
+			{
+				id: 'branches',
+				label: 'Branches',
+				Icon: Building2,
+				href: '/branches',
+				permission: 'branch.read',
+			},
+			{
+				id: 'roles',
+				label: 'Roles & Permissions',
+				Icon: Shield,
+				href: '/roles',
+				permission: 'role.read',
+			},
+			{
+				id: 'audit-log',
+				label: 'Audit Log',
+				Icon: History,
+				href: '/audit-log',
+				permission: 'audit.read',
+			},
 		],
 	},
 ];
@@ -237,8 +338,21 @@ function NavButton({
 
 export function Sidebar({ collapsed }: SidebarProps) {
 	const { user, logout } = useAuth();
+	const { can, permissionsLoaded } = usePermissions();
 	const pathname = useRouterState({ select: (s) => s.location.pathname });
 	const tenantSlug = getTenantSlug();
+
+	// Cosmetic nav filtering — show only what the resolved permissions allow, and
+	// drop a group once all its items are hidden. The backend enforces access.
+	// Until `/manage/me` resolves, fail OPEN (show everything) to match the route
+	// guards — otherwise a transient profile-load failure would leave an empty
+	// sidebar over a still-navigable console.
+	const visibleGroups = permissionsLoaded
+		? NAV_GROUPS.map((group) => ({
+				...group,
+				items: group.items.filter((item) => can(item.permission)),
+			})).filter((group) => group.items.length > 0)
+		: NAV_GROUPS;
 
 	const tenantName = tenantSlug
 		? tenantSlug.charAt(0).toUpperCase() + tenantSlug.slice(1)
@@ -282,7 +396,7 @@ export function Sidebar({ collapsed }: SidebarProps) {
 
 			{/* Nav */}
 			<nav className="flex flex-1 flex-col gap-3.5 overflow-y-auto p-2.5 py-3">
-				{NAV_GROUPS.map((group) => (
+				{visibleGroups.map((group) => (
 					<div key={group.label} className="flex flex-col gap-0.5">
 						{/* Group label — collapses via max-height + fades */}
 						<div

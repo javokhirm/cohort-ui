@@ -24,8 +24,10 @@ const STATUS_FILTERS: { value: PayrollStatus | undefined; label: string }[] = [
 export function PayrollPage() {
 	const navigate = useNavigate();
 	const { page = 1, status } = useSearch({ from: '/_authed/payroll' });
-	const { hasRole } = useAuth();
-	const canManage = hasRole(['OWNER']);
+	const { can } = useAuth();
+	const canRun = can('payroll.create');
+	const canApprove = can('payroll.approve');
+	const canPay = can('payroll.pay');
 
 	const [runOpen, setRunOpen] = useState(false);
 
@@ -56,7 +58,7 @@ export function PayrollPage() {
 				title="Payroll"
 				description="Gross, deductions and net by staff member"
 				actions={
-					canManage ? (
+					canRun ? (
 						<Button onClick={() => setRunOpen(true)}>
 							<Wallet className="mr-1.5 size-4" />
 							Run payroll
@@ -99,7 +101,8 @@ export function PayrollPage() {
 					<PayrollTable
 						payrolls={payrolls}
 						isLoading={isLoading}
-						canManage={canManage}
+						canApprove={canApprove}
+						canPay={canPay}
 					/>
 					<div className="border-t border-border px-4 py-3">
 						<Pagination
@@ -112,7 +115,7 @@ export function PayrollPage() {
 				</Card>
 			</div>
 
-			{canManage && <RunPayrollDialog open={runOpen} onOpenChange={setRunOpen} />}
+			{canRun && <RunPayrollDialog open={runOpen} onOpenChange={setRunOpen} />}
 		</div>
 	);
 }

@@ -28,12 +28,25 @@ function StaffAvatar({ staff }: { staff: PayrollResponse['staff'] }) {
 	);
 }
 
-function RowActions({ payroll }: { payroll: PayrollResponse }) {
+function RowActions({
+	payroll,
+	canApprove,
+	canPay,
+}: {
+	payroll: PayrollResponse;
+	canApprove: boolean;
+	canPay: boolean;
+}) {
 	const approve = useApprovePayroll();
 	const markPaid = useMarkPayrollPaid();
 	const isPending = approve.isPending || markPaid.isPending;
 
-	if (payroll.status === 'PAID') {
+	// The only action for each status is permission-gated; if the caller can't
+	// perform the one that applies, there's nothing to show.
+	const actionable =
+		(payroll.status === 'DRAFT' && canApprove) ||
+		(payroll.status === 'APPROVED' && canPay);
+	if (payroll.status === 'PAID' || !actionable) {
 		return <span className="text-muted-foreground">—</span>;
 	}
 
@@ -68,10 +81,10 @@ function RowActions({ payroll }: { payroll: PayrollResponse }) {
 				</Button>
 			</DropdownMenuTrigger>
 			<DropdownMenuContent align="end" onClick={(e) => e.stopPropagation()}>
-				{payroll.status === 'DRAFT' && (
+				{payroll.status === 'DRAFT' && canApprove && (
 					<DropdownMenuItem onClick={handleApprove}>Approve</DropdownMenuItem>
 				)}
-				{payroll.status === 'APPROVED' && (
+				{payroll.status === 'APPROVED' && canPay && (
 					<DropdownMenuItem onClick={handleMarkPaid}>
 						Mark paid
 					</DropdownMenuItem>
@@ -84,11 +97,18 @@ function RowActions({ payroll }: { payroll: PayrollResponse }) {
 interface PayrollTableProps {
 	payrolls: PayrollResponse[];
 	isLoading?: boolean;
-	/** Approve / mark-paid actions are OWNER-gated on the backend. */
-	canManage: boolean;
+	/** Whether the caller may approve DRAFT payroll (`payroll.approve`). */
+	canApprove: boolean;
+	/** Whether the caller may mark APPROVED payroll paid (`payroll.pay`). */
+	canPay: boolean;
 }
 
-export function PayrollTable({ payrolls, isLoading, canManage }: PayrollTableProps) {
+export function PayrollTable({
+	payrolls,
+	isLoading,
+	canApprove,
+	canPay,
+}: PayrollTableProps) {
 	const columns: ColumnDef<PayrollResponse>[] = [
 		{
 			id: 'staff',
@@ -165,11 +185,17 @@ export function PayrollTable({ payrolls, isLoading, canManage }: PayrollTablePro
 		},
 	];
 
-	if (canManage) {
+	if (canApprove || canPay) {
 		columns.push({
 			id: 'actions',
 			header: () => <span className="sr-only">Actions</span>,
-			cell: ({ row }) => <RowActions payroll={row.original} />,
+			cell: ({ row }) => (
+				<RowActions
+					payroll={row.original}
+					canApprove={canApprove}
+					canPay={canPay}
+				/>
+			),
 			size: 56,
 		});
 	}

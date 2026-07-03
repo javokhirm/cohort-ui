@@ -20,7 +20,13 @@ afterEach(() => {
 	server.resetHandlers();
 	cleanup();
 	localStorage.clear();
-	useSessionStore.setState({ accessToken: null, user: null, status: 'unknown' });
+	useSessionStore.setState({
+		accessToken: null,
+		user: null,
+		status: 'unknown',
+		permissions: [],
+		permissionsLoaded: false,
+	});
 	useBranchStore.setState({ activeBranchIds: null });
 });
 

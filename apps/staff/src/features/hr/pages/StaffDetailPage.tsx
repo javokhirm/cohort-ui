@@ -19,6 +19,7 @@ import {
 } from '@repo/ui';
 import { formatDate, formatMoney } from '@repo/utils';
 
+import { Can } from '@/components/Can';
 import { usePayrollList } from '@/features/payroll/api/payroll.queries';
 
 import { useStaffMember, type StaffResponse } from '../api/staff.queries';
@@ -82,10 +83,12 @@ function StaffHeader({ staff, onEdit }: { staff: StaffResponse; onEdit: () => vo
 						<MessageSquare className="mr-1.5 size-3.5" />
 						Message
 					</Button>
-					<Button variant="outline" size="sm" onClick={onEdit}>
-						<Edit className="mr-1.5 size-3.5" />
-						Edit
-					</Button>
+					<Can permission="staff.update">
+						<Button variant="outline" size="sm" onClick={onEdit}>
+							<Edit className="mr-1.5 size-3.5" />
+							Edit
+						</Button>
+					</Can>
 				</div>
 			</div>
 		</div>

@@ -1,5 +1,6 @@
 import { http, HttpResponse } from 'msw';
 
+import { PERMISSION_CODES } from '@/lib/auth/permissions';
 import type { ScheduleDay } from '@/features/groups/api/groups.queries';
 
 /** Mirrors the backend response envelope for the /manage surface in tests. */
@@ -614,6 +615,22 @@ export const handlers = [
 		return fail(401, 'INVALID_TOKEN', 'Invalid refresh token.');
 	}),
 
+	// ── Profile (resolved permissions) ─────────────────────────────────────────
+	http.get(`${MANAGE}/me`, () =>
+		ok({
+			id: 1,
+			firstName: 'Olim',
+			lastName: 'Owner',
+			email: null,
+			phone: '+998901112200',
+			avatarUrl: null,
+			roles: ['OWNER'],
+			branchScope: null,
+			// OWNER holds the full catalog on the backend.
+			permissions: [...PERMISSION_CODES],
+		}),
+	),
+
 	// ── Branches ─────────────────────────────────────────────────────────────
 	http.get(`${MANAGE}/branches`, ({ request }) => {
 		const url = new URL(request.url);
@@ -1041,6 +1058,27 @@ export const handlers = [
 ];
 
 // ─── Named error/empty overrides (use with server.use() in tests) ─────────────
+
+/** `GET /manage/me` returning a specific resolved permission set (or an error). */
+export const meHandlers = {
+	withPermissions: (permissions: string[]) =>
+		http.get(`${MANAGE}/me`, () =>
+			ok({
+				id: 2,
+				firstName: 'Madina',
+				lastName: 'Manager',
+				email: null,
+				phone: '+998901112201',
+				avatarUrl: null,
+				roles: ['MANAGER'],
+				branchScope: [1],
+				permissions,
+			}),
+		),
+	serverError: http.get(`${MANAGE}/me`, () =>
+		fail(500, 'INTERNAL_ERROR', 'Unexpected server error.'),
+	),
+};
 
 export const staffHandlers = {
 	empty: http.get(`${MANAGE}/staff`, () => okPaged([], 1, 20, 0)),

@@ -4,6 +4,7 @@ import { ArrowLeft, BookOpen, CalendarDays, Edit } from 'lucide-react';
 
 import { Button, Card, Separator, Skeleton, StatusBadge } from '@repo/ui';
 
+import { Can } from '@/components/Can';
 import { useCourse, useCourseGroups, type CourseGroup } from '../api/courses.queries';
 import type { CourseResponse } from '../api/courses.queries';
 import { CourseForm } from '../components/CourseForm';
@@ -61,10 +62,12 @@ function CourseHeader({
 					</div>
 				</div>
 
-				<Button variant="outline" size="sm" onClick={onEdit}>
-					<Edit className="mr-1.5 size-3.5" />
-					Edit course
-				</Button>
+				<Can permission="course.update">
+					<Button variant="outline" size="sm" onClick={onEdit}>
+						<Edit className="mr-1.5 size-3.5" />
+						Edit course
+					</Button>
+				</Can>
 			</div>
 
 			<Separator className="my-4" />

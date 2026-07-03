@@ -19,6 +19,7 @@ import {
 } from '@repo/ui';
 import { formatDate, formatMoney } from '@repo/utils';
 
+import { Can } from '@/components/Can';
 import { useBranches } from '@/api/branches';
 import {
 	useStudent,
@@ -94,18 +95,22 @@ function StudentHeader({ studentId, onEdit }: { studentId: number; onEdit: () =>
 				</div>
 
 				<div className="flex items-center gap-2">
-					<Button variant="outline" size="sm" onClick={onEdit}>
-						<Edit className="mr-1.5 size-3.5" />
-						Edit
-					</Button>
+					<Can permission="student.update">
+						<Button variant="outline" size="sm" onClick={onEdit}>
+							<Edit className="mr-1.5 size-3.5" />
+							Edit
+						</Button>
+					</Can>
 					<Button variant="outline" size="sm">
 						<MessageSquare className="mr-1.5 size-3.5" />
 						Message
 					</Button>
-					<Button size="sm">
-						<Plus className="mr-1.5 size-3.5" />
-						Create invoice
-					</Button>
+					<Can permission="invoice.create">
+						<Button size="sm">
+							<Plus className="mr-1.5 size-3.5" />
+							Create invoice
+						</Button>
+					</Can>
 				</div>
 			</div>
 		</div>
@@ -239,14 +244,16 @@ function GuardiansTab({ studentId }: { studentId: number }) {
 									</div>
 								</div>
 							</div>
-							<Button
-								variant="ghost"
-								size="sm"
-								className="text-muted-foreground hover:text-destructive"
-								onClick={() => handleRemove(g)}
-							>
-								<Trash2 className="size-4" />
-							</Button>
+							<Can permission="student.guardian.manage">
+								<Button
+									variant="ghost"
+									size="sm"
+									className="text-muted-foreground hover:text-destructive"
+									onClick={() => handleRemove(g)}
+								>
+									<Trash2 className="size-4" />
+								</Button>
+							</Can>
 						</div>
 					</div>
 				);

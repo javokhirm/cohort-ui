@@ -14,6 +14,7 @@ import {
 	SearchFilterBar,
 } from '@repo/ui';
 
+import { Can } from '@/components/Can';
 import { useCourseList } from '@/features/courses/api/courses.queries';
 
 import { useGroupList } from '../api/groups.queries';
@@ -58,10 +59,12 @@ export function GroupListPage() {
 				title="Groups"
 				description="Class groups — teacher, room, capacity and weekly schedule"
 				actions={
-					<Button onClick={() => void navigate({ to: '/groups/new' })}>
-						<Plus className="mr-1.5 size-4" />
-						Create group
-					</Button>
+					<Can permission="group.create">
+						<Button onClick={() => void navigate({ to: '/groups/new' })}>
+							<Plus className="mr-1.5 size-4" />
+							Create group
+						</Button>
+					</Can>
 				}
 			/>
 

@@ -4,6 +4,7 @@ import { Plus } from 'lucide-react';
 
 import { Button, Card, PageHeader, Pagination, SearchFilterBar } from '@repo/ui';
 
+import { Can } from '@/components/Can';
 import { useCourseList } from '../api/courses.queries';
 import type { CourseListFilters } from '../api/keys';
 import { COURSE_STATUS_FILTERS } from '../lib/course-options';
@@ -68,10 +69,12 @@ export function CourseListPage() {
 				title="Courses"
 				description="Course catalog — levels, durations and branch scope"
 				actions={
-					<Button onClick={() => setAddOpen(true)}>
-						<Plus className="mr-1.5 size-4" />
-						New course
-					</Button>
+					<Can permission="course.create">
+						<Button onClick={() => setAddOpen(true)}>
+							<Plus className="mr-1.5 size-4" />
+							New course
+						</Button>
+					</Can>
 				}
 			/>
 

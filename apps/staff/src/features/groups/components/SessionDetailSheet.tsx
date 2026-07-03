@@ -24,6 +24,7 @@ import {
 import { isApiError } from '@repo/api-client';
 import { formatDate } from '@repo/utils';
 
+import { Can } from '@/components/Can';
 import { useBranches } from '@/api/branches';
 import { useStaffList } from '@/features/hr/api/staff.queries';
 import { useRoomList } from '@/features/rooms/api/rooms.queries';
@@ -205,16 +206,18 @@ function SessionBody({
 				</div>
 			</div>
 
-			{/* Actions */}
+			{/* Actions — reschedule / substitute / cancel all PATCH the session */}
 			{!cancelled && !completed && (
-				<SessionActions
-					session={session}
-					mode={mode}
-					setMode={setMode}
-					setConflict={setConflict}
-					groupId={groupId}
-					onDone={onDone}
-				/>
+				<Can permission="session.update">
+					<SessionActions
+						session={session}
+						mode={mode}
+						setMode={setMode}
+						setConflict={setConflict}
+						groupId={groupId}
+						onDone={onDone}
+					/>
+				</Can>
 			)}
 		</div>
 	);

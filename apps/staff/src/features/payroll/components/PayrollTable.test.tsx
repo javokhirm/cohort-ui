@@ -43,7 +43,7 @@ const ROWS: PayrollResponse[] = [
 
 describe('PayrollTable', () => {
 	it('renders staff, formatted net money and the status badge', () => {
-		renderTable(<PayrollTable payrolls={ROWS} canManage={false} />);
+		renderTable(<PayrollTable payrolls={ROWS} canApprove={false} canPay={false} />);
 
 		expect(screen.getByText('Diyorbek Rustamov')).toBeInTheDocument();
 		// formatMoney(7_040_000, 'UZS', 'uz-UZ') → "7 040 000 soʻm"
@@ -54,17 +54,26 @@ describe('PayrollTable', () => {
 		expect(screen.getByText('72')).toBeInTheDocument();
 	});
 
-	it('hides the actions column when the user cannot manage payroll', () => {
-		renderTable(<PayrollTable payrolls={ROWS} canManage={false} />);
+	it('hides the actions column when the user cannot approve or pay payroll', () => {
+		renderTable(<PayrollTable payrolls={ROWS} canApprove={false} canPay={false} />);
 		expect(
 			screen.queryByRole('button', { name: /payroll actions/i }),
 		).not.toBeInTheDocument();
 	});
 
-	it('shows the actions menu when the user can manage payroll', () => {
-		renderTable(<PayrollTable payrolls={ROWS} canManage />);
+	it('shows the actions menu for a DRAFT row when the user can approve', () => {
+		renderTable(<PayrollTable payrolls={ROWS} canApprove canPay={false} />);
 		expect(
 			screen.getByRole('button', { name: /payroll actions/i }),
 		).toBeInTheDocument();
+	});
+
+	it('hides the actions for a DRAFT row when the user can only pay (not approve)', () => {
+		renderTable(<PayrollTable payrolls={ROWS} canApprove={false} canPay />);
+		// Column renders (canPay), but the DRAFT row's only action is Approve →
+		// nothing actionable, so no menu trigger for this row.
+		expect(
+			screen.queryByRole('button', { name: /payroll actions/i }),
+		).not.toBeInTheDocument();
 	});
 });

@@ -7,7 +7,7 @@ import {
 } from '@tanstack/react-router';
 
 import { Toaster } from '@repo/ui';
-import { requireAuth } from '@/lib/auth/guards';
+import { requireAuth, requirePermission } from '@/lib/auth/guards';
 import { LoginRoute } from '@/routes/login';
 import { AuthedLayout } from '@/routes/authed-layout';
 import { DashboardPage } from '@/routes/dashboard';
@@ -72,18 +72,21 @@ const authedRoute = createRoute({
 const dashboardRoute = createRoute({
 	getParentRoute: () => authedRoute,
 	path: '/',
+	beforeLoad: () => requirePermission('dashboard.read'),
 	component: DashboardPage,
 });
 
 const studentsRoute = createRoute({
 	getParentRoute: () => authedRoute,
 	path: '/students',
+	beforeLoad: () => requirePermission('student.read'),
 	component: StudentsRoute,
 });
 
 const studentDetailRoute = createRoute({
 	getParentRoute: () => authedRoute,
 	path: '/students/$id',
+	beforeLoad: () => requirePermission('student.read'),
 	component: () => {
 		const { id } = studentDetailRoute.useParams();
 		return <StudentDetailRoute id={id} />;
@@ -101,6 +104,7 @@ interface StaffSearch {
 const staffRoute = createRoute({
 	getParentRoute: () => authedRoute,
 	path: '/staff',
+	beforeLoad: () => requirePermission('staff.read'),
 	validateSearch: (search: Record<string, unknown>): StaffSearch => {
 		const page = Number(search.page);
 		const role = search.role;
@@ -119,6 +123,7 @@ const staffRoute = createRoute({
 const staffDetailRoute = createRoute({
 	getParentRoute: () => authedRoute,
 	path: '/staff/$staffId',
+	beforeLoad: () => requirePermission('staff.read'),
 	component: () => {
 		const { staffId } = staffDetailRoute.useParams();
 		return <StaffDetailRoute id={staffId} />;
@@ -135,6 +140,7 @@ interface RoomSearch {
 const roomsRoute = createRoute({
 	getParentRoute: () => authedRoute,
 	path: '/rooms',
+	beforeLoad: () => requirePermission('room.read'),
 	validateSearch: (search: Record<string, unknown>): RoomSearch => {
 		const page = Number(search.page);
 		const status = search.status;
@@ -157,12 +163,14 @@ interface CourseSearch {
 const branchesRoute = createRoute({
 	getParentRoute: () => authedRoute,
 	path: '/branches',
+	beforeLoad: () => requirePermission('branch.read'),
 	component: BranchesRoute,
 });
 
 const coursesRoute = createRoute({
 	getParentRoute: () => authedRoute,
 	path: '/courses',
+	beforeLoad: () => requirePermission('course.read'),
 	validateSearch: (search: Record<string, unknown>): CourseSearch => {
 		const page = Number(search.page);
 		const status = search.status;
@@ -178,6 +186,7 @@ const coursesRoute = createRoute({
 const courseDetailRoute = createRoute({
 	getParentRoute: () => authedRoute,
 	path: '/courses/$courseId',
+	beforeLoad: () => requirePermission('course.read'),
 	component: () => {
 		const { courseId } = courseDetailRoute.useParams();
 		return <CourseDetailRoute id={courseId} />;
@@ -202,6 +211,7 @@ const GROUP_STATUSES: GroupStatusSearch[] = [
 const groupsRoute = createRoute({
 	getParentRoute: () => authedRoute,
 	path: '/groups',
+	beforeLoad: () => requirePermission('group.read'),
 	validateSearch: (search: Record<string, unknown>): GroupSearch => {
 		const page = Number(search.page);
 		const courseId = Number(search.courseId);
@@ -220,12 +230,14 @@ const groupsRoute = createRoute({
 const groupNewRoute = createRoute({
 	getParentRoute: () => authedRoute,
 	path: '/groups/new',
+	beforeLoad: () => requirePermission('group.create'),
 	component: GroupCreateRoute,
 });
 
 const groupDetailRoute = createRoute({
 	getParentRoute: () => authedRoute,
 	path: '/groups/$groupId',
+	beforeLoad: () => requirePermission('group.read'),
 	component: () => {
 		const { groupId } = groupDetailRoute.useParams();
 		return <GroupDetailRoute id={groupId} />;
@@ -235,6 +247,7 @@ const groupDetailRoute = createRoute({
 const groupEditRoute = createRoute({
 	getParentRoute: () => authedRoute,
 	path: '/groups/$groupId/edit',
+	beforeLoad: () => requirePermission('group.update'),
 	component: () => {
 		const { groupId } = groupEditRoute.useParams();
 		return <GroupEditRoute id={groupId} />;
@@ -256,6 +269,7 @@ const SCHEDULE_VIEWS: ScheduleViewSearch[] = ['week', 'month'];
 const scheduleRoute = createRoute({
 	getParentRoute: () => authedRoute,
 	path: '/schedule',
+	beforeLoad: () => requirePermission('session.read'),
 	validateSearch: (search: Record<string, unknown>): ScheduleSearch => {
 		const status = search.status;
 		const view = search.view;
@@ -286,6 +300,7 @@ interface PayrollSearch {
 const payrollRoute = createRoute({
 	getParentRoute: () => authedRoute,
 	path: '/payroll',
+	beforeLoad: () => requirePermission('payroll.read'),
 	validateSearch: (search: Record<string, unknown>): PayrollSearch => {
 		const page = Number(search.page);
 		const status = search.status;

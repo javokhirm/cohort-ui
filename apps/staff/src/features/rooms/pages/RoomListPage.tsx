@@ -4,6 +4,8 @@ import { Plus } from 'lucide-react';
 
 import { Button, Card, PageHeader, Pagination, SearchFilterBar } from '@repo/ui';
 
+import { Can } from '@/components/Can';
+import { usePermissions } from '@/features/auth/hooks';
 import { useRoomList } from '../api/rooms.queries';
 import type { RoomResponse } from '../api/rooms.queries';
 import type { RoomListFilters } from '../api/keys';
@@ -15,10 +17,12 @@ const PAGE_SIZE = 20;
 
 export function RoomListPage() {
 	const navigate = useNavigate();
+	const { can } = usePermissions();
 	const { page = 1, status } = useSearch({ from: '/_authed/rooms' });
 
 	const [addOpen, setAddOpen] = useState(false);
 	const [editRoom, setEditRoom] = useState<RoomResponse | null>(null);
+	const canEdit = can('room.update');
 
 	const filters: RoomListFilters = {
 		page,
@@ -46,10 +50,12 @@ export function RoomListPage() {
 				title="Rooms"
 				description="Physical and online rooms by branch"
 				actions={
-					<Button onClick={() => setAddOpen(true)}>
-						<Plus className="mr-1.5 size-4" />
-						New room
-					</Button>
+					<Can permission="room.create">
+						<Button onClick={() => setAddOpen(true)}>
+							<Plus className="mr-1.5 size-4" />
+							New room
+						</Button>
+					</Can>
 				}
 			/>
 
@@ -70,7 +76,11 @@ export function RoomListPage() {
 				)}
 
 				<Card className="gap-0 overflow-hidden py-0">
-					<RoomTable rooms={rooms} isLoading={isLoading} onEdit={setEditRoom} />
+					<RoomTable
+						rooms={rooms}
+						isLoading={isLoading}
+						onEdit={canEdit ? setEditRoom : undefined}
+					/>
 					<div className="border-t border-border px-4 py-3">
 						<Pagination
 							page={page}

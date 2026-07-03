@@ -4,6 +4,7 @@ import { Plus } from 'lucide-react';
 
 import { Button, Card, PageHeader, Pagination, SearchFilterBar } from '@repo/ui';
 
+import { Can } from '@/components/Can';
 import { useStaffList } from '../api/staff.queries';
 import type { StaffListFilters } from '../api/keys';
 import { ROLE_FILTERS } from '../lib/roles';
@@ -59,10 +60,12 @@ export function StaffListPage() {
 				title="Staff & HR"
 				description="Teachers, managers and administrators"
 				actions={
-					<Button onClick={() => setAddOpen(true)}>
-						<Plus className="mr-1.5 size-4" />
-						Add staff member
-					</Button>
+					<Can permission="staff.create">
+						<Button onClick={() => setAddOpen(true)}>
+							<Plus className="mr-1.5 size-4" />
+							Add staff member
+						</Button>
+					</Can>
 				}
 			/>
 

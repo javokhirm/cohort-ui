@@ -3,6 +3,7 @@ import { useState } from 'react';
 import { Button, PageHeader, Pagination, SearchFilterBar } from '@repo/ui';
 import { Download, Plus } from 'lucide-react';
 
+import { Can } from '@/components/Can';
 import { getTenantSlug } from '@/lib/tenant';
 import { useStudents } from '../api/students.queries';
 import type { StudentListFilters } from '../api/keys';
@@ -63,10 +64,12 @@ export function StudentListPage() {
 						: 'Manage student records, enrollments and balances'
 				}
 				actions={
-					<Button onClick={() => setAddOpen(true)}>
-						<Plus className="mr-1.5 size-4" />
-						Add student
-					</Button>
+					<Can permission="student.create">
+						<Button onClick={() => setAddOpen(true)}>
+							<Plus className="mr-1.5 size-4" />
+							Add student
+						</Button>
+					</Can>
 				}
 			/>
 

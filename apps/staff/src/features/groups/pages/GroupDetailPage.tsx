@@ -25,6 +25,7 @@ import {
 } from '@repo/ui';
 import { formatDate } from '@repo/utils';
 
+import { Can } from '@/components/Can';
 import { useGroup, type GroupDetail } from '../api/groups.queries';
 import { formatScheduleRule, GROUP_STATUS_META } from '../lib/group-options';
 import { RosterSection } from '../components/RosterSection';
@@ -55,10 +56,12 @@ function GroupHeader({ group, onEdit }: { group: GroupDetail; onEdit: () => void
 					</div>
 				</div>
 
-				<Button variant="outline" size="sm" onClick={onEdit}>
-					<Edit className="mr-1.5 size-3.5" />
-					Edit group
-				</Button>
+				<Can permission="group.update">
+					<Button variant="outline" size="sm" onClick={onEdit}>
+						<Edit className="mr-1.5 size-3.5" />
+						Edit group
+					</Button>
+				</Can>
 			</div>
 
 			<Separator className="my-4" />

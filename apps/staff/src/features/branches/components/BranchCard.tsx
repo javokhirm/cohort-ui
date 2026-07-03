@@ -2,6 +2,7 @@ import { MapPin, Pencil, Phone } from 'lucide-react';
 
 import { Card, StatusBadge } from '@repo/ui';
 
+import { Can } from '@/components/Can';
 import type { Branch } from '@/api/branches';
 
 interface BranchCardProps {
@@ -51,14 +52,16 @@ export function BranchCard({ branch, onEdit }: BranchCardProps) {
 					) : (
 						<StatusBadge tone="slate">Inactive</StatusBadge>
 					)}
-					<button
-						type="button"
-						onClick={() => onEdit(branch)}
-						aria-label={`Edit ${branch.name}`}
-						className="flex size-7 items-center justify-center rounded-md text-muted-foreground transition-colors hover:bg-muted hover:text-foreground"
-					>
-						<Pencil className="size-4" />
-					</button>
+					<Can permission="branch.update">
+						<button
+							type="button"
+							onClick={() => onEdit(branch)}
+							aria-label={`Edit ${branch.name}`}
+							className="flex size-7 items-center justify-center rounded-md text-muted-foreground transition-colors hover:bg-muted hover:text-foreground"
+						>
+							<Pencil className="size-4" />
+						</button>
+					</Can>
 				</div>
 			</div>
 

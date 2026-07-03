@@ -21,6 +21,7 @@ import {
 import { isApiError } from '@repo/api-client';
 import { formatDate } from '@repo/utils';
 
+import { Can } from '@/components/Can';
 import { useGroupEnrollments, type Enrollment } from '../api/groups.queries';
 import { useUpdateEnrollment } from '../api/groups.mutations';
 import { EnrollStudentsDialog } from './EnrollStudentsDialog';
@@ -50,10 +51,12 @@ export function RosterSection({ groupId, capacity }: RosterSectionProps) {
 						{capacity != null ? `/${capacity}` : ''} enrolled
 					</span>
 				</h2>
-				<Button size="sm" onClick={() => setEnrollOpen(true)}>
-					<Plus className="mr-1.5 size-4" />
-					Enroll students
-				</Button>
+				<Can permission="enrollment.create">
+					<Button size="sm" onClick={() => setEnrollOpen(true)}>
+						<Plus className="mr-1.5 size-4" />
+						Enroll students
+					</Button>
+				</Can>
 			</div>
 
 			{isLoading ? (
@@ -71,10 +74,12 @@ export function RosterSection({ groupId, capacity }: RosterSectionProps) {
 						title="No students enrolled"
 						description="Enroll active students to build this group's roster."
 						action={
-							<Button size="sm" onClick={() => setEnrollOpen(true)}>
-								<Plus className="mr-1.5 size-4" />
-								Enroll students
-							</Button>
+							<Can permission="enrollment.create">
+								<Button size="sm" onClick={() => setEnrollOpen(true)}>
+									<Plus className="mr-1.5 size-4" />
+									Enroll students
+								</Button>
+							</Can>
 						}
 					/>
 				</Card>
@@ -96,15 +101,17 @@ export function RosterSection({ groupId, capacity }: RosterSectionProps) {
 							<div className="flex items-center gap-3">
 								<StatusBadge kind="enrollment" status={e.status} />
 								{e.status === 'ACTIVE' && (
-									<Button
-										variant="ghost"
-										size="sm"
-										className="text-destructive hover:text-destructive"
-										onClick={() => setDropTarget(e)}
-									>
-										<UserMinus className="mr-1.5 size-3.5" />
-										Drop
-									</Button>
+									<Can permission="enrollment.update">
+										<Button
+											variant="ghost"
+											size="sm"
+											className="text-destructive hover:text-destructive"
+											onClick={() => setDropTarget(e)}
+										>
+											<UserMinus className="mr-1.5 size-3.5" />
+											Drop
+										</Button>
+									</Can>
 								)}
 							</div>
 						</div>

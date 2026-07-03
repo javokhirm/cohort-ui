@@ -9,7 +9,8 @@ import type { RoomResponse } from '../api/rooms.queries';
 interface RoomTableProps {
 	rooms: RoomResponse[];
 	isLoading?: boolean;
-	onEdit: (room: RoomResponse) => void;
+	/** Row-click opens the edit form. Omit to disable editing (no `room.update`). */
+	onEdit?: (room: RoomResponse) => void;
 }
 
 export function RoomTable({ rooms, isLoading, onEdit }: RoomTableProps) {
@@ -78,7 +79,7 @@ export function RoomTable({ rooms, isLoading, onEdit }: RoomTableProps) {
 			data={rooms}
 			isLoading={isLoading}
 			getRowId={(row) => String(row.id)}
-			onRowClick={(row) => onEdit(row)}
+			onRowClick={onEdit ? (row) => onEdit(row) : undefined}
 			emptyState={
 				<div className="py-16 text-center text-sm text-muted-foreground">
 					No rooms match this filter.

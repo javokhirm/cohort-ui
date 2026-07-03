@@ -3,6 +3,7 @@ import { Plus } from 'lucide-react';
 
 import { Button, PageHeader, Spinner } from '@repo/ui';
 
+import { Can } from '@/components/Can';
 import { useBranches, type Branch } from '@/api/branches';
 
 import { BranchCard } from '../components/BranchCard';
@@ -20,10 +21,12 @@ export function BranchListPage() {
 				title="Branches"
 				description="Physical campuses — addresses, contacts and capacity"
 				actions={
-					<Button onClick={() => setAddOpen(true)}>
-						<Plus className="mr-1.5 size-4" />
-						Add branch
-					</Button>
+					<Can permission="branch.create">
+						<Button onClick={() => setAddOpen(true)}>
+							<Plus className="mr-1.5 size-4" />
+							Add branch
+						</Button>
+					</Can>
 				}
 			/>
 
