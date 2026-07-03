@@ -170,6 +170,13 @@ export const STATUS_MAPS = {
 		one_time: { tone: 'slate', label: 'One-time' },
 		per_session: { tone: 'amber', label: 'Per session' },
 	},
+	expense: {
+		rent: { tone: 'indigo', label: 'Rent' },
+		utilities: { tone: 'blue', label: 'Utilities' },
+		marketing: { tone: 'violet', label: 'Marketing' },
+		salary: { tone: 'amber', label: 'Salary' },
+		other: { tone: 'slate', label: 'Other' },
+	},
 	role: {
 		owner: { tone: 'yellow', label: 'Owner' },
 		admin: { tone: 'cyan', label: 'Admin' },

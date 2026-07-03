@@ -31,6 +31,7 @@ import { GroupDetailRoute } from '@/routes/_authed.groups.$id';
 import { GroupEditRoute } from '@/routes/_authed.groups.$id.edit';
 import { ScheduleRoute } from '@/routes/_authed.schedule';
 import { PayrollRoute } from '@/routes/_authed.payroll';
+import { ExpensesRoute } from '@/routes/_authed.expenses';
 import { useSessionStore } from '@/store/sessionStore';
 
 const rootRoute = createRootRoute({
@@ -425,6 +426,49 @@ const payrollRoute = createRoute({
 	component: PayrollRoute,
 });
 
+type ExpenseCategorySearch = 'RENT' | 'UTILITIES' | 'MARKETING' | 'SALARY' | 'OTHER';
+
+const EXPENSE_CATEGORIES_SEARCH: ExpenseCategorySearch[] = [
+	'RENT',
+	'UTILITIES',
+	'MARKETING',
+	'SALARY',
+	'OTHER',
+];
+
+const ISO_DATE_SEARCH = /^\d{4}-\d{2}-\d{2}$/;
+
+interface ExpenseSearch {
+	page?: number;
+	category?: ExpenseCategorySearch;
+	from?: string;
+	to?: string;
+}
+
+const expensesRoute = createRoute({
+	getParentRoute: () => authedRoute,
+	path: '/expenses',
+	beforeLoad: () => requirePermission('expense.read'),
+	validateSearch: (search: Record<string, unknown>): ExpenseSearch => {
+		const page = Number(search.page);
+		const category = search.category;
+		const from = search.from;
+		const to = search.to;
+		return {
+			page: Number.isFinite(page) && page > 0 ? page : undefined,
+			category: EXPENSE_CATEGORIES_SEARCH.includes(
+				category as ExpenseCategorySearch,
+			)
+				? (category as ExpenseCategorySearch)
+				: undefined,
+			from:
+				typeof from === 'string' && ISO_DATE_SEARCH.test(from) ? from : undefined,
+			to: typeof to === 'string' && ISO_DATE_SEARCH.test(to) ? to : undefined,
+		};
+	},
+	component: ExpensesRoute,
+});
+
 const routeTree = rootRoute.addChildren([
 	loginRoute,
 	forbiddenRoute,
@@ -449,6 +493,7 @@ const routeTree = rootRoute.addChildren([
 		groupEditRoute,
 		scheduleRoute,
 		payrollRoute,
+		expensesRoute,
 	]),
 ]);
 

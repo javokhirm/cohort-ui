@@ -74,6 +74,7 @@ export const PERMISSION_CODES = [
 	// discount
 	'discount.manage',
 	// expense
+	'expense.read',
 	'expense.create',
 	'expense.update',
 	'expense.delete',

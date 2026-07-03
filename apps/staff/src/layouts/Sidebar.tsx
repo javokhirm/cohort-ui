@@ -192,7 +192,12 @@ const NAV_GROUPS: NavGroupDef[] = [
 				label: 'Expenses',
 				Icon: Receipt,
 				href: '/expenses',
-				permission: ['expense.create', 'expense.update', 'expense.delete'],
+				permission: [
+					'expense.read',
+					'expense.create',
+					'expense.update',
+					'expense.delete',
+				],
 			},
 			{
 				id: 'payroll',
