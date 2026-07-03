@@ -16,7 +16,9 @@ import { StudentsRoute } from '@/routes/_authed.students';
 import { StudentDetailRoute } from '@/routes/_authed.students.$id';
 import { StaffRoute } from '@/routes/_authed.staff';
 import { StaffDetailRoute } from '@/routes/_authed.staff.$id';
+import { StaffEditRoute } from '@/routes/_authed.staff.$id.edit';
 import { RoomsRoute } from '@/routes/_authed.rooms';
+import { FeePlansRoute } from '@/routes/_authed.fee-plans';
 import { BranchesRoute } from '@/routes/_authed.branches';
 import { CoursesRoute } from '@/routes/_authed.courses';
 import { CourseDetailRoute } from '@/routes/_authed.courses.$id';
@@ -130,6 +132,16 @@ const staffDetailRoute = createRoute({
 	},
 });
 
+const staffEditRoute = createRoute({
+	getParentRoute: () => authedRoute,
+	path: '/staff/$staffId/edit',
+	beforeLoad: () => requirePermission('staff.update'),
+	component: () => {
+		const { staffId } = staffEditRoute.useParams();
+		return <StaffEditRoute id={staffId} />;
+	},
+});
+
 type RoomStatusSearch = 'active' | 'inactive';
 
 interface RoomSearch {
@@ -159,6 +171,28 @@ interface CourseSearch {
 	search?: string;
 	status?: CourseStatusSearch;
 }
+
+type FeePlanStatusSearch = 'active' | 'inactive';
+
+interface FeePlanSearch {
+	page?: number;
+	status?: FeePlanStatusSearch;
+}
+
+const feePlansRoute = createRoute({
+	getParentRoute: () => authedRoute,
+	path: '/fee-plans',
+	beforeLoad: () => requirePermission('fee-plan.manage'),
+	validateSearch: (search: Record<string, unknown>): FeePlanSearch => {
+		const page = Number(search.page);
+		const status = search.status;
+		return {
+			page: Number.isFinite(page) && page > 0 ? page : undefined,
+			status: status === 'active' || status === 'inactive' ? status : undefined,
+		};
+	},
+	component: FeePlansRoute,
+});
 
 const branchesRoute = createRoute({
 	getParentRoute: () => authedRoute,
@@ -324,7 +358,9 @@ const routeTree = rootRoute.addChildren([
 		studentDetailRoute,
 		staffRoute,
 		staffDetailRoute,
+		staffEditRoute,
 		roomsRoute,
+		feePlansRoute,
 		branchesRoute,
 		coursesRoute,
 		courseDetailRoute,

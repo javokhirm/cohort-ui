@@ -402,9 +402,83 @@ export const MOCK_STUDENTS = [
 
 // ─── Fee plan fixtures ────────────────────────────────────────────────────────
 
-export const MOCK_FEE_PLANS = [
-	{ id: 1, name: 'IELTS Monthly', amount: 850000, cycle: 'monthly' },
-	{ id: 2, name: 'One-time', amount: 2400000, cycle: 'one_time' },
+interface MockFeePlan {
+	id: number;
+	branchId: number | null;
+	courseId: number | null;
+	name: string;
+	amount: number;
+	currency: string;
+	billingCycle: 'MONTHLY' | 'QUARTERLY' | 'ONE_TIME' | 'PER_SESSION';
+	dueDay: number;
+	lateFeeAmount: number;
+	gracePeriodDays: number;
+	isActive: boolean;
+	createdAt: string;
+	updatedAt: string;
+}
+
+export const MOCK_FEE_PLANS: MockFeePlan[] = [
+	{
+		id: 1,
+		branchId: null,
+		courseId: 1,
+		name: 'Monthly Tuition — IELTS',
+		amount: 1_300_000,
+		currency: 'UZS',
+		billingCycle: 'MONTHLY',
+		dueDay: 1,
+		lateFeeAmount: 50_000,
+		gracePeriodDays: 3,
+		isActive: true,
+		createdAt: '2025-01-10T00:00:00Z',
+		updatedAt: '2025-01-10T00:00:00Z',
+	},
+	{
+		id: 2,
+		branchId: 1,
+		courseId: 2,
+		name: 'Monthly Tuition — General English',
+		amount: 650_000,
+		currency: 'UZS',
+		billingCycle: 'MONTHLY',
+		dueDay: 1,
+		lateFeeAmount: 30_000,
+		gracePeriodDays: 3,
+		isActive: true,
+		createdAt: '2025-01-11T00:00:00Z',
+		updatedAt: '2025-01-11T00:00:00Z',
+	},
+	{
+		id: 3,
+		branchId: null,
+		courseId: null,
+		name: 'Trial Lesson — One-time',
+		amount: 50_000,
+		currency: 'UZS',
+		billingCycle: 'ONE_TIME',
+		dueDay: 1,
+		lateFeeAmount: 0,
+		gracePeriodDays: 3,
+		isActive: true,
+		createdAt: '2025-01-12T00:00:00Z',
+		updatedAt: '2025-01-12T00:00:00Z',
+	},
+	{
+		id: 4,
+		branchId: null,
+		courseId: null,
+		name: 'Private Tutoring — Per session',
+		amount: 120_000,
+		currency: 'UZS',
+		billingCycle: 'PER_SESSION',
+		dueDay: 1,
+		lateFeeAmount: 0,
+		gracePeriodDays: 3,
+		isActive: false,
+		createdAt: '2025-01-13T00:00:00Z',
+		updatedAt: '2025-01-13T00:00:00Z',
+	},
 ];
 
 // ─── Staff fixtures ───────────────────────────────────────────────────────────
@@ -906,9 +980,61 @@ export const handlers = [
 	}),
 
 	// ── Fee plans ─────────────────────────────────────────────────────────────
-	http.get(`${MANAGE}/fee-plans`, () =>
-		okPaged(MOCK_FEE_PLANS, 1, 100, MOCK_FEE_PLANS.length),
-	),
+	http.get(`${MANAGE}/fee-plans`, ({ request }) => {
+		const url = new URL(request.url);
+		const branchIds = readBranchIds(url);
+		const courseId = url.searchParams.get('courseId');
+		const isActive = url.searchParams.get('isActive');
+		const page = Number(url.searchParams.get('page') ?? 1);
+		const limit = Number(url.searchParams.get('limit') ?? 20);
+
+		let rows = MOCK_FEE_PLANS;
+		// Shared plans (null branchId) stay visible under any branch scope.
+		if (branchIds)
+			rows = rows.filter(
+				(p) => p.branchId === null || branchIds.includes(p.branchId),
+			);
+		if (courseId) rows = rows.filter((p) => p.courseId === Number(courseId));
+		if (isActive !== null)
+			rows = rows.filter((p) => p.isActive === (isActive === 'true'));
+
+		const total = rows.length;
+		const start = (page - 1) * limit;
+		return okPaged(rows.slice(start, start + limit), page, limit, total);
+	}),
+
+	http.post(`${MANAGE}/fee-plans`, async ({ request }) => {
+		const body = (await request.json()) as Record<string, unknown>;
+		return HttpResponse.json(
+			{
+				success: true,
+				data: {
+					id: 99,
+					branchId: body['branchId'] ?? null,
+					courseId: body['courseId'] ?? null,
+					name: body['name'],
+					amount: body['amount'],
+					currency: body['currency'] ?? 'UZS',
+					billingCycle: body['billingCycle'],
+					dueDay: body['dueDay'] ?? 1,
+					lateFeeAmount: body['lateFeeAmount'] ?? 0,
+					gracePeriodDays: body['gracePeriodDays'] ?? 3,
+					isActive: true,
+					createdAt: '2026-07-03T00:00:00Z',
+					updatedAt: '2026-07-03T00:00:00Z',
+				},
+				meta: { timestamp: 'test' },
+			},
+			{ status: 201 },
+		);
+	}),
+
+	http.patch(`${MANAGE}/fee-plans/:id`, async ({ params, request }) => {
+		const feePlan = MOCK_FEE_PLANS.find((p) => p.id === Number(params['id']));
+		if (!feePlan) return fail(404, 'FEE_PLAN_NOT_FOUND', 'Fee plan not found.');
+		const body = (await request.json()) as Record<string, unknown>;
+		return ok({ ...feePlan, ...body, updatedAt: '2026-07-04T00:00:00Z' });
+	}),
 
 	// ── Staff ────────────────────────────────────────────────────────────────
 	http.get(`${MANAGE}/staff`, ({ request }) => {
@@ -1109,6 +1235,16 @@ export const roomHandlers = {
 		fail(403, 'FORBIDDEN', 'You do not have permission.'),
 	),
 	serverError: http.get(`${MANAGE}/rooms`, () =>
+		fail(500, 'INTERNAL_ERROR', 'Unexpected server error.'),
+	),
+};
+
+export const feePlanHandlers = {
+	empty: http.get(`${MANAGE}/fee-plans`, () => okPaged([], 1, 20, 0)),
+	forbidden: http.get(`${MANAGE}/fee-plans`, () =>
+		fail(403, 'FORBIDDEN', 'You do not have permission.'),
+	),
+	serverError: http.get(`${MANAGE}/fee-plans`, () =>
 		fail(500, 'INTERNAL_ERROR', 'Unexpected server error.'),
 	),
 };
