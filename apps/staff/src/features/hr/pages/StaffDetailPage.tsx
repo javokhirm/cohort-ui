@@ -1,5 +1,4 @@
-import { useState } from 'react';
-import { Link } from '@tanstack/react-router';
+import { Link, useNavigate } from '@tanstack/react-router';
 import { ArrowLeft, Building2, Edit, Mail, MessageSquare, Phone } from 'lucide-react';
 
 import {
@@ -24,7 +23,6 @@ import { usePayrollList } from '@/features/payroll/api/payroll.queries';
 
 import { useStaffMember, type StaffResponse } from '../api/staff.queries';
 import { primaryRole, roleLabel } from '../lib/roles';
-import { StaffForm } from '../components/StaffForm';
 
 function employmentLabel(type: StaffResponse['employmentType']): string {
 	switch (type) {
@@ -231,7 +229,7 @@ interface StaffDetailPageProps {
 }
 
 export function StaffDetailPage({ staffId }: StaffDetailPageProps) {
-	const [editOpen, setEditOpen] = useState(false);
+	const navigate = useNavigate();
 	const { data: staff, isLoading, isError } = useStaffMember(staffId);
 
 	return (
@@ -260,7 +258,15 @@ export function StaffDetailPage({ staffId }: StaffDetailPageProps) {
 				</div>
 			) : (
 				<>
-					<StaffHeader staff={staff} onEdit={() => setEditOpen(true)} />
+					<StaffHeader
+						staff={staff}
+						onEdit={() =>
+							void navigate({
+								to: '/staff/$staffId/edit',
+								params: { staffId: String(staff.id) },
+							})
+						}
+					/>
 
 					<Tabs defaultValue="overview">
 						<TabsList>
@@ -281,13 +287,6 @@ export function StaffDetailPage({ staffId }: StaffDetailPageProps) {
 							</TabsContent>
 						</div>
 					</Tabs>
-
-					<StaffForm
-						mode="edit"
-						open={editOpen}
-						onOpenChange={setEditOpen}
-						staff={staff}
-					/>
 				</>
 			)}
 		</div>

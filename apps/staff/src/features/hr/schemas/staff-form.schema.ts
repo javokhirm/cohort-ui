@@ -22,7 +22,6 @@ export const createStaffSchema = z.object({
 });
 
 export const editStaffSchema = z.object({
-	branchId: z.number({ error: 'Branch is required' }).min(1, 'Branch is required'),
 	position: z.string().optional(),
 	employmentType: z.enum(['FULL_TIME', 'PART_TIME', 'CONTRACTOR']),
 	baseSalary: z.number().min(0, 'Salary cannot be negative').optional(),

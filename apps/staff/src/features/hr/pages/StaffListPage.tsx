@@ -101,7 +101,7 @@ export function StaffListPage() {
 				</Card>
 			</div>
 
-			<StaffForm mode="create" open={addOpen} onOpenChange={setAddOpen} />
+			<StaffForm open={addOpen} onOpenChange={setAddOpen} />
 		</div>
 	);
 }
