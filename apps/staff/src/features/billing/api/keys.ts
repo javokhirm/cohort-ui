@@ -28,3 +28,23 @@ export const discountsKeys = {
 	discountList: (filters: DiscountListFilters) =>
 		[...discountsKeys.discounts(), 'list', filters] as const,
 };
+
+export interface InvoiceListFilters {
+	page?: number;
+	limit?: number;
+	branchIds?: number[];
+	studentId?: number;
+	status?: 'DRAFT' | 'UNPAID' | 'PARTIAL' | 'PAID' | 'OVERDUE' | 'VOID' | 'REFUNDED';
+	from?: string;
+	to?: string;
+	dueBefore?: string;
+}
+
+export const invoicesKeys = {
+	all: ['invoices'] as const,
+
+	invoices: () => [...invoicesKeys.all, 'invoice'] as const,
+	invoiceList: (filters: InvoiceListFilters) =>
+		[...invoicesKeys.invoices(), 'list', filters] as const,
+	invoiceDetail: (id: number) => [...invoicesKeys.invoices(), 'detail', id] as const,
+};

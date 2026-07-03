@@ -62,9 +62,11 @@ export const STATUS_MAPS = {
 	},
 	payment: {
 		success: { tone: 'green', label: 'Success' },
+		succeeded: { tone: 'green', label: 'Succeeded' },
 		completed: { tone: 'green', label: 'Completed' },
 		pending: { tone: 'amber', label: 'Pending' },
 		failed: { tone: 'red', label: 'Failed' },
+		refunded: { tone: 'violet', label: 'Refunded' },
 	},
 	session: {
 		scheduled: { tone: 'blue', label: 'Scheduled' },

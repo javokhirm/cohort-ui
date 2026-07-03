@@ -20,6 +20,8 @@ import { StaffEditRoute } from '@/routes/_authed.staff.$id.edit';
 import { RoomsRoute } from '@/routes/_authed.rooms';
 import { FeePlansRoute } from '@/routes/_authed.fee-plans';
 import { DiscountsRoute } from '@/routes/_authed.discounts';
+import { InvoicesRoute } from '@/routes/_authed.invoices';
+import { InvoiceDetailRoute } from '@/routes/_authed.invoices.$id';
 import { BranchesRoute } from '@/routes/_authed.branches';
 import { CoursesRoute } from '@/routes/_authed.courses';
 import { CourseDetailRoute } from '@/routes/_authed.courses.$id';
@@ -217,6 +219,57 @@ const discountsRoute = createRoute({
 	component: DiscountsRoute,
 });
 
+type InvoiceStatusSearch =
+	| 'DRAFT'
+	| 'UNPAID'
+	| 'PARTIAL'
+	| 'PAID'
+	| 'OVERDUE'
+	| 'VOID'
+	| 'REFUNDED';
+
+const INVOICE_STATUSES: InvoiceStatusSearch[] = [
+	'DRAFT',
+	'UNPAID',
+	'PARTIAL',
+	'PAID',
+	'OVERDUE',
+	'VOID',
+	'REFUNDED',
+];
+
+interface InvoiceSearch {
+	page?: number;
+	status?: InvoiceStatusSearch;
+}
+
+const invoicesRoute = createRoute({
+	getParentRoute: () => authedRoute,
+	path: '/invoices',
+	beforeLoad: () => requirePermission('invoice.read'),
+	validateSearch: (search: Record<string, unknown>): InvoiceSearch => {
+		const page = Number(search.page);
+		const status = search.status;
+		return {
+			page: Number.isFinite(page) && page > 0 ? page : undefined,
+			status: INVOICE_STATUSES.includes(status as InvoiceStatusSearch)
+				? (status as InvoiceStatusSearch)
+				: undefined,
+		};
+	},
+	component: InvoicesRoute,
+});
+
+const invoiceDetailRoute = createRoute({
+	getParentRoute: () => authedRoute,
+	path: '/invoices/$id',
+	beforeLoad: () => requirePermission('invoice.read'),
+	component: () => {
+		const { id } = invoiceDetailRoute.useParams();
+		return <InvoiceDetailRoute id={id} />;
+	},
+});
+
 const branchesRoute = createRoute({
 	getParentRoute: () => authedRoute,
 	path: '/branches',
@@ -385,6 +438,8 @@ const routeTree = rootRoute.addChildren([
 		roomsRoute,
 		feePlansRoute,
 		discountsRoute,
+		invoicesRoute,
+		invoiceDetailRoute,
 		branchesRoute,
 		coursesRoute,
 		courseDetailRoute,
