@@ -768,6 +768,245 @@ export const MOCK_PAYROLLS: MockPayroll[] = [
 
 // ─── Handlers (happy-path defaults) ───────────────────────────────────────────
 
+// ─── Lead fixtures ────────────────────────────────────────────────────────────
+
+const LEAD_STATUS_ORDER = [
+	'NEW',
+	'CONTACTED',
+	'TRIAL_BOOKED',
+	'ENROLLED',
+	'LOST',
+] as const;
+
+interface MockLeadActivity {
+	id: number;
+	type: string;
+	notes: string | null;
+	scheduledAt: string | null;
+	actorStaffId: number | null;
+	actorName: string | null;
+	createdAt: string;
+}
+
+interface MockLead {
+	id: number;
+	firstName: string;
+	lastName: string | null;
+	phoneNumber: string;
+	source: string;
+	status: string;
+	branchId: number;
+	courseInterest: { id: number; name: string } | null;
+	assignedTo: { id: number; name: string } | null;
+	email: string | null;
+	notes: string | null;
+	convertedStudentId: number | null;
+	activities: MockLeadActivity[];
+	createdAt: string;
+}
+
+const IELTS = { id: 1, name: 'IELTS Prep' };
+const GENERAL = { id: 2, name: 'General English (A2)' };
+const DILNOZA = { id: 1, name: 'Dilnoza Tosheva' };
+
+export const MOCK_LEADS: MockLead[] = [
+	{
+		id: 1,
+		firstName: 'Bobur',
+		lastName: 'Aliyev',
+		phoneNumber: '+998912345678',
+		source: 'TELEGRAM',
+		status: 'NEW',
+		branchId: 1,
+		courseInterest: GENERAL,
+		assignedTo: DILNOZA,
+		email: null,
+		notes: null,
+		convertedStudentId: null,
+		activities: [
+			{
+				id: 11,
+				type: 'STATUS_CHANGE',
+				notes: 'Lead captured',
+				scheduledAt: null,
+				actorStaffId: null,
+				actorName: null,
+				createdAt: '2026-07-04T09:00:00Z',
+			},
+		],
+		createdAt: '2026-07-04T09:00:00Z',
+	},
+	{
+		id: 2,
+		firstName: 'Kamola',
+		lastName: 'Yodgorova',
+		phoneNumber: '+998909012345',
+		source: 'WEBSITE',
+		status: 'NEW',
+		branchId: 2,
+		courseInterest: GENERAL,
+		assignedTo: null,
+		email: null,
+		notes: null,
+		convertedStudentId: null,
+		activities: [],
+		createdAt: '2026-07-04T08:00:00Z',
+	},
+	{
+		id: 3,
+		firstName: 'Zarina',
+		lastName: 'Komilova',
+		phoneNumber: '+998905678901',
+		source: 'WEBSITE',
+		status: 'CONTACTED',
+		branchId: 1,
+		courseInterest: IELTS,
+		assignedTo: DILNOZA,
+		email: 'zarina@example.com',
+		notes: null,
+		convertedStudentId: null,
+		activities: [
+			{
+				id: 31,
+				type: 'MESSAGE',
+				notes: 'Sent IELTS course brochure and pricing via Telegram',
+				scheduledAt: null,
+				actorStaffId: 1,
+				actorName: 'Dilnoza Tosheva',
+				createdAt: '2026-07-02T10:00:00Z',
+			},
+			{
+				id: 32,
+				type: 'STATUS_CHANGE',
+				notes: 'Submitted the website inquiry form',
+				scheduledAt: null,
+				actorStaffId: null,
+				actorName: null,
+				createdAt: '2026-06-30T10:00:00Z',
+			},
+		],
+		createdAt: '2026-06-30T10:00:00Z',
+	},
+	{
+		id: 4,
+		firstName: 'Sevara',
+		lastName: 'Mirzayeva',
+		phoneNumber: '+998901234567',
+		source: 'INSTAGRAM',
+		status: 'TRIAL_BOOKED',
+		branchId: 2,
+		courseInterest: IELTS,
+		assignedTo: DILNOZA,
+		email: null,
+		notes: null,
+		convertedStudentId: null,
+		activities: [],
+		createdAt: '2026-07-02T12:00:00Z',
+	},
+	{
+		id: 5,
+		firstName: 'Dilshoda',
+		lastName: 'Nazarova',
+		phoneNumber: '+998937890123',
+		source: 'REFERRAL',
+		status: 'TRIAL_BOOKED',
+		branchId: 1,
+		courseInterest: IELTS,
+		assignedTo: null,
+		email: null,
+		notes: null,
+		convertedStudentId: null,
+		activities: [],
+		createdAt: '2026-07-04T03:00:00Z',
+	},
+	{
+		id: 6,
+		firstName: 'Jasur',
+		lastName: 'Karimov',
+		phoneNumber: '+998933456789',
+		source: 'WALK_IN',
+		status: 'ENROLLED',
+		branchId: 1,
+		courseInterest: GENERAL,
+		assignedTo: DILNOZA,
+		email: null,
+		notes: null,
+		convertedStudentId: 100,
+		activities: [],
+		createdAt: '2026-06-20T12:00:00Z',
+	},
+	{
+		id: 7,
+		firstName: 'Nigora',
+		lastName: 'Saidova',
+		phoneNumber: '+998944567890',
+		source: 'OTHER',
+		status: 'LOST',
+		branchId: 2,
+		courseInterest: null,
+		assignedTo: null,
+		email: null,
+		notes: null,
+		convertedStudentId: null,
+		activities: [],
+		createdAt: '2026-06-15T12:00:00Z',
+	},
+];
+
+function leadCard(lead: MockLead) {
+	const [latest] = lead.activities;
+	return {
+		id: lead.id,
+		firstName: lead.firstName,
+		lastName: lead.lastName,
+		phoneNumber: lead.phoneNumber,
+		source: lead.source,
+		status: lead.status,
+		branchId: lead.branchId,
+		courseInterest: lead.courseInterest,
+		assignedTo: lead.assignedTo,
+		latestActivity: latest
+			? { type: latest.type, notes: latest.notes, createdAt: latest.createdAt }
+			: null,
+		createdAt: lead.createdAt,
+	};
+}
+
+function leadDetail(lead: MockLead) {
+	return {
+		...leadCard(lead),
+		email: lead.email,
+		notes: lead.notes,
+		convertedStudentId: lead.convertedStudentId,
+		activities: lead.activities,
+	};
+}
+
+function filterLeads(url: URL): MockLead[] {
+	const branchIds = readBranchIds(url);
+	const source = url.searchParams.get('source');
+	const assignedToStaffId = url.searchParams.get('assignedToStaffId');
+	const courseInterestId = url.searchParams.get('courseInterestId');
+	const search = url.searchParams.get('search')?.toLowerCase() ?? '';
+	const createdAfter = url.searchParams.get('createdAfter');
+
+	let rows = MOCK_LEADS;
+	if (branchIds) rows = rows.filter((l) => branchIds.includes(l.branchId));
+	if (source) rows = rows.filter((l) => l.source === source);
+	if (assignedToStaffId)
+		rows = rows.filter((l) => l.assignedTo?.id === Number(assignedToStaffId));
+	if (courseInterestId)
+		rows = rows.filter((l) => l.courseInterest?.id === Number(courseInterestId));
+	if (search)
+		rows = rows.filter(
+			(l) =>
+				`${l.firstName} ${l.lastName ?? ''}`.toLowerCase().includes(search) ||
+				l.phoneNumber.includes(search),
+		);
+	if (createdAfter) rows = rows.filter((l) => l.createdAt >= createdAfter);
+	return rows;
+}
+
 export const handlers = [
 	http.post(`${BASE}/public/auth/refresh`, async ({ request }) => {
 		const body = (await request.json()) as { refreshToken?: string };
@@ -1168,6 +1407,127 @@ export const handlers = [
 		return ok(detail);
 	}),
 
+	// ── Leads / Pipeline ───────────────────────────────────────────────────────
+	http.get(`${MANAGE}/leads`, ({ request }) => {
+		const url = new URL(request.url);
+		const rows = filterLeads(url);
+		const status = url.searchParams.get('status');
+
+		if (status) {
+			// Column mode: a flat paginated single column.
+			const page = Number(url.searchParams.get('page') ?? 1);
+			const limit = Number(url.searchParams.get('limit') ?? 12);
+			const col = rows.filter((l) => l.status === status);
+			const start = (page - 1) * limit;
+			return okPaged(
+				col.slice(start, start + limit).map(leadCard),
+				page,
+				limit,
+				col.length,
+			);
+		}
+
+		// Board mode: one column per status in fixed order.
+		const limit = Number(url.searchParams.get('limit') ?? 12);
+		const columns = LEAD_STATUS_ORDER.map((s) => {
+			const col = rows.filter((l) => l.status === s);
+			return {
+				status: s,
+				total: col.length,
+				items: col.slice(0, limit).map(leadCard),
+			};
+		});
+		return ok({ columns });
+	}),
+
+	http.get(`${MANAGE}/leads/:id`, ({ params }) => {
+		const lead = MOCK_LEADS.find((l) => l.id === Number(params['id']));
+		if (!lead) return fail(404, 'LEAD_NOT_FOUND', 'Lead not found.');
+		return ok(leadDetail(lead));
+	}),
+
+	http.post(`${MANAGE}/leads`, async ({ request }) => {
+		const body = (await request.json()) as Record<string, unknown>;
+		const created: MockLead = {
+			id: 999,
+			firstName: String(body['firstName'] ?? ''),
+			lastName: (body['lastName'] as string) ?? null,
+			phoneNumber: String(body['phoneNumber'] ?? ''),
+			source: String(body['source'] ?? 'OTHER'),
+			status: 'NEW',
+			branchId: Number(body['branchId'] ?? 1),
+			courseInterest: null,
+			assignedTo: null,
+			email: (body['email'] as string) ?? null,
+			notes: (body['notes'] as string) ?? null,
+			convertedStudentId: null,
+			activities: [
+				{
+					id: 1,
+					type: 'STATUS_CHANGE',
+					notes: 'Lead captured',
+					scheduledAt: null,
+					actorStaffId: null,
+					actorName: null,
+					createdAt: '2026-07-04T12:00:00Z',
+				},
+			],
+			createdAt: '2026-07-04T12:00:00Z',
+		};
+		return HttpResponse.json(
+			{ success: true, data: leadDetail(created), meta: { timestamp: 'test' } },
+			{ status: 201 },
+		);
+	}),
+
+	http.patch(`${MANAGE}/leads/:id/status`, async ({ params, request }) => {
+		const lead = MOCK_LEADS.find((l) => l.id === Number(params['id']));
+		if (!lead) return fail(404, 'LEAD_NOT_FOUND', 'Lead not found.');
+		const body = (await request.json()) as { status: string };
+		return ok(leadDetail({ ...lead, status: body.status }));
+	}),
+
+	http.patch(`${MANAGE}/leads/:id`, async ({ params, request }) => {
+		const lead = MOCK_LEADS.find((l) => l.id === Number(params['id']));
+		if (!lead) return fail(404, 'LEAD_NOT_FOUND', 'Lead not found.');
+		const body = (await request.json()) as Partial<MockLead>;
+		return ok(leadDetail({ ...lead, ...body }));
+	}),
+
+	http.post(`${MANAGE}/leads/:id/activities`, async ({ params, request }) => {
+		const lead = MOCK_LEADS.find((l) => l.id === Number(params['id']));
+		if (!lead) return fail(404, 'LEAD_NOT_FOUND', 'Lead not found.');
+		const body = (await request.json()) as { type: string; notes?: string };
+		const activity = {
+			id: 555,
+			type: body.type,
+			notes: body.notes ?? null,
+			scheduledAt: null,
+			actorStaffId: 1,
+			actorName: 'Dilnoza Tosheva',
+			createdAt: '2026-07-04T13:00:00Z',
+		};
+		return HttpResponse.json(
+			{ success: true, data: activity, meta: { timestamp: 'test' } },
+			{ status: 201 },
+		);
+	}),
+
+	http.post(`${MANAGE}/leads/:id/convert`, ({ params }) => {
+		const lead = MOCK_LEADS.find((l) => l.id === Number(params['id']));
+		if (!lead) return fail(404, 'LEAD_NOT_FOUND', 'Lead not found.');
+		if (lead.status === 'LOST')
+			return fail(400, 'LEAD_CONVERT_FROM_LOST', 'Cannot convert a lost lead.');
+		return HttpResponse.json(
+			{
+				success: true,
+				data: { id: 100, studentCode: 'STU-2026-0100' },
+				meta: { timestamp: 'test' },
+			},
+			{ status: 201 },
+		);
+	}),
+
 	// ── Staff ────────────────────────────────────────────────────────────────
 	http.get(`${MANAGE}/staff`, ({ request }) => {
 		const url = new URL(request.url);
@@ -1472,4 +1832,45 @@ export const groupHandlers = {
 			},
 		),
 	),
+};
+
+export const leadHandlers = {
+	empty: http.get(`${MANAGE}/leads`, () =>
+		ok({
+			columns: LEAD_STATUS_ORDER.map((s) => ({
+				status: s,
+				total: 0,
+				items: [],
+			})),
+		}),
+	),
+	forbidden: http.get(`${MANAGE}/leads`, () =>
+		fail(403, 'FORBIDDEN', 'You do not have permission.'),
+	),
+	serverError: http.get(`${MANAGE}/leads`, () =>
+		fail(500, 'INTERNAL_ERROR', 'Unexpected server error.'),
+	),
+	// Column mode with four pages of 12 — exercises the "load more" pagination.
+	columnPaged: http.get(`${MANAGE}/leads`, ({ request }) => {
+		const url = new URL(request.url);
+		const page = Number(url.searchParams.get('page') ?? 1);
+		const limit = 12;
+		const rows = Array.from({ length: limit }, (_, i) => {
+			const id = (page - 1) * limit + i + 1;
+			return {
+				id,
+				firstName: `Lead${id}`,
+				lastName: null,
+				phoneNumber: '+998900000000',
+				source: 'WEBSITE',
+				status: 'NEW',
+				branchId: 1,
+				courseInterest: null,
+				assignedTo: null,
+				latestActivity: null,
+				createdAt: '2026-07-01T00:00:00Z',
+			};
+		});
+		return okPaged(rows, page, limit, 40);
+	}),
 };

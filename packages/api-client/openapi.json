@@ -30,7 +30,9 @@
           }
         },
         "summary": "Authenticate with phone + password for the tenant resolved from the subdomain",
-        "tags": ["Auth"]
+        "tags": [
+          "Auth"
+        ]
       }
     },
     "/api/v1/public/auth/refresh": {
@@ -62,7 +64,9 @@
           }
         },
         "summary": "Exchange a valid refresh token for a new JWT pair",
-        "tags": ["Auth"]
+        "tags": [
+          "Auth"
+        ]
       }
     },
     "/api/v1/public/admin/auth/login": {
@@ -85,7 +89,9 @@
           }
         },
         "summary": "Step 1: verify operator email + password and email an OTP",
-        "tags": ["Admin Auth"]
+        "tags": [
+          "Admin Auth"
+        ]
       }
     },
     "/api/v1/public/admin/auth/verify-otp": {
@@ -108,7 +114,34 @@
           }
         },
         "summary": "Step 2: verify the OTP and issue a JWT pair",
-        "tags": ["Admin Auth"]
+        "tags": [
+          "Admin Auth"
+        ]
+      }
+    },
+    "/api/v1/public/admin/auth/refresh": {
+      "post": {
+        "operationId": "AdminAuthController_refresh",
+        "parameters": [],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/RefreshTokenDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        },
+        "summary": "Exchange a valid super-admin refresh token for a new JWT pair",
+        "tags": [
+          "Admin Auth"
+        ]
       }
     },
     "/api/v1/public/health": {
@@ -121,7 +154,9 @@
           }
         },
         "summary": "Health check — DB and Redis connectivity",
-        "tags": ["Health"]
+        "tags": [
+          "Health"
+        ]
       }
     },
     "/api/v1/webhooks/click": {
@@ -143,7 +178,9 @@
           }
         },
         "summary": "Click payment-gateway webhook (signature-verified, no JWT)",
-        "tags": ["Webhooks"]
+        "tags": [
+          "Webhooks"
+        ]
       }
     },
     "/api/v1/admin/me": {
@@ -161,10 +198,95 @@
           }
         ],
         "summary": "The authenticated platform operator's profile",
-        "tags": ["Admin / Profile"]
+        "tags": [
+          "Admin / Profile"
+        ]
+      }
+    },
+    "/api/v1/admin/tenants/summary": {
+      "get": {
+        "operationId": "TenantsController_summary",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Tenant directory KPIs (status counts, subscription counts, total MRR)",
+        "tags": [
+          "Admin / Tenants"
+        ]
       }
     },
     "/api/v1/admin/tenants": {
+      "get": {
+        "operationId": "TenantsController_list",
+        "parameters": [
+          {
+            "name": "page",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "minimum": 1,
+              "default": 1,
+              "type": "number"
+            }
+          },
+          {
+            "name": "limit",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "minimum": 1,
+              "maximum": 100,
+              "default": 20,
+              "type": "number"
+            }
+          },
+          {
+            "name": "search",
+            "required": false,
+            "in": "query",
+            "description": "Matches name or subdomain (case-insensitive)",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "status",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "type": "string",
+              "enum": [
+                "ACTIVE",
+                "SUSPENDED",
+                "PENDING",
+                "CANCELLED"
+              ]
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "List education centers (search + status filter, paginated)",
+        "tags": [
+          "Admin / Tenants"
+        ]
+      },
       "post": {
         "operationId": "TenantsController_onboard",
         "parameters": [],
@@ -189,7 +311,162 @@
           }
         ],
         "summary": "Onboard a new education center (tenant + branch + owner + plan)",
-        "tags": ["Admin / Tenants"]
+        "tags": [
+          "Admin / Tenants"
+        ]
+      }
+    },
+    "/api/v1/admin/tenants/{id}": {
+      "get": {
+        "operationId": "TenantsController_findOne",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "number"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Full tenant detail with branches, subscription and KPI stats",
+        "tags": [
+          "Admin / Tenants"
+        ]
+      },
+      "patch": {
+        "operationId": "TenantsController_update",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "number"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/UpdateTenantDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Update tenant settings/branding",
+        "tags": [
+          "Admin / Tenants"
+        ]
+      }
+    },
+    "/api/v1/admin/tenants/{id}/branches": {
+      "get": {
+        "operationId": "TenantsController_branches",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "number"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "List all branches for a tenant with student and staff counts",
+        "tags": [
+          "Admin / Tenants"
+        ]
+      }
+    },
+    "/api/v1/admin/tenants/{id}/members": {
+      "get": {
+        "operationId": "TenantsController_members",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "number"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "List all members of a tenant with their roles",
+        "tags": [
+          "Admin / Tenants"
+        ]
+      }
+    },
+    "/api/v1/admin/tenants/{id}/stats": {
+      "get": {
+        "operationId": "TenantsController_stats",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "number"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Per-tenant health metrics (students, staff, revenue, balance)",
+        "tags": [
+          "Admin / Tenants"
+        ]
       }
     },
     "/api/v1/admin/tenants/{id}/suspend": {
@@ -226,7 +503,9 @@
           }
         ],
         "summary": "Suspend a tenant (blocks all tenant access)",
-        "tags": ["Admin / Tenants"]
+        "tags": [
+          "Admin / Tenants"
+        ]
       }
     },
     "/api/v1/admin/tenants/{id}/unsuspend": {
@@ -263,7 +542,9 @@
           }
         ],
         "summary": "Lift a suspension (restore a tenant to ACTIVE)",
-        "tags": ["Admin / Tenants"]
+        "tags": [
+          "Admin / Tenants"
+        ]
       }
     },
     "/api/v1/admin/tenants/{id}/cancel": {
@@ -300,7 +581,9 @@
           }
         ],
         "summary": "Cancel a tenant (data retained per retention policy)",
-        "tags": ["Admin / Tenants"]
+        "tags": [
+          "Admin / Tenants"
+        ]
       }
     },
     "/api/v1/admin/tenants/{id}/change-plan": {
@@ -337,44 +620,9 @@
           }
         ],
         "summary": "Change a tenant subscription plan (immediate, no proration)",
-        "tags": ["Admin / Tenants"]
-      }
-    },
-    "/api/v1/admin/tenants/{id}": {
-      "patch": {
-        "operationId": "TenantsController_update",
-        "parameters": [
-          {
-            "name": "id",
-            "required": true,
-            "in": "path",
-            "schema": {
-              "type": "number"
-            }
-          }
-        ],
-        "requestBody": {
-          "required": true,
-          "content": {
-            "application/json": {
-              "schema": {
-                "$ref": "#/components/schemas/UpdateTenantDto"
-              }
-            }
-          }
-        },
-        "responses": {
-          "200": {
-            "description": ""
-          }
-        },
-        "security": [
-          {
-            "bearer": []
-          }
-        ],
-        "summary": "Update tenant settings/branding",
-        "tags": ["Admin / Tenants"]
+        "tags": [
+          "Admin / Tenants"
+        ]
       }
     },
     "/api/v1/admin/tenants/{tenantId}/members": {
@@ -411,7 +659,9 @@
           }
         ],
         "summary": "Add a user to a tenant with a role",
-        "tags": ["Admin / Tenant Members"]
+        "tags": [
+          "Admin / Tenant Members"
+        ]
       }
     },
     "/api/v1/admin/tenants/{tenantId}/members/{userId}": {
@@ -456,40 +706,9 @@
           }
         ],
         "summary": "Change a member's role in a tenant",
-        "tags": ["Admin / Tenant Members"]
-      },
-      "delete": {
-        "operationId": "TenantMembersController_remove",
-        "parameters": [
-          {
-            "name": "tenantId",
-            "required": true,
-            "in": "path",
-            "schema": {
-              "type": "number"
-            }
-          },
-          {
-            "name": "userId",
-            "required": true,
-            "in": "path",
-            "schema": {
-              "type": "number"
-            }
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": ""
-          }
-        },
-        "security": [
-          {
-            "bearer": []
-          }
-        ],
-        "summary": "Remove a member from a tenant",
-        "tags": ["Admin / Tenant Members"]
+        "tags": [
+          "Admin / Tenant Members"
+        ]
       }
     },
     "/api/v1/admin/users": {
@@ -532,7 +751,11 @@
             "in": "query",
             "schema": {
               "type": "string",
-              "enum": ["active", "invited", "inactive"]
+              "enum": [
+                "active",
+                "invited",
+                "inactive"
+              ]
             }
           }
         ],
@@ -547,7 +770,9 @@
           }
         ],
         "summary": "Platform-wide user directory (search/filter, paginated)",
-        "tags": ["Admin / Users"]
+        "tags": [
+          "Admin / Users"
+        ]
       }
     },
     "/api/v1/admin/users/{id}": {
@@ -574,7 +799,9 @@
           }
         ],
         "summary": "User detail with cross-tenant memberships and roles",
-        "tags": ["Admin / Users"]
+        "tags": [
+          "Admin / Users"
+        ]
       }
     },
     "/api/v1/admin/users/{id}/reset-password": {
@@ -611,7 +838,9 @@
           }
         ],
         "summary": "Set a new password for a user (operator-supplied)",
-        "tags": ["Admin / Users"]
+        "tags": [
+          "Admin / Users"
+        ]
       }
     },
     "/api/v1/admin/users/{id}/deactivate": {
@@ -638,7 +867,9 @@
           }
         ],
         "summary": "Globally deactivate a user (blocks login + refresh)",
-        "tags": ["Admin / Users"]
+        "tags": [
+          "Admin / Users"
+        ]
       }
     },
     "/api/v1/admin/roles": {
@@ -656,7 +887,9 @@
           }
         ],
         "summary": "System role templates with their permission matrix",
-        "tags": ["Admin / Roles"]
+        "tags": [
+          "Admin / Roles"
+        ]
       }
     },
     "/api/v1/admin/roles/{role}/permissions": {
@@ -693,7 +926,9 @@
           }
         ],
         "summary": "Replace a system role template's permission set (applies to all tenants)",
-        "tags": ["Admin / Roles"]
+        "tags": [
+          "Admin / Roles"
+        ]
       }
     },
     "/api/v1/admin/permissions": {
@@ -711,7 +946,9 @@
           }
         ],
         "summary": "The system-defined permission catalog (grouped by domain)",
-        "tags": ["Admin / Permissions"]
+        "tags": [
+          "Admin / Permissions"
+        ]
       }
     },
     "/api/v1/admin/plans": {
@@ -759,7 +996,9 @@
           }
         ],
         "summary": "List subscription plans (paginated, filterable)",
-        "tags": ["Admin / Plans"]
+        "tags": [
+          "Admin / Plans"
+        ]
       },
       "post": {
         "operationId": "PlansController_create",
@@ -785,7 +1024,9 @@
           }
         ],
         "summary": "Create a subscription plan",
-        "tags": ["Admin / Plans"]
+        "tags": [
+          "Admin / Plans"
+        ]
       }
     },
     "/api/v1/admin/plans/{id}": {
@@ -812,7 +1053,9 @@
           }
         ],
         "summary": "Get a subscription plan by id",
-        "tags": ["Admin / Plans"]
+        "tags": [
+          "Admin / Plans"
+        ]
       },
       "patch": {
         "operationId": "PlansController_update",
@@ -847,7 +1090,9 @@
           }
         ],
         "summary": "Edit a plan price / feature matrix / caps",
-        "tags": ["Admin / Plans"]
+        "tags": [
+          "Admin / Plans"
+        ]
       }
     },
     "/api/v1/admin/subscriptions/analytics": {
@@ -865,7 +1110,9 @@
           }
         ],
         "summary": "MRR / ARR, signups, churn and the MRR trend",
-        "tags": ["Admin / Subscriptions"]
+        "tags": [
+          "Admin / Subscriptions"
+        ]
       }
     },
     "/api/v1/admin/subscriptions": {
@@ -899,7 +1146,12 @@
             "in": "query",
             "schema": {
               "type": "string",
-              "enum": ["TRIALING", "ACTIVE", "PAST_DUE", "CANCELLED"]
+              "enum": [
+                "TRIALING",
+                "ACTIVE",
+                "PAST_DUE",
+                "CANCELLED"
+              ]
             }
           },
           {
@@ -922,7 +1174,9 @@
           }
         ],
         "summary": "List subscriptions across tenants (status/tier filters)",
-        "tags": ["Admin / Subscriptions"]
+        "tags": [
+          "Admin / Subscriptions"
+        ]
       }
     },
     "/api/v1/admin/audit-logs": {
@@ -1038,7 +1292,9 @@
           }
         ],
         "summary": "Cross-tenant platform audit trail (filter, paginated, newest first)",
-        "tags": ["Admin / Audit Logs"]
+        "tags": [
+          "Admin / Audit Logs"
+        ]
       }
     },
     "/api/v1/admin/audit-logs/{id}": {
@@ -1065,7 +1321,9 @@
           }
         ],
         "summary": "Full audit-log entry detail",
-        "tags": ["Admin / Audit Logs"]
+        "tags": [
+          "Admin / Audit Logs"
+        ]
       }
     },
     "/api/v1/admin/dashboard": {
@@ -1083,7 +1341,9 @@
           }
         ],
         "summary": "Network-wide platform KPIs",
-        "tags": ["Admin / Dashboard"]
+        "tags": [
+          "Admin / Dashboard"
+        ]
       }
     },
     "/api/v1/admin/dashboard/mrr-trend": {
@@ -1097,7 +1357,11 @@
             "schema": {
               "default": "12m",
               "type": "string",
-              "enum": ["6m", "12m", "24m"]
+              "enum": [
+                "6m",
+                "12m",
+                "24m"
+              ]
             }
           }
         ],
@@ -1112,7 +1376,9 @@
           }
         ],
         "summary": "MRR trend time series (6m / 12m / 24m)",
-        "tags": ["Admin / Dashboard"]
+        "tags": [
+          "Admin / Dashboard"
+        ]
       }
     },
     "/api/v1/manage/me": {
@@ -1130,7 +1396,9 @@
           }
         ],
         "summary": "The authenticated staff member's profile, roles and resolved permission codes",
-        "tags": ["Manage / Profile"]
+        "tags": [
+          "Manage / Profile"
+        ]
       }
     },
     "/api/v1/manage/students": {
@@ -1159,11 +1427,15 @@
             }
           },
           {
-            "name": "branchId",
+            "name": "branchIds",
             "required": false,
             "in": "query",
+            "description": "Filter to these branch ids (comma-separated or repeated); must be within your branch scope",
             "schema": {
-              "type": "number"
+              "type": "array",
+              "items": {
+                "type": "number"
+              }
             }
           },
           {
@@ -1172,7 +1444,12 @@
             "in": "query",
             "schema": {
               "type": "string",
-              "enum": ["ACTIVE", "INACTIVE", "GRADUATED", "SUSPENDED"]
+              "enum": [
+                "ACTIVE",
+                "INACTIVE",
+                "GRADUATED",
+                "SUSPENDED"
+              ]
             }
           },
           {
@@ -1224,7 +1501,9 @@
           }
         ],
         "summary": "List students (paginated, filterable)",
-        "tags": ["Manage / Students"]
+        "tags": [
+          "Manage / Students"
+        ]
       },
       "post": {
         "operationId": "StudentsController_create",
@@ -1250,7 +1529,9 @@
           }
         ],
         "summary": "Register a new student",
-        "tags": ["Manage / Students"]
+        "tags": [
+          "Manage / Students"
+        ]
       }
     },
     "/api/v1/manage/students/{id}": {
@@ -1277,7 +1558,9 @@
           }
         ],
         "summary": "Get full student detail",
-        "tags": ["Manage / Students"]
+        "tags": [
+          "Manage / Students"
+        ]
       },
       "patch": {
         "operationId": "StudentsController_update",
@@ -1312,7 +1595,9 @@
           }
         ],
         "summary": "Update a student profile",
-        "tags": ["Manage / Students"]
+        "tags": [
+          "Manage / Students"
+        ]
       },
       "delete": {
         "operationId": "StudentsController_remove",
@@ -1337,7 +1622,9 @@
           }
         ],
         "summary": "Soft-delete a student",
-        "tags": ["Manage / Students"]
+        "tags": [
+          "Manage / Students"
+        ]
       }
     },
     "/api/v1/manage/students/{id}/guardians": {
@@ -1364,7 +1651,9 @@
           }
         ],
         "summary": "List a student's guardians",
-        "tags": ["Manage / Students"]
+        "tags": [
+          "Manage / Students"
+        ]
       },
       "post": {
         "operationId": "StudentsController_addGuardian",
@@ -1399,7 +1688,9 @@
           }
         ],
         "summary": "Link a guardian to a student",
-        "tags": ["Manage / Students"]
+        "tags": [
+          "Manage / Students"
+        ]
       }
     },
     "/api/v1/manage/students/{id}/guardians/{guardianId}": {
@@ -1434,7 +1725,9 @@
           }
         ],
         "summary": "Unlink a guardian from a student",
-        "tags": ["Manage / Students"]
+        "tags": [
+          "Manage / Students"
+        ]
       }
     },
     "/api/v1/manage/students/{id}/enrollments": {
@@ -1452,7 +1745,9 @@
           }
         ],
         "summary": "List a student's enrollments (stub)",
-        "tags": ["Manage / Students"]
+        "tags": [
+          "Manage / Students"
+        ]
       }
     },
     "/api/v1/manage/students/{id}/invoices": {
@@ -1470,7 +1765,9 @@
           }
         ],
         "summary": "List a student's invoices (stub)",
-        "tags": ["Manage / Students"]
+        "tags": [
+          "Manage / Students"
+        ]
       }
     },
     "/api/v1/manage/students/{id}/payments": {
@@ -1488,7 +1785,9 @@
           }
         ],
         "summary": "List a student's payments (stub)",
-        "tags": ["Manage / Students"]
+        "tags": [
+          "Manage / Students"
+        ]
       }
     },
     "/api/v1/manage/students/{id}/attendances": {
@@ -1506,7 +1805,9 @@
           }
         ],
         "summary": "List a student's attendances (stub)",
-        "tags": ["Manage / Students"]
+        "tags": [
+          "Manage / Students"
+        ]
       }
     },
     "/api/v1/manage/students/{id}/results": {
@@ -1524,7 +1825,9 @@
           }
         ],
         "summary": "List a student's results (stub)",
-        "tags": ["Manage / Students"]
+        "tags": [
+          "Manage / Students"
+        ]
       }
     },
     "/api/v1/manage/staff": {
@@ -1553,11 +1856,15 @@
             }
           },
           {
-            "name": "branchId",
+            "name": "branchIds",
             "required": false,
             "in": "query",
+            "description": "Filter to these branch ids (comma-separated or repeated); must be within your branch scope",
             "schema": {
-              "type": "number"
+              "type": "array",
+              "items": {
+                "type": "number"
+              }
             }
           },
           {
@@ -1574,7 +1881,11 @@
             "in": "query",
             "schema": {
               "type": "string",
-              "enum": ["FULL_TIME", "PART_TIME", "CONTRACTOR"]
+              "enum": [
+                "FULL_TIME",
+                "PART_TIME",
+                "CONTRACTOR"
+              ]
             }
           },
           {
@@ -1583,7 +1894,21 @@
             "in": "query",
             "schema": {
               "type": "string",
-              "enum": ["ACTIVE", "ON_LEAVE", "TERMINATED"]
+              "enum": [
+                "ACTIVE",
+                "ON_LEAVE",
+                "TERMINATED"
+              ]
+            }
+          },
+          {
+            "name": "role",
+            "required": false,
+            "in": "query",
+            "description": "RBAC role name the member must hold (TEACHER, MANAGER, ADMIN)",
+            "schema": {
+              "example": "TEACHER",
+              "type": "string"
             }
           },
           {
@@ -1607,7 +1932,9 @@
           }
         ],
         "summary": "List staff (paginated, filterable)",
-        "tags": ["Manage / Staff"]
+        "tags": [
+          "Manage / Staff"
+        ]
       },
       "post": {
         "operationId": "StaffController_create",
@@ -1633,7 +1960,9 @@
           }
         ],
         "summary": "Register a new staff member",
-        "tags": ["Manage / Staff"]
+        "tags": [
+          "Manage / Staff"
+        ]
       }
     },
     "/api/v1/manage/staff/{id}": {
@@ -1660,7 +1989,9 @@
           }
         ],
         "summary": "Get full staff detail",
-        "tags": ["Manage / Staff"]
+        "tags": [
+          "Manage / Staff"
+        ]
       },
       "patch": {
         "operationId": "StaffController_update",
@@ -1695,7 +2026,9 @@
           }
         ],
         "summary": "Update a staff member",
-        "tags": ["Manage / Staff"]
+        "tags": [
+          "Manage / Staff"
+        ]
       },
       "delete": {
         "operationId": "StaffController_remove",
@@ -1720,7 +2053,9 @@
           }
         ],
         "summary": "Soft-delete a staff member",
-        "tags": ["Manage / Staff"]
+        "tags": [
+          "Manage / Staff"
+        ]
       }
     },
     "/api/v1/manage/branches": {
@@ -1747,7 +2082,9 @@
           }
         ],
         "summary": "List the tenant branches",
-        "tags": ["Manage / Branches"]
+        "tags": [
+          "Manage / Branches"
+        ]
       },
       "post": {
         "operationId": "BranchesController_create",
@@ -1773,7 +2110,9 @@
           }
         ],
         "summary": "Create a branch",
-        "tags": ["Manage / Branches"]
+        "tags": [
+          "Manage / Branches"
+        ]
       }
     },
     "/api/v1/manage/branches/{id}": {
@@ -1800,7 +2139,9 @@
           }
         ],
         "summary": "Get a branch",
-        "tags": ["Manage / Branches"]
+        "tags": [
+          "Manage / Branches"
+        ]
       },
       "patch": {
         "operationId": "BranchesController_update",
@@ -1835,7 +2176,9 @@
           }
         ],
         "summary": "Update a branch",
-        "tags": ["Manage / Branches"]
+        "tags": [
+          "Manage / Branches"
+        ]
       }
     },
     "/api/v1/manage/courses": {
@@ -1864,11 +2207,15 @@
             }
           },
           {
-            "name": "branchId",
+            "name": "branchIds",
             "required": false,
             "in": "query",
+            "description": "Filter to these branch ids (comma-separated or repeated); must be within your branch scope. Shared (tenant-wide) courses are always included.",
             "schema": {
-              "type": "number"
+              "type": "array",
+              "items": {
+                "type": "number"
+              }
             }
           },
           {
@@ -1899,7 +2246,9 @@
           }
         ],
         "summary": "List courses (paginated, filterable)",
-        "tags": ["Manage / Courses"]
+        "tags": [
+          "Manage / Courses"
+        ]
       },
       "post": {
         "operationId": "CoursesController_create",
@@ -1925,10 +2274,39 @@
           }
         ],
         "summary": "Create a course",
-        "tags": ["Manage / Courses"]
+        "tags": [
+          "Manage / Courses"
+        ]
       }
     },
     "/api/v1/manage/courses/{id}": {
+      "get": {
+        "operationId": "CoursesController_findOne",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "number"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Get a course by id",
+        "tags": [
+          "Manage / Courses"
+        ]
+      },
       "patch": {
         "operationId": "CoursesController_update",
         "parameters": [
@@ -1962,7 +2340,9 @@
           }
         ],
         "summary": "Update a course",
-        "tags": ["Manage / Courses"]
+        "tags": [
+          "Manage / Courses"
+        ]
       }
     },
     "/api/v1/manage/rooms": {
@@ -1991,11 +2371,15 @@
             }
           },
           {
-            "name": "branchId",
+            "name": "branchIds",
             "required": false,
             "in": "query",
+            "description": "Filter to these branch ids (comma-separated or repeated); must be within your branch scope",
             "schema": {
-              "type": "number"
+              "type": "array",
+              "items": {
+                "type": "number"
+              }
             }
           },
           {
@@ -2018,7 +2402,9 @@
           }
         ],
         "summary": "List rooms (paginated, filterable)",
-        "tags": ["Manage / Rooms"]
+        "tags": [
+          "Manage / Rooms"
+        ]
       },
       "post": {
         "operationId": "RoomsController_create",
@@ -2044,7 +2430,9 @@
           }
         ],
         "summary": "Create a room",
-        "tags": ["Manage / Rooms"]
+        "tags": [
+          "Manage / Rooms"
+        ]
       }
     },
     "/api/v1/manage/rooms/{id}": {
@@ -2081,7 +2469,9 @@
           }
         ],
         "summary": "Update a room",
-        "tags": ["Manage / Rooms"]
+        "tags": [
+          "Manage / Rooms"
+        ]
       }
     },
     "/api/v1/manage/groups": {
@@ -2110,11 +2500,15 @@
             }
           },
           {
-            "name": "branchId",
+            "name": "branchIds",
             "required": false,
             "in": "query",
+            "description": "Filter to these branch ids (comma-separated or repeated); must be within your branch scope",
             "schema": {
-              "type": "number"
+              "type": "array",
+              "items": {
+                "type": "number"
+              }
             }
           },
           {
@@ -2140,7 +2534,12 @@
             "in": "query",
             "schema": {
               "type": "string",
-              "enum": ["PLANNED", "ACTIVE", "COMPLETED", "CANCELLED"]
+              "enum": [
+                "PLANNED",
+                "ACTIVE",
+                "COMPLETED",
+                "CANCELLED"
+              ]
             }
           }
         ],
@@ -2155,7 +2554,9 @@
           }
         ],
         "summary": "List groups (paginated, filterable)",
-        "tags": ["Manage / Groups"]
+        "tags": [
+          "Manage / Groups"
+        ]
       },
       "post": {
         "operationId": "GroupsController_create",
@@ -2181,7 +2582,9 @@
           }
         ],
         "summary": "Create a group; if scheduleRule + startDate + endDate are set, sessions are generated",
-        "tags": ["Manage / Groups"]
+        "tags": [
+          "Manage / Groups"
+        ]
       }
     },
     "/api/v1/manage/groups/{id}": {
@@ -2208,7 +2611,9 @@
           }
         ],
         "summary": "Get full group detail",
-        "tags": ["Manage / Groups"]
+        "tags": [
+          "Manage / Groups"
+        ]
       },
       "patch": {
         "operationId": "GroupsController_update",
@@ -2243,7 +2648,9 @@
           }
         ],
         "summary": "Update a group; pass regenerateSessions=true to regenerate future sessions from new schedule",
-        "tags": ["Manage / Groups"]
+        "tags": [
+          "Manage / Groups"
+        ]
       }
     },
     "/api/v1/manage/groups/{id}/enrollments": {
@@ -2264,7 +2671,12 @@
             "in": "query",
             "schema": {
               "type": "string",
-              "enum": ["ACTIVE", "DROPPED", "COMPLETED", "TRANSFERRED"]
+              "enum": [
+                "ACTIVE",
+                "DROPPED",
+                "COMPLETED",
+                "TRANSFERRED"
+              ]
             }
           }
         ],
@@ -2279,7 +2691,9 @@
           }
         ],
         "summary": "List a group's enrolled students (optional ?status=ACTIVE)",
-        "tags": ["Manage / Groups"]
+        "tags": [
+          "Manage / Groups"
+        ]
       },
       "post": {
         "operationId": "GroupsController_enroll",
@@ -2314,7 +2728,9 @@
           }
         ],
         "summary": "Batch-enroll students into a group; returns 409 if group is at capacity",
-        "tags": ["Manage / Groups"]
+        "tags": [
+          "Manage / Groups"
+        ]
       }
     },
     "/api/v1/manage/groups/{id}/sessions": {
@@ -2353,7 +2769,11 @@
             "in": "query",
             "schema": {
               "type": "string",
-              "enum": ["SCHEDULED", "COMPLETED", "CANCELLED"]
+              "enum": [
+                "SCHEDULED",
+                "COMPLETED",
+                "CANCELLED"
+              ]
             }
           }
         ],
@@ -2368,7 +2788,9 @@
           }
         ],
         "summary": "List a group's sessions (optional ?from=&to=&status=)",
-        "tags": ["Manage / Groups"]
+        "tags": [
+          "Manage / Groups"
+        ]
       }
     },
     "/api/v1/manage/sessions": {
@@ -2376,11 +2798,15 @@
         "operationId": "SessionsController_calendar",
         "parameters": [
           {
-            "name": "branchId",
+            "name": "branchIds",
             "required": false,
             "in": "query",
+            "description": "Filter to these branch ids (comma-separated or repeated); must be within your branch scope",
             "schema": {
-              "type": "number"
+              "type": "array",
+              "items": {
+                "type": "number"
+              }
             }
           },
           {
@@ -2426,7 +2852,11 @@
             "in": "query",
             "schema": {
               "type": "string",
-              "enum": ["SCHEDULED", "COMPLETED", "CANCELLED"]
+              "enum": [
+                "SCHEDULED",
+                "COMPLETED",
+                "CANCELLED"
+              ]
             }
           }
         ],
@@ -2441,7 +2871,9 @@
           }
         ],
         "summary": "Calendar: sessions across all accessible groups in a date window (from + to required, max 90 days)",
-        "tags": ["Manage / Sessions"]
+        "tags": [
+          "Manage / Sessions"
+        ]
       }
     },
     "/api/v1/manage/sessions/{id}": {
@@ -2468,7 +2900,9 @@
           }
         ],
         "summary": "Get full session detail including the enrolled student roster",
-        "tags": ["Manage / Sessions"]
+        "tags": [
+          "Manage / Sessions"
+        ]
       },
       "patch": {
         "operationId": "SessionsController_update",
@@ -2503,7 +2937,9 @@
           }
         ],
         "summary": "Update a session (reschedule / room change / substitute / cancel). CANCELLED requires cancellationReason; room/teacher changes are conflict-checked (409 on double-book).",
-        "tags": ["Manage / Sessions"]
+        "tags": [
+          "Manage / Sessions"
+        ]
       }
     },
     "/api/v1/manage/enrollments/{id}": {
@@ -2530,7 +2966,9 @@
           }
         ],
         "summary": "Get enrollment detail",
-        "tags": ["Manage / Enrollments"]
+        "tags": [
+          "Manage / Enrollments"
+        ]
       },
       "patch": {
         "operationId": "EnrollmentsController_update",
@@ -2565,7 +3003,9 @@
           }
         ],
         "summary": "Update enrollment status (DROPPED / COMPLETED / TRANSFERRED). DROPPED requires dropReason.",
-        "tags": ["Manage / Enrollments"]
+        "tags": [
+          "Manage / Enrollments"
+        ]
       }
     },
     "/api/v1/manage/fee-plans": {
@@ -2594,11 +3034,15 @@
             }
           },
           {
-            "name": "branchId",
+            "name": "branchIds",
             "required": false,
             "in": "query",
+            "description": "Filter to these branch ids (comma-separated or repeated); must be within your branch scope. Shared plans (no branch) are always included.",
             "schema": {
-              "type": "number"
+              "type": "array",
+              "items": {
+                "type": "number"
+              }
             }
           },
           {
@@ -2629,7 +3073,9 @@
           }
         ],
         "summary": "List fee plans (paginated, filterable)",
-        "tags": ["Manage / Fee Plans"]
+        "tags": [
+          "Manage / Fee Plans"
+        ]
       },
       "post": {
         "operationId": "FeePlansController_create",
@@ -2655,7 +3101,9 @@
           }
         ],
         "summary": "Create a fee plan",
-        "tags": ["Manage / Fee Plans"]
+        "tags": [
+          "Manage / Fee Plans"
+        ]
       }
     },
     "/api/v1/manage/fee-plans/{id}": {
@@ -2692,7 +3140,9 @@
           }
         ],
         "summary": "Update a fee plan",
-        "tags": ["Manage / Fee Plans"]
+        "tags": [
+          "Manage / Fee Plans"
+        ]
       }
     },
     "/api/v1/manage/invoices": {
@@ -2721,11 +3171,15 @@
             }
           },
           {
-            "name": "branchId",
+            "name": "branchIds",
             "required": false,
             "in": "query",
+            "description": "Filter to these branch ids (comma-separated or repeated); must be within your branch scope",
             "schema": {
-              "type": "number"
+              "type": "array",
+              "items": {
+                "type": "number"
+              }
             }
           },
           {
@@ -2795,7 +3249,9 @@
           }
         ],
         "summary": "List invoices (paginated, filterable)",
-        "tags": ["Manage / Invoices"]
+        "tags": [
+          "Manage / Invoices"
+        ]
       },
       "post": {
         "operationId": "InvoicesController_create",
@@ -2821,7 +3277,97 @@
           }
         ],
         "summary": "Create an invoice (DRAFT)",
-        "tags": ["Manage / Invoices"]
+        "tags": [
+          "Manage / Invoices"
+        ]
+      }
+    },
+    "/api/v1/manage/invoices/summary": {
+      "get": {
+        "operationId": "InvoicesController_summary",
+        "parameters": [
+          {
+            "name": "branchIds",
+            "required": false,
+            "in": "query",
+            "description": "Filter to these branch ids (comma-separated or repeated); must be within your branch scope",
+            "schema": {
+              "type": "array",
+              "items": {
+                "type": "number"
+              }
+            }
+          },
+          {
+            "name": "studentId",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "type": "number"
+            }
+          },
+          {
+            "name": "status",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "type": "string",
+              "enum": [
+                "DRAFT",
+                "UNPAID",
+                "PARTIAL",
+                "PAID",
+                "OVERDUE",
+                "VOID",
+                "REFUNDED"
+              ]
+            }
+          },
+          {
+            "name": "from",
+            "required": false,
+            "in": "query",
+            "description": "Issue-date range start (YYYY-MM-DD)",
+            "schema": {
+              "example": "2026-01-01",
+              "type": "string"
+            }
+          },
+          {
+            "name": "to",
+            "required": false,
+            "in": "query",
+            "description": "Issue-date range end (YYYY-MM-DD)",
+            "schema": {
+              "example": "2026-01-31",
+              "type": "string"
+            }
+          },
+          {
+            "name": "dueBefore",
+            "required": false,
+            "in": "query",
+            "description": "Find invoices due before this date (YYYY-MM-DD)",
+            "schema": {
+              "example": "2026-02-01",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Invoice totals for the summary strip (true aggregate, not just the current page)",
+        "tags": [
+          "Manage / Invoices"
+        ]
       }
     },
     "/api/v1/manage/invoices/{id}": {
@@ -2848,7 +3394,9 @@
           }
         ],
         "summary": "Get full invoice detail",
-        "tags": ["Manage / Invoices"]
+        "tags": [
+          "Manage / Invoices"
+        ]
       },
       "patch": {
         "operationId": "InvoicesController_update",
@@ -2883,7 +3431,9 @@
           }
         ],
         "summary": "Update an invoice (dueDate while DRAFT, notes, status). Voiding requires invoice.void.",
-        "tags": ["Manage / Invoices"]
+        "tags": [
+          "Manage / Invoices"
+        ]
       }
     },
     "/api/v1/manage/invoices/{id}/line-items": {
@@ -2910,7 +3460,9 @@
           }
         ],
         "summary": "List an invoice's line items",
-        "tags": ["Manage / Invoices"]
+        "tags": [
+          "Manage / Invoices"
+        ]
       },
       "post": {
         "operationId": "InvoicesController_addLineItem",
@@ -2945,7 +3497,9 @@
           }
         ],
         "summary": "Add a line item to a DRAFT invoice (recalculates totals)",
-        "tags": ["Manage / Invoices"]
+        "tags": [
+          "Manage / Invoices"
+        ]
       }
     },
     "/api/v1/manage/invoices/{id}/payments": {
@@ -2972,7 +3526,9 @@
           }
         ],
         "summary": "List payments applied to an invoice",
-        "tags": ["Manage / Invoices"]
+        "tags": [
+          "Manage / Invoices"
+        ]
       },
       "post": {
         "operationId": "InvoicesController_recordPayment",
@@ -3007,7 +3563,9 @@
           }
         ],
         "summary": "Record a manual (cash/card/bank-transfer) payment. For online payments use the Portal/webhooks, not this endpoint.",
-        "tags": ["Manage / Invoices"]
+        "tags": [
+          "Manage / Invoices"
+        ]
       }
     },
     "/api/v1/manage/invoices/{id}/discounts": {
@@ -3044,7 +3602,9 @@
           }
         ],
         "summary": "Apply a discount to an invoice (recalculates totals)",
-        "tags": ["Manage / Invoices"]
+        "tags": [
+          "Manage / Invoices"
+        ]
       }
     },
     "/api/v1/manage/payments": {
@@ -3073,11 +3633,15 @@
             }
           },
           {
-            "name": "branchId",
+            "name": "branchIds",
             "required": false,
             "in": "query",
+            "description": "Filter to these branch ids (comma-separated or repeated); must be within your branch scope",
             "schema": {
-              "type": "number"
+              "type": "array",
+              "items": {
+                "type": "number"
+              }
             }
           },
           {
@@ -3102,7 +3666,14 @@
             "in": "query",
             "schema": {
               "type": "string",
-              "enum": ["CASH", "CLICK", "PAYME", "UZUM", "CARD", "BANK_TRANSFER"]
+              "enum": [
+                "CASH",
+                "CLICK",
+                "PAYME",
+                "UZUM",
+                "CARD",
+                "BANK_TRANSFER"
+              ]
             }
           },
           {
@@ -3111,7 +3682,12 @@
             "in": "query",
             "schema": {
               "type": "string",
-              "enum": ["PENDING", "SUCCEEDED", "FAILED", "REFUNDED"]
+              "enum": [
+                "PENDING",
+                "SUCCEEDED",
+                "FAILED",
+                "REFUNDED"
+              ]
             }
           },
           {
@@ -3146,7 +3722,9 @@
           }
         ],
         "summary": "List payments (paginated, filterable)",
-        "tags": ["Manage / Payments"]
+        "tags": [
+          "Manage / Payments"
+        ]
       }
     },
     "/api/v1/manage/payments/{id}": {
@@ -3173,7 +3751,9 @@
           }
         ],
         "summary": "Get full payment detail",
-        "tags": ["Manage / Payments"]
+        "tags": [
+          "Manage / Payments"
+        ]
       }
     },
     "/api/v1/manage/discounts": {
@@ -3230,7 +3810,9 @@
           }
         ],
         "summary": "List discounts (paginated, filterable)",
-        "tags": ["Manage / Discounts"]
+        "tags": [
+          "Manage / Discounts"
+        ]
       },
       "post": {
         "operationId": "DiscountsController_create",
@@ -3256,7 +3838,9 @@
           }
         ],
         "summary": "Create a discount",
-        "tags": ["Manage / Discounts"]
+        "tags": [
+          "Manage / Discounts"
+        ]
       }
     },
     "/api/v1/manage/discounts/{id}": {
@@ -3293,7 +3877,993 @@
           }
         ],
         "summary": "Update a discount",
-        "tags": ["Manage / Discounts"]
+        "tags": [
+          "Manage / Discounts"
+        ]
+      }
+    },
+    "/api/v1/manage/payrolls": {
+      "get": {
+        "operationId": "PayrollsController_list",
+        "parameters": [
+          {
+            "name": "page",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "minimum": 1,
+              "default": 1,
+              "type": "number"
+            }
+          },
+          {
+            "name": "limit",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "minimum": 1,
+              "maximum": 100,
+              "default": 20,
+              "type": "number"
+            }
+          },
+          {
+            "name": "branchIds",
+            "required": false,
+            "in": "query",
+            "description": "Filter to these branch ids (comma-separated or repeated); must be within your branch scope",
+            "schema": {
+              "type": "array",
+              "items": {
+                "type": "number"
+              }
+            }
+          },
+          {
+            "name": "staffId",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "type": "number"
+            }
+          },
+          {
+            "name": "status",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "type": "string",
+              "enum": [
+                "DRAFT",
+                "APPROVED",
+                "PAID"
+              ]
+            }
+          },
+          {
+            "name": "periodFrom",
+            "required": false,
+            "in": "query",
+            "description": "YYYY-MM-DD",
+            "schema": {
+              "example": "2026-01-01",
+              "type": "string"
+            }
+          },
+          {
+            "name": "periodTo",
+            "required": false,
+            "in": "query",
+            "description": "YYYY-MM-DD",
+            "schema": {
+              "example": "2026-12-31",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "List payroll records (paginated, filterable)",
+        "tags": [
+          "Manage / Payroll"
+        ]
+      },
+      "post": {
+        "operationId": "PayrollsController_create",
+        "parameters": [],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CreatePayrollDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": ""
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Create a single payroll record",
+        "tags": [
+          "Manage / Payroll"
+        ]
+      }
+    },
+    "/api/v1/manage/payrolls/run": {
+      "post": {
+        "operationId": "PayrollsController_run",
+        "parameters": [],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/RunPayrollDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": ""
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Generate DRAFT payrolls for all active staff in a period",
+        "tags": [
+          "Manage / Payroll"
+        ]
+      }
+    },
+    "/api/v1/manage/payrolls/summary": {
+      "get": {
+        "operationId": "PayrollsController_summary",
+        "parameters": [
+          {
+            "name": "branchIds",
+            "required": false,
+            "in": "query",
+            "description": "Filter to these branch ids (comma-separated or repeated); must be within your branch scope",
+            "schema": {
+              "type": "array",
+              "items": {
+                "type": "number"
+              }
+            }
+          },
+          {
+            "name": "staffId",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "type": "number"
+            }
+          },
+          {
+            "name": "status",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "type": "string",
+              "enum": [
+                "DRAFT",
+                "APPROVED",
+                "PAID"
+              ]
+            }
+          },
+          {
+            "name": "periodFrom",
+            "required": false,
+            "in": "query",
+            "description": "YYYY-MM-DD",
+            "schema": {
+              "example": "2026-01-01",
+              "type": "string"
+            }
+          },
+          {
+            "name": "periodTo",
+            "required": false,
+            "in": "query",
+            "description": "YYYY-MM-DD",
+            "schema": {
+              "example": "2026-12-31",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Payroll totals for the summary strip (true aggregate, not just the current page)",
+        "tags": [
+          "Manage / Payroll"
+        ]
+      }
+    },
+    "/api/v1/manage/payrolls/{id}": {
+      "get": {
+        "operationId": "PayrollsController_findOne",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "number"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Get a payroll record",
+        "tags": [
+          "Manage / Payroll"
+        ]
+      },
+      "patch": {
+        "operationId": "PayrollsController_update",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "number"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/UpdatePayrollDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Update a DRAFT payroll record",
+        "tags": [
+          "Manage / Payroll"
+        ]
+      }
+    },
+    "/api/v1/manage/payrolls/{id}/approve": {
+      "post": {
+        "operationId": "PayrollsController_approve",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "number"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Approve a payroll record (DRAFT → APPROVED)",
+        "tags": [
+          "Manage / Payroll"
+        ]
+      }
+    },
+    "/api/v1/manage/payrolls/{id}/mark-paid": {
+      "post": {
+        "operationId": "PayrollsController_markPaid",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "number"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Mark a payroll record paid (APPROVED → PAID)",
+        "tags": [
+          "Manage / Payroll"
+        ]
+      }
+    },
+    "/api/v1/manage/expenses/summary": {
+      "get": {
+        "operationId": "ExpensesController_summary",
+        "parameters": [
+          {
+            "name": "branchIds",
+            "required": false,
+            "in": "query",
+            "description": "Filter to these branch ids (comma-separated or repeated); must be within your branch scope",
+            "schema": {
+              "type": "array",
+              "items": {
+                "type": "number"
+              }
+            }
+          },
+          {
+            "name": "category",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "type": "string",
+              "enum": [
+                "RENT",
+                "UTILITIES",
+                "MARKETING",
+                "SALARY",
+                "OTHER"
+              ]
+            }
+          },
+          {
+            "name": "from",
+            "required": false,
+            "in": "query",
+            "description": "YYYY-MM-DD",
+            "schema": {
+              "example": "2026-01-01",
+              "type": "string"
+            }
+          },
+          {
+            "name": "to",
+            "required": false,
+            "in": "query",
+            "description": "YYYY-MM-DD",
+            "schema": {
+              "example": "2026-12-31",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Expense totals for the summary strip (true aggregate + per-category split)",
+        "tags": [
+          "Manage / Expenses"
+        ]
+      }
+    },
+    "/api/v1/manage/expenses": {
+      "get": {
+        "operationId": "ExpensesController_list",
+        "parameters": [
+          {
+            "name": "page",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "minimum": 1,
+              "default": 1,
+              "type": "number"
+            }
+          },
+          {
+            "name": "limit",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "minimum": 1,
+              "maximum": 100,
+              "default": 20,
+              "type": "number"
+            }
+          },
+          {
+            "name": "branchIds",
+            "required": false,
+            "in": "query",
+            "description": "Filter to these branch ids (comma-separated or repeated); must be within your branch scope",
+            "schema": {
+              "type": "array",
+              "items": {
+                "type": "number"
+              }
+            }
+          },
+          {
+            "name": "category",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "type": "string",
+              "enum": [
+                "RENT",
+                "UTILITIES",
+                "MARKETING",
+                "SALARY",
+                "OTHER"
+              ]
+            }
+          },
+          {
+            "name": "from",
+            "required": false,
+            "in": "query",
+            "description": "YYYY-MM-DD",
+            "schema": {
+              "example": "2026-01-01",
+              "type": "string"
+            }
+          },
+          {
+            "name": "to",
+            "required": false,
+            "in": "query",
+            "description": "YYYY-MM-DD",
+            "schema": {
+              "example": "2026-12-31",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "List expenses (paginated, filterable)",
+        "tags": [
+          "Manage / Expenses"
+        ]
+      },
+      "post": {
+        "operationId": "ExpensesController_create",
+        "parameters": [],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CreateExpenseDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": ""
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Record an expense",
+        "tags": [
+          "Manage / Expenses"
+        ]
+      }
+    },
+    "/api/v1/manage/expenses/{id}": {
+      "patch": {
+        "operationId": "ExpensesController_update",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "number"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/UpdateExpenseDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Update an expense",
+        "tags": [
+          "Manage / Expenses"
+        ]
+      },
+      "delete": {
+        "operationId": "ExpensesController_remove",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "number"
+            }
+          }
+        ],
+        "responses": {
+          "204": {
+            "description": ""
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Soft-delete an expense",
+        "tags": [
+          "Manage / Expenses"
+        ]
+      }
+    },
+    "/api/v1/manage/leads": {
+      "get": {
+        "operationId": "LeadsController_list",
+        "parameters": [
+          {
+            "name": "page",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "minimum": 1,
+              "default": 1,
+              "type": "number"
+            }
+          },
+          {
+            "name": "limit",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "minimum": 1,
+              "maximum": 100,
+              "default": 20,
+              "type": "number"
+            }
+          },
+          {
+            "name": "branchIds",
+            "required": false,
+            "in": "query",
+            "description": "Filter to these branch ids (comma-separated or repeated); must be within your branch scope",
+            "schema": {
+              "type": "array",
+              "items": {
+                "type": "number"
+              }
+            }
+          },
+          {
+            "name": "status",
+            "required": false,
+            "in": "query",
+            "description": "Present → flat paginated list for this column; absent → the full board",
+            "schema": {
+              "type": "string",
+              "enum": [
+                "NEW",
+                "CONTACTED",
+                "TRIAL_BOOKED",
+                "ENROLLED",
+                "LOST"
+              ]
+            }
+          },
+          {
+            "name": "source",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "type": "string",
+              "enum": [
+                "INSTAGRAM",
+                "TELEGRAM",
+                "REFERRAL",
+                "WALK_IN",
+                "WEBSITE",
+                "OTHER"
+              ]
+            }
+          },
+          {
+            "name": "assignedToStaffId",
+            "required": false,
+            "in": "query",
+            "description": "FK to staff",
+            "schema": {
+              "type": "number"
+            }
+          },
+          {
+            "name": "courseInterestId",
+            "required": false,
+            "in": "query",
+            "description": "FK to courses",
+            "schema": {
+              "type": "number"
+            }
+          },
+          {
+            "name": "search",
+            "required": false,
+            "in": "query",
+            "description": "Matches firstName, lastName, phoneNumber",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "createdAfter",
+            "required": false,
+            "in": "query",
+            "description": "ISO cutoff for the time window (last 24h / 7 / 30 / 90 days)",
+            "schema": {
+              "example": "2026-06-27T00:00:00.000Z",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Pipeline board (default) or a flat paginated column (with ?status=)",
+        "tags": [
+          "Manage / Leads"
+        ]
+      },
+      "post": {
+        "operationId": "LeadsController_create",
+        "parameters": [],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CreateLeadDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": ""
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Capture a new lead",
+        "tags": [
+          "Manage / Leads"
+        ]
+      }
+    },
+    "/api/v1/manage/leads/{id}": {
+      "get": {
+        "operationId": "LeadsController_findOne",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "number"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Get full lead detail incl. activity timeline",
+        "tags": [
+          "Manage / Leads"
+        ]
+      },
+      "patch": {
+        "operationId": "LeadsController_update",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "number"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/UpdateLeadDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Update lead fields (and optionally its status)",
+        "tags": [
+          "Manage / Leads"
+        ]
+      }
+    },
+    "/api/v1/manage/leads/{id}/activities": {
+      "get": {
+        "operationId": "LeadsController_listActivities",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "number"
+            }
+          },
+          {
+            "name": "page",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "minimum": 1,
+              "default": 1,
+              "type": "number"
+            }
+          },
+          {
+            "name": "limit",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "minimum": 1,
+              "maximum": 100,
+              "default": 20,
+              "type": "number"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "List a lead's activity timeline (paginated, newest first)",
+        "tags": [
+          "Manage / Leads"
+        ]
+      },
+      "post": {
+        "operationId": "LeadsController_logActivity",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "number"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CreateLeadActivityDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": ""
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Log a call/message/trial/note on a lead",
+        "tags": [
+          "Manage / Leads"
+        ]
+      }
+    },
+    "/api/v1/manage/leads/{id}/status": {
+      "patch": {
+        "operationId": "LeadsController_moveStatus",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "number"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/MoveLeadStatusDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Move a lead to another pipeline stage (drag-and-drop / mark lost)",
+        "tags": [
+          "Manage / Leads"
+        ]
+      }
+    },
+    "/api/v1/manage/leads/{id}/convert": {
+      "post": {
+        "operationId": "LeadsController_convert",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "number"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ConvertLeadDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": ""
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Convert a lead into an enrolled student (idempotent)",
+        "tags": [
+          "Manage / Leads"
+        ]
       }
     },
     "/api/v1/teach/sessions": {
@@ -3326,7 +4896,11 @@
             "in": "query",
             "schema": {
               "type": "string",
-              "enum": ["SCHEDULED", "COMPLETED", "CANCELLED"]
+              "enum": [
+                "SCHEDULED",
+                "COMPLETED",
+                "CANCELLED"
+              ]
             }
           }
         ],
@@ -3341,7 +4915,9 @@
           }
         ],
         "summary": "My calendar: sessions I teach (default teacher or substitute) in a date window (from + to required, max 90 days)",
-        "tags": ["Teach / My Sessions"]
+        "tags": [
+          "Teach / My Sessions"
+        ]
       }
     },
     "/api/v1/teach/sessions/{id}": {
@@ -3368,7 +4944,9 @@
           }
         ],
         "summary": "Session detail + enrolled roster (must be a session I teach)",
-        "tags": ["Teach / My Sessions"]
+        "tags": [
+          "Teach / My Sessions"
+        ]
       }
     },
     "/api/v1/teach/groups": {
@@ -3402,7 +4980,12 @@
             "in": "query",
             "schema": {
               "type": "string",
-              "enum": ["PLANNED", "ACTIVE", "COMPLETED", "CANCELLED"]
+              "enum": [
+                "PLANNED",
+                "ACTIVE",
+                "COMPLETED",
+                "CANCELLED"
+              ]
             }
           }
         ],
@@ -3417,7 +5000,9 @@
           }
         ],
         "summary": "List the groups I teach (paginated, optional status filter)",
-        "tags": ["Teach / My Groups"]
+        "tags": [
+          "Teach / My Groups"
+        ]
       }
     },
     "/api/v1/teach/groups/{id}": {
@@ -3444,7 +5029,9 @@
           }
         ],
         "summary": "Group detail with full roster (must be a group I teach)",
-        "tags": ["Teach / My Groups"]
+        "tags": [
+          "Teach / My Groups"
+        ]
       }
     },
     "/api/v1/teach/groups/{id}/students": {
@@ -3471,7 +5058,9 @@
           }
         ],
         "summary": "Enriched roster: student contact + per-group attendance rate (must be a group I teach)",
-        "tags": ["Teach / My Groups"]
+        "tags": [
+          "Teach / My Groups"
+        ]
       }
     },
     "/api/v1/teach/sessions/{id}/attendances": {
@@ -3498,7 +5087,9 @@
           }
         ],
         "summary": "Current attendance state for a session I teach",
-        "tags": ["Teach / Attendance"]
+        "tags": [
+          "Teach / Attendance"
+        ]
       },
       "post": {
         "operationId": "AttendanceController_submit",
@@ -3533,7 +5124,9 @@
           }
         ],
         "summary": "Batch submit attendance for a session I teach (rejects cancelled sessions, non-enrolled or duplicate students)",
-        "tags": ["Teach / Attendance"]
+        "tags": [
+          "Teach / Attendance"
+        ]
       },
       "patch": {
         "operationId": "AttendanceController_update",
@@ -3568,7 +5161,9 @@
           }
         ],
         "summary": "Batch update previously-submitted attendance for a session I teach",
-        "tags": ["Teach / Attendance"]
+        "tags": [
+          "Teach / Attendance"
+        ]
       }
     },
     "/api/v1/teach/assessments": {
@@ -3611,7 +5206,13 @@
             "in": "query",
             "schema": {
               "type": "string",
-              "enum": ["QUIZ", "MIDTERM", "FINAL", "MOCK", "HOMEWORK"]
+              "enum": [
+                "QUIZ",
+                "MIDTERM",
+                "FINAL",
+                "MOCK",
+                "HOMEWORK"
+              ]
             }
           },
           {
@@ -3646,7 +5247,9 @@
           }
         ],
         "summary": "List assessments across my groups (optionally narrowed to one group I teach)",
-        "tags": ["Teach / Assessments"]
+        "tags": [
+          "Teach / Assessments"
+        ]
       },
       "post": {
         "operationId": "AssessmentsController_create",
@@ -3672,7 +5275,9 @@
           }
         ],
         "summary": "Create an assessment in a group I teach",
-        "tags": ["Teach / Assessments"]
+        "tags": [
+          "Teach / Assessments"
+        ]
       }
     },
     "/api/v1/teach/assessments/{id}": {
@@ -3699,7 +5304,9 @@
           }
         ],
         "summary": "Get an assessment (must be in a group I teach)",
-        "tags": ["Teach / Assessments"]
+        "tags": [
+          "Teach / Assessments"
+        ]
       },
       "patch": {
         "operationId": "AssessmentsController_update",
@@ -3734,7 +5341,9 @@
           }
         ],
         "summary": "Update an assessment (must be in a group I teach)",
-        "tags": ["Teach / Assessments"]
+        "tags": [
+          "Teach / Assessments"
+        ]
       }
     },
     "/api/v1/teach/assessments/{id}/results": {
@@ -3761,7 +5370,9 @@
           }
         ],
         "summary": "List results for an assessment (must be in a group I teach)",
-        "tags": ["Teach / Assessments"]
+        "tags": [
+          "Teach / Assessments"
+        ]
       },
       "post": {
         "operationId": "AssessmentsController_submitResults",
@@ -3796,7 +5407,9 @@
           }
         ],
         "summary": "Batch submit grades; grade label + percentile are derived by the domain",
-        "tags": ["Teach / Assessments"]
+        "tags": [
+          "Teach / Assessments"
+        ]
       },
       "patch": {
         "operationId": "AssessmentsController_updateResults",
@@ -3831,7 +5444,9 @@
           }
         ],
         "summary": "Batch update grades (matched by assessment + student)",
-        "tags": ["Teach / Assessments"]
+        "tags": [
+          "Teach / Assessments"
+        ]
       }
     },
     "/api/v1/teach/assessments/{id}/publish": {
@@ -3858,7 +5473,9 @@
           }
         ],
         "summary": "Publish results to students/parents (idempotent; emits ResultsPublishedEvent)",
-        "tags": ["Teach / Assessments"]
+        "tags": [
+          "Teach / Assessments"
+        ]
       }
     },
     "/api/v1/teach/materials": {
@@ -3901,7 +5518,12 @@
             "in": "query",
             "schema": {
               "type": "string",
-              "enum": ["PDF", "VIDEO", "HOMEWORK", "LINK"]
+              "enum": [
+                "PDF",
+                "VIDEO",
+                "HOMEWORK",
+                "LINK"
+              ]
             }
           }
         ],
@@ -3916,7 +5538,9 @@
           }
         ],
         "summary": "List materials for my groups (optionally narrowed to one group)",
-        "tags": ["Teach / Materials"]
+        "tags": [
+          "Teach / Materials"
+        ]
       },
       "post": {
         "operationId": "MaterialsController_create",
@@ -3942,7 +5566,9 @@
           }
         ],
         "summary": "Upload a material to a group I teach (branchId auto-set from the group)",
-        "tags": ["Teach / Materials"]
+        "tags": [
+          "Teach / Materials"
+        ]
       }
     },
     "/api/v1/teach/materials/{id}": {
@@ -3969,7 +5595,9 @@
           }
         ],
         "summary": "Delete a material I uploaded myself",
-        "tags": ["Teach / Materials"]
+        "tags": [
+          "Teach / Materials"
+        ]
       }
     },
     "/api/v1/teach/students/{id}": {
@@ -3996,7 +5624,9 @@
           }
         ],
         "summary": "Limited profile of a student in one of my groups",
-        "tags": ["Teach / Student Profiles"]
+        "tags": [
+          "Teach / Student Profiles"
+        ]
       }
     },
     "/api/v1/teach/students/{id}/attendances": {
@@ -4043,7 +5673,9 @@
           }
         ],
         "summary": "A student's attendance across my groups (optional date window)",
-        "tags": ["Teach / Student Profiles"]
+        "tags": [
+          "Teach / Student Profiles"
+        ]
       }
     },
     "/api/v1/teach/students/{id}/results": {
@@ -4070,7 +5702,9 @@
           }
         ],
         "summary": "A student's assessment results across my groups",
-        "tags": ["Teach / Student Profiles"]
+        "tags": [
+          "Teach / Student Profiles"
+        ]
       }
     },
     "/api/v1/teach/grading-scales": {
@@ -4088,7 +5722,9 @@
           }
         ],
         "summary": "List the tenant grading scales",
-        "tags": ["Teach / Grading Scales"]
+        "tags": [
+          "Teach / Grading Scales"
+        ]
       }
     }
   },
@@ -4122,7 +5758,10 @@
             "example": "S3cret-pass"
           }
         },
-        "required": ["phone", "password"]
+        "required": [
+          "phone",
+          "password"
+        ]
       },
       "RefreshTokenDto": {
         "type": "object",
@@ -4132,7 +5771,9 @@
             "description": "A valid refresh token previously issued by login or refresh."
           }
         },
-        "required": ["refreshToken"]
+        "required": [
+          "refreshToken"
+        ]
       },
       "AdminLoginDto": {
         "type": "object",
@@ -4146,7 +5787,10 @@
             "example": "S3cret-pass"
           }
         },
-        "required": ["email", "password"]
+        "required": [
+          "email",
+          "password"
+        ]
       },
       "AdminVerifyOtpDto": {
         "type": "object",
@@ -4161,7 +5805,10 @@
             "description": "6-digit one-time code"
           }
         },
-        "required": ["email", "code"]
+        "required": [
+          "email",
+          "code"
+        ]
       },
       "OnboardBranchDto": {
         "type": "object",
@@ -4187,7 +5834,10 @@
             "type": "string"
           }
         },
-        "required": ["name", "code"]
+        "required": [
+          "name",
+          "code"
+        ]
       },
       "OnboardOwnerDto": {
         "type": "object",
@@ -4211,7 +5861,12 @@
             "minLength": 8
           }
         },
-        "required": ["phone", "firstName", "lastName", "password"]
+        "required": [
+          "phone",
+          "firstName",
+          "lastName",
+          "password"
+        ]
       },
       "OnboardTenantDto": {
         "type": "object",
@@ -4238,7 +5893,11 @@
           },
           "locale": {
             "type": "string",
-            "enum": ["uz", "ru", "en"]
+            "enum": [
+              "uz",
+              "ru",
+              "en"
+            ]
           },
           "currency": {
             "type": "string",
@@ -4256,7 +5915,13 @@
             "$ref": "#/components/schemas/OnboardOwnerDto"
           }
         },
-        "required": ["name", "subdomain", "subscriptionTierId", "mainBranch", "ownerUser"]
+        "required": [
+          "name",
+          "subdomain",
+          "subscriptionTierId",
+          "mainBranch",
+          "ownerUser"
+        ]
       },
       "TenantActionDto": {
         "type": "object",
@@ -4270,7 +5935,9 @@
             "maxLength": 500
           }
         },
-        "required": ["confirm"]
+        "required": [
+          "confirm"
+        ]
       },
       "UnsuspendTenantDto": {
         "type": "object",
@@ -4290,10 +5957,15 @@
           },
           "billingInterval": {
             "type": "string",
-            "enum": ["MONTHLY", "ANNUAL"]
+            "enum": [
+              "MONTHLY",
+              "ANNUAL"
+            ]
           }
         },
-        "required": ["subscriptionTierId"]
+        "required": [
+          "subscriptionTierId"
+        ]
       },
       "UpdateTenantDto": {
         "type": "object",
@@ -4304,7 +5976,11 @@
           },
           "locale": {
             "type": "string",
-            "enum": ["uz", "ru", "en"]
+            "enum": [
+              "uz",
+              "ru",
+              "en"
+            ]
           },
           "currency": {
             "type": "string",
@@ -4344,7 +6020,10 @@
             "description": "Branch to scope the role to; omit/null = all branches"
           }
         },
-        "required": ["userId", "roleId"]
+        "required": [
+          "userId",
+          "roleId"
+        ]
       },
       "ChangeMemberRoleDto": {
         "type": "object",
@@ -4359,7 +6038,9 @@
             "description": "Branch to scope the role to; omit/null = all branches"
           }
         },
-        "required": ["roleId"]
+        "required": [
+          "roleId"
+        ]
       },
       "ResetPasswordDto": {
         "type": "object",
@@ -4370,21 +6051,28 @@
             "maxLength": 128
           }
         },
-        "required": ["newPassword"]
+        "required": [
+          "newPassword"
+        ]
       },
       "UpdateRolePermissionsDto": {
         "type": "object",
         "properties": {
           "permissionCodes": {
             "description": "Full replacement set of permission codes for the role. Empty array clears all permissions.",
-            "example": ["student.read", "student.create"],
+            "example": [
+              "student.read",
+              "student.create"
+            ],
             "type": "array",
             "items": {
               "type": "string"
             }
           }
         },
-        "required": ["permissionCodes"]
+        "required": [
+          "permissionCodes"
+        ]
       },
       "CreatePlanDto": {
         "type": "object",
@@ -4422,7 +6110,11 @@
             "default": true
           }
         },
-        "required": ["name", "priceMonthly", "priceAnnual"]
+        "required": [
+          "name",
+          "priceMonthly",
+          "priceAnnual"
+        ]
       },
       "UpdatePlanDto": {
         "type": "object",
@@ -4472,7 +6164,11 @@
             "type": "string"
           }
         },
-        "required": ["name", "phone", "relation"]
+        "required": [
+          "name",
+          "phone",
+          "relation"
+        ]
       },
       "CreateStudentDto": {
         "type": "object",
@@ -4501,7 +6197,11 @@
           },
           "gender": {
             "type": "string",
-            "enum": ["M", "F", "O"]
+            "enum": [
+              "M",
+              "F",
+              "O"
+            ]
           },
           "address": {
             "type": "string"
@@ -4513,7 +6213,12 @@
             "type": "string"
           }
         },
-        "required": ["branchId", "firstName", "lastName", "phone"]
+        "required": [
+          "branchId",
+          "firstName",
+          "lastName",
+          "phone"
+        ]
       },
       "UpdateStudentDto": {
         "type": "object",
@@ -4528,7 +6233,11 @@
           },
           "gender": {
             "type": "string",
-            "enum": ["M", "F", "O"]
+            "enum": [
+              "M",
+              "F",
+              "O"
+            ]
           },
           "address": {
             "type": "string"
@@ -4541,7 +6250,12 @@
           },
           "status": {
             "type": "string",
-            "enum": ["ACTIVE", "INACTIVE", "GRADUATED", "SUSPENDED"]
+            "enum": [
+              "ACTIVE",
+              "INACTIVE",
+              "GRADUATED",
+              "SUSPENDED"
+            ]
           }
         }
       },
@@ -4563,7 +6277,11 @@
           },
           "relation": {
             "type": "string",
-            "enum": ["mother", "father", "guardian"]
+            "enum": [
+              "mother",
+              "father",
+              "guardian"
+            ]
           },
           "isPrimary": {
             "type": "boolean",
@@ -4574,7 +6292,10 @@
             "default": true
           }
         },
-        "required": ["phone", "relation"]
+        "required": [
+          "phone",
+          "relation"
+        ]
       },
       "CreateStaffDto": {
         "type": "object",
@@ -4596,11 +6317,19 @@
           "email": {
             "type": "string"
           },
+          "position": {
+            "type": "string",
+            "example": "Senior IELTS Instructor",
+            "description": "Job title"
+          },
           "department": {
             "type": "string"
           },
           "specialization": {
-            "example": ["IELTS", "General English"],
+            "example": [
+              "IELTS",
+              "General English"
+            ],
             "type": "array",
             "items": {
               "type": "string"
@@ -4613,7 +6342,11 @@
           },
           "employmentType": {
             "type": "string",
-            "enum": ["FULL_TIME", "PART_TIME", "CONTRACTOR"]
+            "enum": [
+              "FULL_TIME",
+              "PART_TIME",
+              "CONTRACTOR"
+            ]
           },
           "baseSalary": {
             "type": "number",
@@ -4624,7 +6357,12 @@
             "description": "Default: TEACHER. Also ADMIN or MANAGER."
           }
         },
-        "required": ["branchId", "firstName", "lastName", "phone"]
+        "required": [
+          "branchId",
+          "firstName",
+          "lastName",
+          "phone"
+        ]
       },
       "UpdateStaffDto": {
         "type": "object",
@@ -4632,11 +6370,19 @@
           "branchId": {
             "type": "number"
           },
+          "position": {
+            "type": "string",
+            "example": "Senior IELTS Instructor",
+            "description": "Job title"
+          },
           "department": {
             "type": "string"
           },
           "specialization": {
-            "example": ["IELTS", "General English"],
+            "example": [
+              "IELTS",
+              "General English"
+            ],
             "type": "array",
             "items": {
               "type": "string"
@@ -4644,7 +6390,11 @@
           },
           "employmentType": {
             "type": "string",
-            "enum": ["FULL_TIME", "PART_TIME", "CONTRACTOR"]
+            "enum": [
+              "FULL_TIME",
+              "PART_TIME",
+              "CONTRACTOR"
+            ]
           },
           "baseSalary": {
             "type": "number",
@@ -4652,7 +6402,11 @@
           },
           "status": {
             "type": "string",
-            "enum": ["ACTIVE", "ON_LEAVE", "TERMINATED"]
+            "enum": [
+              "ACTIVE",
+              "ON_LEAVE",
+              "TERMINATED"
+            ]
           }
         }
       },
@@ -4687,7 +6441,10 @@
             "description": "Only one branch can be main"
           }
         },
-        "required": ["name", "code"]
+        "required": [
+          "name",
+          "code"
+        ]
       },
       "UpdateBranchDto": {
         "type": "object",
@@ -4744,7 +6501,9 @@
             "nullable": true
           }
         },
-        "required": ["name"]
+        "required": [
+          "name"
+        ]
       },
       "UpdateCourseDto": {
         "type": "object",
@@ -4788,11 +6547,19 @@
           },
           "type": {
             "type": "string",
-            "enum": ["classroom", "lab", "online"],
+            "enum": [
+              "classroom",
+              "lab",
+              "online"
+            ],
             "nullable": true
           }
         },
-        "required": ["branchId", "name", "capacity"]
+        "required": [
+          "branchId",
+          "name",
+          "capacity"
+        ]
       },
       "UpdateRoomDto": {
         "type": "object",
@@ -4809,7 +6576,11 @@
           },
           "type": {
             "type": "string",
-            "enum": ["classroom", "lab", "online"],
+            "enum": [
+              "classroom",
+              "lab",
+              "online"
+            ],
             "nullable": true
           },
           "isActive": {
@@ -4824,7 +6595,15 @@
             "type": "array",
             "items": {
               "type": "string",
-              "enum": ["MON", "TUE", "WED", "THU", "FRI", "SAT", "SUN"]
+              "enum": [
+                "MON",
+                "TUE",
+                "WED",
+                "THU",
+                "FRI",
+                "SAT",
+                "SUN"
+              ]
             }
           },
           "startTime": {
@@ -4836,7 +6615,11 @@
             "example": "10:30"
           }
         },
-        "required": ["days", "startTime", "endTime"]
+        "required": [
+          "days",
+          "startTime",
+          "endTime"
+        ]
       },
       "CreateGroupDto": {
         "type": "object",
@@ -4885,7 +6668,11 @@
             ]
           }
         },
-        "required": ["branchId", "courseId", "name"]
+        "required": [
+          "branchId",
+          "courseId",
+          "name"
+        ]
       },
       "UpdateGroupDto": {
         "type": "object",
@@ -4926,11 +6713,16 @@
           },
           "status": {
             "type": "string",
-            "enum": ["PLANNED", "ACTIVE", "COMPLETED", "CANCELLED"]
+            "enum": [
+              "PLANNED",
+              "ACTIVE",
+              "COMPLETED",
+              "CANCELLED"
+            ]
           },
           "regenerateSessions": {
             "type": "boolean",
-            "description": "Regenerate future SCHEDULED sessions from the updated schedule rule"
+            "description": "Regenerate future SCHEDULED sessions from the updated schedule rule. Required (true or false) whenever scheduleRule actually changes — otherwise the request is rejected with REGENERATE_SESSIONS_REQUIRED."
           }
         }
       },
@@ -4950,7 +6742,9 @@
             "description": "Per-enrollment fee plan override"
           }
         },
-        "required": ["studentIds"]
+        "required": [
+          "studentIds"
+        ]
       },
       "UpdateSessionDto": {
         "type": "object",
@@ -4984,7 +6778,11 @@
           },
           "status": {
             "type": "string",
-            "enum": ["SCHEDULED", "COMPLETED", "CANCELLED"],
+            "enum": [
+              "SCHEDULED",
+              "COMPLETED",
+              "CANCELLED"
+            ],
             "description": "CANCELLED requires cancellationReason"
           },
           "cancellationReason": {
@@ -4999,7 +6797,11 @@
         "properties": {
           "status": {
             "type": "string",
-            "enum": ["DROPPED", "COMPLETED", "TRANSFERRED"],
+            "enum": [
+              "DROPPED",
+              "COMPLETED",
+              "TRANSFERRED"
+            ],
             "description": "DROPPED requires dropReason. TRANSFERRED: create new enrollment separately."
           },
           "dropReason": {
@@ -5008,7 +6810,9 @@
             "description": "Required when status = DROPPED"
           }
         },
-        "required": ["status"]
+        "required": [
+          "status"
+        ]
       },
       "CreateFeePlanDto": {
         "type": "object",
@@ -5036,7 +6840,12 @@
           },
           "billingCycle": {
             "type": "string",
-            "enum": ["MONTHLY", "QUARTERLY", "ONE_TIME", "PER_SESSION"]
+            "enum": [
+              "MONTHLY",
+              "QUARTERLY",
+              "ONE_TIME",
+              "PER_SESSION"
+            ]
           },
           "dueDay": {
             "type": "number",
@@ -5053,7 +6862,11 @@
             "default": 3
           }
         },
-        "required": ["name", "amount", "billingCycle"]
+        "required": [
+          "name",
+          "amount",
+          "billingCycle"
+        ]
       },
       "UpdateFeePlanDto": {
         "type": "object",
@@ -5077,7 +6890,12 @@
           },
           "billingCycle": {
             "type": "string",
-            "enum": ["MONTHLY", "QUARTERLY", "ONE_TIME", "PER_SESSION"]
+            "enum": [
+              "MONTHLY",
+              "QUARTERLY",
+              "ONE_TIME",
+              "PER_SESSION"
+            ]
           },
           "dueDay": {
             "type": "number",
@@ -5110,7 +6928,11 @@
             "example": 500000
           }
         },
-        "required": ["description", "quantity", "unitAmount"]
+        "required": [
+          "description",
+          "quantity",
+          "unitAmount"
+        ]
       },
       "CreateInvoiceDto": {
         "type": "object",
@@ -5159,7 +6981,11 @@
             "nullable": true
           }
         },
-        "required": ["branchId", "studentId", "dueDate"]
+        "required": [
+          "branchId",
+          "studentId",
+          "dueDate"
+        ]
       },
       "UpdateInvoiceDto": {
         "type": "object",
@@ -5175,7 +7001,15 @@
           },
           "status": {
             "type": "string",
-            "enum": ["DRAFT", "UNPAID", "PARTIAL", "PAID", "OVERDUE", "VOID", "REFUNDED"],
+            "enum": [
+              "DRAFT",
+              "UNPAID",
+              "PARTIAL",
+              "PAID",
+              "OVERDUE",
+              "VOID",
+              "REFUNDED"
+            ],
             "description": "Allowed transitions: DRAFT → UNPAID, any → VOID"
           }
         }
@@ -5195,7 +7029,11 @@
             "example": 500000
           }
         },
-        "required": ["description", "quantity", "unitAmount"]
+        "required": [
+          "description",
+          "quantity",
+          "unitAmount"
+        ]
       },
       "RecordPaymentDto": {
         "type": "object",
@@ -5206,7 +7044,11 @@
           },
           "method": {
             "type": "string",
-            "enum": ["CASH", "CARD", "BANK_TRANSFER"]
+            "enum": [
+              "CASH",
+              "CARD",
+              "BANK_TRANSFER"
+            ]
           },
           "paidAt": {
             "type": "string",
@@ -5218,7 +7060,10 @@
             "nullable": true
           }
         },
-        "required": ["amount", "method"]
+        "required": [
+          "amount",
+          "method"
+        ]
       },
       "ApplyDiscountDto": {
         "type": "object",
@@ -5227,7 +7072,9 @@
             "type": "number"
           }
         },
-        "required": ["discountId"]
+        "required": [
+          "discountId"
+        ]
       },
       "CreateDiscountDto": {
         "type": "object",
@@ -5237,7 +7084,10 @@
           },
           "type": {
             "type": "string",
-            "enum": ["PERCENTAGE", "FIXED_AMOUNT"]
+            "enum": [
+              "PERCENTAGE",
+              "FIXED_AMOUNT"
+            ]
           },
           "value": {
             "type": "number",
@@ -5270,7 +7120,11 @@
             "description": "YYYY-MM-DD"
           }
         },
-        "required": ["name", "type", "value"]
+        "required": [
+          "name",
+          "type",
+          "value"
+        ]
       },
       "UpdateDiscountDto": {
         "type": "object",
@@ -5280,7 +7134,10 @@
           },
           "type": {
             "type": "string",
-            "enum": ["PERCENTAGE", "FIXED_AMOUNT"]
+            "enum": [
+              "PERCENTAGE",
+              "FIXED_AMOUNT"
+            ]
           },
           "value": {
             "type": "number"
@@ -5313,6 +7170,364 @@
           }
         }
       },
+      "PayrollBreakdownDto": {
+        "type": "object",
+        "properties": {
+          "hoursTaught": {
+            "type": "number",
+            "minimum": 0,
+            "example": 40
+          },
+          "rate": {
+            "type": "number",
+            "minimum": 0,
+            "example": 50000
+          },
+          "bonuses": {
+            "type": "number",
+            "minimum": 0,
+            "example": 100000
+          }
+        }
+      },
+      "CreatePayrollDto": {
+        "type": "object",
+        "properties": {
+          "branchId": {
+            "type": "number"
+          },
+          "staffId": {
+            "type": "number",
+            "description": "FK to staff.id"
+          },
+          "periodStart": {
+            "type": "string",
+            "example": "2026-06-01",
+            "description": "YYYY-MM-DD"
+          },
+          "periodEnd": {
+            "type": "string",
+            "example": "2026-06-30",
+            "description": "YYYY-MM-DD"
+          },
+          "autoCalculate": {
+            "type": "boolean",
+            "default": true
+          },
+          "grossAmount": {
+            "type": "number",
+            "minimum": 0,
+            "description": "Required when autoCalculate is false"
+          },
+          "deductions": {
+            "type": "number",
+            "minimum": 0,
+            "default": 0
+          },
+          "breakdown": {
+            "$ref": "#/components/schemas/PayrollBreakdownDto"
+          }
+        },
+        "required": [
+          "branchId",
+          "staffId",
+          "periodStart",
+          "periodEnd"
+        ]
+      },
+      "RunPayrollDto": {
+        "type": "object",
+        "properties": {
+          "branchId": {
+            "type": "number",
+            "description": "Restrict the run to one branch"
+          },
+          "periodStart": {
+            "type": "string",
+            "example": "2026-06-01",
+            "description": "YYYY-MM-DD"
+          },
+          "periodEnd": {
+            "type": "string",
+            "example": "2026-06-30",
+            "description": "YYYY-MM-DD"
+          },
+          "autoCalculate": {
+            "type": "boolean",
+            "default": true
+          }
+        },
+        "required": [
+          "periodStart",
+          "periodEnd"
+        ]
+      },
+      "UpdatePayrollDto": {
+        "type": "object",
+        "properties": {
+          "grossAmount": {
+            "type": "number",
+            "minimum": 0
+          },
+          "deductions": {
+            "type": "number",
+            "minimum": 0
+          },
+          "breakdown": {
+            "$ref": "#/components/schemas/PayrollBreakdownDto"
+          }
+        }
+      },
+      "CreateExpenseDto": {
+        "type": "object",
+        "properties": {
+          "branchId": {
+            "type": "number"
+          },
+          "category": {
+            "type": "string",
+            "enum": [
+              "RENT",
+              "UTILITIES",
+              "MARKETING",
+              "SALARY",
+              "OTHER"
+            ]
+          },
+          "amount": {
+            "type": "number"
+          },
+          "currency": {
+            "type": "string",
+            "default": "UZS"
+          },
+          "expenseDate": {
+            "type": "string",
+            "example": "2026-06-01",
+            "description": "YYYY-MM-DD"
+          },
+          "vendor": {
+            "type": "string"
+          },
+          "description": {
+            "type": "string"
+          },
+          "receiptUrl": {
+            "type": "string",
+            "description": "Upload via storage endpoint first"
+          }
+        },
+        "required": [
+          "branchId",
+          "category",
+          "amount",
+          "expenseDate"
+        ]
+      },
+      "UpdateExpenseDto": {
+        "type": "object",
+        "properties": {
+          "branchId": {
+            "type": "number"
+          },
+          "category": {
+            "type": "string",
+            "enum": [
+              "RENT",
+              "UTILITIES",
+              "MARKETING",
+              "SALARY",
+              "OTHER"
+            ]
+          },
+          "amount": {
+            "type": "number"
+          },
+          "currency": {
+            "type": "string"
+          },
+          "expenseDate": {
+            "type": "string",
+            "example": "2026-06-01",
+            "description": "YYYY-MM-DD"
+          },
+          "vendor": {
+            "type": "string"
+          },
+          "description": {
+            "type": "string"
+          },
+          "receiptUrl": {
+            "type": "string"
+          }
+        }
+      },
+      "CreateLeadDto": {
+        "type": "object",
+        "properties": {
+          "branchId": {
+            "type": "number",
+            "description": "Defaults to your branch when you have exactly one"
+          },
+          "firstName": {
+            "type": "string"
+          },
+          "lastName": {
+            "type": "string"
+          },
+          "phoneNumber": {
+            "type": "string",
+            "example": "+998901234567",
+            "description": "E.164 phone number"
+          },
+          "email": {
+            "type": "string"
+          },
+          "source": {
+            "type": "string",
+            "enum": [
+              "INSTAGRAM",
+              "TELEGRAM",
+              "REFERRAL",
+              "WALK_IN",
+              "WEBSITE",
+              "OTHER"
+            ]
+          },
+          "courseInterestId": {
+            "type": "number",
+            "description": "FK to courses"
+          },
+          "assignedToStaffId": {
+            "type": "number",
+            "description": "FK to staff"
+          },
+          "notes": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "firstName",
+          "phoneNumber",
+          "source"
+        ]
+      },
+      "UpdateLeadDto": {
+        "type": "object",
+        "properties": {
+          "branchId": {
+            "type": "number"
+          },
+          "firstName": {
+            "type": "string"
+          },
+          "lastName": {
+            "type": "string"
+          },
+          "phoneNumber": {
+            "type": "string",
+            "example": "+998901234567",
+            "description": "E.164 phone number"
+          },
+          "email": {
+            "type": "string"
+          },
+          "source": {
+            "type": "string",
+            "enum": [
+              "INSTAGRAM",
+              "TELEGRAM",
+              "REFERRAL",
+              "WALK_IN",
+              "WEBSITE",
+              "OTHER"
+            ]
+          },
+          "courseInterestId": {
+            "type": "number",
+            "description": "FK to courses"
+          },
+          "assignedToStaffId": {
+            "type": "number",
+            "description": "FK to staff"
+          },
+          "notes": {
+            "type": "string"
+          },
+          "status": {
+            "type": "string",
+            "enum": [
+              "NEW",
+              "CONTACTED",
+              "TRIAL_BOOKED",
+              "ENROLLED",
+              "LOST"
+            ]
+          }
+        }
+      },
+      "MoveLeadStatusDto": {
+        "type": "object",
+        "properties": {
+          "status": {
+            "type": "string",
+            "enum": [
+              "NEW",
+              "CONTACTED",
+              "TRIAL_BOOKED",
+              "ENROLLED",
+              "LOST"
+            ]
+          },
+          "note": {
+            "type": "string",
+            "description": "Reason/context, e.g. why the lead was lost"
+          }
+        },
+        "required": [
+          "status"
+        ]
+      },
+      "CreateLeadActivityDto": {
+        "type": "object",
+        "properties": {
+          "type": {
+            "type": "string",
+            "enum": [
+              "CALL",
+              "MESSAGE",
+              "TRIAL",
+              "NOTE"
+            ]
+          },
+          "notes": {
+            "type": "string",
+            "description": "What happened"
+          },
+          "scheduledAt": {
+            "type": "string",
+            "description": "ISO datetime for a scheduled follow-up"
+          }
+        },
+        "required": [
+          "type"
+        ]
+      },
+      "ConvertLeadDto": {
+        "type": "object",
+        "properties": {
+          "branchId": {
+            "type": "number",
+            "description": "Target branch for the student (defaults to the lead's)"
+          },
+          "firstName": {
+            "type": "string"
+          },
+          "lastName": {
+            "type": "string"
+          }
+        }
+      },
       "AttendanceRecordDto": {
         "type": "object",
         "properties": {
@@ -5321,14 +7536,22 @@
           },
           "status": {
             "type": "string",
-            "enum": ["PRESENT", "ABSENT", "LATE", "EXCUSED"]
+            "enum": [
+              "PRESENT",
+              "ABSENT",
+              "LATE",
+              "EXCUSED"
+            ]
           },
           "note": {
             "type": "string",
             "nullable": true
           }
         },
-        "required": ["studentId", "status"]
+        "required": [
+          "studentId",
+          "status"
+        ]
       },
       "BatchAttendanceDto": {
         "type": "object",
@@ -5340,7 +7563,9 @@
             }
           }
         },
-        "required": ["records"]
+        "required": [
+          "records"
+        ]
       },
       "CreateAssessmentDto": {
         "type": "object",
@@ -5359,7 +7584,13 @@
           },
           "type": {
             "type": "string",
-            "enum": ["QUIZ", "MIDTERM", "FINAL", "MOCK", "HOMEWORK"]
+            "enum": [
+              "QUIZ",
+              "MIDTERM",
+              "FINAL",
+              "MOCK",
+              "HOMEWORK"
+            ]
           },
           "examDate": {
             "type": "string",
@@ -5377,7 +7608,11 @@
             "minimum": 0
           }
         },
-        "required": ["groupId", "title", "type"]
+        "required": [
+          "groupId",
+          "title",
+          "type"
+        ]
       },
       "UpdateAssessmentDto": {
         "type": "object",
@@ -5387,7 +7622,13 @@
           },
           "type": {
             "type": "string",
-            "enum": ["QUIZ", "MIDTERM", "FINAL", "MOCK", "HOMEWORK"]
+            "enum": [
+              "QUIZ",
+              "MIDTERM",
+              "FINAL",
+              "MOCK",
+              "HOMEWORK"
+            ]
           },
           "examDate": {
             "type": "string",
@@ -5424,7 +7665,9 @@
             "nullable": true
           }
         },
-        "required": ["studentId"]
+        "required": [
+          "studentId"
+        ]
       },
       "BatchResultsDto": {
         "type": "object",
@@ -5436,7 +7679,9 @@
             }
           }
         },
-        "required": ["results"]
+        "required": [
+          "results"
+        ]
       },
       "CreateMaterialDto": {
         "type": "object",
@@ -5463,16 +7708,29 @@
           },
           "materialType": {
             "type": "string",
-            "enum": ["PDF", "VIDEO", "HOMEWORK", "LINK"],
+            "enum": [
+              "PDF",
+              "VIDEO",
+              "HOMEWORK",
+              "LINK"
+            ],
             "default": "PDF"
           },
           "visibility": {
             "type": "string",
-            "enum": ["GROUP", "BRANCH", "TENANT"],
+            "enum": [
+              "GROUP",
+              "BRANCH",
+              "TENANT"
+            ],
             "default": "GROUP"
           }
         },
-        "required": ["groupId", "title", "fileUrl"]
+        "required": [
+          "groupId",
+          "title",
+          "fileUrl"
+        ]
       }
     }
   }

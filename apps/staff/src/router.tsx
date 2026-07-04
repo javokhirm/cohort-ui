@@ -34,6 +34,7 @@ import { PayrollRoute } from '@/routes/_authed.payroll';
 import { PayrollDetailRoute } from '@/routes/_authed.payroll.$id';
 import { ExpensesRoute } from '@/routes/_authed.expenses';
 import { PaymentsRoute } from '@/routes/_authed.payments';
+import { LeadsRoute } from '@/routes/_authed.leads';
 import { useSessionStore } from '@/store/sessionStore';
 
 const rootRoute = createRootRoute({
@@ -570,6 +571,68 @@ const expensesRoute = createRoute({
 	component: ExpensesRoute,
 });
 
+type LeadSourceSearch =
+	| 'INSTAGRAM'
+	| 'TELEGRAM'
+	| 'REFERRAL'
+	| 'WALK_IN'
+	| 'WEBSITE'
+	| 'OTHER';
+
+const LEAD_SOURCE_SEARCH: LeadSourceSearch[] = [
+	'INSTAGRAM',
+	'TELEGRAM',
+	'REFERRAL',
+	'WALK_IN',
+	'WEBSITE',
+	'OTHER',
+];
+
+type LeadWindowSearch = '24h' | '7d' | '30d' | '90d';
+const LEAD_WINDOW_SEARCH: LeadWindowSearch[] = ['24h', '7d', '30d', '90d'];
+
+interface LeadSearch {
+	source?: LeadSourceSearch;
+	assignedToStaffId?: number;
+	courseInterestId?: number;
+	search?: string;
+	window?: LeadWindowSearch;
+}
+
+const leadsRoute = createRoute({
+	getParentRoute: () => authedRoute,
+	path: '/leads',
+	beforeLoad: () => requirePermission('lead.read'),
+	validateSearch: (search: Record<string, unknown>): LeadSearch => {
+		const source = search.source;
+		const assignedToStaffId = Number(search.assignedToStaffId);
+		const courseInterestId = Number(search.courseInterestId);
+		const searchTerm = search.search;
+		const window = search.window;
+		return {
+			source: LEAD_SOURCE_SEARCH.includes(source as LeadSourceSearch)
+				? (source as LeadSourceSearch)
+				: undefined,
+			assignedToStaffId:
+				Number.isFinite(assignedToStaffId) && assignedToStaffId > 0
+					? assignedToStaffId
+					: undefined,
+			courseInterestId:
+				Number.isFinite(courseInterestId) && courseInterestId > 0
+					? courseInterestId
+					: undefined,
+			search:
+				typeof searchTerm === 'string' && searchTerm.trim()
+					? searchTerm
+					: undefined,
+			window: LEAD_WINDOW_SEARCH.includes(window as LeadWindowSearch)
+				? (window as LeadWindowSearch)
+				: undefined,
+		};
+	},
+	component: LeadsRoute,
+});
+
 const routeTree = rootRoute.addChildren([
 	loginRoute,
 	forbiddenRoute,
@@ -597,6 +660,7 @@ const routeTree = rootRoute.addChildren([
 		payrollRoute,
 		payrollDetailRoute,
 		expensesRoute,
+		leadsRoute,
 	]),
 ]);
 
