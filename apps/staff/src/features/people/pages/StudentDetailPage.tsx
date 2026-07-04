@@ -20,6 +20,8 @@ import {
 import { formatDate, formatMoney } from '@repo/utils';
 
 import { Can } from '@/components/Can';
+import { usePermissions } from '@/features/auth/hooks';
+import { StandingDiscountCell } from '@/features/billing';
 import { useBranches } from '@/api/branches';
 import {
 	useStudent,
@@ -264,12 +266,12 @@ function GuardiansTab({ studentId }: { studentId: number }) {
 
 // ─── Enrollments tab ──────────────────────────────────────────────────────────
 
-const enrollmentColumns: ColumnDef<Enrollment>[] = [
+const baseEnrollmentColumns: ColumnDef<Enrollment>[] = [
 	{
-		accessorKey: 'groupCode',
+		accessorKey: 'groupName',
 		header: 'Group',
 		cell: ({ getValue }) => (
-			<span className="font-mono text-xs">{getValue<string>()}</span>
+			<span className="text-muted-foreground text-xs">{getValue<string>()}</span>
 		),
 	},
 	{
@@ -295,8 +297,28 @@ const enrollmentColumns: ColumnDef<Enrollment>[] = [
 	},
 ];
 
+/** Standing per-enrollment discount column — gated to `enrollment.discount.manage`. */
+const standingDiscountColumn: ColumnDef<Enrollment> = {
+	id: 'standingDiscount',
+	header: 'Standing discount',
+	cell: ({ row }) => (
+		<StandingDiscountCell
+			enrollmentId={row.original.id}
+			groupName={row.original.groupName}
+		/>
+	),
+};
+
 function EnrollmentsTab({ studentId }: { studentId: number }) {
 	const { data: enrollments = [], isLoading } = useStudentEnrollments(studentId);
+	const { can } = usePermissions();
+
+	// The discount endpoints require `enrollment.discount.manage` (OWNER/ADMIN, not
+	// MANAGER), so drop the whole column for users without it — showing it would
+	// only 403 on fetch.
+	const columns = can('enrollment.discount.manage')
+		? [...baseEnrollmentColumns, standingDiscountColumn]
+		: baseEnrollmentColumns;
 
 	if (isLoading) {
 		return <Skeleton className="h-32 rounded-xl" />;
@@ -304,7 +326,7 @@ function EnrollmentsTab({ studentId }: { studentId: number }) {
 
 	return (
 		<DataTable
-			columns={enrollmentColumns}
+			columns={columns}
 			data={enrollments}
 			getRowId={(row) => String(row.id)}
 			emptyState={

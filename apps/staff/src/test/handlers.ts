@@ -410,6 +410,7 @@ interface MockFeePlan {
 	amount: number;
 	currency: string;
 	billingCycle: 'MONTHLY' | 'QUARTERLY' | 'ONE_TIME' | 'PER_SESSION';
+	prorationMethod: 'SESSION' | 'DAILY' | 'NONE';
 	dueDay: number;
 	lateFeeAmount: number;
 	gracePeriodDays: number;
@@ -427,6 +428,7 @@ export const MOCK_FEE_PLANS: MockFeePlan[] = [
 		amount: 1_300_000,
 		currency: 'UZS',
 		billingCycle: 'MONTHLY',
+		prorationMethod: 'SESSION',
 		dueDay: 1,
 		lateFeeAmount: 50_000,
 		gracePeriodDays: 3,
@@ -448,6 +450,7 @@ export const MOCK_FEE_PLANS: MockFeePlan[] = [
 		isActive: true,
 		createdAt: '2025-01-11T00:00:00Z',
 		updatedAt: '2025-01-11T00:00:00Z',
+		prorationMethod: 'SESSION',
 	},
 	{
 		id: 3,
@@ -463,6 +466,7 @@ export const MOCK_FEE_PLANS: MockFeePlan[] = [
 		isActive: true,
 		createdAt: '2025-01-12T00:00:00Z',
 		updatedAt: '2025-01-12T00:00:00Z',
+		prorationMethod: 'SESSION',
 	},
 	{
 		id: 4,
@@ -478,6 +482,7 @@ export const MOCK_FEE_PLANS: MockFeePlan[] = [
 		isActive: false,
 		createdAt: '2025-01-13T00:00:00Z',
 		updatedAt: '2025-01-13T00:00:00Z',
+		prorationMethod: 'SESSION',
 	},
 ];
 

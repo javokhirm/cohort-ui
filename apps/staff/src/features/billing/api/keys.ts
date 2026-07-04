@@ -29,6 +29,13 @@ export const discountsKeys = {
 		[...discountsKeys.discounts(), 'list', filters] as const,
 };
 
+export const enrollmentDiscountsKeys = {
+	all: ['enrollment-discounts'] as const,
+
+	forEnrollment: (enrollmentId: number) =>
+		[...enrollmentDiscountsKeys.all, enrollmentId] as const,
+};
+
 export interface InvoiceListFilters {
 	page?: number;
 	limit?: number;

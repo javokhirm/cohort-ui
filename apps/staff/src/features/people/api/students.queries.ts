@@ -66,10 +66,17 @@ export interface Guardian {
 export interface Enrollment {
 	id: number;
 	groupId: number;
-	groupCode: string;
+	groupName: string;
+	courseId: number;
 	courseName: string;
+	/** Per-enrollment fee-plan override, if any. */
+	feePlanId: number | null;
 	enrolledAt: string;
 	status: 'ACTIVE' | 'COMPLETED' | 'DROPPED' | 'TRANSFERRED';
+	/** Set when `status` is `DROPPED`. */
+	dropReason: string | null;
+	/** Set when `status` is `COMPLETED`. */
+	completedAt: string | null;
 }
 
 export interface AttendanceRecord {

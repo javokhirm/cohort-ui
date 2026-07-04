@@ -47,6 +47,7 @@ export const PERMISSION_CODES = [
 	'enrollment.read',
 	'enrollment.create',
 	'enrollment.update',
+	'enrollment.discount.manage',
 	// attendance
 	'attendance.read',
 	'attendance.mark',
@@ -68,6 +69,7 @@ export const PERMISSION_CODES = [
 	'invoice.update',
 	'invoice.void',
 	'invoice.discount.apply',
+	'invoice.generate',
 	// payment
 	'payment.read',
 	'payment.record',
