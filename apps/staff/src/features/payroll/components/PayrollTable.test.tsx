@@ -26,7 +26,12 @@ const ROWS: PayrollResponse[] = [
 		id: 1,
 		branchId: 1,
 		staffId: 1,
-		staff: { id: 1, staffCode: 'STF-001', firstName: 'Diyorbek', lastName: 'Rustamov' },
+		staff: {
+			id: 1,
+			staffCode: 'STF-001',
+			firstName: 'Diyorbek',
+			lastName: 'Rustamov',
+		},
 		periodStart: '2026-06-01',
 		periodEnd: '2026-06-30',
 		grossAmount: 8_000_000,
@@ -75,5 +80,20 @@ describe('PayrollTable', () => {
 		expect(
 			screen.queryByRole('button', { name: /payroll actions/i }),
 		).not.toBeInTheDocument();
+	});
+
+	it('calls onRowClick with the row payroll when a row is clicked', () => {
+		const onRowClick = vi.fn();
+		renderTable(
+			<PayrollTable
+				payrolls={ROWS}
+				canApprove={false}
+				canPay={false}
+				onRowClick={onRowClick}
+			/>,
+		);
+
+		screen.getByText('Diyorbek Rustamov').closest('tr')?.click();
+		expect(onRowClick).toHaveBeenCalledWith(ROWS[0]);
 	});
 });

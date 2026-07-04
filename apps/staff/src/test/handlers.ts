@@ -1116,6 +1116,8 @@ export const handlers = [
 		const branchIds = readBranchIds(url);
 		const status = url.searchParams.get('status');
 		const staffId = url.searchParams.get('staffId');
+		const periodFrom = url.searchParams.get('periodFrom');
+		const periodTo = url.searchParams.get('periodTo');
 		const page = Number(url.searchParams.get('page') ?? 1);
 		const limit = Number(url.searchParams.get('limit') ?? 20);
 
@@ -1123,10 +1125,35 @@ export const handlers = [
 		if (branchIds) rows = rows.filter((p) => branchIds.includes(p.branchId));
 		if (status) rows = rows.filter((p) => p.status === status);
 		if (staffId) rows = rows.filter((p) => p.staffId === Number(staffId));
+		if (periodFrom) rows = rows.filter((p) => p.periodStart >= periodFrom);
+		if (periodTo) rows = rows.filter((p) => p.periodEnd <= periodTo);
 
 		const total = rows.length;
 		const start = (page - 1) * limit;
 		return okPaged(rows.slice(start, start + limit), page, limit, total);
+	}),
+
+	http.get(`${MANAGE}/payrolls/summary`, ({ request }) => {
+		const url = new URL(request.url);
+		const branchIds = readBranchIds(url);
+		const status = url.searchParams.get('status');
+		const staffId = url.searchParams.get('staffId');
+		const periodFrom = url.searchParams.get('periodFrom');
+		const periodTo = url.searchParams.get('periodTo');
+
+		let rows = MOCK_PAYROLLS;
+		if (branchIds) rows = rows.filter((p) => branchIds.includes(p.branchId));
+		if (status) rows = rows.filter((p) => p.status === status);
+		if (staffId) rows = rows.filter((p) => p.staffId === Number(staffId));
+		if (periodFrom) rows = rows.filter((p) => p.periodStart >= periodFrom);
+		if (periodTo) rows = rows.filter((p) => p.periodEnd <= periodTo);
+
+		return ok({
+			currency: 'UZS',
+			totalGross: rows.reduce((sum, p) => sum + p.grossAmount, 0),
+			totalDeductions: rows.reduce((sum, p) => sum + p.deductions, 0),
+			totalNetPayable: rows.reduce((sum, p) => sum + p.netAmount, 0),
+		});
 	}),
 
 	http.post(`${MANAGE}/payrolls/run`, async ({ request }) => {

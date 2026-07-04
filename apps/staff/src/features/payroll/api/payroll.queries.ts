@@ -4,7 +4,12 @@ import { manageApi } from '@/api/apiClient';
 import { useActiveBranchIds } from '@/store/branchStore';
 import type { PaginatedResult } from '@repo/api-client';
 
-import { payrollKeys, type PayrollListFilters, type PayrollStatus } from './keys';
+import {
+	payrollKeys,
+	type PayrollListFilters,
+	type PayrollStatus,
+	type PayrollSummaryFilters,
+} from './keys';
 
 // ─── Domain types ────────────────────────────────────────────────────────────
 // Hand-written to match the backend contract for the `/manage` payroll endpoints.
@@ -15,6 +20,14 @@ export interface PayrollBreakdown {
 	hoursTaught?: number;
 	rate?: number;
 	bonuses?: number;
+}
+
+/** `GET /payrolls/summary` — true aggregate over every matching payroll (not just a page). */
+export interface PayrollSummaryResponse {
+	currency: string;
+	totalGross: number;
+	totalDeductions: number;
+	totalNetPayable: number;
 }
 
 export interface PayrollResponse {
@@ -57,6 +70,27 @@ export function usePayrollList(filters: PayrollListFilters) {
 			manageApi.getPaginated<PayrollResponse>('/payrolls', {
 				params: effectiveFilters,
 			}) as Promise<PaginatedResult<PayrollResponse>>,
+		placeholderData: keepPreviousData,
+	});
+}
+
+/**
+ * Totals for the summary strip above the payroll list — the same filters as
+ * the list (branch scope, status, staff, period), minus pagination, so the
+ * strip reads as "totals for what's on screen".
+ */
+export function usePayrollSummary(filters: PayrollSummaryFilters = {}) {
+	const activeBranchIds = useActiveBranchIds();
+	const effectiveFilters: PayrollSummaryFilters = {
+		...filters,
+		branchIds: filters.branchIds ?? activeBranchIds,
+	};
+	return useQuery({
+		queryKey: payrollKeys.summary(effectiveFilters),
+		queryFn: () =>
+			manageApi.get<PayrollSummaryResponse>('/payrolls/summary', {
+				params: effectiveFilters,
+			}),
 		placeholderData: keepPreviousData,
 	});
 }

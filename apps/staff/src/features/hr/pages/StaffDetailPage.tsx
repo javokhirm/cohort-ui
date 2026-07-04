@@ -155,6 +155,7 @@ function OverviewTab({ staff }: { staff: StaffResponse }) {
 // ─── Payroll tab ──────────────────────────────────────────────────────────────
 
 function PayrollTab({ staff }: { staff: StaffResponse }) {
+	const navigate = useNavigate();
 	const { data, isLoading } = usePayrollList({ staffId: staff.id, limit: 12 });
 	const payslips = data?.rows ?? [];
 
@@ -190,7 +191,16 @@ function PayrollTab({ staff }: { staff: StaffResponse }) {
 							{payslips.map((p, i) => (
 								<div key={p.id}>
 									{i > 0 && <Separator />}
-									<div className="flex items-center justify-between py-3">
+									<button
+										type="button"
+										onClick={() =>
+											void navigate({
+												to: '/payroll/$id',
+												params: { id: String(p.id) },
+											})
+										}
+										className="flex w-full items-center justify-between rounded-md py-3 text-left hover:bg-muted/50"
+									>
 										<div>
 											<p className="text-sm font-medium">
 												{formatDate(p.periodStart)} –{' '}
@@ -201,7 +211,7 @@ function PayrollTab({ staff }: { staff: StaffResponse }) {
 											</p>
 										</div>
 										<StatusBadge kind="payroll" status={p.status} />
-									</div>
+									</button>
 								</div>
 							))}
 						</div>

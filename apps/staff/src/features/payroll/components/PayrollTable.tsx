@@ -101,6 +101,7 @@ interface PayrollTableProps {
 	canApprove: boolean;
 	/** Whether the caller may mark APPROVED payroll paid (`payroll.pay`). */
 	canPay: boolean;
+	onRowClick?: (payroll: PayrollResponse) => void;
 }
 
 export function PayrollTable({
@@ -108,6 +109,7 @@ export function PayrollTable({
 	isLoading,
 	canApprove,
 	canPay,
+	onRowClick,
 }: PayrollTableProps) {
 	const columns: ColumnDef<PayrollResponse>[] = [
 		{
@@ -206,6 +208,7 @@ export function PayrollTable({
 			data={payrolls}
 			isLoading={isLoading}
 			getRowId={(row) => String(row.id)}
+			onRowClick={onRowClick}
 			emptyState={
 				<div className="py-16 text-center text-sm text-muted-foreground">
 					No payroll records for this filter.

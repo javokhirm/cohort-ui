@@ -31,6 +31,7 @@ import { GroupDetailRoute } from '@/routes/_authed.groups.$id';
 import { GroupEditRoute } from '@/routes/_authed.groups.$id.edit';
 import { ScheduleRoute } from '@/routes/_authed.schedule';
 import { PayrollRoute } from '@/routes/_authed.payroll';
+import { PayrollDetailRoute } from '@/routes/_authed.payroll.$id';
 import { ExpensesRoute } from '@/routes/_authed.expenses';
 import { useSessionStore } from '@/store/sessionStore';
 
@@ -423,6 +424,9 @@ type PayrollStatusSearch = 'DRAFT' | 'APPROVED' | 'PAID';
 interface PayrollSearch {
 	page?: number;
 	status?: PayrollStatusSearch;
+	staffId?: number;
+	periodFrom?: string;
+	periodTo?: string;
 }
 
 const payrollRoute = createRoute({
@@ -432,15 +436,37 @@ const payrollRoute = createRoute({
 	validateSearch: (search: Record<string, unknown>): PayrollSearch => {
 		const page = Number(search.page);
 		const status = search.status;
+		const staffId = Number(search.staffId);
+		const periodFrom = search.periodFrom;
+		const periodTo = search.periodTo;
 		return {
 			page: Number.isFinite(page) && page > 0 ? page : undefined,
 			status:
 				status === 'DRAFT' || status === 'APPROVED' || status === 'PAID'
 					? status
 					: undefined,
+			staffId: Number.isFinite(staffId) && staffId > 0 ? staffId : undefined,
+			periodFrom:
+				typeof periodFrom === 'string' && ISO_DATE_SEARCH.test(periodFrom)
+					? periodFrom
+					: undefined,
+			periodTo:
+				typeof periodTo === 'string' && ISO_DATE_SEARCH.test(periodTo)
+					? periodTo
+					: undefined,
 		};
 	},
 	component: PayrollRoute,
+});
+
+const payrollDetailRoute = createRoute({
+	getParentRoute: () => authedRoute,
+	path: '/payroll/$id',
+	beforeLoad: () => requirePermission('payroll.read'),
+	component: () => {
+		const { id } = payrollDetailRoute.useParams();
+		return <PayrollDetailRoute id={id} />;
+	},
 });
 
 type ExpenseCategorySearch = 'RENT' | 'UTILITIES' | 'MARKETING' | 'SALARY' | 'OTHER';
@@ -510,6 +536,7 @@ const routeTree = rootRoute.addChildren([
 		groupEditRoute,
 		scheduleRoute,
 		payrollRoute,
+		payrollDetailRoute,
 		expensesRoute,
 	]),
 ]);
