@@ -53,3 +53,24 @@ export const invoicesKeys = {
 		[...invoicesKeys.invoices(), 'summary', filters] as const,
 	invoiceDetail: (id: number) => [...invoicesKeys.invoices(), 'detail', id] as const,
 };
+
+export interface PaymentListFilters {
+	page?: number;
+	limit?: number;
+	branchIds?: number[];
+	studentId?: number;
+	invoiceId?: number;
+	method?: 'CASH' | 'CLICK' | 'PAYME' | 'UZUM' | 'CARD' | 'BANK_TRANSFER';
+	status?: 'PENDING' | 'SUCCEEDED' | 'FAILED' | 'REFUNDED';
+	from?: string;
+	to?: string;
+}
+
+export const paymentsKeys = {
+	all: ['payments'] as const,
+
+	payments: () => [...paymentsKeys.all, 'payment'] as const,
+	paymentList: (filters: PaymentListFilters) =>
+		[...paymentsKeys.payments(), 'list', filters] as const,
+	paymentDetail: (id: number) => [...paymentsKeys.payments(), 'detail', id] as const,
+};

@@ -133,27 +133,27 @@ const NAV_GROUPS: NavGroupDef[] = [
 				href: '/schedule',
 				permission: 'session.read',
 			},
-			{
-				id: 'attendance',
-				label: 'Attendance',
-				Icon: CheckSquare,
-				href: '/attendance',
-				permission: 'attendance.read',
-			},
-			{
-				id: 'assessments',
-				label: 'Assessments',
-				Icon: ClipboardList,
-				href: '/assessments',
-				permission: 'assessment.read',
-			},
-			{
-				id: 'report-cards',
-				label: 'Report Cards',
-				Icon: ScrollText,
-				href: '/report-cards',
-				permission: ['report-card.generate', 'report-card.publish'],
-			},
+			// {
+			// 	id: 'attendance',
+			// 	label: 'Attendance',
+			// 	Icon: CheckSquare,
+			// 	href: '/attendance',
+			// 	permission: 'attendance.read',
+			// },
+			// {
+			// 	id: 'assessments',
+			// 	label: 'Assessments',
+			// 	Icon: ClipboardList,
+			// 	href: '/assessments',
+			// 	permission: 'assessment.read',
+			// },
+			// {
+			// 	id: 'report-cards',
+			// 	label: 'Report Cards',
+			// 	Icon: ScrollText,
+			// 	href: '/report-cards',
+			// 	permission: ['report-card.generate', 'report-card.publish'],
+			// },
 		],
 	},
 	{
@@ -209,29 +209,29 @@ const NAV_GROUPS: NavGroupDef[] = [
 			},
 		],
 	},
-	{
-		label: 'Engagement',
-		items: [
-			{
-				id: 'communication',
-				label: 'Communication',
-				Icon: MessageSquare,
-				href: '/communication',
-				permission: [
-					'notification.send',
-					'notification-template.manage',
-					'reminder-rule.manage',
-				],
-			},
-			{
-				id: 'materials',
-				label: 'Learning Materials',
-				Icon: FolderOpen,
-				href: '/materials',
-				permission: 'material.read',
-			},
-		],
-	},
+	// {
+	// 	label: 'Engagement',
+	// 	items: [
+	// 		{
+	// 			id: 'communication',
+	// 			label: 'Communication',
+	// 			Icon: MessageSquare,
+	// 			href: '/communication',
+	// 			permission: [
+	// 				'notification.send',
+	// 				'notification-template.manage',
+	// 				'reminder-rule.manage',
+	// 			],
+	// 		},
+	// 		{
+	// 			id: 'materials',
+	// 			label: 'Learning Materials',
+	// 			Icon: FolderOpen,
+	// 			href: '/materials',
+	// 			permission: 'material.read',
+	// 		},
+	// 	],
+	// },
 	{
 		label: 'Administration',
 		items: [
@@ -242,20 +242,20 @@ const NAV_GROUPS: NavGroupDef[] = [
 				href: '/branches',
 				permission: 'branch.read',
 			},
-			{
-				id: 'roles',
-				label: 'Roles & Permissions',
-				Icon: Shield,
-				href: '/roles',
-				permission: 'role.read',
-			},
-			{
-				id: 'audit-log',
-				label: 'Audit Log',
-				Icon: History,
-				href: '/audit-log',
-				permission: 'audit.read',
-			},
+			// {
+			// 	id: 'roles',
+			// 	label: 'Roles & Permissions',
+			// 	Icon: Shield,
+			// 	href: '/roles',
+			// 	permission: 'role.read',
+			// },
+			// {
+			// 	id: 'audit-log',
+			// 	label: 'Audit Log',
+			// 	Icon: History,
+			// 	href: '/audit-log',
+			// 	permission: 'audit.read',
+			// },
 		],
 	},
 ];

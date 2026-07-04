@@ -481,6 +481,105 @@ export const MOCK_FEE_PLANS: MockFeePlan[] = [
 	},
 ];
 
+// ─── Payment fixtures ─────────────────────────────────────────────────────────
+
+interface MockPayment {
+	id: number;
+	branchId: number;
+	invoiceId: number | null;
+	studentId: number;
+	studentName: string;
+	amount: number;
+	currency: string;
+	method: 'CASH' | 'CLICK' | 'PAYME' | 'UZUM' | 'CARD' | 'BANK_TRANSFER';
+	status: 'PENDING' | 'SUCCEEDED' | 'FAILED' | 'REFUNDED';
+	providerTxnId: string | null;
+	paidAt: string | null;
+	notes: string | null;
+	createdAt: string;
+	updatedAt: string;
+}
+
+export const MOCK_PAYMENTS: MockPayment[] = [
+	{
+		id: 310,
+		branchId: 1,
+		invoiceId: 101,
+		studentId: 1,
+		studentName: 'Aziz Karimov',
+		amount: 600_000,
+		currency: 'UZS',
+		method: 'PAYME',
+		status: 'SUCCEEDED',
+		providerTxnId: 'PM-TXN-310',
+		paidAt: '2026-06-24T09:42:00Z',
+		notes: null,
+		createdAt: '2026-06-24T09:42:00Z',
+		updatedAt: '2026-06-24T09:42:00Z',
+	},
+	{
+		id: 307,
+		branchId: 1,
+		invoiceId: 102,
+		studentId: 3,
+		studentName: 'Diyorbek Rustamov',
+		amount: 600_000,
+		currency: 'UZS',
+		method: 'UZUM',
+		status: 'SUCCEEDED',
+		providerTxnId: 'UZ-TXN-307',
+		paidAt: '2026-06-23T16:20:00Z',
+		notes: null,
+		createdAt: '2026-06-23T16:20:00Z',
+		updatedAt: '2026-06-23T16:20:00Z',
+	},
+	{
+		id: 305,
+		branchId: 1,
+		invoiceId: 103,
+		studentId: 1,
+		studentName: 'Aziz Karimov',
+		amount: 600_000,
+		currency: 'UZS',
+		method: 'BANK_TRANSFER',
+		status: 'PENDING',
+		providerTxnId: null,
+		paidAt: null,
+		notes: null,
+		createdAt: '2026-06-23T11:30:00Z',
+		updatedAt: '2026-06-23T11:30:00Z',
+	},
+	{
+		id: 304,
+		branchId: 2,
+		invoiceId: 104,
+		studentId: 3,
+		studentName: 'Diyorbek Rustamov',
+		amount: 1_200_000,
+		currency: 'UZS',
+		method: 'PAYME',
+		status: 'FAILED',
+		providerTxnId: 'PM-TXN-304',
+		paidAt: '2026-06-22T18:44:00Z',
+		notes: null,
+		createdAt: '2026-06-22T18:44:00Z',
+		updatedAt: '2026-06-22T18:44:00Z',
+	},
+];
+
+/** Detail projection for a payment (adds the settled invoice's number). */
+export function mockPaymentDetail(id: number) {
+	const payment = MOCK_PAYMENTS.find((p) => p.id === id);
+	if (!payment) return null;
+	return {
+		...payment,
+		invoiceNumber:
+			payment.invoiceId != null
+				? `INV-2026-${String(payment.invoiceId).padStart(4, '0')}`
+				: null,
+	};
+}
+
 // ─── Staff fixtures ───────────────────────────────────────────────────────────
 
 interface MockStaff {
@@ -1036,6 +1135,39 @@ export const handlers = [
 		return ok({ ...feePlan, ...body, updatedAt: '2026-07-04T00:00:00Z' });
 	}),
 
+	// ── Payments ─────────────────────────────────────────────────────────────
+	http.get(`${MANAGE}/payments`, ({ request }) => {
+		const url = new URL(request.url);
+		const branchIds = readBranchIds(url);
+		const studentId = url.searchParams.get('studentId');
+		const invoiceId = url.searchParams.get('invoiceId');
+		const method = url.searchParams.get('method');
+		const status = url.searchParams.get('status');
+		const from = url.searchParams.get('from');
+		const to = url.searchParams.get('to');
+		const page = Number(url.searchParams.get('page') ?? 1);
+		const limit = Number(url.searchParams.get('limit') ?? 20);
+
+		let rows = MOCK_PAYMENTS;
+		if (branchIds) rows = rows.filter((p) => branchIds.includes(p.branchId));
+		if (studentId) rows = rows.filter((p) => p.studentId === Number(studentId));
+		if (invoiceId) rows = rows.filter((p) => p.invoiceId === Number(invoiceId));
+		if (method) rows = rows.filter((p) => p.method === method);
+		if (status) rows = rows.filter((p) => p.status === status);
+		if (from) rows = rows.filter((p) => (p.paidAt ?? '') >= from);
+		if (to) rows = rows.filter((p) => (p.paidAt ?? '') <= `${to}T23:59:59Z`);
+
+		const total = rows.length;
+		const start = (page - 1) * limit;
+		return okPaged(rows.slice(start, start + limit), page, limit, total);
+	}),
+
+	http.get(`${MANAGE}/payments/:id`, ({ params }) => {
+		const detail = mockPaymentDetail(Number(params['id']));
+		if (!detail) return fail(404, 'PAYMENT_NOT_FOUND', 'Payment not found.');
+		return ok(detail);
+	}),
+
 	// ── Staff ────────────────────────────────────────────────────────────────
 	http.get(`${MANAGE}/staff`, ({ request }) => {
 		const url = new URL(request.url);
@@ -1272,6 +1404,16 @@ export const feePlanHandlers = {
 		fail(403, 'FORBIDDEN', 'You do not have permission.'),
 	),
 	serverError: http.get(`${MANAGE}/fee-plans`, () =>
+		fail(500, 'INTERNAL_ERROR', 'Unexpected server error.'),
+	),
+};
+
+export const paymentHandlers = {
+	empty: http.get(`${MANAGE}/payments`, () => okPaged([], 1, 20, 0)),
+	forbidden: http.get(`${MANAGE}/payments`, () =>
+		fail(403, 'FORBIDDEN', 'You do not have permission.'),
+	),
+	serverError: http.get(`${MANAGE}/payments`, () =>
 		fail(500, 'INTERNAL_ERROR', 'Unexpected server error.'),
 	),
 };

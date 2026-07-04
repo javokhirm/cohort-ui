@@ -33,6 +33,7 @@ import { ScheduleRoute } from '@/routes/_authed.schedule';
 import { PayrollRoute } from '@/routes/_authed.payroll';
 import { PayrollDetailRoute } from '@/routes/_authed.payroll.$id';
 import { ExpensesRoute } from '@/routes/_authed.expenses';
+import { PaymentsRoute } from '@/routes/_authed.payments';
 import { useSessionStore } from '@/store/sessionStore';
 
 const rootRoute = createRootRoute({
@@ -289,6 +290,63 @@ const invoiceDetailRoute = createRoute({
 	},
 });
 
+type PaymentMethodSearch = 'CASH' | 'CLICK' | 'PAYME' | 'UZUM' | 'CARD' | 'BANK_TRANSFER';
+type PaymentStatusSearch = 'PENDING' | 'SUCCEEDED' | 'FAILED' | 'REFUNDED';
+
+const PAYMENT_METHODS: PaymentMethodSearch[] = [
+	'CASH',
+	'CLICK',
+	'PAYME',
+	'UZUM',
+	'CARD',
+	'BANK_TRANSFER',
+];
+
+const PAYMENT_STATUSES: PaymentStatusSearch[] = [
+	'PENDING',
+	'SUCCEEDED',
+	'FAILED',
+	'REFUNDED',
+];
+
+interface PaymentSearch {
+	page?: number;
+	status?: PaymentStatusSearch;
+	method?: PaymentMethodSearch;
+	studentId?: number;
+	from?: string;
+	to?: string;
+}
+
+const paymentsRoute = createRoute({
+	getParentRoute: () => authedRoute,
+	path: '/payments',
+	beforeLoad: () => requirePermission('payment.read'),
+	validateSearch: (search: Record<string, unknown>): PaymentSearch => {
+		const page = Number(search.page);
+		const status = search.status;
+		const method = search.method;
+		const studentId = Number(search.studentId);
+		const from = search.from;
+		const to = search.to;
+		return {
+			page: Number.isFinite(page) && page > 0 ? page : undefined,
+			status: PAYMENT_STATUSES.includes(status as PaymentStatusSearch)
+				? (status as PaymentStatusSearch)
+				: undefined,
+			method: PAYMENT_METHODS.includes(method as PaymentMethodSearch)
+				? (method as PaymentMethodSearch)
+				: undefined,
+			studentId:
+				Number.isFinite(studentId) && studentId > 0 ? studentId : undefined,
+			from:
+				typeof from === 'string' && ISO_DATE_SEARCH.test(from) ? from : undefined,
+			to: typeof to === 'string' && ISO_DATE_SEARCH.test(to) ? to : undefined,
+		};
+	},
+	component: PaymentsRoute,
+});
+
 const branchesRoute = createRoute({
 	getParentRoute: () => authedRoute,
 	path: '/branches',
@@ -527,6 +585,7 @@ const routeTree = rootRoute.addChildren([
 		discountsRoute,
 		invoicesRoute,
 		invoiceDetailRoute,
+		paymentsRoute,
 		branchesRoute,
 		coursesRoute,
 		courseDetailRoute,

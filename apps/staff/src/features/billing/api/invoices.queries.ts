@@ -80,6 +80,7 @@ export interface PaymentResponse {
 	branchId: number;
 	invoiceId: number | null;
 	studentId: number;
+	studentName: string;
 	amount: number;
 	currency: string;
 	method: PaymentMethod;

@@ -35,7 +35,7 @@ export function FormSheet({
 	return (
 		<Sheet open={open} onOpenChange={onOpenChange}>
 			<SheetContent className={`flex flex-col gap-0 ${MAX_WIDTH[maxWidth]}`}>
-				<SheetHeader className="shrink-0 px-6 pb-4 pt-6">
+				<SheetHeader className="shrink-0 px-6 pb-4 pt-6 border-b">
 					<SheetTitle>{title}</SheetTitle>
 					{description && <SheetDescription>{description}</SheetDescription>}
 				</SheetHeader>
