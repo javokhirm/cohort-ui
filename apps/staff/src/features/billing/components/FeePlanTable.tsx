@@ -6,6 +6,7 @@ import { formatPrice } from '@repo/utils';
 import { useCourseList } from '@/features/courses/api/courses.queries';
 
 import type { FeePlanResponse } from '../api/fee-plans.queries';
+import { FEE_PLAN_PRORATION_LABELS } from '../lib/fee-plan-options';
 
 interface FeePlanTableProps {
 	feePlans: FeePlanResponse[];
@@ -64,6 +65,18 @@ export function FeePlanTable({ feePlans, isLoading, onEdit }: FeePlanTableProps)
 				/>
 			),
 			size: 120,
+		},
+		{
+			accessorKey: 'prorationMethod',
+			header: 'Proration',
+			cell: ({ getValue }) => (
+				<span className="text-sm text-muted-foreground">
+					{FEE_PLAN_PRORATION_LABELS[
+						getValue<FeePlanResponse['prorationMethod']>()
+					] ?? '—'}
+				</span>
+			),
+			size: 130,
 		},
 		{
 			id: 'due',

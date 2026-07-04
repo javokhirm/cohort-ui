@@ -1,12 +1,16 @@
 import { useEffect, useState } from 'react';
-import { useForm } from 'react-hook-form';
+import { useForm, type Control, type FieldPath, type FieldValues } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 
 import {
 	Button,
 	FieldGroup,
 	Form,
+	FormField,
 	FormInput,
+	FormItem,
+	FormLabel,
+	FormMessage,
 	FormSelect,
 	Spinner,
 	toast,
@@ -32,6 +36,7 @@ import type { FeePlanResponse } from '../api/fee-plans.queries';
 import { useCreateFeePlan, useUpdateFeePlan } from '../api/fee-plans.mutations';
 import {
 	FEE_PLAN_BILLING_CYCLE_OPTIONS,
+	FEE_PLAN_PRORATION_OPTIONS,
 	FEE_PLAN_STATUS_OPTIONS,
 } from '../lib/fee-plan-options';
 
@@ -52,6 +57,42 @@ type FeePlanFormProps = CreateProps | EditProps;
 
 function Section({ children }: { children: React.ReactNode }) {
 	return <div className="flex flex-col gap-4 rounded-xl bg-white p-4">{children}</div>;
+}
+
+/**
+ * Segmented proration control (mid-month joins). Generic over the form values so
+ * both the create and edit forms can share it — both carry a `prorationMethod`.
+ */
+function ProrationField<T extends FieldValues>({ control }: { control: Control<T> }) {
+	return (
+		<FormField
+			control={control}
+			name={'prorationMethod' as FieldPath<T>}
+			render={({ field }) => (
+				<FormItem>
+					<FormLabel>Proration (mid-month joins)</FormLabel>
+					<div className="grid grid-cols-3 gap-2">
+						{FEE_PLAN_PRORATION_OPTIONS.map((o) => (
+							<Button
+								key={o.value}
+								type="button"
+								variant={field.value === o.value ? 'default' : 'outline'}
+								onClick={() => field.onChange(o.value)}
+							>
+								{o.label}
+							</Button>
+						))}
+					</div>
+					<p className="text-xs text-muted-foreground">
+						Applies to the first partial month only — later months bill in
+						full. Session-based falls back to daily proration when a group has
+						no schedule.
+					</p>
+					<FormMessage />
+				</FormItem>
+			)}
+		/>
+	);
 }
 
 /** Branch options with a leading "shared across all branches" choice. */
@@ -87,6 +128,7 @@ function CreateFeePlanForm({
 			branch: SHARED_BRANCH_VALUE,
 			course: ANY_COURSE_VALUE,
 			billingCycle: 'MONTHLY',
+			prorationMethod: 'SESSION',
 			dueDay: 1,
 			gracePeriodDays: 3,
 			lateFeeAmount: 0,
@@ -108,6 +150,7 @@ function CreateFeePlanForm({
 			name: values.name.trim(),
 			amount: values.amount,
 			billingCycle: values.billingCycle,
+			prorationMethod: values.prorationMethod,
 			dueDay: values.dueDay,
 			gracePeriodDays: values.gracePeriodDays,
 			lateFeeAmount: values.lateFeeAmount,
@@ -221,6 +264,7 @@ function CreateFeePlanForm({
 								)
 							}
 						/>
+						<ProrationField control={form.control} />
 					</FieldGroup>
 				</Section>
 			</form>
@@ -243,6 +287,7 @@ function EditFeePlanForm({
 		course: courseToForm(p.courseId),
 		amount: p.amount,
 		billingCycle: p.billingCycle,
+		prorationMethod: p.prorationMethod,
 		dueDay: p.dueDay,
 		gracePeriodDays: p.gracePeriodDays,
 		lateFeeAmount: p.lateFeeAmount,
@@ -275,6 +320,7 @@ function EditFeePlanForm({
 			name: values.name.trim(),
 			amount: values.amount,
 			billingCycle: values.billingCycle,
+			prorationMethod: values.prorationMethod,
 			dueDay: values.dueDay,
 			gracePeriodDays: values.gracePeriodDays,
 			lateFeeAmount: values.lateFeeAmount,
@@ -388,6 +434,7 @@ function EditFeePlanForm({
 								)
 							}
 						/>
+						<ProrationField control={form.control} />
 						<FormSelect
 							control={form.control}
 							name="status"

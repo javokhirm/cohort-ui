@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { Users } from 'lucide-react';
 
 import { isApiError } from '@repo/api-client';
@@ -35,6 +35,47 @@ export function LeadBoard({
 	const [dragging, setDragging] = useState<{ id: number; from: LeadStatus } | null>(
 		null,
 	);
+
+	const scrollRef = useRef<HTMLDivElement>(null);
+	const scrollVelocity = useRef(0);
+
+	// Native drag-and-drop doesn't auto-scroll the board, so a card being dragged
+	// toward an off-screen column (e.g. Enrolled/Lost on a narrow viewport) gets
+	// stuck. Track pointer proximity to the scroll edges while dragging and nudge
+	// scrollLeft every frame, decoupled from how often dragover actually fires.
+	useEffect(() => {
+		if (!dragging) {
+			scrollVelocity.current = 0;
+			return;
+		}
+		let frame: number;
+		const step = () => {
+			const el = scrollRef.current;
+			if (el && scrollVelocity.current !== 0) {
+				el.scrollLeft += scrollVelocity.current;
+			}
+			frame = requestAnimationFrame(step);
+		};
+		frame = requestAnimationFrame(step);
+		return () => cancelAnimationFrame(frame);
+	}, [dragging]);
+
+	function handleBoardDragOver(e: React.DragEvent) {
+		const el = scrollRef.current;
+		if (!el) return;
+		const EDGE = 80;
+		const MAX_SPEED = 16;
+		const rect = el.getBoundingClientRect();
+		const fromLeft = e.clientX - rect.left;
+		const fromRight = rect.right - e.clientX;
+		if (fromLeft < EDGE) {
+			scrollVelocity.current = -MAX_SPEED * (1 - Math.max(fromLeft, 0) / EDGE);
+		} else if (fromRight < EDGE) {
+			scrollVelocity.current = MAX_SPEED * (1 - Math.max(fromRight, 0) / EDGE);
+		} else {
+			scrollVelocity.current = 0;
+		}
+	}
 
 	// Re-key columns on a filter change so their "load more" expansion resets.
 	const filterKey = JSON.stringify([
@@ -88,7 +129,11 @@ export function LeadBoard({
 	}
 
 	return (
-		<div className="flex flex-1 items-start gap-3 overflow-x-auto pb-2">
+		<div
+			ref={scrollRef}
+			onDragOver={handleBoardDragOver}
+			className="flex flex-1 items-start gap-3 overflow-x-auto pb-2"
+		>
 			{columns.map((col) => (
 				<LeadColumn
 					key={`${col.status}:${filterKey}`}

@@ -3,7 +3,11 @@ import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { manageApi } from '@/api/apiClient';
 
 import { feePlansKeys } from './keys';
-import type { FeePlanBillingCycle, FeePlanResponse } from './fee-plans.queries';
+import type {
+	FeePlanBillingCycle,
+	FeePlanProrationMethod,
+	FeePlanResponse,
+} from './fee-plans.queries';
 
 // ─── Input types ─────────────────────────────────────────────────────────────
 // Mirror the backend `CreateFeePlanDto` / `UpdateFeePlanDto` (api-reference.md §3.12).
@@ -15,6 +19,7 @@ export interface CreateFeePlanInput {
 	amount: number;
 	currency?: string;
 	billingCycle: FeePlanBillingCycle;
+	prorationMethod?: FeePlanProrationMethod;
 	dueDay?: number;
 	lateFeeAmount?: number;
 	gracePeriodDays?: number;
@@ -28,6 +33,7 @@ export interface UpdateFeePlanInput {
 	amount?: number;
 	currency?: string;
 	billingCycle?: FeePlanBillingCycle;
+	prorationMethod?: FeePlanProrationMethod;
 	dueDay?: number;
 	lateFeeAmount?: number;
 	gracePeriodDays?: number;

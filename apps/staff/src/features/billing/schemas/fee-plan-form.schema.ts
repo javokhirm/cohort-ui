@@ -1,6 +1,9 @@
 import { z } from 'zod';
 
-import { FEE_PLAN_BILLING_CYCLES } from '../api/fee-plans.queries';
+import {
+	FEE_PLAN_BILLING_CYCLES,
+	FEE_PLAN_PRORATION_METHODS,
+} from '../api/fee-plans.queries';
 
 /**
  * Branch is nullable on fee plans (`null` = applies across all branches), so
@@ -13,6 +16,8 @@ export const SHARED_BRANCH_VALUE = 'shared';
 export const ANY_COURSE_VALUE = 'any';
 
 const billingCycle = z.enum(FEE_PLAN_BILLING_CYCLES);
+
+const prorationMethod = z.enum(FEE_PLAN_PRORATION_METHODS);
 
 const dueDay = z
 	.number({ error: 'Due day is required' })
@@ -37,6 +42,7 @@ export const createFeePlanSchema = z.object({
 		.number({ error: 'Amount is required' })
 		.positive('Amount must be greater than 0'),
 	billingCycle,
+	prorationMethod,
 	dueDay,
 	gracePeriodDays,
 	lateFeeAmount,
