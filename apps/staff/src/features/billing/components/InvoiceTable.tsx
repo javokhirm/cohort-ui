@@ -49,6 +49,22 @@ export function InvoiceTable({ invoices, isLoading, onRowClick }: InvoiceTablePr
 			size: 150,
 		},
 		{
+			id: 'balance',
+			header: () => <div className="text-right">Balance</div>,
+			cell: ({ row }) => (
+				<div
+					className={
+						row.original.amountDue > 0
+							? 'text-right tabular-nums text-tone-red-fg'
+							: 'text-right tabular-nums text-muted-foreground'
+					}
+				>
+					{formatPrice(row.original.amountDue)} UZS
+				</div>
+			),
+			size: 150,
+		},
+		{
 			accessorKey: 'status',
 			header: 'Status',
 			cell: ({ getValue }) => (

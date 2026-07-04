@@ -99,6 +99,18 @@ function InvoiceHeader({
 							{formatPrice(invoice.amountPaid)} UZS
 						</div>
 					</div>
+					<div className="text-right">
+						<div className="text-xs text-muted-foreground">Balance</div>
+						<div
+							className={
+								invoice.amountDue > 0
+									? 'text-base font-bold tabular-nums text-tone-red-fg'
+									: 'text-base font-bold tabular-nums text-muted-foreground'
+							}
+						>
+							{formatPrice(invoice.amountDue)} UZS
+						</div>
+					</div>
 				</div>
 			</div>
 

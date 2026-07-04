@@ -40,11 +40,16 @@ export interface InvoiceListFilters {
 	dueBefore?: string;
 }
 
+/** `GET /invoices/summary` filters — the list filters, without pagination. */
+export type InvoiceSummaryFilters = Omit<InvoiceListFilters, 'page' | 'limit'>;
+
 export const invoicesKeys = {
 	all: ['invoices'] as const,
 
 	invoices: () => [...invoicesKeys.all, 'invoice'] as const,
 	invoiceList: (filters: InvoiceListFilters) =>
 		[...invoicesKeys.invoices(), 'list', filters] as const,
+	invoiceSummary: (filters: InvoiceSummaryFilters) =>
+		[...invoicesKeys.invoices(), 'summary', filters] as const,
 	invoiceDetail: (id: number) => [...invoicesKeys.invoices(), 'detail', id] as const,
 };

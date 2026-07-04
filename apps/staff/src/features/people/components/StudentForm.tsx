@@ -259,7 +259,7 @@ function CreateStudentForm({
 									valueAsNumber
 									options={groups.map((g) => ({
 										value: String(g.id),
-										label: g.code,
+										label: g.name,
 									}))}
 								/>
 								<FormSelect

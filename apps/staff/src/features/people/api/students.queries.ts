@@ -10,7 +10,6 @@ import { peopleKeys, type StudentListFilters } from './keys';
 
 export interface Group {
 	id: number;
-	code: string;
 	name: string;
 	branchId: number;
 	courseId: number;

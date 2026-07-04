@@ -4,7 +4,11 @@ import { manageApi } from '@/api/apiClient';
 import { useActiveBranchIds } from '@/store/branchStore';
 import type { PaginatedResult } from '@repo/api-client';
 
-import { invoicesKeys, type InvoiceListFilters } from './keys';
+import {
+	invoicesKeys,
+	type InvoiceListFilters,
+	type InvoiceSummaryFilters,
+} from './keys';
 
 // ─── Domain types ────────────────────────────────────────────────────────────
 // Mirrors the backend invoice/payment surface (api-reference.md §3.13/§3.14),
@@ -114,6 +118,14 @@ export interface InvoiceResponse {
 	updatedAt: string;
 }
 
+/** `GET /invoices/summary` — true aggregate over every matching invoice (not just a page). */
+export interface InvoiceSummaryResponse {
+	currency: string;
+	totalInvoiced: number;
+	collected: number;
+	outstanding: number;
+}
+
 /** `GET /invoices/:id` — the list shape plus student identity and sub-resources. */
 export interface InvoiceDetail extends InvoiceResponse {
 	studentName: string;
@@ -140,6 +152,28 @@ export function useInvoiceList(filters: InvoiceListFilters) {
 			manageApi.getPaginated<InvoiceResponse>('/invoices', {
 				params: effectiveFilters,
 			}) as Promise<PaginatedResult<InvoiceResponse>>,
+		placeholderData: keepPreviousData,
+	});
+}
+
+/**
+ * Totals for the summary strip above the invoice list. Scoped to the active
+ * branch selection like the list, but deliberately excludes the status tab
+ * filter — the strip reports the whole picture regardless of which tab is
+ * selected.
+ */
+export function useInvoiceSummary(filters: InvoiceSummaryFilters = {}) {
+	const activeBranchIds = useActiveBranchIds();
+	const effectiveFilters: InvoiceSummaryFilters = {
+		...filters,
+		branchIds: filters.branchIds ?? activeBranchIds,
+	};
+	return useQuery({
+		queryKey: invoicesKeys.invoiceSummary(effectiveFilters),
+		queryFn: () =>
+			manageApi.get<InvoiceSummaryResponse>('/invoices/summary', {
+				params: effectiveFilters,
+			}),
 		placeholderData: keepPreviousData,
 	});
 }

@@ -242,6 +242,10 @@ const INVOICE_STATUSES: InvoiceStatusSearch[] = [
 interface InvoiceSearch {
 	page?: number;
 	status?: InvoiceStatusSearch;
+	studentId?: number;
+	from?: string;
+	to?: string;
+	dueBefore?: string;
 }
 
 const invoicesRoute = createRoute({
@@ -251,11 +255,24 @@ const invoicesRoute = createRoute({
 	validateSearch: (search: Record<string, unknown>): InvoiceSearch => {
 		const page = Number(search.page);
 		const status = search.status;
+		const studentId = Number(search.studentId);
+		const from = search.from;
+		const to = search.to;
+		const dueBefore = search.dueBefore;
 		return {
 			page: Number.isFinite(page) && page > 0 ? page : undefined,
 			status: INVOICE_STATUSES.includes(status as InvoiceStatusSearch)
 				? (status as InvoiceStatusSearch)
 				: undefined,
+			studentId:
+				Number.isFinite(studentId) && studentId > 0 ? studentId : undefined,
+			from:
+				typeof from === 'string' && ISO_DATE_SEARCH.test(from) ? from : undefined,
+			to: typeof to === 'string' && ISO_DATE_SEARCH.test(to) ? to : undefined,
+			dueBefore:
+				typeof dueBefore === 'string' && ISO_DATE_SEARCH.test(dueBefore)
+					? dueBefore
+					: undefined,
 		};
 	},
 	component: InvoicesRoute,
