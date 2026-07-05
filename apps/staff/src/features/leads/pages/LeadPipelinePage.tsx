@@ -59,7 +59,7 @@ export function LeadPipelinePage() {
 	}
 
 	return (
-		<div className="mx-auto flex w-full max-w-[1400px] flex-col gap-5">
+		<div className="mx-auto flex h-full w-full max-w-[1400px] flex-col gap-5">
 			<PageHeader
 				title="Leads / Pipeline"
 				description={`${scopeLabel} · ${totalLeads} leads · drag prospects from first contact to enrollment`}
@@ -79,13 +79,15 @@ export function LeadPipelinePage() {
 				onClear={handleClear}
 			/>
 
-			<LeadBoard
-				board={board}
-				isLoading={isLoading}
-				isError={isError}
-				filters={filters}
-				onOpenLead={setSelectedLeadId}
-			/>
+			<div className="min-h-0 max-h-screen flex-1">
+				<LeadBoard
+					board={board}
+					isLoading={isLoading}
+					isError={isError}
+					filters={filters}
+					onOpenLead={setSelectedLeadId}
+				/>
+			</div>
 
 			<LeadDetailSheet
 				leadId={selectedLeadId}
