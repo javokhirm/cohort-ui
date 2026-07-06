@@ -23,14 +23,23 @@ import {
 } from '@repo/ui';
 import { isApiError } from '@repo/api-client';
 
-import type { BillingPolicyResponse } from '../api/billing-policy.queries';
+import type { BillingMode, BillingPolicyResponse } from '../api/billing-policy.queries';
 import { useUpdateBillingPolicy } from '../api/billing-policy.mutations';
 import {
 	billingPolicySchema,
 	type BillingPolicyFormValues,
 } from '../schemas/billing-policy-form.schema';
 
-const BILLING_MODE_OPTIONS = [{ value: 'PREPAID', label: 'Prepaid' }];
+const BILLING_MODE_OPTIONS = [
+	{ value: 'PREPAID', label: 'Prepaid' },
+	{ value: 'POSTPAID', label: 'Postpaid (arrears)' },
+];
+
+const BILLING_MODE_HINTS: Record<BillingMode, string> = {
+	PREPAID: 'Bills the current month in advance, before it starts.',
+	POSTPAID:
+		"Bills the previous, fully-elapsed month in arrears, via two independent legs: a time-based leg for Monthly fee plans and a consumption-based leg for Per-session plans (billed by sessions actually consumed, per the consumption rule below). Each enrollment is billed by exactly one leg, based on its fee plan's billing cycle — never both.",
+};
 
 const PRORATION_OPTIONS = [
 	{ value: 'SESSION', label: 'Session-based' },
@@ -160,8 +169,7 @@ function SwitchField({
 
 function toDefaults(p: BillingPolicyResponse): BillingPolicyFormValues {
 	return {
-		// The form only supports PREPAID; POSTPAID is reserved and not settable.
-		billingMode: 'PREPAID',
+		billingMode: p.billingMode,
 		billingDay: p.billingDay,
 		dueDay: p.dueDay,
 		immediateDueDays: p.immediateDueDays,
@@ -189,6 +197,7 @@ export function BillingPolicyForm({ policy }: { policy: BillingPolicyResponse })
 
 	const updatePolicy = useUpdateBillingPolicy();
 	const lateFeeEnabled = form.watch('lateFeeEnabled');
+	const billingMode = form.watch('billingMode');
 
 	useEffect(() => {
 		form.reset(toDefaults(policy));
@@ -198,11 +207,7 @@ export function BillingPolicyForm({ policy }: { policy: BillingPolicyResponse })
 	async function onSubmit(values: BillingPolicyFormValues) {
 		try {
 			await updatePolicy.mutateAsync({
-				// Only send billingMode when the tenant is already PREPAID — never
-				// flip a reserved POSTPAID tenant via this form.
-				...(policy.billingMode === 'PREPAID'
-					? { billingMode: values.billingMode }
-					: {}),
+				billingMode: values.billingMode,
 				billingDay: values.billingDay,
 				dueDay: values.dueDay,
 				immediateDueDays: values.immediateDueDays,
@@ -242,13 +247,18 @@ export function BillingPolicyForm({ policy }: { policy: BillingPolicyResponse })
 						</CardDescription>
 					</CardHeader>
 					<CardContent className="flex flex-col gap-4">
-						<div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
+						<div className="flex flex-col gap-1.5">
 							<FormSelect
 								control={form.control}
 								name="billingMode"
 								label="Billing mode"
 								options={BILLING_MODE_OPTIONS}
 							/>
+							<p className="text-xs text-muted-foreground">
+								{BILLING_MODE_HINTS[billingMode]}
+							</p>
+						</div>
+						<div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
 							<FormSelect
 								control={form.control}
 								name="prorationMethod"
@@ -391,21 +401,30 @@ export function BillingPolicyForm({ policy }: { policy: BillingPolicyResponse })
 					<CardHeader>
 						<CardTitle>Advanced</CardTitle>
 						<CardDescription>
-							Reserved for later phases (per-session billing, wallet) — no
-							visible effect yet.
+							Consumption rule for per-session billing, plus wallet settings
+							reserved for a later phase.
 						</CardDescription>
 					</CardHeader>
 					<CardContent className="flex flex-col gap-4">
-						<FormSelect
-							control={form.control}
-							name="consumptionRule"
-							label="Consumption rule"
-							options={CONSUMPTION_OPTIONS}
-						/>
+						<div className="flex flex-col gap-1.5">
+							<FormSelect
+								control={form.control}
+								name="consumptionRule"
+								label="Consumption rule"
+								options={CONSUMPTION_OPTIONS}
+							/>
+							<p className="text-xs text-muted-foreground">
+								Which sessions count as chargeable on a Per-session fee
+								plan's invoice: attended sessions plus unexcused absences,
+								every scheduled session, or only sessions actually
+								attended.
+							</p>
+						</div>
 						<SwitchField
 							control={form.control}
 							name="autoApplyCredit"
 							label="Auto-apply wallet credit"
+							description="Reserved for a later phase — no visible effect yet."
 						/>
 					</CardContent>
 				</Card>

@@ -58,6 +58,16 @@ describe('useUpdateBillingPolicy', () => {
 		expect(updated.billingDay).toBe(1);
 	});
 
+	it('accepts POSTPAID as a settable billing mode', async () => {
+		const { result } = renderHook(() => useUpdateBillingPolicy(), {
+			wrapper: wrapper(),
+		});
+
+		const updated = await result.current.mutateAsync({ billingMode: 'POSTPAID' });
+
+		expect(updated.billingMode).toBe('POSTPAID');
+	});
+
 	it('rejects a percentage late fee above 100 (422)', async () => {
 		const { result } = renderHook(() => useUpdateBillingPolicy(), {
 			wrapper: wrapper(),

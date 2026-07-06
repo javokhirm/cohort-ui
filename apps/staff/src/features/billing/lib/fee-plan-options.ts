@@ -13,6 +13,13 @@ export const FEE_PLAN_BILLING_CYCLE_OPTIONS: {
 	{ value: 'PER_SESSION', label: 'Per session' },
 ];
 
+/** Amount field label per billing cycle — `PER_SESSION` charges a per-session price, not a monthly amount. */
+export const FEE_PLAN_AMOUNT_LABELS: Record<FeePlanBillingCycle, string> = {
+	MONTHLY: 'Amount (UZS) *',
+	ONE_TIME: 'Amount (UZS) *',
+	PER_SESSION: 'Price per session (UZS) *',
+};
+
 /** Proration control options for the fee plan form (segmented, mid-month joins). */
 export const FEE_PLAN_PRORATION_OPTIONS: {
 	value: FeePlanProrationMethod;

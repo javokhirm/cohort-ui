@@ -36,6 +36,7 @@ import {
 import type { FeePlanResponse } from '../api/fee-plans.queries';
 import { useCreateFeePlan, useUpdateFeePlan } from '../api/fee-plans.mutations';
 import {
+	FEE_PLAN_AMOUNT_LABELS,
 	FEE_PLAN_BILLING_CYCLE_OPTIONS,
 	FEE_PLAN_PRORATION_OPTIONS,
 	FEE_PLAN_STATUS_OPTIONS,
@@ -171,12 +172,24 @@ function CreateFeePlanForm({
 	const courseOptions = useCourseOptions();
 	const createFeePlan = useCreateFeePlan();
 
+	const billingCycle = form.watch('billingCycle');
 	const overrideDueDay = form.watch('overrideDueDay');
 	const overrideProration = form.watch('overrideProration');
+	const isPerSession = billingCycle === 'PER_SESSION';
 
 	useEffect(() => {
 		onPendingChange(createFeePlan.isPending);
 	}, [createFeePlan.isPending, onPendingChange]);
+
+	// Per-session plans aren't prorated and don't take a due-day override — drop
+	// any stale override state so it can't be hidden-but-still-submitted.
+	useEffect(() => {
+		if (isPerSession) {
+			form.setValue('overrideDueDay', false);
+			form.setValue('overrideProration', false);
+		}
+		// eslint-disable-next-line react-hooks/exhaustive-deps
+	}, [isPerSession]);
 
 	async function onSubmit(values: CreateFeePlanFormValues) {
 		await createFeePlan.mutateAsync({
@@ -225,7 +238,7 @@ function CreateFeePlanForm({
 							<FormInput
 								control={form.control}
 								name="amount"
-								label="Amount (UZS) *"
+								label={FEE_PLAN_AMOUNT_LABELS[billingCycle]}
 								type="number"
 								min={1}
 								placeholder="e.g. 1 300 000"
@@ -246,50 +259,62 @@ function CreateFeePlanForm({
 								options={FEE_PLAN_BILLING_CYCLE_OPTIONS}
 							/>
 						</div>
-						<div className="flex flex-col gap-2">
-							<OverrideToggle
-								control={form.control}
-								name="overrideDueDay"
-								label="Override tenant default due day"
-							/>
-							{overrideDueDay ? (
-								<FormInput
-									control={form.control}
-									name="dueDay"
-									label="Due day (1–28)"
-									type="number"
-									min={1}
-									max={28}
-									onChange={(e) =>
-										form.setValue(
-											'dueDay',
-											e.target.value === ''
-												? (undefined as unknown as number)
-												: Number(e.target.value),
-											{ shouldValidate: true },
-										)
-									}
-								/>
-							) : (
-								<p className="text-xs text-muted-foreground">
-									Inherits the tenant billing policy due-day.
-								</p>
-							)}
-						</div>
-						<div className="flex flex-col gap-2">
-							<OverrideToggle
-								control={form.control}
-								name="overrideProration"
-								label="Override tenant default proration"
-							/>
-							{overrideProration ? (
-								<ProrationField control={form.control} />
-							) : (
-								<p className="text-xs text-muted-foreground">
-									Inherits the tenant billing policy proration method.
-								</p>
-							)}
-						</div>
+						{isPerSession ? (
+							<p className="rounded-lg border border-border bg-muted/40 p-3 text-xs text-muted-foreground">
+								Per-session plans aren&apos;t prorated and don&apos;t
+								support a custom due day — each invoice is due on the
+								tenant billing policy&apos;s due day, in the month after
+								the sessions are consumed.
+							</p>
+						) : (
+							<>
+								<div className="flex flex-col gap-2">
+									<OverrideToggle
+										control={form.control}
+										name="overrideDueDay"
+										label="Override tenant default due day"
+									/>
+									{overrideDueDay ? (
+										<FormInput
+											control={form.control}
+											name="dueDay"
+											label="Due day (1–28)"
+											type="number"
+											min={1}
+											max={28}
+											onChange={(e) =>
+												form.setValue(
+													'dueDay',
+													e.target.value === ''
+														? (undefined as unknown as number)
+														: Number(e.target.value),
+													{ shouldValidate: true },
+												)
+											}
+										/>
+									) : (
+										<p className="text-xs text-muted-foreground">
+											Inherits the tenant billing policy due-day.
+										</p>
+									)}
+								</div>
+								<div className="flex flex-col gap-2">
+									<OverrideToggle
+										control={form.control}
+										name="overrideProration"
+										label="Override tenant default proration"
+									/>
+									{overrideProration ? (
+										<ProrationField control={form.control} />
+									) : (
+										<p className="text-xs text-muted-foreground">
+											Inherits the tenant billing policy proration
+											method.
+										</p>
+									)}
+								</div>
+							</>
+						)}
 					</FieldGroup>
 				</Section>
 			</form>
@@ -333,12 +358,24 @@ function EditFeePlanForm({
 	const courseOptions = useCourseOptions();
 	const updateFeePlan = useUpdateFeePlan();
 
+	const billingCycle = form.watch('billingCycle');
 	const overrideDueDay = form.watch('overrideDueDay');
 	const overrideProration = form.watch('overrideProration');
+	const isPerSession = billingCycle === 'PER_SESSION';
 
 	useEffect(() => {
 		onPendingChange(updateFeePlan.isPending);
 	}, [updateFeePlan.isPending, onPendingChange]);
+
+	// Per-session plans aren't prorated and don't take a due-day override — drop
+	// any stale override state so it can't be hidden-but-still-submitted.
+	useEffect(() => {
+		if (isPerSession) {
+			form.setValue('overrideDueDay', false);
+			form.setValue('overrideProration', false);
+		}
+		// eslint-disable-next-line react-hooks/exhaustive-deps
+	}, [isPerSession]);
 
 	async function onSubmit(values: EditFeePlanFormValues) {
 		await updateFeePlan.mutateAsync({
@@ -389,7 +426,7 @@ function EditFeePlanForm({
 							<FormInput
 								control={form.control}
 								name="amount"
-								label="Amount (UZS) *"
+								label={FEE_PLAN_AMOUNT_LABELS[billingCycle]}
 								type="number"
 								min={1}
 								onChange={(e) =>
@@ -409,50 +446,62 @@ function EditFeePlanForm({
 								options={FEE_PLAN_BILLING_CYCLE_OPTIONS}
 							/>
 						</div>
-						<div className="flex flex-col gap-2">
-							<OverrideToggle
-								control={form.control}
-								name="overrideDueDay"
-								label="Override tenant default due day"
-							/>
-							{overrideDueDay ? (
-								<FormInput
-									control={form.control}
-									name="dueDay"
-									label="Due day (1–28)"
-									type="number"
-									min={1}
-									max={28}
-									onChange={(e) =>
-										form.setValue(
-											'dueDay',
-											e.target.value === ''
-												? (undefined as unknown as number)
-												: Number(e.target.value),
-											{ shouldValidate: true },
-										)
-									}
-								/>
-							) : (
-								<p className="text-xs text-muted-foreground">
-									Inherits the tenant billing policy due-day.
-								</p>
-							)}
-						</div>
-						<div className="flex flex-col gap-2">
-							<OverrideToggle
-								control={form.control}
-								name="overrideProration"
-								label="Override tenant default proration"
-							/>
-							{overrideProration ? (
-								<ProrationField control={form.control} />
-							) : (
-								<p className="text-xs text-muted-foreground">
-									Inherits the tenant billing policy proration method.
-								</p>
-							)}
-						</div>
+						{isPerSession ? (
+							<p className="rounded-lg border border-border bg-muted/40 p-3 text-xs text-muted-foreground">
+								Per-session plans aren&apos;t prorated and don&apos;t
+								support a custom due day — each invoice is due on the
+								tenant billing policy&apos;s due day, in the month after
+								the sessions are consumed.
+							</p>
+						) : (
+							<>
+								<div className="flex flex-col gap-2">
+									<OverrideToggle
+										control={form.control}
+										name="overrideDueDay"
+										label="Override tenant default due day"
+									/>
+									{overrideDueDay ? (
+										<FormInput
+											control={form.control}
+											name="dueDay"
+											label="Due day (1–28)"
+											type="number"
+											min={1}
+											max={28}
+											onChange={(e) =>
+												form.setValue(
+													'dueDay',
+													e.target.value === ''
+														? (undefined as unknown as number)
+														: Number(e.target.value),
+													{ shouldValidate: true },
+												)
+											}
+										/>
+									) : (
+										<p className="text-xs text-muted-foreground">
+											Inherits the tenant billing policy due-day.
+										</p>
+									)}
+								</div>
+								<div className="flex flex-col gap-2">
+									<OverrideToggle
+										control={form.control}
+										name="overrideProration"
+										label="Override tenant default proration"
+									/>
+									{overrideProration ? (
+										<ProrationField control={form.control} />
+									) : (
+										<p className="text-xs text-muted-foreground">
+											Inherits the tenant billing policy proration
+											method.
+										</p>
+									)}
+								</div>
+							</>
+						)}
 						<FormSelect
 							control={form.control}
 							name="status"

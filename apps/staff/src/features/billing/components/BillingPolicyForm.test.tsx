@@ -39,4 +39,18 @@ describe('BillingPolicyForm', () => {
 			expect(screen.getByLabelText('Late fee amount')).toBeInTheDocument(),
 		);
 	});
+
+	it('explains the advance-billing behavior for a PREPAID tenant', () => {
+		renderForm(<BillingPolicyForm policy={POLICY} />);
+
+		expect(
+			screen.getByText(/bills the current month in advance/i),
+		).toBeInTheDocument();
+	});
+
+	it('explains the arrears/two-legs behavior for a POSTPAID tenant', () => {
+		renderForm(<BillingPolicyForm policy={{ ...POLICY, billingMode: 'POSTPAID' }} />);
+
+		expect(screen.getByText(/two independent legs/i)).toBeInTheDocument();
+	});
 });

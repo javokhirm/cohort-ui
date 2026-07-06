@@ -17,7 +17,6 @@ import type {
 // merge-upsert: only send the fields being changed, the rest are left as-is.
 
 export interface UpdateBillingPolicyInput {
-	/** Only `PREPAID` is accepted today (`POSTPAID` is rejected by the validator). */
 	billingMode?: BillingMode;
 	billingDay?: number;
 	dueDay?: number;

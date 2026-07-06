@@ -11,14 +11,18 @@ import { billingPolicyKeys } from './keys';
 // request DTOs, so the response shape is hand-declared here — reconcile if the
 // spec starts emitting response schemas.
 
-/** Only `PREPAID` is accepted by the PUT validator today (`POSTPAID` is reserved). */
-export const BILLING_MODES = ['PREPAID'] as const;
+/**
+ * `PREPAID` bills the current month in advance. `POSTPAID` bills the previous,
+ * fully-elapsed month in arrears via two independent legs — a time-based leg
+ * for `MONTHLY` fee plans and a consumption-based leg for `PER_SESSION` plans.
+ */
+export const BILLING_MODES = ['PREPAID', 'POSTPAID'] as const;
 export type BillingMode = (typeof BILLING_MODES)[number];
 
 export const POLICY_PRORATION_METHODS = ['SESSION', 'DAILY', 'NONE'] as const;
 export type PolicyProrationMethod = (typeof POLICY_PRORATION_METHODS)[number];
 
-/** Reserved for a later phase (per-session / package billing) — no effect yet. */
+/** Which sessions count as chargeable for a `PER_SESSION` fee plan's period. */
 export const CONSUMPTION_RULES = [
 	'ATTENDED_PLUS_UNEXCUSED',
 	'ALL_SCHEDULED',
@@ -33,8 +37,7 @@ export const LATE_FEE_RECURRENCES = ['ONE_TIME', 'DAILY', 'WEEKLY'] as const;
 export type LateFeeRecurrence = (typeof LATE_FEE_RECURRENCES)[number];
 
 export interface BillingPolicyResponse {
-	/** `POSTPAID` may be stored for a future phase but is not settable today. */
-	billingMode: BillingMode | 'POSTPAID';
+	billingMode: BillingMode;
 	/** Day the daily billing cycle starts generating a period's invoices (1–28). */
 	billingDay: number;
 	/** Default due-day for periodic invoices (a fee plan may override). */

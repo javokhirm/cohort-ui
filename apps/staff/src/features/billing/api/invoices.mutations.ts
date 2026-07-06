@@ -53,6 +53,46 @@ export interface ApplyDiscountInput {
 	discountId: number;
 }
 
+/** `POST /invoices/generate-monthly` body — omit `year`/`month` for the natural current period. */
+export interface GenerateMonthlyInvoicesInput {
+	year?: number;
+	month?: number;
+	branchId?: number;
+}
+
+/**
+ * A single failure from a generate-monthly run — one enrollment's invoice
+ * couldn't be created. Only `message` is guaranteed; the backend contract
+ * for this endpoint isn't in the generated OpenAPI spec yet, so the shape is
+ * hand-declared and kept defensive (api-reference.md, billing engine phase 2).
+ */
+export interface GenerateMonthlyInvoicesError {
+	message: string;
+	[key: string]: unknown;
+}
+
+/**
+ * `POST /invoices/generate-monthly` response. For a `POSTPAID` tenant a single
+ * call resolves both the `MONTHLY` and `PER_SESSION` legs for the period, so
+ * the counts below are the combined total across both legs.
+ */
+export interface GenerateMonthlyInvoicesResult {
+	period: { year: number; month: number };
+	/** Invoices created. */
+	generated: number;
+	/** Of `generated`, how many were prorated (mid-cycle enrollment). */
+	prorated: number;
+	/** Enrollment already had an invoice for this period. */
+	skippedExisting: number;
+	/** Enrollment has no resolvable fee plan. */
+	skippedNoFeePlan: number;
+	/** `PER_SESSION` enrollment had zero chargeable sessions in the period — no invoice, not a zero-value one. */
+	skippedZeroConsumption: number;
+	/** Enrollment was suspended for the entire period. */
+	skippedSuspended: number;
+	errors: GenerateMonthlyInvoicesError[];
+}
+
 // ─── Mutations ────────────────────────────────────────────────────────────────
 
 export function useCreateInvoice() {
@@ -105,6 +145,26 @@ export function useApplyDiscount() {
 			void qc.invalidateQueries({
 				queryKey: invoicesKeys.invoiceDetail(invoiceId),
 			});
+		},
+	});
+}
+
+/**
+ * The manual "generate monthly invoices" run (`POST /invoices/generate-monthly`).
+ * Mode-aware on the backend: for a `PREPAID` tenant the period is the month
+ * being billed in advance; for `POSTPAID` it's the previous, fully-elapsed
+ * month, and this single call resolves both billing legs for it.
+ */
+export function useGenerateMonthlyInvoices() {
+	const qc = useQueryClient();
+	return useMutation({
+		mutationFn: (input: GenerateMonthlyInvoicesInput) =>
+			manageApi.post<GenerateMonthlyInvoicesResult>(
+				'/invoices/generate-monthly',
+				input,
+			),
+		onSuccess: () => {
+			void qc.invalidateQueries({ queryKey: invoicesKeys.invoices() });
 		},
 	});
 }
