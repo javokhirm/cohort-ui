@@ -95,7 +95,7 @@ one that diverges.
 - **API client:** `openapi-typescript` types from the backend's OpenAPI spec + a thin typed
   client + hand-written TanStack Query hooks
 - **i18n:** uz (default), ru, en · **Region:** UZS currency, `Asia/Tashkent` timezone
-- **Testing:** Vitest + React Testing Library + MSW; Playwright for critical E2E
+- **Testing:** Skip writing any tests for now
 - **Quality:** ESLint (flat config) + Prettier + `prettier-plugin-tailwindcss`, husky +
   lint-staged
 
