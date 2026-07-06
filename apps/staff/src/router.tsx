@@ -19,6 +19,7 @@ import { StaffDetailRoute } from '@/routes/_authed.staff.$id';
 import { StaffEditRoute } from '@/routes/_authed.staff.$id.edit';
 import { RoomsRoute } from '@/routes/_authed.rooms';
 import { FeePlansRoute } from '@/routes/_authed.fee-plans';
+import { BillingPolicyRoute } from '@/routes/_authed.billing-policy';
 import { DiscountsRoute } from '@/routes/_authed.discounts';
 import { InvoicesRoute } from '@/routes/_authed.invoices';
 import { InvoiceDetailRoute } from '@/routes/_authed.invoices.$id';
@@ -201,6 +202,13 @@ const feePlansRoute = createRoute({
 	component: FeePlansRoute,
 });
 
+const billingPolicyRoute = createRoute({
+	getParentRoute: () => authedRoute,
+	path: '/billing-policy',
+	beforeLoad: () => requirePermission('billing-policy.manage'),
+	component: BillingPolicyRoute,
+});
+
 type DiscountStatusSearch = 'active' | 'inactive';
 
 interface DiscountSearch {
@@ -223,14 +231,7 @@ const discountsRoute = createRoute({
 	component: DiscountsRoute,
 });
 
-type InvoiceStatusSearch =
-	| 'DRAFT'
-	| 'UNPAID'
-	| 'PARTIAL'
-	| 'PAID'
-	| 'OVERDUE'
-	| 'VOID'
-	| 'REFUNDED';
+type InvoiceStatusSearch = 'DRAFT' | 'UNPAID' | 'PARTIAL' | 'PAID' | 'OVERDUE' | 'VOID';
 
 const INVOICE_STATUSES: InvoiceStatusSearch[] = [
 	'DRAFT',
@@ -239,7 +240,6 @@ const INVOICE_STATUSES: InvoiceStatusSearch[] = [
 	'PAID',
 	'OVERDUE',
 	'VOID',
-	'REFUNDED',
 ];
 
 interface InvoiceSearch {
@@ -645,6 +645,7 @@ const routeTree = rootRoute.addChildren([
 		staffEditRoute,
 		roomsRoute,
 		feePlansRoute,
+		billingPolicyRoute,
 		discountsRoute,
 		invoicesRoute,
 		invoiceDetailRoute,

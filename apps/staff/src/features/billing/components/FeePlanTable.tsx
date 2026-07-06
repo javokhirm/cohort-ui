@@ -69,13 +69,14 @@ export function FeePlanTable({ feePlans, isLoading, onEdit }: FeePlanTableProps)
 		{
 			accessorKey: 'prorationMethod',
 			header: 'Proration',
-			cell: ({ getValue }) => (
-				<span className="text-sm text-muted-foreground">
-					{FEE_PLAN_PRORATION_LABELS[
-						getValue<FeePlanResponse['prorationMethod']>()
-					] ?? '—'}
-				</span>
-			),
+			cell: ({ getValue }) => {
+				const method = getValue<FeePlanResponse['prorationMethod']>();
+				return (
+					<span className="text-sm text-muted-foreground">
+						{method == null ? 'Inherited' : FEE_PLAN_PRORATION_LABELS[method]}
+					</span>
+				);
+			},
 			size: 130,
 		},
 		{
@@ -83,23 +84,12 @@ export function FeePlanTable({ feePlans, isLoading, onEdit }: FeePlanTableProps)
 			header: 'Due',
 			cell: ({ row }) => (
 				<span className="text-sm text-muted-foreground">
-					Day {row.original.dueDay}
+					{row.original.dueDay == null
+						? 'Inherited'
+						: `Day ${row.original.dueDay}`}
 				</span>
 			),
-			size: 90,
-		},
-		{
-			id: 'lateFee',
-			header: () => <div className="text-right">Late fee</div>,
-			cell: ({ row }) =>
-				row.original.lateFeeAmount > 0 ? (
-					<div className="text-right text-sm tabular-nums text-muted-foreground">
-						{formatPrice(row.original.lateFeeAmount)} {row.original.currency}
-					</div>
-				) : (
-					<div className="text-right text-sm text-muted-foreground">—</div>
-				),
-			size: 140,
+			size: 110,
 		},
 		{
 			accessorKey: 'isActive',

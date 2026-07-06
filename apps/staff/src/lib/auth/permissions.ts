@@ -63,6 +63,8 @@ export const PERMISSION_CODES = [
 	'report-card.publish',
 	// fee plan
 	'fee-plan.manage',
+	// billing policy (owner-only, server-side)
+	'billing-policy.manage',
 	// invoice
 	'invoice.read',
 	'invoice.create',

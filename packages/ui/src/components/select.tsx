@@ -5,7 +5,11 @@ import { Check, ChevronDown, ChevronUp } from 'lucide-react';
 import { cn } from '../lib/utils';
 
 function Select(props: React.ComponentProps<typeof SelectPrimitive.Root>) {
-	return <SelectPrimitive.Root data-slot="select" {...props} />;
+	return (
+		<span className="relative flex w-full">
+			<SelectPrimitive.Root data-slot="select" {...props} />
+		</span>
+	);
 }
 
 function SelectGroup(props: React.ComponentProps<typeof SelectPrimitive.Group>) {

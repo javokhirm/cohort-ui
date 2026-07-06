@@ -83,20 +83,36 @@ describe('useCreateFeePlan', () => {
 		const created = await result.current.mutateAsync({
 			branchId: null,
 			courseId: null,
-			name: 'SAT Prep — Quarterly',
+			name: 'SAT Prep — Monthly',
 			amount: 3_600_000,
-			billingCycle: 'QUARTERLY',
+			billingCycle: 'MONTHLY',
 			dueDay: 5,
-			lateFeeAmount: 100_000,
-			gracePeriodDays: 3,
+			prorationMethod: 'DAILY',
 		});
 
 		expect(created.id).toBe(99);
-		expect(created.name).toBe('SAT Prep — Quarterly');
+		expect(created.name).toBe('SAT Prep — Monthly');
 		expect(created.amount).toBe(3_600_000);
-		expect(created.billingCycle).toBe('QUARTERLY');
+		expect(created.billingCycle).toBe('MONTHLY');
 		expect(created.branchId).toBeNull();
 		expect(created.isActive).toBe(true);
+	});
+
+	it('creates a plan that inherits the tenant policy (null overrides)', async () => {
+		const { result } = renderHook(() => useCreateFeePlan(), { wrapper: wrapper() });
+
+		const created = await result.current.mutateAsync({
+			branchId: null,
+			courseId: null,
+			name: 'Inheriting plan',
+			amount: 500_000,
+			billingCycle: 'MONTHLY',
+			dueDay: null,
+			prorationMethod: null,
+		});
+
+		expect(created.dueDay).toBeNull();
+		expect(created.prorationMethod).toBeNull();
 	});
 });
 
@@ -110,16 +126,16 @@ describe('useUpdateFeePlan', () => {
 		expect(updated.isActive).toBe(false);
 	});
 
-	it('updates the amount and late fee', async () => {
+	it('updates the amount and clears the due-day override', async () => {
 		const { result } = renderHook(() => useUpdateFeePlan(), { wrapper: wrapper() });
 
 		const updated = await result.current.mutateAsync({
 			id: 2,
 			amount: 700_000,
-			lateFeeAmount: 35_000,
+			dueDay: null,
 		});
 
 		expect(updated.amount).toBe(700_000);
-		expect(updated.lateFeeAmount).toBe(35_000);
+		expect(updated.dueDay).toBeNull();
 	});
 });

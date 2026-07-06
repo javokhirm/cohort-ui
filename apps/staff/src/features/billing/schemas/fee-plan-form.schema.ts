@@ -17,24 +17,19 @@ export const ANY_COURSE_VALUE = 'any';
 
 const billingCycle = z.enum(FEE_PLAN_BILLING_CYCLES);
 
-const prorationMethod = z.enum(FEE_PLAN_PRORATION_METHODS);
-
+// Due-day and proration are per-plan overrides of the tenant billing policy.
+// The controls are optional so a hidden (toggle-off) field never blocks submit;
+// the `superRefine` below enforces them only while the matching override is on.
 const dueDay = z
-	.number({ error: 'Due day is required' })
+	.number()
 	.int('Due day must be a whole number')
 	.min(1, 'Due day must be between 1 and 28')
-	.max(28, 'Due day must be between 1 and 28');
+	.max(28, 'Due day must be between 1 and 28')
+	.optional();
 
-const gracePeriodDays = z
-	.number({ error: 'Grace period is required' })
-	.int('Grace period must be a whole number')
-	.min(0, 'Grace period cannot be negative');
+const prorationMethod = z.enum(FEE_PLAN_PRORATION_METHODS).optional();
 
-const lateFeeAmount = z
-	.number({ error: 'Late fee is required' })
-	.min(0, 'Late fee cannot be negative');
-
-export const createFeePlanSchema = z.object({
+const feePlanBase = z.object({
 	name: z.string().min(1, 'Plan name is required'),
 	branch: z.string(),
 	course: z.string(),
@@ -42,15 +37,43 @@ export const createFeePlanSchema = z.object({
 		.number({ error: 'Amount is required' })
 		.positive('Amount must be greater than 0'),
 	billingCycle,
-	prorationMethod,
+	overrideDueDay: z.boolean(),
 	dueDay,
-	gracePeriodDays,
-	lateFeeAmount,
+	overrideProration: z.boolean(),
+	prorationMethod,
 });
 
-export const editFeePlanSchema = createFeePlanSchema.extend({
-	status: z.enum(['active', 'inactive']),
-});
+/** Enforce each override's control only while that override is toggled on. */
+function refineOverrides(
+	v: {
+		overrideDueDay: boolean;
+		dueDay?: number;
+		overrideProration: boolean;
+		prorationMethod?: unknown;
+	},
+	ctx: z.RefinementCtx,
+) {
+	if (v.overrideDueDay && v.dueDay == null) {
+		ctx.addIssue({
+			code: 'custom',
+			path: ['dueDay'],
+			message: 'Due day is required',
+		});
+	}
+	if (v.overrideProration && v.prorationMethod == null) {
+		ctx.addIssue({
+			code: 'custom',
+			path: ['prorationMethod'],
+			message: 'Select a proration method',
+		});
+	}
+}
+
+export const createFeePlanSchema = feePlanBase.superRefine(refineOverrides);
+
+export const editFeePlanSchema = feePlanBase
+	.extend({ status: z.enum(['active', 'inactive']) })
+	.superRefine(refineOverrides);
 
 export type CreateFeePlanFormValues = z.infer<typeof createFeePlanSchema>;
 export type EditFeePlanFormValues = z.infer<typeof editFeePlanSchema>;

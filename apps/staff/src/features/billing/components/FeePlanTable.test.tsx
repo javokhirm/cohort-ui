@@ -27,8 +27,6 @@ const ROWS: FeePlanResponse[] = [
 		billingCycle: 'MONTHLY',
 		prorationMethod: 'SESSION',
 		dueDay: 1,
-		lateFeeAmount: 50_000,
-		gracePeriodDays: 3,
 		isActive: true,
 		createdAt: '2025-01-10T00:00:00Z',
 		updatedAt: '2025-01-10T00:00:00Z',
@@ -41,10 +39,9 @@ const ROWS: FeePlanResponse[] = [
 		amount: 120_000,
 		currency: 'UZS',
 		billingCycle: 'PER_SESSION',
-		prorationMethod: 'NONE',
-		dueDay: 1,
-		lateFeeAmount: 0,
-		gracePeriodDays: 3,
+		// Inherits the tenant billing policy (null overrides).
+		prorationMethod: null,
+		dueDay: null,
 		isActive: false,
 		createdAt: '2025-01-13T00:00:00Z',
 		updatedAt: '2025-01-13T00:00:00Z',
@@ -62,12 +59,14 @@ describe('FeePlanTable', () => {
 		expect(screen.getByText('Active')).toBeInTheDocument();
 	});
 
-	it('shows "Any" for a plan with no course and "—" for a zero late fee', () => {
+	it('shows "Any" for a plan with no course and "Inherited" for null overrides', () => {
 		renderTable(<FeePlanTable feePlans={ROWS} />);
 
 		expect(screen.getByText('Any')).toBeInTheDocument();
 		expect(screen.getByText('Per session')).toBeInTheDocument();
 		expect(screen.getByText('Inactive')).toBeInTheDocument();
+		// Null due-day and proration both render as "Inherited".
+		expect(screen.getAllByText('Inherited')).toHaveLength(2);
 	});
 
 	it('invokes onEdit when a row is clicked', async () => {

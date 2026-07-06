@@ -22,6 +22,7 @@ import {
 	Receipt,
 	ScrollText,
 	Shield,
+	SlidersHorizontal,
 	Tag,
 	User,
 	Wallet,
@@ -179,6 +180,14 @@ const NAV_GROUPS: NavGroupDef[] = [
 				Icon: Layers,
 				href: '/fee-plans',
 				permission: 'fee-plan.manage',
+			},
+			{
+				id: 'billing-policy',
+				label: 'Billing Policy',
+				Icon: SlidersHorizontal,
+				href: '/billing-policy',
+				badge: 'OWNER',
+				permission: 'billing-policy.manage',
 			},
 			{
 				id: 'discounts',

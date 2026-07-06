@@ -12,12 +12,7 @@ import { feePlansKeys, type FeePlanListFilters } from './keys';
 // expose the request DTOs but not response bodies, so the shape is declared
 // here; reconcile if the spec starts emitting response schemas.
 
-export const FEE_PLAN_BILLING_CYCLES = [
-	'MONTHLY',
-	'QUARTERLY',
-	'ONE_TIME',
-	'PER_SESSION',
-] as const;
+export const FEE_PLAN_BILLING_CYCLES = ['MONTHLY', 'ONE_TIME', 'PER_SESSION'] as const;
 export type FeePlanBillingCycle = (typeof FEE_PLAN_BILLING_CYCLES)[number];
 
 /**
@@ -39,10 +34,10 @@ export interface FeePlanResponse {
 	amount: number;
 	currency: string;
 	billingCycle: FeePlanBillingCycle;
-	prorationMethod: FeePlanProrationMethod;
-	dueDay: number;
-	lateFeeAmount: number;
-	gracePeriodDays: number;
+	/** Per-plan override; `null` inherits the tenant billing policy default. */
+	prorationMethod: FeePlanProrationMethod | null;
+	/** Per-plan override; `null` inherits the tenant billing policy due-day. */
+	dueDay: number | null;
 	isActive: boolean;
 	createdAt: string;
 	updatedAt: string;

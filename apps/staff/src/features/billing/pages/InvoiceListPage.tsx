@@ -29,7 +29,14 @@ const PAGE_SIZE = 20;
 
 export function InvoiceListPage() {
 	const navigate = useNavigate();
-	const { page = 1, status, studentId, from, to, dueBefore } = useSearch({
+	const {
+		page = 1,
+		status,
+		studentId,
+		from,
+		to,
+		dueBefore,
+	} = useSearch({
 		from: '/_authed/invoices',
 	});
 
@@ -51,8 +58,15 @@ export function InvoiceListPage() {
 
 	// The strip mirrors the currently applied filters (minus pagination), same
 	// as the list — so it reads as "totals for what's on screen".
-	const summaryFilters: InvoiceSummaryFilters = { status, studentId, from, to, dueBefore };
-	const { data: summary, isLoading: isSummaryLoading } = useInvoiceSummary(summaryFilters);
+	const summaryFilters: InvoiceSummaryFilters = {
+		status,
+		studentId,
+		from,
+		to,
+		dueBefore,
+	};
+	const { data: summary, isLoading: isSummaryLoading } =
+		useInvoiceSummary(summaryFilters);
 	const statValue = (amount: number) =>
 		isSummaryLoading ? '—' : `${formatPrice(amount)} UZS`;
 
@@ -109,7 +123,10 @@ export function InvoiceListPage() {
 			/>
 
 			<div className="grid grid-cols-1 gap-4 sm:grid-cols-3">
-				<StatCard label="Total invoiced" value={statValue(summary?.totalInvoiced ?? 0)} />
+				<StatCard
+					label="Total invoiced"
+					value={statValue(summary?.totalInvoiced ?? 0)}
+				/>
 				<StatCard
 					label="Collected"
 					value={
@@ -155,11 +172,17 @@ export function InvoiceListPage() {
 					<div className="flex flex-col gap-1.5">
 						<Label className="text-xs text-muted-foreground">Student</Label>
 						<div className="w-56">
-							<StudentPicker value={studentId} onChange={handleStudentChange} />
+							<StudentPicker
+								value={studentId}
+								onChange={handleStudentChange}
+							/>
 						</div>
 					</div>
 					<div className="flex flex-col gap-1.5">
-						<Label htmlFor="invoice-from" className="text-xs text-muted-foreground">
+						<Label
+							htmlFor="invoice-from"
+							className="text-xs text-muted-foreground"
+						>
 							Issued from
 						</Label>
 						<Input
@@ -171,7 +194,10 @@ export function InvoiceListPage() {
 						/>
 					</div>
 					<div className="flex flex-col gap-1.5">
-						<Label htmlFor="invoice-to" className="text-xs text-muted-foreground">
+						<Label
+							htmlFor="invoice-to"
+							className="text-xs text-muted-foreground"
+						>
 							Issued to
 						</Label>
 						<Input
@@ -183,19 +209,28 @@ export function InvoiceListPage() {
 						/>
 					</div>
 					<div className="flex flex-col gap-1.5">
-						<Label htmlFor="invoice-due-before" className="text-xs text-muted-foreground">
+						<Label
+							htmlFor="invoice-due-before"
+							className="text-xs text-muted-foreground"
+						>
 							Due before
 						</Label>
 						<Input
 							id="invoice-due-before"
 							type="date"
 							value={dueBefore ?? ''}
-							onChange={(e) => handleDateChange('dueBefore', e.target.value)}
+							onChange={(e) =>
+								handleDateChange('dueBefore', e.target.value)
+							}
 							className="h-9 w-37.5"
 						/>
 					</div>
 					{hasExtraFilters && (
-						<Button variant="ghost" size="sm" onClick={handleClearExtraFilters}>
+						<Button
+							variant="ghost"
+							size="sm"
+							onClick={handleClearExtraFilters}
+						>
 							<X className="mr-1.5 size-3.5" />
 							Clear filters
 						</Button>

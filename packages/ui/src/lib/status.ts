@@ -58,7 +58,6 @@ export const STATUS_MAPS = {
 		paid: { tone: 'green', label: 'Paid' },
 		overdue: { tone: 'red', label: 'Overdue' },
 		void: { tone: 'slate', label: 'Void' },
-		refunded: { tone: 'violet', label: 'Refunded' },
 	},
 	payment: {
 		success: { tone: 'green', label: 'Success' },
@@ -166,7 +165,6 @@ export const STATUS_MAPS = {
 	},
 	fee_cycle: {
 		monthly: { tone: 'indigo', label: 'Monthly' },
-		quarterly: { tone: 'blue', label: 'Quarterly' },
 		one_time: { tone: 'slate', label: 'One-time' },
 		per_session: { tone: 'amber', label: 'Per session' },
 	},

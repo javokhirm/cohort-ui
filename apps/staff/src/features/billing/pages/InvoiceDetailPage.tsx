@@ -70,7 +70,7 @@ function InvoiceHeader({
 }) {
 	const canRecordPayment =
 		invoice.amountDue > 0 && invoice.status !== 'VOID' && invoice.status !== 'DRAFT';
-	const canVoid = invoice.status !== 'VOID' && invoice.status !== 'REFUNDED';
+	const canVoid = invoice.status !== 'VOID';
 
 	return (
 		<Card className="p-5">

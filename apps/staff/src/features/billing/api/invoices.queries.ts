@@ -26,7 +26,6 @@ export const INVOICE_STATUSES = [
 	'PAID',
 	'OVERDUE',
 	'VOID',
-	'REFUNDED',
 ] as const;
 export type InvoiceStatus = (typeof INVOICE_STATUSES)[number];
 

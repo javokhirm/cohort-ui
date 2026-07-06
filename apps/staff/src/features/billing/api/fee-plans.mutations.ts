@@ -19,10 +19,10 @@ export interface CreateFeePlanInput {
 	amount: number;
 	currency?: string;
 	billingCycle: FeePlanBillingCycle;
-	prorationMethod?: FeePlanProrationMethod;
-	dueDay?: number;
-	lateFeeAmount?: number;
-	gracePeriodDays?: number;
+	/** `null` inherits the tenant billing-policy default (§billing policy). */
+	prorationMethod?: FeePlanProrationMethod | null;
+	/** `null` inherits the tenant billing-policy due-day. */
+	dueDay?: number | null;
 }
 
 export interface UpdateFeePlanInput {
@@ -33,10 +33,10 @@ export interface UpdateFeePlanInput {
 	amount?: number;
 	currency?: string;
 	billingCycle?: FeePlanBillingCycle;
-	prorationMethod?: FeePlanProrationMethod;
-	dueDay?: number;
-	lateFeeAmount?: number;
-	gracePeriodDays?: number;
+	/** `null` inherits the tenant billing-policy default (§billing policy). */
+	prorationMethod?: FeePlanProrationMethod | null;
+	/** `null` inherits the tenant billing-policy due-day. */
+	dueDay?: number | null;
 	isActive?: boolean;
 }
 

@@ -9,7 +9,6 @@ export const FEE_PLAN_BILLING_CYCLE_OPTIONS: {
 	label: string;
 }[] = [
 	{ value: 'MONTHLY', label: 'Monthly' },
-	{ value: 'QUARTERLY', label: 'Quarterly' },
 	{ value: 'ONE_TIME', label: 'One-time' },
 	{ value: 'PER_SESSION', label: 'Per session' },
 ];

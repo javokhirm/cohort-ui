@@ -70,7 +70,10 @@ export function PaymentDetailSheet({
 											<span className="truncate text-base font-bold">
 												{payment.studentName}
 											</span>
-											<StatusBadge kind="payment" status={payment.status} />
+											<StatusBadge
+												kind="payment"
+												status={payment.status}
+											/>
 										</div>
 										<div className="mt-0.5 flex items-center gap-1.5 text-sm text-muted-foreground">
 											<span className="font-mono">
@@ -82,7 +85,9 @@ export function PaymentDetailSheet({
 									</div>
 								</div>
 								<div className="mt-3 border-t pt-3">
-									<div className="text-xs text-muted-foreground">Amount</div>
+									<div className="text-xs text-muted-foreground">
+										Amount
+									</div>
 									<div className="text-xl font-bold tabular-nums">
 										{formatPrice(payment.amount)} {payment.currency}
 									</div>
@@ -108,7 +113,10 @@ export function PaymentDetailSheet({
 										</div>
 										<div className="text-sm font-semibold">
 											{payment.paidAt
-												? formatDateTime(payment.paidAt).replace(', ', ' · ')
+												? formatDateTime(payment.paidAt).replace(
+														', ',
+														' · ',
+													)
 												: 'Not yet settled'}
 										</div>
 									</div>
@@ -147,14 +155,19 @@ export function PaymentDetailSheet({
 											</div>
 											<div>
 												<div className="text-sm font-semibold">
-													{payment.invoiceNumber ?? `#${payment.invoiceId}`}
+													{payment.invoiceNumber ??
+														`#${payment.invoiceId}`}
 												</div>
 												<div className="text-xs text-muted-foreground">
 													Invoice reference
 												</div>
 											</div>
 										</div>
-										<Button asChild variant="outline" className="mt-3 w-full">
+										<Button
+											asChild
+											variant="outline"
+											className="mt-3 w-full"
+										>
 											<Link
 												to="/invoices/$id"
 												params={{ id: String(payment.invoiceId) }}

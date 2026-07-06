@@ -104,7 +104,7 @@ export interface Invoice {
 	invoiceCode: string;
 	date: string;
 	total: number;
-	status: 'DRAFT' | 'UNPAID' | 'PARTIAL' | 'PAID' | 'OVERDUE' | 'VOID' | 'REFUNDED';
+	status: 'DRAFT' | 'UNPAID' | 'PARTIAL' | 'PAID' | 'OVERDUE' | 'VOID';
 }
 
 // ─── Queries ─────────────────────────────────────────────────────────────────

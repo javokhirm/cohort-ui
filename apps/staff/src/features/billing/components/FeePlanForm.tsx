@@ -4,6 +4,7 @@ import { zodResolver } from '@hookform/resolvers/zod';
 
 import {
 	Button,
+	Checkbox,
 	FieldGroup,
 	Form,
 	FormField,
@@ -57,6 +58,37 @@ type FeePlanFormProps = CreateProps | EditProps;
 
 function Section({ children }: { children: React.ReactNode }) {
 	return <div className="flex flex-col gap-4 rounded-xl bg-white p-4">{children}</div>;
+}
+
+/**
+ * Checkbox bound to a boolean form field — gates whether a per-plan override is
+ * sent (checked) or the value is left `null` to inherit the tenant billing
+ * policy default (unchecked). Generic so both forms can share it.
+ */
+function OverrideToggle<T extends FieldValues>({
+	control,
+	name,
+	label,
+}: {
+	control: Control<T>;
+	name: FieldPath<T>;
+	label: string;
+}) {
+	return (
+		<FormField
+			control={control}
+			name={name}
+			render={({ field }) => (
+				<label className="flex cursor-pointer items-center gap-2 text-sm font-medium">
+					<Checkbox
+						checked={Boolean(field.value)}
+						onCheckedChange={(v) => field.onChange(v === true)}
+					/>
+					{label}
+				</label>
+			)}
+		/>
+	);
 }
 
 /**
@@ -128,16 +160,19 @@ function CreateFeePlanForm({
 			branch: SHARED_BRANCH_VALUE,
 			course: ANY_COURSE_VALUE,
 			billingCycle: 'MONTHLY',
-			prorationMethod: 'SESSION',
+			overrideDueDay: false,
 			dueDay: 1,
-			gracePeriodDays: 3,
-			lateFeeAmount: 0,
+			overrideProration: false,
+			prorationMethod: 'SESSION',
 		},
 	});
 
 	const branchOptions = useBranchOptions();
 	const courseOptions = useCourseOptions();
 	const createFeePlan = useCreateFeePlan();
+
+	const overrideDueDay = form.watch('overrideDueDay');
+	const overrideProration = form.watch('overrideProration');
 
 	useEffect(() => {
 		onPendingChange(createFeePlan.isPending);
@@ -150,10 +185,8 @@ function CreateFeePlanForm({
 			name: values.name.trim(),
 			amount: values.amount,
 			billingCycle: values.billingCycle,
-			prorationMethod: values.prorationMethod,
-			dueDay: values.dueDay,
-			gracePeriodDays: values.gracePeriodDays,
-			lateFeeAmount: values.lateFeeAmount,
+			dueDay: values.overrideDueDay ? values.dueDay : null,
+			prorationMethod: values.overrideProration ? values.prorationMethod : null,
 		});
 		toast.success('Fee plan added');
 		onSuccess();
@@ -213,58 +246,50 @@ function CreateFeePlanForm({
 								options={FEE_PLAN_BILLING_CYCLE_OPTIONS}
 							/>
 						</div>
-						<div className="grid grid-cols-2 gap-3">
-							<FormInput
+						<div className="flex flex-col gap-2">
+							<OverrideToggle
 								control={form.control}
-								name="dueDay"
-								label="Due day (1–28)"
-								type="number"
-								min={1}
-								max={28}
-								onChange={(e) =>
-									form.setValue(
-										'dueDay',
-										e.target.value === ''
-											? (undefined as unknown as number)
-											: Number(e.target.value),
-										{ shouldValidate: true },
-									)
-								}
+								name="overrideDueDay"
+								label="Override tenant default due day"
 							/>
-							<FormInput
-								control={form.control}
-								name="gracePeriodDays"
-								label="Grace (days)"
-								type="number"
-								min={0}
-								onChange={(e) =>
-									form.setValue(
-										'gracePeriodDays',
-										e.target.value === ''
-											? (undefined as unknown as number)
-											: Number(e.target.value),
-										{ shouldValidate: true },
-									)
-								}
-							/>
+							{overrideDueDay ? (
+								<FormInput
+									control={form.control}
+									name="dueDay"
+									label="Due day (1–28)"
+									type="number"
+									min={1}
+									max={28}
+									onChange={(e) =>
+										form.setValue(
+											'dueDay',
+											e.target.value === ''
+												? (undefined as unknown as number)
+												: Number(e.target.value),
+											{ shouldValidate: true },
+										)
+									}
+								/>
+							) : (
+								<p className="text-xs text-muted-foreground">
+									Inherits the tenant billing policy due-day.
+								</p>
+							)}
 						</div>
-						<FormInput
-							control={form.control}
-							name="lateFeeAmount"
-							label="Late fee (UZS)"
-							type="number"
-							min={0}
-							onChange={(e) =>
-								form.setValue(
-									'lateFeeAmount',
-									e.target.value === ''
-										? (undefined as unknown as number)
-										: Number(e.target.value),
-									{ shouldValidate: true },
-								)
-							}
-						/>
-						<ProrationField control={form.control} />
+						<div className="flex flex-col gap-2">
+							<OverrideToggle
+								control={form.control}
+								name="overrideProration"
+								label="Override tenant default proration"
+							/>
+							{overrideProration ? (
+								<ProrationField control={form.control} />
+							) : (
+								<p className="text-xs text-muted-foreground">
+									Inherits the tenant billing policy proration method.
+								</p>
+							)}
+						</div>
 					</FieldGroup>
 				</Section>
 			</form>
@@ -287,10 +312,10 @@ function EditFeePlanForm({
 		course: courseToForm(p.courseId),
 		amount: p.amount,
 		billingCycle: p.billingCycle,
-		prorationMethod: p.prorationMethod,
-		dueDay: p.dueDay,
-		gracePeriodDays: p.gracePeriodDays,
-		lateFeeAmount: p.lateFeeAmount,
+		overrideDueDay: p.dueDay != null,
+		dueDay: p.dueDay ?? 1,
+		overrideProration: p.prorationMethod != null,
+		prorationMethod: p.prorationMethod ?? 'SESSION',
 		status: p.isActive ? 'active' : 'inactive',
 	});
 
@@ -308,6 +333,9 @@ function EditFeePlanForm({
 	const courseOptions = useCourseOptions();
 	const updateFeePlan = useUpdateFeePlan();
 
+	const overrideDueDay = form.watch('overrideDueDay');
+	const overrideProration = form.watch('overrideProration');
+
 	useEffect(() => {
 		onPendingChange(updateFeePlan.isPending);
 	}, [updateFeePlan.isPending, onPendingChange]);
@@ -320,10 +348,8 @@ function EditFeePlanForm({
 			name: values.name.trim(),
 			amount: values.amount,
 			billingCycle: values.billingCycle,
-			prorationMethod: values.prorationMethod,
-			dueDay: values.dueDay,
-			gracePeriodDays: values.gracePeriodDays,
-			lateFeeAmount: values.lateFeeAmount,
+			dueDay: values.overrideDueDay ? values.dueDay : null,
+			prorationMethod: values.overrideProration ? values.prorationMethod : null,
 			isActive: values.status === 'active',
 		});
 		toast.success('Fee plan updated');
@@ -383,58 +409,50 @@ function EditFeePlanForm({
 								options={FEE_PLAN_BILLING_CYCLE_OPTIONS}
 							/>
 						</div>
-						<div className="grid grid-cols-2 gap-3">
-							<FormInput
+						<div className="flex flex-col gap-2">
+							<OverrideToggle
 								control={form.control}
-								name="dueDay"
-								label="Due day (1–28)"
-								type="number"
-								min={1}
-								max={28}
-								onChange={(e) =>
-									form.setValue(
-										'dueDay',
-										e.target.value === ''
-											? (undefined as unknown as number)
-											: Number(e.target.value),
-										{ shouldValidate: true },
-									)
-								}
+								name="overrideDueDay"
+								label="Override tenant default due day"
 							/>
-							<FormInput
-								control={form.control}
-								name="gracePeriodDays"
-								label="Grace (days)"
-								type="number"
-								min={0}
-								onChange={(e) =>
-									form.setValue(
-										'gracePeriodDays',
-										e.target.value === ''
-											? (undefined as unknown as number)
-											: Number(e.target.value),
-										{ shouldValidate: true },
-									)
-								}
-							/>
+							{overrideDueDay ? (
+								<FormInput
+									control={form.control}
+									name="dueDay"
+									label="Due day (1–28)"
+									type="number"
+									min={1}
+									max={28}
+									onChange={(e) =>
+										form.setValue(
+											'dueDay',
+											e.target.value === ''
+												? (undefined as unknown as number)
+												: Number(e.target.value),
+											{ shouldValidate: true },
+										)
+									}
+								/>
+							) : (
+								<p className="text-xs text-muted-foreground">
+									Inherits the tenant billing policy due-day.
+								</p>
+							)}
 						</div>
-						<FormInput
-							control={form.control}
-							name="lateFeeAmount"
-							label="Late fee (UZS)"
-							type="number"
-							min={0}
-							onChange={(e) =>
-								form.setValue(
-									'lateFeeAmount',
-									e.target.value === ''
-										? (undefined as unknown as number)
-										: Number(e.target.value),
-									{ shouldValidate: true },
-								)
-							}
-						/>
-						<ProrationField control={form.control} />
+						<div className="flex flex-col gap-2">
+							<OverrideToggle
+								control={form.control}
+								name="overrideProration"
+								label="Override tenant default proration"
+							/>
+							{overrideProration ? (
+								<ProrationField control={form.control} />
+							) : (
+								<p className="text-xs text-muted-foreground">
+									Inherits the tenant billing policy proration method.
+								</p>
+							)}
+						</div>
 						<FormSelect
 							control={form.control}
 							name="status"

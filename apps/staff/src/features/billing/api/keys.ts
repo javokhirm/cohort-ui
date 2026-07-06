@@ -14,6 +14,12 @@ export const feePlansKeys = {
 		[...feePlansKeys.feePlans(), 'list', filters] as const,
 };
 
+/** One billing policy per tenant — a singleton resource, so no filters/id. */
+export const billingPolicyKeys = {
+	all: ['billing-policy'] as const,
+	detail: () => [...billingPolicyKeys.all, 'detail'] as const,
+};
+
 export interface DiscountListFilters {
 	page?: number;
 	limit?: number;
@@ -41,7 +47,7 @@ export interface InvoiceListFilters {
 	limit?: number;
 	branchIds?: number[];
 	studentId?: number;
-	status?: 'DRAFT' | 'UNPAID' | 'PARTIAL' | 'PAID' | 'OVERDUE' | 'VOID' | 'REFUNDED';
+	status?: 'DRAFT' | 'UNPAID' | 'PARTIAL' | 'PAID' | 'OVERDUE' | 'VOID';
 	from?: string;
 	to?: string;
 	dueBefore?: string;

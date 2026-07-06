@@ -1,6 +1,7 @@
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 
 import { manageApi } from '@/api/apiClient';
+import { invoicesKeys } from '@/features/billing/api/keys';
 
 import { peopleKeys } from './keys';
 import type { Guardian, Student } from './students.queries';
@@ -126,6 +127,9 @@ export function useEnrollStudent() {
 				queryKey: peopleKeys.studentEnrollments(variables.studentId),
 			});
 			void qc.invalidateQueries({ queryKey: peopleKeys.students() });
+			// A PREPAID tenant with charge-on-enrollment issues a prorated invoice
+			// as a server-side side effect, so refresh the invoice list + summary.
+			void qc.invalidateQueries({ queryKey: invoicesKeys.invoices() });
 		},
 	});
 }
