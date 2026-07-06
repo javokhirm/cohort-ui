@@ -14,7 +14,9 @@ import { GroupFormPage } from './GroupFormPage';
 // router so it can render outside a RouterProvider.
 vi.mock('@tanstack/react-router', () => ({
 	useNavigate: () => vi.fn(),
-	Link: ({ children, ...props }: { children: ReactNode }) => <a {...props}>{children}</a>,
+	Link: ({ children, ...props }: { children: ReactNode }) => (
+		<a {...props}>{children}</a>
+	),
 }));
 
 const MANAGE = 'http://localhost:5050/api/v1/manage';

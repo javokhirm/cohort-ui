@@ -77,11 +77,7 @@ function useFormField() {
 /** Vertical stack of fields with consistent spacing. Wrap related FormItems in one. */
 function FieldGroup({ className, ...props }: React.ComponentProps<'div'>) {
 	return (
-		<div
-			data-slot="field-group"
-			className={cn('grid gap-4', className)}
-			{...props}
-		/>
+		<div data-slot="field-group" className={cn('grid gap-4', className)} {...props} />
 	);
 }
 
@@ -99,10 +95,7 @@ function FormItem({ className, ...props }: React.ComponentProps<'div'>) {
 	);
 }
 
-function FormLabel({
-	className,
-	...props
-}: React.ComponentProps<typeof Label>) {
+function FormLabel({ className, ...props }: React.ComponentProps<typeof Label>) {
 	const { error, formItemId } = useFormField();
 
 	return (
@@ -116,9 +109,7 @@ function FormLabel({
 	);
 }
 
-function FormControl({
-	...props
-}: React.ComponentProps<typeof SlotPrimitive.Root>) {
+function FormControl({ ...props }: React.ComponentProps<typeof SlotPrimitive.Root>) {
 	const { error, formItemId, formDescriptionId, formMessageId } = useFormField();
 
 	return (

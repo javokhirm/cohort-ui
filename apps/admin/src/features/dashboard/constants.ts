@@ -1,4 +1,11 @@
-import { CreditCard, Database, HardDrive, Mail, MessageSquare, Server } from 'lucide-react';
+import {
+	CreditCard,
+	Database,
+	HardDrive,
+	Mail,
+	MessageSquare,
+	Server,
+} from 'lucide-react';
 
 export const TOOLTIP_STYLE: React.CSSProperties = {
 	backgroundColor: '#131c30',

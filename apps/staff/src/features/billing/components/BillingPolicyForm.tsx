@@ -413,8 +413,8 @@ export function BillingPolicyForm({ policy }: { policy: BillingPolicyResponse })
 					<CardHeader>
 						<CardTitle>Advanced</CardTitle>
 						<CardDescription>
-							Consumption rule for per-session billing, plus wallet settings
-							reserved for a later phase.
+							Consumption rule for per-session billing, plus how wallet
+							credit is applied to invoices.
 						</CardDescription>
 					</CardHeader>
 					<CardContent className="flex flex-col gap-4">
@@ -436,7 +436,7 @@ export function BillingPolicyForm({ policy }: { policy: BillingPolicyResponse })
 							control={form.control}
 							name="autoApplyCredit"
 							label="Auto-apply wallet credit"
-							description="Reserved for a later phase — no visible effect yet."
+							description="Automatically applies any available wallet credit when an invoice is issued."
 						/>
 					</CardContent>
 				</Card>

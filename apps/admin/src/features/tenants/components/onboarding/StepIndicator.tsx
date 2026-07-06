@@ -20,7 +20,9 @@ export function StepIndicator({ current }: { current: OnboardStep }) {
 								'flex size-8 shrink-0 items-center justify-center rounded-full text-sm font-bold transition-colors',
 								done && 'bg-primary text-primary-foreground',
 								active && 'border-2 border-primary text-primary',
-								!done && !active && 'border-2 border-border text-muted-foreground',
+								!done &&
+									!active &&
+									'border-2 border-border text-muted-foreground',
 							)}
 						>
 							{done ? <Check className="size-4" strokeWidth={2.5} /> : n}
@@ -28,7 +30,9 @@ export function StepIndicator({ current }: { current: OnboardStep }) {
 						<span
 							className={cn(
 								'hidden text-xs font-medium sm:block',
-								active || done ? 'text-foreground' : 'text-muted-foreground',
+								active || done
+									? 'text-foreground'
+									: 'text-muted-foreground',
 							)}
 						>
 							{label}
@@ -41,7 +45,10 @@ export function StepIndicator({ current }: { current: OnboardStep }) {
 				return [
 					<div
 						key={`connector-${i}`}
-						className={cn('mt-4 h-px flex-1', n <= current ? 'bg-primary' : 'bg-border')}
+						className={cn(
+							'mt-4 h-px flex-1',
+							n <= current ? 'bg-primary' : 'bg-border',
+						)}
 					/>,
 					circle,
 				];

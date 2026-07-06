@@ -5,8 +5,9 @@ import {
 	Ban,
 	Download,
 	Edit,
+	Landmark,
 	MessageSquareWarning,
-	RefreshCcw,
+	RotateCcw,
 	Wallet,
 } from 'lucide-react';
 
@@ -33,9 +34,14 @@ import { formatDate, formatPrice } from '@repo/utils';
 
 import { Can } from '@/components/Can';
 import { useInvoice, type InvoiceDetail } from '../api/invoices.queries';
-import { useUpdateInvoice } from '../api/invoices.mutations';
+import { useApplyWalletCredit, useUpdateInvoice } from '../api/invoices.mutations';
+import { CreditNotesCard } from '../components/CreditNotesCard';
 import { InvoiceForm } from '../components/InvoiceForm';
 import { RecordPaymentDialog } from '../components/RecordPaymentDialog';
+import {
+	RefundPaymentDialog,
+	type RefundablePayment,
+} from '../components/RefundPaymentDialog';
 
 function DisabledAction({ label, icon }: { label: string; icon: React.ReactNode }) {
 	return (
@@ -58,18 +64,26 @@ function InvoiceHeader({
 	onEdit,
 	onIssue,
 	onRecordPayment,
+	onApplyCredit,
 	onVoid,
 	actionPending,
+	applyCreditPending,
 }: {
 	invoice: InvoiceDetail;
 	onEdit: () => void;
 	onIssue: () => void;
 	onRecordPayment: () => void;
+	onApplyCredit: () => void;
 	onVoid: () => void;
 	actionPending: boolean;
+	applyCreditPending: boolean;
 }) {
 	const canRecordPayment =
 		invoice.amountDue > 0 && invoice.status !== 'VOID' && invoice.status !== 'DRAFT';
+	const canApplyCredit =
+		invoice.status === 'UNPAID' ||
+		invoice.status === 'PARTIAL' ||
+		invoice.status === 'OVERDUE';
 	const canVoid = invoice.status !== 'VOID';
 
 	return (
@@ -127,6 +141,19 @@ function InvoiceHeader({
 						</Can>
 					)}
 
+					{canApplyCredit && (
+						<Can permission="wallet.apply">
+							<Button
+								variant="outline"
+								onClick={onApplyCredit}
+								disabled={applyCreditPending}
+							>
+								<Landmark className="mr-1.5 size-4" />
+								Apply wallet credit
+							</Button>
+						</Can>
+					)}
+
 					{invoice.status === 'DRAFT' && (
 						<Can permission="invoice.update">
 							<Button variant="outline" onClick={onEdit}>
@@ -154,10 +181,6 @@ function InvoiceHeader({
 				</div>
 
 				<div className="ml-auto flex items-center gap-2">
-					<DisabledAction
-						label="Refund"
-						icon={<RefreshCcw className="mr-1.5 size-4" />}
-					/>
 					{canVoid && (
 						<Can permission="invoice.void">
 							<Button
@@ -248,6 +271,17 @@ function LineItemsCard({ invoice }: { invoice: InvoiceDetail }) {
 
 function PaymentHistoryCard({ invoice }: { invoice: InvoiceDetail }) {
 	const { payments } = invoice;
+	const [refundTarget, setRefundTarget] = useState<
+		InvoiceDetail['payments'][number] | null
+	>(null);
+
+	const refundablePayment: RefundablePayment | null = refundTarget && {
+		id: refundTarget.id,
+		amount: refundTarget.amount,
+		currency: invoice.currency,
+		invoiceId: invoice.id,
+		studentId: invoice.studentId,
+	};
 
 	return (
 		<Card className="p-5">
@@ -273,11 +307,34 @@ function PaymentHistoryCard({ invoice }: { invoice: InvoiceDetail }) {
 									{p.paidAt ? formatDate(p.paidAt) : '—'} · {p.method}
 								</div>
 							</div>
-							<StatusBadge kind="payment" status={p.status} />
+							<div className="flex items-center gap-2">
+								<StatusBadge kind="payment" status={p.status} />
+								{p.status === 'SUCCEEDED' && p.method !== 'CREDIT' && (
+									<Can permission="payment.refund">
+										<Button
+											variant="ghost"
+											size="sm"
+											className="size-8 p-0"
+											aria-label="Refund payment"
+											onClick={() => setRefundTarget(p)}
+										>
+											<RotateCcw className="size-4" />
+										</Button>
+									</Can>
+								)}
+							</div>
 						</div>
 					))}
 				</div>
 			)}
+
+			<RefundPaymentDialog
+				payment={refundablePayment}
+				open={refundablePayment != null}
+				onOpenChange={(open) => {
+					if (!open) setRefundTarget(null);
+				}}
+			/>
 		</Card>
 	);
 }
@@ -294,6 +351,7 @@ export function InvoiceDetailPage({ invoiceId }: InvoiceDetailPageProps) {
 	const [voidOpen, setVoidOpen] = useState(false);
 
 	const updateInvoice = useUpdateInvoice();
+	const applyWalletCredit = useApplyWalletCredit();
 
 	async function handleIssue() {
 		if (!invoice) return;
@@ -302,6 +360,20 @@ export function InvoiceDetailPage({ invoiceId }: InvoiceDetailPageProps) {
 			toast.success('Invoice issued');
 		} catch (err) {
 			toast.error(isApiError(err) ? err.message : 'Failed to issue invoice');
+		}
+	}
+
+	async function handleApplyCredit() {
+		if (!invoice) return;
+		try {
+			const result = await applyWalletCredit.mutateAsync(invoice.id);
+			toast.success(
+				result.applied > 0
+					? `Applied ${formatPrice(result.applied)} UZS in wallet credit`
+					: 'No wallet credit available to apply',
+			);
+		} catch (err) {
+			toast.error(isApiError(err) ? err.message : 'Failed to apply wallet credit');
 		}
 	}
 
@@ -339,15 +411,20 @@ export function InvoiceDetailPage({ invoiceId }: InvoiceDetailPageProps) {
 						onEdit={() => setEditOpen(true)}
 						onIssue={() => void handleIssue()}
 						onRecordPayment={() => setPaymentOpen(true)}
+						onApplyCredit={() => void handleApplyCredit()}
 						onVoid={() => setVoidOpen(true)}
 						actionPending={updateInvoice.isPending}
+						applyCreditPending={applyWalletCredit.isPending}
 					/>
 
 					<div className="grid grid-cols-1 gap-5 lg:grid-cols-3">
 						<div className="lg:col-span-2">
 							<LineItemsCard invoice={invoice} />
 						</div>
-						<PaymentHistoryCard invoice={invoice} />
+						<div className="flex flex-col gap-5">
+							<PaymentHistoryCard invoice={invoice} />
+							<CreditNotesCard invoice={invoice} />
+						</div>
 					</div>
 
 					<InvoiceForm

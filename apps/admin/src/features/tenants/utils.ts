@@ -23,4 +23,3 @@ export function getInitials(name: string): string {
 export function avatarClass(id: number): string {
 	return AVATAR_PALETTE[id % AVATAR_PALETTE.length];
 }
-

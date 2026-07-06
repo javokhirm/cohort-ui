@@ -7,7 +7,13 @@ const AUTH: AuthResult = {
 	accessToken: 'access',
 	refreshToken: 'refresh',
 	expiresIn: 900,
-	user: { id: 1, firstName: 'Olim', lastName: 'Owner', roles: ['OWNER'], branchScope: null },
+	user: {
+		id: 1,
+		firstName: 'Olim',
+		lastName: 'Owner',
+		roles: ['OWNER'],
+		branchScope: null,
+	},
 };
 
 describe('sessionStore — permissions', () => {

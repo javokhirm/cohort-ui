@@ -60,8 +60,8 @@ export function ResetPasswordDialog({
 				<DialogHeader>
 					<DialogTitle>Reset password</DialogTitle>
 					<DialogDescription>
-						Set a new password for <strong>{fullName}</strong>. They will need to use
-						this password on their next login.
+						Set a new password for <strong>{fullName}</strong>. They will need
+						to use this password on their next login.
 					</DialogDescription>
 				</DialogHeader>
 				<Form {...form}>
@@ -104,7 +104,9 @@ export function ResetPasswordDialog({
 								Cancel
 							</Button>
 							<Button type="submit" disabled={mutation.isPending}>
-								{mutation.isPending && <Spinner className="mr-2 size-4" />}
+								{mutation.isPending && (
+									<Spinner className="mr-2 size-4" />
+								)}
 								Reset password
 							</Button>
 						</DialogFooter>

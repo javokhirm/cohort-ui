@@ -99,15 +99,15 @@ apps/staff/
 
 ### Where things go (app-level)
 
-| You're adding…                              | Put it in…                                            |
-| ------------------------------------------- | ----------------------------------------------------- |
-| A new screen reachable by URL               | `routes/` (route) + `features/<domain>/screens/`      |
-| A data hook for a `/manage` endpoint        | `features/<domain>/api/*.queries.ts` / `*.mutations.ts` |
-| A form's validation schema                  | `features/<domain>/schemas/`                          |
-| A component used only in one feature        | `features/<domain>/components/`                       |
-| A component used across features in this app| `apps/staff/src/components/`                          |
-| A component reusable across **apps**        | `packages/ui` (discuss first)                         |
-| App-wide config / clients                   | `apps/staff/src/lib/`                                 |
+| You're adding…                               | Put it in…                                              |
+| -------------------------------------------- | ------------------------------------------------------- |
+| A new screen reachable by URL                | `routes/` (route) + `features/<domain>/screens/`        |
+| A data hook for a `/manage` endpoint         | `features/<domain>/api/*.queries.ts` / `*.mutations.ts` |
+| A form's validation schema                   | `features/<domain>/schemas/`                            |
+| A component used only in one feature         | `features/<domain>/components/`                         |
+| A component used across features in this app | `apps/staff/src/components/`                            |
+| A component reusable across **apps**         | `packages/ui` (discuss first)                           |
+| App-wide config / clients                    | `apps/staff/src/lib/`                                   |
 
 **Feature isolation:** a feature imports from `packages/*`, from `apps/staff/src/lib` and
 `components`, and from its own folder — **not** from another feature's internals. Need to

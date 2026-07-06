@@ -45,7 +45,10 @@ export function PermissionMatrix({
 				<tbody>
 					{catalog.groups.map((group) => (
 						<>
-							<tr key={`group-${group.domain}`} className="border-b border-border bg-muted/20">
+							<tr
+								key={`group-${group.domain}`}
+								className="border-b border-border bg-muted/20"
+							>
 								<td
 									colSpan={roles.length + 1}
 									className="px-4 py-2 text-[10px] font-semibold uppercase tracking-widest text-muted-foreground"
@@ -58,7 +61,8 @@ export function PermissionMatrix({
 									key={perm.code}
 									className={cn(
 										'border-b border-border transition-colors hover:bg-muted/10',
-										idx === group.permissions.length - 1 && 'border-b-0',
+										idx === group.permissions.length - 1 &&
+											'border-b-0',
 									)}
 								>
 									<td className="sticky left-0 bg-background px-4 py-3">
@@ -72,20 +76,31 @@ export function PermissionMatrix({
 										</div>
 									</td>
 									{roles.map((role) => {
-										const granted = permissionSet.get(role.name)?.has(perm.code) ?? false;
+										const granted =
+											permissionSet
+												.get(role.name)
+												?.has(perm.code) ?? false;
 										const isSaving = savingRole === role.name;
 										return (
-											<td key={role.name} className="px-4 py-3 text-center">
+											<td
+												key={role.name}
+												className="px-4 py-3 text-center"
+											>
 												<Checkbox
 													checked={granted}
 													disabled={!role.editable || isSaving}
 													aria-label={`${role.name}: ${perm.description}`}
 													onCheckedChange={(checked) =>
-														onToggle(role.name, perm.code, checked === true)
+														onToggle(
+															role.name,
+															perm.code,
+															checked === true,
+														)
 													}
 													className={cn(
 														'mx-auto',
-														!role.editable && 'cursor-not-allowed opacity-50',
+														!role.editable &&
+															'cursor-not-allowed opacity-50',
 													)}
 												/>
 											</td>

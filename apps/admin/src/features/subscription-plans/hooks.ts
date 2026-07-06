@@ -25,8 +25,13 @@ export function useCreatePlan(options?: { onSuccess?: () => void }) {
 export function useUpdatePlan(options?: { onSuccess?: () => void }) {
 	const queryClient = useQueryClient();
 	return useMutation({
-		mutationFn: ({ id, input }: { id: number; input: Parameters<typeof updatePlan>[1] }) =>
-			updatePlan(id, input),
+		mutationFn: ({
+			id,
+			input,
+		}: {
+			id: number;
+			input: Parameters<typeof updatePlan>[1];
+		}) => updatePlan(id, input),
 		onSuccess: () => {
 			void queryClient.invalidateQueries({ queryKey: plansKeys.all });
 			options?.onSuccess?.();

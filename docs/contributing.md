@@ -50,6 +50,7 @@ pnpm gen:api           # refresh OpenAPI types after a backend contract change
 ## 4. Pull requests
 
 A PR should:
+
 - Be scoped to one feature/fix and stay reviewable.
 - Pass all CI gates (lint, typecheck, test, build).
 - Include tests and (for new endpoints) MSW handlers.
@@ -75,21 +76,22 @@ A PR should:
 
 ## 5. Adding things — quick recipes
 
-| Task                         | Steps                                                                                  |
-| ---------------------------- | -------------------------------------------------------------------------------------- |
-| New screen                   | route in `routes/` → screen in `features/<domain>/screens/` → wire nav + guard.        |
+| Task                         | Steps                                                                                                                |
+| ---------------------------- | -------------------------------------------------------------------------------------------------------------------- |
+| New screen                   | route in `routes/` → screen in `features/<domain>/screens/` → wire nav + guard.                                      |
 | New endpoint integration     | `gen:api` → keys → query/mutation hook → MSW handler + test → consume. ([api-integration.md](api-integration.md) §6) |
-| New form                     | Zod schema in `schemas/` → RHF + `<Form/>` → map server field errors. ([conventions.md](conventions.md) §6) |
-| New shared UI component      | discuss → add to `packages/ui` (presentational only) → add a usage/render test.         |
-| New shared package           | **stop and ask the engineer** — it's an architecture change.                           |
-| New dependency               | **stop and ask the engineer.**                                                         |
-| New app (teacher/portal/...) | follow the evolution path in [architecture.md](architecture.md) §6 — with the engineer. |
+| New form                     | Zod schema in `schemas/` → RHF + `<Form/>` → map server field errors. ([conventions.md](conventions.md) §6)          |
+| New shared UI component      | discuss → add to `packages/ui` (presentational only) → add a usage/render test.                                      |
+| New shared package           | **stop and ask the engineer** — it's an architecture change.                                                         |
+| New dependency               | **stop and ask the engineer.**                                                                                       |
+| New app (teacher/portal/...) | follow the evolution path in [architecture.md](architecture.md) §6 — with the engineer.                              |
 
 ---
 
 ## 6. Working with AI agents
 
 This repo is set up so AI agents can contribute safely:
+
 - The agent must **read the relevant `docs/` first** (CLAUDE.md enforces this).
 - The same gates apply: conventions, tests, no new deps, no boundary breaks, no invented
   contract.

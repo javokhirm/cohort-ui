@@ -58,14 +58,14 @@ unchanged, which is the whole point of doing the package split now.
 
 We keep the package count minimal and grow it only when a second consumer appears.
 
-| Package          | Responsibility                                                                            | May depend on        |
-| ---------------- | ----------------------------------------------------------------------------------------- | -------------------- |
-| `utils`          | Framework-agnostic pure helpers (money, dates, formatting, code parsing, guards) **and** shared cross-cutting types. The leaf. | — |
-| `config`         | Build tooling: ESLint flat config, Tailwind preset + design tokens, base `tsconfig` — via subpath exports (`@educore/config/eslint`, `/tailwind`, `/ts`). | — (leaf) |
-| `api-client`     | Generated OpenAPI types, the typed HTTP client (envelope unwrap, error normalization, injected auth hook), query-key factories, pagination helpers. | `utils` |
-| `auth`           | Session store, token storage + silent refresh, permission catalog, `<Can>`, route guards, `useAuth`/`usePermissions`. | `api-client`, `utils` |
-| `i18n`           | uz/ru/en message catalogs, locale provider, money/date/number formatters (UZS, Asia/Tashkent). | `utils`         |
-| `ui`             | shadcn/ui primitives + composed, app-agnostic components. No data fetching, no business logic. | `config`, `utils` |
+| Package      | Responsibility                                                                                                                                            | May depend on         |
+| ------------ | --------------------------------------------------------------------------------------------------------------------------------------------------------- | --------------------- |
+| `utils`      | Framework-agnostic pure helpers (money, dates, formatting, code parsing, guards) **and** shared cross-cutting types. The leaf.                            | —                     |
+| `config`     | Build tooling: ESLint flat config, Tailwind preset + design tokens, base `tsconfig` — via subpath exports (`@educore/config/eslint`, `/tailwind`, `/ts`). | — (leaf)              |
+| `api-client` | Generated OpenAPI types, the typed HTTP client (envelope unwrap, error normalization, injected auth hook), query-key factories, pagination helpers.       | `utils`               |
+| `auth`       | Session store, token storage + silent refresh, permission catalog, `<Can>`, route guards, `useAuth`/`usePermissions`.                                     | `api-client`, `utils` |
+| `i18n`       | uz/ru/en message catalogs, locale provider, money/date/number formatters (UZS, Asia/Tashkent).                                                            | `utils`               |
+| `ui`         | shadcn/ui primitives + composed, app-agnostic components. No data fetching, no business logic.                                                            | `config`, `utils`     |
 
 > **Why so few?** A one-app repo doesn't need nine packages. We folded standalone `types`
 > into `utils` (no cross-package type earns its own package yet) and the three `config-*`
@@ -88,6 +88,7 @@ config  (leaf — build tooling, no runtime deps)
 ```
 
 Rules:
+
 - **No cycles.** `api-client` must not import `auth`; `auth` imports `api-client` (it needs
   the client to perform refresh). The client takes its token getter / refresh hook via
   **injection**, not by importing `auth` — this is what keeps the arrow one-way. See
@@ -122,17 +123,17 @@ need the same thing, it moves up (to `components/`, `lib/`, or a package). Detai
 The backend's domains map to staff-app features — **some consolidated**. A feature is created
 only once the corresponding `/manage/*` endpoints exist:
 
-| Backend domain(s) (educore-be)     | Staff feature        | Covers                                                       |
-| ---------------------------------- | -------------------- | ------------------------------------------------------------ |
-| identity                           | (in `packages/auth`) | login, session, roles/permissions, branch scope              |
-| platform                           | `features/platform`  | branches, tenant settings                                    |
-| people                             | `features/people`    | students, staff, guardians                                   |
-| academics                          | `features/academics` | courses, rooms, groups, sessions, enrollments, materials     |
-| assessment                         | `features/assessment`| grading scales, assessments, results, attendance overview    |
-| **billing + finance + payments**   | `features/billing`   | fee plans, invoices, payments, discounts, expenses, payroll  |
-| communication                      | `features/communication` | templates, notification log, reminder rules              |
-| crm                                | `features/crm`       | leads, pipeline, activities                                  |
-| (cross-domain read models)         | `features/dashboard` | analytics/dashboard views                                    |
+| Backend domain(s) (educore-be)   | Staff feature            | Covers                                                      |
+| -------------------------------- | ------------------------ | ----------------------------------------------------------- |
+| identity                         | (in `packages/auth`)     | login, session, roles/permissions, branch scope             |
+| platform                         | `features/platform`      | branches, tenant settings                                   |
+| people                           | `features/people`        | students, staff, guardians                                  |
+| academics                        | `features/academics`     | courses, rooms, groups, sessions, enrollments, materials    |
+| assessment                       | `features/assessment`    | grading scales, assessments, results, attendance overview   |
+| **billing + finance + payments** | `features/billing`       | fee plans, invoices, payments, discounts, expenses, payroll |
+| communication                    | `features/communication` | templates, notification log, reminder rules                 |
+| crm                              | `features/crm`           | leads, pipeline, activities                                 |
+| (cross-domain read models)       | `features/dashboard`     | analytics/dashboard views                                   |
 
 > **Build order:** today the backend `/manage/*` surface implements **branches, students,
 > staff** — so build `features/platform` (branches) and `features/people` (students, staff)
@@ -173,15 +174,15 @@ Ownership is about _who reviews changes_, not exclusive write access. It is refl
 current reality. Note that "needs a second reviewer" is enforced by **branch protection**
 (required approvals ≥ 2), not by CODEOWNERS alone.
 
-| Area                                  | Owner (placeholder)      | Notes                                                     |
-| ------------------------------------- | ------------------------ | --------------------------------------------------------- |
-| `packages/ui`, design tokens          | frontend / design        | Visual consistency, a11y, theming.                        |
-| `packages/api-client`, shared types   | frontend / platform      | Contract fidelity; gate changes against backend OpenAPI.  |
-| `packages/auth`                       | frontend / platform      | Security-sensitive; **second reviewer** (branch rule).    |
-| `packages/i18n`                       | frontend / platform      | Locale completeness (uz/ru/en).                           |
-| `apps/staff/src/features/billing`     | frontend / billing       | Money-critical; **second reviewer**.                      |
-| `apps/staff` (shell, other features)  | frontend / staff-app     | App composition, routing, layout.                         |
-| root configs, CI, `docs/`             | frontend / platform      | Toolchain & conventions.                                  |
+| Area                                 | Owner (placeholder)  | Notes                                                    |
+| ------------------------------------ | -------------------- | -------------------------------------------------------- |
+| `packages/ui`, design tokens         | frontend / design    | Visual consistency, a11y, theming.                       |
+| `packages/api-client`, shared types  | frontend / platform  | Contract fidelity; gate changes against backend OpenAPI. |
+| `packages/auth`                      | frontend / platform  | Security-sensitive; **second reviewer** (branch rule).   |
+| `packages/i18n`                      | frontend / platform  | Locale completeness (uz/ru/en).                          |
+| `apps/staff/src/features/billing`    | frontend / billing   | Money-critical; **second reviewer**.                     |
+| `apps/staff` (shell, other features) | frontend / staff-app | App composition, routing, layout.                        |
+| root configs, CI, `docs/`            | frontend / platform  | Toolchain & conventions.                                 |
 
 **Changing a boundary** (new package, new cross-package edge, new app) is an architectural
 decision — open it with the engineer first (see CLAUDE.md "stop and ask").

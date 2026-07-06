@@ -1,5 +1,6 @@
+import { useState } from 'react';
 import { Link } from '@tanstack/react-router';
-import { FileText } from 'lucide-react';
+import { FileText, RotateCcw } from 'lucide-react';
 
 import {
 	Button,
@@ -13,8 +14,14 @@ import {
 import { formatDateTime, formatPrice } from '@repo/utils';
 
 import { useBranches } from '@/api/branches';
+import { Can } from '@/components/Can';
 import { usePayment, type PaymentDetail } from '../api/payments.queries';
 import { paymentMethodLabel } from '../lib/payment-options';
+import { RefundPaymentDialog } from './RefundPaymentDialog';
+
+function isRefundable(payment: PaymentDetail): boolean {
+	return payment.status === 'SUCCEEDED' && payment.method !== 'CREDIT';
+}
 
 /** Client-side display id (`PMT-2026-0310`) — no such field exists on the backend. */
 function transactionNumber(payment: PaymentDetail): string {
@@ -40,6 +47,7 @@ export function PaymentDetailSheet({
 }: PaymentDetailSheetProps) {
 	const { data: payment, isLoading } = usePayment(open ? paymentId : null);
 	const { data: branches = [] } = useBranches();
+	const [refundOpen, setRefundOpen] = useState(false);
 
 	const branchName = payment
 		? (branches.find((b) => b.id === payment.branchId)?.name ?? '—')
@@ -92,6 +100,18 @@ export function PaymentDetailSheet({
 										{formatPrice(payment.amount)} {payment.currency}
 									</div>
 								</div>
+								{isRefundable(payment) && (
+									<Can permission="payment.refund">
+										<Button
+											variant="outline"
+											className="mt-3 w-full"
+											onClick={() => setRefundOpen(true)}
+										>
+											<RotateCcw className="mr-1.5 size-4" />
+											Refund
+										</Button>
+									</Can>
+								)}
 							</div>
 
 							<div className="rounded-xl border bg-card p-4">
@@ -186,6 +206,20 @@ export function PaymentDetailSheet({
 						</div>
 					)}
 				</div>
+
+				{payment && (
+					<RefundPaymentDialog
+						payment={{
+							id: payment.id,
+							amount: payment.amount,
+							currency: payment.currency,
+							invoiceId: payment.invoiceId,
+							studentId: payment.studentId,
+						}}
+						open={refundOpen}
+						onOpenChange={setRefundOpen}
+					/>
+				)}
 			</SheetContent>
 		</Sheet>
 	);

@@ -45,6 +45,7 @@ import type {
 } from '../api/students.queries';
 import { useRemoveGuardian } from '../api/students.mutations';
 import { StudentForm } from '../components/StudentForm';
+import { WalletSection } from '../components/WalletSection';
 
 function genderLabel(g?: string | null) {
 	if (g === 'M') return 'Male';
@@ -544,6 +545,12 @@ function BillingTab({ studentId }: { studentId: number }) {
 	);
 }
 
+// ─── Wallet tab ───────────────────────────────────────────────────────────────
+
+function WalletTab({ studentId }: { studentId: number }) {
+	return <WalletSection studentId={studentId} />;
+}
+
 interface StudentDetailPageProps {
 	studentId: number;
 }
@@ -572,6 +579,9 @@ export function StudentDetailPage({ studentId }: StudentDetailPageProps) {
 					<TabsTrigger value="attendance">Attendance</TabsTrigger>
 					<TabsTrigger value="grades">Grades</TabsTrigger>
 					<TabsTrigger value="billing">Billing</TabsTrigger>
+					<Can permission="wallet.read">
+						<TabsTrigger value="wallet">Wallet</TabsTrigger>
+					</Can>
 				</TabsList>
 
 				<div className="mt-4">
@@ -593,6 +603,11 @@ export function StudentDetailPage({ studentId }: StudentDetailPageProps) {
 					<TabsContent value="billing">
 						<BillingTab studentId={studentId} />
 					</TabsContent>
+					<Can permission="wallet.read">
+						<TabsContent value="wallet">
+							<WalletTab studentId={studentId} />
+						</TabsContent>
+					</Can>
 				</div>
 			</Tabs>
 

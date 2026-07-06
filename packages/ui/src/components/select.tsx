@@ -4,9 +4,12 @@ import { Check, ChevronDown, ChevronUp } from 'lucide-react';
 
 import { cn } from '../lib/utils';
 
-function Select(props: React.ComponentProps<typeof SelectPrimitive.Root>) {
+function Select({
+	className,
+	...props
+}: React.ComponentProps<typeof SelectPrimitive.Root> & { className?: string }) {
 	return (
-		<span className="relative flex w-full">
+		<span className={cn('relative flex w-full', className)}>
 			<SelectPrimitive.Root data-slot="select" {...props} />
 		</span>
 	);

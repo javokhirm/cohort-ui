@@ -601,6 +601,162 @@ export function mockPaymentDetail(id: number) {
 	};
 }
 
+// ─── Wallet fixtures ──────────────────────────────────────────────────────────
+
+type MockWalletTransactionType =
+	| 'DEPOSIT'
+	| 'OVERPAYMENT'
+	| 'REFUND_CREDIT'
+	| 'INVOICE_APPLICATION'
+	| 'ADJUSTMENT'
+	| 'CASHOUT';
+
+interface MockWalletTransaction {
+	id: number;
+	type: MockWalletTransactionType;
+	amount: number;
+	invoiceId: number | null;
+	paymentId: number | null;
+	creditNoteId: number | null;
+	notes: string | null;
+	createdAt: string;
+}
+
+interface MockWallet {
+	studentId: number;
+	currency: string;
+	balance: number;
+	transactions: MockWalletTransaction[];
+}
+
+/** Mutable per-test-run wallet store, seeded for student 1; other ids start empty. */
+const MOCK_WALLETS = new Map<number, MockWallet>([
+	[
+		1,
+		{
+			studentId: 1,
+			currency: 'UZS',
+			balance: 250_000,
+			transactions: [
+				{
+					id: 2,
+					type: 'INVOICE_APPLICATION',
+					amount: -50_000,
+					invoiceId: 101,
+					paymentId: null,
+					creditNoteId: null,
+					notes: null,
+					createdAt: '2026-06-25T09:00:00Z',
+				},
+				{
+					id: 1,
+					type: 'DEPOSIT',
+					amount: 300_000,
+					invoiceId: null,
+					paymentId: null,
+					creditNoteId: null,
+					notes: 'Front-desk top-up',
+					createdAt: '2026-06-20T10:00:00Z',
+				},
+			],
+		},
+	],
+]);
+
+function getOrCreateMockWallet(studentId: number): MockWallet {
+	let wallet = MOCK_WALLETS.get(studentId);
+	if (!wallet) {
+		wallet = { studentId, currency: 'UZS', balance: 0, transactions: [] };
+		MOCK_WALLETS.set(studentId, wallet);
+	}
+	return wallet;
+}
+
+function pushMockWalletTransaction(
+	wallet: MockWallet,
+	entry: Omit<MockWalletTransaction, 'id' | 'createdAt'>,
+) {
+	wallet.transactions = [
+		{
+			...entry,
+			id: wallet.transactions.length + 1,
+			createdAt: '2026-07-06T12:00:00Z',
+		},
+		...wallet.transactions,
+	];
+}
+
+// ─── Invoice detail fixture (for apply-credit's embedded invoice) ─────────────
+// No `GET /invoices/:id` handler exists yet in this file, so this is a small,
+// self-contained fixture rather than a full invoice-detail mock system.
+
+const MOCK_INVOICE_DETAIL = {
+	id: 101,
+	branchId: 1,
+	invoiceNumber: 'INV-2026-0101',
+	studentId: 1,
+	studentName: 'Aziz Karimov',
+	studentCode: 'STU-2024-001',
+	enrollmentId: null,
+	feePlanId: 1,
+	periodStart: '2026-06-01',
+	periodEnd: '2026-06-30',
+	issueDate: '2026-06-01',
+	dueDate: '2026-06-05',
+	status: 'PARTIAL' as const,
+	subtotal: 1_300_000,
+	discountAmount: 0,
+	taxAmount: 0,
+	total: 1_300_000,
+	amountPaid: 600_000,
+	amountDue: 700_000,
+	currency: 'UZS',
+	notes: null,
+	createdAt: '2026-06-01T00:00:00Z',
+	updatedAt: '2026-06-24T09:42:00Z',
+	lineItems: [
+		{
+			id: 1,
+			description: 'Monthly Tuition — IELTS',
+			quantity: 1,
+			unitAmount: 1_300_000,
+			amount: 1_300_000,
+			type: 'TUITION' as const,
+		},
+	],
+	discounts: [] as {
+		id: number;
+		discountId: number;
+		name: string;
+		appliedAmount: number;
+	}[],
+	payments: [
+		{
+			id: 310,
+			amount: 600_000,
+			method: 'PAYME' as const,
+			status: 'SUCCEEDED' as const,
+			paidAt: '2026-06-24T09:42:00Z',
+			providerTxnId: 'PM-TXN-310',
+		},
+	],
+};
+
+// ─── Credit note fixtures ─────────────────────────────────────────────────────
+
+interface MockCreditNote {
+	id: number;
+	creditNoteNumber: string;
+	invoiceId: number;
+	studentId: number;
+	amount: number;
+	reason: string;
+	createdByUserId: number;
+	createdAt: string;
+}
+
+const MOCK_CREDIT_NOTES = new Map<number, MockCreditNote[]>();
+
 // ─── Staff fixtures ───────────────────────────────────────────────────────────
 
 interface MockStaff {
@@ -1338,6 +1494,65 @@ export const handlers = [
 		return okPaged(rows.slice(start, start + limit), page, limit, total);
 	}),
 
+	// ── Wallet ───────────────────────────────────────────────────────────────
+	http.get(`${MANAGE}/students/:id/wallet`, ({ params }) =>
+		ok(getOrCreateMockWallet(Number(params['id']))),
+	),
+
+	http.post(`${MANAGE}/students/:id/wallet/deposits`, async ({ params, request }) => {
+		const wallet = getOrCreateMockWallet(Number(params['id']));
+		const body = (await request.json()) as {
+			amount: number;
+			method: string;
+			notes?: string | null;
+		};
+		if (!['CASH', 'CARD', 'BANK_TRANSFER'].includes(body.method)) {
+			return fail(
+				422,
+				'PAYMENT_METHOD_NOT_MANUAL',
+				'This method cannot be used for a manual deposit.',
+			);
+		}
+		wallet.balance += body.amount;
+		pushMockWalletTransaction(wallet, {
+			type: 'DEPOSIT',
+			amount: body.amount,
+			invoiceId: null,
+			paymentId: null,
+			creditNoteId: null,
+			notes: body.notes ?? null,
+		});
+		return ok(wallet);
+	}),
+
+	http.post(
+		`${MANAGE}/students/:id/wallet/adjustments`,
+		async ({ params, request }) => {
+			const wallet = getOrCreateMockWallet(Number(params['id']));
+			const body = (await request.json()) as { amount: number; reason: string };
+			if (body.amount === 0) {
+				return fail(422, 'WALLET_ADJUSTMENT_INVALID', 'Amount must not be zero.');
+			}
+			if (wallet.balance + body.amount < 0) {
+				return fail(
+					422,
+					'CREDIT_INSUFFICIENT_BALANCE',
+					'This adjustment would drive the balance below zero.',
+				);
+			}
+			wallet.balance += body.amount;
+			pushMockWalletTransaction(wallet, {
+				type: 'ADJUSTMENT',
+				amount: body.amount,
+				invoiceId: null,
+				paymentId: null,
+				creditNoteId: null,
+				notes: body.reason,
+			});
+			return ok(wallet);
+		},
+	),
+
 	// ── Fee plans ─────────────────────────────────────────────────────────────
 	http.get(`${MANAGE}/fee-plans`, ({ request }) => {
 		const url = new URL(request.url);
@@ -1452,6 +1667,67 @@ export const handlers = [
 		});
 	}),
 
+	// ── Wallet credit application ────────────────────────────────────────────
+	http.post(`${MANAGE}/invoices/:id/apply-credit`, ({ params }) => {
+		const invoiceId = Number(params['id']);
+		const wallet = getOrCreateMockWallet(MOCK_INVOICE_DETAIL.studentId);
+		const applied = Math.min(wallet.balance, MOCK_INVOICE_DETAIL.amountDue);
+		if (applied > 0) {
+			wallet.balance -= applied;
+			pushMockWalletTransaction(wallet, {
+				type: 'INVOICE_APPLICATION',
+				amount: -applied,
+				invoiceId,
+				paymentId: null,
+				creditNoteId: null,
+				notes: null,
+			});
+		}
+		return ok({
+			applied,
+			walletBalance: wallet.balance,
+			invoice: {
+				...MOCK_INVOICE_DETAIL,
+				id: invoiceId,
+				amountPaid: MOCK_INVOICE_DETAIL.amountPaid + applied,
+				amountDue: MOCK_INVOICE_DETAIL.amountDue - applied,
+			},
+		});
+	}),
+
+	// ── Credit notes ─────────────────────────────────────────────────────────
+	http.get(`${MANAGE}/invoices/:id/credit-notes`, ({ params }) =>
+		ok(MOCK_CREDIT_NOTES.get(Number(params['id'])) ?? []),
+	),
+
+	http.post(`${MANAGE}/invoices/:id/credit-notes`, async ({ params, request }) => {
+		const invoiceId = Number(params['id']);
+		const body = (await request.json()) as { amount: number; reason: string };
+		if (body.amount <= 0) {
+			return fail(
+				422,
+				'CREDIT_NOTE_AMOUNT_INVALID',
+				'Amount must be greater than 0.',
+			);
+		}
+		const existing = MOCK_CREDIT_NOTES.get(invoiceId) ?? [];
+		const created: MockCreditNote = {
+			id: 900 + existing.length,
+			creditNoteNumber: `CN-2026-${String(900 + existing.length).padStart(5, '0')}`,
+			invoiceId,
+			studentId: MOCK_INVOICE_DETAIL.studentId,
+			amount: body.amount,
+			reason: body.reason,
+			createdByUserId: 1,
+			createdAt: '2026-07-06T12:00:00Z',
+		};
+		MOCK_CREDIT_NOTES.set(invoiceId, [...existing, created]);
+		return HttpResponse.json(
+			{ success: true, data: created, meta: { timestamp: 'test' } },
+			{ status: 201 },
+		);
+	}),
+
 	// ── Payments ─────────────────────────────────────────────────────────────
 	http.get(`${MANAGE}/payments`, ({ request }) => {
 		const url = new URL(request.url);
@@ -1483,6 +1759,56 @@ export const handlers = [
 		const detail = mockPaymentDetail(Number(params['id']));
 		if (!detail) return fail(404, 'PAYMENT_NOT_FOUND', 'Payment not found.');
 		return ok(detail);
+	}),
+
+	http.post(`${MANAGE}/payments/:id/refund`, async ({ params, request }) => {
+		const payment = MOCK_PAYMENTS.find((p) => p.id === Number(params['id']));
+		if (!payment) return fail(404, 'PAYMENT_NOT_FOUND', 'Payment not found.');
+		if (payment.status !== 'SUCCEEDED') {
+			return fail(
+				422,
+				'PAYMENT_NOT_REFUNDABLE',
+				'Only succeeded payments can be refunded.',
+			);
+		}
+		const body = (await request.json()) as {
+			amount: number;
+			destination: 'WALLET' | 'CASH_OUT';
+			notes?: string | null;
+		};
+		if (body.destination === 'WALLET' && payment.invoiceId == null) {
+			return fail(
+				422,
+				'REFUND_DESTINATION_INVALID',
+				'A wallet-only payment can only be refunded as cash.',
+			);
+		}
+		if (body.amount > payment.amount) {
+			return fail(
+				422,
+				'PAYMENT_REFUND_EXCEEDS',
+				'Refund amount exceeds what remains on this payment.',
+			);
+		}
+		return HttpResponse.json(
+			{
+				success: true,
+				data: {
+					id: 700 + payment.id,
+					paymentId: payment.id,
+					invoiceId: payment.invoiceId,
+					amount: body.amount,
+					destination: body.destination,
+					creditTransactionId:
+						body.destination === 'WALLET' ? 1000 + payment.id : null,
+					notes: body.notes ?? null,
+					createdByUserId: 1,
+					createdAt: '2026-07-06T12:00:00Z',
+				},
+				meta: { timestamp: 'test' },
+			},
+			{ status: 201 },
+		);
 	}),
 
 	// ── Leads / Pipeline ───────────────────────────────────────────────────────

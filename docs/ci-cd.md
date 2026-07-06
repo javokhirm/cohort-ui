@@ -20,18 +20,19 @@ install  →  lint  →  typecheck  →  test  →  build        (turbo, affecte
 ```yaml
 # .github/workflows/ci.yml (sketch)
 jobs:
-  verify:
-    steps:
-      - uses: actions/checkout@v4
-      - uses: pnpm/action-setup@v4
-      - uses: actions/setup-node@v4
-        with: { node-version-file: '.nvmrc', cache: 'pnpm' }
-      - run: pnpm install --frozen-lockfile
-      - run: pnpm turbo run lint typecheck test build --cache-dir=.turbo
-      # TURBO_TOKEN / TURBO_TEAM (or self-hosted cache) set via secrets
+    verify:
+        steps:
+            - uses: actions/checkout@v4
+            - uses: pnpm/action-setup@v4
+            - uses: actions/setup-node@v4
+              with: { node-version-file: '.nvmrc', cache: 'pnpm' }
+            - run: pnpm install --frozen-lockfile
+            - run: pnpm turbo run lint typecheck test build --cache-dir=.turbo
+            # TURBO_TOKEN / TURBO_TEAM (or self-hosted cache) set via secrets
 ```
 
 Principles:
+
 - **`--frozen-lockfile`** — the lockfile is the source of truth; CI never mutates deps.
 - **Turbo remote cache** (Vercel Remote Cache or self-hosted) so unchanged packages aren't
   rebuilt/retested across runs and machines.

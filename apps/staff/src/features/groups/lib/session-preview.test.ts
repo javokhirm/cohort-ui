@@ -5,7 +5,11 @@ import { generateSessionDates } from './session-preview';
 describe('generateSessionDates', () => {
 	it('enumerates matching weekdays across the range, inclusive of both ends', () => {
 		// 2025-03-03 is a Monday.
-		const dates = generateSessionDates(['MON', 'WED', 'FRI'], '2025-03-03', '2025-03-14');
+		const dates = generateSessionDates(
+			['MON', 'WED', 'FRI'],
+			'2025-03-03',
+			'2025-03-14',
+		);
 		expect(dates).toEqual([
 			'2025-03-03',
 			'2025-03-05',

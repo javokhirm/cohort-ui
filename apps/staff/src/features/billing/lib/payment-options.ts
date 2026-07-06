@@ -20,6 +20,7 @@ export const PAYMENT_METHOD_OPTIONS: { value: PaymentMethod; label: string }[] =
 	{ value: 'UZUM', label: 'Uzum' },
 	{ value: 'CARD', label: 'Card' },
 	{ value: 'BANK_TRANSFER', label: 'Bank transfer' },
+	{ value: 'CREDIT', label: 'Wallet credit' },
 ];
 
 export function paymentMethodLabel(method: PaymentMethod): string {

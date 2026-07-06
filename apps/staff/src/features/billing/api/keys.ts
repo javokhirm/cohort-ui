@@ -42,6 +42,12 @@ export const enrollmentDiscountsKeys = {
 		[...enrollmentDiscountsKeys.all, enrollmentId] as const,
 };
 
+export const creditNotesKeys = {
+	all: ['credit-notes'] as const,
+
+	forInvoice: (invoiceId: number) => [...creditNotesKeys.all, invoiceId] as const,
+};
+
 export interface InvoiceListFilters {
 	page?: number;
 	limit?: number;
@@ -73,7 +79,7 @@ export interface PaymentListFilters {
 	branchIds?: number[];
 	studentId?: number;
 	invoiceId?: number;
-	method?: 'CASH' | 'CLICK' | 'PAYME' | 'UZUM' | 'CARD' | 'BANK_TRANSFER';
+	method?: 'CASH' | 'CLICK' | 'PAYME' | 'UZUM' | 'CARD' | 'BANK_TRANSFER' | 'CREDIT';
 	status?: 'PENDING' | 'SUCCEEDED' | 'FAILED' | 'REFUNDED';
 	from?: string;
 	to?: string;

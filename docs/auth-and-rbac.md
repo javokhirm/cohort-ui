@@ -25,10 +25,10 @@ and the route guards.
 
 ## 2. The token model (matches the backend)
 
-| Token         | Lifetime | Carries                                              | Where the backend puts it |
-| ------------- | -------- | ---------------------------------------------------- | ------------------------- |
-| access token  | 15m      | `{ sub, tenantId, roles[], branchScope }`            | login/refresh JSON body   |
-| refresh token | 7d       | `{ sub, tenantId }` (minimal; no authz)              | login/refresh JSON body   |
+| Token         | Lifetime | Carries                                   | Where the backend puts it |
+| ------------- | -------- | ----------------------------------------- | ------------------------- |
+| access token  | 15m      | `{ sub, tenantId, roles[], branchScope }` | login/refresh JSON body   |
+| refresh token | 7d       | `{ sub, tenantId }` (minimal; no authz)   | login/refresh JSON body   |
 
 - **Permissions are NOT in the token.** The access token carries **role names** and
   `branchScope` only; fine-grained permissions are resolved server-side. The UI derives
@@ -60,6 +60,7 @@ POST /api/v1/public/auth/reset-password  { phone, otp, newPassword }  → 200
 > **Access token → in memory** (Zustand session store). **Refresh token → `localStorage`.**
 
 Rationale and the explicit trade-off:
+
 - Works with the current API (tokens in the JSON body, Bearer scheme) — **no backend change
   needed**.
 - Survives reloads/new tabs (good UX for a daily-use back-office) via the persisted refresh
@@ -78,11 +79,11 @@ the standard. Do not change storage strategy without the engineer (CLAUDE.md "st
 ```ts
 // packages/auth/src/session-store.ts (shape)
 interface SessionState {
-  accessToken: string | null;          // memory only
-  user: AuthUserSummary | null;
-  status: 'unknown' | 'authenticated' | 'anonymous';
-  setSession(r: AuthResult): void;     // stores access in memory, refresh via token-storage
-  clear(): void;
+	accessToken: string | null; // memory only
+	user: AuthUserSummary | null;
+	status: 'unknown' | 'authenticated' | 'anonymous';
+	setSession(r: AuthResult): void; // stores access in memory, refresh via token-storage
+	clear(): void;
 }
 ```
 
@@ -124,10 +125,12 @@ Roles are in the access token, so role-based gating works **now** and is the def
 const { user, hasRole } = useAuth();
 
 <Can role={['OWNER', 'ADMIN']}>
-  <PayrollNavItem />
-</Can>
+	<PayrollNavItem />
+</Can>;
 
-if (!hasRole(['OWNER', 'ADMIN'])) { /* hide the action */ }
+if (!hasRole(['OWNER', 'ADMIN'])) {
+	/* hide the action */
+}
 ```
 
 ### Later: permission-based gating — NOT YET (blocked on the backend)
@@ -151,7 +154,7 @@ This follows the repo rule: don't build ahead of the API.
 ## 6. Branch scope
 
 - The backend derives a **surface-specific branch scope** for staff users: `GET
-  /manage/branches` returns only the branches the user can access with a back-office
+/manage/branches` returns only the branches the user can access with a back-office
   role (OWNER/ADMIN/MANAGER; a tenant-wide assignment grants all). The UI never
   computes access from the token's `branchScope` claim — the branches endpoint is
   the source of truth for the selector.
@@ -161,7 +164,7 @@ This follows the repo rule: don't build ahead of the API.
   branch, several, or all accessible branches at once.
 - Every list query injects the selection as `?branchIds=<id>,<id>` through its
   query filters (so it's part of the query key — changing the selection refetches).
-  Selecting *all* accessible branches sends no `branchIds` param; the backend
+  Selecting _all_ accessible branches sends no `branchIds` param; the backend
   auto-narrows to the user's scope. An id outside the scope → 403
   `BRANCH_FORBIDDEN`.
 - A single-branch user has no selector; the active branch is fixed.
@@ -176,7 +179,7 @@ This follows the repo rule: don't build ahead of the API.
 
 - A public route group (`/login`, password reset) renders without a session.
 - An `_authed` layout route guards everything else: in `beforeLoad`, if `status !==
-  'authenticated'` (after boot refresh resolves), redirect to `/login` preserving the intended
+'authenticated'` (after boot refresh resolves), redirect to `/login` preserving the intended
   destination.
 - Role requirements can be attached per-route via the guard helpers
   (`requireRole(['OWNER','ADMIN'])`), redirecting or rendering a "not permitted" screen on
@@ -185,8 +188,12 @@ This follows the repo rule: don't build ahead of the API.
 
 ```ts
 // route-guards.ts (shape)
-export const requireAuth = (location) => { if (!isAuthed()) throw redirect({ to: '/login', search: { next: location.href } }); };
-export const requireRole  = (roles: string[]) => () => { if (!hasRole(roles)) throw redirect({ to: '/forbidden' }); };
+export const requireAuth = (location) => {
+	if (!isAuthed()) throw redirect({ to: '/login', search: { next: location.href } });
+};
+export const requireRole = (roles: string[]) => () => {
+	if (!hasRole(roles)) throw redirect({ to: '/forbidden' });
+};
 // requirePermission(code) — added when GET /manage/me (resolved permissions) exists (§5)
 ```
 

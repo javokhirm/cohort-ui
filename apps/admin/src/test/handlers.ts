@@ -555,10 +555,18 @@ export const MOCK_ROLES = [
 		isSystem: true,
 		editable: false,
 		permissions: [
-			'student.view', 'student.create', 'student.delete',
-			'invoice.create', 'invoice.void', 'payroll.approve',
-			'attendance.mark', 'grade.enter', 'group.manage',
-			'settings.edit', 'role.manage', 'report.view',
+			'student.view',
+			'student.create',
+			'student.delete',
+			'invoice.create',
+			'invoice.void',
+			'payroll.approve',
+			'attendance.mark',
+			'grade.enter',
+			'group.manage',
+			'settings.edit',
+			'role.manage',
+			'report.view',
 		],
 	},
 	{
@@ -568,10 +576,15 @@ export const MOCK_ROLES = [
 		isSystem: true,
 		editable: true,
 		permissions: [
-			'student.view', 'student.create', 'student.delete',
-			'invoice.create', 'invoice.void',
-			'attendance.mark', 'group.manage',
-			'settings.edit', 'report.view',
+			'student.view',
+			'student.create',
+			'student.delete',
+			'invoice.create',
+			'invoice.void',
+			'attendance.mark',
+			'group.manage',
+			'settings.edit',
+			'report.view',
 		],
 	},
 	{
@@ -581,9 +594,11 @@ export const MOCK_ROLES = [
 		isSystem: true,
 		editable: true,
 		permissions: [
-			'student.view', 'student.create',
+			'student.view',
+			'student.create',
 			'invoice.create',
-			'attendance.mark', 'group.manage',
+			'attendance.mark',
+			'group.manage',
 			'report.view',
 		],
 	},
@@ -763,7 +778,8 @@ export const handlers = [
 	http.patch(`${BASE}/admin/roles/:role/permissions`, async ({ params, request }) => {
 		const role = MOCK_ROLES.find((r) => r.name === params['role']);
 		if (!role) return fail(404, 'ROLE_NOT_FOUND', 'Role not found.');
-		if (!role.editable) return fail(400, 'ROLE_NOT_EDITABLE', 'This role cannot be modified.');
+		if (!role.editable)
+			return fail(400, 'ROLE_NOT_EDITABLE', 'This role cannot be modified.');
 		const body = (await request.json()) as { permissionCodes: string[] };
 		return ok({ ...role, permissions: body.permissionCodes });
 	}),

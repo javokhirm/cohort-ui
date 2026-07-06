@@ -1,6 +1,7 @@
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 
 import { manageApi } from '@/api/apiClient';
+import { peopleKeys } from '@/features/people/api/keys';
 
 import { invoicesKeys } from './keys';
 import type {
@@ -93,6 +94,13 @@ export interface GenerateMonthlyInvoicesResult {
 	errors: GenerateMonthlyInvoicesError[];
 }
 
+/** `POST /invoices/:id/apply-credit` response — mirrors `ApplyCreditResponseDto`. */
+export interface ApplyCreditResult {
+	applied: number;
+	walletBalance: number;
+	invoice: InvoiceDetail;
+}
+
 // ─── Mutations ────────────────────────────────────────────────────────────────
 
 export function useCreateInvoice() {
@@ -144,6 +152,28 @@ export function useApplyDiscount() {
 			void qc.invalidateQueries({ queryKey: invoicesKeys.invoices() });
 			void qc.invalidateQueries({
 				queryKey: invoicesKeys.invoiceDetail(invoiceId),
+			});
+		},
+	});
+}
+
+/**
+ * Apply available wallet credit to an invoice (`POST /invoices/:id/apply-credit`,
+ * no request body). Applying with a zero wallet balance is a harmless no-op
+ * (`applied: 0`), not an error.
+ */
+export function useApplyWalletCredit() {
+	const qc = useQueryClient();
+	return useMutation({
+		mutationFn: (invoiceId: number) =>
+			manageApi.post<ApplyCreditResult>(`/invoices/${invoiceId}/apply-credit`),
+		onSuccess: (data, invoiceId) => {
+			void qc.invalidateQueries({ queryKey: invoicesKeys.invoices() });
+			void qc.invalidateQueries({
+				queryKey: invoicesKeys.invoiceDetail(invoiceId),
+			});
+			void qc.invalidateQueries({
+				queryKey: peopleKeys.studentWallet(data.invoice.studentId),
 			});
 		},
 	});

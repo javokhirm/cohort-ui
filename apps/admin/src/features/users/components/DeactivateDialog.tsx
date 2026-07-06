@@ -40,8 +40,8 @@ export function DeactivateDialog({
 				<DialogHeader>
 					<DialogTitle>Deactivate user</DialogTitle>
 					<DialogDescription>
-						This will revoke <strong>{fullName}</strong>'s access across all tenants.
-						They will not be able to log in until reactivated.
+						This will revoke <strong>{fullName}</strong>'s access across all
+						tenants. They will not be able to log in until reactivated.
 					</DialogDescription>
 				</DialogHeader>
 				<Separator />

@@ -13,11 +13,11 @@ stack, then dive into the area you're working in.
 4. [conventions.md](conventions.md) — naming, components, state, forms, i18n, styling, the
    enforced architecture rules.
 5. The area-specific docs as needed:
-   - [api-integration.md](api-integration.md) — codegen, the typed client, Query hooks.
-   - [auth-and-rbac.md](auth-and-rbac.md) — tenancy, tokens, silent refresh, permission gating.
-   - [testing.md](testing.md) — Vitest, RTL, MSW, Playwright.
-   - [environments.md](environments.md) — env vars, typed env, local multi-tenant dev.
-   - [ci-cd.md](ci-cd.md) — pipeline, caching, deployment.
+    - [api-integration.md](api-integration.md) — codegen, the typed client, Query hooks.
+    - [auth-and-rbac.md](auth-and-rbac.md) — tenancy, tokens, silent refresh, permission gating.
+    - [testing.md](testing.md) — Vitest, RTL, MSW, Playwright.
+    - [environments.md](environments.md) — env vars, typed env, local multi-tenant dev.
+    - [ci-cd.md](ci-cd.md) — pipeline, caching, deployment.
 6. [contributing.md](contributing.md) — workflow, PRs, the review checklist.
 
 ## The one-paragraph summary

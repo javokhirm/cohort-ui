@@ -36,7 +36,9 @@ export function OwnerStep({
 							<Input
 								id="owner-first-name"
 								value={data.ownerFirstName}
-								onChange={(e) => onChange({ ownerFirstName: e.target.value })}
+								onChange={(e) =>
+									onChange({ ownerFirstName: e.target.value })
+								}
 								placeholder="Aziz"
 							/>
 						</div>
@@ -45,7 +47,9 @@ export function OwnerStep({
 							<Input
 								id="owner-last-name"
 								value={data.ownerLastName}
-								onChange={(e) => onChange({ ownerLastName: e.target.value })}
+								onChange={(e) =>
+									onChange({ ownerLastName: e.target.value })
+								}
 								placeholder="Yusupov"
 							/>
 						</div>
@@ -62,7 +66,8 @@ export function OwnerStep({
 					</div>
 					<div className="flex flex-col gap-1.5">
 						<Label htmlFor="owner-email">
-							Email <span className="text-muted-foreground">(optional)</span>
+							Email{' '}
+							<span className="text-muted-foreground">(optional)</span>
 						</Label>
 						<Input
 							id="owner-email"

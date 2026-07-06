@@ -1,10 +1,4 @@
-import {
-	Activity,
-	ArrowUpRight,
-	Building2,
-	Users,
-	Wallet,
-} from 'lucide-react';
+import { Activity, ArrowUpRight, Building2, Users, Wallet } from 'lucide-react';
 import {
 	Bar,
 	BarChart,
@@ -116,8 +110,12 @@ export function DashboardContent({ data }: { data: DashboardKpis }) {
 				{/* Revenue trend */}
 				<Card className="gap-0 py-0">
 					<CardHeader className="border-b border-border px-5 py-4">
-						<CardTitle className="text-sm font-semibold">Revenue Trend</CardTitle>
-						<p className="text-xs text-muted-foreground">Last 6 months (UZS)</p>
+						<CardTitle className="text-sm font-semibold">
+							Revenue Trend
+						</CardTitle>
+						<p className="text-xs text-muted-foreground">
+							Last 6 months (UZS)
+						</p>
 					</CardHeader>
 					<CardContent className="px-2 py-4">
 						<ResponsiveContainer width="100%" height={180}>
@@ -153,7 +151,9 @@ export function DashboardContent({ data }: { data: DashboardKpis }) {
 				{/* New signups */}
 				<Card className="gap-0 py-0">
 					<CardHeader className="border-b border-border px-5 py-4">
-						<CardTitle className="text-sm font-semibold">New Signups</CardTitle>
+						<CardTitle className="text-sm font-semibold">
+							New Signups
+						</CardTitle>
 						<p className="text-xs text-muted-foreground">Tenants per month</p>
 					</CardHeader>
 					<CardContent className="px-2 py-4">
@@ -174,7 +174,11 @@ export function DashboardContent({ data }: { data: DashboardKpis }) {
 									allowDecimals={false}
 								/>
 								<Tooltip contentStyle={TOOLTIP_STYLE} />
-								<Bar dataKey="signups" fill="#60a5fa" radius={[4, 4, 0, 0]} />
+								<Bar
+									dataKey="signups"
+									fill="#60a5fa"
+									radius={[4, 4, 0, 0]}
+								/>
 							</BarChart>
 						</ResponsiveContainer>
 					</CardContent>
@@ -183,8 +187,12 @@ export function DashboardContent({ data }: { data: DashboardKpis }) {
 				{/* Tenant status distribution */}
 				<Card className="gap-0 py-0">
 					<CardHeader className="border-b border-border px-5 py-4">
-						<CardTitle className="text-sm font-semibold">Tenant Status</CardTitle>
-						<p className="text-xs text-muted-foreground">Lifecycle breakdown</p>
+						<CardTitle className="text-sm font-semibold">
+							Tenant Status
+						</CardTitle>
+						<p className="text-xs text-muted-foreground">
+							Lifecycle breakdown
+						</p>
 					</CardHeader>
 					<CardContent className="flex items-center justify-center px-2 py-4">
 						<ResponsiveContainer width="100%" height={180}>
@@ -221,7 +229,9 @@ export function DashboardContent({ data }: { data: DashboardKpis }) {
 				{/* Needs Attention */}
 				<Card className="gap-0 py-0">
 					<CardHeader className="border-b border-border px-5 py-4">
-						<CardTitle className="text-sm font-semibold">Needs Attention</CardTitle>
+						<CardTitle className="text-sm font-semibold">
+							Needs Attention
+						</CardTitle>
 						<p className="text-xs text-muted-foreground">
 							Suspended or at-risk tenants
 						</p>
@@ -245,7 +255,10 @@ export function DashboardContent({ data }: { data: DashboardKpis }) {
 											<span className="flex-1 truncate text-sm font-medium">
 												{tenant.name}
 											</span>
-											<StatusBadge kind="tenant" status={tenant.status} />
+											<StatusBadge
+												kind="tenant"
+												status={tenant.status}
+											/>
 											<Button
 												variant="outline"
 												size="sm"
@@ -264,8 +277,12 @@ export function DashboardContent({ data }: { data: DashboardKpis }) {
 				{/* Monthly Highlights */}
 				<Card className="gap-0 py-0">
 					<CardHeader className="border-b border-border px-5 py-4">
-						<CardTitle className="text-sm font-semibold">Monthly Highlights</CardTitle>
-						<p className="text-xs text-muted-foreground">Current period at a glance</p>
+						<CardTitle className="text-sm font-semibold">
+							Monthly Highlights
+						</CardTitle>
+						<p className="text-xs text-muted-foreground">
+							Current period at a glance
+						</p>
 					</CardHeader>
 					<CardContent className="px-0 py-0">
 						{[
@@ -281,7 +298,8 @@ export function DashboardContent({ data }: { data: DashboardKpis }) {
 							},
 							{
 								label: 'Churned',
-								value: data.mrr.churned > 0 ? `-${data.mrr.churned}` : '0',
+								value:
+									data.mrr.churned > 0 ? `-${data.mrr.churned}` : '0',
 								tone:
 									data.mrr.churned > 0
 										? 'text-tone-red-fg'
@@ -302,14 +320,18 @@ export function DashboardContent({ data }: { data: DashboardKpis }) {
 								label: 'Revenue collected',
 								value:
 									data.revenue.processedThisMonth > 0
-										? formatPriceCompact(data.revenue.processedThisMonth)
+										? formatPriceCompact(
+												data.revenue.processedThisMonth,
+											)
 										: '—',
 								tone: 'text-foreground',
 							},
 						].map((item, i, arr) => (
 							<div key={item.label}>
 								<div className="flex items-center justify-between px-5 py-3">
-									<span className="text-sm text-muted-foreground">{item.label}</span>
+									<span className="text-sm text-muted-foreground">
+										{item.label}
+									</span>
 									<span
 										className={`text-sm font-semibold tabular-nums ${item.tone}`}
 									>
@@ -326,8 +348,12 @@ export function DashboardContent({ data }: { data: DashboardKpis }) {
 			{/* ── Section D: System Services ────────────────────────────── */}
 			<Card className="gap-0 py-0">
 				<CardHeader className="border-b border-border px-5 py-4">
-					<CardTitle className="text-sm font-semibold">System Services</CardTitle>
-					<p className="text-xs text-muted-foreground">Live status — all times UTC+5</p>
+					<CardTitle className="text-sm font-semibold">
+						System Services
+					</CardTitle>
+					<p className="text-xs text-muted-foreground">
+						Live status — all times UTC+5
+					</p>
 				</CardHeader>
 				<CardContent className="px-5 py-4">
 					<div className="grid grid-cols-2 gap-3 md:grid-cols-3">

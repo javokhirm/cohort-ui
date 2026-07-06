@@ -75,7 +75,7 @@ one that diverges.
 | [docs/api-integration.md](docs/api-integration.md)   | The API client: codegen, the typed client, envelope/error handling, Query hooks.     |
 | [docs/auth-and-rbac.md](docs/auth-and-rbac.md)       | Tenant resolution, token lifecycle, silent refresh, permission gating, branch scope. |
 | [docs/conventions.md](docs/conventions.md)           | Naming, imports, components, forms, validation, state, i18n, money/date formatting.  |
-| [docs/testing.md](docs/testing.md)                   | What to test and how (Vitest, RTL, MSW, Playwright).                                  |
+| [docs/testing.md](docs/testing.md)                   | What to test and how (Vitest, RTL, MSW, Playwright).                                 |
 | [docs/environments.md](docs/environments.md)         | Env vars, the typed env schema, local multi-tenant dev.                              |
 | [docs/ci-cd.md](docs/ci-cd.md)                       | The CI pipeline, Turbo caching, and deployment model.                                |
 | [docs/contributing.md](docs/contributing.md)         | Branching, commits, PRs, the review checklist.                                       |
@@ -109,6 +109,7 @@ one that diverges.
 - Icons: use `lucide-react` only
 
 ## Component Rules
+
 - Buttons: use `<Button variant="...">` — variants: default, outline, ghost, destructive
 - Layout: use `Card`, `Separator`, `Sheet` for structure
 - No inline styles. No hardcoded hex colors.
@@ -155,12 +156,12 @@ The backend exposes **four role-gated API surfaces** (plus a shared, unauthentic
 `/public` surface used by every app for auth). Each role-gated surface becomes its own app
 **when its roadmap phase arrives** — today `staff` and `admin` exist:
 
-| App                | Backend surface     | Roles                   |
-| ------------------ | ------------------- | ----------------------- |
-| `staff` (now)      | `/api/v1/manage/*`  | OWNER, ADMIN, MANAGER   |
-| `admin` (now)      | `/api/v1/admin/*`   | SUPER_ADMIN             |
-| `teacher` (future) | `/api/v1/teach/*`   | TEACHER                 |
-| `portal` (future)  | `/api/v1/portal/*`  | STUDENT, PARENT         |
+| App                | Backend surface    | Roles                 |
+| ------------------ | ------------------ | --------------------- |
+| `staff` (now)      | `/api/v1/manage/*` | OWNER, ADMIN, MANAGER |
+| `admin` (now)      | `/api/v1/admin/*`  | SUPER_ADMIN           |
+| `teacher` (future) | `/api/v1/teach/*`  | TEACHER               |
+| `portal` (future)  | `/api/v1/portal/*` | STUDENT, PARENT       |
 
 Every app also talks to `/api/v1/public/*` for login/refresh. Inside an app, `src/features/*`
 folders mirror the backend domains (`people`, `academics`, `billing`, …) — grouped by what

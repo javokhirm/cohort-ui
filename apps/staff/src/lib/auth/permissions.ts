@@ -75,8 +75,16 @@ export const PERMISSION_CODES = [
 	// payment
 	'payment.read',
 	'payment.record',
+	'payment.refund',
 	// discount
 	'discount.manage',
+	// wallet
+	'wallet.read',
+	'wallet.deposit',
+	'wallet.adjust',
+	'wallet.apply',
+	// credit note
+	'credit-note.create',
 	// expense
 	'expense.read',
 	'expense.create',

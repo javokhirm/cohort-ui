@@ -51,7 +51,10 @@ export function PlanDrawer({
 
 	return (
 		<Sheet open={open} onOpenChange={onOpenChange}>
-			<SheetContent side="right" className="w-[480px] sm:max-w-[480px] overflow-y-auto">
+			<SheetContent
+				side="right"
+				className="w-[480px] sm:max-w-[480px] overflow-y-auto"
+			>
 				<SheetHeader className="pb-2">
 					<SheetTitle>{isEdit ? 'Edit plan' : 'Create plan'}</SheetTitle>
 				</SheetHeader>
@@ -88,7 +91,9 @@ export function PlanDrawer({
 												min={0}
 												placeholder="2400000"
 												{...field}
-												onChange={(e) => field.onChange(Number(e.target.value))}
+												onChange={(e) =>
+													field.onChange(Number(e.target.value))
+												}
 											/>
 										</FormControl>
 										<FormMessage />
@@ -107,7 +112,9 @@ export function PlanDrawer({
 												min={0}
 												placeholder="24000000"
 												{...field}
-												onChange={(e) => field.onChange(Number(e.target.value))}
+												onChange={(e) =>
+													field.onChange(Number(e.target.value))
+												}
 											/>
 										</FormControl>
 										<FormMessage />
@@ -129,10 +136,14 @@ export function PlanDrawer({
 												min={0}
 												placeholder="300"
 												{...field}
-												onChange={(e) => field.onChange(Number(e.target.value))}
+												onChange={(e) =>
+													field.onChange(Number(e.target.value))
+												}
 											/>
 										</FormControl>
-										<p className="text-xs text-muted-foreground">0 = unlimited</p>
+										<p className="text-xs text-muted-foreground">
+											0 = unlimited
+										</p>
 										<FormMessage />
 									</FormItem>
 								)}
@@ -149,10 +160,14 @@ export function PlanDrawer({
 												min={0}
 												placeholder="5"
 												{...field}
-												onChange={(e) => field.onChange(Number(e.target.value))}
+												onChange={(e) =>
+													field.onChange(Number(e.target.value))
+												}
 											/>
 										</FormControl>
-										<p className="text-xs text-muted-foreground">0 = unlimited</p>
+										<p className="text-xs text-muted-foreground">
+											0 = unlimited
+										</p>
 										<FormMessage />
 									</FormItem>
 								)}
@@ -160,7 +175,9 @@ export function PlanDrawer({
 						</div>
 
 						<div className="flex flex-col gap-3">
-							<Label className="text-sm font-medium">Features included</Label>
+							<Label className="text-sm font-medium">
+								Features included
+							</Label>
 							{ALL_FEATURES.map((feature) => (
 								<FormField
 									key={feature}

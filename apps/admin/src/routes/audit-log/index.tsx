@@ -2,12 +2,7 @@ import { useState } from 'react';
 import { useNavigate } from '@tanstack/react-router';
 import { Search } from 'lucide-react';
 
-import {
-	Card,
-	DataTable,
-	Pagination,
-	type ColumnDef,
-} from '@repo/ui';
+import { Card, DataTable, Pagination, type ColumnDef } from '@repo/ui';
 
 import { formatDateTime as formatTimestamp } from '@repo/utils';
 import { useAuditLogs } from '@/features/audit-log/hooks';

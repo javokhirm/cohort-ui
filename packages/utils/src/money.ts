@@ -7,11 +7,7 @@ const NUMBER_FORMATTER = new Intl.NumberFormat('ru-RU');
  * call this directly only when locale context is unavailable.
  * Never use raw `toFixed` or string-concat a currency symbol.
  */
-export function formatMoney(
-	amount: number,
-	currency = 'UZS',
-	locale = 'uz-UZ',
-): string {
+export function formatMoney(amount: number, currency = 'UZS', locale = 'uz-UZ'): string {
 	return new Intl.NumberFormat(locale, {
 		style: 'currency',
 		currency,

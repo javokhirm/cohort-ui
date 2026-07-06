@@ -21,6 +21,7 @@ export const peopleKeys = {
 		[...peopleKeys.students(), id, 'attendances'] as const,
 	studentResults: (id: number) => [...peopleKeys.students(), id, 'results'] as const,
 	studentInvoices: (id: number) => [...peopleKeys.students(), id, 'invoices'] as const,
+	studentWallet: (id: number) => [...peopleKeys.students(), id, 'wallet'] as const,
 
 	groups: (filters?: { branchIds?: number[]; status?: string }) =>
 		[...peopleKeys.all, 'groups', filters] as const,

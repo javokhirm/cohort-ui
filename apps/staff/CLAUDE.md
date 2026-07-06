@@ -42,4 +42,3 @@ updates on payroll.
   (small private sub-components used only by that file may stay inline).
 - Every async view handles loading / error / empty, not just success.
 - Tabs for indentation; named exports; kebab-case dirs/non-component files, PascalCase components.
-

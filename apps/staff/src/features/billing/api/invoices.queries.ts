@@ -29,7 +29,12 @@ export const INVOICE_STATUSES = [
 ] as const;
 export type InvoiceStatus = (typeof INVOICE_STATUSES)[number];
 
-/** Every method the backend can report on a payment (online methods are portal/webhook-only). */
+/**
+ * Every method the backend can report on a payment (online methods are
+ * portal/webhook-only). `CREDIT` is internal-only — never accepted by the
+ * manual-payment or checkout endpoints, only ever set server-side when wallet
+ * credit settles an invoice (see `useApplyWalletCredit` / credit notes).
+ */
 export const PAYMENT_METHODS = [
 	'CASH',
 	'CLICK',
@@ -37,6 +42,7 @@ export const PAYMENT_METHODS = [
 	'UZUM',
 	'CARD',
 	'BANK_TRANSFER',
+	'CREDIT',
 ] as const;
 export type PaymentMethod = (typeof PAYMENT_METHODS)[number];
 

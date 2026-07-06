@@ -16,7 +16,13 @@ interface FormInputProps<
 export function FormInput<
 	TFieldValues extends FieldValues = FieldValues,
 	TName extends FieldPath<TFieldValues> = FieldPath<TFieldValues>,
->({ control, name, label, onChange: onChangeProp, ...inputProps }: FormInputProps<TFieldValues, TName>) {
+>({
+	control,
+	name,
+	label,
+	onChange: onChangeProp,
+	...inputProps
+}: FormInputProps<TFieldValues, TName>) {
 	return (
 		<FormField
 			control={control}
@@ -25,7 +31,11 @@ export function FormInput<
 				<FormItem>
 					{label && <FormLabel>{label}</FormLabel>}
 					<FormControl>
-						<Input {...inputProps} {...field} onChange={onChangeProp ?? field.onChange} />
+						<Input
+							{...inputProps}
+							{...field}
+							onChange={onChangeProp ?? field.onChange}
+						/>
 					</FormControl>
 					<FormMessage />
 				</FormItem>

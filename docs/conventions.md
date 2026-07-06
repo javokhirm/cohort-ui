@@ -9,7 +9,7 @@ the rest is review discipline.
 ## 1. Architecture rules (enforced — non-negotiable)
 
 1. **Dependency direction.** `apps → packages`; within packages: `ui/auth/i18n → api-client
-   → utils → types` (configs are leaves). No cycles, no backward edges.
+→ utils → types` (configs are leaves). No cycles, no backward edges.
    ([architecture.md](architecture.md))
 2. **Barrels only.** Import a package via its name (`@educore/ui`), never a deep path. Import
    a feature via its `index.ts`, never another feature's internals.
@@ -21,7 +21,7 @@ the rest is review discipline.
 6. **`ui` is presentational.** No data fetching, routing, Query, Zustand, or business logic in
    `packages/ui`.
 7. **Money/dates go through shared formatters.** Never `toFixed`, never `new
-   Date().toLocaleString()` ad hoc. (§7)
+Date().toLocaleString()` ad hoc. (§7)
 8. **No tenant, no secret in the bundle.** Tenant is runtime (subdomain); SPA env is public.
 
 ESLint enforces 1–3 via import/boundary rules; reviewers enforce the rest.
@@ -44,17 +44,17 @@ ESLint enforces 1–3 via import/boundary rules; reviewers enforce the rest.
 
 ## 3. Naming & files
 
-| Thing                         | Convention            | Example                          |
-| ----------------------------- | --------------------- | -------------------------------- |
-| Directory                     | `kebab-case`          | `features/billing/`              |
-| React component file + symbol | `PascalCase`          | `StudentTable.tsx` → `StudentTable` |
-| Hook                          | `useX` in `use-x.ts`  | `use-students.ts` → `useStudents` |
-| Non-component module          | `kebab-case`          | `students.queries.ts`            |
-| shadcn primitive (in `ui`)    | `kebab-case` (per CLI)| `button.tsx`                     |
-| Zod schema                    | `*-form.schema.ts`    | `student-form.schema.ts`         |
-| Test                          | `*.test.ts(x)` co-located | `StudentTable.test.tsx`      |
-| Constant values               | `SCREAMING_SNAKE_CASE`| `MAX_PAGE_LIMIT`                 |
-| Type / interface              | `PascalCase`          | `StudentListFilters`             |
+| Thing                         | Convention                | Example                             |
+| ----------------------------- | ------------------------- | ----------------------------------- |
+| Directory                     | `kebab-case`              | `features/billing/`                 |
+| React component file + symbol | `PascalCase`              | `StudentTable.tsx` → `StudentTable` |
+| Hook                          | `useX` in `use-x.ts`      | `use-students.ts` → `useStudents`   |
+| Non-component module          | `kebab-case`              | `students.queries.ts`               |
+| shadcn primitive (in `ui`)    | `kebab-case` (per CLI)    | `button.tsx`                        |
+| Zod schema                    | `*-form.schema.ts`        | `student-form.schema.ts`            |
+| Test                          | `*.test.ts(x)` co-located | `StudentTable.test.tsx`             |
+| Constant values               | `SCREAMING_SNAKE_CASE`    | `MAX_PAGE_LIMIT`                    |
+| Type / interface              | `PascalCase`              | `StudentListFilters`                |
 
 Booleans read as predicates (`isLoading`, `hasError`, `canEdit`). Event handlers are
 `handleX`; props that take them are `onX`.
@@ -87,13 +87,13 @@ hooks (e.g. `students.queries.ts` → `useStudents`, `useStudent`). See
 
 ## 5. State management
 
-| Kind of state                              | Tool                         |
-| ------------------------------------------ | ---------------------------- |
-| Anything from the API                      | **TanStack Query**           |
-| Session/tokens/user, active branch, theme, locale | **Zustand** (in `auth`/app) |
-| URL-shareable view state: filters, sort, page, tab | **Router search params** |
-| Form field state                           | **React Hook Form**          |
-| Local ephemeral (open/hover, input draft)  | `useState`/`useReducer`      |
+| Kind of state                                      | Tool                        |
+| -------------------------------------------------- | --------------------------- |
+| Anything from the API                              | **TanStack Query**          |
+| Session/tokens/user, active branch, theme, locale  | **Zustand** (in `auth`/app) |
+| URL-shareable view state: filters, sort, page, tab | **Router search params**    |
+| Form field state                                   | **React Hook Form**         |
+| Local ephemeral (open/hover, input draft)          | `useState`/`useReducer`     |
 
 - **List filters, sort, and page live in the URL** (TanStack Router typed search params), not
   in component state — so views are shareable, back/forward works, and the query key is the
@@ -117,9 +117,9 @@ hooks (e.g. `students.queries.ts` → `useStudents`, `useStudent`). See
 
 ```tsx
 const schema = z.object({
-  firstName: z.string().min(1),
-  phone: z.string().regex(/^\+998\d{9}$/),
-  dateOfBirth: z.coerce.date().optional(),
+	firstName: z.string().min(1),
+	phone: z.string().regex(/^\+998\d{9}$/),
+	dateOfBirth: z.coerce.date().optional(),
 });
 type StudentForm = z.infer<typeof schema>;
 
@@ -134,7 +134,7 @@ const form = useForm<StudentForm>({ resolver: zodResolver(schema) });
   from `packages/i18n`. Add keys to **all three locales** (`uz` default, `ru`, `en`); where a
   string corresponds to a backend message/error code, key it by that code.
 - **Money:** `numeric(14,2)`, default **UZS**. Always format via `formatMoney(amount,
-  currency)` from `i18n`/`utils`. Never `toFixed`, never string-concat a currency symbol.
+currency)` from `i18n`/`utils`. Never `toFixed`, never string-concat a currency symbol.
   Treat amounts as numbers from the API (the backend transforms `numeric` → JS number).
 - **Dates/times:** default timezone **`Asia/Tashkent`**. Format via the shared
   `formatDate`/`formatDateTime` helpers; parse API timestamps (ISO with offset) — don't

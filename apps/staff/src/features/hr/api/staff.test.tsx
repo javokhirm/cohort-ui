@@ -14,9 +14,7 @@ function wrapper() {
 		defaultOptions: { queries: { retry: false }, mutations: { retry: false } },
 	});
 	return function Wrapper({ children }: { children: ReactNode }) {
-		return (
-			<QueryClientProvider client={queryClient}>{children}</QueryClientProvider>
-		);
+		return <QueryClientProvider client={queryClient}>{children}</QueryClientProvider>;
 	};
 }
 

@@ -20,12 +20,12 @@ How configuration flows into the apps, and how to run a multi-tenant app locally
 Vite only exposes vars prefixed `VITE_`. Per-app `.env` files; document them in
 `apps/<app>/.env.example`.
 
-| Var                     | Required | Example                       | Purpose                                              |
-| ----------------------- | -------- | ----------------------------- | ---------------------------------------------------- |
-| `VITE_API_ORIGIN`       | yes      | `https://api.educore.uz`      | Backend origin; the client appends `/api/v1/<surface>`. |
-| `VITE_APP_ENV`          | yes      | `development` \| `staging` \| `production` | Drives logging/telemetry behavior.      |
-| `VITE_SENTRY_DSN`       | no       | `https://…`                   | Error reporting (if enabled).                        |
-| `VITE_DEV_TENANT`       | dev only | `zabon`                       | Local tenant override when not using `*.localhost`.  |
+| Var               | Required | Example                                    | Purpose                                                 |
+| ----------------- | -------- | ------------------------------------------ | ------------------------------------------------------- |
+| `VITE_API_ORIGIN` | yes      | `https://api.educore.uz`                   | Backend origin; the client appends `/api/v1/<surface>`. |
+| `VITE_APP_ENV`    | yes      | `development` \| `staging` \| `production` | Drives logging/telemetry behavior.                      |
+| `VITE_SENTRY_DSN` | no       | `https://…`                                | Error reporting (if enabled).                           |
+| `VITE_DEV_TENANT` | dev only | `zabon`                                    | Local tenant override when not using `*.localhost`.     |
 
 > The API base path (`/api/v1`) and the surface prefix (`/manage`) are **constants in code**,
 > not env vars — they're part of the contract, not the environment.
@@ -37,10 +37,10 @@ Vite only exposes vars prefixed `VITE_`. Per-app `.env` files; document them in
 ```ts
 // apps/staff/src/lib/env.ts (shape)
 const Env = z.object({
-  VITE_API_ORIGIN: z.string().url(),
-  VITE_APP_ENV: z.enum(['development', 'staging', 'production']),
-  VITE_SENTRY_DSN: z.string().url().optional(),
-  VITE_DEV_TENANT: z.string().optional(),
+	VITE_API_ORIGIN: z.string().url(),
+	VITE_APP_ENV: z.enum(['development', 'staging', 'production']),
+	VITE_SENTRY_DSN: z.string().url().optional(),
+	VITE_DEV_TENANT: z.string().optional(),
 });
 export const env = Env.parse(import.meta.env); // throws at boot if misconfigured
 ```
@@ -67,12 +67,12 @@ Because the tenant is the subdomain, local dev needs a subdomain too:
 
 ## 5. Environments
 
-| Environment | Hosting                        | Domain                         | Notes                                  |
-| ----------- | ------------------------------ | ------------------------------ | -------------------------------------- |
-| development | local Vite dev server          | `*.localhost:5173`             | HMR; local or shared-dev backend.      |
-| preview     | PR deploy (per [ci-cd.md](ci-cd.md)) | per-PR URL                | Built artifact; staging API.           |
-| staging     | static host + wildcard domain  | `*.staging.educore.uz`         | Mirrors prod; staging backend.         |
-| production  | static host + CDN              | `*.educore.uz`                 | Wildcard TLS for tenant subdomains.    |
+| Environment | Hosting                              | Domain                 | Notes                               |
+| ----------- | ------------------------------------ | ---------------------- | ----------------------------------- |
+| development | local Vite dev server                | `*.localhost:5173`     | HMR; local or shared-dev backend.   |
+| preview     | PR deploy (per [ci-cd.md](ci-cd.md)) | per-PR URL             | Built artifact; staging API.        |
+| staging     | static host + wildcard domain        | `*.staging.educore.uz` | Mirrors prod; staging backend.      |
+| production  | static host + CDN                    | `*.educore.uz`         | Wildcard TLS for tenant subdomains. |
 
 A **wildcard DNS + TLS** for `*.educore.uz` (and staging) is required so every tenant subdomain
 resolves to the same SPA build. Confirm this hosting/DNS model with infra — it's an assumption

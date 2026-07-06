@@ -81,6 +81,7 @@ export function LeadFilters({ values, onChange, onClear }: LeadFiltersProps) {
 			</div>
 
 			<Select
+				className="w-auto"
 				value={values.source ?? ALL}
 				onValueChange={(v) =>
 					onChange({ source: v === ALL ? undefined : (v as LeadSource) })
@@ -100,6 +101,7 @@ export function LeadFilters({ values, onChange, onClear }: LeadFiltersProps) {
 			</Select>
 
 			<Select
+				className="w-auto"
 				value={
 					values.assignedToStaffId != null
 						? String(values.assignedToStaffId)
@@ -123,6 +125,7 @@ export function LeadFilters({ values, onChange, onClear }: LeadFiltersProps) {
 			</Select>
 
 			<Select
+				className="w-auto"
 				value={
 					values.courseInterestId != null
 						? String(values.courseInterestId)
@@ -146,6 +149,7 @@ export function LeadFilters({ values, onChange, onClear }: LeadFiltersProps) {
 			</Select>
 
 			<Select
+				className="w-auto"
 				value={values.window ?? ALL}
 				onValueChange={(v) =>
 					onChange({ window: v === ALL ? undefined : (v as TimeWindow) })

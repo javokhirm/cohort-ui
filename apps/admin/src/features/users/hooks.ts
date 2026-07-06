@@ -34,10 +34,7 @@ export function useDeactivateUser(id: number, options?: { onSuccess?: () => void
 	});
 }
 
-export function useResetPassword(
-	id: number,
-	options?: { onSuccess?: () => void },
-) {
+export function useResetPassword(id: number, options?: { onSuccess?: () => void }) {
 	return useMutation({
 		mutationFn: (values: { newPassword: string }) =>
 			resetUserPassword(id, { newPassword: values.newPassword }),

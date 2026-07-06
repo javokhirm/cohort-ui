@@ -17,7 +17,12 @@ describe('describeScheduleConflict', () => {
 		const msg = describeScheduleConflict(
 			conflictError({
 				conflicts: [
-					{ type: 'ROOM', sessionDate: '2025-03-03', startTime: '09:00:00', endTime: '10:30:00' },
+					{
+						type: 'ROOM',
+						sessionDate: '2025-03-03',
+						startTime: '09:00:00',
+						endTime: '10:30:00',
+					},
 				],
 			}),
 		);
@@ -31,12 +36,19 @@ describe('describeScheduleConflict', () => {
 		const msg = describeScheduleConflict(
 			conflictError({
 				conflicts: [
-					{ type: 'TEACHER', sessionDate: '2025-03-05', startTime: '14:00', endTime: '15:00' },
+					{
+						type: 'TEACHER',
+						sessionDate: '2025-03-05',
+						startTime: '14:00',
+						endTime: '15:00',
+					},
 				],
 			}),
 		);
 
-		expect(msg).toContain('The teacher is already booked on 2025-03-05 (14:00–15:00)');
+		expect(msg).toContain(
+			'The teacher is already booked on 2025-03-05 (14:00–15:00)',
+		);
 	});
 
 	it('falls back to the server message when no conflict detail is present', () => {
@@ -45,7 +57,11 @@ describe('describeScheduleConflict', () => {
 	});
 
 	it('returns null for a non-conflict ApiError', () => {
-		expect(describeScheduleConflict(new ApiError('ROOM_NOT_FOUND', 'Room not found.', 404))).toBeNull();
+		expect(
+			describeScheduleConflict(
+				new ApiError('ROOM_NOT_FOUND', 'Room not found.', 404),
+			),
+		).toBeNull();
 	});
 
 	it('returns null for a non-ApiError value', () => {

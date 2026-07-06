@@ -18,19 +18,19 @@ When they disagree, the backend doc wins — update this and regenerate types.
 - **Auth:** `Authorization: Bearer <accessToken>` on every authenticated request.
 - **Response envelope (every response):**
 
-  ```jsonc
-  // success (single resource)
-  { "success": true, "data": { /* T */ }, "meta": { "timestamp": "2025-03-15T10:30:00+05:00" } }
+    ```jsonc
+    // success (single resource)
+    { "success": true, "data": { /* T */ }, "meta": { "timestamp": "2025-03-15T10:30:00+05:00" } }
 
-  // success (list) — pagination fields added to meta
-  { "success": true, "data": [ /* T[] */ ],
-    "meta": { "timestamp": "...", "page": 1, "limit": 20, "total": 137, "totalPages": 7 } }
+    // success (list) — pagination fields added to meta
+    { "success": true, "data": [ /* T[] */ ],
+      "meta": { "timestamp": "...", "page": 1, "limit": 20, "total": 137, "totalPages": 7 } }
 
-  // failure
-  { "success": false,
-    "error": { "code": "INVOICE_ALREADY_VOID", "message": "…", "details": { } },
-    "meta": { "timestamp": "..." } }
-  ```
+    // failure
+    { "success": false,
+      "error": { "code": "INVOICE_ALREADY_VOID", "message": "…", "details": { } },
+      "meta": { "timestamp": "..." } }
+    ```
 
 - **Pagination (offset):** request `?page=<1-based>&limit=<≤100>` (default `page=1`,
   `limit=20`, hard max `100`). Totals come back in `meta`.
@@ -55,6 +55,7 @@ openapi-typescript ./openapi.json -o src/generated/schema.d.ts
 ```
 
 Rules:
+
 - **Never hand-edit `generated/`.** Regenerate. The file is committed so CI/typecheck don't
   need a running backend, but it is owned by the generator.
 - Prefer generating from a **committed `openapi.json`** snapshot (updated via `gen:api`
@@ -91,21 +92,25 @@ A small wrapper (built on `openapi-fetch`, which consumes the generated `schema.
 ```ts
 // packages/api-client — shape (illustrative)
 export interface ApiClientOptions {
-  baseUrl: string;                         // e.g. `${env.apiOrigin}/api/v1/manage`
-  getAccessToken: () => string | null;     // injected by auth
-  onUnauthorized: () => Promise<boolean>;  // injected by auth: refresh; true = retry
+	baseUrl: string; // e.g. `${env.apiOrigin}/api/v1/manage`
+	getAccessToken: () => string | null; // injected by auth
+	onUnauthorized: () => Promise<boolean>; // injected by auth: refresh; true = retry
 }
 
 export class ApiError extends Error {
-  constructor(
-    readonly code: string,
-    message: string,
-    readonly status: number,
-    readonly details?: Record<string, unknown>,
-  ) { super(message); }
+	constructor(
+		readonly code: string,
+		message: string,
+		readonly status: number,
+		readonly details?: Record<string, unknown>,
+	) {
+		super(message);
+	}
 }
 
-export function createApiClient(opts: ApiClientOptions) { /* ...openapi-fetch + middleware... */ }
+export function createApiClient(opts: ApiClientOptions) {
+	/* ...openapi-fetch + middleware... */
+}
 ```
 
 The app wires one client per surface in `apps/staff/src/lib/api.ts` and passes the token
@@ -115,8 +120,11 @@ getter / refresh function from `packages/auth`.
 
 ```ts
 export interface PaginatedResult<T> {
-  rows: T[];
-  page: number; limit: number; total: number; totalPages: number;
+	rows: T[];
+	page: number;
+	limit: number;
+	total: number;
+	totalPages: number;
 }
 // the client maps a list envelope { data, meta:{page,limit,total,totalPages} } → PaginatedResult<T>
 ```
@@ -149,10 +157,11 @@ the hooks provide the React Query bindings.
 ```ts
 // features/people/api/keys.ts
 export const peopleKeys = {
-  all: ['people'] as const,
-  students: () => [...peopleKeys.all, 'students'] as const,
-  studentList: (filters: StudentListFilters) => [...peopleKeys.students(), 'list', filters] as const,
-  student: (id: number) => [...peopleKeys.students(), 'detail', id] as const,
+	all: ['people'] as const,
+	students: () => [...peopleKeys.all, 'students'] as const,
+	studentList: (filters: StudentListFilters) =>
+		[...peopleKeys.students(), 'list', filters] as const,
+	student: (id: number) => [...peopleKeys.students(), 'detail', id] as const,
 };
 ```
 
@@ -164,11 +173,11 @@ list keys include the full filter object so each filter combination caches indep
 ```ts
 // features/people/api/students.queries.ts
 export function useStudents(filters: StudentListFilters) {
-  return useQuery({
-    queryKey: peopleKeys.studentList(filters),
-    queryFn: () => api.GET('/students', { params: { query: filters } }), // typed by generated schema
-    placeholderData: keepPreviousData, // smooth pagination
-  });
+	return useQuery({
+		queryKey: peopleKeys.studentList(filters),
+		queryFn: () => api.GET('/students', { params: { query: filters } }), // typed by generated schema
+		placeholderData: keepPreviousData, // smooth pagination
+	});
 }
 ```
 
@@ -177,11 +186,11 @@ export function useStudents(filters: StudentListFilters) {
 ```ts
 // features/people/api/students.mutations.ts
 export function useCreateStudent() {
-  const qc = useQueryClient();
-  return useMutation({
-    mutationFn: (input: CreateStudentInput) => api.POST('/students', { body: input }),
-    onSuccess: () => qc.invalidateQueries({ queryKey: peopleKeys.students() }),
-  });
+	const qc = useQueryClient();
+	return useMutation({
+		mutationFn: (input: CreateStudentInput) => api.POST('/students', { body: input }),
+		onSuccess: () => qc.invalidateQueries({ queryKey: peopleKeys.students() }),
+	});
 }
 ```
 

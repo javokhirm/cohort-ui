@@ -7,11 +7,11 @@ fast, reliable suite, not coverage theater.
 
 ## 1. The stack & the pyramid
 
-| Level                | Tool                                   | What it covers                                            |
-| -------------------- | -------------------------------------- | --------------------------------------------------------- |
-| Unit                 | **Vitest**                             | Pure logic: utils, formatters, schemas, reducers, hooks.  |
-| Component / integration | **Vitest + React Testing Library + MSW** | Components & feature screens with mocked network.    |
-| End-to-end (few)     | **Playwright**                         | Critical user journeys against a running app + test API.  |
+| Level                   | Tool                                     | What it covers                                           |
+| ----------------------- | ---------------------------------------- | -------------------------------------------------------- |
+| Unit                    | **Vitest**                               | Pure logic: utils, formatters, schemas, reducers, hooks. |
+| Component / integration | **Vitest + React Testing Library + MSW** | Components & feature screens with mocked network.        |
+| End-to-end (few)        | **Playwright**                           | Critical user journeys against a running app + test API. |
 
 Why Vitest (not Jest, which the backend uses): it shares Vite's transform pipeline, so there's
 no second build config, and the API is Jest-compatible. The split from the backend's Jest is
@@ -35,11 +35,17 @@ the real envelope/error mapping, with the network stubbed.
 ```ts
 // test/handlers/students.ts (shape)
 http.get('*/api/v1/manage/students', () =>
-  HttpResponse.json({
-    success: true,
-    data: [studentFixture()],
-    meta: { timestamp: '2025-01-01T00:00:00+05:00', page: 1, limit: 20, total: 1, totalPages: 1 },
-  }),
+	HttpResponse.json({
+		success: true,
+		data: [studentFixture()],
+		meta: {
+			timestamp: '2025-01-01T00:00:00+05:00',
+			page: 1,
+			limit: 20,
+			total: 1,
+			totalPages: 1,
+		},
+	}),
 );
 ```
 
@@ -51,6 +57,7 @@ backend's `fishery` factories.
 ## 3. What to test (and what not to)
 
 **Do test:**
+
 - Pure logic & money/date formatters (table-driven; include UZS + `Asia/Tashkent` cases).
 - Zod schemas (valid + invalid inputs, including the backend's constraints).
 - Feature behavior: list renders rows, filters update the URL and refetch, a form submits and
@@ -59,6 +66,7 @@ backend's `fishery` factories.
 - The envelope/error mapping in `api-client` (unit).
 
 **Don't test:**
+
 - `packages/ui` primitives' internal behavior (that's Radix's job) — test _your_ composition.
 - Implementation details (internal state, exact call counts). Assert on what the user sees.
 - The backend. Contract trust comes from generated types + MSW, not by re-testing the API.
@@ -80,6 +88,7 @@ critical-path E2E.
 ## 5. E2E (Playwright) — keep it small
 
 A handful of journeys, run in CI against a built app + a seeded test backend:
+
 - **Auth:** login → land on dashboard → token refresh keeps the session → logout.
 - **People:** create a student → appears in the list → edit → soft-delete.
 - **Billing (when built):** create/issue an invoice → record a payment → status reflects.

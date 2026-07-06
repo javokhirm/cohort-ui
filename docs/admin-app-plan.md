@@ -15,7 +15,7 @@ the project id). This plan follows the repo rules in [architecture.md](architect
   surface yet.**
 - The roadmap (`educore-be` `project-overview.md` §10) places the Super Admin panel in
   **Phase 4**, after the current Staff (Phase 1) work.
-- Per `CLAUDE.md`: *"Don't build ahead of the API."* → **No ADMIN feature code until its
+- Per `CLAUDE.md`: _"Don't build ahead of the API."_ → **No ADMIN feature code until its
   backend endpoints exist.** What we build now is the **shared foundation** (justified because
   the Staff app needs it today); ADMIN then becomes mostly composition.
 
@@ -26,12 +26,12 @@ confirm against `educore-be/docs/api-reference.md`, then `pnpm gen:api`.
 
 ## 1. Decisions required before ADMIN starts (CLAUDE.md "stop and ask")
 
-| # | Decision | Why |
-| - | -------- | --- |
-| 1 | **Admin auth model** | The design diverges from the tenant model in [auth-and-rbac.md](auth-and-rbac.md): work-email login, **Google Workspace SSO + 2FA**, **no tenant subdomain** (platform-wide), **SUPER_ADMIN**, **BYPASSRLS**, and **impersonation**. `packages/auth` today is tenant-centric (subdomain→tenant, phone+password, branchScope). Security-sensitive **and** needs backend endpoints that don't exist. |
-| 2 | **New app `apps/admin`** | Adding an app is an architectural change ([architecture.md](architecture.md) §5). |
-| 3 | **Charts dependency** | ADMIN + Staff dashboards need line/bar/sparkline charts → a new dep (e.g. `recharts`). |
-| 4 | **Shell sharing** | Whether sidebar/topbar become shared `ui` primitives or stay app-local. |
+| #   | Decision                 | Why                                                                                                                                                                                                                                                                                                                                                                                                |
+| --- | ------------------------ | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| 1   | **Admin auth model**     | The design diverges from the tenant model in [auth-and-rbac.md](auth-and-rbac.md): work-email login, **Google Workspace SSO + 2FA**, **no tenant subdomain** (platform-wide), **SUPER_ADMIN**, **BYPASSRLS**, and **impersonation**. `packages/auth` today is tenant-centric (subdomain→tenant, phone+password, branchScope). Security-sensitive **and** needs backend endpoints that don't exist. |
+| 2   | **New app `apps/admin`** | Adding an app is an architectural change ([architecture.md](architecture.md) §5).                                                                                                                                                                                                                                                                                                                  |
+| 3   | **Charts dependency**    | ADMIN + Staff dashboards need line/bar/sparkline charts → a new dep (e.g. `recharts`).                                                                                                                                                                                                                                                                                                             |
+| 4   | **Shell sharing**        | Whether sidebar/topbar become shared `ui` primitives or stay app-local.                                                                                                                                                                                                                                                                                                                            |
 
 ---
 
@@ -45,15 +45,15 @@ Tooltip, Toaster, EmptyState, PageHeader, Spinner, Skeleton, Separator, Avatar, 
 
 **Should be shared — build for Staff now, ADMIN inherits free:**
 
-| Component | Consumers | Notes |
-| --------- | --------- | ----- |
-| **Form / FieldGroup** (RHF-aware) | every app/form | `CLAUDE.md` mandates `FieldGroup + RHF + Zod`; `packages/ui/form.tsx` is in the planned layout. **(building first)** |
-| **DataTable + Pagination** | ADMIN (tenants/users/subs), Staff (students/invoices) | sortable, paginated, row actions, selection, loading/empty. Highest-leverage DRY win. |
-| **ConfirmDialog** (+ type-to-confirm) | ADMIN (suspend/cancel), Staff (void/delete) | one component, two modes. |
-| **CommandPalette (⌘K)** | ADMIN + MANAGE | identical pattern in both designs. |
-| **Theme provider + ThemeToggle** | ADMIN/TEACH/PORTAL dark mode | tokens already in `globals.css`. |
-| **Stepper / Wizard** | ADMIN onboarding, Staff multi-step | drives the onboard wizard. |
-| **Chart primitives** | ADMIN + Staff dashboards | blocked on decision #3. |
+| Component                             | Consumers                                             | Notes                                                                                                                |
+| ------------------------------------- | ----------------------------------------------------- | -------------------------------------------------------------------------------------------------------------------- |
+| **Form / FieldGroup** (RHF-aware)     | every app/form                                        | `CLAUDE.md` mandates `FieldGroup + RHF + Zod`; `packages/ui/form.tsx` is in the planned layout. **(building first)** |
+| **DataTable + Pagination**            | ADMIN (tenants/users/subs), Staff (students/invoices) | sortable, paginated, row actions, selection, loading/empty. Highest-leverage DRY win.                                |
+| **ConfirmDialog** (+ type-to-confirm) | ADMIN (suspend/cancel), Staff (void/delete)           | one component, two modes.                                                                                            |
+| **CommandPalette (⌘K)**               | ADMIN + MANAGE                                        | identical pattern in both designs.                                                                                   |
+| **Theme provider + ThemeToggle**      | ADMIN/TEACH/PORTAL dark mode                          | tokens already in `globals.css`.                                                                                     |
+| **Stepper / Wizard**                  | ADMIN onboarding, Staff multi-step                    | drives the onboard wizard.                                                                                           |
+| **Chart primitives**                  | ADMIN + Staff dashboards                              | blocked on decision #3.                                                                                              |
 
 **ADMIN-specific** (live in `apps/admin/src/features/*`): dark "console" topbar +
 impersonation banner (shell), subscription tier/pricing cards, feature-flag matrix,
@@ -64,23 +64,24 @@ permission-template matrix, audit-log diff rows, onboard-wizard screens.
 ## 3. Phases
 
 **Phase 0 — Foundation (now; serves Staff, unblocks ADMIN)**
+
 - Build the "should be shared" components above.
 - Finish `packages/auth` (tenant model), `packages/i18n`, `packages/utils`; wire the Staff
   shell + `lib/api.ts` / `lib/query-client.ts`.
 - Resolve decisions #1–#3 with backend.
 
-**Phase A — Shell & access** *(gated: admin auth + base endpoints)*
+**Phase A — Shell & access** _(gated: admin auth + base endpoints)_
 Scaffold `apps/admin` (copy the staff shell), implement the admin auth model (SSO/2FA/
 impersonation per decision #1), the dark console layout, `requireRole(['SUPER_ADMIN'])`.
 
-**Phase B — Tenants** *(gated: `/admin/tenants*`)*
+**Phase B — Tenants** _(gated: `/admin/tenants_`)\*
 Directory (DataTable + status filters), tenant detail (tabs: overview/subscription/branches/
 members/audit/danger), lifecycle (suspend/cancel via type-to-confirm), onboard wizard (Stepper).
 
-**Phase C — Revenue** *(gated: `/admin/subscription-tiers*`, `/admin/subscriptions*`)*
+**Phase C — Revenue** _(gated: `/admin/subscription-tiers_`, `/admin/subscriptions*`)*
 Plans/tiers, feature-flag matrix + toggles, subscriptions table + drawer (billing lifecycle).
 
-**Phase D — Platform ops** *(gated: `/admin/dashboard`, `/admin/audit*`, `/admin/users*`, `/admin/roles*`)*
+**Phase D — Platform ops** _(gated: `/admin/dashboard`, `/admin/audit_`, `/admin/users*`, `/admin/roles*`)\*
 Dashboard (StatCard + charts), audit log (diff rows), user directory, role/permission
 templates, console settings, impersonation banner.
 

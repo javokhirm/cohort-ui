@@ -66,7 +66,9 @@ export function BranchSelector() {
 					className="gap-2"
 				>
 					<span className="flex-1">All branches</span>
-					{activeBranchIds === null && <Check className="size-3.5 text-primary" />}
+					{activeBranchIds === null && (
+						<Check className="size-3.5 text-primary" />
+					)}
 				</DropdownMenuItem>
 				<DropdownMenuSeparator />
 				{branches.map((branch) => (

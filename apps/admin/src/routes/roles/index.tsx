@@ -1,7 +1,11 @@
 import { useState } from 'react';
 import { Info } from 'lucide-react';
 
-import { usePermissions, useRoles, useUpdateRolePermissions } from '@/features/roles/hooks';
+import {
+	usePermissions,
+	useRoles,
+	useUpdateRolePermissions,
+} from '@/features/roles/hooks';
 import { PermissionMatrix } from '@/features/roles/components/PermissionMatrix';
 import { MatrixSkeleton } from '@/features/roles/components/MatrixSkeleton';
 
@@ -52,8 +56,8 @@ export function RoleTemplatesPage() {
 				<Info className="mt-0.5 size-4 shrink-0" />
 				<p>
 					Editing a system-role template takes effect{' '}
-					<strong>globally across all tenants immediately</strong>. Locked roles (OWNER,
-					SUPER_ADMIN) cannot be modified.
+					<strong>globally across all tenants immediately</strong>. Locked roles
+					(OWNER, SUPER_ADMIN) cannot be modified.
 				</p>
 			</div>
 

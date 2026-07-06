@@ -49,12 +49,8 @@ describe('FeePlanForm (edit)', () => {
 		);
 
 		expect(screen.getByLabelText('Amount (UZS) *')).toBeInTheDocument();
-		expect(
-			screen.getByText('Override tenant default due day'),
-		).toBeInTheDocument();
-		expect(
-			screen.getByText('Override tenant default proration'),
-		).toBeInTheDocument();
+		expect(screen.getByText('Override tenant default due day')).toBeInTheDocument();
+		expect(screen.getByText('Override tenant default proration')).toBeInTheDocument();
 	});
 
 	it('labels the amount field as a per-session price and hides proration/due-day overrides', () => {

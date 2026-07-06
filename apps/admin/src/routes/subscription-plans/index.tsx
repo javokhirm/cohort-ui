@@ -7,8 +7,16 @@ import type { PlanView } from '@/api/plans/types';
 import { PlanCard } from '@/features/subscription-plans/components/PlanCard';
 import { PlanDrawer } from '@/features/subscription-plans/components/PlanDrawer';
 import { PlanSkeleton } from '@/features/subscription-plans/components/PlanSkeleton';
-import { useCreatePlan, usePlans, useUpdatePlan } from '@/features/subscription-plans/hooks';
-import { formValuesToInput, type DrawerMode, type PlanFormValues } from '@/features/subscription-plans/schemas';
+import {
+	useCreatePlan,
+	usePlans,
+	useUpdatePlan,
+} from '@/features/subscription-plans/hooks';
+import {
+	formValuesToInput,
+	type DrawerMode,
+	type PlanFormValues,
+} from '@/features/subscription-plans/schemas';
 
 export function SubscriptionPlansPage() {
 	const [drawerOpen, setDrawerOpen] = useState(false);
@@ -49,7 +57,9 @@ export function SubscriptionPlansPage() {
 		<div className="flex flex-col gap-6">
 			<div className="flex items-start justify-between">
 				<div>
-					<h1 className="text-xl font-semibold tracking-tight">Subscription Plans</h1>
+					<h1 className="text-xl font-semibold tracking-tight">
+						Subscription Plans
+					</h1>
 					<p className="text-sm text-muted-foreground">
 						Tiers, pricing and feature flags applied across every tenant.
 					</p>
