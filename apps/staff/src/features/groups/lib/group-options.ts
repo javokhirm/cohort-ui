@@ -39,10 +39,43 @@ export const GROUP_STATUS_OPTIONS = (Object.keys(GROUP_STATUS_META) as GroupStat
 
 export const ENROLLMENT_STATUS_META: Record<EnrollmentStatus, string> = {
 	ACTIVE: 'Active',
+	SUSPENDED: 'Suspended',
 	DROPPED: 'Dropped',
 	COMPLETED: 'Completed',
 	TRANSFERRED: 'Transferred',
 };
+
+/** Status filter chips for a roster/enrollments list (maps to `?status=`). */
+export const ENROLLMENT_STATUS_FILTERS: {
+	value: EnrollmentStatus | undefined;
+	label: string;
+}[] = [
+	{ value: undefined, label: 'All' },
+	...(Object.keys(ENROLLMENT_STATUS_META) as EnrollmentStatus[]).map((value) => ({
+		value,
+		label: ENROLLMENT_STATUS_META[value],
+	})),
+];
+
+/**
+ * Server-enforced transitions for `PATCH /manage/enrollments/:id` (400 on a
+ * violation) — mirrored here so invalid actions are disabled client-side
+ * rather than surfacing a raw error. Terminal statuses have no way out.
+ */
+export const ENROLLMENT_TRANSITIONS: Record<EnrollmentStatus, EnrollmentStatus[]> = {
+	ACTIVE: ['SUSPENDED', 'DROPPED', 'COMPLETED', 'TRANSFERRED'],
+	SUSPENDED: ['ACTIVE', 'DROPPED'],
+	DROPPED: [],
+	COMPLETED: [],
+	TRANSFERRED: [],
+};
+
+export function canTransitionEnrollment(
+	from: EnrollmentStatus,
+	to: EnrollmentStatus,
+): boolean {
+	return ENROLLMENT_TRANSITIONS[from].includes(to);
+}
 
 // ─── Session status ───────────────────────────────────────────────────────────
 

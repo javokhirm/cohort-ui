@@ -72,7 +72,7 @@ export interface Enrollment {
 	/** Per-enrollment fee-plan override, if any. */
 	feePlanId: number | null;
 	enrolledAt: string;
-	status: 'ACTIVE' | 'COMPLETED' | 'DROPPED' | 'TRANSFERRED';
+	status: 'ACTIVE' | 'SUSPENDED' | 'COMPLETED' | 'DROPPED' | 'TRANSFERRED';
 	/** Set when `status` is `DROPPED`. */
 	dropReason: string | null;
 	/** Set when `status` is `COMPLETED`. */

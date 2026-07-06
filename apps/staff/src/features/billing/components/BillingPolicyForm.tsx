@@ -318,8 +318,8 @@ export function BillingPolicyForm({ policy }: { policy: BillingPolicyResponse })
 					<CardHeader>
 						<CardTitle>Late fees</CardTitle>
 						<CardDescription>
-							Reserved for a later dunning phase — configurable now, but not
-							yet applied automatically.
+							Applied automatically by the nightly dunning job once an
+							invoice is overdue.
 						</CardDescription>
 					</CardHeader>
 					<CardContent className="flex flex-col gap-4">
@@ -328,37 +328,39 @@ export function BillingPolicyForm({ policy }: { policy: BillingPolicyResponse })
 							name="lateFeeEnabled"
 							label="Enable late fees"
 						/>
-						{lateFeeEnabled && (
-							<div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
-								<FormSelect
-									control={form.control}
-									name="lateFeeType"
-									label="Late fee type"
-									options={LATE_FEE_TYPE_OPTIONS}
-								/>
-								<NumberField
-									control={form.control}
-									name="lateFeeAmount"
-									label="Late fee amount"
-									min={0}
-									hint="A percentage must be ≤ 100."
-								/>
-								<FormSelect
-									control={form.control}
-									name="lateFeeRecurrence"
-									label="Recurrence"
-									options={LATE_FEE_RECURRENCE_OPTIONS}
-								/>
-								<NumberField
-									control={form.control}
-									name="lateFeeMaxTotal"
-									label="Max total (blank = uncapped)"
-									min={0}
-									nullable
-									placeholder="Uncapped"
-								/>
-							</div>
-						)}
+						<div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
+							<FormSelect
+								control={form.control}
+								name="lateFeeType"
+								label="Late fee type"
+								options={LATE_FEE_TYPE_OPTIONS}
+								disabled={!lateFeeEnabled}
+							/>
+							<NumberField
+								control={form.control}
+								name="lateFeeAmount"
+								label="Late fee amount"
+								min={0}
+								hint="A percentage must be ≤ 100."
+								disabled={!lateFeeEnabled}
+							/>
+							<FormSelect
+								control={form.control}
+								name="lateFeeRecurrence"
+								label="Recurrence"
+								options={LATE_FEE_RECURRENCE_OPTIONS}
+								disabled={!lateFeeEnabled}
+							/>
+							<NumberField
+								control={form.control}
+								name="lateFeeMaxTotal"
+								label="Max total (blank = uncapped)"
+								min={0}
+								nullable
+								placeholder="Uncapped"
+								disabled={!lateFeeEnabled}
+							/>
+						</div>
 					</CardContent>
 				</Card>
 
@@ -366,7 +368,8 @@ export function BillingPolicyForm({ policy }: { policy: BillingPolicyResponse })
 					<CardHeader>
 						<CardTitle>Dunning</CardTitle>
 						<CardDescription>
-							Reserved for a later phase. Auto-cancel days must exceed
+							Runs nightly per tenant: suspends, then cancels, enrollments
+							whose invoices stay unpaid. Auto-cancel days must exceed
 							auto-suspend days.
 						</CardDescription>
 					</CardHeader>
@@ -379,6 +382,7 @@ export function BillingPolicyForm({ policy }: { policy: BillingPolicyResponse })
 								min={1}
 								nullable
 								placeholder="Disabled"
+								hint="Days past the invoice's due date before its enrollment is auto-suspended."
 							/>
 							<NumberField
 								control={form.control}
@@ -387,12 +391,20 @@ export function BillingPolicyForm({ policy }: { policy: BillingPolicyResponse })
 								min={1}
 								nullable
 								placeholder="Disabled"
+								hint="Days past the invoice's due date before its enrollment is auto-dropped."
 							/>
 						</div>
+						<p className="text-xs text-muted-foreground">
+							Grace days, auto-suspend, and auto-cancel are all counted from
+							the invoice's actual due date — grace only delays when it
+							flips to OVERDUE, it doesn't reset the clock for
+							suspend/cancel.
+						</p>
 						<SwitchField
 							control={form.control}
 							name="remindersEnabled"
 							label="Payment reminders"
+							description="Fires the Payment Reminder Rules you've configured as invoices approach and pass their due date."
 						/>
 					</CardContent>
 				</Card>

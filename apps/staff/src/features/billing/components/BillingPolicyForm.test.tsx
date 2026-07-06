@@ -27,16 +27,16 @@ describe('BillingPolicyForm', () => {
 		expect(screen.getByLabelText('Grace days (0–60)')).toHaveValue(7);
 	});
 
-	it('reveals the late-fee sub-fields only when late fees are enabled', async () => {
+	it('disables the late-fee sub-fields until late fees are enabled', async () => {
 		renderForm(<BillingPolicyForm policy={POLICY} />);
 
-		// Hidden while disabled (the fixture has lateFeeEnabled: false).
-		expect(screen.queryByLabelText('Late fee amount')).not.toBeInTheDocument();
+		// Greyed out while disabled (the fixture has lateFeeEnabled: false).
+		expect(screen.getByLabelText('Late fee amount')).toBeDisabled();
 
 		await userEvent.click(screen.getByLabelText('Enable late fees'));
 
 		await waitFor(() =>
-			expect(screen.getByLabelText('Late fee amount')).toBeInTheDocument(),
+			expect(screen.getByLabelText('Late fee amount')).toBeEnabled(),
 		);
 	});
 

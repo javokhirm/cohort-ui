@@ -7,6 +7,11 @@ import {
 	Card,
 	CardContent,
 	DataTable,
+	Select,
+	SelectContent,
+	SelectItem,
+	SelectTrigger,
+	SelectValue,
 	Separator,
 	Skeleton,
 	StatusBadge,
@@ -266,6 +271,17 @@ function GuardiansTab({ studentId }: { studentId: number }) {
 
 // ─── Enrollments tab ──────────────────────────────────────────────────────────
 
+const ENROLLMENT_STATUS_ALL = 'all';
+
+const ENROLLMENT_STATUS_FILTER_OPTIONS: { value: string; label: string }[] = [
+	{ value: ENROLLMENT_STATUS_ALL, label: 'All' },
+	{ value: 'ACTIVE', label: 'Active' },
+	{ value: 'SUSPENDED', label: 'Suspended' },
+	{ value: 'DROPPED', label: 'Dropped' },
+	{ value: 'COMPLETED', label: 'Completed' },
+	{ value: 'TRANSFERRED', label: 'Transferred' },
+];
+
 const baseEnrollmentColumns: ColumnDef<Enrollment>[] = [
 	{
 		accessorKey: 'groupName',
@@ -312,6 +328,9 @@ const standingDiscountColumn: ColumnDef<Enrollment> = {
 function EnrollmentsTab({ studentId }: { studentId: number }) {
 	const { data: enrollments = [], isLoading } = useStudentEnrollments(studentId);
 	const { can } = usePermissions();
+	const [statusFilter, setStatusFilter] = useState<Enrollment['status'] | undefined>(
+		undefined,
+	);
 
 	// The discount endpoints require `enrollment.discount.manage` (OWNER/ADMIN, not
 	// MANAGER), so drop the whole column for users without it — showing it would
@@ -324,17 +343,50 @@ function EnrollmentsTab({ studentId }: { studentId: number }) {
 		return <Skeleton className="h-32 rounded-xl" />;
 	}
 
+	// Not paginated (a student has few enrollments), so filter client-side rather
+	// than round-tripping — the endpoint doesn't take a `status` query param.
+	const visibleEnrollments = statusFilter
+		? enrollments.filter((e) => e.status === statusFilter)
+		: enrollments;
+
 	return (
-		<DataTable
-			columns={columns}
-			data={enrollments}
-			getRowId={(row) => String(row.id)}
-			emptyState={
-				<div className="flex min-h-32 items-center justify-center text-sm text-muted-foreground">
-					No enrollments
-				</div>
-			}
-		/>
+		<div className="flex flex-col gap-3">
+			<div className="flex justify-end">
+				<Select
+					value={statusFilter ?? ENROLLMENT_STATUS_ALL}
+					onValueChange={(v) =>
+						setStatusFilter(
+							v === ENROLLMENT_STATUS_ALL
+								? undefined
+								: (v as Enrollment['status']),
+						)
+					}
+				>
+					<SelectTrigger className="h-9 w-36" size="sm">
+						<SelectValue placeholder="All statuses" />
+					</SelectTrigger>
+					<SelectContent>
+						{ENROLLMENT_STATUS_FILTER_OPTIONS.map((opt) => (
+							<SelectItem key={opt.value} value={opt.value}>
+								{opt.label}
+							</SelectItem>
+						))}
+					</SelectContent>
+				</Select>
+			</div>
+			<DataTable
+				columns={columns}
+				data={visibleEnrollments}
+				getRowId={(row) => String(row.id)}
+				emptyState={
+					<div className="flex min-h-32 items-center justify-center text-sm text-muted-foreground">
+						{statusFilter
+							? 'No enrollments with this status'
+							: 'No enrollments'}
+					</div>
+				}
+			/>
+		</div>
 	);
 }
 

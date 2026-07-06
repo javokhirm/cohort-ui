@@ -23,6 +23,7 @@ export type SessionStatus = (typeof SESSION_STATUSES)[number];
 
 export const ENROLLMENT_STATUSES = [
 	'ACTIVE',
+	'SUSPENDED',
 	'DROPPED',
 	'COMPLETED',
 	'TRANSFERRED',

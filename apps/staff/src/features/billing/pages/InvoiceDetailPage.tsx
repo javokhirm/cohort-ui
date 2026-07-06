@@ -188,6 +188,7 @@ function LineItemsCard({ invoice }: { invoice: InvoiceDetail }) {
 				<TableHeader>
 					<TableRow>
 						<TableHead>Description</TableHead>
+						<TableHead>Type</TableHead>
 						<TableHead className="text-right">Qty</TableHead>
 						<TableHead className="text-right">Unit</TableHead>
 						<TableHead className="text-right">Amount</TableHead>
@@ -197,6 +198,9 @@ function LineItemsCard({ invoice }: { invoice: InvoiceDetail }) {
 					{lineItems.map((li) => (
 						<TableRow key={li.id}>
 							<TableCell>{li.description}</TableCell>
+							<TableCell>
+								<StatusBadge kind="invoice_line_item" status={li.type} />
+							</TableCell>
 							<TableCell className="text-right tabular-nums text-muted-foreground">
 								{li.quantity}
 							</TableCell>
@@ -210,7 +214,7 @@ function LineItemsCard({ invoice }: { invoice: InvoiceDetail }) {
 					))}
 					{discounts.map((d) => (
 						<TableRow key={`discount-${d.id}`}>
-							<TableCell colSpan={3} className="text-primary">
+							<TableCell colSpan={4} className="text-primary">
 								{d.name}
 							</TableCell>
 							<TableCell className="text-right font-medium tabular-nums text-primary">
@@ -220,7 +224,7 @@ function LineItemsCard({ invoice }: { invoice: InvoiceDetail }) {
 					))}
 					{taxAmount > 0 && (
 						<TableRow>
-							<TableCell colSpan={3} className="text-muted-foreground">
+							<TableCell colSpan={4} className="text-muted-foreground">
 								Tax
 							</TableCell>
 							<TableCell className="text-right tabular-nums text-muted-foreground">
@@ -229,7 +233,7 @@ function LineItemsCard({ invoice }: { invoice: InvoiceDetail }) {
 						</TableRow>
 					)}
 					<TableRow>
-						<TableCell colSpan={3} className="text-base font-bold">
+						<TableCell colSpan={4} className="text-base font-bold">
 							Total
 						</TableCell>
 						<TableCell className="text-right text-base font-bold tabular-nums">

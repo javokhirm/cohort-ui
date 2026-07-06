@@ -47,12 +47,22 @@ export type RecordablePaymentMethod = (typeof RECORDABLE_PAYMENT_METHODS)[number
 export const PAYMENT_STATUSES = ['PENDING', 'SUCCEEDED', 'FAILED', 'REFUNDED'] as const;
 export type PaymentStatus = (typeof PAYMENT_STATUSES)[number];
 
+export const INVOICE_LINE_ITEM_TYPES = [
+	'TUITION',
+	'LATE_FEE',
+	'ADJUSTMENT',
+	'PACKAGE',
+] as const;
+export type InvoiceLineItemType = (typeof INVOICE_LINE_ITEM_TYPES)[number];
+
 export interface InvoiceLineItem {
 	id: number;
 	description: string;
 	quantity: number;
 	unitAmount: number;
 	amount: number;
+	/** `ADJUSTMENT`/`PACKAGE` aren't produced by any endpoint yet — render generically. */
+	type: InvoiceLineItemType;
 }
 
 /** A discount as applied to an invoice — a reduced shape, not the full `DiscountResponse`. */

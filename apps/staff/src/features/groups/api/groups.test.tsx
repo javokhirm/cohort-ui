@@ -1,5 +1,6 @@
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { act, renderHook, waitFor } from '@testing-library/react';
+import { http, HttpResponse } from 'msw';
 import { describe, expect, it } from 'vitest';
 import type { ReactNode } from 'react';
 
@@ -8,6 +9,8 @@ import { isApiError } from '@repo/api-client';
 import { server } from '@/test/server';
 import { groupHandlers } from '@/test/handlers';
 import { useBranchStore } from '@/store/branchStore';
+
+const MANAGE = 'http://localhost:5050/api/v1/manage';
 
 import {
 	useGroup,
@@ -232,6 +235,52 @@ describe('roster', () => {
 			dropReason: 'Transferred',
 		});
 		expect(updated.status).toBe('DROPPED');
+	});
+
+	it('suspends a student', async () => {
+		const { result } = renderHook(() => useUpdateEnrollment(), {
+			wrapper: wrapper(),
+		});
+
+		const updated = await result.current.mutateAsync({
+			id: 500,
+			groupId: 10,
+			status: 'SUSPENDED',
+		});
+		expect(updated.status).toBe('SUSPENDED');
+	});
+
+	it('reactivates a suspended student', async () => {
+		const { result } = renderHook(() => useUpdateEnrollment(), {
+			wrapper: wrapper(),
+		});
+
+		const updated = await result.current.mutateAsync({
+			id: 501,
+			groupId: 10,
+			status: 'ACTIVE',
+		});
+		expect(updated.status).toBe('ACTIVE');
+	});
+
+	it('filters the roster by status', async () => {
+		server.use(
+			http.get(`${MANAGE}/groups/:id/enrollments`, ({ request }) => {
+				const url = new URL(request.url);
+				expect(url.searchParams.get('status')).toBe('SUSPENDED');
+				return HttpResponse.json({
+					success: true,
+					data: [],
+					meta: { timestamp: 'test' },
+				});
+			}),
+		);
+		const { result } = renderHook(() => useGroupEnrollments(10, 'SUSPENDED'), {
+			wrapper: wrapper(),
+		});
+
+		await waitFor(() => expect(result.current.isSuccess).toBe(true));
+		expect(result.current.data).toEqual([]);
 	});
 });
 

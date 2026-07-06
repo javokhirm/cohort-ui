@@ -88,6 +88,7 @@ export const STATUS_MAPS = {
 	},
 	enrollment: {
 		active: { tone: 'green', label: 'Active' },
+		suspended: { tone: 'orange', label: 'Suspended' },
 		dropped: { tone: 'red', label: 'Dropped' },
 		completed: { tone: 'blue', label: 'Completed' },
 		transferred: { tone: 'amber', label: 'Transferred' },
@@ -167,6 +168,12 @@ export const STATUS_MAPS = {
 		monthly: { tone: 'indigo', label: 'Monthly' },
 		one_time: { tone: 'slate', label: 'One-time' },
 		per_session: { tone: 'amber', label: 'Per session' },
+	},
+	invoice_line_item: {
+		tuition: { tone: 'slate', label: 'Tuition' },
+		late_fee: { tone: 'amber', label: 'Late fee' },
+		adjustment: { tone: 'blue', label: 'Adjustment' },
+		package: { tone: 'violet', label: 'Package' },
 	},
 	expense: {
 		rent: { tone: 'indigo', label: 'Rent' },

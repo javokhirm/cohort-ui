@@ -260,7 +260,7 @@ interface MockEnrollment {
 	studentCode: string;
 	feePlanId: number | null;
 	enrolledAt: string;
-	status: 'ACTIVE' | 'DROPPED' | 'COMPLETED' | 'TRANSFERRED';
+	status: 'ACTIVE' | 'SUSPENDED' | 'DROPPED' | 'COMPLETED' | 'TRANSFERRED';
 	dropReason: string | null;
 	completedAt: string | null;
 }
