@@ -27,7 +27,7 @@ function errorMessage(error: unknown, fallback: string): string {
 	return isApiError(error) ? error.message : fallback;
 }
 
-/** EduCore "E" mark + wordmark + INTERNAL badge — shared by the rail and the mobile header. */
+/** Cohort "E" mark + wordmark + INTERNAL badge — shared by the rail and the mobile header. */
 function BrandLockup({ compact = false }: { compact?: boolean }) {
 	return (
 		<div className="flex items-center gap-2.5">
@@ -39,7 +39,7 @@ function BrandLockup({ compact = false }: { compact?: boolean }) {
 				E
 			</span>
 			<span className="text-[15px] font-bold tracking-tight text-foreground">
-				EduCore
+				Cohort
 			</span>
 			<span className="rounded-[5px] border border-tone-amber-fg/25 bg-tone-amber-bg px-1.5 py-0.5 text-[10px] font-bold uppercase tracking-widest text-tone-amber-fg">
 				Internal
@@ -69,7 +69,7 @@ function ConsoleRail() {
 				<h2 className="mt-3.5 text-[30px] font-extrabold leading-[1.15] tracking-tight text-foreground">
 					The control room for
 					<br />
-					the EduCore network.
+					the Cohort network.
 				</h2>
 				<p className="mt-3.5 max-w-95 text-sm leading-relaxed text-muted-foreground">
 					Onboard education centers, manage subscriptions and feature flags, and
@@ -191,7 +191,7 @@ export function LoginForm({ onAuthenticated }: LoginFormProps) {
 								Sign in to the console
 							</h1>
 							<p className="mt-1.5 text-[13.5px] text-muted-foreground">
-								Restricted to EduCore platform staff.
+								Restricted to Cohort platform staff.
 							</p>
 
 							<Form {...credForm}>
@@ -211,7 +211,7 @@ export function LoginForm({ onAuthenticated }: LoginFormProps) {
 														<Input
 															type="email"
 															autoComplete="username"
-															placeholder="you@educore.uz"
+															placeholder="you@cohort.uz"
 															{...field}
 														/>
 													</FormControl>

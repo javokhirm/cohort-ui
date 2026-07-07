@@ -2,11 +2,11 @@
 
 Guidance for Claude Code (and any AI assistant) working in this repository.
 
-**educore-fe** is the frontend monorepo for **EduCore** — a multi-tenant B2B SaaS for
+**cohort-fe** is the frontend monorepo for **Cohort** — a multi-tenant B2B SaaS for
 managing education centers (CRM, students, scheduling, attendance, assessments, billing,
-payroll, notifications). It consumes the **educore-be** NestJS API. Target market:
+payroll, notifications). It consumes the **cohort-be** NestJS API. Target market:
 education centers in Uzbekistan (UZS, Click/Payme/Uzum payments, Telegram-first
-communication, uz/ru/en locales). The backend lives in the sibling `educore-be/` repo and
+communication, uz/ru/en locales). The backend lives in the sibling `cohort-be/` repo and
 its `docs/` are the source of truth for the API contract and domain model.
 
 ---
@@ -21,7 +21,7 @@ one that diverges.
   changing anything. Follow the documented conventions. When the docs and the code
   disagree, **the docs win** — fix the code or flag it.
 - **The backend contract is authoritative.** Never invent endpoints, fields, statuses, or
-  enums. Cross-check against `educore-be/docs/api-reference.md` and the generated OpenAPI
+  enums. Cross-check against `cohort-be/docs/api-reference.md` and the generated OpenAPI
   types (see [docs/api-integration.md](docs/api-integration.md)). If a type is missing,
   regenerate from the spec — do not hand-write it.
 - **Don't build ahead of the API.** Build a feature/screen only once its backend endpoints
@@ -103,7 +103,7 @@ one that diverges.
 
 ## UI Design System
 
-- Import every component from `@repo/ui` (shadcn/ui primitives + composed EduCore components). Never write raw HTML buttons, inputs, etc., and never re-create a primitive that the barrel already exports.
+- Import every component from `@repo/ui` (shadcn/ui primitives + composed Cohort components). Never write raw HTML buttons, inputs, etc., and never re-create a primitive that the barrel already exports.
 - Theme tokens live in `tailwind.config.ts` and `globals.css` (CSS variables)
 - Forms: always use `FieldGroup` + React Hook Form + Zod
 - Icons: use `lucide-react` only
@@ -134,7 +134,7 @@ A pre-commit hook (husky + lint-staged) runs prettier/eslint on staged files. Se
 - **Flag candidates for promotion.** If you find yourself building anything — a component, helper, formatter, or type — that would logically be useful across more than one app (`staff`, `admin`, and the future `teacher`/`portal`), **stop and ask the engineer** whether it belongs in the relevant `@repo/*` package instead of the app. Do not place it in the app and do not create or expand the shared package yourself — that decision belongs to the engineer.
 
 ```
-educore-fe/
+cohort-fe/
 ├── apps/
 │   ├── admin/       # Admin Web App (/api/v1/admin/* surface)
 │   └── staff/       # Staff Web App (/api/v1/manage/* surface)
@@ -172,8 +172,8 @@ changes together, so tightly-coupled backend domains may share one feature
 
 ## Multi-tenancy (important context)
 
-EduCore is multi-tenant: one education-center _business_ (tenant) with one or many
-_branches_. **The tenant is identified by the subdomain** (`zabon.educore.uz`) and resolved
+Cohort is multi-tenant: one education-center _business_ (tenant) with one or many
+_branches_. **The tenant is identified by the subdomain** (`zabon.cohort.uz`) and resolved
 by the backend from the Host header, cross-checked against the JWT `tenantId`. The frontend
 serves **one build for all tenants** — never bake a tenant into the build. Multi-branch
 users pick their view in a global, multi-select **branch selector**; the selection is

@@ -1970,13 +1970,13 @@ export interface components {
 			refreshToken: string;
 		};
 		AdminLoginDto: {
-			/** @example operator@educore.uz */
+			/** @example operator@cohort.uz */
 			email: string;
 			/** @example S3cret-pass */
 			password: string;
 		};
 		AdminVerifyOtpDto: {
-			/** @example operator@educore.uz */
+			/** @example operator@cohort.uz */
 			email: string;
 			/**
 			 * @description 6-digit one-time code

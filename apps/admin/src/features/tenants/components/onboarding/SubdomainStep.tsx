@@ -40,7 +40,7 @@ export function SubdomainStep({
 							placeholder="zabon"
 						/>
 						<span className="inline-flex items-center rounded-r-md border border-l-0 border-input bg-muted px-3 text-sm text-muted-foreground">
-							.educore.uz
+							.cohort.uz
 						</span>
 					</div>
 				</div>

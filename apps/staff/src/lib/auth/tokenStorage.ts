@@ -3,7 +3,7 @@
  * lives in localStorage while the access token stays in memory (Zustand store).
  * The key is staff-scoped to avoid clashing with sibling apps on the same origin.
  */
-const REFRESH_TOKEN_KEY = 'educore.staff.refreshToken';
+const REFRESH_TOKEN_KEY = 'cohort.staff.refreshToken';
 
 export function getStoredRefreshToken(): string | null {
 	try {

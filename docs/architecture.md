@@ -1,6 +1,6 @@
 # Architecture
 
-How `educore-fe` is organized, why, and the rules that keep it that way. Read this before
+How `cohort-fe` is organized, why, and the rules that keep it that way. Read this before
 adding an app, a package, or a cross-package dependency.
 
 ---
@@ -61,7 +61,7 @@ We keep the package count minimal and grow it only when a second consumer appear
 | Package      | Responsibility                                                                                                                                            | May depend on         |
 | ------------ | --------------------------------------------------------------------------------------------------------------------------------------------------------- | --------------------- |
 | `utils`      | Framework-agnostic pure helpers (money, dates, formatting, code parsing, guards) **and** shared cross-cutting types. The leaf.                            | —                     |
-| `config`     | Build tooling: ESLint flat config, Tailwind preset + design tokens, base `tsconfig` — via subpath exports (`@educore/config/eslint`, `/tailwind`, `/ts`). | — (leaf)              |
+| `config`     | Build tooling: ESLint flat config, Tailwind preset + design tokens, base `tsconfig` — via subpath exports (`@cohort/config/eslint`, `/tailwind`, `/ts`). | — (leaf)              |
 | `api-client` | Generated OpenAPI types, the typed HTTP client (envelope unwrap, error normalization, injected auth hook), query-key factories, pagination helpers.       | `utils`               |
 | `auth`       | Session store, token storage + silent refresh, permission catalog, `<Can>`, route guards, `useAuth`/`usePermissions`.                                     | `api-client`, `utils` |
 | `i18n`       | uz/ru/en message catalogs, locale provider, money/date/number formatters (UZS, Asia/Tashkent).                                                            | `utils`               |
@@ -95,8 +95,8 @@ Rules:
   [api-integration.md](api-integration.md).
 - **`ui` is dumb.** No API calls, no Query, no Zustand, no router. It receives data and
   callbacks as props. This keeps it usable from any app and trivially testable.
-- **No deep imports.** `import { Button } from '@educore/ui'` ✅ ·
-  `import { Button } from '@educore/ui/src/button'` ❌.
+- **No deep imports.** `import { Button } from '@cohort/ui'` ✅ ·
+  `import { Button } from '@cohort/ui/src/button'` ❌.
 - Enforced by ESLint (`no-restricted-imports` / boundary rules) and the Turbo task graph.
 
 ---
@@ -123,7 +123,7 @@ need the same thing, it moves up (to `components/`, `lib/`, or a package). Detai
 The backend's domains map to staff-app features — **some consolidated**. A feature is created
 only once the corresponding `/manage/*` endpoints exist:
 
-| Backend domain(s) (educore-be)   | Staff feature            | Covers                                                      |
+| Backend domain(s) (cohort-be)   | Staff feature            | Covers                                                      |
 | -------------------------------- | ------------------------ | ----------------------------------------------------------- |
 | identity                         | (in `packages/auth`)     | login, session, roles/permissions, branch scope             |
 | platform                         | `features/platform`      | branches, tenant settings                                   |
@@ -152,7 +152,7 @@ only once the corresponding `/manage/*` endpoints exist:
    useStudents()  ── TanStack Query ──►  api-client (typed fetch)
      │                                      │  Authorization: Bearer <access token>
      │  returns {data, isLoading, error}    ▼
-     │                                   educore-be  /api/v1/manage/students
+     │                                   cohort-be  /api/v1/manage/students
      ▼                                      │  401 → silent refresh (auth) → retry
    render                                   ▼
                                       envelope unwrapped → typed data | typed ApiError

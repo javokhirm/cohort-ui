@@ -26,7 +26,7 @@ export * from './components/tabs';
 export * from './components/textarea';
 export * from './components/tooltip';
 
-// ─── Composed — EduCore domain components ────────────────────────────────────
+// ─── Composed — Cohort domain components ────────────────────────────────────
 export * from './components/empty-state';
 export * from './components/page-header';
 export * from './components/stat-card';

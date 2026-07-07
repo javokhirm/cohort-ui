@@ -1,6 +1,6 @@
-# EduCore Frontend — Documentation
+# Cohort Frontend — Documentation
 
-The architecture and conventions for **educore-fe**, the frontend monorepo for the EduCore
+The architecture and conventions for **cohort-fe**, the frontend monorepo for the Cohort
 education-center SaaS. Start with [../CLAUDE.md](../CLAUDE.md) for the working agreement and
 stack, then dive into the area you're working in.
 
@@ -34,4 +34,4 @@ boundaries clean, don't build ahead of the API.
 ## Source of truth
 
 - **This repo's architecture & conventions:** these docs (docs win over code on conflict).
-- **The API contract & domain model:** `educore-be/docs/` — never invent endpoints or fields.
+- **The API contract & domain model:** `cohort-be/docs/` — never invent endpoints or fields.

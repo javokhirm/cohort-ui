@@ -84,7 +84,7 @@ export function OnboardTenantPage() {
 					Onboard a new center
 				</h1>
 				<p className="text-sm text-muted-foreground">
-					Set up a new tenant on the EduCore platform.
+					Set up a new tenant on the Cohort platform.
 				</p>
 			</div>
 

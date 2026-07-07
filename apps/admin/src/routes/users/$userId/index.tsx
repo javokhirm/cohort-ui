@@ -142,7 +142,7 @@ export function UserDetailPage() {
 										{m.tenant.name}
 									</p>
 									<p className="text-xs text-muted-foreground">
-										{m.tenant.subdomain}.educore.uz
+										{m.tenant.subdomain}.cohort.uz
 									</p>
 								</div>
 

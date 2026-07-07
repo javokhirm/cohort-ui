@@ -4,7 +4,7 @@
  * while the access token stays in memory (the Zustand session store). The key is
  * admin-scoped to avoid clashing with future sibling apps on the same origin.
  */
-const REFRESH_TOKEN_KEY = 'educore.admin.refreshToken';
+const REFRESH_TOKEN_KEY = 'cohort.admin.refreshToken';
 
 export function getStoredRefreshToken(): string | null {
 	try {

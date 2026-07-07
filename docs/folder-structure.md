@@ -8,7 +8,7 @@ doesn't fit, that's a signal to discuss — not to invent a new location.
 ## Repository root
 
 ```
-educore-fe/
+cohort-fe/
 ├── apps/
 │   └── staff/                      # Phase-1 Staff Web App
 ├── packages/
@@ -26,7 +26,7 @@ educore-fe/
 ├── turbo.json                      # task pipeline + caching
 ├── pnpm-workspace.yaml             # workspace globs: apps/*, packages/*
 ├── package.json                    # root scripts (delegate to turbo), shared devDeps
-├── tsconfig.json                   # references the packages; base from @educore/config/ts
+├── tsconfig.json                   # references the packages; base from @cohort/config/ts
 ├── .nvmrc                          # pinned Node version
 ├── .prettierrc / .prettierignore
 └── CLAUDE.md
@@ -45,7 +45,7 @@ their files are `PascalCase`** (`StudentTable.tsx`); hooks follow the rule in
 apps/staff/
 ├── index.html
 ├── vite.config.ts
-├── tsconfig.json                   # extends @educore/config/ts
+├── tsconfig.json                   # extends @cohort/config/ts
 ├── package.json                    # depends on workspace packages via "workspace:*"
 ├── .env.example                    # documents required VITE_* vars (see environments.md)
 └── src/
@@ -192,9 +192,9 @@ Each app sets a `@/` alias to its own `src/` (via `vite.config.ts` + `tsconfig`)
 are imported by their workspace name, never by relative path:
 
 ```ts
-import { Button } from '@educore/ui';
+import { Button } from '@cohort/ui';
 import { useStudents } from '@/features/people';
 // ❌ never: import { Button } from '../../../packages/ui/src/button';
 ```
 
-(The `@educore/*` scope is the working convention; confirm the npm scope at scaffold time.)
+(The `@cohort/*` scope is the working convention; confirm the npm scope at scaffold time.)

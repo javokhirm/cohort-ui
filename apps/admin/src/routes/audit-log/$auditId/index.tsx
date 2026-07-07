@@ -79,7 +79,7 @@ export function AuditLogDetailPage() {
 								>
 									{entry.tenant.name}
 									<span className="ml-1 text-xs text-muted-foreground">
-										({entry.tenant.subdomain}.educore.uz)
+										({entry.tenant.subdomain}.cohort.uz)
 									</span>
 								</Link>
 							) : (

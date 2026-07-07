@@ -11,7 +11,7 @@ the rest is review discipline.
 1. **Dependency direction.** `apps → packages`; within packages: `ui/auth/i18n → api-client
 → utils → types` (configs are leaves). No cycles, no backward edges.
    ([architecture.md](architecture.md))
-2. **Barrels only.** Import a package via its name (`@educore/ui`), never a deep path. Import
+2. **Barrels only.** Import a package via its name (`@cohort/ui`), never a deep path. Import
    a feature via its `index.ts`, never another feature's internals.
 3. **No `fetch`/`axios` in components.** Network access goes through feature Query hooks built
    on `api-client`. ([api-integration.md](api-integration.md))
@@ -161,7 +161,7 @@ currency)` from `i18n`/`utils`. Never `toFixed`, never string-concat a currency 
 
 ## 9. Imports & module hygiene
 
-- Order: external → `@educore/*` packages → `@/` app aliases → relative. (Auto-organized by
+- Order: external → `@cohort/*` packages → `@/` app aliases → relative. (Auto-organized by
   the import plugin.)
 - No deep/relative reaches across feature or package boundaries (rule §1.2).
 - Side-effect-free modules; no top-level network or `Date.now()` in module scope.

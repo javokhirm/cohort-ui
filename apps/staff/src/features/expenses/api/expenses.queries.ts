@@ -11,7 +11,7 @@ import {
 } from './keys';
 
 // Mirrors the backend operating-expense surface (api-reference.md §3.16),
-// cross-checked against educore-be src/domain/billing/entities/expense.entity.ts
+// cross-checked against cohort-be src/domain/billing/entities/expense.entity.ts
 // and src/api/manage/dto/expenses/*.
 
 export const EXPENSE_CATEGORIES = [

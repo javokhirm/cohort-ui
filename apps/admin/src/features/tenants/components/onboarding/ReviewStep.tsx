@@ -24,7 +24,7 @@ export function ReviewStep({
 	const rows: { label: string; value: string }[] = [
 		{ label: 'Center name', value: data.centerName },
 		{ label: 'City', value: data.city },
-		{ label: 'Subdomain', value: `${data.subdomain}.educore.uz` },
+		{ label: 'Subdomain', value: `${data.subdomain}.cohort.uz` },
 		{ label: 'Owner', value: `${data.ownerFirstName} ${data.ownerLastName}` },
 		{ label: 'Owner phone', value: data.ownerPhone },
 		...(data.ownerEmail ? [{ label: 'Owner email', value: data.ownerEmail }] : []),

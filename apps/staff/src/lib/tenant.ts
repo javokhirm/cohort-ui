@@ -6,7 +6,7 @@ import { env } from './env';
  * Returns null if no tenant can be determined (edge case).
  *
  * Examples:
- *   zabon.educore.uz        → "zabon"
+ *   zabon.cohort.uz        → "zabon"
  *   zabon.localhost:5174    → "zabon"
  *   localhost:5174          → env.VITE_DEV_TENANT ?? null
  */

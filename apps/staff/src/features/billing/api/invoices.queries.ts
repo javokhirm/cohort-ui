@@ -12,7 +12,7 @@ import {
 
 // ─── Domain types ────────────────────────────────────────────────────────────
 // Mirrors the backend invoice/payment surface (api-reference.md §3.13/§3.14),
-// cross-checked against the actual response DTOs in educore-be
+// cross-checked against the actual response DTOs in cohort-be
 // (src/api/manage/dto/invoices/invoice-response.dto.ts and
 // src/api/manage/dto/payments/payment-response.dto.ts) — the generated
 // `@repo/api-client` OpenAPI types only expose the request DTOs, so these

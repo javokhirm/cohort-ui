@@ -143,7 +143,7 @@ export function LoginForm({ onAuthenticated }: LoginFormProps) {
 
 				<p className="mt-6 border-t border-border pt-4 text-center text-[11.5px] text-muted-foreground">
 					Powered by{' '}
-					<span className="font-semibold text-foreground">EduCore</span>
+					<span className="font-semibold text-foreground">Cohort</span>
 				</p>
 			</div>
 		</div>

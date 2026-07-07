@@ -38,7 +38,7 @@ export function Header() {
 					E
 				</div>
 				<div className="flex items-center gap-2">
-					<span className="text-sm font-bold text-white">EduCore</span>
+					<span className="text-sm font-bold text-white">Cohort</span>
 					<span className="flex items-center gap-1.5 rounded-md border border-amber-900 bg-amber-950 px-2 py-0.5 text-[10px] font-bold tracking-wide text-amber-400">
 						<ShieldCheck className="size-3" />
 						INTERNAL · PLATFORM CONSOLE

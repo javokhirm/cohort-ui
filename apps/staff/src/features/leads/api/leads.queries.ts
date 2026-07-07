@@ -8,7 +8,7 @@ import { leadsKeys, type LeadListFilters } from './keys';
 
 // ─── Domain types ────────────────────────────────────────────────────────────
 // Response shapes for the `/manage/leads` surface (api-reference.md §3.2),
-// cross-checked against educore-be src/api/manage/dto/leads/lead-response.dto.ts.
+// cross-checked against cohort-be src/api/manage/dto/leads/lead-response.dto.ts.
 // openapi-typescript emits only the request DTOs, so the response bodies (and the
 // enums the whole feature keys off) are declared here as the single source.
 

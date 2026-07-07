@@ -37,4 +37,4 @@ yarn-error.log*
 .DS_Store
 *.pem
 
-apps/staff/educore-manage-platform-prototype-extracted
+apps/staff/cohort-manage-platform-prototype-extracted

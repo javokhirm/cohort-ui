@@ -1,6 +1,6 @@
 /**
  * The staff-app mirror of the backend permission catalog
- * (`educore-be/src/infra/database/seeders/permissions.seeder.ts`). Codes are the
+ * (`cohort-be/src/infra/database/seeders/permissions.seeder.ts`). Codes are the
  * single source of truth the backend's `RbacGuard` enforces; here they only gate
  * the UI cosmetically (`<Can>`, `usePermissions().can`, `requirePermission`).
  *

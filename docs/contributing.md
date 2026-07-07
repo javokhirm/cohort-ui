@@ -9,7 +9,7 @@ first; this doc is the process around them.
 
 - **Node** — the version in `.nvmrc` (`nvm use`).
 - **pnpm** — the package manager (`corepack enable` to get the pinned version).
-- A running **educore-be** (local at `http://localhost:5050`) or access to a shared dev API.
+- A running **cohort-be** (local at `http://localhost:5050`) or access to a shared dev API.
 
 ```bash
 pnpm install
@@ -105,4 +105,4 @@ This repo is set up so AI agents can contribute safely:
 
 - Architecture/convention questions → the relevant `docs/` file, then the area owner
   (`.github/CODEOWNERS`).
-- API contract questions → `educore-be/docs/api-reference.md`, then the backend team.
+- API contract questions → `cohort-be/docs/api-reference.md`, then the backend team.

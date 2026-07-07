@@ -59,7 +59,7 @@ Principles:
 The apps are **static SPAs** → build to static assets, serve from a CDN.
 
 - **Hosting options:** Vercel / Netlify / Cloudflare Pages, or S3 + CloudFront. Any static
-  host with **wildcard subdomain + wildcard TLS** support (so `*.educore.uz` all serve the
+  host with **wildcard subdomain + wildcard TLS** support (so `*.cohort.uz` all serve the
   same build — the tenant is resolved at runtime; see [environments.md](environments.md)).
 - **SPA routing:** configure the host to rewrite unknown paths to `index.html` (client-side
   router owns routing).

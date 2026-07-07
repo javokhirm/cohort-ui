@@ -2,7 +2,7 @@ import { beforeEach, describe, expect, it } from 'vitest';
 
 import { useBranchStore } from './branchStore';
 
-const STORAGE_KEY = 'educore.staff.activeBranchIds';
+const STORAGE_KEY = 'cohort.staff.activeBranchIds';
 
 describe('branchStore', () => {
 	beforeEach(() => {

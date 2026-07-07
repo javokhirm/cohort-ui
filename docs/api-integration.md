@@ -1,9 +1,9 @@
 # API Integration
 
-How the frontend talks to **educore-be**. This is the layer where contract fidelity matters
+How the frontend talks to **cohort-be**. This is the layer where contract fidelity matters
 most — get it right and the rest of the app inherits type-safety for free.
 
-The backend contract this doc encodes is authoritative in `educore-be/docs/api-reference.md`.
+The backend contract this doc encodes is authoritative in `cohort-be/docs/api-reference.md`.
 When they disagree, the backend doc wins — update this and regenerate types.
 
 ---
@@ -217,7 +217,7 @@ export function useCreateStudent() {
 
 ## 6. Adding a new endpoint integration — checklist
 
-1. Confirm the endpoint in `educore-be/docs/api-reference.md` (path, params, DTO, status).
+1. Confirm the endpoint in `cohort-be/docs/api-reference.md` (path, params, DTO, status).
 2. `pnpm gen:api` to refresh types (regenerate the committed spec if needed).
 3. Add/extend the domain's `keys.ts`.
 4. Write the query/mutation hook in `features/<domain>/api/`.

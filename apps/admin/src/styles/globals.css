@@ -1,4 +1,4 @@
-/* Admin console styles. The design system (Tailwind v4 import + EduCore tokens,
+/* Admin console styles. The design system (Tailwind v4 import + Cohort tokens,
    light & dark) lives in @repo/ui; the app runs in the dark "console" palette
    (`<html class="dark">`). Scan this app's own sources for utility classes. */
 @import '@repo/ui/globals.css';

@@ -1,5 +1,5 @@
 {
-	"name": "educore-ui",
+	"name": "cohort-ui",
 	"private": true,
 	"scripts": {
 		"build": "turbo run build",

@@ -10,7 +10,7 @@ import { create } from 'zustand';
  * Persisted per app (like the refresh token) so the selection survives reloads;
  * it is reconciled against the freshly fetched branches on boot.
  */
-const ACTIVE_BRANCHES_KEY = 'educore.staff.activeBranchIds';
+const ACTIVE_BRANCHES_KEY = 'cohort.staff.activeBranchIds';
 
 function readStoredSelection(): number[] | null {
 	try {

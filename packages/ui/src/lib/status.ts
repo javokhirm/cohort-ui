@@ -2,7 +2,7 @@
  * Semantic status "tones" and the domain status → tone/label maps.
  *
  * The prototypes drive every status pill from a single `badge(kind, status)`
- * table; this is the React-side equivalent. The mappings mirror the EduCore
+ * table; this is the React-side equivalent. The mappings mirror the Cohort
  * domain documented in the backend `project-overview.md` (invoice/payment/lead/
  * session/attendance lifecycles, etc.). They are presentation metadata only —
  * when the generated OpenAPI enums land, reconcile the keys here against them.

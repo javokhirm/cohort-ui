@@ -3,7 +3,7 @@
 Everything about identity in the frontend: how a tenant is determined, how tokens are
 obtained/stored/refreshed, and how the UI gates on roles and permissions. This area is
 security-sensitive — **changes need a second reviewer** and must match the backend
-(`educore-be/docs/api-reference.md` §1.1 and the identity domain).
+(`cohort-be/docs/api-reference.md` §1.1 and the identity domain).
 
 All of this lives in `packages/auth`. Apps consume `useAuth()`, `usePermissions()`, `<Can>`,
 and the route guards.
@@ -12,7 +12,7 @@ and the route guards.
 
 ## 1. Multi-tenancy = subdomain
 
-- Each tenant runs on its own subdomain: `zabon.educore.uz`, `acme.educore.uz`, …
+- Each tenant runs on its own subdomain: `zabon.cohort.uz`, `acme.cohort.uz`, …
 - The frontend **reads the subdomain at runtime** (`lib/tenant.ts`) for display/branding and
   to know which origin to talk to. It does **not** send a tenant id — the backend resolves
   the tenant from the Host header and cross-checks it against the JWT `tenantId` claim.
@@ -159,7 +159,7 @@ This follows the repo rule: don't build ahead of the API.
   computes access from the token's `branchScope` claim — the branches endpoint is
   the source of truth for the selector.
 - The **active branch selection** is a client-state value (Zustand branch store,
-  persisted to `localStorage` under `educore.staff.activeBranchIds`) shown in a
+  persisted to `localStorage` under `cohort.staff.activeBranchIds`) shown in a
   global header **branch selector**. It is **multi-select**: the user can view one
   branch, several, or all accessible branches at once.
 - Every list query injects the selection as `?branchIds=<id>,<id>` through its
@@ -201,7 +201,7 @@ export const requireRole = (roles: string[]) => () => {
 
 ## 8. Login → app, end to end
 
-1. User lands on `zabon.educore.uz` → boot refresh runs; no token → `/login`.
+1. User lands on `zabon.cohort.uz` → boot refresh runs; no token → `/login`.
 2. Login form posts `{ phone, password }` to `/public/auth/login` (tenant from subdomain).
 3. On success: store access (memory) + refresh (localStorage) + `user`; redirect to `next`
    or the dashboard.

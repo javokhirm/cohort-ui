@@ -1,6 +1,6 @@
 /**
  * Admin auth contract types — mirror the backend interfaces
- * (educore-be `src/domain/identity/interfaces/auth-result.interface.ts` and
+ * (cohort-be `src/domain/identity/interfaces/auth-result.interface.ts` and
  * `operator-profile.interface.ts`).
  *
  * NOTE: the committed OpenAPI spec (packages/api-client/openapi.json) does not

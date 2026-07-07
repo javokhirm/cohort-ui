@@ -1,7 +1,7 @@
 # Super Admin (ADMIN) App — Development Plan
 
 A phased plan for the platform **Super Admin** app (`/api/v1/admin/*`, role `SUPER_ADMIN`).
-Source of the UI: the `EduCore ADMIN` claude.ai/design prototype (see the project memory for
+Source of the UI: the `Cohort ADMIN` claude.ai/design prototype (see the project memory for
 the project id). This plan follows the repo rules in [architecture.md](architecture.md),
 [auth-and-rbac.md](auth-and-rbac.md), [api-integration.md](api-integration.md), and
 [folder-structure.md](folder-structure.md), and the working agreement in `CLAUDE.md`.
@@ -13,14 +13,14 @@ the project id). This plan follows the repo rules in [architecture.md](architect
 - The committed OpenAPI spec (`packages/api-client/openapi.json`) currently exposes only
   **`/public`** (3 auth paths) and **`/manage`** (25 paths). **There is no `/api/v1/admin/*`
   surface yet.**
-- The roadmap (`educore-be` `project-overview.md` §10) places the Super Admin panel in
+- The roadmap (`cohort-be` `project-overview.md` §10) places the Super Admin panel in
   **Phase 4**, after the current Staff (Phase 1) work.
 - Per `CLAUDE.md`: _"Don't build ahead of the API."_ → **No ADMIN feature code until its
   backend endpoints exist.** What we build now is the **shared foundation** (justified because
   the Staff app needs it today); ADMIN then becomes mostly composition.
 
 Each phase below (A–D) is **gated on its backend `/api/v1/admin/*` endpoints shipping** —
-confirm against `educore-be/docs/api-reference.md`, then `pnpm gen:api`.
+confirm against `cohort-be/docs/api-reference.md`, then `pnpm gen:api`.
 
 ---
 

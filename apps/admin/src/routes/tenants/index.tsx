@@ -51,7 +51,7 @@ const columns: ColumnDef<TenantRow>[] = [
 							{tenant.name}
 						</p>
 						<p className="truncate text-xs text-muted-foreground">
-							{tenant.subdomain}.educore.uz
+							{tenant.subdomain}.cohort.uz
 						</p>
 					</div>
 				</div>
@@ -159,7 +159,7 @@ export function TenantsPage() {
 				<div>
 					<h1 className="text-xl font-semibold tracking-tight">Tenants</h1>
 					<p className="text-sm text-muted-foreground">
-						Every education center on the EduCore platform
+						Every education center on the Cohort platform
 						{summary ? ` · ${summary.total} total` : ''}
 					</p>
 				</div>

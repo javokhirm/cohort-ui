@@ -370,7 +370,7 @@ export function Sidebar({ collapsed }: SidebarProps) {
 
 	const tenantName = tenantSlug
 		? tenantSlug.charAt(0).toUpperCase() + tenantSlug.slice(1)
-		: 'EduCore';
+		: 'Cohort';
 	const tenantInitial = tenantName[0]?.toUpperCase() ?? 'E';
 
 	const fullName = user ? `${user.firstName} ${user.lastName}`.trim() : '';

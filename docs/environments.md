@@ -22,7 +22,7 @@ Vite only exposes vars prefixed `VITE_`. Per-app `.env` files; document them in
 
 | Var               | Required | Example                                    | Purpose                                                 |
 | ----------------- | -------- | ------------------------------------------ | ------------------------------------------------------- |
-| `VITE_API_ORIGIN` | yes      | `https://api.educore.uz`                   | Backend origin; the client appends `/api/v1/<surface>`. |
+| `VITE_API_ORIGIN` | yes      | `https://api.cohort.uz`                   | Backend origin; the client appends `/api/v1/<surface>`. |
 | `VITE_APP_ENV`    | yes      | `development` \| `staging` \| `production` | Drives logging/telemetry behavior.                      |
 | `VITE_SENTRY_DSN` | no       | `https://…`                                | Error reporting (if enabled).                           |
 | `VITE_DEV_TENANT` | dev only | `zabon`                                    | Local tenant override when not using `*.localhost`.     |
@@ -71,15 +71,15 @@ Because the tenant is the subdomain, local dev needs a subdomain too:
 | ----------- | ------------------------------------ | ---------------------- | ----------------------------------- |
 | development | local Vite dev server                | `*.localhost:5173`     | HMR; local or shared-dev backend.   |
 | preview     | PR deploy (per [ci-cd.md](ci-cd.md)) | per-PR URL             | Built artifact; staging API.        |
-| staging     | static host + wildcard domain        | `*.staging.educore.uz` | Mirrors prod; staging backend.      |
-| production  | static host + CDN                    | `*.educore.uz`         | Wildcard TLS for tenant subdomains. |
+| staging     | static host + wildcard domain        | `*.staging.cohort.uz` | Mirrors prod; staging backend.      |
+| production  | static host + CDN                    | `*.cohort.uz`         | Wildcard TLS for tenant subdomains. |
 
-A **wildcard DNS + TLS** for `*.educore.uz` (and staging) is required so every tenant subdomain
+A **wildcard DNS + TLS** for `*.cohort.uz` (and staging) is required so every tenant subdomain
 resolves to the same SPA build. Confirm this hosting/DNS model with infra — it's an assumption
 of the architecture.
 
 **Preview (PR) deploys are optional** (free on hosts like Vercel/Netlify/Cloudflare Pages) and
 not part of the required baseline — staging + production are. Because a per-PR URL is **not** a
-`*.educore.uz` subdomain, there's no tenant in the hostname, so a preview build sets a
+`*.cohort.uz` subdomain, there's no tenant in the hostname, so a preview build sets a
 `VITE_DEV_TENANT` default (or accepts a `?tenant=` override) for `lib/tenant.ts` to resolve
 against. See [ci-cd.md](ci-cd.md) §3.

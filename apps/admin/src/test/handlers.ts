@@ -30,7 +30,7 @@ function fail(status: number, code: string, message: string) {
 
 /** The single valid operator credential set used across tests. */
 export const VALID = {
-	email: 'operator@educore.uz',
+	email: 'operator@cohort.uz',
 	password: 'S3cret-pass',
 	code: '123456',
 };

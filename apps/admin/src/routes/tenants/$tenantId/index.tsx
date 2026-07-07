@@ -106,7 +106,7 @@ export function TenantDetailPage() {
 						<div className="flex flex-wrap items-center gap-3 text-sm text-muted-foreground">
 							<span className="flex items-center gap-1">
 								<Globe className="size-3.5" />
-								{tenant.subdomain}.educore.uz
+								{tenant.subdomain}.cohort.uz
 							</span>
 						</div>
 					</div>
