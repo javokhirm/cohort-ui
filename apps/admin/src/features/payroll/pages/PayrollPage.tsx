@@ -43,7 +43,7 @@ const STATUS_FILTERS: { value: PayrollStatus | undefined; label: string }[] = [
 ];
 
 export function PayrollPage() {
-	const navigate = useNavigate();
+	const navigate = useNavigate({ from: '/payroll' });
 	const {
 		page = 1,
 		status,

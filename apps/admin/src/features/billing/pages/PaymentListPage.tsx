@@ -30,7 +30,7 @@ const PAGE_SIZE = 20;
 const ALL = 'all';
 
 export function PaymentListPage() {
-	const navigate = useNavigate();
+	const navigate = useNavigate({ from: '/payments' });
 	const { can } = usePermissions();
 	const [selectedPaymentId, setSelectedPaymentId] = useState<number | null>(null);
 	const {

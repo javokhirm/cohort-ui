@@ -441,7 +441,12 @@ export function GroupFormPage(props: GroupFormPageProps) {
 	return (
 		<div className="mx-auto flex max-w-6xl flex-col gap-5">
 			<Link
-				to={props.mode === 'create' ? '/groups' : `/groups/${props.group.id}`}
+				{...(props.mode === 'create'
+					? { to: '/groups' as const }
+					: {
+							to: '/groups/$groupId' as const,
+							params: { groupId: String(props.group.id) },
+						})}
 				className="flex w-fit items-center gap-1.5 text-sm text-muted-foreground hover:text-foreground"
 			>
 				<ArrowLeft className="size-3.5" />

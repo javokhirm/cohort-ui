@@ -14,7 +14,7 @@ import { StaffForm } from '../components/StaffForm';
 const PAGE_SIZE = 20;
 
 export function StaffListPage() {
-	const navigate = useNavigate();
+	const navigate = useNavigate({ from: '/staff' });
 	const { page = 1, search: searchParam, role } = useSearch({ from: '/_authed/staff' });
 
 	const [inputValue, setInputValue] = useState(searchParam ?? '');
