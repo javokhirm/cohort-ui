@@ -1,0 +1,17 @@
+# Keep the build context small and NEVER let host artifacts leak into the
+# image: `COPY . .` in the builder stage would otherwise overwrite the
+# container's freshly-installed Linux node_modules with macOS ones.
+node_modules
+**/node_modules
+**/dist
+.turbo
+**/.turbo
+.git
+.github
+docs
+*.md
+.env
+.env.*
+!.env.example
+.DS_Store
+coverage

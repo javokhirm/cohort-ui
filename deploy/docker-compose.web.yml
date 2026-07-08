@@ -1,0 +1,44 @@
+# Frontend stack. Deployed to BOTH /opt/cohort/web-prod and /opt/cohort/web-dev
+# on the single VPS. Everything that differs between envs comes from the .env
+# file sitting next to this one (see .env.server.example):
+#   COMPOSE_PROJECT_NAME=cohort-web-prod  (or cohort-web-dev)
+#   ADMIN_ALIAS=web-admin                 (or web-admin-dev)    -> Caddy upstream
+#   INTERNAL_ALIAS=web-internal           (or web-internal-dev) -> Caddy upstream
+#   ADMIN_IMAGE / INTERNAL_IMAGE          -> overridden per-SHA by the deploy workflow
+#
+# No host ports — the shared `edge` network + Caddy front everything (TLS via
+# Let's Encrypt lives in cohort-be/deploy/Caddyfile).
+
+networks:
+  edge:
+    external: true # created once on the VPS: `docker network create edge`
+
+x-web: &web
+  restart: always
+  mem_limit: 64m # static nginx needs ~5 MB; the cap protects the shared VPS
+  healthcheck:
+    test: ['CMD', 'wget', '-q', '--spider', 'http://127.0.0.1/healthz']
+    interval: 15s
+    timeout: 3s
+    retries: 3
+    start_period: 5s
+  logging:
+    driver: json-file
+    options:
+      max-size: '10m'
+      max-file: '5'
+
+services:
+  web-admin:
+    <<: *web
+    image: ${ADMIN_IMAGE}
+    networks:
+      edge:
+        aliases: ['${ADMIN_ALIAS}']
+
+  web-internal:
+    <<: *web
+    image: ${INTERNAL_IMAGE}
+    networks:
+      edge:
+        aliases: ['${INTERNAL_ALIAS}']

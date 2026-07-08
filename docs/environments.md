@@ -11,7 +11,7 @@ How configuration flows into the apps, and how to run the apps locally.
 - **Build once, run anywhere.** Per-environment values (API origin, feature flags) are read at
   build time per target; the **tenant is a post-login runtime fact** (the backend derives it
   from the user's single membership), never baked in — each app is served from one fixed host
-  (`staff.cohort.uz`, `internal.cohort.uz`).
+  (`admin.cohort.uz`, `internal.cohort.uz`).
 - **Fail fast.** Env is validated against a Zod schema at app boot; a missing/invalid var
   crashes startup with a clear message rather than failing mysteriously later.
 
@@ -55,7 +55,7 @@ validated, typed values.
 The tenant comes from whoever logs in, so local dev is
 plain `localhost`:
 
-- Run the app on `http://localhost:5174` (staff) / `http://localhost:5173` (super admin).
+- Run the app on `http://localhost:5174` (admin) / `http://localhost:5173` (internal-platform).
 - Point `VITE_API_ORIGIN` at your local backend (default `http://localhost:5050`). Ensure the
   backend's `CORS_ORIGINS` allows the dev origin.
 - To test as a specific education center, log in with a user belonging to that center.
@@ -64,15 +64,16 @@ plain `localhost`:
 
 ## 5. Environments
 
-| Environment | Hosting                              | Domain                                                | Notes                             |
-| ----------- | ------------------------------------ | ----------------------------------------------------- | --------------------------------- |
-| development | local Vite dev server                | `localhost:5174` (staff) / `localhost:5173` (super admin)   | HMR; local or shared-dev backend. |
-| preview     | PR deploy (per [ci-cd.md](ci-cd.md)) | per-PR URL                                            | Built artifact; staging API.      |
-| staging     | static host                          | `staff.staging.cohort.uz` / `internal.staging.cohort.uz` | Mirrors prod; staging backend.    |
-| production  | static host + CDN                    | `staff.cohort.uz` / `internal.cohort.uz`                 | One fixed host per app.           |
+| Environment | Hosting                                                           | Domain                                                           | Notes                                                        |
+| ----------- | ----------------------------------------------------------------- | ----------------------------------------------------------------- | ------------------------------------------------------------ |
+| development | local Vite dev server                                              | `localhost:5174` (admin) / `localhost:5173` (internal-platform)    | HMR; local or shared-dev backend.                             |
+| preview     | PR deploy (optional, per [ci-cd.md](ci-cd.md) §3)                  | per-PR URL                                                         | Built artifact; dev API.                                      |
+| staging     | VPS `web-dev` stack ([deploy/README.md](../deploy/README.md))      | `admin-dev.cohort.uz` / `internal-dev.cohort.uz`                   | Deploys from `dev`; `VITE_APP_ENV=staging`, `api-dev` backend. |
+| production  | VPS `web-prod` stack — nginx behind the edge Caddy                 | `admin.cohort.uz` / `internal.cohort.uz`                           | Deploys from `main`; one fixed host per app.                  |
 
 Each app needs one DNS record + TLS cert per environment — no wildcard DNS, since tenants are
-not encoded in the hostname.
+not encoded in the hostname. Both are hands-off: an A record to the VPS, and the edge Caddy
+issues/renews the Let's Encrypt cert automatically.
 
 **Preview (PR) deploys are optional** (free on hosts like Vercel/Netlify/Cloudflare Pages) and
 not part of the required baseline — staging + production are. A preview build needs no tenant

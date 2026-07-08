@@ -56,29 +56,40 @@ Principles:
 
 ## 3. CD — deployment
 
-The apps are **static SPAs** → build to static assets, serve from a CDN.
+The apps are **static SPAs** → each builds to static assets, packaged into a tiny nginx
+image ([Dockerfile](../Dockerfile)) and served from the project VPS behind the shared edge
+Caddy (TLS via Let's Encrypt). Server layout, bootstrap, secrets and rollback:
+[deploy/README.md](../deploy/README.md).
 
-- **Hosting options:** Vercel / Netlify / Cloudflare Pages, or S3 + CloudFront. Any static
-  host works — each app lives on one fixed host (`staff.cohort.uz`, `internal.cohort.uz`; see
-  [environments.md](environments.md)).
-- **SPA routing:** configure the host to rewrite unknown paths to `index.html` (client-side
-  router owns routing).
-- **Per-app:** each `apps/*` builds and deploys independently (today only `staff`). Turbo
-  builds only the affected app.
-- **PR previews (optional):** if the host offers them for free (Vercel/Netlify/CF Pages),
-  deploy the built artifact to a per-PR URL against the **staging** API. Not required —
-  staging + production are the baseline. No tenant configuration is needed on a preview URL —
-  the tenant comes from whoever logs in (see [environments.md](environments.md) §4/§5).
-- **Promotion:** `main` → staging automatically; production via a tagged release / manual
-  approval. Keep this in lockstep with backend deploys when a contract changes.
+- **Hosts:** `admin.cohort.uz` / `internal.cohort.uz` (prod, from `main`) and
+  `admin-dev.cohort.uz` / `internal-dev.cohort.uz` (dev, from `dev`) — one fixed host per
+  app (see [environments.md](environments.md)).
+- **SPA routing:** [deploy/nginx.conf](../deploy/nginx.conf) rewrites unknown paths to
+  `index.html` (client-side router owns routing); hashed `/assets` are cached immutable,
+  `index.html` is never cached.
+- **Pipelines:** `.github/workflows/deploy-web-prod.yml` / `deploy-web-dev.yml` build both
+  apps (Docker matrix → GHCR, tagged `latest`|`dev` + git SHA) and roll the matching web
+  stack over SSH — same pattern as the backend.
+- **Env baking:** `VITE_*` values are compile-time and public; they come from GitHub
+  repository **variables** (`PROD_API_ORIGIN` / `DEV_API_ORIGIN`) passed as Docker
+  build-args. Changing one means re-running the workflow (`workflow_dispatch`), not editing
+  the server.
+- **Zero-downtime:** compose healthchecks + `up -d --wait`, with the edge Caddy retrying
+  (`lb_try_duration`) across the ~1s container swap.
+- **PR previews (optional):** not wired; if ever needed, deploy the built artifact to a
+  per-PR URL against the dev API. No tenant configuration is needed on a preview URL — the
+  tenant comes from whoever logs in (see [environments.md](environments.md) §4/§5).
+- **Promotion:** `dev` branch → dev stack automatically; `main` → production. Keep frontend
+  and backend deploys in lockstep when a contract changes.
 
 ---
 
 ## 4. Caching & secrets
 
 - `.turbo` local cache + remote cache; never cache `node_modules` contents in app outputs.
-- CI secrets: `TURBO_TOKEN`/`TURBO_TEAM` (or self-hosted cache creds), deploy host token,
-  `VITE_SENTRY_DSN` if used. **No backend secrets** — the SPA holds none.
+- CI secrets: `TURBO_TOKEN`/`TURBO_TEAM` (or self-hosted cache creds), the VPS SSH deploy
+  key (`VPS_HOST`/`DEPLOY_USER`/`DEPLOY_SSH_KEY`). **No backend secrets** — the SPA holds
+  none, and `VITE_*` values are public repository variables, not secrets.
 
 ---
 
