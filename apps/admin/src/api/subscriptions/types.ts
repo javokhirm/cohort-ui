@@ -5,7 +5,6 @@ export interface SubscriptionView {
 	id: number;
 	tenantId: number;
 	tenantName: string | null;
-	tenantSubdomain: string | null;
 	subscriptionTierId: number;
 	tierName: string | null;
 	status: SubscriptionStatus;

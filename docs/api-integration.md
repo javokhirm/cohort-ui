@@ -12,9 +12,9 @@ When they disagree, the backend doc wins — update this and regenerate types.
 
 - **Base URL:** `<api-origin>/api/v1`. Surfaces are path prefixes: `/public`, `/manage`,
   `/teach`, `/portal`, `/admin`. The staff app uses `/public` (auth) + `/manage`.
-- **Tenant:** resolved by the backend from the request **subdomain** (Host header),
-  cross-checked against the JWT `tenantId`. The frontend does not send a tenant id; it just
-  runs on the tenant's subdomain. (See [auth-and-rbac.md](auth-and-rbac.md).)
+- **Tenant:** resolved by the backend from the **logged-in user's single membership** (one
+  user = one business) and carried in the JWT `tenantId`. The frontend never sends a tenant
+  id. (See [auth-and-rbac.md](auth-and-rbac.md).)
 - **Auth:** `Authorization: Bearer <accessToken>` on every authenticated request.
 - **Response envelope (every response):**
 

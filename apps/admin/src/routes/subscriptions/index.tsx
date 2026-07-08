@@ -39,13 +39,11 @@ const columns: ColumnDef<SubscriptionRow>[] = [
 						<AvatarFallback
 							className={cn('text-xs font-bold', avatarClass(sub.tenantId))}
 						>
-							{getInitials(sub.tenantName ?? sub.tenantSubdomain ?? '?')}
+							{getInitials(sub.tenantName ?? '?')}
 						</AvatarFallback>
 					</Avatar>
 					<span className="truncate text-sm font-medium">
-						{sub.tenantName ??
-							sub.tenantSubdomain ??
-							`Tenant #${sub.tenantId}`}
+						{sub.tenantName ?? `Tenant #${sub.tenantId}`}
 					</span>
 				</div>
 			);

@@ -92,7 +92,6 @@ apps/staff/
     │   ├── env.ts                  # typed, Zod-validated import.meta.env
     │   ├── query-client.ts         # configured QueryClient (defaults, retry, error mapping)
     │   ├── api.ts                  # configured api-client instance for the /manage surface
-    │   └── tenant.ts               # read tenant from subdomain
     └── styles/
         └── globals.css             # tailwind entry + base layer
 ```

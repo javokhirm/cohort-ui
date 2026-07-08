@@ -6,7 +6,6 @@ export type TenantMemberStatus = 'ACTIVE' | 'INACTIVE' | 'INVITED';
 export interface TenantSummaryView {
 	id: number;
 	name: string;
-	subdomain: string;
 	status: TenantStatus;
 	city: string | null;
 	phone: string | null;
@@ -124,7 +123,6 @@ export interface ChangePlanInput {
 export interface TenantListRow {
 	id: number;
 	name: string;
-	subdomain: string;
 	status: TenantStatus;
 	plan: { id: number; name: string } | null;
 	subscriptionStatus: SubscriptionStatus | null;
@@ -167,7 +165,6 @@ export interface ChangeMemberRoleInput {
 
 export interface OnboardTenantInput {
 	name: string;
-	subdomain: string;
 	city?: string;
 	phone?: string;
 	timezone?: string;

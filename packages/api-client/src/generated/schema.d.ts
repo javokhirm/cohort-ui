@@ -13,7 +13,7 @@ export interface paths {
 		};
 		get?: never;
 		put?: never;
-		/** Authenticate with phone + password for the tenant resolved from the subdomain */
+		/** Authenticate with phone + password; the tenant is the user's education center */
 		post: operations['AuthController_login'];
 		delete?: never;
 		options?: never;
@@ -2009,11 +2009,6 @@ export interface components {
 		};
 		OnboardTenantDto: {
 			name: string;
-			/**
-			 * @description Unique, lowercase, alphanumeric + hyphens
-			 * @example zabon
-			 */
-			subdomain: string;
 			city?: string;
 			/**
 			 * @description E.164 phone number
@@ -2849,9 +2844,7 @@ export interface operations {
 	AuthController_login: {
 		parameters: {
 			query?: never;
-			header: {
-				host: string;
-			};
+			header?: never;
 			path?: never;
 			cookie?: never;
 		};
@@ -2872,9 +2865,7 @@ export interface operations {
 	AuthController_refresh: {
 		parameters: {
 			query?: never;
-			header: {
-				host: string;
-			};
+			header?: never;
 			path?: never;
 			cookie?: never;
 		};
@@ -3030,7 +3021,7 @@ export interface operations {
 			query?: {
 				page?: number;
 				limit?: number;
-				/** @description Matches name or subdomain (case-insensitive) */
+				/** @description Matches name (case-insensitive) */
 				search?: string;
 				status?: 'ACTIVE' | 'SUSPENDED' | 'PENDING' | 'CANCELLED';
 			};

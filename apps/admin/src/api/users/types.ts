@@ -3,7 +3,6 @@ export type UserDirectoryStatus = 'active' | 'invited' | 'inactive';
 export interface UserTenantSummary {
 	tenantId: number;
 	name: string;
-	subdomain: string;
 	status: string;
 }
 
@@ -22,7 +21,7 @@ export interface UserDirectoryRow {
 
 export interface UserMembershipDetail {
 	tenantId: number;
-	tenant: { id: number; name: string; subdomain: string; status: string };
+	tenant: { id: number; name: string; status: string };
 	status: string;
 	joinedAt: string | null;
 	roles: string[];

@@ -173,9 +173,10 @@ changes together, so tightly-coupled backend domains may share one feature
 ## Multi-tenancy (important context)
 
 Cohort is multi-tenant: one education-center _business_ (tenant) with one or many
-_branches_. **The tenant is identified by the subdomain** (`zabon.cohort.uz`) and resolved
-by the backend from the Host header, cross-checked against the JWT `tenantId`. The frontend
-serves **one build for all tenants** — never bake a tenant into the build. Multi-branch
+_branches_. **A user belongs to exactly one tenant**, and every frontend is served from one
+fixed host (staff console → `staff.cohort.uz`, admin console → `admin.cohort.uz`). The backend resolves the tenant from the user's single membership at
+login and scopes every request by the JWT `tenantId`. The frontend serves **one build for
+all tenants** — never bake a tenant into the build. Multi-branch
 users pick their view in a global, multi-select **branch selector**; the selection is
 client state injected into list queries as `branchIds` (part of the query key). The
 selectable set comes from `GET /manage/branches`, already scoped per user by the

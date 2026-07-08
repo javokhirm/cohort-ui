@@ -2,8 +2,7 @@ import { z } from 'zod';
 
 /**
  * Typed, validated environment. Only `VITE_`-prefixed vars are exposed to the
- * bundle (docs/environments.md). Admin is platform-wide — there is no tenant
- * subdomain, so no `VITE_DEV_TENANT`. Read config through `env`, never
+ * bundle (docs/environments.md). Admin is platform-wide, so no `VITE_DEV_TENANT`. Read config through `env`, never
  * `import.meta.env` directly.
  */
 const EnvSchema = z.object({

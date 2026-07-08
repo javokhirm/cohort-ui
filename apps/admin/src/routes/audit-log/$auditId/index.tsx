@@ -78,9 +78,6 @@ export function AuditLogDetailPage() {
 									className="text-primary hover:underline"
 								>
 									{entry.tenant.name}
-									<span className="ml-1 text-xs text-muted-foreground">
-										({entry.tenant.subdomain}.cohort.uz)
-									</span>
 								</Link>
 							) : (
 								<span className="italic text-muted-foreground">

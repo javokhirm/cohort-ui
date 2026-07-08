@@ -10,16 +10,18 @@ and the route guards.
 
 ---
 
-## 1. Multi-tenancy = subdomain
+## 1. Multi-tenancy = membership
 
-- Each tenant runs on its own subdomain: `zabon.cohort.uz`, `acme.cohort.uz`, …
-- The frontend **reads the subdomain at runtime** (`lib/tenant.ts`) for display/branding and
-  to know which origin to talk to. It does **not** send a tenant id — the backend resolves
-  the tenant from the Host header and cross-checks it against the JWT `tenantId` claim.
-- **One build serves all tenants.** Never put a tenant in an env var or the bundle.
-- **Local dev:** use `*.localhost` (e.g. `zabon.localhost:5173`, which resolves to
-  `127.0.0.1` in modern browsers) or a `VITE_DEV_TENANT` override that sets the dev tenant.
-  See [environments.md](environments.md).
+- Every frontend is served from **one fixed host** per app: the staff console at
+  `staff.cohort.uz`, the super-admin console at `admin.cohort.uz`.
+- **A user belongs to exactly one tenant.** The client never sends (or knows about) a
+  tenant id at login — the backend resolves the tenant from the user's single ACTIVE
+  membership and embeds it in the JWT `tenantId` claim; every later request is scoped by
+  that claim.
+- **One build serves all tenants.** Never put a tenant in an env var or the bundle. The
+  tenant identity is a post-login fact, not a deploy-time or host-derived one.
+- **Local dev:** plain `localhost` — no host tricks needed. See
+  [environments.md](environments.md).
 
 ---
 
@@ -51,7 +53,7 @@ POST /api/v1/public/auth/reset-password  { phone, otp, newPassword }  → 200
 
 > The refresh token is sent in the **JSON body** as `refreshToken` (the backend extracts it
 > from the body, not the `Authorization` header). Login authenticates with `phone` +
-> `password`; the tenant comes from the subdomain/Host, not the body.
+> `password`; the tenant is derived server-side from the user's single membership.
 
 ---
 
@@ -201,11 +203,12 @@ export const requireRole = (roles: string[]) => () => {
 
 ## 8. Login → app, end to end
 
-1. User lands on `zabon.cohort.uz` → boot refresh runs; no token → `/login`.
-2. Login form posts `{ phone, password }` to `/public/auth/login` (tenant from subdomain).
+1. User lands on `staff.cohort.uz` → boot refresh runs; no token → `/login`.
+2. Login form posts `{ phone, password }` to `/public/auth/login` (the backend resolves the
+   tenant from the user's single membership).
 3. On success: store access (memory) + refresh (localStorage) + `user`; redirect to `next`
    or the dashboard.
-4. Header shows tenant branding + (if multi-branch) the branch switcher; nav is filtered by
+4. Header shows product branding + (if multi-branch) the branch switcher; nav is filtered by
    role.
 5. Requests carry the Bearer access token; a `401` triggers one silent refresh (refresh token
    in the body) + replay.

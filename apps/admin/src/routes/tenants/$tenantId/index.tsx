@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { Link, useParams } from '@tanstack/react-router';
-import { Eye, Globe } from 'lucide-react';
+import { Eye } from 'lucide-react';
 
 import {
 	Avatar,
@@ -102,12 +102,6 @@ export function TenantDetailPage() {
 								{tenant.name}
 							</h1>
 							<StatusBadge kind="tenant" status={tenant.status} />
-						</div>
-						<div className="flex flex-wrap items-center gap-3 text-sm text-muted-foreground">
-							<span className="flex items-center gap-1">
-								<Globe className="size-3.5" />
-								{tenant.subdomain}.cohort.uz
-							</span>
 						</div>
 					</div>
 				</div>

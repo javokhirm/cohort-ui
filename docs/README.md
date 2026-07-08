@@ -26,7 +26,8 @@ Turborepo + pnpm monorepo of React 19 + Vite SPAs — one app per backend API su
 the **staff** app for `/api/v1/manage`). Routing via TanStack Router; server state via
 TanStack Query over a typed client generated from the backend's OpenAPI spec; client state via
 Zustand; UI from a shared shadcn/ui + Tailwind package; forms via React Hook Form + Zod.
-Multi-tenant by **subdomain** (one build, all tenants); auth is JWT access (memory) + refresh
+Multi-tenant by **membership** (one fixed host per app, one build, all tenants; a user
+belongs to one center); auth is JWT access (memory) + refresh
 (localStorage) with silent refresh; UI is permission/role-gated for UX while the **server
 enforces** authorization. Features mirror the backend's domains. Keep it simple, keep
 boundaries clean, don't build ahead of the API.

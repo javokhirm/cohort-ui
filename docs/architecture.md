@@ -22,7 +22,7 @@ adding an app, a package, or a cross-package dependency.
    the only entrypoint. Internals are private — mirroring the backend's `index.ts` rule.
 5. **Server state is not application state.** TanStack Query owns everything that comes from
    the API. Zustand owns the small slice of true client state. They never overlap.
-6. **Build once, serve every tenant.** The tenant is a runtime fact (the subdomain), never
+6. **Build once, serve every tenant.** The tenant is a runtime fact (who logs in), never
    a build input.
 7. **Don't over-engineer.** Add a package or abstraction when a _second_ consumer appears,
    not in anticipation of one. We start with the staff app; the rest follows the roadmap. We
@@ -58,14 +58,14 @@ unchanged, which is the whole point of doing the package split now.
 
 We keep the package count minimal and grow it only when a second consumer appears.
 
-| Package      | Responsibility                                                                                                                                            | May depend on         |
-| ------------ | --------------------------------------------------------------------------------------------------------------------------------------------------------- | --------------------- |
-| `utils`      | Framework-agnostic pure helpers (money, dates, formatting, code parsing, guards) **and** shared cross-cutting types. The leaf.                            | —                     |
+| Package      | Responsibility                                                                                                                                           | May depend on         |
+| ------------ | -------------------------------------------------------------------------------------------------------------------------------------------------------- | --------------------- |
+| `utils`      | Framework-agnostic pure helpers (money, dates, formatting, code parsing, guards) **and** shared cross-cutting types. The leaf.                           | —                     |
 | `config`     | Build tooling: ESLint flat config, Tailwind preset + design tokens, base `tsconfig` — via subpath exports (`@cohort/config/eslint`, `/tailwind`, `/ts`). | — (leaf)              |
-| `api-client` | Generated OpenAPI types, the typed HTTP client (envelope unwrap, error normalization, injected auth hook), query-key factories, pagination helpers.       | `utils`               |
-| `auth`       | Session store, token storage + silent refresh, permission catalog, `<Can>`, route guards, `useAuth`/`usePermissions`.                                     | `api-client`, `utils` |
-| `i18n`       | uz/ru/en message catalogs, locale provider, money/date/number formatters (UZS, Asia/Tashkent).                                                            | `utils`               |
-| `ui`         | shadcn/ui primitives + composed, app-agnostic components. No data fetching, no business logic.                                                            | `config`, `utils`     |
+| `api-client` | Generated OpenAPI types, the typed HTTP client (envelope unwrap, error normalization, injected auth hook), query-key factories, pagination helpers.      | `utils`               |
+| `auth`       | Session store, token storage + silent refresh, permission catalog, `<Can>`, route guards, `useAuth`/`usePermissions`.                                    | `api-client`, `utils` |
+| `i18n`       | uz/ru/en message catalogs, locale provider, money/date/number formatters (UZS, Asia/Tashkent).                                                           | `utils`               |
+| `ui`         | shadcn/ui primitives + composed, app-agnostic components. No data fetching, no business logic.                                                           | `config`, `utils`     |
 
 > **Why so few?** A one-app repo doesn't need nine packages. We folded standalone `types`
 > into `utils` (no cross-package type earns its own package yet) and the three `config-*`
@@ -123,7 +123,7 @@ need the same thing, it moves up (to `components/`, `lib/`, or a package). Detai
 The backend's domains map to staff-app features — **some consolidated**. A feature is created
 only once the corresponding `/manage/*` endpoints exist:
 
-| Backend domain(s) (cohort-be)   | Staff feature            | Covers                                                      |
+| Backend domain(s) (cohort-be)    | Staff feature            | Covers                                                      |
 | -------------------------------- | ------------------------ | ----------------------------------------------------------- |
 | identity                         | (in `packages/auth`)     | login, session, roles/permissions, branch scope             |
 | platform                         | `features/platform`      | branches, tenant settings                                   |

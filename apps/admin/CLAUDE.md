@@ -6,7 +6,7 @@ here in full — read the relevant doc before working in an area. This file reco
 **specific to this app**.
 
 The admin app is the platform-operator console. It targets the **`/api/v1/admin/*`** surface (plus
-`/api/v1/public/*` for auth) for the single role **SUPER_ADMIN**. It is **platform-wide — there is no tenant subdomain** (no `lib/tenant.ts`, no `VITE_DEV_TENANT`). React 19 + Vite SPA. Dev server runs on **port 5173**. It uses a **dark "console" theme** (`--console-*` CSS tokens) and depends on **`recharts`** for dashboard charts.
+`/api/v1/public/*` for auth) for the single role **SUPER_ADMIN**. React 19 + Vite SPA. Dev server runs on **port 5173**. It uses a **dark "console" theme** (`--console-*` CSS tokens) and depends on **`recharts`** for dashboard charts.
 
 ---
 

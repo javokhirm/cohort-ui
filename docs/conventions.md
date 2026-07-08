@@ -22,7 +22,7 @@ the rest is review discipline.
    `packages/ui`.
 7. **Money/dates go through shared formatters.** Never `toFixed`, never `new
 Date().toLocaleString()` ad hoc. (§7)
-8. **No tenant, no secret in the bundle.** Tenant is runtime (subdomain); SPA env is public.
+8. **No tenant, no secret in the bundle.** Tenant is runtime (who logs in); SPA env is public.
 
 ESLint enforces 1–3 via import/boundary rules; reviewers enforce the rest.
 

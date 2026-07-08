@@ -7,7 +7,6 @@ export interface AuditActorView {
 export interface AuditTenantView {
 	id: number;
 	name: string;
-	subdomain: string;
 }
 
 export interface AuditLogView {

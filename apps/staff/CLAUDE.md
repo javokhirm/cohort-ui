@@ -8,16 +8,17 @@ The staff app is the back-office console for education-center staff. It serves t
 
 ## Auth, session & tenancy (security-sensitive — see [docs/auth-and-rbac.md](../../docs/auth-and-rbac.md))
 
-- **Login**: phone + password → `POST /public/auth/login`. Tenant comes from the **subdomain**
-  (Host header), never the request body. Access token → memory (Zustand); refresh token →
-  `localStorage` under the staff-scoped key in `lib/auth/tokenStorage.ts`.
+- **Login**: phone + password → `POST /public/auth/login`. The tenant is resolved by the
+  backend from the user's single membership (one user = one business) — the client never
+  sends it. Access token → memory (Zustand); refresh token → `localStorage` under the
+  staff-scoped key in `lib/auth/tokenStorage.ts`.
 - **Silent refresh**: `runRefresh()` in `api/apiClient.ts` is both the boot check and the
   `manageApi` 401 hook (single-flight lives inside `@repo/api-client`).
 - **Gating is cosmetic.** Use `hasRole()` / `requireRole()` for UX only. Permission-code gating is
   **not built** (the token carries roles only) — gate by role until the backend ships resolved
   permissions.
-- Multi-tenant: one build serves all tenants; never bake a tenant into the bundle. `lib/tenant.ts`
-  reads the subdomain (with `VITE_DEV_TENANT` for plain-localhost dev).
+- Multi-tenant: one build serves all tenants from the single fixed host `staff.cohort.uz`; never bake a tenant into the bundle. The tenant identity is
+  known only after login.
 - **Do not change token handling, tenant resolution, or RBAC without the engineer** (root CLAUDE.md
   "stop and ask").
 

@@ -123,7 +123,6 @@ export const MOCK_SUBSCRIPTIONS = [
 		id: 101,
 		tenantId: 1,
 		tenantName: 'Zabon Academy',
-		tenantSubdomain: 'zabon',
 		subscriptionTierId: 2,
 		tierName: 'Growth',
 		status: 'ACTIVE',
@@ -139,7 +138,6 @@ export const MOCK_SUBSCRIPTIONS = [
 		id: 102,
 		tenantId: 2,
 		tenantName: 'Tafakkur School',
-		tenantSubdomain: 'tafakkur',
 		subscriptionTierId: 1,
 		tierName: 'Starter',
 		status: 'TRIALING',
@@ -155,7 +153,6 @@ export const MOCK_SUBSCRIPTIONS = [
 		id: 103,
 		tenantId: 3,
 		tenantName: "Najot Ta'lim",
-		tenantSubdomain: 'najot',
 		subscriptionTierId: 2,
 		tierName: 'Growth',
 		status: 'PAST_DUE',
@@ -268,9 +265,7 @@ export const MOCK_USERS = [
 		status: 'active',
 		lastLoginAt: '2026-06-29T07:00:00Z',
 		membershipCount: 1,
-		tenants: [
-			{ tenantId: 1, name: 'Zabon Academy', subdomain: 'zabon', status: 'ACTIVE' },
-		],
+		tenants: [{ tenantId: 1, name: 'Zabon Academy', status: 'ACTIVE' }],
 	},
 	{
 		id: 2,
@@ -281,13 +276,11 @@ export const MOCK_USERS = [
 		isActive: true,
 		status: 'active',
 		lastLoginAt: '2026-06-28T15:30:00Z',
-		membershipCount: 2,
+		membershipCount: 1,
 		tenants: [
-			{ tenantId: 1, name: 'Zabon Academy', subdomain: 'zabon', status: 'ACTIVE' },
 			{
 				tenantId: 2,
 				name: 'Tafakkur School',
-				subdomain: 'tafakkur',
 				status: 'ACTIVE',
 			},
 		],
@@ -306,7 +299,6 @@ export const MOCK_USERS = [
 			{
 				tenantId: 3,
 				name: "Najot Ta'lim",
-				subdomain: 'najot',
 				status: 'SUSPENDED',
 			},
 		],
@@ -330,7 +322,6 @@ export const MOCK_USER_DETAIL = {
 			tenant: {
 				id: 1,
 				name: 'Zabon Academy',
-				subdomain: 'zabon',
 				status: 'ACTIVE',
 			},
 			status: 'active',
@@ -347,7 +338,7 @@ export const MOCK_AUDIT_LOGS = [
 		id: 1,
 		timestamp: '2026-06-29T07:00:00Z',
 		actor: { userId: 1, name: 'Olim Operator', role: 'SUPER_ADMIN' },
-		tenant: { id: 1, name: 'Zabon Academy', subdomain: 'zabon' },
+		tenant: { id: 1, name: 'Zabon Academy' },
 		action: 'tenant.suspend',
 		entityType: 'tenant',
 		entityId: 1,
@@ -369,7 +360,7 @@ export const MOCK_AUDIT_LOGS = [
 		id: 3,
 		timestamp: '2026-06-27T09:30:00Z',
 		actor: { userId: 1, name: 'Olim Operator', role: 'SUPER_ADMIN' },
-		tenant: { id: 2, name: 'Tafakkur School', subdomain: 'tafakkur' },
+		tenant: { id: 2, name: 'Tafakkur School' },
 		action: 'subscription.change_plan',
 		entityType: 'subscription',
 		entityId: 102,
@@ -411,7 +402,6 @@ export const MOCK_DASHBOARD = {
 			{
 				tenantId: 3,
 				name: "Najot Ta'lim",
-				subdomain: 'najot',
 				status: 'SUSPENDED',
 				reason: 'SUSPENDED',
 				reasons: ['SUSPENDED'],
@@ -428,7 +418,6 @@ export const MOCK_TENANT_LIST = [
 	{
 		id: 1,
 		name: 'Zabon Academy',
-		subdomain: 'zabon',
 		status: 'ACTIVE',
 		plan: { id: 2, name: 'Growth' },
 		subscriptionStatus: 'ACTIVE',
@@ -440,7 +429,6 @@ export const MOCK_TENANT_LIST = [
 	{
 		id: 2,
 		name: 'Tafakkur School',
-		subdomain: 'tafakkur',
 		status: 'ACTIVE',
 		plan: { id: 1, name: 'Starter' },
 		subscriptionStatus: 'TRIALING',
@@ -452,7 +440,6 @@ export const MOCK_TENANT_LIST = [
 	{
 		id: 3,
 		name: "Najot Ta'lim",
-		subdomain: 'najot',
 		status: 'SUSPENDED',
 		plan: { id: 2, name: 'Growth' },
 		subscriptionStatus: 'PAST_DUE',
@@ -474,7 +461,6 @@ export const MOCK_TENANT_SUMMARY = {
 export const MOCK_TENANT_DETAIL = {
 	id: 1,
 	name: 'Zabon Academy',
-	subdomain: 'zabon',
 	status: 'ACTIVE',
 	city: 'Tashkent',
 	phone: '+998901234567',
@@ -799,12 +785,7 @@ export const handlers = [
 
 		let rows = MOCK_TENANT_LIST;
 		if (status) rows = rows.filter((t) => t.status === status);
-		if (search)
-			rows = rows.filter(
-				(t) =>
-					t.name.toLowerCase().includes(search) ||
-					t.subdomain.toLowerCase().includes(search),
-			);
+		if (search) rows = rows.filter((t) => t.name.toLowerCase().includes(search));
 
 		const total = rows.length;
 		const start = (page - 1) * limit;
@@ -886,7 +867,6 @@ export const handlers = [
 			id: 101,
 			tenantId: id,
 			tenantName: tenant.name,
-			tenantSubdomain: tenant.subdomain,
 			subscriptionTierId: body['subscriptionTierId'],
 			tierName: null,
 			status: 'ACTIVE',
@@ -907,7 +887,6 @@ export const handlers = [
 		return ok({
 			id: 99,
 			name: body['name'],
-			subdomain: body['subdomain'],
 			status: 'ACTIVE',
 			subscriptionTierId: body['subscriptionTierId'],
 		});

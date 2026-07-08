@@ -4,7 +4,6 @@ const EnvSchema = z.object({
 	VITE_API_ORIGIN: z.url(),
 	VITE_APP_ENV: z.enum(['development', 'staging', 'production']),
 	VITE_SENTRY_DSN: z.url().optional(),
-	VITE_DEV_TENANT: z.string().optional(),
 });
 
 const parsed = EnvSchema.safeParse(import.meta.env);

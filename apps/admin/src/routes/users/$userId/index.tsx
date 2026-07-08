@@ -141,9 +141,6 @@ export function UserDetailPage() {
 									<p className="truncate text-sm font-medium">
 										{m.tenant.name}
 									</p>
-									<p className="text-xs text-muted-foreground">
-										{m.tenant.subdomain}.cohort.uz
-									</p>
 								</div>
 
 								<div className="flex items-center gap-2">

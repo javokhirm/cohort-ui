@@ -59,16 +59,16 @@ Principles:
 The apps are **static SPAs** → build to static assets, serve from a CDN.
 
 - **Hosting options:** Vercel / Netlify / Cloudflare Pages, or S3 + CloudFront. Any static
-  host with **wildcard subdomain + wildcard TLS** support (so `*.cohort.uz` all serve the
-  same build — the tenant is resolved at runtime; see [environments.md](environments.md)).
+  host works — each app lives on one fixed host (`staff.cohort.uz`, `admin.cohort.uz`; see
+  [environments.md](environments.md)).
 - **SPA routing:** configure the host to rewrite unknown paths to `index.html` (client-side
   router owns routing).
 - **Per-app:** each `apps/*` builds and deploys independently (today only `staff`). Turbo
   builds only the affected app.
 - **PR previews (optional):** if the host offers them for free (Vercel/Netlify/CF Pages),
   deploy the built artifact to a per-PR URL against the **staging** API. Not required —
-  staging + production are the baseline. A preview URL isn't a tenant subdomain, so it needs a
-  tenant override (see [environments.md](environments.md) §4/§5).
+  staging + production are the baseline. No tenant configuration is needed on a preview URL —
+  the tenant comes from whoever logs in (see [environments.md](environments.md) §4/§5).
 - **Promotion:** `main` → staging automatically; production via a tagged release / manual
   approval. Keep this in lockstep with backend deploys when a contract changes.
 

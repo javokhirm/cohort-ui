@@ -1,12 +1,11 @@
 import type { PlanView } from '@/api/plans/types';
 import { formatNumber } from '@repo/utils';
 
-export type OnboardStep = 1 | 2 | 3 | 4 | 5 | 6;
+export type OnboardStep = 1 | 2 | 3 | 4 | 5;
 
 export type OnboardFormData = {
 	centerName: string;
 	city: string;
-	subdomain: string;
 	ownerFirstName: string;
 	ownerLastName: string;
 	ownerPhone: string;
@@ -17,12 +16,11 @@ export type OnboardFormData = {
 	branchCode: string;
 };
 
-export const STEP_LABELS = ['Business', 'Subdomain', 'Owner', 'Plan', 'Branch', 'Review'];
+export const STEP_LABELS = ['Business', 'Owner', 'Plan', 'Branch', 'Review'];
 
 export const EMPTY_FORM: OnboardFormData = {
 	centerName: '',
 	city: 'Tashkent',
-	subdomain: '',
 	ownerFirstName: '',
 	ownerLastName: '',
 	ownerPhone: '',

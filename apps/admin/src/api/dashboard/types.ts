@@ -14,7 +14,6 @@ export interface TenantStatusBreakdown {
 export interface AtRiskTenant {
 	tenantId: number;
 	name: string;
-	subdomain: string;
 	status: TenantStatus;
 	reason: AtRiskReason;
 	reasons: AtRiskReason[];

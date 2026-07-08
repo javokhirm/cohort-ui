@@ -50,9 +50,6 @@ const columns: ColumnDef<TenantRow>[] = [
 						<p className="truncate text-sm font-medium leading-tight">
 							{tenant.name}
 						</p>
-						<p className="truncate text-xs text-muted-foreground">
-							{tenant.subdomain}.cohort.uz
-						</p>
 					</div>
 				</div>
 			);
@@ -240,7 +237,7 @@ export function TenantsPage() {
 						type="search"
 						value={search}
 						onChange={handleSearch}
-						placeholder="Search center or subdomain..."
+						placeholder="Search centers..."
 						className="h-9 w-64 rounded-md border border-input bg-background pl-8 pr-3 text-sm shadow-sm placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring"
 					/>
 				</div>

@@ -42,7 +42,6 @@ import {
 } from '@repo/ui';
 import { useAuth, usePermissions } from '@/features/auth/hooks';
 import type { PermissionRequirement } from '@/lib/auth/permissions';
-import { getTenantSlug } from '@/lib/tenant';
 
 type NavItemDef = {
 	id: string;
@@ -354,7 +353,6 @@ export function Sidebar({ collapsed }: SidebarProps) {
 	const { user, logout } = useAuth();
 	const { can, permissionsLoaded } = usePermissions();
 	const pathname = useRouterState({ select: (s) => s.location.pathname });
-	const tenantSlug = getTenantSlug();
 
 	// Cosmetic nav filtering — show only what the resolved permissions allow, and
 	// drop a group once all its items are hidden. The backend enforces access.
@@ -368,10 +366,10 @@ export function Sidebar({ collapsed }: SidebarProps) {
 			})).filter((group) => group.items.length > 0)
 		: NAV_GROUPS;
 
-	const tenantName = tenantSlug
-		? tenantSlug.charAt(0).toUpperCase() + tenantSlug.slice(1)
-		: 'Cohort';
-	const tenantInitial = tenantName[0]?.toUpperCase() ?? 'E';
+	// One fixed host serves every education center,
+	// so the header carries the product brand rather than a tenant name.
+	const tenantName = 'Cohort';
+	const tenantInitial = 'C';
 
 	const fullName = user ? `${user.firstName} ${user.lastName}`.trim() : '';
 	const initials = user

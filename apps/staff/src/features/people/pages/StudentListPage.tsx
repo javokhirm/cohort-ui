@@ -4,7 +4,6 @@ import { Button, PageHeader, Pagination, SearchFilterBar } from '@repo/ui';
 import { Download, Plus } from 'lucide-react';
 
 import { Can } from '@/components/Can';
-import { getTenantSlug } from '@/lib/tenant';
 import { useStudents } from '../api/students.queries';
 import type { StudentListFilters } from '../api/keys';
 import { StudentTable } from '../components/StudentTable';
@@ -27,11 +26,6 @@ export function StudentListPage() {
 	const [search, setSearch] = useState('');
 	const [page, setPage] = useState(1);
 	const [addOpen, setAddOpen] = useState(false);
-
-	const tenantSlug = getTenantSlug();
-	const tenantName = tenantSlug
-		? tenantSlug.charAt(0).toUpperCase() + tenantSlug.slice(1)
-		: null;
 
 	const filters: StudentListFilters = {
 		page,
@@ -58,11 +52,7 @@ export function StudentListPage() {
 		<div className="mx-auto flex max-w-7xl flex-col gap-6">
 			<PageHeader
 				title="Students"
-				description={
-					tenantName
-						? `${tenantName} · manage student records, enrollments and balances`
-						: 'Manage student records, enrollments and balances'
-				}
+				description="Manage student records, enrollments and balances"
 				actions={
 					<Can permission="student.create">
 						<Button onClick={() => setAddOpen(true)}>

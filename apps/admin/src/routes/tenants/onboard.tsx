@@ -13,7 +13,6 @@ import { OwnerStep } from '@/features/tenants/components/onboarding/OwnerStep';
 import { PlanStep } from '@/features/tenants/components/onboarding/PlanStep';
 import { ReviewStep } from '@/features/tenants/components/onboarding/ReviewStep';
 import { StepIndicator } from '@/features/tenants/components/onboarding/StepIndicator';
-import { SubdomainStep } from '@/features/tenants/components/onboarding/SubdomainStep';
 import { EMPTY_FORM } from '@/features/tenants/components/onboarding/types';
 import type {
 	OnboardFormData,
@@ -37,7 +36,6 @@ export function OnboardTenantPage() {
 		mutationFn: () =>
 			onboardTenant({
 				name: form.centerName,
-				subdomain: form.subdomain,
 				city: form.city || undefined,
 				subscriptionTierId: form.planId!,
 				mainBranch: {
@@ -63,7 +61,7 @@ export function OnboardTenantPage() {
 	}
 
 	function next() {
-		setStep((s) => Math.min(s + 1, 6) as OnboardStep);
+		setStep((s) => Math.min(s + 1, 5) as OnboardStep);
 	}
 
 	function back() {
@@ -92,12 +90,9 @@ export function OnboardTenantPage() {
 
 			{step === 1 && <BusinessStep data={form} onChange={patch} onNext={next} />}
 			{step === 2 && (
-				<SubdomainStep data={form} onChange={patch} onBack={back} onNext={next} />
-			)}
-			{step === 3 && (
 				<OwnerStep data={form} onChange={patch} onBack={back} onNext={next} />
 			)}
-			{step === 4 && (
+			{step === 3 && (
 				<PlanStep
 					data={form}
 					onChange={patch}
@@ -107,10 +102,10 @@ export function OnboardTenantPage() {
 					plansLoading={plansLoading}
 				/>
 			)}
-			{step === 5 && (
+			{step === 4 && (
 				<BranchStep data={form} onChange={patch} onBack={back} onNext={next} />
 			)}
-			{step === 6 && (
+			{step === 5 && (
 				<ReviewStep
 					data={form}
 					onBack={back}
