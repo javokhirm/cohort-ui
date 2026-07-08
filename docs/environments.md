@@ -11,7 +11,7 @@ How configuration flows into the apps, and how to run the apps locally.
 - **Build once, run anywhere.** Per-environment values (API origin, feature flags) are read at
   build time per target; the **tenant is a post-login runtime fact** (the backend derives it
   from the user's single membership), never baked in — each app is served from one fixed host
-  (`staff.cohort.uz`, `admin.cohort.uz`).
+  (`staff.cohort.uz`, `internal.cohort.uz`).
 - **Fail fast.** Env is validated against a Zod schema at app boot; a missing/invalid var
   crashes startup with a clear message rather than failing mysteriously later.
 
@@ -55,7 +55,7 @@ validated, typed values.
 The tenant comes from whoever logs in, so local dev is
 plain `localhost`:
 
-- Run the app on `http://localhost:5174` (staff) / `http://localhost:5173` (admin).
+- Run the app on `http://localhost:5174` (staff) / `http://localhost:5173` (super admin).
 - Point `VITE_API_ORIGIN` at your local backend (default `http://localhost:5050`). Ensure the
   backend's `CORS_ORIGINS` allows the dev origin.
 - To test as a specific education center, log in with a user belonging to that center.
@@ -66,10 +66,10 @@ plain `localhost`:
 
 | Environment | Hosting                              | Domain                                                | Notes                             |
 | ----------- | ------------------------------------ | ----------------------------------------------------- | --------------------------------- |
-| development | local Vite dev server                | `localhost:5174` (staff) / `localhost:5173` (admin)   | HMR; local or shared-dev backend. |
+| development | local Vite dev server                | `localhost:5174` (staff) / `localhost:5173` (super admin)   | HMR; local or shared-dev backend. |
 | preview     | PR deploy (per [ci-cd.md](ci-cd.md)) | per-PR URL                                            | Built artifact; staging API.      |
-| staging     | static host                          | `staff.staging.cohort.uz` / `admin.staging.cohort.uz` | Mirrors prod; staging backend.    |
-| production  | static host + CDN                    | `staff.cohort.uz` / `admin.cohort.uz`                 | One fixed host per app.           |
+| staging     | static host                          | `staff.staging.cohort.uz` / `internal.staging.cohort.uz` | Mirrors prod; staging backend.    |
+| production  | static host + CDN                    | `staff.cohort.uz` / `internal.cohort.uz`                 | One fixed host per app.           |
 
 Each app needs one DNS record + TLS cert per environment — no wildcard DNS, since tenants are
 not encoded in the hostname.

@@ -11,7 +11,7 @@ When they disagree, the backend doc wins — update this and regenerate types.
 ## 1. The contract, in brief
 
 - **Base URL:** `<api-origin>/api/v1`. Surfaces are path prefixes: `/public`, `/manage`,
-  `/teach`, `/portal`, `/admin`. The staff app uses `/public` (auth) + `/manage`.
+  `/teach`, `/portal`, `/super-admin`. The staff app uses `/public` (auth) + `/manage`.
 - **Tenant:** resolved by the backend from the **logged-in user's single membership** (one
   user = one business) and carried in the JWT `tenantId`. The frontend never sends a tenant
   id. (See [auth-and-rbac.md](auth-and-rbac.md).)

@@ -1,0 +1,16 @@
+/* Internal platform styles. The design system (Tailwind v4 import + Cohort tokens,
+   light & dark) lives in @repo/ui; the app runs in the dark "console" palette
+   (`<html class="dark">`). Scan this app's own sources for utility classes. */
+@import '@repo/ui/globals.css';
+
+@source '../**/*.{ts,tsx}';
+
+:root {
+	/* Console chrome tokens — referenced via var(--console-*) in arbitrary Tailwind values */
+	--console: #0b1220;
+	--console-line: #1f2c44;
+	--console-fg: #e2e8f0;
+	--console-muted-fg: #64748b;
+	--console-accent: rgba(99, 102, 241, 0.17);
+	--console-accent-fg: #a5b4fc;
+}

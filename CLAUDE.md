@@ -131,12 +131,12 @@ A pre-commit hook (husky + lint-staged) runs prettier/eslint on staged files. Se
 ## Repository structure
 
 - **Always check the shared packages first — for everything, not just UI.** Before writing any component, formatter, helper, guard, shared type, or API-client code, look for it in the `@repo/*` packages: `@repo/ui` (components + primitives), `@repo/utils` (money/date formatters, guards, cross-cutting types), `@repo/api-client` (generated types, typed client, query-key + pagination helpers). Use what fits — do not duplicate.
-- **Flag candidates for promotion.** If you find yourself building anything — a component, helper, formatter, or type — that would logically be useful across more than one app (`staff`, `admin`, and the future `teacher`/`portal`), **stop and ask the engineer** whether it belongs in the relevant `@repo/*` package instead of the app. Do not place it in the app and do not create or expand the shared package yourself — that decision belongs to the engineer.
+- **Flag candidates for promotion.** If you find yourself building anything — a component, helper, formatter, or type — that would logically be useful across more than one app (`staff`, `super admin`, and the future `teacher`/`portal`), **stop and ask the engineer** whether it belongs in the relevant `@repo/*` package instead of the app. Do not place it in the app and do not create or expand the shared package yourself — that decision belongs to the engineer.
 
 ```
 cohort-fe/
 ├── apps/
-│   ├── admin/       # Admin Web App (/api/v1/admin/* surface)
+│   ├── internal-platform/       # Internal Platform Web App (/api/v1/super-admin/* surface)
 │   └── staff/       # Staff Web App (/api/v1/manage/* surface)
 ├── packages/
 │   ├── ui/           # shadcn primitives + composed components
@@ -154,12 +154,12 @@ Full detail in [docs/folder-structure.md](docs/folder-structure.md).
 
 The backend exposes **four role-gated API surfaces** (plus a shared, unauthenticated
 `/public` surface used by every app for auth). Each role-gated surface becomes its own app
-**when its roadmap phase arrives** — today `staff` and `admin` exist:
+**when its roadmap phase arrives** — today `staff` and `internal-platform` exist:
 
 | App                | Backend surface    | Roles                 |
 | ------------------ | ------------------ | --------------------- |
 | `staff` (now)      | `/api/v1/manage/*` | OWNER, ADMIN, MANAGER |
-| `admin` (now)      | `/api/v1/admin/*`  | SUPER_ADMIN           |
+| `internal-platform` (now)      | `/api/v1/super-admin/*`  | SUPER_ADMIN           |
 | `teacher` (future) | `/api/v1/teach/*`  | TEACHER               |
 | `portal` (future)  | `/api/v1/portal/*` | STUDENT, PARENT       |
 
@@ -174,7 +174,7 @@ changes together, so tightly-coupled backend domains may share one feature
 
 Cohort is multi-tenant: one education-center _business_ (tenant) with one or many
 _branches_. **A user belongs to exactly one tenant**, and every frontend is served from one
-fixed host (staff console → `staff.cohort.uz`, admin console → `admin.cohort.uz`). The backend resolves the tenant from the user's single membership at
+fixed host (staff console → `staff.cohort.uz`, super admin console → `internal.cohort.uz`). The backend resolves the tenant from the user's single membership at
 login and scopes every request by the JWT `tenantId`. The frontend serves **one build for
 all tenants** — never bake a tenant into the build. Multi-branch
 users pick their view in a global, multi-select **branch selector**; the selection is

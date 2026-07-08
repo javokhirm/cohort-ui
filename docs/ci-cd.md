@@ -59,7 +59,7 @@ Principles:
 The apps are **static SPAs** → build to static assets, serve from a CDN.
 
 - **Hosting options:** Vercel / Netlify / Cloudflare Pages, or S3 + CloudFront. Any static
-  host works — each app lives on one fixed host (`staff.cohort.uz`, `admin.cohort.uz`; see
+  host works — each app lives on one fixed host (`staff.cohort.uz`, `internal.cohort.uz`; see
   [environments.md](environments.md)).
 - **SPA routing:** configure the host to rewrite unknown paths to `index.html` (client-side
   router owns routing).
