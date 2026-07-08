@@ -291,7 +291,14 @@ const invoiceDetailRoute = createRoute({
 	},
 });
 
-type PaymentMethodSearch = 'CASH' | 'CLICK' | 'PAYME' | 'UZUM' | 'CARD' | 'BANK_TRANSFER';
+type PaymentMethodSearch =
+	| 'CASH'
+	| 'CLICK'
+	| 'PAYME'
+	| 'UZUM'
+	| 'CARD'
+	| 'BANK_TRANSFER'
+	| 'CREDIT';
 type PaymentStatusSearch = 'PENDING' | 'SUCCEEDED' | 'FAILED' | 'REFUNDED';
 
 const PAYMENT_METHODS: PaymentMethodSearch[] = [
@@ -301,6 +308,7 @@ const PAYMENT_METHODS: PaymentMethodSearch[] = [
 	'UZUM',
 	'CARD',
 	'BANK_TRANSFER',
+	'CREDIT',
 ];
 
 const PAYMENT_STATUSES: PaymentStatusSearch[] = [

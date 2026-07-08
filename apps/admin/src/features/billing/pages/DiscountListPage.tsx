@@ -16,7 +16,7 @@ import { DiscountForm } from '../components/DiscountForm';
 const PAGE_SIZE = 20;
 
 export function DiscountListPage() {
-	const navigate = useNavigate();
+	const navigate = useNavigate({ from: '/discounts' });
 	const { can } = usePermissions();
 	const { page = 1, status } = useSearch({ from: '/_authed/discounts' });
 

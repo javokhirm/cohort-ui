@@ -14,7 +14,7 @@ import { CourseForm } from '../components/CourseForm';
 const PAGE_SIZE = 20;
 
 export function CourseListPage() {
-	const navigate = useNavigate();
+	const navigate = useNavigate({ from: '/courses' });
 	const {
 		page = 1,
 		search: searchParam,

@@ -33,7 +33,7 @@ import { ExpenseForm } from '../components/ExpenseForm';
 const PAGE_SIZE = 20;
 
 export function ExpenseListPage() {
-	const navigate = useNavigate();
+	const navigate = useNavigate({ from: '/expenses' });
 	const { can } = usePermissions();
 	const { page = 1, category, from, to } = useSearch({ from: '/_authed/expenses' });
 

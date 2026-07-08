@@ -29,7 +29,7 @@ import { StudentPicker } from '../components/StudentPicker';
 const PAGE_SIZE = 20;
 
 export function InvoiceListPage() {
-	const navigate = useNavigate();
+	const navigate = useNavigate({ from: '/invoices' });
 	const {
 		page = 1,
 		status,

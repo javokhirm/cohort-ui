@@ -17,7 +17,7 @@ import { LeadDetailSheet } from '../components/LeadDetailSheet';
 import { LeadFilters, type LeadFilterValues } from '../components/LeadFilters';
 
 export function LeadPipelinePage() {
-	const navigate = useNavigate();
+	const navigate = useNavigate({ from: '/leads' });
 	const search = useSearch({ from: '/_authed/leads' });
 	const activeBranchIds = useActiveBranchIds();
 	const { data: branches = [] } = useBranches();

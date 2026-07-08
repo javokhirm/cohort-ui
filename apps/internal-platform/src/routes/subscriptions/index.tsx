@@ -95,7 +95,7 @@ const columns: ColumnDef<SubscriptionRow>[] = [
 ];
 
 export function SubscriptionsPage() {
-	const navigate = useNavigate();
+	const navigate = useNavigate({ from: '/subscriptions' });
 	const { page = 1, status } = useSearch({ from: '/_authed/subscriptions' });
 
 	const analyticsQuery = useSubscriptionAnalytics();

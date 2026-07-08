@@ -26,7 +26,7 @@ const PAGE_SIZE = 20;
 const ALL = 'all';
 
 export function GroupListPage() {
-	const navigate = useNavigate();
+	const navigate = useNavigate({ from: '/groups' });
 	const { page = 1, courseId, status } = useSearch({ from: '/_authed/groups' });
 
 	const { data: courseData } = useCourseList({ limit: 100, isActive: true });

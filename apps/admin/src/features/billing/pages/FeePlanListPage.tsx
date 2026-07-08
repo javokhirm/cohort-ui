@@ -16,7 +16,7 @@ import { FeePlanForm } from '../components/FeePlanForm';
 const PAGE_SIZE = 20;
 
 export function FeePlanListPage() {
-	const navigate = useNavigate();
+	const navigate = useNavigate({ from: '/fee-plans' });
 	const { can } = usePermissions();
 	const { page = 1, status } = useSearch({ from: '/_authed/fee-plans' });
 

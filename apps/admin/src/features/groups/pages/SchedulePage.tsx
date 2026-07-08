@@ -65,7 +65,7 @@ function parseDate(value: string | undefined): Date {
 }
 
 export function SchedulePage() {
-	const navigate = useNavigate();
+	const navigate = useNavigate({ from: '/schedule' });
 	const { date, status, view = 'week' } = useSearch({ from: '/_authed/schedule' });
 
 	const selectedDate = parseDate(date);

@@ -16,7 +16,7 @@ import { RoomForm } from '../components/RoomForm';
 const PAGE_SIZE = 20;
 
 export function RoomListPage() {
-	const navigate = useNavigate();
+	const navigate = useNavigate({ from: '/rooms' });
 	const { can } = usePermissions();
 	const { page = 1, status } = useSearch({ from: '/_authed/rooms' });
 

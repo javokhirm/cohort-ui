@@ -87,7 +87,7 @@ const columns: ColumnDef<UserRow>[] = [
 ];
 
 export function UserDirectoryPage() {
-	const navigate = useNavigate();
+	const navigate = useNavigate({ from: '/users' });
 	const { page = 1, search: searchParam } = useSearch({ from: '/_authed/users' });
 
 	const [inputValue, setInputValue] = useState(searchParam ?? '');
