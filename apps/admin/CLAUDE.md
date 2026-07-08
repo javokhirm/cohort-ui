@@ -1,8 +1,8 @@
-# CLAUDE.md — `apps/staff`
+# CLAUDE.md — `apps/admin`
 
-App-specific guidance for the **Staff Web App**. The repo-root [CLAUDE.md](../../CLAUDE.md) and everything under [docs/](../../docs) are authoritative and apply here in full — read the relevant doc before working in an area. This file records only what is **specific to this app** and, where the shipped code diverges from the docs, **what the code actually does**.
+App-specific guidance for the **Admin Web App**. The repo-root [CLAUDE.md](../../CLAUDE.md) and everything under [docs/](../../docs) are authoritative and apply here in full — read the relevant doc before working in an area. This file records only what is **specific to this app** and, where the shipped code diverges from the docs, **what the code actually does**.
 
-The staff app is the back-office console for education-center staff. It serves the **`/api/v1/manage/*`** surface (plus `/api/v1/public/*` for auth), for roles **OWNER, ADMIN, MANAGER**. It is a React 19 + Vite SPA. Dev server runs on **port 5174**.
+The admin app is the back-office console for education-center admins. It serves the **`/api/v1/manage/*`** surface (plus `/api/v1/public/*` for auth), for roles **OWNER, ADMIN, MANAGER**. It is a React 19 + Vite SPA. Dev server runs on **port 5174**.
 
 ---
 

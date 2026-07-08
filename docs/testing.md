@@ -29,7 +29,7 @@ the real envelope/error mapping, with the network stubbed.
   unwrap, `ApiError`, pagination) — not a mocked client.
 - Handlers return the **real envelope shape** (`{ success, data, meta }` / failure with
   `error.code`). Keep a shared set of handlers and per-test overrides.
-- Handlers live in `apps/staff/src/test/handlers/` (shared) and are typed against the
+- Handlers live in `apps/admin/src/test/handlers/` (shared) and are typed against the
   generated OpenAPI schema so mocks can't drift from the contract.
 
 ```ts

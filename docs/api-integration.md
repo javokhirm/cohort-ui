@@ -113,7 +113,7 @@ export function createApiClient(opts: ApiClientOptions) {
 }
 ```
 
-The app wires one client per surface in `apps/staff/src/lib/api.ts` and passes the token
+The app wires one client per surface in `apps/admin/src/lib/api.ts` and passes the token
 getter / refresh function from `packages/auth`.
 
 ### Pagination helper
@@ -148,7 +148,7 @@ responses.)
 
 ## 4. Query & mutation hooks (in features, not packages)
 
-Surface-specific hooks live in `apps/staff/src/features/<domain>/api/`. They are the **only**
+Surface-specific hooks live in `apps/admin/src/features/<domain>/api/`. They are the **only**
 thing components use to reach the network. `api-client` provides the typed client + helpers;
 the hooks provide the React Query bindings.
 

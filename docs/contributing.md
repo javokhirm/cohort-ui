@@ -13,7 +13,7 @@ first; this doc is the process around them.
 
 ```bash
 pnpm install
-cp apps/staff/.env.example apps/staff/.env   # fill in VITE_API_ORIGIN, etc.
+cp apps/admin/.env.example apps/admin/.env   # fill in VITE_API_ORIGIN, etc.
 pnpm gen:api                                  # generate API types from the backend spec
 pnpm dev                                       # http://zabon.localhost:5173
 ```

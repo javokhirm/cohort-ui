@@ -36,7 +36,7 @@ Vite only exposes vars prefixed `VITE_`. Per-app `.env` files; document them in
 ## 3. The typed env module
 
 ```ts
-// apps/staff/src/lib/env.ts (shape)
+// apps/admin/src/lib/env.ts (shape)
 const Env = z.object({
 	VITE_API_ORIGIN: z.string().url(),
 	VITE_APP_ENV: z.enum(['development', 'staging', 'production']),

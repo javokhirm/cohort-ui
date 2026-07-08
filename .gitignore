@@ -37,4 +37,4 @@ yarn-error.log*
 .DS_Store
 *.pem
 
-apps/staff/cohort-manage-platform-prototype-extracted
+apps/admin/cohort-manage-platform-prototype-extracted

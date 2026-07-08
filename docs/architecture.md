@@ -104,7 +104,7 @@ Rules:
 ## 3. Inside an app: feature-first
 
 ```
-apps/staff/src/
+apps/admin/src/
 ├── app/         # shell: providers, router wiring, root layout, error boundary
 ├── routes/      # TanStack Router route definitions (thin; delegate to a feature)
 ├── features/    # ← feature slices, named after backend domains (see mapping below)
@@ -180,8 +180,8 @@ current reality. Note that "needs a second reviewer" is enforced by **branch pro
 | `packages/api-client`, shared types  | frontend / platform  | Contract fidelity; gate changes against backend OpenAPI. |
 | `packages/auth`                      | frontend / platform  | Security-sensitive; **second reviewer** (branch rule).   |
 | `packages/i18n`                      | frontend / platform  | Locale completeness (uz/ru/en).                          |
-| `apps/staff/src/features/billing`    | frontend / billing   | Money-critical; **second reviewer**.                     |
-| `apps/staff` (shell, other features) | frontend / staff-app | App composition, routing, layout.                        |
+| `apps/admin/src/features/billing`    | frontend / billing   | Money-critical; **second reviewer**.                     |
+| `apps/admin` (shell, other features) | frontend / admin-app | App composition, routing, layout.                        |
 | root configs, CI, `docs/`            | frontend / platform  | Toolchain & conventions.                                 |
 
 **Changing a boundary** (new package, new cross-package edge, new app) is an architectural

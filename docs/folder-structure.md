@@ -39,10 +39,10 @@ their files are `PascalCase`** (`StudentTable.tsx`); hooks follow the rule in
 
 ---
 
-## An app — `apps/staff/`
+## An app — `apps/admin/`
 
 ```
-apps/staff/
+apps/admin/
 ├── index.html
 ├── vite.config.ts
 ├── tsconfig.json                   # extends @cohort/config/ts
@@ -104,11 +104,11 @@ apps/staff/
 | A data hook for a `/manage` endpoint         | `features/<domain>/api/*.queries.ts` / `*.mutations.ts` |
 | A form's validation schema                   | `features/<domain>/schemas/`                            |
 | A component used only in one feature         | `features/<domain>/components/`                         |
-| A component used across features in this app | `apps/staff/src/components/`                            |
+| A component used across features in this app | `apps/admin/src/components/`                            |
 | A component reusable across **apps**         | `packages/ui` (discuss first)                           |
-| App-wide config / clients                    | `apps/staff/src/lib/`                                   |
+| App-wide config / clients                    | `apps/admin/src/lib/`                                   |
 
-**Feature isolation:** a feature imports from `packages/*`, from `apps/staff/src/lib` and
+**Feature isolation:** a feature imports from `packages/*`, from `apps/admin/src/lib` and
 `components`, and from its own folder — **not** from another feature's internals. Need to
 share between features? Lift it to `components/`, `lib/`, or a package.
 
@@ -177,9 +177,9 @@ packages/config/  src/eslint.js · src/tailwind.ts (preset + tokens.css) · src/
 ## Test file placement
 
 - **Unit/component tests** are co-located: `StudentTable.test.tsx` next to `StudentTable.tsx`.
-- **MSW handlers** live in `apps/staff/src/test/handlers/` (or `packages/api-client` test
+- **MSW handlers** live in `apps/admin/src/test/handlers/` (or `packages/api-client` test
   fixtures for shared ones).
-- **E2E (Playwright)** live in `apps/staff/e2e/`.
+- **E2E (Playwright)** live in `apps/admin/e2e/`.
 
 See [testing.md](testing.md).
 
