@@ -11,13 +11,13 @@ The admin app is the back-office console for education-center admins. It serves 
 - **Login**: phone + password → `POST /public/auth/login`. The tenant is resolved by the
   backend from the user's single membership (one user = one business) — the client never
   sends it. Access token → memory (Zustand); refresh token → `localStorage` under the
-  staff-scoped key in `lib/auth/tokenStorage.ts`.
+  admin-scoped key in `lib/auth/tokenStorage.ts`.
 - **Silent refresh**: `runRefresh()` in `api/apiClient.ts` is both the boot check and the
   `manageApi` 401 hook (single-flight lives inside `@repo/api-client`).
 - **Gating is cosmetic.** Use `hasRole()` / `requireRole()` for UX only. Permission-code gating is
   **not built** (the token carries roles only) — gate by role until the backend ships resolved
   permissions.
-- Multi-tenant: one build serves all tenants from the single fixed host `staff.cohort.uz`; never bake a tenant into the bundle. The tenant identity is
+- Multi-tenant: one build serves all tenants from the single fixed host `admin.cohort.uz`; never bake a tenant into the bundle. The tenant identity is
   known only after login.
 - **Do not change token handling, tenant resolution, or RBAC without the engineer** (root CLAUDE.md
   "stop and ask").

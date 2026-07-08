@@ -2,7 +2,7 @@
 #
 # Builds ONE Vite SPA from this pnpm/turbo monorepo and serves its static
 # `dist/` from a tiny Caddy container. Which app is chosen by the APP build-arg
-# (internal | staff). Vite env vars are compile-time, so VITE_API_ORIGIN /
+# (internal | admin). Vite env vars are compile-time, so VITE_API_ORIGIN /
 # VITE_APP_ENV are baked in here (per environment) via build-args.
 #
 #   docker build --build-arg APP=internal \
