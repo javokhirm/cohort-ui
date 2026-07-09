@@ -10,9 +10,10 @@ no certbot, no manual cert work.
 | web-prod | `/opt/cohort/web-prod` | `admin.cohort.uz`, `internal.cohort.uz`         | push to `main` |
 | web-dev  | `/opt/cohort/web-dev`  | `admin-dev.cohort.uz`, `internal-dev.cohort.uz` | push to `dev`  |
 
-Caddy routes hostname → container alias (`web-admin`, `web-internal`, `*-dev`)
-over the external `edge` network. The containers publish no host ports and hold
-no secrets — `VITE_*` config is compile-time and baked into the image by CI.
+Caddy routes hostname → container alias (`web-admin-prod`, `web-internal-prod`,
+`*-dev`) over the external `edge` network. The containers publish no host ports
+and hold no secrets — `VITE_*` config is compile-time and baked into the image
+by CI.
 
 ## 1. DNS (cohort.uz panel)
 
