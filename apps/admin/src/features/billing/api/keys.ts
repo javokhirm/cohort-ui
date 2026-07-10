@@ -2,7 +2,6 @@ export interface FeePlanListFilters {
 	page?: number;
 	limit?: number;
 	branchIds?: number[];
-	courseId?: number;
 	isActive?: boolean;
 }
 
@@ -12,6 +11,7 @@ export const feePlansKeys = {
 	feePlans: () => [...feePlansKeys.all, 'fee-plan'] as const,
 	feePlanList: (filters: FeePlanListFilters) =>
 		[...feePlansKeys.feePlans(), 'list', filters] as const,
+	feePlanGroups: (id: number) => [...feePlansKeys.feePlans(), 'groups', id] as const,
 };
 
 /** One billing policy per tenant — a singleton resource, so no filters/id. */

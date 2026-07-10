@@ -16,6 +16,9 @@ const durationWeeks = z
 export const createCourseSchema = z.object({
 	name: z.string().min(1, 'Course name is required'),
 	branch: z.string(),
+	// Required: every group of this course bills on the plan. Modelled as a
+	// string because it comes from a `FormSelect`; `Number()`ed at submit time.
+	feePlan: z.string().min(1, 'Fee plan is required'),
 	level: z.string().optional(),
 	defaultDurationWeeks: durationWeeks,
 	description: z.string().optional(),
@@ -36,4 +39,17 @@ export function branchToPayload(branch: string): number | null {
 /** Payload `branchId` → form branch string. */
 export function branchToForm(branchId: number | null): string {
 	return branchId == null ? SHARED_BRANCH_VALUE : String(branchId);
+}
+
+/**
+ * Only a shared plan (`branchId: null`) or one in the course's own branch may
+ * back the course — the server enforces the same rule with
+ * `FEE_PLAN_BRANCH_MISMATCH`. A shared course therefore accepts only a shared
+ * plan, which falls out of comparing against `branchToPayload`'s `null`.
+ */
+export function isPlanBranchCompatible(
+	planBranchId: number | null,
+	courseBranch: string,
+): boolean {
+	return planBranchId == null || planBranchId === branchToPayload(courseBranch);
 }

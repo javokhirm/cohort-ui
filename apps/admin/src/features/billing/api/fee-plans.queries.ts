@@ -2,6 +2,7 @@ import { keepPreviousData, useQuery } from '@tanstack/react-query';
 
 import { manageApi } from '@/api/apiClient';
 import { useActiveBranchIds } from '@/store/branchStore';
+import type { GroupListItem } from '@/features/groups/api/groups.queries';
 import type { PaginatedResult } from '@repo/api-client';
 
 import { feePlansKeys, type FeePlanListFilters } from './keys';
@@ -12,7 +13,12 @@ import { feePlansKeys, type FeePlanListFilters } from './keys';
 // expose the request DTOs but not response bodies, so the shape is declared
 // here; reconcile if the spec starts emitting response schemas.
 
-export const FEE_PLAN_BILLING_CYCLES = ['MONTHLY', 'ONE_TIME', 'PER_SESSION'] as const;
+/**
+ * Both cycles are auto-billed: each maps to exactly one generation leg, so a
+ * plan attached to a course always bills. Not to be confused with the billing
+ * policy's `lateFeeRecurrence`, which has its own unrelated `ONE_TIME` value.
+ */
+export const FEE_PLAN_BILLING_CYCLES = ['MONTHLY', 'PER_SESSION'] as const;
 export type FeePlanBillingCycle = (typeof FEE_PLAN_BILLING_CYCLES)[number];
 
 /**
@@ -28,8 +34,11 @@ export interface FeePlanResponse {
 	id: number;
 	/** Null = applies across all branches. */
 	branchId: number | null;
-	/** Null = applies to any course. */
-	courseId: number | null;
+	/**
+	 * Live groups billing on this plan, reached through their course. Computed
+	 * by the list endpoint only; `0` on create/update responses.
+	 */
+	groupCount: number;
 	name: string;
 	amount: number;
 	currency: string;
@@ -62,5 +71,24 @@ export function useFeePlanList(filters: FeePlanListFilters) {
 				params: effectiveFilters,
 			}) as Promise<PaginatedResult<FeePlanResponse>>,
 		placeholderData: keepPreviousData,
+	});
+}
+
+/**
+ * The groups billing on a plan, reached through their course
+ * (`group.courseId → courses.feePlanId`). Read-only: groups are never assigned
+ * to a plan from the plans page — a course carries the plan.
+ *
+ * Its own `fee-plan.manage` sub-resource rather than `GET /groups?feePlanId=`,
+ * so a plans-page user need not also hold `group.read`.
+ */
+export function useFeePlanGroups(feePlanId: number, enabled = true) {
+	return useQuery({
+		queryKey: feePlansKeys.feePlanGroups(feePlanId),
+		queryFn: () =>
+			manageApi.getPaginated<GroupListItem>(`/fee-plans/${feePlanId}/groups`, {
+				params: { limit: 100 },
+			}) as Promise<PaginatedResult<GroupListItem>>,
+		enabled,
 	});
 }

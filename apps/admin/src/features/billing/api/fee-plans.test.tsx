@@ -42,17 +42,15 @@ describe('useFeePlanList', () => {
 		expect(result.current.data?.rows[0]?.isActive).toBe(false);
 	});
 
-	it('filters by course', async () => {
-		const { result } = renderHook(
-			() => useFeePlanList({ page: 1, limit: 20, courseId: 2 }),
-			{ wrapper: wrapper() },
-		);
+	it('exposes groupCount — the live groups billing on each plan', async () => {
+		const { result } = renderHook(() => useFeePlanList({ page: 1, limit: 20 }), {
+			wrapper: wrapper(),
+		});
 
 		await waitFor(() => expect(result.current.isSuccess).toBe(true));
-		expect(result.current.data?.total).toBe(1);
-		expect(result.current.data?.rows[0]?.name).toBe(
-			'Monthly Tuition — General English',
-		);
+		const byId = new Map(result.current.data?.rows.map((p) => [p.id, p.groupCount]));
+		expect(byId.get(1)).toBe(2);
+		expect(byId.get(3)).toBe(0);
 	});
 
 	it('renders an empty directory', async () => {
@@ -77,12 +75,11 @@ describe('useFeePlanList', () => {
 });
 
 describe('useCreateFeePlan', () => {
-	it('creates a shared fee plan (null branchId, null courseId)', async () => {
+	it('creates a shared fee plan (null branchId)', async () => {
 		const { result } = renderHook(() => useCreateFeePlan(), { wrapper: wrapper() });
 
 		const created = await result.current.mutateAsync({
 			branchId: null,
-			courseId: null,
 			name: 'SAT Prep — Monthly',
 			amount: 3_600_000,
 			billingCycle: 'MONTHLY',
@@ -103,7 +100,6 @@ describe('useCreateFeePlan', () => {
 
 		const created = await result.current.mutateAsync({
 			branchId: null,
-			courseId: null,
 			name: 'Inheriting plan',
 			amount: 500_000,
 			billingCycle: 'MONTHLY',
@@ -117,13 +113,23 @@ describe('useCreateFeePlan', () => {
 });
 
 describe('useUpdateFeePlan', () => {
-	it('retires a fee plan via isActive', async () => {
+	it('retires a fee plan no group bills on', async () => {
 		const { result } = renderHook(() => useUpdateFeePlan(), { wrapper: wrapper() });
 
-		const updated = await result.current.mutateAsync({ id: 1, isActive: false });
+		// Plan 3 has groupCount 0 — nothing is billing on it.
+		const updated = await result.current.mutateAsync({ id: 3, isActive: false });
 
-		expect(updated.id).toBe(1);
+		expect(updated.id).toBe(3);
 		expect(updated.isActive).toBe(false);
+	});
+
+	it('refuses to retire a plan a live course still uses (409)', async () => {
+		const { result } = renderHook(() => useUpdateFeePlan(), { wrapper: wrapper() });
+
+		// Plan 1 backs two groups; retiring it would silently stop billing them.
+		await expect(
+			result.current.mutateAsync({ id: 1, isActive: false }),
+		).rejects.toMatchObject({ code: 'FEE_PLAN_IN_USE' });
 	});
 
 	it('updates the amount and clears the due-day override', async () => {

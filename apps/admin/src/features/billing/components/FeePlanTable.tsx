@@ -3,8 +3,6 @@ import { Layers } from 'lucide-react';
 import { DataTable, StatusBadge, type ColumnDef } from '@repo/ui';
 import { formatPrice } from '@repo/utils';
 
-import { useCourseList } from '@/features/courses/api/courses.queries';
-
 import type { FeePlanResponse } from '../api/fee-plans.queries';
 import { FEE_PLAN_PRORATION_LABELS } from '../lib/fee-plan-options';
 
@@ -16,13 +14,6 @@ interface FeePlanTableProps {
 }
 
 export function FeePlanTable({ feePlans, isLoading, onEdit }: FeePlanTableProps) {
-	const { data: courseData } = useCourseList({ limit: 100 });
-	const courses = courseData?.rows ?? [];
-	const courseName = (id: number | null) => {
-		if (id == null) return 'Any';
-		return courses.find((c) => c.id === id)?.name ?? '—';
-	};
-
 	const columns: ColumnDef<FeePlanResponse>[] = [
 		{
 			id: 'name',
@@ -37,13 +28,20 @@ export function FeePlanTable({ feePlans, isLoading, onEdit }: FeePlanTableProps)
 			),
 		},
 		{
-			id: 'course',
-			header: 'Course',
-			cell: ({ row }) => (
-				<span className="text-sm text-muted-foreground">
-					{courseName(row.original.courseId)}
-				</span>
-			),
+			id: 'groups',
+			header: 'Groups',
+			// Groups reach a plan through their course; open a plan to see which.
+			cell: ({ row }) => {
+				const count = row.original.groupCount;
+				return (
+					<span className="text-sm text-muted-foreground">
+						{count === 0
+							? 'Not in use'
+							: `${count} group${count === 1 ? '' : 's'}`}
+					</span>
+				);
+			},
+			size: 130,
 		},
 		{
 			id: 'amount',

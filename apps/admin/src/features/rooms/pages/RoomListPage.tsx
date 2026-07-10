@@ -2,15 +2,16 @@ import { useState } from 'react';
 import { useNavigate, useSearch } from '@tanstack/react-router';
 import { Plus } from 'lucide-react';
 
-import { Button, Card, PageHeader, Pagination, SearchFilterBar } from '@repo/ui';
+import { Button, Card, PageHeader, Pagination, SearchFilterBar, Spinner } from '@repo/ui';
 
 import { Can } from '@/components/Can';
+import { useBranches } from '@/api/branches';
 import { usePermissions } from '@/features/auth/hooks';
 import { useRoomList } from '../api/rooms.queries';
 import type { RoomResponse } from '../api/rooms.queries';
 import type { RoomListFilters } from '../api/keys';
 import { ROOM_STATUS_FILTERS } from '../lib/room-type';
-import { RoomTable } from '../components/RoomTable';
+import { RoomCard } from '../components/RoomCard';
 import { RoomForm } from '../components/RoomForm';
 
 const PAGE_SIZE = 20;
@@ -33,6 +34,9 @@ export function RoomListPage() {
 	const { data, isLoading, isError } = useRoomList(filters);
 	const rooms = data?.rows ?? [];
 	const total = data?.total ?? 0;
+
+	const { data: branches = [] } = useBranches();
+	const branchName = (id: number) => branches.find((b) => b.id === id)?.name ?? '—';
 
 	function handleStatusChange(value: (typeof ROOM_STATUS_FILTERS)[number]['value']) {
 		void navigate({
@@ -75,21 +79,39 @@ export function RoomListPage() {
 					</div>
 				)}
 
-				<Card className="gap-0 overflow-hidden py-0">
-					<RoomTable
-						rooms={rooms}
-						isLoading={isLoading}
-						onEdit={canEdit ? setEditRoom : undefined}
-					/>
-					<div className="border-t border-border px-4 py-3">
+				{isLoading ? (
+					<div className="flex items-center justify-center py-16 text-muted-foreground">
+						<Spinner className="size-5" />
+					</div>
+				) : rooms.length > 0 ? (
+					<div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
+						{rooms.map((room) => (
+							<RoomCard
+								key={room.id}
+								room={room}
+								branchName={branchName(room.branchId)}
+								onEdit={canEdit ? setEditRoom : undefined}
+							/>
+						))}
+					</div>
+				) : (
+					!isError && (
+						<div className="rounded-lg border border-dashed border-border py-16 text-center text-sm text-muted-foreground">
+							No rooms match this filter.
+						</div>
+					)
+				)}
+
+				{!isLoading && rooms.length > 0 && (
+					<Card className="px-4 py-3">
 						<Pagination
 							page={page}
 							pageSize={PAGE_SIZE}
 							total={total}
 							onPageChange={handlePage}
 						/>
-					</div>
-				</Card>
+					</Card>
+				)}
 			</div>
 
 			<RoomForm mode="create" open={addOpen} onOpenChange={setAddOpen} />

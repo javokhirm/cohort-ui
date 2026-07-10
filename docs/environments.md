@@ -64,12 +64,12 @@ plain `localhost`:
 
 ## 5. Environments
 
-| Environment | Hosting                                                           | Domain                                                           | Notes                                                        |
-| ----------- | ----------------------------------------------------------------- | ----------------------------------------------------------------- | ------------------------------------------------------------ |
-| development | local Vite dev server                                              | `localhost:5174` (admin) / `localhost:5173` (internal-platform)    | HMR; local or shared-dev backend.                             |
-| preview     | PR deploy (optional, per [ci-cd.md](ci-cd.md) §3)                  | per-PR URL                                                         | Built artifact; dev API.                                      |
-| staging     | VPS `web-dev` stack ([deploy/README.md](../deploy/README.md))      | `admin-dev.cohort.uz` / `internal-dev.cohort.uz`                   | Deploys from `dev`; `VITE_APP_ENV=staging`, `api-dev` backend. |
-| production  | VPS `web-prod` stack — nginx behind the edge Caddy                 | `admin.cohort.uz` / `internal.cohort.uz`                           | Deploys from `main`; one fixed host per app.                  |
+| Environment | Hosting                                                       | Domain                                                          | Notes                                                          |
+| ----------- | ------------------------------------------------------------- | --------------------------------------------------------------- | -------------------------------------------------------------- |
+| development | local Vite dev server                                         | `localhost:5174` (admin) / `localhost:5173` (internal-platform) | HMR; local or shared-dev backend.                              |
+| preview     | PR deploy (optional, per [ci-cd.md](ci-cd.md) §3)             | per-PR URL                                                      | Built artifact; dev API.                                       |
+| staging     | VPS `web-dev` stack ([deploy/README.md](../deploy/README.md)) | `admin-dev.cohort.uz` / `internal-dev.cohort.uz`                | Deploys from `dev`; `VITE_APP_ENV=staging`, `api-dev` backend. |
+| production  | VPS `web-prod` stack — nginx behind the edge Caddy            | `admin.cohort.uz` / `internal.cohort.uz`                        | Deploys from `main`; one fixed host per app.                   |
 
 Each app needs one DNS record + TLS cert per environment — no wildcard DNS, since tenants are
 not encoded in the hostname. Both are hands-off: an A record to the VPS, and the edge Caddy

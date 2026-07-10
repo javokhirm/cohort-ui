@@ -27,8 +27,8 @@ export const createStudentSchema = z.object({
 	guardianPhone: phone,
 	guardianRelation: z.enum(['mother', 'father', 'guardian']),
 
+	// No fee plan: the student bills on the plan attached to the group's course.
 	groupId: z.number().optional(),
-	feePlanId: z.number().optional(),
 });
 
 export const editStudentSchema = z.object({

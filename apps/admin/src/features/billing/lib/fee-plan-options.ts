@@ -9,14 +9,12 @@ export const FEE_PLAN_BILLING_CYCLE_OPTIONS: {
 	label: string;
 }[] = [
 	{ value: 'MONTHLY', label: 'Monthly' },
-	{ value: 'ONE_TIME', label: 'One-time' },
 	{ value: 'PER_SESSION', label: 'Per session' },
 ];
 
 /** Amount field label per billing cycle — `PER_SESSION` charges a per-session price, not a monthly amount. */
 export const FEE_PLAN_AMOUNT_LABELS: Record<FeePlanBillingCycle, string> = {
 	MONTHLY: 'Amount (UZS) *',
-	ONE_TIME: 'Amount (UZS) *',
 	PER_SESSION: 'Price per session (UZS) *',
 };
 

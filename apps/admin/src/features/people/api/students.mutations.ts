@@ -42,10 +42,10 @@ export interface AddGuardianInput {
 	canPickup?: boolean;
 }
 
+/** No fee plan: the student bills on the plan attached to the group's course. */
 export interface EnrollStudentInput {
 	groupId: number;
 	studentId: number;
-	feePlanId?: number | null;
 }
 
 // ─── Mutations ────────────────────────────────────────────────────────────────
@@ -117,10 +117,9 @@ export function useRemoveGuardian() {
 export function useEnrollStudent() {
 	const qc = useQueryClient();
 	return useMutation({
-		mutationFn: ({ groupId, studentId, feePlanId }: EnrollStudentInput) =>
+		mutationFn: ({ groupId, studentId }: EnrollStudentInput) =>
 			manageApi.post<void>(`/groups/${groupId}/enrollments`, {
 				studentIds: [studentId],
-				feePlanId: feePlanId ?? null,
 			}),
 		onSuccess: (_data, variables) => {
 			void qc.invalidateQueries({

@@ -35,6 +35,8 @@ export interface CourseResponse {
 	id: number;
 	/** Null = shared across all branches of the tenant. */
 	branchId: number | null;
+	/** The plan every group of this course bills on (always set). */
+	feePlanId: number;
 	name: string;
 	description: string | null;
 	level: string | null;
