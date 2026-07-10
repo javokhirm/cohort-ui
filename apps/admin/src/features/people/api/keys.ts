@@ -25,5 +25,4 @@ export const peopleKeys = {
 
 	groups: (filters?: { branchIds?: number[]; status?: string }) =>
 		[...peopleKeys.all, 'groups', filters] as const,
-	feePlans: () => [...peopleKeys.all, 'fee-plans'] as const,
 };

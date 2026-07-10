@@ -40,10 +40,13 @@ export interface UpdateGroupInput {
 	regenerateSessions?: boolean;
 }
 
+/**
+ * Carries no fee plan: per-student pricing does not exist — every enrollment
+ * bills on the plan attached to the group's course.
+ */
 export interface EnrollStudentsInput {
 	groupId: number;
 	studentIds: number[];
-	feePlanId?: number | null;
 }
 
 export interface UpdateEnrollmentInput {
@@ -83,10 +86,9 @@ export function useUpdateGroup() {
 export function useEnrollStudents() {
 	const qc = useQueryClient();
 	return useMutation({
-		mutationFn: ({ groupId, studentIds, feePlanId }: EnrollStudentsInput) =>
+		mutationFn: ({ groupId, studentIds }: EnrollStudentsInput) =>
 			manageApi.post<Enrollment[]>(`/groups/${groupId}/enrollments`, {
 				studentIds,
-				feePlanId: feePlanId ?? null,
 			}),
 		onSuccess: (_data, { groupId }) => {
 			void qc.invalidateQueries({ queryKey: groupsKeys.groupEnrollments(groupId) });

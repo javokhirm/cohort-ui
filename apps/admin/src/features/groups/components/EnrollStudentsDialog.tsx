@@ -11,21 +11,14 @@ import {
 	DialogHeader,
 	DialogTitle,
 	Input,
-	Select,
-	SelectContent,
-	SelectItem,
-	SelectTrigger,
-	SelectValue,
 	Spinner,
 	toast,
 } from '@repo/ui';
 import { isApiError } from '@repo/api-client';
 
-import { useStudents, useFeePlans } from '@/features/people/api/students.queries';
+import { useStudents } from '@/features/people/api/students.queries';
 
 import { useEnrollStudents } from '../api/groups.mutations';
-
-const NO_PLAN = 'none';
 
 interface EnrollStudentsDialogProps {
 	groupId: number;
@@ -77,11 +70,8 @@ function EnrollForm({
 	const [input, setInput] = useState('');
 	const [search, setSearch] = useState('');
 	const [selected, setSelected] = useState<number[]>([]);
-	const [feePlanId, setFeePlanId] = useState<string>(NO_PLAN);
 
 	const enrollStudents = useEnrollStudents();
-	const { data: feePlanData } = useFeePlans();
-	const feePlans = feePlanData?.rows ?? [];
 
 	// Debounce the search box (async setState — not a synchronous effect write).
 	useEffect(() => {
@@ -105,11 +95,7 @@ function EnrollForm({
 
 	async function onEnroll() {
 		try {
-			await enrollStudents.mutateAsync({
-				groupId,
-				studentIds: selected,
-				feePlanId: feePlanId === NO_PLAN ? null : Number(feePlanId),
-			});
+			await enrollStudents.mutateAsync({ groupId, studentIds: selected });
 			toast.success(
 				`${selected.length} student${selected.length === 1 ? '' : 's'} enrolled`,
 			);
@@ -170,23 +156,6 @@ function EnrollForm({
 							))}
 						</div>
 					)}
-				</div>
-
-				<div className="flex flex-col gap-1.5">
-					<span className="text-sm font-medium">Fee plan (optional)</span>
-					<Select value={feePlanId} onValueChange={setFeePlanId}>
-						<SelectTrigger className="w-full">
-							<SelectValue placeholder="No fee plan override" />
-						</SelectTrigger>
-						<SelectContent>
-							<SelectItem value={NO_PLAN}>No fee plan override</SelectItem>
-							{feePlans.map((p) => (
-								<SelectItem key={p.id} value={String(p.id)}>
-									{p.name}
-								</SelectItem>
-							))}
-						</SelectContent>
-					</Select>
 				</div>
 			</div>
 

@@ -1,0 +1,128 @@
+import { ArrowRight, Pencil } from 'lucide-react';
+
+import {
+	Badge,
+	Card,
+	cn,
+	ProgressBar,
+	StatusBadge,
+	TONE_CLASSES,
+	type StatusTone,
+} from '@repo/ui';
+import { formatDate } from '@repo/utils';
+
+import { Can } from '@/components/Can';
+
+import type { DiscountResponse, DiscountType } from '../api/discounts.queries';
+import { formatDiscountValue } from '../lib/discount-options';
+
+interface DiscountCardProps {
+	discount: DiscountResponse;
+	/** Omit to hide the edit affordance (no `discount.manage`). */
+	onEdit?: (discount: DiscountResponse) => void;
+}
+
+const TYPE_META: Record<DiscountType, { tone: StatusTone; description: string }> = {
+	PERCENTAGE: { tone: 'violet', description: 'Percentage off' },
+	FIXED_AMOUNT: { tone: 'green', description: 'Fixed amount off' },
+};
+
+function Validity({
+	validFrom,
+	validUntil,
+}: Pick<DiscountResponse, 'validFrom' | 'validUntil'>) {
+	if (validFrom && validUntil) {
+		return (
+			<span className="flex items-center gap-1.5">
+				{formatDate(validFrom)}
+				<ArrowRight className="size-3 shrink-0" />
+				{formatDate(validUntil)}
+			</span>
+		);
+	}
+	if (validFrom) return <span>From {formatDate(validFrom)}</span>;
+	if (validUntil) return <span>Until {formatDate(validUntil)}</span>;
+	return <span>No expiry</span>;
+}
+
+export function DiscountCard({ discount, onEdit }: DiscountCardProps) {
+	const { tone, description } = TYPE_META[discount.type];
+	const capped = discount.maxUses != null;
+	const usagePct = capped ? (discount.currentUses / discount.maxUses!) * 100 : 0;
+
+	return (
+		<Card className="gap-0 p-5">
+			<div className="flex items-start justify-between gap-2">
+				<div className="min-w-0">
+					<h3 className="truncate font-semibold text-foreground">
+						{discount.name}
+					</h3>
+					<p className="mt-0.5 text-xs text-muted-foreground">{description}</p>
+				</div>
+				<div className="flex shrink-0 items-center gap-2">
+					{discount.isActive ? (
+						<StatusBadge tone="green">Active</StatusBadge>
+					) : (
+						<StatusBadge tone="slate">Inactive</StatusBadge>
+					)}
+					{onEdit && (
+						<Can permission="discount.manage">
+							<button
+								type="button"
+								onClick={() => onEdit(discount)}
+								aria-label={`Edit ${discount.name}`}
+								className="flex size-7 items-center justify-center rounded-md text-muted-foreground transition-colors hover:bg-muted hover:text-foreground"
+							>
+								<Pencil className="size-4" />
+							</button>
+						</Can>
+					)}
+				</div>
+			</div>
+
+			<div
+				className={cn(
+					'mt-3 flex items-baseline gap-1.5 rounded-xl px-4 py-4',
+					TONE_CLASSES[tone],
+				)}
+			>
+				<span className="text-2xl font-extrabold tabular-nums">
+					{formatDiscountValue(discount.type, discount.value)}
+				</span>
+				<span className="text-xs font-medium opacity-70">off</span>
+			</div>
+
+			<div className="mt-4 flex flex-col gap-2 text-sm">
+				<div className="flex items-center justify-between gap-2">
+					<span className="text-muted-foreground">Promo code</span>
+					{discount.code ? (
+						<Badge
+							variant="outline"
+							className="border-primary/20 bg-primary/10 font-mono text-primary"
+						>
+							{discount.code}
+						</Badge>
+					) : (
+						<span className="text-muted-foreground">—</span>
+					)}
+				</div>
+				<div className="flex items-center justify-between gap-2">
+					<span className="text-muted-foreground">Usage</span>
+					<span className="font-semibold tabular-nums text-foreground">
+						{capped
+							? `${discount.currentUses} / ${discount.maxUses} used`
+							: `${discount.currentUses} redeemed`}
+					</span>
+				</div>
+				{capped && <ProgressBar value={usagePct} tone={tone} />}
+			</div>
+
+			<div className="mt-4 flex items-center border-t border-border pt-3 text-xs text-muted-foreground">
+				<Validity
+					validFrom={discount.validFrom}
+					validUntil={discount.validUntil}
+				/>
+			</div>
+		</Card>
+	);
+}

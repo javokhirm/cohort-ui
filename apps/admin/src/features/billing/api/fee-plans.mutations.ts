@@ -14,7 +14,6 @@ import type {
 
 export interface CreateFeePlanInput {
 	branchId?: number | null;
-	courseId?: number | null;
 	name: string;
 	amount: number;
 	currency?: string;
@@ -25,10 +24,10 @@ export interface CreateFeePlanInput {
 	dueDay?: number | null;
 }
 
+/** Setting `isActive: false` while a live course uses the plan returns 409 `FEE_PLAN_IN_USE`. */
 export interface UpdateFeePlanInput {
 	id: number;
 	branchId?: number | null;
-	courseId?: number | null;
 	name?: string;
 	amount?: number;
 	currency?: string;

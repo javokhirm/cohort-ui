@@ -1,16 +1,18 @@
 import { useState } from 'react';
 import { useNavigate, useSearch } from '@tanstack/react-router';
-import { Plus } from 'lucide-react';
+import { DoorOpen, Plus } from 'lucide-react';
 
-import { Button, Card, PageHeader, Pagination, SearchFilterBar } from '@repo/ui';
+import { Button, EmptyState, PageHeader, SearchFilterBar, Spinner } from '@repo/ui';
 
 import { Can } from '@/components/Can';
+import { useBranches } from '@/api/branches';
 import { usePermissions } from '@/features/auth/hooks';
-import { useRoomList } from '../api/rooms.queries';
+import { useInfiniteScrollSentinel } from '@/hooks/useInfiniteScrollSentinel';
+import { useInfiniteRoomList } from '../api/rooms.queries';
 import type { RoomResponse } from '../api/rooms.queries';
 import type { RoomListFilters } from '../api/keys';
 import { ROOM_STATUS_FILTERS } from '../lib/room-type';
-import { RoomTable } from '../components/RoomTable';
+import { RoomCard } from '../components/RoomCard';
 import { RoomForm } from '../components/RoomForm';
 
 const PAGE_SIZE = 20;
@@ -18,30 +20,34 @@ const PAGE_SIZE = 20;
 export function RoomListPage() {
 	const navigate = useNavigate({ from: '/rooms' });
 	const { can } = usePermissions();
-	const { page = 1, status } = useSearch({ from: '/_authed/rooms' });
+	const { status } = useSearch({ from: '/_authed/rooms' });
 
 	const [addOpen, setAddOpen] = useState(false);
 	const [editRoom, setEditRoom] = useState<RoomResponse | null>(null);
 	const canEdit = can('room.update');
 
-	const filters: RoomListFilters = {
-		page,
+	const filters: Omit<RoomListFilters, 'page'> = {
 		limit: PAGE_SIZE,
 		isActive: status === undefined ? undefined : status === 'active',
 	};
 
-	const { data, isLoading, isError } = useRoomList(filters);
-	const rooms = data?.rows ?? [];
-	const total = data?.total ?? 0;
+	const { data, isLoading, isError, fetchNextPage, hasNextPage, isFetchingNextPage } =
+		useInfiniteRoomList(filters);
+	const rooms = data?.pages.flatMap((p) => p.rows) ?? [];
+
+	const { data: branches = [] } = useBranches();
+	const branchName = (id: number) => branches.find((b) => b.id === id)?.name ?? '—';
+
+	const sentinelRef = useInfiniteScrollSentinel({
+		hasNextPage,
+		isFetchingNextPage,
+		fetchNextPage,
+	});
 
 	function handleStatusChange(value: (typeof ROOM_STATUS_FILTERS)[number]['value']) {
 		void navigate({
-			search: (prev) => ({ ...prev, status: value, page: undefined }),
+			search: (prev) => ({ ...prev, status: value }),
 		});
-	}
-
-	function handlePage(newPage: number) {
-		void navigate({ search: (prev) => ({ ...prev, page: newPage }) });
 	}
 
 	return (
@@ -75,21 +81,37 @@ export function RoomListPage() {
 					</div>
 				)}
 
-				<Card className="gap-0 overflow-hidden py-0">
-					<RoomTable
-						rooms={rooms}
-						isLoading={isLoading}
-						onEdit={canEdit ? setEditRoom : undefined}
-					/>
-					<div className="border-t border-border px-4 py-3">
-						<Pagination
-							page={page}
-							pageSize={PAGE_SIZE}
-							total={total}
-							onPageChange={handlePage}
-						/>
+				{isLoading ? (
+					<div className="flex items-center justify-center py-16 text-muted-foreground">
+						<Spinner className="size-5" />
 					</div>
-				</Card>
+				) : rooms.length > 0 ? (
+					<>
+						<div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
+							{rooms.map((room) => (
+								<RoomCard
+									key={room.id}
+									room={room}
+									branchName={branchName(room.branchId)}
+									onEdit={canEdit ? setEditRoom : undefined}
+								/>
+							))}
+						</div>
+						{hasNextPage && (
+							<div ref={sentinelRef} className="flex justify-center py-4">
+								{isFetchingNextPage && <Spinner className="size-5" />}
+							</div>
+						)}
+					</>
+				) : (
+					!isError && (
+						<EmptyState
+							icon={<DoorOpen />}
+							title="No rooms match this filter"
+							description="Try adjusting the status filter, or add a new room."
+						/>
+					)
+				)}
 			</div>
 
 			<RoomForm mode="create" open={addOpen} onOpenChange={setAddOpen} />

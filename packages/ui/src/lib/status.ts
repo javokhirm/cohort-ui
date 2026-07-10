@@ -166,7 +166,6 @@ export const STATUS_MAPS = {
 	},
 	fee_cycle: {
 		monthly: { tone: 'indigo', label: 'Monthly' },
-		one_time: { tone: 'slate', label: 'One-time' },
 		per_session: { tone: 'amber', label: 'Per session' },
 	},
 	invoice_line_item: {

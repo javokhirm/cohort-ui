@@ -69,6 +69,8 @@ describe('useCreateCourse', () => {
 
 		const created = await result.current.mutateAsync({
 			branchId: null,
+			// Required: a shared course must reference a shared plan.
+			feePlanId: 1,
 			name: 'SAT Prep',
 			level: 'Advanced',
 			defaultDurationWeeks: 10,
@@ -78,6 +80,7 @@ describe('useCreateCourse', () => {
 		expect(created.id).toBe(99);
 		expect(created.name).toBe('SAT Prep');
 		expect(created.branchId).toBeNull();
+		expect(created.feePlanId).toBe(1);
 		expect(created.isActive).toBe(true);
 	});
 });

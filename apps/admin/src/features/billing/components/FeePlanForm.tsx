@@ -16,17 +16,14 @@ import {
 	Spinner,
 	toast,
 } from '@repo/ui';
+import { isApiError } from '@repo/api-client';
 
 import { FormSheet } from '@/components/FormSheet';
 import { useBranches } from '@/api/branches';
-import { useCourseList } from '@/features/courses/api/courses.queries';
 
 import {
-	ANY_COURSE_VALUE,
 	branchToForm,
 	branchToPayload,
-	courseToForm,
-	courseToPayload,
 	createFeePlanSchema,
 	editFeePlanSchema,
 	SHARED_BRANCH_VALUE,
@@ -41,6 +38,7 @@ import {
 	FEE_PLAN_PRORATION_OPTIONS,
 	FEE_PLAN_STATUS_OPTIONS,
 } from '../lib/fee-plan-options';
+import { FeePlanGroupsSection } from './FeePlanGroupsSection';
 
 interface CreateProps {
 	mode: 'create';
@@ -137,16 +135,6 @@ function useBranchOptions() {
 	];
 }
 
-/** Course options with a leading "any course" choice. */
-function useCourseOptions() {
-	const { data: courseData } = useCourseList({ limit: 100, isActive: true });
-	const courses = courseData?.rows ?? [];
-	return [
-		{ value: ANY_COURSE_VALUE, label: 'Any course' },
-		...courses.map((c) => ({ value: String(c.id), label: c.name })),
-	];
-}
-
 function CreateFeePlanForm({
 	onSuccess,
 	onPendingChange,
@@ -159,7 +147,6 @@ function CreateFeePlanForm({
 		defaultValues: {
 			name: '',
 			branch: SHARED_BRANCH_VALUE,
-			course: ANY_COURSE_VALUE,
 			billingCycle: 'MONTHLY',
 			overrideDueDay: false,
 			dueDay: 1,
@@ -169,7 +156,6 @@ function CreateFeePlanForm({
 	});
 
 	const branchOptions = useBranchOptions();
-	const courseOptions = useCourseOptions();
 	const createFeePlan = useCreateFeePlan();
 
 	const billingCycle = form.watch('billingCycle');
@@ -194,7 +180,6 @@ function CreateFeePlanForm({
 	async function onSubmit(values: CreateFeePlanFormValues) {
 		await createFeePlan.mutateAsync({
 			branchId: branchToPayload(values.branch),
-			courseId: courseToPayload(values.course),
 			name: values.name.trim(),
 			amount: values.amount,
 			billingCycle: values.billingCycle,
@@ -220,20 +205,16 @@ function CreateFeePlanForm({
 							label="Plan name *"
 							placeholder="e.g. Monthly Tuition — IELTS"
 						/>
-						<div className="grid grid-cols-2 gap-3">
-							<FormSelect
-								control={form.control}
-								name="branch"
-								label="Branch"
-								options={branchOptions}
-							/>
-							<FormSelect
-								control={form.control}
-								name="course"
-								label="Course"
-								options={courseOptions}
-							/>
-						</div>
+						<FormSelect
+							control={form.control}
+							name="branch"
+							label="Branch"
+							options={branchOptions}
+						/>
+						<p className="text-xs text-muted-foreground">
+							Plans are standalone. Attach this one to a course after you
+							save it — every group of that course will bill on it.
+						</p>
 						<div className="grid grid-cols-2 gap-3">
 							<FormInput
 								control={form.control}
@@ -334,7 +315,6 @@ function EditFeePlanForm({
 	const toDefaults = (p: FeePlanResponse): EditFeePlanFormValues => ({
 		name: p.name,
 		branch: branchToForm(p.branchId),
-		course: courseToForm(p.courseId),
 		amount: p.amount,
 		billingCycle: p.billingCycle,
 		overrideDueDay: p.dueDay != null,
@@ -355,7 +335,6 @@ function EditFeePlanForm({
 	}, [feePlan]);
 
 	const branchOptions = useBranchOptions();
-	const courseOptions = useCourseOptions();
 	const updateFeePlan = useUpdateFeePlan();
 
 	const billingCycle = form.watch('billingCycle');
@@ -378,17 +357,31 @@ function EditFeePlanForm({
 	}, [isPerSession]);
 
 	async function onSubmit(values: EditFeePlanFormValues) {
-		await updateFeePlan.mutateAsync({
-			id: feePlan.id,
-			branchId: branchToPayload(values.branch),
-			courseId: courseToPayload(values.course),
-			name: values.name.trim(),
-			amount: values.amount,
-			billingCycle: values.billingCycle,
-			dueDay: values.overrideDueDay ? values.dueDay : null,
-			prorationMethod: values.overrideProration ? values.prorationMethod : null,
-			isActive: values.status === 'active',
-		});
+		try {
+			await updateFeePlan.mutateAsync({
+				id: feePlan.id,
+				branchId: branchToPayload(values.branch),
+				name: values.name.trim(),
+				amount: values.amount,
+				billingCycle: values.billingCycle,
+				dueDay: values.overrideDueDay ? values.dueDay : null,
+				prorationMethod: values.overrideProration ? values.prorationMethod : null,
+				isActive: values.status === 'active',
+			});
+		} catch (err) {
+			// Deactivating a plan a live course uses would silently stop billing
+			// its groups; the server refuses. Say what to do about it.
+			if (isApiError(err) && err.status === 409) {
+				toast.error(
+					'Courses are still using this plan. Move them to another plan before deactivating it.',
+				);
+			} else if (isApiError(err)) {
+				toast.error(err.message);
+			} else {
+				toast.error('Something went wrong');
+			}
+			return;
+		}
 		toast.success('Fee plan updated');
 		onSuccess();
 	}
@@ -408,20 +401,12 @@ function EditFeePlanForm({
 							label="Plan name *"
 							placeholder="e.g. Monthly Tuition — IELTS"
 						/>
-						<div className="grid grid-cols-2 gap-3">
-							<FormSelect
-								control={form.control}
-								name="branch"
-								label="Branch"
-								options={branchOptions}
-							/>
-							<FormSelect
-								control={form.control}
-								name="course"
-								label="Course"
-								options={courseOptions}
-							/>
-						</div>
+						<FormSelect
+							control={form.control}
+							name="branch"
+							label="Branch"
+							options={branchOptions}
+						/>
 						<div className="grid grid-cols-2 gap-3">
 							<FormInput
 								control={form.control}
@@ -510,6 +495,8 @@ function EditFeePlanForm({
 						/>
 					</FieldGroup>
 				</Section>
+
+				<FeePlanGroupsSection feePlanId={feePlan.id} />
 			</form>
 		</Form>
 	);

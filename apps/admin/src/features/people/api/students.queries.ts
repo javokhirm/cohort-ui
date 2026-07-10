@@ -17,13 +17,6 @@ export interface Group {
 	status: 'PLANNED' | 'ACTIVE' | 'COMPLETED' | 'CANCELLED';
 }
 
-export interface FeePlan {
-	id: number;
-	name: string;
-	amount: number;
-	cycle: string;
-}
-
 export interface StudentUser {
 	id: number;
 	firstName: string;
@@ -192,16 +185,5 @@ export function useGroups(filters?: { branchIds?: number[] }) {
 				params: { ...effectiveFilters, status: 'ACTIVE', limit: 100 },
 			}) as Promise<PaginatedResult<Group>>,
 		staleTime: 60_000,
-	});
-}
-
-export function useFeePlans() {
-	return useQuery({
-		queryKey: peopleKeys.feePlans(),
-		queryFn: () =>
-			manageApi.getPaginated<FeePlan>('/fee-plans', {
-				params: { limit: 100 },
-			}) as Promise<PaginatedResult<FeePlan>>,
-		staleTime: 5 * 60 * 1000,
 	});
 }

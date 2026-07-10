@@ -16,7 +16,7 @@ import {
 } from '../schemas/student-form.schema';
 import { useBranches } from '@/api/branches';
 import { useBranchStore } from '@/store/branchStore';
-import { useGroups, useFeePlans, type Student } from '../api/students.queries';
+import { useGroups, type Student } from '../api/students.queries';
 import {
 	useCreateStudent,
 	useUpdateStudent,
@@ -102,8 +102,6 @@ function CreateStudentForm({
 		selectedBranchId ? { branchIds: [selectedBranchId] } : undefined,
 	);
 	const groups = groupsPage?.rows ?? [];
-	const { data: feePlansPage } = useFeePlans();
-	const feePlans = feePlansPage?.rows ?? [];
 
 	const createStudent = useCreateStudent();
 	const addGuardian = useAddGuardian();
@@ -147,11 +145,7 @@ function CreateStudentForm({
 		});
 
 		if (values.groupId) {
-			await enrollStudent.mutateAsync({
-				groupId: values.groupId,
-				studentId,
-				feePlanId: values.feePlanId ?? null,
-			});
+			await enrollStudent.mutateAsync({ groupId: values.groupId, studentId });
 		}
 
 		toast.success('Student added successfully');
@@ -247,32 +241,20 @@ function CreateStudentForm({
 					</FieldGroup>
 				</Section>
 
-				{/* INITIAL ENROLLMENT */}
-				{(groups.length > 0 || feePlans.length > 0) && (
+				{/* INITIAL ENROLLMENT — the student bills on the group's course plan. */}
+				{groups.length > 0 && (
 					<Section heading="Initial enrollment">
 						<FieldGroup>
-							<div className="grid grid-cols-2 gap-3">
-								<FormSelect
-									control={form.control}
-									name="groupId"
-									label="Group"
-									valueAsNumber
-									options={groups.map((g) => ({
-										value: String(g.id),
-										label: g.name,
-									}))}
-								/>
-								<FormSelect
-									control={form.control}
-									name="feePlanId"
-									label="Fee plan"
-									valueAsNumber
-									options={feePlans.map((fp) => ({
-										value: String(fp.id),
-										label: fp.name,
-									}))}
-								/>
-							</div>
+							<FormSelect
+								control={form.control}
+								name="groupId"
+								label="Group"
+								valueAsNumber
+								options={groups.map((g) => ({
+									value: String(g.id),
+									label: g.name,
+								}))}
+							/>
 						</FieldGroup>
 					</Section>
 				)}

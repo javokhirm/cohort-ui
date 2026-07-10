@@ -156,12 +156,12 @@ The backend exposes **four role-gated API surfaces** (plus a shared, unauthentic
 `/public` surface used by every app for auth). Each role-gated surface becomes its own app
 **when its roadmap phase arrives** — today `admin` and `internal-platform` exist:
 
-| App                | Backend surface    | Roles                 |
-| ------------------ | ------------------ | --------------------- |
-| `admin` (now)      | `/api/v1/manage/*` | OWNER, ADMIN, MANAGER |
-| `internal-platform` (now)      | `/api/v1/super-admin/*`  | SUPER_ADMIN           |
-| `teacher` (future) | `/api/v1/teach/*`  | TEACHER               |
-| `portal` (future)  | `/api/v1/portal/*` | STUDENT, PARENT       |
+| App                       | Backend surface         | Roles                 |
+| ------------------------- | ----------------------- | --------------------- |
+| `admin` (now)             | `/api/v1/manage/*`      | OWNER, ADMIN, MANAGER |
+| `internal-platform` (now) | `/api/v1/super-admin/*` | SUPER_ADMIN           |
+| `teacher` (future)        | `/api/v1/teach/*`       | TEACHER               |
+| `portal` (future)         | `/api/v1/portal/*`      | STUDENT, PARENT       |
 
 Every app also talks to `/api/v1/public/*` for login/refresh. Inside an app, `src/features/*`
 folders mirror the backend domains (`people`, `academics`, `billing`, …) — grouped by what

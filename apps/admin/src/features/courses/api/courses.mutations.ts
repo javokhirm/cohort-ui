@@ -10,6 +10,12 @@ import type { CourseResponse } from './courses.queries';
 export interface CreateCourseInput {
 	/** Null = shared across all branches of the tenant. */
 	branchId?: number | null;
+	/**
+	 * Required. The plan every group of this course bills on. Must be active and
+	 * branch-compatible, else 404 `FEE_PLAN_NOT_FOUND` / 400
+	 * `FEE_PLAN_BRANCH_MISMATCH`.
+	 */
+	feePlanId: number;
 	name: string;
 	description?: string | null;
 	level?: string | null;
@@ -19,6 +25,8 @@ export interface CreateCourseInput {
 export interface UpdateCourseInput {
 	id: number;
 	branchId?: number | null;
+	/** Re-validated against the course's branch whenever either side changes. */
+	feePlanId?: number;
 	name?: string;
 	description?: string | null;
 	level?: string | null;

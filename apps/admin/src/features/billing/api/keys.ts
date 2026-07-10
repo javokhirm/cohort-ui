@@ -2,7 +2,6 @@ export interface FeePlanListFilters {
 	page?: number;
 	limit?: number;
 	branchIds?: number[];
-	courseId?: number;
 	isActive?: boolean;
 }
 
@@ -12,6 +11,7 @@ export const feePlansKeys = {
 	feePlans: () => [...feePlansKeys.all, 'fee-plan'] as const,
 	feePlanList: (filters: FeePlanListFilters) =>
 		[...feePlansKeys.feePlans(), 'list', filters] as const,
+	feePlanGroups: (id: number) => [...feePlansKeys.feePlans(), 'groups', id] as const,
 };
 
 /** One billing policy per tenant — a singleton resource, so no filters/id. */
@@ -33,6 +33,9 @@ export const discountsKeys = {
 	discounts: () => [...discountsKeys.all, 'discount'] as const,
 	discountList: (filters: DiscountListFilters) =>
 		[...discountsKeys.discounts(), 'list', filters] as const,
+	/** Distinct from `discountList` — that key stores a flat `PaginatedResult` page (dropdowns), this stores `useInfiniteQuery`'s `{ pages }` shape (the card grid). */
+	discountInfiniteList: (filters: Omit<DiscountListFilters, 'page'>) =>
+		[...discountsKeys.discounts(), 'infinite-list', filters] as const,
 };
 
 export const enrollmentDiscountsKeys = {
@@ -57,6 +60,9 @@ export interface InvoiceListFilters {
 	from?: string;
 	to?: string;
 	dueBefore?: string;
+	/** Sort column (default `createdAt`). `dueDate` + `order: 'asc'` = most overdue first. */
+	sort?: 'createdAt' | 'dueDate';
+	order?: 'asc' | 'desc';
 }
 
 /** `GET /invoices/summary` filters — the list filters, without pagination. */

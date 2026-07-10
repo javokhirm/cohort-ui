@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react';
-import { useForm } from 'react-hook-form';
+import { useForm, type Control, type FieldPath, type FieldValues } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 
 import {
@@ -11,15 +11,19 @@ import {
 	Spinner,
 	toast,
 } from '@repo/ui';
+import { formatPrice } from '@repo/utils';
+import { isApiError } from '@repo/api-client';
 
 import { FormSheet } from '@/components/FormSheet';
 import { useBranches } from '@/api/branches';
+import { useFeePlanList } from '@/features/billing/api/fee-plans.queries';
 
 import {
 	branchToForm,
 	branchToPayload,
 	createCourseSchema,
 	editCourseSchema,
+	isPlanBranchCompatible,
 	SHARED_BRANCH_VALUE,
 	type CreateCourseFormValues,
 	type EditCourseFormValues,
@@ -56,6 +60,56 @@ function useBranchOptions() {
 	];
 }
 
+/**
+ * Active plans this course may bill on, narrowed to the branch-compatible ones
+ * — the same rule the server enforces (`FEE_PLAN_BRANCH_MISMATCH`), applied here
+ * so an impossible choice is never offered. A shared course sees only shared
+ * plans. The list re-narrows whenever the branch picker changes.
+ */
+function useFeePlanOptions(branch: string) {
+	const { data, isPending } = useFeePlanList({ isActive: true, limit: 100 });
+	const plans = data?.rows ?? [];
+	const options = plans
+		.filter((p) => isPlanBranchCompatible(p.branchId, branch))
+		.map((p) => ({
+			value: String(p.id),
+			label: `${p.name} — ${formatPrice(p.amount)} ${p.currency}`,
+		}));
+	// `isPending` matters: until the plans land, "no options" means "not loaded",
+	// not "none compatible" — callers must not act on an empty list before then.
+	return { options, isPending };
+}
+
+/** Required fee-plan picker; explains itself when no compatible plan exists. */
+function FeePlanField<T extends FieldValues>({
+	control,
+	options,
+}: {
+	control: Control<T>;
+	options: { value: string; label: string }[];
+}) {
+	if (options.length === 0) {
+		return (
+			<div className="flex flex-col gap-1.5">
+				<span className="text-sm font-medium">Fee plan *</span>
+				<p className="rounded-lg border border-border bg-muted/40 p-3 text-xs text-muted-foreground">
+					No active fee plan is available for this branch. Create one on the Fee
+					plans page first — a course cannot exist without the plan its groups
+					bill on.
+				</p>
+			</div>
+		);
+	}
+	return (
+		<FormSelect
+			control={control}
+			name={'feePlan' as FieldPath<T>}
+			label="Fee plan *"
+			options={options}
+		/>
+	);
+}
+
 function CreateCourseForm({
 	onSuccess,
 	onPendingChange,
@@ -68,6 +122,7 @@ function CreateCourseForm({
 		defaultValues: {
 			name: '',
 			branch: SHARED_BRANCH_VALUE,
+			feePlan: '',
 			level: '',
 			description: '',
 		},
@@ -76,18 +131,43 @@ function CreateCourseForm({
 	const branchOptions = useBranchOptions();
 	const createCourse = useCreateCourse();
 
+	const branch = form.watch('branch');
+	const { options: feePlanOptions, isPending: plansPending } =
+		useFeePlanOptions(branch);
+
 	useEffect(() => {
 		onPendingChange(createCourse.isPending);
 	}, [createCourse.isPending, onPendingChange]);
 
+	// Switching branch can strand the chosen plan; drop it rather than submit a
+	// value the server will reject. Guarded on `plansPending` so an empty list
+	// mid-fetch never clears a valid selection.
+	const selectedPlan = form.watch('feePlan');
+	useEffect(() => {
+		if (
+			!plansPending &&
+			selectedPlan &&
+			!feePlanOptions.some((o) => o.value === selectedPlan)
+		) {
+			form.setValue('feePlan', '');
+		}
+		// eslint-disable-next-line react-hooks/exhaustive-deps
+	}, [branch, plansPending, feePlanOptions.length]);
+
 	async function onSubmit(values: CreateCourseFormValues) {
-		await createCourse.mutateAsync({
-			branchId: branchToPayload(values.branch),
-			name: values.name.trim(),
-			description: values.description?.trim() || null,
-			level: values.level?.trim() || null,
-			defaultDurationWeeks: values.defaultDurationWeeks ?? null,
-		});
+		try {
+			await createCourse.mutateAsync({
+				branchId: branchToPayload(values.branch),
+				feePlanId: Number(values.feePlan),
+				name: values.name.trim(),
+				description: values.description?.trim() || null,
+				level: values.level?.trim() || null,
+				defaultDurationWeeks: values.defaultDurationWeeks ?? null,
+			});
+		} catch (err) {
+			toast.error(isApiError(err) ? err.message : 'Something went wrong');
+			return;
+		}
 		toast.success('Course added');
 		onSuccess();
 	}
@@ -113,6 +193,7 @@ function CreateCourseForm({
 							label="Branch"
 							options={branchOptions}
 						/>
+						<FeePlanField control={form.control} options={feePlanOptions} />
 						<div className="grid grid-cols-2 gap-3">
 							<FormInput
 								control={form.control}
@@ -163,6 +244,7 @@ function EditCourseForm({
 	const toDefaults = (c: CourseResponse): EditCourseFormValues => ({
 		name: c.name,
 		branch: branchToForm(c.branchId),
+		feePlan: String(c.feePlanId),
 		level: c.level ?? '',
 		defaultDurationWeeks: c.defaultDurationWeeks ?? undefined,
 		description: c.description ?? '',
@@ -182,20 +264,46 @@ function EditCourseForm({
 	const branchOptions = useBranchOptions();
 	const updateCourse = useUpdateCourse();
 
+	const branch = form.watch('branch');
+	const { options: feePlanOptions, isPending: plansPending } =
+		useFeePlanOptions(branch);
+
 	useEffect(() => {
 		onPendingChange(updateCourse.isPending);
 	}, [updateCourse.isPending, onPendingChange]);
 
+	// Moving the course to another branch can strand its current plan; drop it so
+	// the admin re-picks rather than submitting a value the server rejects.
+	// Guarded on `plansPending` so an empty list mid-fetch never clears the
+	// course's existing plan.
+	const selectedPlan = form.watch('feePlan');
+	useEffect(() => {
+		if (
+			!plansPending &&
+			selectedPlan &&
+			!feePlanOptions.some((o) => o.value === selectedPlan)
+		) {
+			form.setValue('feePlan', '');
+		}
+		// eslint-disable-next-line react-hooks/exhaustive-deps
+	}, [branch, plansPending, feePlanOptions.length]);
+
 	async function onSubmit(values: EditCourseFormValues) {
-		await updateCourse.mutateAsync({
-			id: course.id,
-			branchId: branchToPayload(values.branch),
-			name: values.name.trim(),
-			description: values.description?.trim() || null,
-			level: values.level?.trim() || null,
-			defaultDurationWeeks: values.defaultDurationWeeks ?? null,
-			isActive: values.status === 'active',
-		});
+		try {
+			await updateCourse.mutateAsync({
+				id: course.id,
+				branchId: branchToPayload(values.branch),
+				feePlanId: Number(values.feePlan),
+				name: values.name.trim(),
+				description: values.description?.trim() || null,
+				level: values.level?.trim() || null,
+				defaultDurationWeeks: values.defaultDurationWeeks ?? null,
+				isActive: values.status === 'active',
+			});
+		} catch (err) {
+			toast.error(isApiError(err) ? err.message : 'Something went wrong');
+			return;
+		}
 		toast.success('Course updated');
 		onSuccess();
 	}
@@ -221,6 +329,12 @@ function EditCourseForm({
 							label="Branch"
 							options={branchOptions}
 						/>
+						<FeePlanField control={form.control} options={feePlanOptions} />
+						<p className="text-xs text-muted-foreground">
+							Changing the plan re-prices every future invoice for this
+							course&apos;s groups. Invoices already issued keep their
+							original plan.
+						</p>
 						<div className="grid grid-cols-2 gap-3">
 							<FormInput
 								control={form.control}

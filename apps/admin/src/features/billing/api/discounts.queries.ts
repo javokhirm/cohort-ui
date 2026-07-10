@@ -1,4 +1,4 @@
-import { keepPreviousData, useQuery } from '@tanstack/react-query';
+import { keepPreviousData, useInfiniteQuery, useQuery } from '@tanstack/react-query';
 
 import { manageApi } from '@/api/apiClient';
 import type { PaginatedResult } from '@repo/api-client';
@@ -40,6 +40,21 @@ export function useDiscountList(filters: DiscountListFilters) {
 			manageApi.getPaginated<DiscountResponse>('/discounts', {
 				params: filters,
 			}) as Promise<PaginatedResult<DiscountResponse>>,
+		placeholderData: keepPreviousData,
+	});
+}
+
+/** Card-grid variant of {@link useDiscountList}: accumulates pages for infinite scroll. */
+export function useInfiniteDiscountList(filters: Omit<DiscountListFilters, 'page'>) {
+	return useInfiniteQuery({
+		queryKey: discountsKeys.discountInfiniteList(filters),
+		queryFn: ({ pageParam }) =>
+			manageApi.getPaginated<DiscountResponse>('/discounts', {
+				params: { ...filters, page: pageParam },
+			}) as Promise<PaginatedResult<DiscountResponse>>,
+		initialPageParam: 1,
+		getNextPageParam: (last) =>
+			last.page < last.totalPages ? last.page + 1 : undefined,
 		placeholderData: keepPreviousData,
 	});
 }

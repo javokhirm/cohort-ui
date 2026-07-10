@@ -1,5 +1,5 @@
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
-import { render, screen, waitFor } from '@testing-library/react';
+import { render, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { describe, expect, it, vi } from 'vitest';
 import type { ReactNode } from 'react';
@@ -20,7 +20,7 @@ const ROWS: FeePlanResponse[] = [
 	{
 		id: 1,
 		branchId: null,
-		courseId: 1,
+		groupCount: 2,
 		name: 'Monthly Tuition — IELTS',
 		amount: 1_300_000,
 		currency: 'UZS',
@@ -34,7 +34,7 @@ const ROWS: FeePlanResponse[] = [
 	{
 		id: 4,
 		branchId: null,
-		courseId: null,
+		groupCount: 0,
 		name: 'Private Tutoring — Per session',
 		amount: 120_000,
 		currency: 'UZS',
@@ -49,33 +49,34 @@ const ROWS: FeePlanResponse[] = [
 ];
 
 describe('FeePlanTable', () => {
-	it('renders the plan name, resolved course, formatted money and badges', async () => {
+	it('renders the plan name, group count, formatted money and badges', () => {
 		renderTable(<FeePlanTable feePlans={ROWS} />);
 
 		expect(screen.getByText('Monthly Tuition — IELTS')).toBeInTheDocument();
-		await waitFor(() => expect(screen.getByText('IELTS Prep')).toBeInTheDocument());
+		expect(screen.getByText('2 groups')).toBeInTheDocument();
 		expect(screen.getByText(/1.300.000/)).toBeInTheDocument();
 		expect(screen.getByText('Monthly')).toBeInTheDocument();
 		expect(screen.getByText('Active')).toBeInTheDocument();
 	});
 
-	it('shows "Any" for a plan with no course and "Inherited" for null overrides', () => {
+	it('shows "Not in use" for a plan no group bills on, and "Inherited" for null overrides', () => {
 		renderTable(<FeePlanTable feePlans={ROWS} />);
 
-		expect(screen.getByText('Any')).toBeInTheDocument();
+		expect(screen.getByText('Not in use')).toBeInTheDocument();
 		expect(screen.getByText('Per session')).toBeInTheDocument();
 		expect(screen.getByText('Inactive')).toBeInTheDocument();
 		// Null due-day and proration both render as "Inherited".
 		expect(screen.getAllByText('Inherited')).toHaveLength(2);
 	});
 
+	it('singularises a lone group', () => {
+		renderTable(<FeePlanTable feePlans={[{ ...ROWS[0]!, groupCount: 1 }]} />);
+		expect(screen.getByText('1 group')).toBeInTheDocument();
+	});
+
 	it('invokes onEdit when a row is clicked', async () => {
 		const onEdit = vi.fn();
 		renderTable(<FeePlanTable feePlans={ROWS} onEdit={onEdit} />);
-
-		// Let the course-list fetch settle first — clicking mid-fetch races the
-		// re-render and can land on a since-replaced DOM node.
-		await waitFor(() => expect(screen.getByText('IELTS Prep')).toBeInTheDocument());
 
 		await userEvent.click(screen.getByText('Monthly Tuition — IELTS'));
 		expect(onEdit).toHaveBeenCalledWith(ROWS[0]);

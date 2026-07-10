@@ -12,9 +12,6 @@ import {
  */
 export const SHARED_BRANCH_VALUE = 'shared';
 
-/** Course is nullable (`null` = applies to any course); sentinel for "any". */
-export const ANY_COURSE_VALUE = 'any';
-
 const billingCycle = z.enum(FEE_PLAN_BILLING_CYCLES);
 
 // Due-day and proration are per-plan overrides of the tenant billing policy.
@@ -29,10 +26,11 @@ const dueDay = z
 
 const prorationMethod = z.enum(FEE_PLAN_PRORATION_METHODS).optional();
 
+// A plan is standalone: it carries no course or group. Courses point at a plan
+// (`courses.feePlanId`), so assignment happens on the course form.
 const feePlanBase = z.object({
 	name: z.string().min(1, 'Plan name is required'),
 	branch: z.string(),
-	course: z.string(),
 	amount: z
 		.number({ error: 'Amount is required' })
 		.positive('Amount must be greater than 0'),
@@ -86,14 +84,4 @@ export function branchToPayload(branch: string): number | null {
 /** Payload `branchId` → form branch string. */
 export function branchToForm(branchId: number | null): string {
 	return branchId == null ? SHARED_BRANCH_VALUE : String(branchId);
-}
-
-/** Form course string → payload `courseId` (`null` when "any"). */
-export function courseToPayload(course: string): number | null {
-	return course === ANY_COURSE_VALUE ? null : Number(course);
-}
-
-/** Payload `courseId` → form course string. */
-export function courseToForm(courseId: number | null): string {
-	return courseId == null ? ANY_COURSE_VALUE : String(courseId);
 }

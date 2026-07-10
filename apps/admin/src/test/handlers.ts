@@ -125,6 +125,8 @@ export const MOCK_ROOMS: MockRoom[] = [
 interface MockCourse {
 	id: number;
 	branchId: number | null;
+	/** Required: the plan every group of this course bills on. */
+	feePlanId: number;
 	name: string;
 	description: string | null;
 	level: string | null;
@@ -138,6 +140,8 @@ export const MOCK_COURSES: MockCourse[] = [
 	{
 		id: 1,
 		branchId: null,
+		// Shared course → shared plan (MOCK_FEE_PLANS[0], branchId null).
+		feePlanId: 1,
 		name: 'IELTS Prep',
 		description: 'Exam-focused academic English',
 		level: 'Upper-Intermediate',
@@ -149,6 +153,8 @@ export const MOCK_COURSES: MockCourse[] = [
 	{
 		id: 2,
 		branchId: 1,
+		// Branch-1 course → branch-1 plan.
+		feePlanId: 2,
 		name: 'General English A2',
 		description: null,
 		level: 'A2',
@@ -160,6 +166,8 @@ export const MOCK_COURSES: MockCourse[] = [
 	{
 		id: 3,
 		branchId: 2,
+		// Branch-2 course → shared plan (a shared plan backs any branch).
+		feePlanId: 1,
 		name: 'Kids Coding',
 		description: 'Scratch and Python basics',
 		level: 'Beginner',
@@ -405,11 +413,12 @@ export const MOCK_STUDENTS = [
 interface MockFeePlan {
 	id: number;
 	branchId: number | null;
-	courseId: number | null;
+	/** Live groups reaching this plan through their course (list endpoint only). */
+	groupCount: number;
 	name: string;
 	amount: number;
 	currency: string;
-	billingCycle: 'MONTHLY' | 'ONE_TIME' | 'PER_SESSION';
+	billingCycle: 'MONTHLY' | 'PER_SESSION';
 	/** `null` inherits the tenant billing-policy default. */
 	prorationMethod: 'SESSION' | 'DAILY' | 'NONE' | null;
 	/** `null` inherits the tenant billing-policy due-day. */
@@ -423,7 +432,7 @@ export const MOCK_FEE_PLANS: MockFeePlan[] = [
 	{
 		id: 1,
 		branchId: null,
-		courseId: 1,
+		groupCount: 2,
 		name: 'Monthly Tuition — IELTS',
 		amount: 1_300_000,
 		currency: 'UZS',
@@ -437,7 +446,7 @@ export const MOCK_FEE_PLANS: MockFeePlan[] = [
 	{
 		id: 2,
 		branchId: 1,
-		courseId: 2,
+		groupCount: 1,
 		name: 'Monthly Tuition — General English',
 		amount: 650_000,
 		currency: 'UZS',
@@ -451,11 +460,11 @@ export const MOCK_FEE_PLANS: MockFeePlan[] = [
 	{
 		id: 3,
 		branchId: null,
-		courseId: null,
-		name: 'Trial Lesson — One-time',
+		groupCount: 0,
+		name: 'Trial Lesson',
 		amount: 50_000,
 		currency: 'UZS',
-		billingCycle: 'ONE_TIME',
+		billingCycle: 'PER_SESSION',
 		// Inherits the tenant billing-policy defaults (null override).
 		dueDay: null,
 		isActive: true,
@@ -466,7 +475,7 @@ export const MOCK_FEE_PLANS: MockFeePlan[] = [
 	{
 		id: 4,
 		branchId: null,
-		courseId: null,
+		groupCount: 0,
 		name: 'Private Tutoring — Per session',
 		amount: 120_000,
 		currency: 'UZS',
@@ -1325,6 +1334,7 @@ export const handlers = [
 		return ok({
 			id: 99,
 			branchId: body['branchId'] ?? null,
+			feePlanId: body['feePlanId'],
 			name: body['name'],
 			description: body['description'] ?? null,
 			level: body['level'] ?? null,
@@ -1557,7 +1567,6 @@ export const handlers = [
 	http.get(`${MANAGE}/fee-plans`, ({ request }) => {
 		const url = new URL(request.url);
 		const branchIds = readBranchIds(url);
-		const courseId = url.searchParams.get('courseId');
 		const isActive = url.searchParams.get('isActive');
 		const page = Number(url.searchParams.get('page') ?? 1);
 		const limit = Number(url.searchParams.get('limit') ?? 20);
@@ -1568,13 +1577,20 @@ export const handlers = [
 			rows = rows.filter(
 				(p) => p.branchId === null || branchIds.includes(p.branchId),
 			);
-		if (courseId) rows = rows.filter((p) => p.courseId === Number(courseId));
 		if (isActive !== null)
 			rows = rows.filter((p) => p.isActive === (isActive === 'true'));
 
 		const total = rows.length;
 		const start = (page - 1) * limit;
 		return okPaged(rows.slice(start, start + limit), page, limit, total);
+	}),
+
+	/** Groups whose course bills on the plan; read-only drill-in from the plans page. */
+	http.get(`${MANAGE}/fee-plans/:id/groups`, ({ params }) => {
+		const feePlan = MOCK_FEE_PLANS.find((p) => p.id === Number(params['id']));
+		if (!feePlan) return fail(404, 'FEE_PLAN_NOT_FOUND', 'Fee plan not found.');
+		const rows = MOCK_GROUPS.slice(0, feePlan.groupCount);
+		return okPaged(rows, 1, 100, rows.length);
 	}),
 
 	http.post(`${MANAGE}/fee-plans`, async ({ request }) => {
@@ -1585,7 +1601,7 @@ export const handlers = [
 				data: {
 					id: 99,
 					branchId: body['branchId'] ?? null,
-					courseId: body['courseId'] ?? null,
+					groupCount: 0,
 					name: body['name'],
 					amount: body['amount'],
 					currency: body['currency'] ?? 'UZS',
@@ -1606,6 +1622,14 @@ export const handlers = [
 		const feePlan = MOCK_FEE_PLANS.find((p) => p.id === Number(params['id']));
 		if (!feePlan) return fail(404, 'FEE_PLAN_NOT_FOUND', 'Fee plan not found.');
 		const body = (await request.json()) as Record<string, unknown>;
+		// Retiring a plan a course still uses would silently stop billing its groups.
+		if (body['isActive'] === false && feePlan.groupCount > 0) {
+			return fail(
+				409,
+				'FEE_PLAN_IN_USE',
+				'This fee plan cannot be deactivated while courses are using it.',
+			);
+		}
 		return ok({ ...feePlan, ...body, updatedAt: '2026-07-04T00:00:00Z' });
 	}),
 

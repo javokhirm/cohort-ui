@@ -153,7 +153,6 @@ const staffEditRoute = createRoute({
 type RoomStatusSearch = 'active' | 'inactive';
 
 interface RoomSearch {
-	page?: number;
 	status?: RoomStatusSearch;
 }
 
@@ -162,10 +161,8 @@ const roomsRoute = createRoute({
 	path: '/rooms',
 	beforeLoad: () => requirePermission('room.read'),
 	validateSearch: (search: Record<string, unknown>): RoomSearch => {
-		const page = Number(search.page);
 		const status = search.status;
 		return {
-			page: Number.isFinite(page) && page > 0 ? page : undefined,
 			status: status === 'active' || status === 'inactive' ? status : undefined,
 		};
 	},
@@ -212,8 +209,8 @@ const billingPolicyRoute = createRoute({
 type DiscountStatusSearch = 'active' | 'inactive';
 
 interface DiscountSearch {
-	page?: number;
 	status?: DiscountStatusSearch;
+	search?: string;
 }
 
 const discountsRoute = createRoute({
@@ -221,11 +218,10 @@ const discountsRoute = createRoute({
 	path: '/discounts',
 	beforeLoad: () => requirePermission('discount.manage'),
 	validateSearch: (search: Record<string, unknown>): DiscountSearch => {
-		const page = Number(search.page);
 		const status = search.status;
 		return {
-			page: Number.isFinite(page) && page > 0 ? page : undefined,
 			status: status === 'active' || status === 'inactive' ? status : undefined,
+			search: typeof search.search === 'string' ? search.search : undefined,
 		};
 	},
 	component: DiscountsRoute,

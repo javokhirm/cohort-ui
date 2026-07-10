@@ -1,5 +1,5 @@
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
-import { render, screen } from '@testing-library/react';
+import { render, screen, waitFor } from '@testing-library/react';
 import { describe, expect, it } from 'vitest';
 import type { ReactNode } from 'react';
 
@@ -18,7 +18,7 @@ function renderForm(children: ReactNode) {
 const MONTHLY_PLAN: FeePlanResponse = {
 	id: 1,
 	branchId: null,
-	courseId: 1,
+	groupCount: 2,
 	name: 'Monthly Tuition — IELTS',
 	amount: 1_300_000,
 	currency: 'UZS',
@@ -71,5 +71,23 @@ describe('FeePlanForm (edit)', () => {
 			screen.queryByText('Override tenant default proration'),
 		).not.toBeInTheDocument();
 		expect(screen.getByText(/aren.t prorated/i)).toBeInTheDocument();
+	});
+
+	it('lists the groups billing on the plan, and offers no course picker', async () => {
+		renderForm(
+			<FeePlanForm
+				mode="edit"
+				open
+				feePlan={MONTHLY_PLAN}
+				onOpenChange={() => {}}
+			/>,
+		);
+
+		expect(screen.getByText('Groups using this plan')).toBeInTheDocument();
+		// A plan is standalone — courses point at it, never the other way round.
+		expect(screen.queryByLabelText('Course')).not.toBeInTheDocument();
+		await waitFor(() =>
+			expect(screen.getByText('IELTS Prep — Morning')).toBeInTheDocument(),
+		);
 	});
 });
