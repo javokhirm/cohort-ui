@@ -60,6 +60,9 @@ export interface InvoiceListFilters {
 	from?: string;
 	to?: string;
 	dueBefore?: string;
+	/** Sort column (default `createdAt`). `dueDate` + `order: 'asc'` = most overdue first. */
+	sort?: 'createdAt' | 'dueDate';
+	order?: 'asc' | 'desc';
 }
 
 /** `GET /invoices/summary` filters — the list filters, without pagination. */
