@@ -212,8 +212,8 @@ const billingPolicyRoute = createRoute({
 type DiscountStatusSearch = 'active' | 'inactive';
 
 interface DiscountSearch {
-	page?: number;
 	status?: DiscountStatusSearch;
+	search?: string;
 }
 
 const discountsRoute = createRoute({
@@ -221,11 +221,10 @@ const discountsRoute = createRoute({
 	path: '/discounts',
 	beforeLoad: () => requirePermission('discount.manage'),
 	validateSearch: (search: Record<string, unknown>): DiscountSearch => {
-		const page = Number(search.page);
 		const status = search.status;
 		return {
-			page: Number.isFinite(page) && page > 0 ? page : undefined,
 			status: status === 'active' || status === 'inactive' ? status : undefined,
+			search: typeof search.search === 'string' ? search.search : undefined,
 		};
 	},
 	component: DiscountsRoute,

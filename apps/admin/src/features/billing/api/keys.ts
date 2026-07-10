@@ -33,6 +33,9 @@ export const discountsKeys = {
 	discounts: () => [...discountsKeys.all, 'discount'] as const,
 	discountList: (filters: DiscountListFilters) =>
 		[...discountsKeys.discounts(), 'list', filters] as const,
+	/** Distinct from `discountList` — that key stores a flat `PaginatedResult` page (dropdowns), this stores `useInfiniteQuery`'s `{ pages }` shape (the card grid). */
+	discountInfiniteList: (filters: Omit<DiscountListFilters, 'page'>) =>
+		[...discountsKeys.discounts(), 'infinite-list', filters] as const,
 };
 
 export const enrollmentDiscountsKeys = {
