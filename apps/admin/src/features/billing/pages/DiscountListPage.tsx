@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from 'react';
+import { useEffect, useState } from 'react';
 import { useNavigate, useSearch } from '@tanstack/react-router';
 import { Plus, Tag } from 'lucide-react';
 
@@ -6,6 +6,7 @@ import { Button, EmptyState, PageHeader, SearchFilterBar, Spinner } from '@repo/
 
 import { Can } from '@/components/Can';
 import { usePermissions } from '@/features/auth/hooks';
+import { useInfiniteScrollSentinel } from '@/hooks/useInfiniteScrollSentinel';
 import { useInfiniteDiscountList } from '../api/discounts.queries';
 import type { DiscountResponse } from '../api/discounts.queries';
 import type { DiscountListFilters } from '../api/keys';
@@ -53,20 +54,11 @@ export function DiscountListPage() {
 		useInfiniteDiscountList(filters);
 	const discounts = data?.pages.flatMap((p) => p.rows) ?? [];
 
-	// Auto-load the next page once the sentinel below the grid scrolls into view.
-	const sentinelRef = useRef<HTMLDivElement>(null);
-	useEffect(() => {
-		const el = sentinelRef.current;
-		if (!el || !hasNextPage) return;
-		const observer = new IntersectionObserver(
-			([entry]) => {
-				if (entry.isIntersecting && !isFetchingNextPage) void fetchNextPage();
-			},
-			{ rootMargin: '300px' },
-		);
-		observer.observe(el);
-		return () => observer.disconnect();
-	}, [hasNextPage, isFetchingNextPage, fetchNextPage]);
+	const sentinelRef = useInfiniteScrollSentinel({
+		hasNextPage,
+		isFetchingNextPage,
+		fetchNextPage,
+	});
 
 	function handleStatusChange(
 		value: (typeof DISCOUNT_STATUS_FILTERS)[number]['value'],

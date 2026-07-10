@@ -1,4 +1,4 @@
-import { keepPreviousData, useQuery } from '@tanstack/react-query';
+import { keepPreviousData, useInfiniteQuery, useQuery } from '@tanstack/react-query';
 
 import { manageApi } from '@/api/apiClient';
 import { useActiveBranchIds } from '@/store/branchStore';
@@ -43,6 +43,26 @@ export function useRoomList(filters: RoomListFilters) {
 			manageApi.getPaginated<RoomResponse>('/rooms', {
 				params: effectiveFilters,
 			}) as Promise<PaginatedResult<RoomResponse>>,
+		placeholderData: keepPreviousData,
+	});
+}
+
+/** Card-grid variant of {@link useRoomList}: accumulates pages for infinite scroll. */
+export function useInfiniteRoomList(filters: Omit<RoomListFilters, 'page'>) {
+	const activeBranchIds = useActiveBranchIds();
+	const effectiveFilters: Omit<RoomListFilters, 'page'> = {
+		...filters,
+		branchIds: filters.branchIds ?? activeBranchIds,
+	};
+	return useInfiniteQuery({
+		queryKey: roomsKeys.roomInfiniteList(effectiveFilters),
+		queryFn: ({ pageParam }) =>
+			manageApi.getPaginated<RoomResponse>('/rooms', {
+				params: { ...effectiveFilters, page: pageParam },
+			}) as Promise<PaginatedResult<RoomResponse>>,
+		initialPageParam: 1,
+		getNextPageParam: (last) =>
+			last.page < last.totalPages ? last.page + 1 : undefined,
 		placeholderData: keepPreviousData,
 	});
 }
