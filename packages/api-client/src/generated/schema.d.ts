@@ -620,6 +620,91 @@ export interface paths {
 		patch?: never;
 		trace?: never;
 	};
+	'/api/v1/manage/dashboard/stats': {
+		parameters: {
+			query?: never;
+			header?: never;
+			path?: never;
+			cookie?: never;
+		};
+		/** KPI strip: students, attendance, revenue, receivables, leads */
+		get: operations['DashboardController_stats'];
+		put?: never;
+		post?: never;
+		delete?: never;
+		options?: never;
+		head?: never;
+		patch?: never;
+		trace?: never;
+	};
+	'/api/v1/manage/dashboard/revenue-trend': {
+		parameters: {
+			query?: never;
+			header?: never;
+			path?: never;
+			cookie?: never;
+		};
+		/** Settled revenue per month over a trailing window */
+		get: operations['DashboardController_revenueTrend'];
+		put?: never;
+		post?: never;
+		delete?: never;
+		options?: never;
+		head?: never;
+		patch?: never;
+		trace?: never;
+	};
+	'/api/v1/manage/dashboard/enrollment-trend': {
+		parameters: {
+			query?: never;
+			header?: never;
+			path?: never;
+			cookie?: never;
+		};
+		/** New enrollments per month over a trailing window */
+		get: operations['DashboardController_enrollmentTrend'];
+		put?: never;
+		post?: never;
+		delete?: never;
+		options?: never;
+		head?: never;
+		patch?: never;
+		trace?: never;
+	};
+	'/api/v1/manage/dashboard/attendance-trend': {
+		parameters: {
+			query?: never;
+			header?: never;
+			path?: never;
+			cookie?: never;
+		};
+		/** Daily attendance rate over a trailing window */
+		get: operations['DashboardController_attendanceTrend'];
+		put?: never;
+		post?: never;
+		delete?: never;
+		options?: never;
+		head?: never;
+		patch?: never;
+		trace?: never;
+	};
+	'/api/v1/manage/dashboard/lead-funnel': {
+		parameters: {
+			query?: never;
+			header?: never;
+			path?: never;
+			cookie?: never;
+		};
+		/** Stage-entry lead funnel for a window (default: the current ISO week) */
+		get: operations['DashboardController_leadFunnel'];
+		put?: never;
+		post?: never;
+		delete?: never;
+		options?: never;
+		head?: never;
+		patch?: never;
+		trace?: never;
+	};
 	'/api/v1/manage/students': {
 		parameters: {
 			query?: never;
@@ -2493,6 +2578,11 @@ export interface components {
 			quantity: number;
 			/** @example 500000 */
 			unitAmount: number;
+			/**
+			 * @description Line classification; defaults to TUITION. Only TUITION/OTHER are client-settable — LATE_FEE/ADJUSTMENT/PACKAGE are system-generated only.
+			 * @enum {string}
+			 */
+			type?: 'TUITION' | 'OTHER';
 		};
 		CreateInvoiceDto: {
 			branchId: number;
@@ -2546,6 +2636,11 @@ export interface components {
 			quantity: number;
 			/** @example 500000 */
 			unitAmount: number;
+			/**
+			 * @description Line classification; defaults to TUITION. Only TUITION/OTHER are client-settable — LATE_FEE/ADJUSTMENT/PACKAGE are system-generated only.
+			 * @enum {string}
+			 */
+			type?: 'TUITION' | 'OTHER';
 		};
 		CreateCreditNoteDto: {
 			/** @example 100000 */
@@ -3701,6 +3796,116 @@ export interface operations {
 			};
 		};
 	};
+	DashboardController_stats: {
+		parameters: {
+			query?: {
+				/** @description Filter to these branch ids (comma-separated or repeated); must be within your branch scope */
+				branchIds?: number[];
+			};
+			header?: never;
+			path?: never;
+			cookie?: never;
+		};
+		requestBody?: never;
+		responses: {
+			200: {
+				headers: {
+					[name: string]: unknown;
+				};
+				content?: never;
+			};
+		};
+	};
+	DashboardController_revenueTrend: {
+		parameters: {
+			query?: {
+				/** @description Filter to these branch ids (comma-separated or repeated); must be within your branch scope */
+				branchIds?: number[];
+				/** @description Length of the trailing window, in whole months */
+				months?: number;
+			};
+			header?: never;
+			path?: never;
+			cookie?: never;
+		};
+		requestBody?: never;
+		responses: {
+			200: {
+				headers: {
+					[name: string]: unknown;
+				};
+				content?: never;
+			};
+		};
+	};
+	DashboardController_enrollmentTrend: {
+		parameters: {
+			query?: {
+				/** @description Filter to these branch ids (comma-separated or repeated); must be within your branch scope */
+				branchIds?: number[];
+				/** @description Length of the trailing window, in whole months */
+				months?: number;
+			};
+			header?: never;
+			path?: never;
+			cookie?: never;
+		};
+		requestBody?: never;
+		responses: {
+			200: {
+				headers: {
+					[name: string]: unknown;
+				};
+				content?: never;
+			};
+		};
+	};
+	DashboardController_attendanceTrend: {
+		parameters: {
+			query?: {
+				/** @description Filter to these branch ids (comma-separated or repeated); must be within your branch scope */
+				branchIds?: number[];
+				/** @description Length of the trailing window, in whole days (ending today) */
+				days?: number;
+			};
+			header?: never;
+			path?: never;
+			cookie?: never;
+		};
+		requestBody?: never;
+		responses: {
+			200: {
+				headers: {
+					[name: string]: unknown;
+				};
+				content?: never;
+			};
+		};
+	};
+	DashboardController_leadFunnel: {
+		parameters: {
+			query?: {
+				/** @description Filter to these branch ids (comma-separated or repeated); must be within your branch scope */
+				branchIds?: number[];
+				/** @description Window start (inclusive). Defaults to the start of the current ISO week. */
+				from?: string;
+				/** @description Window end (inclusive). Defaults to six days after `from`. */
+				to?: string;
+			};
+			header?: never;
+			path?: never;
+			cookie?: never;
+		};
+		requestBody?: never;
+		responses: {
+			200: {
+				headers: {
+					[name: string]: unknown;
+				};
+				content?: never;
+			};
+		};
+	};
 	StudentsController_list: {
 		parameters: {
 			query?: {
@@ -4784,6 +4989,10 @@ export interface operations {
 				to?: string;
 				/** @description Find invoices due before this date (YYYY-MM-DD) */
 				dueBefore?: string;
+				/** @description Sort column. Omit for the default newest-first ordering. */
+				sort?: 'createdAt' | 'dueDate';
+				/** @description Sort direction. `sort=dueDate&order=asc` lists most-overdue first. */
+				order?: 'asc' | 'desc';
 			};
 			header?: never;
 			path?: never;
@@ -4854,6 +5063,10 @@ export interface operations {
 				to?: string;
 				/** @description Find invoices due before this date (YYYY-MM-DD) */
 				dueBefore?: string;
+				/** @description Sort column. Omit for the default newest-first ordering. */
+				sort?: 'createdAt' | 'dueDate';
+				/** @description Sort direction. `sort=dueDate&order=asc` lists most-overdue first. */
+				order?: 'asc' | 'desc';
 			};
 			header?: never;
 			path?: never;

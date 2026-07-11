@@ -1,4 +1,4 @@
-import { DataTable, StatusBadge, type ColumnDef } from '@repo/ui';
+import { cn, DataTable, StatusBadge, type ColumnDef } from '@repo/ui';
 import { formatDate, formatPrice } from '@repo/utils';
 
 import type { InvoiceResponse } from '../api/invoices.queries';
@@ -9,13 +9,22 @@ interface InvoiceTableProps {
 	onRowClick?: (invoice: InvoiceResponse) => void;
 }
 
+function isVoid(invoice: InvoiceResponse) {
+	return invoice.status === 'VOID';
+}
+
 export function InvoiceTable({ invoices, isLoading, onRowClick }: InvoiceTableProps) {
 	const columns: ColumnDef<InvoiceResponse>[] = [
 		{
 			accessorKey: 'invoiceNumber',
 			header: 'Invoice #',
-			cell: ({ getValue }) => (
-				<span className="font-mono text-xs font-semibold">
+			cell: ({ row, getValue }) => (
+				<span
+					className={cn(
+						'font-mono text-xs font-semibold',
+						isVoid(row.original) && 'text-muted-foreground line-through',
+					)}
+				>
 					{getValue<string>()}
 				</span>
 			),
@@ -25,14 +34,26 @@ export function InvoiceTable({ invoices, isLoading, onRowClick }: InvoiceTablePr
 			id: 'student',
 			header: 'Student',
 			cell: ({ row }) => (
-				<span className="font-medium">{row.original.studentName}</span>
+				<span
+					className={cn(
+						'font-medium',
+						isVoid(row.original) && 'text-muted-foreground',
+					)}
+				>
+					{row.original.studentName}
+				</span>
 			),
 		},
 		{
 			id: 'total',
 			header: () => <div className="text-right">Total</div>,
 			cell: ({ row }) => (
-				<div className="text-right tabular-nums">
+				<div
+					className={cn(
+						'text-right tabular-nums',
+						isVoid(row.original) && 'text-muted-foreground line-through',
+					)}
+				>
 					{formatPrice(row.original.total)} UZS
 				</div>
 			),
@@ -42,7 +63,14 @@ export function InvoiceTable({ invoices, isLoading, onRowClick }: InvoiceTablePr
 			id: 'paid',
 			header: () => <div className="text-right">Paid</div>,
 			cell: ({ row }) => (
-				<div className="text-right tabular-nums text-tone-green-fg">
+				<div
+					className={cn(
+						'text-right tabular-nums',
+						isVoid(row.original)
+							? 'text-muted-foreground'
+							: 'text-tone-green-fg',
+					)}
+				>
 					{formatPrice(row.original.amountPaid)} UZS
 				</div>
 			),
@@ -53,11 +81,14 @@ export function InvoiceTable({ invoices, isLoading, onRowClick }: InvoiceTablePr
 			header: () => <div className="text-right">Balance</div>,
 			cell: ({ row }) => (
 				<div
-					className={
-						row.original.amountDue > 0
-							? 'text-right tabular-nums text-tone-red-fg'
-							: 'text-right tabular-nums text-muted-foreground'
-					}
+					className={cn(
+						'text-right tabular-nums',
+						isVoid(row.original)
+							? 'text-muted-foreground'
+							: row.original.amountDue > 0
+								? 'text-tone-red-fg'
+								: 'text-muted-foreground',
+					)}
 				>
 					{formatPrice(row.original.amountDue)} UZS
 				</div>
@@ -90,6 +121,7 @@ export function InvoiceTable({ invoices, isLoading, onRowClick }: InvoiceTablePr
 			data={invoices}
 			isLoading={isLoading}
 			getRowId={(row) => String(row.id)}
+			getRowClassName={(row) => (isVoid(row) ? 'opacity-60' : undefined)}
 			onRowClick={onRowClick}
 			emptyState={
 				<div className="py-16 text-center text-sm text-muted-foreground">

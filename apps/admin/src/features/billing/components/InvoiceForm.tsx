@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react';
 import { useFieldArray, useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
-import { Plus, Trash2 } from 'lucide-react';
+import { AlertTriangle, Copy, Plus, Trash2 } from 'lucide-react';
 
 import {
 	Button,
@@ -14,6 +14,7 @@ import {
 	FormItem,
 	FormLabel,
 	FormMessage,
+	FormMoneyInput,
 	FormSelect,
 	Separator,
 	Spinner,
@@ -21,7 +22,7 @@ import {
 	toast,
 } from '@repo/ui';
 import { isApiError } from '@repo/api-client';
-import { formatPrice } from '@repo/utils';
+import { formatPrice, toIsoDate } from '@repo/utils';
 
 import { FormSheet } from '@/components/FormSheet';
 import { useBranches } from '@/api/branches';
@@ -42,6 +43,7 @@ import {
 	useUpdateInvoice,
 } from '../api/invoices.mutations';
 import { useDiscountList } from '../api/discounts.queries';
+import { INVOICE_LINE_ITEM_TYPE_OPTIONS } from '../lib/invoice-options';
 import { StudentPicker } from './StudentPicker';
 
 interface CreateProps {
@@ -85,13 +87,14 @@ function CreateInvoiceForm({
 					description: '',
 					quantity: 1,
 					unitAmount: undefined as unknown as number,
+					type: 'TUITION',
 				},
 			],
 			discountId: NO_DISCOUNT_VALUE,
 			notes: '',
 		},
 	});
-	const { fields, append, remove } = useFieldArray({
+	const { fields, append, insert, remove } = useFieldArray({
 		control: form.control,
 		name: 'lineItems',
 	});
@@ -204,6 +207,7 @@ function CreateInvoiceForm({
 								control={form.control}
 								name="dueDate"
 								label="Due date *"
+								minDate={toIsoDate(new Date())}
 							/>
 						</div>
 					</FieldGroup>
@@ -214,81 +218,106 @@ function CreateInvoiceForm({
 						<span className="text-sm font-semibold text-muted-foreground">
 							Line items
 						</span>
-						<Button
-							type="button"
-							variant="ghost"
-							size="sm"
-							onClick={() =>
-								append({
-									description: '',
-									quantity: 1,
-									unitAmount: undefined as unknown as number,
-								})
-							}
-						>
-							<Plus className="mr-1 size-3.5" />
-							Add item
-						</Button>
 					</div>
 					<div className="flex flex-col gap-3">
-						{fields.map((field, index) => (
-							<div key={field.id} className="flex items-start gap-2">
-								<div className="flex-1">
+						{fields.map((field, index) => {
+							return (
+								<div
+									key={field.id}
+									className="flex flex-col gap-3 rounded-lg border border-border bg-muted/40 p-3"
+								>
+									<div className="flex items-center justify-between">
+										<span className="text-xs font-medium text-muted-foreground">
+											Item {index + 1}
+										</span>
+										<div className="flex items-center">
+											<Button
+												type="button"
+												variant="ghost"
+												size="icon"
+												className="size-7 text-muted-foreground hover:text-foreground"
+												aria-label="Duplicate item"
+												onClick={() =>
+													insert(index + 1, {
+														...form.getValues(
+															`lineItems.${index}`,
+														),
+													})
+												}
+											>
+												<Copy className="size-4" />
+											</Button>
+											<Button
+												type="button"
+												variant="ghost"
+												size="icon"
+												className="size-7 text-muted-foreground hover:text-destructive"
+												aria-label="Remove item"
+												disabled={fields.length === 1}
+												onClick={() => remove(index)}
+											>
+												<Trash2 className="size-4" />
+											</Button>
+										</div>
+									</div>
 									<FormInput
 										control={form.control}
 										name={`lineItems.${index}.description`}
-										placeholder="Description"
+										label="Description"
+										placeholder="e.g. Monthly tuition — March"
 									/>
+									<div className="grid grid-cols-[1.3fr_0.6fr_1.3fr] gap-2">
+										<FormSelect
+											control={form.control}
+											name={`lineItems.${index}.type`}
+											label="Type"
+											options={INVOICE_LINE_ITEM_TYPE_OPTIONS}
+										/>
+										<FormInput
+											control={form.control}
+											name={`lineItems.${index}.quantity`}
+											label="Qty"
+											type="number"
+											min={1}
+											onChange={(e) =>
+												form.setValue(
+													`lineItems.${index}.quantity`,
+													e.target.value === ''
+														? (undefined as unknown as number)
+														: Number(e.target.value),
+													{ shouldValidate: true },
+												)
+											}
+										/>
+										<FormMoneyInput
+											control={form.control}
+											name={`lineItems.${index}.unitAmount`}
+											label="Unit price"
+											suffix="UZS"
+											placeholder="0"
+										/>
+									</div>
 								</div>
-								<div className="w-16">
-									<FormInput
-										control={form.control}
-										name={`lineItems.${index}.quantity`}
-										type="number"
-										min={1}
-										placeholder="Qty"
-										onChange={(e) =>
-											form.setValue(
-												`lineItems.${index}.quantity`,
-												e.target.value === ''
-													? (undefined as unknown as number)
-													: Number(e.target.value),
-												{ shouldValidate: true },
-											)
-										}
-									/>
-								</div>
-								<div className="w-36">
-									<FormInput
-										control={form.control}
-										name={`lineItems.${index}.unitAmount`}
-										type="number"
-										min={0}
-										placeholder="Unit price"
-										onChange={(e) =>
-											form.setValue(
-												`lineItems.${index}.unitAmount`,
-												e.target.value === ''
-													? (undefined as unknown as number)
-													: Number(e.target.value),
-												{ shouldValidate: true },
-											)
-										}
-									/>
-								</div>
-								<Button
-									type="button"
-									variant="ghost"
-									size="icon"
-									className="mt-0.5 shrink-0 text-muted-foreground hover:text-destructive"
-									disabled={fields.length === 1}
-									onClick={() => remove(index)}
-								>
-									<Trash2 className="size-4" />
-								</Button>
-							</div>
-						))}
+							);
+						})}
 					</div>
+					<Button
+						type="button"
+						variant="outline"
+						size="sm"
+						className="w-full border-dashed"
+						onClick={() =>
+							append({
+								description: '',
+								quantity: 1,
+								unitAmount: undefined as unknown as number,
+								type: 'TUITION',
+							})
+						}
+					>
+						<Plus className="mr-1 size-3.5" />
+						Add item
+					</Button>
 					{form.formState.errors.lineItems?.root?.message && (
 						<p className="text-sm font-medium text-destructive">
 							{form.formState.errors.lineItems.root.message}
@@ -312,7 +341,11 @@ function CreateInvoiceForm({
 						</div>
 						{selectedDiscount && (
 							<div className="flex justify-between text-sm text-primary">
-								<span>{selectedDiscount.name}</span>
+								<span>
+									{selectedDiscount.name}
+									{selectedDiscount.type === 'PERCENTAGE' &&
+										` (${selectedDiscount.value}%)`}
+								</span>
 								<span className="tabular-nums">
 									-{formatPrice(discountAmount)} UZS
 								</span>
@@ -323,6 +356,15 @@ function CreateInvoiceForm({
 							<span>Total</span>
 							<span className="tabular-nums">{formatPrice(total)} UZS</span>
 						</div>
+						{subtotal > 0 && total === 0 && (
+							<div className="mt-1 flex items-start gap-1.5 text-xs text-tone-amber-fg">
+								<AlertTriangle className="mt-0.5 size-3.5 shrink-0" />
+								<span>
+									This discount brings the total to 0 UZS — nothing will
+									be charged.
+								</span>
+							</div>
+						)}
 					</div>
 				</Section>
 

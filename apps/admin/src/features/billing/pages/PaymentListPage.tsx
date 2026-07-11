@@ -201,7 +201,6 @@ export function PaymentListPage() {
 					<PaymentTable
 						payments={payments}
 						isLoading={isLoading}
-						canRefund={can('payment.refund')}
 						onRowClick={(payment) => setSelectedPaymentId(payment.id)}
 					/>
 					<div className="border-t border-border px-4 py-3">

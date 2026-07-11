@@ -58,8 +58,14 @@ export const INVOICE_LINE_ITEM_TYPES = [
 	'LATE_FEE',
 	'ADJUSTMENT',
 	'PACKAGE',
+	'OTHER',
 ] as const;
 export type InvoiceLineItemType = (typeof INVOICE_LINE_ITEM_TYPES)[number];
+
+/** Client-settable subset (mirrors cohort-be's CLIENT_SETTABLE_INVOICE_LINE_ITEM_TYPES) — used by the create-invoice form. */
+export const CLIENT_SETTABLE_INVOICE_LINE_ITEM_TYPES = ['TUITION', 'OTHER'] as const;
+export type ClientSettableInvoiceLineItemType =
+	(typeof CLIENT_SETTABLE_INVOICE_LINE_ITEM_TYPES)[number];
 
 export interface InvoiceLineItem {
 	id: number;
@@ -67,7 +73,7 @@ export interface InvoiceLineItem {
 	quantity: number;
 	unitAmount: number;
 	amount: number;
-	/** `ADJUSTMENT`/`PACKAGE` aren't produced by any endpoint yet — render generically. */
+	/** `LATE_FEE`/`ADJUSTMENT` are system-generated only; `PACKAGE` is reserved (not yet produced by any endpoint). */
 	type: InvoiceLineItemType;
 }
 
