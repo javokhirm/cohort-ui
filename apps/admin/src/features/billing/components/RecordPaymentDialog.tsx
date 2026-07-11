@@ -12,6 +12,7 @@ import {
 	DialogTitle,
 	FieldGroup,
 	Form,
+	FormDatePicker,
 	FormField,
 	FormInput,
 	FormItem,
@@ -162,11 +163,10 @@ function RecordPaymentForm({
 					/>
 
 					<div className="grid grid-cols-2 gap-3">
-						<FormInput
+						<FormDatePicker
 							control={form.control}
 							name="paidAt"
 							label="Date"
-							type="date"
 						/>
 						<FormInput
 							control={form.control}

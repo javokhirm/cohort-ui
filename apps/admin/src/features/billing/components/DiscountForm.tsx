@@ -6,6 +6,7 @@ import {
 	Button,
 	FieldGroup,
 	Form,
+	FormDatePicker,
 	FormInput,
 	FormSelect,
 	Spinner,
@@ -128,17 +129,15 @@ function CreateDiscountForm({
 							placeholder="SIBLING10 (optional)"
 						/>
 						<div className="grid grid-cols-2 gap-3">
-							<FormInput
+							<FormDatePicker
 								control={form.control}
 								name="validFrom"
 								label="Valid from"
-								type="date"
 							/>
-							<FormInput
+							<FormDatePicker
 								control={form.control}
 								name="validUntil"
 								label="Valid until"
-								type="date"
 							/>
 						</div>
 					</FieldGroup>
@@ -244,17 +243,15 @@ function EditDiscountForm({
 							placeholder="SIBLING10 (optional)"
 						/>
 						<div className="grid grid-cols-2 gap-3">
-							<FormInput
+							<FormDatePicker
 								control={form.control}
 								name="validFrom"
 								label="Valid from"
-								type="date"
 							/>
-							<FormInput
+							<FormDatePicker
 								control={form.control}
 								name="validUntil"
 								label="Valid until"
-								type="date"
 							/>
 						</div>
 						<FormSelect

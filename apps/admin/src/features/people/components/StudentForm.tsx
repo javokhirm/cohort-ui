@@ -3,7 +3,15 @@ import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { toast } from '@repo/ui';
 
-import { Button, FieldGroup, Form, FormInput, FormSelect, Spinner } from '@repo/ui';
+import {
+	Button,
+	FieldGroup,
+	Form,
+	FormDatePicker,
+	FormInput,
+	FormSelect,
+	Spinner,
+} from '@repo/ui';
 
 import { FormSheet } from '@/components/FormSheet';
 
@@ -169,11 +177,10 @@ function CreateStudentForm({
 							placeholder="e.g. Diyorbek Rustamov"
 						/>
 						<div className="grid grid-cols-2 gap-3">
-							<FormInput
+							<FormDatePicker
 								control={form.control}
 								name="dateOfBirth"
 								label="Date of birth"
-								type="date"
 							/>
 							<FormSelect
 								control={form.control}
@@ -334,11 +341,10 @@ function EditStudentForm({
 							disabled
 						/>
 						<div className="grid grid-cols-2 gap-3">
-							<FormInput
+							<FormDatePicker
 								control={form.control}
 								name="dateOfBirth"
 								label="Date of birth"
-								type="date"
 							/>
 							<FormSelect
 								control={form.control}

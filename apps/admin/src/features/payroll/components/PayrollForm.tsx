@@ -7,6 +7,7 @@ import {
 	FieldGroup,
 	Form,
 	FormControl,
+	FormDatePicker,
 	FormField,
 	FormInput,
 	FormItem,
@@ -135,17 +136,15 @@ function CreatePayrollForm({
 							valueAsNumber
 						/>
 						<div className="grid grid-cols-2 gap-3">
-							<FormInput
+							<FormDatePicker
 								control={form.control}
 								name="periodStart"
 								label="Period start *"
-								type="date"
 							/>
-							<FormInput
+							<FormDatePicker
 								control={form.control}
 								name="periodEnd"
 								label="Period end *"
-								type="date"
 							/>
 						</div>
 					</FieldGroup>

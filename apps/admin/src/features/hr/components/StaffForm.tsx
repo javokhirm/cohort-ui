@@ -6,6 +6,7 @@ import {
 	Button,
 	FieldGroup,
 	Form,
+	FormDatePicker,
 	FormInput,
 	FormSelect,
 	Spinner,
@@ -185,11 +186,10 @@ function CreateStaffForm({
 								label="Contract"
 								options={EMPLOYMENT_OPTIONS}
 							/>
-							<FormInput
+							<FormDatePicker
 								control={form.control}
 								name="hireDate"
 								label="Start date"
-								type="date"
 							/>
 						</div>
 						<FormInput

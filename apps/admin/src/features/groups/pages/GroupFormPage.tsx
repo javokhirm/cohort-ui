@@ -8,6 +8,7 @@ import {
 	Button,
 	ConfirmDialog,
 	FieldGroup,
+	FormDatePicker,
 	FormInput,
 	FormSelect,
 	PageHeader,
@@ -176,17 +177,15 @@ function GroupFields({
 						</div>
 
 						<div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
-							<FormInput
+							<FormDatePicker
 								control={form.control}
 								name="startDate"
 								label="Start date"
-								type="date"
 							/>
-							<FormInput
+							<FormDatePicker
 								control={form.control}
 								name="endDate"
 								label="End date"
-								type="date"
 							/>
 						</div>
 					</FieldGroup>

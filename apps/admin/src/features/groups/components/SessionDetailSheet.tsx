@@ -5,6 +5,7 @@ import {
 	Avatar,
 	AvatarFallback,
 	Button,
+	DatePicker,
 	Label,
 	Select,
 	SelectContent,
@@ -316,11 +317,10 @@ function SessionActions({
 				<h3 className="text-sm font-semibold">Reschedule session</h3>
 				<div>
 					<Label className="mb-1.5">Date</Label>
-					<input
-						type="date"
+					<DatePicker
 						value={date}
-						onChange={(e) => setDate(e.target.value)}
-						className="h-9 w-full rounded-md border border-input bg-background px-3 text-sm"
+						onChange={(value) => setDate(value ?? '')}
+						className="w-full"
 					/>
 				</div>
 				<div className="grid grid-cols-2 gap-3">

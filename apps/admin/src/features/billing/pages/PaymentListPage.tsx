@@ -5,7 +5,7 @@ import { X } from 'lucide-react';
 import {
 	Button,
 	Card,
-	Input,
+	DatePicker,
 	Label,
 	PageHeader,
 	Pagination,
@@ -158,11 +158,10 @@ export function PaymentListPage() {
 						>
 							Paid from
 						</Label>
-						<Input
+						<DatePicker
 							id="payment-from"
-							type="date"
-							value={from ?? ''}
-							onChange={(e) => handleDateChange('from', e.target.value)}
+							value={from}
+							onChange={(value) => handleDateChange('from', value ?? '')}
 							className="h-9 w-37.5"
 						/>
 					</div>
@@ -173,11 +172,10 @@ export function PaymentListPage() {
 						>
 							Paid to
 						</Label>
-						<Input
+						<DatePicker
 							id="payment-to"
-							type="date"
-							value={to ?? ''}
-							onChange={(e) => handleDateChange('to', e.target.value)}
+							value={to}
+							onChange={(value) => handleDateChange('to', value ?? '')}
 							className="h-9 w-37.5"
 						/>
 					</div>

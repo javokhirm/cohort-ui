@@ -7,6 +7,7 @@ import {
 	FieldGroup,
 	Form,
 	FormControl,
+	FormDatePicker,
 	FormField,
 	FormInput,
 	FormItem,
@@ -138,11 +139,10 @@ function CreateExpenseForm({
 							}
 						/>
 						<div className="grid grid-cols-2 gap-3">
-							<FormInput
+							<FormDatePicker
 								control={form.control}
 								name="expenseDate"
 								label="Date *"
-								type="date"
 							/>
 							<FormInput
 								control={form.control}
@@ -266,11 +266,10 @@ function EditExpenseForm({
 							}
 						/>
 						<div className="grid grid-cols-2 gap-3">
-							<FormInput
+							<FormDatePicker
 								control={form.control}
 								name="expenseDate"
 								label="Date *"
-								type="date"
 							/>
 							<FormInput
 								control={form.control}

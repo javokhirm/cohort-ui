@@ -8,6 +8,7 @@ import {
 	FieldGroup,
 	Form,
 	FormControl,
+	FormDatePicker,
 	FormField,
 	FormInput,
 	FormItem,
@@ -199,11 +200,10 @@ function CreateInvoiceForm({
 								options={branchOptions}
 								valueAsNumber
 							/>
-							<FormInput
+							<FormDatePicker
 								control={form.control}
 								name="dueDate"
 								label="Due date *"
-								type="date"
 							/>
 						</div>
 					</FieldGroup>
@@ -388,11 +388,10 @@ function EditInvoiceForm({
 			>
 				<Section>
 					<FieldGroup>
-						<FormInput
+						<FormDatePicker
 							control={form.control}
 							name="dueDate"
 							label="Due date *"
-							type="date"
 						/>
 						<FormField
 							control={form.control}
