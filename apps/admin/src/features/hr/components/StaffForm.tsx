@@ -79,6 +79,7 @@ function CreateStaffForm({
 			employmentType: 'FULL_TIME',
 			hireDate: '',
 			specialization: '',
+			password: '',
 		},
 	});
 
@@ -102,6 +103,7 @@ function CreateStaffForm({
 			hireDate: values.hireDate || undefined,
 			baseSalary: values.baseSalary,
 			specialization: parseSpecialization(values.specialization),
+			password: values.password || undefined,
 		});
 		toast.success('Staff member added');
 		onSuccess();
@@ -174,6 +176,23 @@ function CreateStaffForm({
 								placeholder="name@center.uz"
 							/>
 						</div>
+					</FieldGroup>
+				</Section>
+
+				<Section heading="Access">
+					<FieldGroup>
+						<FormInput
+							control={form.control}
+							name="password"
+							label="Password"
+							type="password"
+							autoComplete="new-password"
+							placeholder="Min. 8 characters"
+						/>
+						<p className="text-xs text-muted-foreground">
+							They sign in with their phone number and this password. Leave
+							blank to set it later.
+						</p>
 					</FieldGroup>
 				</Section>
 

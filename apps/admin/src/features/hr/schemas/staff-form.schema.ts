@@ -7,6 +7,24 @@ const phone = z
 
 const email = z.union([z.literal(''), z.email('Enter a valid email')]).optional();
 
+/**
+ * The initial login password, set only when registering a staff member. Blank is
+ * allowed (the member sets their own later, from their account page), but anything
+ * typed must clear the backend's 8–128 policy. Same blank-or-valid shape as `email`.
+ *
+ * There is deliberately no password field on the edit form: a password is only ever
+ * set at creation or changed by its owner on `/account`.
+ */
+const optionalPassword = z
+	.union([
+		z.literal(''),
+		z
+			.string()
+			.min(8, 'Password must be at least 8 characters')
+			.max(128, 'Password must be at most 128 characters'),
+	])
+	.optional();
+
 export const createStaffSchema = z.object({
 	firstName: z.string().min(1, 'First name is required'),
 	lastName: z.string().min(1, 'Last name is required'),
@@ -19,6 +37,7 @@ export const createStaffSchema = z.object({
 	hireDate: z.string().optional(),
 	baseSalary: z.number().min(0, 'Salary cannot be negative').optional(),
 	specialization: z.string().optional(),
+	password: optionalPassword,
 });
 
 export const editStaffSchema = z.object({

@@ -1383,6 +1383,36 @@
         ]
       }
     },
+    "/api/v1/manage/me/password": {
+      "patch": {
+        "operationId": "MeController_changePassword",
+        "parameters": [],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ChangeMyPasswordDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Change the authenticated staff member's own password",
+        "tags": [
+          "Manage / Profile"
+        ]
+      }
+    },
     "/api/v1/manage/dashboard/stats": {
       "get": {
         "operationId": "DashboardController_stats",
@@ -6877,6 +6907,19 @@
           }
         }
       },
+      "ChangeMyPasswordDto": {
+        "type": "object",
+        "properties": {
+          "newPassword": {
+            "type": "string",
+            "minLength": 8,
+            "maxLength": 128
+          }
+        },
+        "required": [
+          "newPassword"
+        ]
+      },
       "EmergencyContactDto": {
         "type": "object",
         "properties": {
@@ -7124,6 +7167,12 @@
           "roleName": {
             "type": "string",
             "description": "Default: TEACHER. Also ADMIN or MANAGER."
+          },
+          "password": {
+            "type": "string",
+            "minLength": 8,
+            "maxLength": 128,
+            "description": "The staff member's initial login password. Ignored if the phone is already a user."
           }
         },
         "required": [

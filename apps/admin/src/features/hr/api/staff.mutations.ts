@@ -25,6 +25,12 @@ export interface CreateStaffInput {
 	employmentType?: EmploymentType;
 	baseSalary?: number;
 	roleName?: StaffRoleName;
+	/**
+	 * Initial login password (8–128). Applied only when `phone` belongs to a new
+	 * user — an existing account keeps its credentials. Omit to let the member set
+	 * their own later from their account page.
+	 */
+	password?: string;
 }
 
 export interface UpdateStaffInput {
