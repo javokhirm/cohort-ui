@@ -23,7 +23,11 @@ import {
 } from '@repo/ui';
 import { isApiError } from '@repo/api-client';
 
-import type { BillingMode, BillingPolicyResponse } from '../api/billing-policy.queries';
+import type {
+	BillingCycleAnchor,
+	BillingMode,
+	BillingPolicyResponse,
+} from '../api/billing-policy.queries';
 import { useUpdateBillingPolicy } from '../api/billing-policy.mutations';
 import {
 	billingPolicySchema,
@@ -39,6 +43,18 @@ const BILLING_MODE_HINTS: Record<BillingMode, string> = {
 	PREPAID: 'Bills the current month in advance, before it starts.',
 	POSTPAID:
 		"Bills the previous, fully-elapsed month in arrears, via two independent legs: a time-based leg for Monthly fee plans and a consumption-based leg for Per-session plans (billed by sessions actually consumed, per the consumption rule below). Each enrollment is billed by exactly one leg, based on its fee plan's billing cycle — never both.",
+};
+
+const BILLING_CYCLE_ANCHOR_OPTIONS = [
+	{ value: 'CALENDAR', label: 'Calendar month' },
+	{ value: 'ENROLLMENT', label: 'Enrollment anniversary' },
+];
+
+const BILLING_CYCLE_ANCHOR_HINTS: Record<BillingCycleAnchor, string> = {
+	CALENDAR:
+		"Everyone shares one calendar month (the 1st to the last day). A student who joins mid-month is charged a prorated first invoice for the part of the month they'll actually attend, then falls into the shared cycle.",
+	ENROLLMENT:
+		'Each student rolls on their own join date: join on 12 July and they are billed 12 July – 11 August, then again on 12 August, and so on. Every cycle is a whole month, so nobody is ever prorated on the way in — they pay the full price from the day they start. Prepaid only.',
 };
 
 const PRORATION_OPTIONS = [
@@ -170,8 +186,10 @@ function SwitchField({
 function toDefaults(p: BillingPolicyResponse): BillingPolicyFormValues {
 	return {
 		billingMode: p.billingMode,
+		billingCycleAnchor: p.billingCycleAnchor,
 		billingDay: p.billingDay,
 		dueDay: p.dueDay,
+		dueOffsetDays: p.dueOffsetDays,
 		immediateDueDays: p.immediateDueDays,
 		graceDays: p.graceDays,
 		prorationMethod: p.prorationMethod,
@@ -198,6 +216,8 @@ export function BillingPolicyForm({ policy }: { policy: BillingPolicyResponse })
 	const updatePolicy = useUpdateBillingPolicy();
 	const lateFeeEnabled = form.watch('lateFeeEnabled');
 	const billingMode = form.watch('billingMode');
+	const billingCycleAnchor = form.watch('billingCycleAnchor');
+	const isAnniversary = billingCycleAnchor === 'ENROLLMENT';
 
 	useEffect(() => {
 		form.reset(toDefaults(policy));
@@ -208,8 +228,10 @@ export function BillingPolicyForm({ policy }: { policy: BillingPolicyResponse })
 		try {
 			await updatePolicy.mutateAsync({
 				billingMode: values.billingMode,
+				billingCycleAnchor: values.billingCycleAnchor,
 				billingDay: values.billingDay,
 				dueDay: values.dueDay,
+				dueOffsetDays: values.dueOffsetDays,
 				immediateDueDays: values.immediateDueDays,
 				graceDays: values.graceDays,
 				prorationMethod: values.prorationMethod,
@@ -258,6 +280,17 @@ export function BillingPolicyForm({ policy }: { policy: BillingPolicyResponse })
 								{BILLING_MODE_HINTS[billingMode]}
 							</p>
 						</div>
+						<div className="flex flex-col gap-1.5">
+							<FormSelect
+								control={form.control}
+								name="billingCycleAnchor"
+								label="Billing cycle"
+								options={BILLING_CYCLE_ANCHOR_OPTIONS}
+							/>
+							<p className="text-xs text-muted-foreground">
+								{BILLING_CYCLE_ANCHOR_HINTS[billingCycleAnchor]}
+							</p>
+						</div>
 						<div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
 							<FormSelect
 								control={form.control}
@@ -265,21 +298,34 @@ export function BillingPolicyForm({ policy }: { policy: BillingPolicyResponse })
 								label="Default proration"
 								options={PRORATION_OPTIONS}
 							/>
-							<NumberField
-								control={form.control}
-								name="billingDay"
-								label="Billing day (1–28)"
-								min={1}
-								max={28}
-								hint="Day the daily cycle generates that period's invoices."
-							/>
-							<NumberField
-								control={form.control}
-								name="dueDay"
-								label="Default due day (1–28)"
-								min={1}
-								max={28}
-							/>
+							{isAnniversary ? (
+								<NumberField
+									control={form.control}
+									name="dueOffsetDays"
+									label="Due offset (days into the cycle)"
+									min={0}
+									max={28}
+									hint="Days after a student's cycle starts that their invoice falls due; 0 = due on the day the cycle begins."
+								/>
+							) : (
+								<>
+									<NumberField
+										control={form.control}
+										name="billingDay"
+										label="Billing day (1–28)"
+										min={1}
+										max={28}
+										hint="Day the daily cycle generates that period's invoices."
+									/>
+									<NumberField
+										control={form.control}
+										name="dueDay"
+										label="Default due day (1–28)"
+										min={1}
+										max={28}
+									/>
+								</>
+							)}
 							<NumberField
 								control={form.control}
 								name="immediateDueDays"
@@ -297,6 +343,16 @@ export function BillingPolicyForm({ policy }: { policy: BillingPolicyResponse })
 								hint="Days past due before an invoice flips to OVERDUE."
 							/>
 						</div>
+						{isAnniversary && (
+							<p className="text-xs text-muted-foreground">
+								Each student's cycle starts on their own join date, so
+								there is no shared billing day or due day — the daily run
+								issues whichever cycle each student is currently in.
+								Because every cycle is a whole month, the proration
+								setting above has no effect on tuition invoices while this
+								cycle is selected.
+							</p>
+						)}
 					</CardContent>
 				</Card>
 
@@ -309,7 +365,11 @@ export function BillingPolicyForm({ policy }: { policy: BillingPolicyResponse })
 							control={form.control}
 							name="chargeOnEnrollment"
 							label="Charge on enrollment"
-							description="Issue a prorated invoice immediately when a student is enrolled onto a monthly fee plan."
+							description={
+								isAnniversary
+									? "Issue the first full-cycle invoice immediately when a student is enrolled onto a monthly fee plan, instead of waiting for that night's run."
+									: 'Issue a prorated invoice immediately when a student is enrolled onto a monthly fee plan.'
+							}
 						/>
 					</CardContent>
 				</Card>

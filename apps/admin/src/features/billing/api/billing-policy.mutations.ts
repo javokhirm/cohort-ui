@@ -4,6 +4,7 @@ import { manageApi } from '@/api/apiClient';
 
 import { billingPolicyKeys, feePlansKeys } from './keys';
 import type {
+	BillingCycleAnchor,
 	BillingMode,
 	BillingPolicyResponse,
 	ConsumptionRule,
@@ -18,8 +19,10 @@ import type {
 
 export interface UpdateBillingPolicyInput {
 	billingMode?: BillingMode;
+	billingCycleAnchor?: BillingCycleAnchor;
 	billingDay?: number;
 	dueDay?: number;
+	dueOffsetDays?: number;
 	immediateDueDays?: number;
 	graceDays?: number;
 	prorationMethod?: PolicyProrationMethod;

@@ -19,6 +19,17 @@ import { billingPolicyKeys } from './keys';
 export const BILLING_MODES = ['PREPAID', 'POSTPAID'] as const;
 export type BillingMode = (typeof BILLING_MODES)[number];
 
+/**
+ * What a billing period is anchored to. `CALENDAR` bills everyone for the same
+ * calendar month and prorates a mid-month joiner's first invoice. `ENROLLMENT`
+ * rolls each student on their own join-date anniversary (join Jul 12 → billed
+ * Jul 12–Aug 11, then Aug 12–Sep 11), so every cycle is whole and charged in
+ * full. `ENROLLMENT` is PREPAID-only, and uses `dueOffsetDays` in place of
+ * `billingDay`/`dueDay`.
+ */
+export const BILLING_CYCLE_ANCHORS = ['CALENDAR', 'ENROLLMENT'] as const;
+export type BillingCycleAnchor = (typeof BILLING_CYCLE_ANCHORS)[number];
+
 export const POLICY_PRORATION_METHODS = ['SESSION', 'DAILY', 'NONE'] as const;
 export type PolicyProrationMethod = (typeof POLICY_PRORATION_METHODS)[number];
 
@@ -38,10 +49,14 @@ export type LateFeeRecurrence = (typeof LATE_FEE_RECURRENCES)[number];
 
 export interface BillingPolicyResponse {
 	billingMode: BillingMode;
-	/** Day the daily billing cycle starts generating a period's invoices (1–28). */
+	/** Calendar month for everyone, or each student's own join-date cycle. */
+	billingCycleAnchor: BillingCycleAnchor;
+	/** `CALENDAR` only: day the daily cycle generates a period's invoices (1–28). */
 	billingDay: number;
-	/** Default due-day for periodic invoices (a fee plan may override). */
+	/** `CALENDAR` only: default due-day for periodic invoices (a fee plan may override). */
 	dueDay: number;
+	/** `ENROLLMENT` only: days after a cycle starts that its invoice is due (0–28). */
+	dueOffsetDays: number;
 	/** Due offset for charge-on-enrollment invoices; 0 = due same day (0–28). */
 	immediateDueDays: number;
 	/** Days past due before an invoice flips OVERDUE (0–60). */

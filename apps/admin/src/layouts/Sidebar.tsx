@@ -483,7 +483,9 @@ export function Sidebar({ collapsed }: SidebarProps) {
 								</button>
 							</DropdownMenuTrigger>
 							<DropdownMenuContent side="top" align="end" className="w-40">
-								<DropdownMenuItem onClick={() => void navigate({ to: '/account' })}>
+								<DropdownMenuItem
+									onClick={() => void navigate({ to: '/account' })}
+								>
 									<User className="mr-2 size-4" />
 									Profile
 								</DropdownMenuItem>

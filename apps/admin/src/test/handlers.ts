@@ -493,8 +493,10 @@ export const MOCK_FEE_PLANS: MockFeePlan[] = [
 /** One policy per tenant (`GET/PUT /manage/billing-policy`). */
 export const MOCK_BILLING_POLICY = {
 	billingMode: 'PREPAID' as const,
+	billingCycleAnchor: 'CALENDAR' as const,
 	billingDay: 1,
 	dueDay: 5,
+	dueOffsetDays: 0,
 	immediateDueDays: 3,
 	graceDays: 7,
 	prorationMethod: 'SESSION' as const,
@@ -1662,6 +1664,18 @@ export const handlers = [
 				422,
 				'BILLING_POLICY_INVALID_DUNNING_DAYS',
 				'Auto-cancel days must exceed auto-suspend days.',
+			);
+		}
+		// Validated on the MERGED result server-side, so fall back to the stored
+		// value when the request only sends one side of the pair.
+		const anchor: unknown =
+			body['billingCycleAnchor'] ?? MOCK_BILLING_POLICY.billingCycleAnchor;
+		const mode: unknown = body['billingMode'] ?? MOCK_BILLING_POLICY.billingMode;
+		if (anchor === 'ENROLLMENT' && mode !== 'PREPAID') {
+			return fail(
+				422,
+				'BILLING_POLICY_ANCHOR_REQUIRES_PREPAID',
+				'Enrollment-anniversary billing is only available in PREPAID mode.',
 			);
 		}
 		// Merge-upsert — only the sent fields change.

@@ -25,13 +25,14 @@ function ReadOnlyField({ label, value }: { label: string; value: string }) {
 export function AccountPage() {
 	const { data: profile, isLoading, isError } = useMyProfile();
 
-	const fullName = profile
-		? `${profile.firstName} ${profile.lastName}`.trim()
-		: '';
+	const fullName = profile ? `${profile.firstName} ${profile.lastName}`.trim() : '';
 
 	return (
 		<div className="mx-auto flex max-w-3xl flex-col gap-6">
-			<PageHeader title="My account" description="Your profile and sign-in password" />
+			<PageHeader
+				title="My account"
+				description="Your profile and sign-in password"
+			/>
 
 			{isLoading && <Skeleton className="h-44 w-full rounded-xl" />}
 

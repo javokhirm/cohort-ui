@@ -56,6 +56,24 @@ function formatPeriod(year: number, month: number): string {
 	});
 }
 
+/**
+ * The run's `period` key as the server returns it: `yyyy-MM` for a calendar
+ * month, or `yyyy-MM-dd` (the as-of date) for an anniversary sweep, where each
+ * student is on their own cycle and no single month was billed.
+ */
+function formatResultPeriod(period: string): string {
+	const [year, month, day] = period.split('-').map(Number);
+	if (!year || !month) return period;
+	if (day) {
+		return new Date(year, month - 1, day).toLocaleDateString('en', {
+			day: 'numeric',
+			month: 'long',
+			year: 'numeric',
+		});
+	}
+	return formatPeriod(year, month);
+}
+
 interface GenerateInvoicesDialogProps {
 	open: boolean;
 	onOpenChange: (open: boolean) => void;
@@ -81,6 +99,10 @@ function GenerateInvoicesForm({ onClose }: { onClose: () => void }) {
 	const { data: branches = [] } = useBranches();
 	const billingMode = policy?.billingMode;
 	const isPostpaid = billingMode === 'POSTPAID';
+	// Anniversary cycles have no shared month: every student rolls on their own
+	// join date, so the run is "bill every cycle that is currently due" and the
+	// server rejects an explicit month outright.
+	const isAnniversary = policy?.billingCycleAnchor === 'ENROLLMENT';
 
 	const defaults = naturalPeriod(billingMode);
 	const [period, setPeriod] = useState(
@@ -99,8 +121,9 @@ function GenerateInvoicesForm({ onClose }: { onClose: () => void }) {
 		e.preventDefault();
 		try {
 			const data = await generate.mutateAsync({
-				year,
-				month,
+				// Omitting the month is what asks the server for the natural period —
+				// every currently-due anniversary cycle.
+				...(isAnniversary ? {} : { year, month }),
 				branchId: branchId === ALL_BRANCHES ? undefined : Number(branchId),
 			});
 			setResult(data);
@@ -122,27 +145,35 @@ function GenerateInvoicesForm({ onClose }: { onClose: () => void }) {
 	return (
 		<form onSubmit={(e) => void handleSubmit(e)} className="flex flex-col gap-5">
 			<DialogHeader>
-				<DialogTitle>Generate monthly invoices</DialogTitle>
+				<DialogTitle>
+					{isAnniversary
+						? 'Generate due invoices'
+						: 'Generate monthly invoices'}
+				</DialogTitle>
 				<DialogDescription>
-					{isPostpaid
-						? 'Bills the selected month in arrears, after it has fully elapsed — this single run covers both the time-based monthly leg and the consumption-based per-session leg.'
-						: 'Bills the selected month in advance, before it starts.'}
+					{isAnniversary
+						? 'Bills every student whose own cycle has started but has not been invoiced yet. Each student is billed for their own period — the one that began on their enrollment anniversary — so there is no month to choose.'
+						: isPostpaid
+							? 'Bills the selected month in arrears, after it has fully elapsed — this single run covers both the time-based monthly leg and the consumption-based per-session leg.'
+							: 'Bills the selected month in advance, before it starts.'}
 				</DialogDescription>
 			</DialogHeader>
 
 			<div className="grid grid-cols-2 gap-3">
-				<div className="flex flex-col gap-1.5">
-					<Label htmlFor="generate-period">
-						{isPostpaid ? 'Consumed month' : 'Billing month'}
-					</Label>
-					<Input
-						id="generate-period"
-						type="month"
-						required
-						value={period}
-						onChange={(e) => setPeriod(e.target.value)}
-					/>
-				</div>
+				{!isAnniversary && (
+					<div className="flex flex-col gap-1.5">
+						<Label htmlFor="generate-period">
+							{isPostpaid ? 'Consumed month' : 'Billing month'}
+						</Label>
+						<Input
+							id="generate-period"
+							type="month"
+							required
+							value={period}
+							onChange={(e) => setPeriod(e.target.value)}
+						/>
+					</div>
+				)}
 				<div className="flex flex-col gap-1.5">
 					<Label htmlFor="generate-branch">Branch</Label>
 					<Select value={branchId} onValueChange={setBranchId}>
@@ -162,9 +193,11 @@ function GenerateInvoicesForm({ onClose }: { onClose: () => void }) {
 			</div>
 
 			<p className="text-xs text-muted-foreground">
-				{isPostpaid
-					? `Generates invoices for enrollments consumed in ${formatPeriod(year, month)}. Existing invoices for the period are left untouched.`
-					: `Generates invoices for ${formatPeriod(year, month)}, in advance. Existing invoices for the period are left untouched.`}
+				{isAnniversary
+					? 'The nightly run already does this. Use it to catch up after downtime — students already invoiced for their current cycle are left untouched.'
+					: isPostpaid
+						? `Generates invoices for enrollments consumed in ${formatPeriod(year, month)}. Existing invoices for the period are left untouched.`
+						: `Generates invoices for ${formatPeriod(year, month)}, in advance. Existing invoices for the period are left untouched.`}
 			</p>
 
 			<DialogFooter>
@@ -207,8 +240,7 @@ function GenerationResult({
 		<div className="flex flex-col gap-5">
 			<DialogHeader>
 				<DialogTitle>
-					Invoices generated for{' '}
-					{formatPeriod(result.period.year, result.period.month)}
+					Invoices generated for {formatResultPeriod(result.period)}
 				</DialogTitle>
 				<DialogDescription>
 					{result.generated} invoice{result.generated === 1 ? '' : 's'} created
@@ -237,18 +269,15 @@ function GenerationResult({
 				/>
 			</div>
 
-			{result.errors.length > 0 && (
+			{result.errors > 0 && (
 				<Alert variant="destructive">
 					<AlertTitle>
-						{result.errors.length} error
-						{result.errors.length === 1 ? '' : 's'} during generation
+						{result.errors} enrollment{result.errors === 1 ? '' : 's'} failed
+						to generate
 					</AlertTitle>
 					<AlertDescription>
-						<ul className="list-disc pl-4">
-							{result.errors.map((e, i) => (
-								<li key={i}>{e.message}</li>
-							))}
-						</ul>
+						The rest of the run completed — these were skipped, not billed.
+						Re-run to retry them; check the server logs for the cause.
 					</AlertDescription>
 				</Alert>
 			)}
