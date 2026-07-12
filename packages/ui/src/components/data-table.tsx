@@ -38,6 +38,8 @@ interface DataTableProps<TData, TValue> {
 	onRowClick?: (row: TData) => void;
 	/** Rendered when there are no rows and not loading. */
 	emptyState?: React.ReactNode;
+	/** Extra className applied per row (e.g. to dim a voided/inactive record). */
+	getRowClassName?: (row: TData) => string | undefined;
 	skeletonRows?: number;
 	className?: string;
 }
@@ -56,6 +58,7 @@ function DataTable<TData, TValue>({
 	manualSorting = true,
 	onRowClick,
 	emptyState,
+	getRowClassName,
 	skeletonRows = 8,
 	className,
 }: DataTableProps<TData, TValue>) {
@@ -155,7 +158,10 @@ function DataTable<TData, TValue>({
 										? () => onRowClick(row.original)
 										: undefined
 								}
-								className={cn(onRowClick && 'cursor-pointer')}
+								className={cn(
+									onRowClick && 'cursor-pointer',
+									getRowClassName?.(row.original),
+								)}
 							>
 								{row.getVisibleCells().map((cell) => (
 									<TableCell key={cell.id}>

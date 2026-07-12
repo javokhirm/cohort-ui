@@ -5,7 +5,7 @@ import { CalendarClock, Download, Plus, X } from 'lucide-react';
 import {
 	Button,
 	Card,
-	Input,
+	DatePicker,
 	Label,
 	PageHeader,
 	Pagination,
@@ -198,11 +198,10 @@ export function InvoiceListPage() {
 						>
 							Issued from
 						</Label>
-						<Input
+						<DatePicker
 							id="invoice-from"
-							type="date"
-							value={from ?? ''}
-							onChange={(e) => handleDateChange('from', e.target.value)}
+							value={from}
+							onChange={(value) => handleDateChange('from', value ?? '')}
 							className="h-9 w-37.5"
 						/>
 					</div>
@@ -213,11 +212,10 @@ export function InvoiceListPage() {
 						>
 							Issued to
 						</Label>
-						<Input
+						<DatePicker
 							id="invoice-to"
-							type="date"
-							value={to ?? ''}
-							onChange={(e) => handleDateChange('to', e.target.value)}
+							value={to}
+							onChange={(value) => handleDateChange('to', value ?? '')}
 							className="h-9 w-37.5"
 						/>
 					</div>
@@ -228,12 +226,11 @@ export function InvoiceListPage() {
 						>
 							Due before
 						</Label>
-						<Input
+						<DatePicker
 							id="invoice-due-before"
-							type="date"
-							value={dueBefore ?? ''}
-							onChange={(e) =>
-								handleDateChange('dueBefore', e.target.value)
+							value={dueBefore}
+							onChange={(value) =>
+								handleDateChange('dueBefore', value ?? '')
 							}
 							className="h-9 w-37.5"
 						/>

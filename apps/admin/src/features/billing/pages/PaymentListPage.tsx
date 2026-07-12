@@ -5,7 +5,7 @@ import { X } from 'lucide-react';
 import {
 	Button,
 	Card,
-	Input,
+	DatePicker,
 	Label,
 	PageHeader,
 	Pagination,
@@ -16,8 +16,6 @@ import {
 	SelectTrigger,
 	SelectValue,
 } from '@repo/ui';
-
-import { usePermissions } from '@/features/auth/hooks';
 
 import { usePaymentList } from '../api/payments.queries';
 import type { PaymentListFilters } from '../api/keys';
@@ -31,7 +29,6 @@ const ALL = 'all';
 
 export function PaymentListPage() {
 	const navigate = useNavigate({ from: '/payments' });
-	const { can } = usePermissions();
 	const [selectedPaymentId, setSelectedPaymentId] = useState<number | null>(null);
 	const {
 		page = 1,
@@ -158,11 +155,10 @@ export function PaymentListPage() {
 						>
 							Paid from
 						</Label>
-						<Input
+						<DatePicker
 							id="payment-from"
-							type="date"
-							value={from ?? ''}
-							onChange={(e) => handleDateChange('from', e.target.value)}
+							value={from}
+							onChange={(value) => handleDateChange('from', value ?? '')}
 							className="h-9 w-37.5"
 						/>
 					</div>
@@ -173,11 +169,10 @@ export function PaymentListPage() {
 						>
 							Paid to
 						</Label>
-						<Input
+						<DatePicker
 							id="payment-to"
-							type="date"
-							value={to ?? ''}
-							onChange={(e) => handleDateChange('to', e.target.value)}
+							value={to}
+							onChange={(value) => handleDateChange('to', value ?? '')}
 							className="h-9 w-37.5"
 						/>
 					</div>
@@ -203,7 +198,6 @@ export function PaymentListPage() {
 					<PaymentTable
 						payments={payments}
 						isLoading={isLoading}
-						canRefund={can('payment.refund')}
 						onRowClick={(payment) => setSelectedPaymentId(payment.id)}
 					/>
 					<div className="border-t border-border px-4 py-3">

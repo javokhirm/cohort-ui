@@ -5,7 +5,7 @@ import { Plus, Wallet, X } from 'lucide-react';
 import {
 	Button,
 	Card,
-	Input,
+	DatePicker,
 	Label,
 	PageHeader,
 	Pagination,
@@ -212,12 +212,11 @@ export function PayrollPage() {
 						>
 							Period from
 						</Label>
-						<Input
+						<DatePicker
 							id="payroll-period-from"
-							type="date"
-							value={periodFrom ?? ''}
-							onChange={(e) =>
-								handleDateChange('periodFrom', e.target.value)
+							value={periodFrom}
+							onChange={(value) =>
+								handleDateChange('periodFrom', value ?? '')
 							}
 							className="h-9 w-37.5"
 						/>
@@ -229,11 +228,12 @@ export function PayrollPage() {
 						>
 							Period to
 						</Label>
-						<Input
+						<DatePicker
 							id="payroll-period-to"
-							type="date"
-							value={periodTo ?? ''}
-							onChange={(e) => handleDateChange('periodTo', e.target.value)}
+							value={periodTo}
+							onChange={(value) =>
+								handleDateChange('periodTo', value ?? '')
+							}
 							className="h-9 w-37.5"
 						/>
 					</div>

@@ -173,6 +173,7 @@ export const STATUS_MAPS = {
 		late_fee: { tone: 'amber', label: 'Late fee' },
 		adjustment: { tone: 'blue', label: 'Adjustment' },
 		package: { tone: 'violet', label: 'Package' },
+		other: { tone: 'slate', label: 'Other' },
 	},
 	expense: {
 		rent: { tone: 'indigo', label: 'Rent' },

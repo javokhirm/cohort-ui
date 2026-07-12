@@ -1,71 +1,19 @@
 import { useState } from 'react';
-import { RotateCcw } from 'lucide-react';
 
-import {
-	Button,
-	DataTable,
-	StatusBadge,
-	Tooltip,
-	TooltipContent,
-	TooltipTrigger,
-	type ColumnDef,
-} from '@repo/ui';
+import { DataTable, StatusBadge, type ColumnDef } from '@repo/ui';
 import { formatDateTime, formatPrice } from '@repo/utils';
 
 import type { PaymentResponse } from '../api/invoices.queries';
 import { paymentMethodLabel } from '../lib/payment-options';
 import { RefundPaymentDialog, type RefundablePayment } from './RefundPaymentDialog';
 
-function isRefundable(payment: PaymentResponse): boolean {
-	return payment.status === 'SUCCEEDED' && payment.method !== 'CREDIT';
-}
-
-function RowActions({
-	payment,
-	onRefundClick,
-}: {
-	payment: PaymentResponse;
-	onRefundClick: (payment: PaymentResponse) => void;
-}) {
-	if (!isRefundable(payment)) {
-		return <span className="text-muted-foreground">—</span>;
-	}
-
-	return (
-		<Tooltip>
-			<TooltipTrigger asChild>
-				<Button
-					variant="ghost"
-					size="sm"
-					className="size-8 p-0"
-					aria-label="Refund payment"
-					onClick={(e) => {
-						e.stopPropagation();
-						onRefundClick(payment);
-					}}
-				>
-					<RotateCcw className="size-4" />
-				</Button>
-			</TooltipTrigger>
-			<TooltipContent>Refund</TooltipContent>
-		</Tooltip>
-	);
-}
-
 interface PaymentTableProps {
 	payments: PaymentResponse[];
 	isLoading?: boolean;
-	/** Whether the caller may refund payments (`payment.refund`). */
-	canRefund?: boolean;
 	onRowClick?: (payment: PaymentResponse) => void;
 }
 
-export function PaymentTable({
-	payments,
-	isLoading,
-	canRefund,
-	onRowClick,
-}: PaymentTableProps) {
+export function PaymentTable({ payments, isLoading, onRowClick }: PaymentTableProps) {
 	const [refundTarget, setRefundTarget] = useState<RefundablePayment | null>(null);
 
 	const columns: ColumnDef<PaymentResponse>[] = [
@@ -125,17 +73,6 @@ export function PaymentTable({
 			size: 160,
 		},
 	];
-
-	if (canRefund) {
-		columns.push({
-			id: 'actions',
-			header: () => <span className="sr-only">Actions</span>,
-			cell: ({ row }) => (
-				<RowActions payment={row.original} onRefundClick={setRefundTarget} />
-			),
-			size: 56,
-		});
-	}
 
 	return (
 		<>

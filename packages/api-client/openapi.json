@@ -1383,6 +1383,227 @@
         ]
       }
     },
+    "/api/v1/manage/dashboard/stats": {
+      "get": {
+        "operationId": "DashboardController_stats",
+        "parameters": [
+          {
+            "name": "branchIds",
+            "required": false,
+            "in": "query",
+            "description": "Filter to these branch ids (comma-separated or repeated); must be within your branch scope",
+            "schema": {
+              "type": "array",
+              "items": {
+                "type": "number"
+              }
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "KPI strip: students, attendance, revenue, receivables, leads",
+        "tags": [
+          "Manage / Dashboard"
+        ]
+      }
+    },
+    "/api/v1/manage/dashboard/revenue-trend": {
+      "get": {
+        "operationId": "DashboardController_revenueTrend",
+        "parameters": [
+          {
+            "name": "branchIds",
+            "required": false,
+            "in": "query",
+            "description": "Filter to these branch ids (comma-separated or repeated); must be within your branch scope",
+            "schema": {
+              "type": "array",
+              "items": {
+                "type": "number"
+              }
+            }
+          },
+          {
+            "name": "months",
+            "required": false,
+            "in": "query",
+            "description": "Length of the trailing window, in whole months",
+            "schema": {
+              "minimum": 1,
+              "maximum": 24,
+              "default": 12,
+              "type": "number"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Settled revenue per month over a trailing window",
+        "tags": [
+          "Manage / Dashboard"
+        ]
+      }
+    },
+    "/api/v1/manage/dashboard/enrollment-trend": {
+      "get": {
+        "operationId": "DashboardController_enrollmentTrend",
+        "parameters": [
+          {
+            "name": "branchIds",
+            "required": false,
+            "in": "query",
+            "description": "Filter to these branch ids (comma-separated or repeated); must be within your branch scope",
+            "schema": {
+              "type": "array",
+              "items": {
+                "type": "number"
+              }
+            }
+          },
+          {
+            "name": "months",
+            "required": false,
+            "in": "query",
+            "description": "Length of the trailing window, in whole months",
+            "schema": {
+              "minimum": 1,
+              "maximum": 24,
+              "default": 12,
+              "type": "number"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "New enrollments per month over a trailing window",
+        "tags": [
+          "Manage / Dashboard"
+        ]
+      }
+    },
+    "/api/v1/manage/dashboard/attendance-trend": {
+      "get": {
+        "operationId": "DashboardController_attendanceTrend",
+        "parameters": [
+          {
+            "name": "branchIds",
+            "required": false,
+            "in": "query",
+            "description": "Filter to these branch ids (comma-separated or repeated); must be within your branch scope",
+            "schema": {
+              "type": "array",
+              "items": {
+                "type": "number"
+              }
+            }
+          },
+          {
+            "name": "days",
+            "required": false,
+            "in": "query",
+            "description": "Length of the trailing window, in whole days (ending today)",
+            "schema": {
+              "minimum": 1,
+              "maximum": 90,
+              "default": 14,
+              "type": "number"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Daily attendance rate over a trailing window",
+        "tags": [
+          "Manage / Dashboard"
+        ]
+      }
+    },
+    "/api/v1/manage/dashboard/lead-funnel": {
+      "get": {
+        "operationId": "DashboardController_leadFunnel",
+        "parameters": [
+          {
+            "name": "branchIds",
+            "required": false,
+            "in": "query",
+            "description": "Filter to these branch ids (comma-separated or repeated); must be within your branch scope",
+            "schema": {
+              "type": "array",
+              "items": {
+                "type": "number"
+              }
+            }
+          },
+          {
+            "name": "from",
+            "required": false,
+            "in": "query",
+            "description": "Window start (inclusive). Defaults to the start of the current ISO week.",
+            "schema": {
+              "example": "2026-06-22",
+              "type": "string"
+            }
+          },
+          {
+            "name": "to",
+            "required": false,
+            "in": "query",
+            "description": "Window end (inclusive). Defaults to six days after `from`.",
+            "schema": {
+              "example": "2026-06-28",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Stage-entry lead funnel for a window (default: the current ISO week)",
+        "tags": [
+          "Manage / Dashboard"
+        ]
+      }
+    },
     "/api/v1/manage/students": {
       "get": {
         "operationId": "StudentsController_list",
@@ -3424,6 +3645,34 @@
               "example": "2026-02-01",
               "type": "string"
             }
+          },
+          {
+            "name": "sort",
+            "required": false,
+            "in": "query",
+            "description": "Sort column. Omit for the default newest-first ordering.",
+            "schema": {
+              "default": "createdAt",
+              "type": "string",
+              "enum": [
+                "createdAt",
+                "dueDate"
+              ]
+            }
+          },
+          {
+            "name": "order",
+            "required": false,
+            "in": "query",
+            "description": "Sort direction. `sort=dueDate&order=asc` lists most-overdue first.",
+            "schema": {
+              "default": "desc",
+              "type": "string",
+              "enum": [
+                "asc",
+                "desc"
+              ]
+            }
           }
         ],
         "responses": {
@@ -3568,6 +3817,34 @@
             "schema": {
               "example": "2026-02-01",
               "type": "string"
+            }
+          },
+          {
+            "name": "sort",
+            "required": false,
+            "in": "query",
+            "description": "Sort column. Omit for the default newest-first ordering.",
+            "schema": {
+              "default": "createdAt",
+              "type": "string",
+              "enum": [
+                "createdAt",
+                "dueDate"
+              ]
+            }
+          },
+          {
+            "name": "order",
+            "required": false,
+            "in": "query",
+            "description": "Sort direction. `sort=dueDate&order=asc` lists most-overdue first.",
+            "schema": {
+              "default": "desc",
+              "type": "string",
+              "enum": [
+                "asc",
+                "desc"
+              ]
             }
           }
         ],
@@ -7520,6 +7797,14 @@
           "unitAmount": {
             "type": "number",
             "example": 500000
+          },
+          "type": {
+            "type": "string",
+            "enum": [
+              "TUITION",
+              "OTHER"
+            ],
+            "description": "Line classification; defaults to TUITION. Only TUITION/OTHER are client-settable — LATE_FEE/ADJUSTMENT/PACKAGE are system-generated only."
           }
         },
         "required": [
@@ -7641,6 +7926,14 @@
           "unitAmount": {
             "type": "number",
             "example": 500000
+          },
+          "type": {
+            "type": "string",
+            "enum": [
+              "TUITION",
+              "OTHER"
+            ],
+            "description": "Line classification; defaults to TUITION. Only TUITION/OTHER are client-settable — LATE_FEE/ADJUSTMENT/PACKAGE are system-generated only."
           }
         },
         "required": [

@@ -5,6 +5,7 @@ import { peopleKeys } from '@/features/people/api/keys';
 
 import { invoicesKeys } from './keys';
 import type {
+	ClientSettableInvoiceLineItemType,
 	InvoiceDetail,
 	InvoiceResponse,
 	PaymentResponse,
@@ -19,6 +20,8 @@ export interface CreateInvoiceLineItemInput {
 	description: string;
 	quantity: number;
 	unitAmount: number;
+	/** Defaults to `TUITION` server-side when omitted. */
+	type?: ClientSettableInvoiceLineItemType;
 }
 
 export interface CreateInvoiceInput {

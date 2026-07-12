@@ -7,7 +7,7 @@ import {
 	Card,
 	cn,
 	ConfirmDialog,
-	Input,
+	DatePicker,
 	Label,
 	PageHeader,
 	Pagination,
@@ -165,11 +165,12 @@ export function ExpenseListPage() {
 							>
 								From
 							</Label>
-							<Input
+							<DatePicker
 								id="expense-from"
-								type="date"
-								value={from ?? ''}
-								onChange={(e) => handleDateChange('from', e.target.value)}
+								value={from}
+								onChange={(value) =>
+									handleDateChange('from', value ?? '')
+								}
 								className="h-8 w-37.5"
 							/>
 							<Label
@@ -178,11 +179,10 @@ export function ExpenseListPage() {
 							>
 								To
 							</Label>
-							<Input
+							<DatePicker
 								id="expense-to"
-								type="date"
-								value={to ?? ''}
-								onChange={(e) => handleDateChange('to', e.target.value)}
+								value={to}
+								onChange={(value) => handleDateChange('to', value ?? '')}
 								className="h-8 w-37.5"
 							/>
 						</div>

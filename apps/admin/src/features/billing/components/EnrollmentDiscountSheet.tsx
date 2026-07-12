@@ -7,8 +7,8 @@ import {
 	Button,
 	cn,
 	Form,
+	FormDatePicker,
 	FormField,
-	FormInput,
 	FormItem,
 	FormMessage,
 	RadioGroup,
@@ -247,11 +247,10 @@ export function EnrollmentDiscountSheet({
 
 						{options.length > 0 && (
 							<Section>
-								<FormInput
+								<FormDatePicker
 									control={form.control}
 									name="validUntil"
 									label="Valid until"
-									type="date"
 								/>
 								<p className="text-xs text-muted-foreground">
 									Applied to every monthly invoice generated before this

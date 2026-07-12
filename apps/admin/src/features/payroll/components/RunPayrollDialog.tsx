@@ -2,6 +2,7 @@ import { useState } from 'react';
 
 import {
 	Button,
+	DatePicker,
 	Dialog,
 	DialogContent,
 	DialogDescription,
@@ -67,24 +68,18 @@ export function RunPayrollDialog({ open, onOpenChange }: RunPayrollDialogProps) 
 					<div className="grid grid-cols-2 gap-3">
 						<div className="flex flex-col gap-1.5">
 							<Label htmlFor="period-start">Period start</Label>
-							<input
+							<DatePicker
 								id="period-start"
-								type="date"
-								required
 								value={periodStart}
-								onChange={(e) => setPeriodStart(e.target.value)}
-								className="flex h-9 w-full rounded-md border border-input bg-transparent px-3 py-1 text-sm shadow-sm focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring"
+								onChange={(value) => setPeriodStart(value ?? '')}
 							/>
 						</div>
 						<div className="flex flex-col gap-1.5">
 							<Label htmlFor="period-end">Period end</Label>
-							<input
+							<DatePicker
 								id="period-end"
-								type="date"
-								required
 								value={periodEnd}
-								onChange={(e) => setPeriodEnd(e.target.value)}
-								className="flex h-9 w-full rounded-md border border-input bg-transparent px-3 py-1 text-sm shadow-sm focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring"
+								onChange={(value) => setPeriodEnd(value ?? '')}
 							/>
 						</div>
 					</div>
@@ -113,7 +108,10 @@ export function RunPayrollDialog({ open, onOpenChange }: RunPayrollDialogProps) 
 						>
 							Cancel
 						</Button>
-						<Button type="submit" disabled={runPayroll.isPending}>
+						<Button
+							type="submit"
+							disabled={runPayroll.isPending || !periodStart || !periodEnd}
+						>
 							{runPayroll.isPending && <Spinner className="mr-2 size-4" />}
 							Run payroll
 						</Button>
