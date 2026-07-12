@@ -17,8 +17,6 @@ import {
 	SelectValue,
 } from '@repo/ui';
 
-import { usePermissions } from '@/features/auth/hooks';
-
 import { usePaymentList } from '../api/payments.queries';
 import type { PaymentListFilters } from '../api/keys';
 import { PAYMENT_METHOD_OPTIONS, PAYMENT_STATUS_FILTERS } from '../lib/payment-options';
@@ -31,7 +29,6 @@ const ALL = 'all';
 
 export function PaymentListPage() {
 	const navigate = useNavigate({ from: '/payments' });
-	const { can } = usePermissions();
 	const [selectedPaymentId, setSelectedPaymentId] = useState<number | null>(null);
 	const {
 		page = 1,
