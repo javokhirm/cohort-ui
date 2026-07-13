@@ -693,6 +693,72 @@
         ]
       }
     },
+    "/api/v1/super-admin/tenants/{id}/billing-policy": {
+      "get": {
+        "operationId": "BillingPolicyController_get",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "number"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "A tenant's effective billing policy (its stored row, or the defaults)",
+        "tags": [
+          "Super Admin / Billing Policy"
+        ]
+      },
+      "put": {
+        "operationId": "BillingPolicyController_update",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "number"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/UpdateTenantBillingPolicyDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Merge-upsert a tenant's billing policy (only provided fields change; applies from the next billing run)",
+        "tags": [
+          "Super Admin / Billing Policy"
+        ]
+      }
+    },
     "/api/v1/super-admin/users": {
       "get": {
         "operationId": "UsersController_list",
@@ -1218,6 +1284,7 @@
                 "TENANT_REACTIVATED",
                 "TENANT_CANCELLED",
                 "TENANT_DELETED",
+                "TENANT_BILLING_POLICY_UPDATED",
                 "PLAN_CREATED",
                 "PLAN_UPDATED",
                 "SUBSCRIPTION_CHANGED",
@@ -3372,35 +3439,7 @@
             "bearer": []
           }
         ],
-        "summary": "The tenant's effective billing policy",
-        "tags": [
-          "Manage / Billing Policy"
-        ]
-      },
-      "put": {
-        "operationId": "BillingPolicyController_update",
-        "parameters": [],
-        "requestBody": {
-          "required": true,
-          "content": {
-            "application/json": {
-              "schema": {
-                "$ref": "#/components/schemas/UpdateBillingPolicyDto"
-              }
-            }
-          }
-        },
-        "responses": {
-          "200": {
-            "description": ""
-          }
-        },
-        "security": [
-          {
-            "bearer": []
-          }
-        ],
-        "summary": "Merge-upsert the billing policy (only provided fields change; applies from the next billing run)",
+        "summary": "The tenant's effective billing policy (read-only)",
         "tags": [
           "Manage / Billing Policy"
         ]
@@ -6798,6 +6837,121 @@
           "roleId"
         ]
       },
+      "UpdateTenantBillingPolicyDto": {
+        "type": "object",
+        "properties": {
+          "billingMode": {
+            "type": "string",
+            "enum": [
+              "PREPAID",
+              "POSTPAID"
+            ]
+          },
+          "billingCycleAnchor": {
+            "type": "string",
+            "enum": [
+              "CALENDAR",
+              "ENROLLMENT"
+            ],
+            "description": "CALENDAR: one shared calendar month, mid-month joiners prorated. ENROLLMENT: each student rolls on their own join-date anniversary (join Jul 12 → billed Jul 12–Aug 11, then Aug 12–Sep 11), every cycle whole and at full price. PREPAID only; billingDay/dueDay are unread and dueOffsetDays sets the due date. Existing tenants stay on CALENDAR unless they opt in."
+          },
+          "billingDay": {
+            "type": "number",
+            "minimum": 1,
+            "maximum": 28,
+            "description": "CALENDAR anchoring only — the day periodic generation starts"
+          },
+          "dueDay": {
+            "type": "number",
+            "minimum": 1,
+            "maximum": 28,
+            "description": "CALENDAR anchoring only — the day of the month invoices fall due"
+          },
+          "dueOffsetDays": {
+            "type": "number",
+            "minimum": 0,
+            "maximum": 28,
+            "description": "ENROLLMENT anchoring only — days after a cycle starts that its invoice falls due (0 = the cycle’s first day)"
+          },
+          "immediateDueDays": {
+            "type": "number",
+            "minimum": 0,
+            "maximum": 28,
+            "description": "Due offset for immediately-issued invoices (0 = same day)"
+          },
+          "graceDays": {
+            "type": "number",
+            "minimum": 0,
+            "maximum": 60
+          },
+          "prorationMethod": {
+            "type": "string",
+            "enum": [
+              "SESSION",
+              "DAILY",
+              "NONE"
+            ]
+          },
+          "consumptionRule": {
+            "type": "string",
+            "enum": [
+              "ATTENDED_PLUS_UNEXCUSED",
+              "ALL_SCHEDULED",
+              "ATTENDED_ONLY"
+            ]
+          },
+          "chargeOnEnrollment": {
+            "type": "boolean"
+          },
+          "autoApplyCredit": {
+            "type": "boolean"
+          },
+          "remindersEnabled": {
+            "type": "boolean"
+          },
+          "lateFeeEnabled": {
+            "type": "boolean"
+          },
+          "lateFeeType": {
+            "type": "string",
+            "enum": [
+              "FIXED",
+              "PERCENT"
+            ]
+          },
+          "lateFeeAmount": {
+            "type": "number",
+            "minimum": 0,
+            "description": "Fixed amount, or percentage (0–100) when lateFeeType=PERCENT"
+          },
+          "lateFeeRecurrence": {
+            "type": "string",
+            "enum": [
+              "ONE_TIME",
+              "DAILY",
+              "WEEKLY"
+            ]
+          },
+          "lateFeeMaxTotal": {
+            "type": "number",
+            "nullable": true,
+            "minimum": 0,
+            "description": "Cap on total late fees per invoice; null = uncapped"
+          },
+          "autoSuspendAfterDays": {
+            "type": "number",
+            "nullable": true,
+            "minimum": 1,
+            "description": "Auto-suspend N days past due; null = disabled"
+          },
+          "autoCancelAfterDays": {
+            "type": "number",
+            "nullable": true,
+            "minimum": 1,
+            "description": "Auto-cancel N days past due; null = disabled (must exceed suspend)"
+          }
+        }
+      },
       "ResetPasswordDto": {
         "type": "object",
         "properties": {
@@ -7637,105 +7791,6 @@
         "required": [
           "status"
         ]
-      },
-      "UpdateBillingPolicyDto": {
-        "type": "object",
-        "properties": {
-          "billingMode": {
-            "type": "string",
-            "enum": [
-              "PREPAID",
-              "POSTPAID"
-            ]
-          },
-          "billingDay": {
-            "type": "number",
-            "minimum": 1,
-            "maximum": 28
-          },
-          "dueDay": {
-            "type": "number",
-            "minimum": 1,
-            "maximum": 28
-          },
-          "immediateDueDays": {
-            "type": "number",
-            "minimum": 0,
-            "maximum": 28,
-            "description": "Due offset for immediately-issued invoices (0 = same day)"
-          },
-          "graceDays": {
-            "type": "number",
-            "minimum": 0,
-            "maximum": 60
-          },
-          "prorationMethod": {
-            "type": "string",
-            "enum": [
-              "SESSION",
-              "DAILY",
-              "NONE"
-            ]
-          },
-          "consumptionRule": {
-            "type": "string",
-            "enum": [
-              "ATTENDED_PLUS_UNEXCUSED",
-              "ALL_SCHEDULED",
-              "ATTENDED_ONLY"
-            ]
-          },
-          "chargeOnEnrollment": {
-            "type": "boolean"
-          },
-          "autoApplyCredit": {
-            "type": "boolean"
-          },
-          "remindersEnabled": {
-            "type": "boolean"
-          },
-          "lateFeeEnabled": {
-            "type": "boolean"
-          },
-          "lateFeeType": {
-            "type": "string",
-            "enum": [
-              "FIXED",
-              "PERCENT"
-            ]
-          },
-          "lateFeeAmount": {
-            "type": "number",
-            "minimum": 0,
-            "description": "Fixed amount, or percentage (0–100) when lateFeeType=PERCENT"
-          },
-          "lateFeeRecurrence": {
-            "type": "string",
-            "enum": [
-              "ONE_TIME",
-              "DAILY",
-              "WEEKLY"
-            ]
-          },
-          "lateFeeMaxTotal": {
-            "type": "number",
-            "nullable": true,
-            "minimum": 0,
-            "description": "Cap on total late fees per invoice; null = uncapped"
-          },
-          "autoSuspendAfterDays": {
-            "type": "number",
-            "nullable": true,
-            "minimum": 1,
-            "description": "Auto-suspend N days past due; null = disabled"
-          },
-          "autoCancelAfterDays": {
-            "type": "number",
-            "nullable": true,
-            "minimum": 1,
-            "description": "Auto-cancel N days past due; null = disabled (must exceed suspend)"
-          }
-        }
       },
       "CreateFeePlanDto": {
         "type": "object",

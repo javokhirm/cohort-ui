@@ -216,7 +216,7 @@ const feePlansRoute = createRoute({
 const billingPolicyRoute = createRoute({
 	getParentRoute: () => authedRoute,
 	path: '/billing-policy',
-	beforeLoad: () => requirePermission('billing-policy.manage'),
+	beforeLoad: () => requirePermission('billing-policy.view'),
 	component: BillingPolicyRoute,
 });
 

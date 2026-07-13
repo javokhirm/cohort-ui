@@ -1,12 +1,11 @@
 import { useEffect } from 'react';
-import { useForm, type Control, type FieldPath } from 'react-hook-form';
+import { useForm, useWatch, type Control, type FieldPath } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 
 import {
 	Button,
 	Card,
 	CardContent,
-	CardDescription,
 	CardHeader,
 	CardTitle,
 	Form,
@@ -26,13 +25,14 @@ import { isApiError } from '@repo/api-client';
 import type {
 	BillingCycleAnchor,
 	BillingMode,
-	BillingPolicyResponse,
-} from '../api/billing-policy.queries';
-import { useUpdateBillingPolicy } from '../api/billing-policy.mutations';
+	TenantBillingPolicy,
+} from '@/api/billing-policy/types';
+
+import { useUpdateTenantBillingPolicy } from '../../hooks';
 import {
 	billingPolicySchema,
 	type BillingPolicyFormValues,
-} from '../schemas/billing-policy-form.schema';
+} from '../../schemas/billing-policy-form.schema';
 
 const BILLING_MODE_OPTIONS = [
 	{ value: 'PREPAID', label: 'Prepaid' },
@@ -79,6 +79,11 @@ const LATE_FEE_RECURRENCE_OPTIONS = [
 	{ value: 'DAILY', label: 'Daily' },
 	{ value: 'WEEKLY', label: 'Weekly' },
 ];
+
+const CARD_CLASS = 'gap-0 py-0';
+const CARD_HEADER_CLASS = 'border-b border-border px-5 py-4';
+const CARD_TITLE_CLASS = 'text-sm font-semibold';
+const CARD_CONTENT_CLASS = 'flex flex-col gap-4 px-5 py-5';
 
 type PolicyControl = Control<BillingPolicyFormValues>;
 type PolicyField = FieldPath<BillingPolicyFormValues>;
@@ -183,7 +188,7 @@ function SwitchField({
 	);
 }
 
-function toDefaults(p: BillingPolicyResponse): BillingPolicyFormValues {
+function toDefaults(p: TenantBillingPolicy): BillingPolicyFormValues {
 	return {
 		billingMode: p.billingMode,
 		billingCycleAnchor: p.billingCycleAnchor,
@@ -207,18 +212,36 @@ function toDefaults(p: BillingPolicyResponse): BillingPolicyFormValues {
 	};
 }
 
-export function BillingPolicyForm({ policy }: { policy: BillingPolicyResponse }) {
+/**
+ * The billing-policy editor for one tenant. This is the only place the policy can
+ * be changed — every save is recorded in the platform audit trail with a
+ * before/after diff, and takes effect from the tenant's next billing run.
+ */
+export function BillingPolicyForm({
+	tenantId,
+	policy,
+}: {
+	tenantId: number;
+	policy: TenantBillingPolicy;
+}) {
 	const form = useForm<BillingPolicyFormValues>({
 		resolver: zodResolver(billingPolicySchema),
 		defaultValues: toDefaults(policy),
 	});
 
-	const updatePolicy = useUpdateBillingPolicy();
-	const lateFeeEnabled = form.watch('lateFeeEnabled');
-	const billingMode = form.watch('billingMode');
-	const billingCycleAnchor = form.watch('billingCycleAnchor');
+	const updatePolicy = useUpdateTenantBillingPolicy(tenantId);
+
+	// `useWatch` rather than `form.watch()`: the latter returns a fresh function
+	// the React Compiler cannot memoize safely, and this app lints with zero
+	// warnings. It also scopes re-renders to just these three fields.
+	const control = form.control;
+	const lateFeeEnabled = useWatch({ control, name: 'lateFeeEnabled' });
+	const billingMode = useWatch({ control, name: 'billingMode' });
+	const billingCycleAnchor = useWatch({ control, name: 'billingCycleAnchor' });
 	const isAnniversary = billingCycleAnchor === 'ENROLLMENT';
 
+	// Re-seed when the console switches to another tenant, or the server returns a
+	// policy that differs from what was submitted (this is a merge-upsert).
 	useEffect(() => {
 		form.reset(toDefaults(policy));
 		// eslint-disable-next-line react-hooks/exhaustive-deps
@@ -249,7 +272,8 @@ export function BillingPolicyForm({ policy }: { policy: BillingPolicyResponse })
 			});
 			toast.success('Billing policy saved');
 		} catch (err) {
-			// No error-code → message layer in this repo; surface the API message.
+			// The server re-validates the cross-field rules against the merged
+			// result and is the source of truth — surface its message verbatim.
 			toast.error(isApiError(err) ? err.message : 'Failed to save billing policy');
 		}
 	}
@@ -258,17 +282,17 @@ export function BillingPolicyForm({ policy }: { policy: BillingPolicyResponse })
 		<Form {...form}>
 			<form
 				onSubmit={(e) => void form.handleSubmit(onSubmit)(e)}
-				className="flex flex-col gap-6"
+				className="flex max-w-3xl flex-col gap-6"
 			>
-				<Card>
-					<CardHeader>
-						<CardTitle>Billing basics</CardTitle>
-						<CardDescription>
+				<Card className={CARD_CLASS}>
+					<CardHeader className={CARD_HEADER_CLASS}>
+						<CardTitle className={CARD_TITLE_CLASS}>Billing basics</CardTitle>
+						<p className="text-xs text-muted-foreground">
 							Defaults for invoice generation. Fee plans may override the
 							due-day and proration per plan.
-						</CardDescription>
+						</p>
 					</CardHeader>
-					<CardContent className="flex flex-col gap-4">
+					<CardContent className={CARD_CONTENT_CLASS}>
 						<div className="flex flex-col gap-1.5">
 							<FormSelect
 								control={form.control}
@@ -356,11 +380,11 @@ export function BillingPolicyForm({ policy }: { policy: BillingPolicyResponse })
 					</CardContent>
 				</Card>
 
-				<Card>
-					<CardHeader>
-						<CardTitle>Enrollment</CardTitle>
+				<Card className={CARD_CLASS}>
+					<CardHeader className={CARD_HEADER_CLASS}>
+						<CardTitle className={CARD_TITLE_CLASS}>Enrollment</CardTitle>
 					</CardHeader>
-					<CardContent>
+					<CardContent className={CARD_CONTENT_CLASS}>
 						<SwitchField
 							control={form.control}
 							name="chargeOnEnrollment"
@@ -374,15 +398,15 @@ export function BillingPolicyForm({ policy }: { policy: BillingPolicyResponse })
 					</CardContent>
 				</Card>
 
-				<Card>
-					<CardHeader>
-						<CardTitle>Late fees</CardTitle>
-						<CardDescription>
+				<Card className={CARD_CLASS}>
+					<CardHeader className={CARD_HEADER_CLASS}>
+						<CardTitle className={CARD_TITLE_CLASS}>Late fees</CardTitle>
+						<p className="text-xs text-muted-foreground">
 							Applied automatically by the nightly dunning job once an
 							invoice is overdue.
-						</CardDescription>
+						</p>
 					</CardHeader>
-					<CardContent className="flex flex-col gap-4">
+					<CardContent className={CARD_CONTENT_CLASS}>
 						<SwitchField
 							control={form.control}
 							name="lateFeeEnabled"
@@ -424,16 +448,16 @@ export function BillingPolicyForm({ policy }: { policy: BillingPolicyResponse })
 					</CardContent>
 				</Card>
 
-				<Card>
-					<CardHeader>
-						<CardTitle>Dunning</CardTitle>
-						<CardDescription>
+				<Card className={CARD_CLASS}>
+					<CardHeader className={CARD_HEADER_CLASS}>
+						<CardTitle className={CARD_TITLE_CLASS}>Dunning</CardTitle>
+						<p className="text-xs text-muted-foreground">
 							Runs nightly per tenant: suspends, then cancels, enrollments
 							whose invoices stay unpaid. Auto-cancel days must exceed
 							auto-suspend days.
-						</CardDescription>
+						</p>
 					</CardHeader>
-					<CardContent className="flex flex-col gap-4">
+					<CardContent className={CARD_CONTENT_CLASS}>
 						<div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
 							<NumberField
 								control={form.control}
@@ -464,20 +488,20 @@ export function BillingPolicyForm({ policy }: { policy: BillingPolicyResponse })
 							control={form.control}
 							name="remindersEnabled"
 							label="Payment reminders"
-							description="Fires the Payment Reminder Rules you've configured as invoices approach and pass their due date."
+							description="Fires the Payment Reminder Rules the tenant has configured as invoices approach and pass their due date."
 						/>
 					</CardContent>
 				</Card>
 
-				<Card>
-					<CardHeader>
-						<CardTitle>Advanced</CardTitle>
-						<CardDescription>
+				<Card className={CARD_CLASS}>
+					<CardHeader className={CARD_HEADER_CLASS}>
+						<CardTitle className={CARD_TITLE_CLASS}>Advanced</CardTitle>
+						<p className="text-xs text-muted-foreground">
 							Consumption rule for per-session billing, plus how wallet
 							credit is applied to invoices.
-						</CardDescription>
+						</p>
 					</CardHeader>
-					<CardContent className="flex flex-col gap-4">
+					<CardContent className={CARD_CONTENT_CLASS}>
 						<div className="flex flex-col gap-1.5">
 							<FormSelect
 								control={form.control}

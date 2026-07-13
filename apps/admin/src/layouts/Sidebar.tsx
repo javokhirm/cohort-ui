@@ -178,8 +178,7 @@ const NAV_GROUPS: NavGroupDef[] = [
 				label: 'Billing Policy',
 				Icon: SlidersHorizontal,
 				href: '/billing-policy',
-				badge: 'OWNER',
-				permission: 'billing-policy.manage',
+				permission: 'billing-policy.view',
 			},
 			{
 				id: 'discounts',

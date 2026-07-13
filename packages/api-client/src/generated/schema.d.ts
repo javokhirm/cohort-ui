@@ -346,6 +346,24 @@ export interface paths {
 		patch: operations['TenantMembersController_changeRole'];
 		trace?: never;
 	};
+	'/api/v1/super-admin/tenants/{id}/billing-policy': {
+		parameters: {
+			query?: never;
+			header?: never;
+			path?: never;
+			cookie?: never;
+		};
+		/** A tenant's effective billing policy (its stored row, or the defaults) */
+		get: operations['BillingPolicyController_get'];
+		/** Merge-upsert a tenant's billing policy (only provided fields change; applies from the next billing run) */
+		put: operations['BillingPolicyController_update'];
+		post?: never;
+		delete?: never;
+		options?: never;
+		head?: never;
+		patch?: never;
+		trace?: never;
+	};
 	'/api/v1/super-admin/users': {
 		parameters: {
 			query?: never;
@@ -1205,10 +1223,9 @@ export interface paths {
 			path?: never;
 			cookie?: never;
 		};
-		/** The tenant's effective billing policy */
+		/** The tenant's effective billing policy (read-only) */
 		get: operations['BillingPolicyController_get'];
-		/** Merge-upsert the billing policy (only provided fields change; applies from the next billing run) */
-		put: operations['BillingPolicyController_update'];
+		put?: never;
 		post?: never;
 		delete?: never;
 		options?: never;
@@ -2192,6 +2209,47 @@ export interface components {
 			/** @description Branch to scope the role to; omit/null = all branches */
 			branchId?: number | null;
 		};
+		UpdateTenantBillingPolicyDto: {
+			/** @enum {string} */
+			billingMode?: 'PREPAID' | 'POSTPAID';
+			/**
+			 * @description CALENDAR: one shared calendar month, mid-month joiners prorated. ENROLLMENT: each student rolls on their own join-date anniversary (join Jul 12 → billed Jul 12–Aug 11, then Aug 12–Sep 11), every cycle whole and at full price. PREPAID only; billingDay/dueDay are unread and dueOffsetDays sets the due date. Existing tenants stay on CALENDAR unless they opt in.
+			 * @enum {string}
+			 */
+			billingCycleAnchor?: 'CALENDAR' | 'ENROLLMENT';
+			/** @description CALENDAR anchoring only — the day periodic generation starts */
+			billingDay?: number;
+			/** @description CALENDAR anchoring only — the day of the month invoices fall due */
+			dueDay?: number;
+			/** @description ENROLLMENT anchoring only — days after a cycle starts that its invoice falls due (0 = the cycle’s first day) */
+			dueOffsetDays?: number;
+			/** @description Due offset for immediately-issued invoices (0 = same day) */
+			immediateDueDays?: number;
+			graceDays?: number;
+			/** @enum {string} */
+			prorationMethod?: 'SESSION' | 'DAILY' | 'NONE';
+			/** @enum {string} */
+			consumptionRule?:
+				| 'ATTENDED_PLUS_UNEXCUSED'
+				| 'ALL_SCHEDULED'
+				| 'ATTENDED_ONLY';
+			chargeOnEnrollment?: boolean;
+			autoApplyCredit?: boolean;
+			remindersEnabled?: boolean;
+			lateFeeEnabled?: boolean;
+			/** @enum {string} */
+			lateFeeType?: 'FIXED' | 'PERCENT';
+			/** @description Fixed amount, or percentage (0–100) when lateFeeType=PERCENT */
+			lateFeeAmount?: number;
+			/** @enum {string} */
+			lateFeeRecurrence?: 'ONE_TIME' | 'DAILY' | 'WEEKLY';
+			/** @description Cap on total late fees per invoice; null = uncapped */
+			lateFeeMaxTotal?: number | null;
+			/** @description Auto-suspend N days past due; null = disabled */
+			autoSuspendAfterDays?: number | null;
+			/** @description Auto-cancel N days past due; null = disabled (must exceed suspend) */
+			autoCancelAfterDays?: number | null;
+		};
 		ResetPasswordDto: {
 			newPassword: string;
 		};
@@ -2526,38 +2584,6 @@ export interface components {
 			status: 'ACTIVE' | 'SUSPENDED' | 'DROPPED' | 'COMPLETED' | 'TRANSFERRED';
 			/** @description Required when status = DROPPED */
 			dropReason?: string | null;
-		};
-		UpdateBillingPolicyDto: {
-			/** @enum {string} */
-			billingMode?: 'PREPAID' | 'POSTPAID';
-			billingDay?: number;
-			dueDay?: number;
-			/** @description Due offset for immediately-issued invoices (0 = same day) */
-			immediateDueDays?: number;
-			graceDays?: number;
-			/** @enum {string} */
-			prorationMethod?: 'SESSION' | 'DAILY' | 'NONE';
-			/** @enum {string} */
-			consumptionRule?:
-				| 'ATTENDED_PLUS_UNEXCUSED'
-				| 'ALL_SCHEDULED'
-				| 'ATTENDED_ONLY';
-			chargeOnEnrollment?: boolean;
-			autoApplyCredit?: boolean;
-			remindersEnabled?: boolean;
-			lateFeeEnabled?: boolean;
-			/** @enum {string} */
-			lateFeeType?: 'FIXED' | 'PERCENT';
-			/** @description Fixed amount, or percentage (0–100) when lateFeeType=PERCENT */
-			lateFeeAmount?: number;
-			/** @enum {string} */
-			lateFeeRecurrence?: 'ONE_TIME' | 'DAILY' | 'WEEKLY';
-			/** @description Cap on total late fees per invoice; null = uncapped */
-			lateFeeMaxTotal?: number | null;
-			/** @description Auto-suspend N days past due; null = disabled */
-			autoSuspendAfterDays?: number | null;
-			/** @description Auto-cancel N days past due; null = disabled (must exceed suspend) */
-			autoCancelAfterDays?: number | null;
 		};
 		CreateFeePlanDto: {
 			/** @description Null = applies across branches */
@@ -3432,6 +3458,48 @@ export interface operations {
 			};
 		};
 	};
+	BillingPolicyController_get: {
+		parameters: {
+			query?: never;
+			header?: never;
+			path: {
+				id: number;
+			};
+			cookie?: never;
+		};
+		requestBody?: never;
+		responses: {
+			200: {
+				headers: {
+					[name: string]: unknown;
+				};
+				content?: never;
+			};
+		};
+	};
+	BillingPolicyController_update: {
+		parameters: {
+			query?: never;
+			header?: never;
+			path: {
+				id: number;
+			};
+			cookie?: never;
+		};
+		requestBody: {
+			content: {
+				'application/json': components['schemas']['UpdateTenantBillingPolicyDto'];
+			};
+		};
+		responses: {
+			200: {
+				headers: {
+					[name: string]: unknown;
+				};
+				content?: never;
+			};
+		};
+	};
 	UsersController_list: {
 		parameters: {
 			query?: {
@@ -3713,6 +3781,7 @@ export interface operations {
 					| 'TENANT_REACTIVATED'
 					| 'TENANT_CANCELLED'
 					| 'TENANT_DELETED'
+					| 'TENANT_BILLING_POLICY_UPDATED'
 					| 'PLAN_CREATED'
 					| 'PLAN_UPDATED'
 					| 'SUBSCRIPTION_CHANGED'
@@ -4898,27 +4967,6 @@ export interface operations {
 			cookie?: never;
 		};
 		requestBody?: never;
-		responses: {
-			200: {
-				headers: {
-					[name: string]: unknown;
-				};
-				content?: never;
-			};
-		};
-	};
-	BillingPolicyController_update: {
-		parameters: {
-			query?: never;
-			header?: never;
-			path?: never;
-			cookie?: never;
-		};
-		requestBody: {
-			content: {
-				'application/json': components['schemas']['UpdateBillingPolicyDto'];
-			};
-		};
 		responses: {
 			200: {
 				headers: {

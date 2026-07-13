@@ -9,7 +9,6 @@ import { server } from '@/test/server';
 import { billingPolicyHandlers } from '@/test/handlers';
 
 import { useBillingPolicy } from './billing-policy.queries';
-import { useUpdateBillingPolicy } from './billing-policy.mutations';
 
 function wrapper() {
 	const queryClient = new QueryClient({
@@ -20,6 +19,9 @@ function wrapper() {
 	};
 }
 
+// The policy is read-only on this surface — it is written from the internal
+// platform (`PUT /super-admin/tenants/:id/billing-policy`), so there is no update
+// hook here to test.
 describe('useBillingPolicy', () => {
 	it('fetches the effective tenant policy', async () => {
 		const { result } = renderHook(() => useBillingPolicy(), { wrapper: wrapper() });
@@ -30,76 +32,11 @@ describe('useBillingPolicy', () => {
 		expect(result.current.data?.autoSuspendAfterDays).toBeNull();
 	});
 
-	it('surfaces a 403 for a non-owner', async () => {
+	it('surfaces a 403 when the caller lacks billing-policy.view', async () => {
 		server.use(billingPolicyHandlers.forbidden);
 		const { result } = renderHook(() => useBillingPolicy(), { wrapper: wrapper() });
 
 		await waitFor(() => expect(result.current.isError).toBe(true));
 		expect(isApiError(result.current.error) && result.current.error.status).toBe(403);
-	});
-});
-
-describe('useUpdateBillingPolicy', () => {
-	it('merge-updates the policy and echoes the sent fields', async () => {
-		const { result } = renderHook(() => useUpdateBillingPolicy(), {
-			wrapper: wrapper(),
-		});
-
-		const updated = await result.current.mutateAsync({
-			dueDay: 10,
-			graceDays: 14,
-			chargeOnEnrollment: false,
-		});
-
-		expect(updated.dueDay).toBe(10);
-		expect(updated.graceDays).toBe(14);
-		expect(updated.chargeOnEnrollment).toBe(false);
-		// Untouched fields keep their stored values (merge-upsert).
-		expect(updated.billingDay).toBe(1);
-	});
-
-	it('accepts POSTPAID as a settable billing mode', async () => {
-		const { result } = renderHook(() => useUpdateBillingPolicy(), {
-			wrapper: wrapper(),
-		});
-
-		const updated = await result.current.mutateAsync({ billingMode: 'POSTPAID' });
-
-		expect(updated.billingMode).toBe('POSTPAID');
-	});
-
-	it('rejects a percentage late fee above 100 (422)', async () => {
-		const { result } = renderHook(() => useUpdateBillingPolicy(), {
-			wrapper: wrapper(),
-		});
-
-		const error = await result.current
-			.mutateAsync({
-				lateFeeEnabled: true,
-				lateFeeType: 'PERCENT',
-				lateFeeAmount: 150,
-			})
-			.catch((e: unknown) => e);
-
-		expect(isApiError(error) && error.status).toBe(422);
-		expect(isApiError(error) && error.code).toBe('BILLING_POLICY_INVALID_LATE_FEE');
-	});
-
-	it('rejects auto-cancel days not exceeding auto-suspend days (422)', async () => {
-		const { result } = renderHook(() => useUpdateBillingPolicy(), {
-			wrapper: wrapper(),
-		});
-
-		const error = await result.current
-			.mutateAsync({
-				autoSuspendAfterDays: 14,
-				autoCancelAfterDays: 7,
-			})
-			.catch((e: unknown) => e);
-
-		expect(isApiError(error) && error.status).toBe(422);
-		expect(isApiError(error) && error.code).toBe(
-			'BILLING_POLICY_INVALID_DUNNING_DAYS',
-		);
 	});
 });

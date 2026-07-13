@@ -16,6 +16,7 @@ import {
 } from '@repo/ui';
 
 import { AuditTab } from '@/features/tenants/components/tenantDetails/AuditTab';
+import { BillingPolicyTab } from '@/features/tenants/components/tenantDetails/BillingPolicyTab';
 import { BranchesTab } from '@/features/tenants/components/tenantDetails/BranchesTab';
 import { ChangePlanDialog } from '@/features/tenants/components/tenantDetails/ChangePlanDialog';
 import { DangerZoneTab } from '@/features/tenants/components/tenantDetails/DangerZoneTab';
@@ -120,6 +121,9 @@ export function TenantDetailPage() {
 					<TabsTrigger value="subscription" className={TAB_TRIGGER_CLASS}>
 						Subscription
 					</TabsTrigger>
+					<TabsTrigger value="billing-policy" className={TAB_TRIGGER_CLASS}>
+						Billing policy
+					</TabsTrigger>
 					<TabsTrigger value="branches" className={TAB_TRIGGER_CLASS}>
 						Branches
 					</TabsTrigger>
@@ -154,6 +158,9 @@ export function TenantDetailPage() {
 							subscriptionTierId={tenant.subscriptionTierId}
 							onChangePlan={() => setChangePlanOpen(true)}
 						/>
+					</TabsContent>
+					<TabsContent value="billing-policy">
+						<BillingPolicyTab tenantId={numericId} />
 					</TabsContent>
 					<TabsContent value="branches">
 						<BranchesTab branches={tenant.branches ?? []} />

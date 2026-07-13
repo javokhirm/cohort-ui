@@ -7,7 +7,7 @@ import {
 	LATE_FEE_RECURRENCES,
 	LATE_FEE_TYPES,
 	POLICY_PRORATION_METHODS,
-} from '../api/billing-policy.queries';
+} from '@/api/billing-policy/types';
 
 const dayOfMonth = z
 	.number({ error: 'Required' })
@@ -30,10 +30,13 @@ const dunningDays = z
 	.nullable();
 
 /**
- * Mirrors `UpdateBillingPolicyDto` plus the three server cross-field rules:
+ * Mirrors `UpdateTenantBillingPolicyDto` plus the three server cross-field rules:
  * `BILLING_POLICY_INVALID_LATE_FEE` (percent > 100),
  * `BILLING_POLICY_INVALID_DUNNING_DAYS` (cancel must exceed suspend) and
  * `BILLING_POLICY_ANCHOR_REQUIRES_PREPAID` (ENROLLMENT anchoring is PREPAID-only).
+ *
+ * Client-side validation is a courtesy, not the guarantee — the server re-checks
+ * every rule against the merged result and is the source of truth.
  */
 export const billingPolicySchema = z
 	.object({

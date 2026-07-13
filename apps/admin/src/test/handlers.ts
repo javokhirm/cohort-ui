@@ -490,7 +490,7 @@ export const MOCK_FEE_PLANS: MockFeePlan[] = [
 
 // ─── Billing policy fixture ───────────────────────────────────────────────────
 
-/** One policy per tenant (`GET/PUT /manage/billing-policy`). */
+/** One policy per tenant (`GET /manage/billing-policy` — read-only here). */
 export const MOCK_BILLING_POLICY = {
 	billingMode: 'PREPAID' as const,
 	billingCycleAnchor: 'CALENDAR' as const,
@@ -1635,52 +1635,11 @@ export const handlers = [
 		return ok({ ...feePlan, ...body, updatedAt: '2026-07-04T00:00:00Z' });
 	}),
 
-	// ── Billing policy (one per tenant, owner-only) ────────────────────────────
+	// ── Billing policy (one per tenant, READ-ONLY on this surface) ─────────────
+	// There is deliberately no PUT: the policy is written from the internal
+	// platform (`PUT /super-admin/tenants/:id/billing-policy`). Mocking a write
+	// here would let a test pass against an endpoint that no longer exists.
 	http.get(`${MANAGE}/billing-policy`, () => ok(MOCK_BILLING_POLICY)),
-
-	http.put(`${MANAGE}/billing-policy`, async ({ request }) => {
-		const body = (await request.json()) as Record<string, unknown>;
-		// Mirror the backend cross-field validators.
-		const lateFeeAmount = body['lateFeeAmount'];
-		if (
-			body['lateFeeType'] === 'PERCENT' &&
-			typeof lateFeeAmount === 'number' &&
-			lateFeeAmount > 100
-		) {
-			return fail(
-				422,
-				'BILLING_POLICY_INVALID_LATE_FEE',
-				'A percentage late fee cannot exceed 100%.',
-			);
-		}
-		const suspend = body['autoSuspendAfterDays'];
-		const cancel = body['autoCancelAfterDays'];
-		if (
-			typeof suspend === 'number' &&
-			typeof cancel === 'number' &&
-			cancel <= suspend
-		) {
-			return fail(
-				422,
-				'BILLING_POLICY_INVALID_DUNNING_DAYS',
-				'Auto-cancel days must exceed auto-suspend days.',
-			);
-		}
-		// Validated on the MERGED result server-side, so fall back to the stored
-		// value when the request only sends one side of the pair.
-		const anchor: unknown =
-			body['billingCycleAnchor'] ?? MOCK_BILLING_POLICY.billingCycleAnchor;
-		const mode: unknown = body['billingMode'] ?? MOCK_BILLING_POLICY.billingMode;
-		if (anchor === 'ENROLLMENT' && mode !== 'PREPAID') {
-			return fail(
-				422,
-				'BILLING_POLICY_ANCHOR_REQUIRES_PREPAID',
-				'Enrollment-anniversary billing is only available in PREPAID mode.',
-			);
-		}
-		// Merge-upsert — only the sent fields change.
-		return ok({ ...MOCK_BILLING_POLICY, ...body });
-	}),
 
 	// ── Invoices — manual generate-monthly run ─────────────────────────────────
 	http.post(`${MANAGE}/invoices/generate-monthly`, async ({ request }) => {
@@ -2206,13 +2165,6 @@ export const billingPolicyHandlers = {
 	),
 	serverError: http.get(`${MANAGE}/billing-policy`, () =>
 		fail(500, 'INTERNAL_ERROR', 'Unexpected server error.'),
-	),
-	lateFeeInvalid: http.put(`${MANAGE}/billing-policy`, () =>
-		fail(
-			422,
-			'BILLING_POLICY_INVALID_LATE_FEE',
-			'A percentage late fee cannot exceed 100%.',
-		),
 	),
 };
 
