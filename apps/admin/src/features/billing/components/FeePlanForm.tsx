@@ -1,17 +1,12 @@
 import { useEffect, useState } from 'react';
-import { useForm, type Control, type FieldPath, type FieldValues } from 'react-hook-form';
+import { useForm, useWatch } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 
 import {
 	Button,
-	Checkbox,
 	FieldGroup,
 	Form,
-	FormField,
 	FormInput,
-	FormItem,
-	FormLabel,
-	FormMessage,
 	FormSelect,
 	Spinner,
 	toast,
@@ -35,7 +30,6 @@ import { useCreateFeePlan, useUpdateFeePlan } from '../api/fee-plans.mutations';
 import {
 	FEE_PLAN_AMOUNT_LABELS,
 	FEE_PLAN_BILLING_CYCLE_OPTIONS,
-	FEE_PLAN_PRORATION_OPTIONS,
 	FEE_PLAN_STATUS_OPTIONS,
 } from '../lib/fee-plan-options';
 import { FeePlanGroupsSection } from './FeePlanGroupsSection';
@@ -57,73 +51,6 @@ type FeePlanFormProps = CreateProps | EditProps;
 
 function Section({ children }: { children: React.ReactNode }) {
 	return <div className="flex flex-col gap-4 rounded-xl bg-white p-4">{children}</div>;
-}
-
-/**
- * Checkbox bound to a boolean form field — gates whether a per-plan override is
- * sent (checked) or the value is left `null` to inherit the tenant billing
- * policy default (unchecked). Generic so both forms can share it.
- */
-function OverrideToggle<T extends FieldValues>({
-	control,
-	name,
-	label,
-}: {
-	control: Control<T>;
-	name: FieldPath<T>;
-	label: string;
-}) {
-	return (
-		<FormField
-			control={control}
-			name={name}
-			render={({ field }) => (
-				<label className="flex cursor-pointer items-center gap-2 text-sm font-medium">
-					<Checkbox
-						checked={Boolean(field.value)}
-						onCheckedChange={(v) => field.onChange(v === true)}
-					/>
-					{label}
-				</label>
-			)}
-		/>
-	);
-}
-
-/**
- * Segmented proration control (mid-month joins). Generic over the form values so
- * both the create and edit forms can share it — both carry a `prorationMethod`.
- */
-function ProrationField<T extends FieldValues>({ control }: { control: Control<T> }) {
-	return (
-		<FormField
-			control={control}
-			name={'prorationMethod' as FieldPath<T>}
-			render={({ field }) => (
-				<FormItem>
-					<FormLabel>Proration (mid-month joins)</FormLabel>
-					<div className="grid grid-cols-3 gap-2">
-						{FEE_PLAN_PRORATION_OPTIONS.map((o) => (
-							<Button
-								key={o.value}
-								type="button"
-								variant={field.value === o.value ? 'default' : 'outline'}
-								onClick={() => field.onChange(o.value)}
-							>
-								{o.label}
-							</Button>
-						))}
-					</div>
-					<p className="text-xs text-muted-foreground">
-						Applies to the first partial month only — later months bill in
-						full. Session-based falls back to daily proration when a group has
-						no schedule.
-					</p>
-					<FormMessage />
-				</FormItem>
-			)}
-		/>
-	);
 }
 
 /** Branch options with a leading "shared across all branches" choice. */
@@ -148,34 +75,19 @@ function CreateFeePlanForm({
 			name: '',
 			branch: SHARED_BRANCH_VALUE,
 			billingCycle: 'MONTHLY',
-			overrideDueDay: false,
-			dueDay: 1,
-			overrideProration: false,
-			prorationMethod: 'SESSION',
 		},
 	});
 
 	const branchOptions = useBranchOptions();
 	const createFeePlan = useCreateFeePlan();
 
-	const billingCycle = form.watch('billingCycle');
-	const overrideDueDay = form.watch('overrideDueDay');
-	const overrideProration = form.watch('overrideProration');
-	const isPerSession = billingCycle === 'PER_SESSION';
+	// `useWatch` over `form.watch()`: the latter hands back a fresh function the
+	// React Compiler cannot memoize safely.
+	const billingCycle = useWatch({ control: form.control, name: 'billingCycle' });
 
 	useEffect(() => {
 		onPendingChange(createFeePlan.isPending);
 	}, [createFeePlan.isPending, onPendingChange]);
-
-	// Per-session plans aren't prorated and don't take a due-day override — drop
-	// any stale override state so it can't be hidden-but-still-submitted.
-	useEffect(() => {
-		if (isPerSession) {
-			form.setValue('overrideDueDay', false);
-			form.setValue('overrideProration', false);
-		}
-		// eslint-disable-next-line react-hooks/exhaustive-deps
-	}, [isPerSession]);
 
 	async function onSubmit(values: CreateFeePlanFormValues) {
 		await createFeePlan.mutateAsync({
@@ -183,8 +95,6 @@ function CreateFeePlanForm({
 			name: values.name.trim(),
 			amount: values.amount,
 			billingCycle: values.billingCycle,
-			dueDay: values.overrideDueDay ? values.dueDay : null,
-			prorationMethod: values.overrideProration ? values.prorationMethod : null,
 		});
 		toast.success('Fee plan added');
 		onSuccess();
@@ -240,62 +150,6 @@ function CreateFeePlanForm({
 								options={FEE_PLAN_BILLING_CYCLE_OPTIONS}
 							/>
 						</div>
-						{isPerSession ? (
-							<p className="rounded-lg border border-border bg-muted/40 p-3 text-xs text-muted-foreground">
-								Per-session plans aren&apos;t prorated and don&apos;t
-								support a custom due day — each invoice is due on the
-								tenant billing policy&apos;s due day, in the month after
-								the sessions are consumed.
-							</p>
-						) : (
-							<>
-								<div className="flex flex-col gap-2">
-									<OverrideToggle
-										control={form.control}
-										name="overrideDueDay"
-										label="Override tenant default due day"
-									/>
-									{overrideDueDay ? (
-										<FormInput
-											control={form.control}
-											name="dueDay"
-											label="Due day (1–28)"
-											type="number"
-											min={1}
-											max={28}
-											onChange={(e) =>
-												form.setValue(
-													'dueDay',
-													e.target.value === ''
-														? (undefined as unknown as number)
-														: Number(e.target.value),
-													{ shouldValidate: true },
-												)
-											}
-										/>
-									) : (
-										<p className="text-xs text-muted-foreground">
-											Inherits the tenant billing policy due-day.
-										</p>
-									)}
-								</div>
-								<div className="flex flex-col gap-2">
-									<OverrideToggle
-										control={form.control}
-										name="overrideProration"
-										label="Override tenant default proration"
-									/>
-									{overrideProration ? (
-										<ProrationField control={form.control} />
-									) : (
-										<p className="text-xs text-muted-foreground">
-											Inherits the tenant billing policy proration
-											method.
-										</p>
-									)}
-								</div>
-							</>
-						)}
 					</FieldGroup>
 				</Section>
 			</form>
@@ -317,10 +171,6 @@ function EditFeePlanForm({
 		branch: branchToForm(p.branchId),
 		amount: p.amount,
 		billingCycle: p.billingCycle,
-		overrideDueDay: p.dueDay != null,
-		dueDay: p.dueDay ?? 1,
-		overrideProration: p.prorationMethod != null,
-		prorationMethod: p.prorationMethod ?? 'SESSION',
 		status: p.isActive ? 'active' : 'inactive',
 	});
 
@@ -337,24 +187,13 @@ function EditFeePlanForm({
 	const branchOptions = useBranchOptions();
 	const updateFeePlan = useUpdateFeePlan();
 
-	const billingCycle = form.watch('billingCycle');
-	const overrideDueDay = form.watch('overrideDueDay');
-	const overrideProration = form.watch('overrideProration');
-	const isPerSession = billingCycle === 'PER_SESSION';
+	// `useWatch` over `form.watch()`: the latter hands back a fresh function the
+	// React Compiler cannot memoize safely.
+	const billingCycle = useWatch({ control: form.control, name: 'billingCycle' });
 
 	useEffect(() => {
 		onPendingChange(updateFeePlan.isPending);
 	}, [updateFeePlan.isPending, onPendingChange]);
-
-	// Per-session plans aren't prorated and don't take a due-day override — drop
-	// any stale override state so it can't be hidden-but-still-submitted.
-	useEffect(() => {
-		if (isPerSession) {
-			form.setValue('overrideDueDay', false);
-			form.setValue('overrideProration', false);
-		}
-		// eslint-disable-next-line react-hooks/exhaustive-deps
-	}, [isPerSession]);
 
 	async function onSubmit(values: EditFeePlanFormValues) {
 		try {
@@ -364,8 +203,6 @@ function EditFeePlanForm({
 				name: values.name.trim(),
 				amount: values.amount,
 				billingCycle: values.billingCycle,
-				dueDay: values.overrideDueDay ? values.dueDay : null,
-				prorationMethod: values.overrideProration ? values.prorationMethod : null,
 				isActive: values.status === 'active',
 			});
 		} catch (err) {
@@ -431,62 +268,6 @@ function EditFeePlanForm({
 								options={FEE_PLAN_BILLING_CYCLE_OPTIONS}
 							/>
 						</div>
-						{isPerSession ? (
-							<p className="rounded-lg border border-border bg-muted/40 p-3 text-xs text-muted-foreground">
-								Per-session plans aren&apos;t prorated and don&apos;t
-								support a custom due day — each invoice is due on the
-								tenant billing policy&apos;s due day, in the month after
-								the sessions are consumed.
-							</p>
-						) : (
-							<>
-								<div className="flex flex-col gap-2">
-									<OverrideToggle
-										control={form.control}
-										name="overrideDueDay"
-										label="Override tenant default due day"
-									/>
-									{overrideDueDay ? (
-										<FormInput
-											control={form.control}
-											name="dueDay"
-											label="Due day (1–28)"
-											type="number"
-											min={1}
-											max={28}
-											onChange={(e) =>
-												form.setValue(
-													'dueDay',
-													e.target.value === ''
-														? (undefined as unknown as number)
-														: Number(e.target.value),
-													{ shouldValidate: true },
-												)
-											}
-										/>
-									) : (
-										<p className="text-xs text-muted-foreground">
-											Inherits the tenant billing policy due-day.
-										</p>
-									)}
-								</div>
-								<div className="flex flex-col gap-2">
-									<OverrideToggle
-										control={form.control}
-										name="overrideProration"
-										label="Override tenant default proration"
-									/>
-									{overrideProration ? (
-										<ProrationField control={form.control} />
-									) : (
-										<p className="text-xs text-muted-foreground">
-											Inherits the tenant billing policy proration
-											method.
-										</p>
-									)}
-								</div>
-							</>
-						)}
 						<FormSelect
 							control={form.control}
 							name="status"

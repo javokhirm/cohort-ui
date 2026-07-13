@@ -83,8 +83,6 @@ describe('useCreateFeePlan', () => {
 			name: 'SAT Prep — Monthly',
 			amount: 3_600_000,
 			billingCycle: 'MONTHLY',
-			dueDay: 5,
-			prorationMethod: 'DAILY',
 		});
 
 		expect(created.id).toBe(99);
@@ -95,20 +93,20 @@ describe('useCreateFeePlan', () => {
 		expect(created.isActive).toBe(true);
 	});
 
-	it('creates a plan that inherits the tenant policy (null overrides)', async () => {
+	it('carries no billing terms — those come from the tenant policy', async () => {
 		const { result } = renderHook(() => useCreateFeePlan(), { wrapper: wrapper() });
 
 		const created = await result.current.mutateAsync({
 			branchId: null,
-			name: 'Inheriting plan',
+			name: 'Policy-governed plan',
 			amount: 500_000,
 			billingCycle: 'MONTHLY',
-			dueDay: null,
-			prorationMethod: null,
 		});
 
-		expect(created.dueDay).toBeNull();
-		expect(created.prorationMethod).toBeNull();
+		// A plan once carried nullable dueDay/prorationMethod overrides of the
+		// billing policy. They are gone: a plan says only WHAT to charge.
+		expect(created).not.toHaveProperty('dueDay');
+		expect(created).not.toHaveProperty('prorationMethod');
 	});
 });
 
@@ -132,16 +130,11 @@ describe('useUpdateFeePlan', () => {
 		).rejects.toMatchObject({ code: 'FEE_PLAN_IN_USE' });
 	});
 
-	it('updates the amount and clears the due-day override', async () => {
+	it('updates the amount', async () => {
 		const { result } = renderHook(() => useUpdateFeePlan(), { wrapper: wrapper() });
 
-		const updated = await result.current.mutateAsync({
-			id: 2,
-			amount: 700_000,
-			dueDay: null,
-		});
+		const updated = await result.current.mutateAsync({ id: 2, amount: 700_000 });
 
 		expect(updated.amount).toBe(700_000);
-		expect(updated.dueDay).toBeNull();
 	});
 });

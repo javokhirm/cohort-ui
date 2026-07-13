@@ -25,8 +25,6 @@ const ROWS: FeePlanResponse[] = [
 		amount: 1_300_000,
 		currency: 'UZS',
 		billingCycle: 'MONTHLY',
-		prorationMethod: 'SESSION',
-		dueDay: 1,
 		isActive: true,
 		createdAt: '2025-01-10T00:00:00Z',
 		updatedAt: '2025-01-10T00:00:00Z',
@@ -39,9 +37,6 @@ const ROWS: FeePlanResponse[] = [
 		amount: 120_000,
 		currency: 'UZS',
 		billingCycle: 'PER_SESSION',
-		// Inherits the tenant billing policy (null overrides).
-		prorationMethod: null,
-		dueDay: null,
 		isActive: false,
 		createdAt: '2025-01-13T00:00:00Z',
 		updatedAt: '2025-01-13T00:00:00Z',
@@ -59,14 +54,20 @@ describe('FeePlanTable', () => {
 		expect(screen.getByText('Active')).toBeInTheDocument();
 	});
 
-	it('shows "Not in use" for a plan no group bills on, and "Inherited" for null overrides', () => {
+	it('shows "Not in use" for a plan no group bills on', () => {
 		renderTable(<FeePlanTable feePlans={ROWS} />);
 
 		expect(screen.getByText('Not in use')).toBeInTheDocument();
 		expect(screen.getByText('Per session')).toBeInTheDocument();
 		expect(screen.getByText('Inactive')).toBeInTheDocument();
-		// Null due-day and proration both render as "Inherited".
-		expect(screen.getAllByText('Inherited')).toHaveLength(2);
+	});
+
+	it('has no proration or due-day column — a plan cannot override the policy', () => {
+		renderTable(<FeePlanTable feePlans={ROWS} />);
+
+		expect(screen.queryByText('Proration')).not.toBeInTheDocument();
+		expect(screen.queryByText('Due')).not.toBeInTheDocument();
+		expect(screen.queryByText('Inherited')).not.toBeInTheDocument();
 	});
 
 	it('singularises a lone group', () => {

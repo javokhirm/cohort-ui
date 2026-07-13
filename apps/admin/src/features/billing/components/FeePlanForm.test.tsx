@@ -23,8 +23,6 @@ const MONTHLY_PLAN: FeePlanResponse = {
 	amount: 1_300_000,
 	currency: 'UZS',
 	billingCycle: 'MONTHLY',
-	prorationMethod: 'SESSION',
-	dueDay: 1,
 	isActive: true,
 	createdAt: '2026-01-01T00:00:00Z',
 	updatedAt: '2026-01-01T00:00:00Z',
@@ -38,7 +36,7 @@ const PER_SESSION_PLAN: FeePlanResponse = {
 };
 
 describe('FeePlanForm (edit)', () => {
-	it('labels the amount field for a monthly plan and shows the override controls', () => {
+	it('labels the amount field for a monthly plan', () => {
 		renderForm(
 			<FeePlanForm
 				mode="edit"
@@ -49,11 +47,9 @@ describe('FeePlanForm (edit)', () => {
 		);
 
 		expect(screen.getByLabelText('Amount (UZS) *')).toBeInTheDocument();
-		expect(screen.getByText('Override tenant default due day')).toBeInTheDocument();
-		expect(screen.getByText('Override tenant default proration')).toBeInTheDocument();
 	});
 
-	it('labels the amount field as a per-session price and hides proration/due-day overrides', () => {
+	it('labels the amount field as a per-session price', () => {
 		renderForm(
 			<FeePlanForm
 				mode="edit"
@@ -64,13 +60,27 @@ describe('FeePlanForm (edit)', () => {
 		);
 
 		expect(screen.getByLabelText('Price per session (UZS) *')).toBeInTheDocument();
+	});
+
+	it('offers no way to override the billing policy, and says where the terms come from', () => {
+		// The plan once carried per-plan due-day and proration overrides. They are
+		// gone — the policy decides for every plan — so the form must expose no
+		// control that implies otherwise.
+		renderForm(
+			<FeePlanForm
+				mode="edit"
+				open
+				feePlan={MONTHLY_PLAN}
+				onOpenChange={() => {}}
+			/>,
+		);
+
+		expect(screen.queryByText(/override/i)).not.toBeInTheDocument();
+		expect(screen.queryByLabelText(/due day/i)).not.toBeInTheDocument();
 		expect(
-			screen.queryByText('Override tenant default due day'),
+			screen.queryByText(/proration \(mid-month joins\)/i),
 		).not.toBeInTheDocument();
-		expect(
-			screen.queryByText('Override tenant default proration'),
-		).not.toBeInTheDocument();
-		expect(screen.getByText(/aren.t prorated/i)).toBeInTheDocument();
+		expect(screen.getByText(/cannot be changed per plan/i)).toBeInTheDocument();
 	});
 
 	it('lists the groups billing on the plan, and offers no course picker', async () => {

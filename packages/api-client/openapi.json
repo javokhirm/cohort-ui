@@ -6853,7 +6853,7 @@
               "CALENDAR",
               "ENROLLMENT"
             ],
-            "description": "CALENDAR: one shared calendar month, mid-month joiners prorated. ENROLLMENT: each student rolls on their own join-date anniversary (join Jul 12 → billed Jul 12–Aug 11, then Aug 12–Sep 11), every cycle whole and at full price. PREPAID only; billingDay/dueDay are unread and dueOffsetDays sets the due date. Existing tenants stay on CALENDAR unless they opt in."
+            "description": "CALENDAR: one shared calendar month, mid-month joiners prorated. ENROLLMENT: each student rolls on their own join-date anniversary (join Jul 12 → billed Jul 12–Aug 11, then Aug 12–Sep 11), every cycle whole and at full price. PREPAID only; billingDay/dueDay are unread and dueOffsetDays sets the due date. ENROLLMENT is the platform default; a tenant opts into CALENDAR."
           },
           "billingDay": {
             "type": "number",
@@ -7818,23 +7818,6 @@
               "MONTHLY",
               "PER_SESSION"
             ]
-          },
-          "prorationMethod": {
-            "type": "string",
-            "enum": [
-              "SESSION",
-              "DAILY",
-              "NONE"
-            ],
-            "nullable": true,
-            "description": "Override of the tenant billing policy; omit/null to inherit"
-          },
-          "dueDay": {
-            "type": "number",
-            "minimum": 1,
-            "maximum": 28,
-            "nullable": true,
-            "description": "Due-day override of the tenant billing policy; omit/null to inherit"
           }
         },
         "required": [
@@ -7865,23 +7848,6 @@
               "MONTHLY",
               "PER_SESSION"
             ]
-          },
-          "prorationMethod": {
-            "type": "string",
-            "enum": [
-              "SESSION",
-              "DAILY",
-              "NONE"
-            ],
-            "nullable": true,
-            "description": "Override of the tenant billing policy; null clears the override"
-          },
-          "dueDay": {
-            "type": "number",
-            "minimum": 1,
-            "maximum": 28,
-            "nullable": true,
-            "description": "Due-day override of the tenant billing policy; null clears it"
           },
           "isActive": {
             "type": "boolean"

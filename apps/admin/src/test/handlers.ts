@@ -410,6 +410,10 @@ export const MOCK_STUDENTS = [
 
 // ─── Fee plan fixtures ────────────────────────────────────────────────────────
 
+/**
+ * A plan says only WHAT to charge. Due day and proration come from the tenant
+ * billing policy (§3.12a) and are not per-plan fields — the columns were dropped.
+ */
 interface MockFeePlan {
 	id: number;
 	branchId: number | null;
@@ -419,10 +423,6 @@ interface MockFeePlan {
 	amount: number;
 	currency: string;
 	billingCycle: 'MONTHLY' | 'PER_SESSION';
-	/** `null` inherits the tenant billing-policy default. */
-	prorationMethod: 'SESSION' | 'DAILY' | 'NONE' | null;
-	/** `null` inherits the tenant billing-policy due-day. */
-	dueDay: number | null;
 	isActive: boolean;
 	createdAt: string;
 	updatedAt: string;
@@ -437,8 +437,6 @@ export const MOCK_FEE_PLANS: MockFeePlan[] = [
 		amount: 1_300_000,
 		currency: 'UZS',
 		billingCycle: 'MONTHLY',
-		prorationMethod: 'SESSION',
-		dueDay: 1,
 		isActive: true,
 		createdAt: '2025-01-10T00:00:00Z',
 		updatedAt: '2025-01-10T00:00:00Z',
@@ -451,11 +449,9 @@ export const MOCK_FEE_PLANS: MockFeePlan[] = [
 		amount: 650_000,
 		currency: 'UZS',
 		billingCycle: 'MONTHLY',
-		dueDay: 1,
 		isActive: true,
 		createdAt: '2025-01-11T00:00:00Z',
 		updatedAt: '2025-01-11T00:00:00Z',
-		prorationMethod: 'SESSION',
 	},
 	{
 		id: 3,
@@ -465,12 +461,9 @@ export const MOCK_FEE_PLANS: MockFeePlan[] = [
 		amount: 50_000,
 		currency: 'UZS',
 		billingCycle: 'PER_SESSION',
-		// Inherits the tenant billing-policy defaults (null override).
-		dueDay: null,
 		isActive: true,
 		createdAt: '2025-01-12T00:00:00Z',
 		updatedAt: '2025-01-12T00:00:00Z',
-		prorationMethod: null,
 	},
 	{
 		id: 4,
@@ -480,11 +473,9 @@ export const MOCK_FEE_PLANS: MockFeePlan[] = [
 		amount: 120_000,
 		currency: 'UZS',
 		billingCycle: 'PER_SESSION',
-		dueDay: 1,
 		isActive: false,
 		createdAt: '2025-01-13T00:00:00Z',
 		updatedAt: '2025-01-13T00:00:00Z',
-		prorationMethod: 'NONE',
 	},
 ];
 
@@ -1608,8 +1599,9 @@ export const handlers = [
 					amount: body['amount'],
 					currency: body['currency'] ?? 'UZS',
 					billingCycle: body['billingCycle'],
-					prorationMethod: body['prorationMethod'] ?? null,
-					dueDay: body['dueDay'] ?? null,
+					// Deliberately does NOT echo dueDay/prorationMethod: the server's
+					// DTO whitelist drops them, so a stale client cannot see its
+					// override reflected back and think it took effect.
 					isActive: true,
 					createdAt: '2026-07-03T00:00:00Z',
 					updatedAt: '2026-07-03T00:00:00Z',

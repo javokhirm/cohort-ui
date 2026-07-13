@@ -1,7 +1,4 @@
-import type {
-	FeePlanBillingCycle,
-	FeePlanProrationMethod,
-} from '../api/fee-plans.queries';
+import type { FeePlanBillingCycle } from '../api/fee-plans.queries';
 
 /** Billing cycle dropdown options for the fee plan form. */
 export const FEE_PLAN_BILLING_CYCLE_OPTIONS: {
@@ -16,23 +13,6 @@ export const FEE_PLAN_BILLING_CYCLE_OPTIONS: {
 export const FEE_PLAN_AMOUNT_LABELS: Record<FeePlanBillingCycle, string> = {
 	MONTHLY: 'Amount (UZS) *',
 	PER_SESSION: 'Price per session (UZS) *',
-};
-
-/** Proration control options for the fee plan form (segmented, mid-month joins). */
-export const FEE_PLAN_PRORATION_OPTIONS: {
-	value: FeePlanProrationMethod;
-	label: string;
-}[] = [
-	{ value: 'SESSION', label: 'Session-based' },
-	{ value: 'DAILY', label: 'Daily' },
-	{ value: 'NONE', label: 'None' },
-];
-
-/** Short label per proration method for read-only display (list column). */
-export const FEE_PLAN_PRORATION_LABELS: Record<FeePlanProrationMethod, string> = {
-	SESSION: 'Session-based',
-	DAILY: 'Daily',
-	NONE: 'None',
 };
 
 /** Status dropdown options for the edit form (`isActive` retire/restore). */

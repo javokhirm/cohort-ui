@@ -22,14 +22,10 @@ export const FEE_PLAN_BILLING_CYCLES = ['MONTHLY', 'PER_SESSION'] as const;
 export type FeePlanBillingCycle = (typeof FEE_PLAN_BILLING_CYCLES)[number];
 
 /**
- * How a student's **first, partial** invoice is prorated when they enroll
- * mid-cycle (api-reference.md §3.12). `SESSION` charges for the classes
- * remaining from the join date (falling back to `DAILY` when the group has no
- * schedule), `DAILY` uses calendar days, `NONE` always charges in full.
+ * A fee plan says only **what** to charge. When and how it bills — due day,
+ * proration, late fees, grace days — comes from the tenant billing policy
+ * (api-reference.md §3.12a) and a plan cannot override any of it.
  */
-export const FEE_PLAN_PRORATION_METHODS = ['SESSION', 'DAILY', 'NONE'] as const;
-export type FeePlanProrationMethod = (typeof FEE_PLAN_PRORATION_METHODS)[number];
-
 export interface FeePlanResponse {
 	id: number;
 	/** Null = applies across all branches. */
@@ -43,10 +39,6 @@ export interface FeePlanResponse {
 	amount: number;
 	currency: string;
 	billingCycle: FeePlanBillingCycle;
-	/** Per-plan override; `null` inherits the tenant billing policy default. */
-	prorationMethod: FeePlanProrationMethod | null;
-	/** Per-plan override; `null` inherits the tenant billing policy due-day. */
-	dueDay: number | null;
 	isActive: boolean;
 	createdAt: string;
 	updatedAt: string;

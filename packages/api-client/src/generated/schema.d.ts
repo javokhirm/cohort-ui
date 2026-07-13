@@ -2213,7 +2213,7 @@ export interface components {
 			/** @enum {string} */
 			billingMode?: 'PREPAID' | 'POSTPAID';
 			/**
-			 * @description CALENDAR: one shared calendar month, mid-month joiners prorated. ENROLLMENT: each student rolls on their own join-date anniversary (join Jul 12 → billed Jul 12–Aug 11, then Aug 12–Sep 11), every cycle whole and at full price. PREPAID only; billingDay/dueDay are unread and dueOffsetDays sets the due date. Existing tenants stay on CALENDAR unless they opt in.
+			 * @description CALENDAR: one shared calendar month, mid-month joiners prorated. ENROLLMENT: each student rolls on their own join-date anniversary (join Jul 12 → billed Jul 12–Aug 11, then Aug 12–Sep 11), every cycle whole and at full price. PREPAID only; billingDay/dueDay are unread and dueOffsetDays sets the due date. ENROLLMENT is the platform default; a tenant opts into CALENDAR.
 			 * @enum {string}
 			 */
 			billingCycleAnchor?: 'CALENDAR' | 'ENROLLMENT';
@@ -2596,13 +2596,6 @@ export interface components {
 			currency: string;
 			/** @enum {string} */
 			billingCycle: 'MONTHLY' | 'PER_SESSION';
-			/**
-			 * @description Override of the tenant billing policy; omit/null to inherit
-			 * @enum {string|null}
-			 */
-			prorationMethod?: 'SESSION' | 'DAILY' | 'NONE' | null;
-			/** @description Due-day override of the tenant billing policy; omit/null to inherit */
-			dueDay?: number | null;
 		};
 		UpdateFeePlanDto: {
 			branchId?: number | null;
@@ -2611,13 +2604,6 @@ export interface components {
 			currency?: string;
 			/** @enum {string} */
 			billingCycle?: 'MONTHLY' | 'PER_SESSION';
-			/**
-			 * @description Override of the tenant billing policy; null clears the override
-			 * @enum {string|null}
-			 */
-			prorationMethod?: 'SESSION' | 'DAILY' | 'NONE' | null;
-			/** @description Due-day override of the tenant billing policy; null clears it */
-			dueDay?: number | null;
 			isActive?: boolean;
 		};
 		InvoiceLineItemInputDto: {
