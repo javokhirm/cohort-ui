@@ -346,6 +346,92 @@ export interface paths {
 		patch: operations['TenantMembersController_changeRole'];
 		trace?: never;
 	};
+	'/api/v1/super-admin/tenants/{tenantId}/student-imports': {
+		parameters: {
+			query?: never;
+			header?: never;
+			path?: never;
+			cookie?: never;
+		};
+		/** List a tenant's recent import sessions (newest first) */
+		get: operations['StudentImportsController_list'];
+		put?: never;
+		/** Upload a student CSV: parse and validate it (writes nothing yet) */
+		post: operations['StudentImportsController_upload'];
+		delete?: never;
+		options?: never;
+		head?: never;
+		patch?: never;
+		trace?: never;
+	};
+	'/api/v1/super-admin/tenants/{tenantId}/student-imports/{sessionId}': {
+		parameters: {
+			query?: never;
+			header?: never;
+			path?: never;
+			cookie?: never;
+		};
+		/** Import session detail — status and counters (the progress poll target) */
+		get: operations['StudentImportsController_findOne'];
+		put?: never;
+		post?: never;
+		delete?: never;
+		options?: never;
+		head?: never;
+		patch?: never;
+		trace?: never;
+	};
+	'/api/v1/super-admin/tenants/{tenantId}/student-imports/{sessionId}/rows': {
+		parameters: {
+			query?: never;
+			header?: never;
+			path?: never;
+			cookie?: never;
+		};
+		/** Paginated row report: each row, its errors/warnings, and its outcome */
+		get: operations['StudentImportsController_rows'];
+		put?: never;
+		post?: never;
+		delete?: never;
+		options?: never;
+		head?: never;
+		patch?: never;
+		trace?: never;
+	};
+	'/api/v1/super-admin/tenants/{tenantId}/student-imports/{sessionId}/commit': {
+		parameters: {
+			query?: never;
+			header?: never;
+			path?: never;
+			cookie?: never;
+		};
+		get?: never;
+		put?: never;
+		/** Commit the session — queue the background job that applies the rows */
+		post: operations['StudentImportsController_commit'];
+		delete?: never;
+		options?: never;
+		head?: never;
+		patch?: never;
+		trace?: never;
+	};
+	'/api/v1/super-admin/tenants/{tenantId}/student-imports/{sessionId}/errors.csv': {
+		parameters: {
+			query?: never;
+			header?: never;
+			path?: never;
+			cookie?: never;
+		};
+		/** Download the invalid and failed rows as a CSV */
+		get: operations['StudentImportsController_errorsCsv'];
+		put?: never;
+		post?: never;
+		delete?: never;
+		options?: never;
+		head?: never;
+		patch?: never;
+		trace?: never;
+	};
 	'/api/v1/super-admin/tenants/{id}/billing-policy': {
 		parameters: {
 			query?: never;
@@ -2209,6 +2295,13 @@ export interface components {
 			/** @description Branch to scope the role to; omit/null = all branches */
 			branchId?: number | null;
 		};
+		CommitStudentImportDto: {
+			/**
+			 * @description Apply the valid rows and leave the invalid ones behind. Without it, a session that still holds invalid rows is refused (409 IMPORT_HAS_INVALID_ROWS) — importing a partial file has to be a deliberate choice.
+			 * @default false
+			 */
+			skipInvalidRows: boolean;
+		};
 		UpdateTenantBillingPolicyDto: {
 			/** @enum {string} */
 			billingMode?: 'PREPAID' | 'POSTPAID';
@@ -3444,6 +3537,142 @@ export interface operations {
 			};
 		};
 	};
+	StudentImportsController_list: {
+		parameters: {
+			query?: never;
+			header?: never;
+			path: {
+				tenantId: number;
+			};
+			cookie?: never;
+		};
+		requestBody?: never;
+		responses: {
+			200: {
+				headers: {
+					[name: string]: unknown;
+				};
+				content?: never;
+			};
+		};
+	};
+	StudentImportsController_upload: {
+		parameters: {
+			query?: never;
+			header?: never;
+			path: {
+				tenantId: number;
+			};
+			cookie?: never;
+		};
+		requestBody: {
+			content: {
+				'multipart/form-data': {
+					/** Format: binary */
+					file: string;
+				};
+			};
+		};
+		responses: {
+			201: {
+				headers: {
+					[name: string]: unknown;
+				};
+				content?: never;
+			};
+		};
+	};
+	StudentImportsController_findOne: {
+		parameters: {
+			query?: never;
+			header?: never;
+			path: {
+				tenantId: number;
+				sessionId: string;
+			};
+			cookie?: never;
+		};
+		requestBody?: never;
+		responses: {
+			200: {
+				headers: {
+					[name: string]: unknown;
+				};
+				content?: never;
+			};
+		};
+	};
+	StudentImportsController_rows: {
+		parameters: {
+			query?: {
+				page?: number;
+				limit?: number;
+				/** @description Show only rows that passed (or failed) validation. */
+				validationStatus?: 'VALID' | 'INVALID';
+				/** @description Show only rows the worker applied with this outcome. */
+				outcome?: 'CREATED' | 'SKIPPED_EXISTING' | 'FAILED';
+			};
+			header?: never;
+			path: {
+				tenantId: number;
+				sessionId: string;
+			};
+			cookie?: never;
+		};
+		requestBody?: never;
+		responses: {
+			200: {
+				headers: {
+					[name: string]: unknown;
+				};
+				content?: never;
+			};
+		};
+	};
+	StudentImportsController_commit: {
+		parameters: {
+			query?: never;
+			header?: never;
+			path: {
+				tenantId: number;
+				sessionId: string;
+			};
+			cookie?: never;
+		};
+		requestBody: {
+			content: {
+				'application/json': components['schemas']['CommitStudentImportDto'];
+			};
+		};
+		responses: {
+			200: {
+				headers: {
+					[name: string]: unknown;
+				};
+				content?: never;
+			};
+		};
+	};
+	StudentImportsController_errorsCsv: {
+		parameters: {
+			query?: never;
+			header?: never;
+			path: {
+				tenantId: number;
+				sessionId: string;
+			};
+			cookie?: never;
+		};
+		requestBody?: never;
+		responses: {
+			200: {
+				headers: {
+					[name: string]: unknown;
+				};
+				content?: never;
+			};
+		};
+	};
 	BillingPolicyController_get: {
 		parameters: {
 			query?: never;
@@ -3768,6 +3997,8 @@ export interface operations {
 					| 'TENANT_CANCELLED'
 					| 'TENANT_DELETED'
 					| 'TENANT_BILLING_POLICY_UPDATED'
+					| 'STUDENT_IMPORT_COMMITTED'
+					| 'STUDENT_IMPORT_COMPLETED'
 					| 'PLAN_CREATED'
 					| 'PLAN_UPDATED'
 					| 'SUBSCRIPTION_CHANGED'

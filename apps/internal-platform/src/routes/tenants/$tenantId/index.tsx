@@ -15,6 +15,7 @@ import {
 	cn,
 } from '@repo/ui';
 
+import { ImportsTab } from '@/features/student-imports/components/ImportsTab';
 import { AuditTab } from '@/features/tenants/components/tenantDetails/AuditTab';
 import { BillingPolicyTab } from '@/features/tenants/components/tenantDetails/BillingPolicyTab';
 import { BranchesTab } from '@/features/tenants/components/tenantDetails/BranchesTab';
@@ -130,6 +131,9 @@ export function TenantDetailPage() {
 					<TabsTrigger value="members" className={TAB_TRIGGER_CLASS}>
 						Members
 					</TabsTrigger>
+					<TabsTrigger value="imports" className={TAB_TRIGGER_CLASS}>
+						Imports
+					</TabsTrigger>
 					<TabsTrigger value="settings" className={TAB_TRIGGER_CLASS}>
 						Settings
 					</TabsTrigger>
@@ -167,6 +171,9 @@ export function TenantDetailPage() {
 					</TabsContent>
 					<TabsContent value="members">
 						<MembersTab members={tenant.members ?? []} />
+					</TabsContent>
+					<TabsContent value="imports">
+						<ImportsTab tenantId={numericId} />
 					</TabsContent>
 					<TabsContent value="settings">
 						<SettingsTab

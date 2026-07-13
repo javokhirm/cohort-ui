@@ -693,6 +693,287 @@
         ]
       }
     },
+    "/api/v1/super-admin/tenants/{tenantId}/student-imports": {
+      "post": {
+        "operationId": "StudentImportsController_upload",
+        "parameters": [
+          {
+            "name": "tenantId",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "number"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "multipart/form-data": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "file": {
+                    "type": "string",
+                    "format": "binary"
+                  }
+                },
+                "required": [
+                  "file"
+                ]
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": ""
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Upload a student CSV: parse and validate it (writes nothing yet)",
+        "tags": [
+          "Super Admin / Student Imports"
+        ]
+      },
+      "get": {
+        "operationId": "StudentImportsController_list",
+        "parameters": [
+          {
+            "name": "tenantId",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "number"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "List a tenant's recent import sessions (newest first)",
+        "tags": [
+          "Super Admin / Student Imports"
+        ]
+      }
+    },
+    "/api/v1/super-admin/tenants/{tenantId}/student-imports/{sessionId}": {
+      "get": {
+        "operationId": "StudentImportsController_findOne",
+        "parameters": [
+          {
+            "name": "tenantId",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "number"
+            }
+          },
+          {
+            "name": "sessionId",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Import session detail — status and counters (the progress poll target)",
+        "tags": [
+          "Super Admin / Student Imports"
+        ]
+      }
+    },
+    "/api/v1/super-admin/tenants/{tenantId}/student-imports/{sessionId}/rows": {
+      "get": {
+        "operationId": "StudentImportsController_rows",
+        "parameters": [
+          {
+            "name": "tenantId",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "number"
+            }
+          },
+          {
+            "name": "sessionId",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "page",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "minimum": 1,
+              "default": 1,
+              "type": "number"
+            }
+          },
+          {
+            "name": "limit",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "minimum": 1,
+              "maximum": 100,
+              "default": 20,
+              "type": "number"
+            }
+          },
+          {
+            "name": "validationStatus",
+            "required": false,
+            "in": "query",
+            "description": "Show only rows that passed (or failed) validation.",
+            "schema": {
+              "type": "string",
+              "enum": [
+                "VALID",
+                "INVALID"
+              ]
+            }
+          },
+          {
+            "name": "outcome",
+            "required": false,
+            "in": "query",
+            "description": "Show only rows the worker applied with this outcome.",
+            "schema": {
+              "type": "string",
+              "enum": [
+                "CREATED",
+                "SKIPPED_EXISTING",
+                "FAILED"
+              ]
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Paginated row report: each row, its errors/warnings, and its outcome",
+        "tags": [
+          "Super Admin / Student Imports"
+        ]
+      }
+    },
+    "/api/v1/super-admin/tenants/{tenantId}/student-imports/{sessionId}/commit": {
+      "post": {
+        "operationId": "StudentImportsController_commit",
+        "parameters": [
+          {
+            "name": "tenantId",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "number"
+            }
+          },
+          {
+            "name": "sessionId",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CommitStudentImportDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Commit the session — queue the background job that applies the rows",
+        "tags": [
+          "Super Admin / Student Imports"
+        ]
+      }
+    },
+    "/api/v1/super-admin/tenants/{tenantId}/student-imports/{sessionId}/errors.csv": {
+      "get": {
+        "operationId": "StudentImportsController_errorsCsv",
+        "parameters": [
+          {
+            "name": "tenantId",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "number"
+            }
+          },
+          {
+            "name": "sessionId",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Download the invalid and failed rows as a CSV",
+        "tags": [
+          "Super Admin / Student Imports"
+        ]
+      }
+    },
     "/api/v1/super-admin/tenants/{id}/billing-policy": {
       "get": {
         "operationId": "BillingPolicyController_get",
@@ -1285,6 +1566,8 @@
                 "TENANT_CANCELLED",
                 "TENANT_DELETED",
                 "TENANT_BILLING_POLICY_UPDATED",
+                "STUDENT_IMPORT_COMMITTED",
+                "STUDENT_IMPORT_COMPLETED",
                 "PLAN_CREATED",
                 "PLAN_UPDATED",
                 "SUBSCRIPTION_CHANGED",
@@ -6836,6 +7119,16 @@
         "required": [
           "roleId"
         ]
+      },
+      "CommitStudentImportDto": {
+        "type": "object",
+        "properties": {
+          "skipInvalidRows": {
+            "type": "boolean",
+            "default": false,
+            "description": "Apply the valid rows and leave the invalid ones behind. Without it, a session that still holds invalid rows is refused (409 IMPORT_HAS_INVALID_ROWS) — importing a partial file has to be a deliberate choice."
+          }
+        }
       },
       "UpdateTenantBillingPolicyDto": {
         "type": "object",
