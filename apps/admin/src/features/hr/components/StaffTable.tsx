@@ -3,7 +3,7 @@ import { useNavigate } from '@tanstack/react-router';
 import { Badge, DataTable, StatusBadge, type ColumnDef } from '@repo/ui';
 
 import type { StaffResponse, StaffUser } from '../api/staff.queries';
-import { primaryRole, roleLabel } from '../lib/roles';
+import { roleLabel } from '../lib/roles';
 
 function StaffAvatar({ user }: { user: StaffUser }) {
 	const initials =
@@ -61,15 +61,20 @@ export function StaffTable({ staff, isLoading }: StaffTableProps) {
 			id: 'role',
 			header: 'Role',
 			cell: ({ row }) => {
-				const role = primaryRole(row.original.roles);
-				if (!role) return <span className="text-muted-foreground">—</span>;
+				const roles = row.original.roles;
+				if (roles.length === 0)
+					return <span className="text-muted-foreground">—</span>;
 				return (
-					<Badge variant="secondary" className="text-xs">
-						{roleLabel(role)}
-					</Badge>
+					<div className="flex flex-wrap gap-1">
+						{roles.map((role) => (
+							<Badge key={role} variant="secondary" className="text-xs">
+								{roleLabel(role)}
+							</Badge>
+						))}
+					</div>
 				);
 			},
-			size: 112,
+			size: 160,
 		},
 		{
 			id: 'branch',

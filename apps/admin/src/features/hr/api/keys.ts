@@ -18,4 +18,9 @@ export const hrKeys = {
 	staffList: (filters: StaffListFilters) =>
 		[...hrKeys.staff(), 'list', filters] as const,
 	staffDetail: (id: number) => [...hrKeys.staff(), 'detail', id] as const,
+
+	/** The tenant's role catalog — reference data, not per-staff-member. */
+	roleCatalog: () => [...hrKeys.all, 'roles'] as const,
+	/** Role grants are keyed by `user.id`, not `staff.id`. */
+	userRoles: (userId: number) => [...hrKeys.all, 'user-roles', userId] as const,
 };
