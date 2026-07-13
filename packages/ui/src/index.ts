@@ -44,10 +44,12 @@ export * from './components/composed/date-picker';
 export * from './components/composed/form-date-picker';
 export * from './components/composed/form-input';
 export * from './components/composed/form-money-input';
+export * from './components/composed/form-phone-input';
 export * from './components/composed/form-select';
 export * from './components/composed/money-input';
 export * from './components/composed/locale-switcher';
 export * from './components/composed/otp-input';
+export * from './components/composed/phone-input';
 export * from './components/composed/search-filter-bar';
 // Layout utilities
 export * from './components/composed/accent-card';

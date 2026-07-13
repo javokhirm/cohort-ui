@@ -13,6 +13,7 @@ import {
 	FormItem,
 	FormLabel,
 	FormMessage,
+	FormPhoneInput,
 	Input,
 	Spinner,
 } from '@repo/ui';
@@ -82,23 +83,11 @@ export function LoginForm({ onAuthenticated }: LoginFormProps) {
 				<Form {...form}>
 					<form onSubmit={form.handleSubmit(onSubmit)} noValidate>
 						<FieldGroup>
-							<FormField
+							<FormPhoneInput
 								control={form.control}
 								name="phone"
-								render={({ field }) => (
-									<FormItem>
-										<FormLabel>Phone number</FormLabel>
-										<FormControl>
-											<Input
-												type="tel"
-												autoComplete="username"
-												placeholder="+998 90 123 45 67"
-												{...field}
-											/>
-										</FormControl>
-										<FormMessage />
-									</FormItem>
-								)}
+								label="Phone number"
+								autoComplete="username"
 							/>
 							<FormField
 								control={form.control}

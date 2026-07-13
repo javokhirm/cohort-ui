@@ -23,3 +23,5 @@ export {
 } from './date';
 
 export { parseApiCode } from './codes';
+
+export { UZ_PHONE_REGEX, isValidUzPhone } from './phone';

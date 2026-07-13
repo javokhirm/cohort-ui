@@ -8,6 +8,7 @@ import {
 	Form,
 	FormDatePicker,
 	FormInput,
+	FormPhoneInput,
 	FormSelect,
 	Spinner,
 	toast,
@@ -62,7 +63,7 @@ function CreateStaffForm({
 			roleName: 'TEACHER',
 			branchId: defaultBranchId,
 			position: '',
-			phone: '+998',
+			phone: '',
 			email: '',
 			employmentType: 'FULL_TIME',
 			hireDate: '',
@@ -150,11 +151,10 @@ function CreateStaffForm({
 				<FormSection title="Contact">
 					<FieldGroup>
 						<div className="grid grid-cols-2 gap-3">
-							<FormInput
+							<FormPhoneInput
 								control={form.control}
 								name="phone"
 								label="Phone *"
-								placeholder="+998"
 							/>
 							<FormInput
 								control={form.control}

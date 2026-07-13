@@ -9,6 +9,7 @@ import {
 	Form,
 	FormDatePicker,
 	FormInput,
+	FormPhoneInput,
 	FormSelect,
 	Spinner,
 } from '@repo/ui';
@@ -83,11 +84,11 @@ function CreateStudentForm({
 		defaultValues: {
 			fullName: '',
 			dateOfBirth: '',
-			phone: '+998',
+			phone: '',
 			branchId: defaultBranchId,
 			address: '',
 			guardianName: '',
-			guardianPhone: '+998',
+			guardianPhone: '',
 			guardianRelation: 'father',
 		},
 	});
@@ -184,11 +185,10 @@ function CreateStudentForm({
 				<FormSection title="Contact">
 					<FieldGroup>
 						<div className="grid grid-cols-2 gap-3">
-							<FormInput
+							<FormPhoneInput
 								control={form.control}
 								name="phone"
 								label="Phone *"
-								placeholder="+998"
 							/>
 							<FormSelect
 								control={form.control}
@@ -227,11 +227,10 @@ function CreateStudentForm({
 								options={GUARDIAN_RELATION_OPTIONS}
 							/>
 						</div>
-						<FormInput
+						<FormPhoneInput
 							control={form.control}
 							name="guardianPhone"
 							label="Guardian phone *"
-							placeholder="+998"
 						/>
 					</FieldGroup>
 				</FormSection>
@@ -348,7 +347,7 @@ function EditStudentForm({
 				<FormSection title="Contact">
 					<FieldGroup>
 						<div className="grid grid-cols-2 gap-3">
-							<FormInput
+							<FormPhoneInput
 								control={form.control}
 								name="phone"
 								label="Phone"

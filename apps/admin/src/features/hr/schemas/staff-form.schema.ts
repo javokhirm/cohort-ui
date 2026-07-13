@@ -1,9 +1,11 @@
 import { z } from 'zod';
 
+import { UZ_PHONE_REGEX } from '@repo/utils';
+
 const phone = z
 	.string()
 	.min(1, 'Phone is required')
-	.regex(/^\+[1-9]\d{6,14}$/, 'Enter a valid phone number');
+	.regex(UZ_PHONE_REGEX, 'Enter a valid phone number');
 
 const email = z.union([z.literal(''), z.email('Enter a valid email')]).optional();
 

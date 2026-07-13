@@ -8,6 +8,7 @@ import {
 	FieldGroup,
 	Form,
 	FormInput,
+	FormPhoneInput,
 	FormSelect,
 	Spinner,
 	toast,
@@ -46,7 +47,7 @@ export function AddLeadSheet({ open, onOpenChange }: AddLeadSheetProps) {
 		defaultValues: {
 			firstName: '',
 			lastName: '',
-			phoneNumber: '+998',
+			phoneNumber: '',
 			email: '',
 			source: 'INSTAGRAM',
 			branchId: activeBranchIds?.length === 1 ? activeBranchIds[0] : undefined,
@@ -142,11 +143,10 @@ export function AddLeadSheet({ open, onOpenChange }: AddLeadSheetProps) {
 									placeholder="e.g. Mirzayeva"
 								/>
 							</div>
-							<FormInput
+							<FormPhoneInput
 								control={form.control}
 								name="phoneNumber"
 								label="Phone *"
-								placeholder="+998901234567"
 							/>
 							<div className="grid grid-cols-2 gap-3">
 								<FormSelect

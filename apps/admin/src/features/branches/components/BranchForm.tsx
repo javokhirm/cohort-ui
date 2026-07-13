@@ -10,6 +10,7 @@ import {
 	FormField,
 	FormInput,
 	FormItem,
+	FormPhoneInput,
 	Spinner,
 	Switch,
 	toast,
@@ -130,12 +131,7 @@ function IdentityAndContact({
 						label="Address *"
 						placeholder="Street, district, city"
 					/>
-					<FormInput
-						control={c}
-						name="phone"
-						label="Phone *"
-						placeholder="+998 71 200 00 00"
-					/>
+					<FormPhoneInput control={c} name="phone" label="Phone *" />
 				</FieldGroup>
 			</FormSection>
 		</>
