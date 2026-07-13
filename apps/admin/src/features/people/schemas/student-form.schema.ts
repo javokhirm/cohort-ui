@@ -7,39 +7,57 @@ const phone = z
 	.min(1, 'Phone is required')
 	.regex(UZ_PHONE_REGEX, 'Enter a valid phone number');
 
-export const createStudentSchema = z.object({
-	fullName: z
-		.string()
-		.min(2, 'Full name is required')
-		.refine((v) => v.trim().includes(' '), {
-			message: 'Please enter both first and last name',
-		}),
-	dateOfBirth: z.string().optional(),
-	gender: z.enum(['M', 'F', 'O']).optional(),
-	phone,
-	branchId: z.number({ error: 'Branch is required' }).min(1, 'Branch is required'),
-	address: z.string().optional(),
+const guardianName = z
+	.string()
+	.min(2, 'Guardian name is required')
+	.refine((v) => v.trim().includes(' '), {
+		message: 'Please enter both first and last name',
+	});
 
-	guardianName: z
-		.string()
-		.min(2, 'Guardian name is required')
-		.refine((v) => v.trim().includes(' '), {
-			message: 'Please enter both first and last name',
-		}),
-	guardianPhone: phone,
-	guardianRelation: z.enum(['mother', 'father', 'guardian']),
+export const createStudentSchema = z
+	.object({
+		firstName: z.string().min(1, 'First name is required'),
+		lastName: z.string().min(1, 'Last name is required'),
+		dateOfBirth: z.string().optional(),
+		gender: z.enum(['M', 'F', 'O']).optional(),
+		phone,
+		branchId: z.number({ error: 'Branch is required' }).min(1, 'Branch is required'),
+		address: z.string().optional(),
 
-	// No fee plan: the student bills on the plan attached to the group's course.
-	groupId: z.number().optional(),
-});
+		// Guardian section is optional and hidden until the user opts in.
+		hasGuardian: z.boolean(),
+		guardianName: z.string().optional(),
+		guardianPhone: z.string().optional(),
+		guardianRelation: z.enum(['mother', 'father', 'guardian']).optional(),
+
+		// No fee plan: the student bills on the plan attached to the group's course.
+		groupId: z.number().optional(),
+	})
+	.superRefine((values, ctx) => {
+		if (!values.hasGuardian) return;
+
+		const nameResult = guardianName.safeParse(values.guardianName ?? '');
+		if (!nameResult.success) {
+			ctx.addIssue({
+				code: 'custom',
+				path: ['guardianName'],
+				message: nameResult.error.issues[0]?.message,
+			});
+		}
+
+		const phoneResult = phone.safeParse(values.guardianPhone ?? '');
+		if (!phoneResult.success) {
+			ctx.addIssue({
+				code: 'custom',
+				path: ['guardianPhone'],
+				message: phoneResult.error.issues[0]?.message,
+			});
+		}
+	});
 
 export const editStudentSchema = z.object({
-	fullName: z
-		.string()
-		.min(2, 'Full name is required')
-		.refine((v) => v.trim().includes(' '), {
-			message: 'Please enter both first and last name',
-		}),
+	firstName: z.string().min(1, 'First name is required'),
+	lastName: z.string().min(1, 'Last name is required'),
 	dateOfBirth: z.string().optional(),
 	gender: z.enum(['M', 'F', 'O']).optional(),
 	phone,
