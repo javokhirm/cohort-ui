@@ -9,10 +9,12 @@ import {
 	Form,
 	FormDatePicker,
 	FormInput,
+	FormPhoneInput,
 	FormSelect,
 	Spinner,
 } from '@repo/ui';
 
+import { FormSection } from '@/components/FormSection';
 import { FormSheet } from '@/components/FormSheet';
 
 import {
@@ -65,19 +67,6 @@ const STUDENT_STATUS_OPTIONS = [
 	{ value: 'SUSPENDED', label: 'Suspended' },
 ];
 
-function Section({ heading, children }: { heading?: string; children: React.ReactNode }) {
-	return (
-		<div className="flex flex-col gap-4 rounded-xl bg-white p-4">
-			{heading && (
-				<p className="text-xs font-semibold uppercase tracking-widest text-muted-foreground">
-					{heading}
-				</p>
-			)}
-			{children}
-		</div>
-	);
-}
-
 function CreateStudentForm({
 	onSuccess,
 	onPendingChange,
@@ -95,11 +84,11 @@ function CreateStudentForm({
 		defaultValues: {
 			fullName: '',
 			dateOfBirth: '',
-			phone: '+998',
+			phone: '',
 			branchId: defaultBranchId,
 			address: '',
 			guardianName: '',
-			guardianPhone: '+998',
+			guardianPhone: '',
 			guardianRelation: 'father',
 		},
 	});
@@ -168,7 +157,7 @@ function CreateStudentForm({
 				className="flex flex-col gap-4"
 			>
 				{/* PERSONAL */}
-				<Section heading="Personal">
+				<FormSection title="Personal">
 					<FieldGroup>
 						<FormInput
 							control={form.control}
@@ -190,17 +179,16 @@ function CreateStudentForm({
 							/>
 						</div>
 					</FieldGroup>
-				</Section>
+				</FormSection>
 
 				{/* CONTACT */}
-				<Section heading="Contact">
+				<FormSection title="Contact">
 					<FieldGroup>
 						<div className="grid grid-cols-2 gap-3">
-							<FormInput
+							<FormPhoneInput
 								control={form.control}
 								name="phone"
 								label="Phone *"
-								placeholder="+998"
 							/>
 							<FormSelect
 								control={form.control}
@@ -220,10 +208,10 @@ function CreateStudentForm({
 							placeholder="Street, district, city"
 						/>
 					</FieldGroup>
-				</Section>
+				</FormSection>
 
 				{/* GUARDIAN */}
-				<Section heading="Guardian">
+				<FormSection title="Guardian">
 					<FieldGroup>
 						<div className="grid grid-cols-2 gap-3">
 							<FormInput
@@ -239,18 +227,17 @@ function CreateStudentForm({
 								options={GUARDIAN_RELATION_OPTIONS}
 							/>
 						</div>
-						<FormInput
+						<FormPhoneInput
 							control={form.control}
 							name="guardianPhone"
 							label="Guardian phone *"
-							placeholder="+998"
 						/>
 					</FieldGroup>
-				</Section>
+				</FormSection>
 
 				{/* INITIAL ENROLLMENT — the student bills on the group's course plan. */}
 				{groups.length > 0 && (
-					<Section heading="Initial enrollment">
+					<FormSection title="Initial enrollment">
 						<FieldGroup>
 							<FormSelect
 								control={form.control}
@@ -263,7 +250,7 @@ function CreateStudentForm({
 								}))}
 							/>
 						</FieldGroup>
-					</Section>
+					</FormSection>
 				)}
 			</form>
 		</Form>
@@ -332,7 +319,7 @@ function EditStudentForm({
 				className="flex flex-col gap-4"
 			>
 				{/* PERSONAL */}
-				<Section heading="Personal">
+				<FormSection title="Personal">
 					<FieldGroup>
 						<FormInput
 							control={form.control}
@@ -354,13 +341,13 @@ function EditStudentForm({
 							/>
 						</div>
 					</FieldGroup>
-				</Section>
+				</FormSection>
 
 				{/* CONTACT */}
-				<Section heading="Contact">
+				<FormSection title="Contact">
 					<FieldGroup>
 						<div className="grid grid-cols-2 gap-3">
-							<FormInput
+							<FormPhoneInput
 								control={form.control}
 								name="phone"
 								label="Phone"
@@ -384,17 +371,17 @@ function EditStudentForm({
 							placeholder="Street, district, city"
 						/>
 					</FieldGroup>
-				</Section>
+				</FormSection>
 
 				{/* STATUS */}
-				<Section heading="Status">
+				<FormSection title="Status">
 					<FormSelect
 						control={form.control}
 						name="status"
 						label="Student status"
 						options={STUDENT_STATUS_OPTIONS}
 					/>
-				</Section>
+				</FormSection>
 			</form>
 		</Form>
 	);

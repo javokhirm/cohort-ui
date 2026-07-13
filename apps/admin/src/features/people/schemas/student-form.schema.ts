@@ -1,9 +1,11 @@
 import { z } from 'zod';
 
+import { UZ_PHONE_REGEX } from '@repo/utils';
+
 const phone = z
 	.string()
 	.min(1, 'Phone is required')
-	.regex(/^\+?[0-9\s\-()]{7,20}$/, 'Enter a valid phone number');
+	.regex(UZ_PHONE_REGEX, 'Enter a valid phone number');
 
 export const createStudentSchema = z.object({
 	fullName: z

@@ -19,6 +19,7 @@ import {
 import { isApiError } from '@repo/api-client';
 
 import { useBranches } from '@/api/branches';
+import { FormSection } from '@/components/FormSection';
 import { useBranchStore } from '@/store/branchStore';
 import { useCourseList } from '@/features/courses/api/courses.queries';
 import { useStaffList } from '@/features/hr/api/staff.queries';
@@ -81,19 +82,6 @@ function useGroupFormOptions(branchId: string) {
 	return { branchOptions, courseOptions, teacherOptions, roomOptions };
 }
 
-function Section({ title, children }: { title?: string; children: React.ReactNode }) {
-	return (
-		<div className="flex flex-col gap-4 rounded-xl border border-border bg-card p-4 shadow-xs">
-			{title && (
-				<span className="text-[11px] font-semibold uppercase tracking-widest text-muted-foreground">
-					{title}
-				</span>
-			)}
-			{children}
-		</div>
-	);
-}
-
 // ─── Shared field layout (used by create + edit via FormProvider) ─────────────
 
 function GroupFields({
@@ -118,7 +106,10 @@ function GroupFields({
 	return (
 		<div className="grid grid-cols-1 gap-4 lg:grid-cols-[1fr_420px] lg:items-start">
 			<div className="flex flex-col gap-4">
-				<Section title="Details">
+				<FormSection
+					title="Details"
+					className="border border-border bg-card shadow-xs"
+				>
 					<FieldGroup>
 						<FormInput
 							control={form.control}
@@ -189,11 +180,14 @@ function GroupFields({
 							/>
 						</div>
 					</FieldGroup>
-				</Section>
+				</FormSection>
 
-				<Section title="Recurring schedule rule">
+				<FormSection
+					title="Recurring schedule rule"
+					className="border border-border bg-card shadow-xs"
+				>
 					<ScheduleRuleFields />
-				</Section>
+				</FormSection>
 
 				{extraSection}
 			</div>
@@ -348,7 +342,10 @@ function EditGroupForm({
 				<GroupFields
 					mode="edit"
 					extraSection={
-						<Section title="Status">
+						<FormSection
+							title="Status"
+							className="border border-border bg-card shadow-xs"
+						>
 							<FieldGroup>
 								<FormSelect
 									control={form.control}
@@ -357,7 +354,7 @@ function EditGroupForm({
 									options={GROUP_STATUS_OPTIONS}
 								/>
 							</FieldGroup>
-						</Section>
+						</FormSection>
 					}
 				/>
 			</form>

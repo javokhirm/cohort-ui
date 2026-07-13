@@ -410,6 +410,10 @@ export const MOCK_STUDENTS = [
 
 // ─── Fee plan fixtures ────────────────────────────────────────────────────────
 
+/**
+ * A plan says only WHAT to charge. Due day and proration come from the tenant
+ * billing policy (§3.12a) and are not per-plan fields — the columns were dropped.
+ */
 interface MockFeePlan {
 	id: number;
 	branchId: number | null;
@@ -419,10 +423,6 @@ interface MockFeePlan {
 	amount: number;
 	currency: string;
 	billingCycle: 'MONTHLY' | 'PER_SESSION';
-	/** `null` inherits the tenant billing-policy default. */
-	prorationMethod: 'SESSION' | 'DAILY' | 'NONE' | null;
-	/** `null` inherits the tenant billing-policy due-day. */
-	dueDay: number | null;
 	isActive: boolean;
 	createdAt: string;
 	updatedAt: string;
@@ -437,8 +437,6 @@ export const MOCK_FEE_PLANS: MockFeePlan[] = [
 		amount: 1_300_000,
 		currency: 'UZS',
 		billingCycle: 'MONTHLY',
-		prorationMethod: 'SESSION',
-		dueDay: 1,
 		isActive: true,
 		createdAt: '2025-01-10T00:00:00Z',
 		updatedAt: '2025-01-10T00:00:00Z',
@@ -451,11 +449,9 @@ export const MOCK_FEE_PLANS: MockFeePlan[] = [
 		amount: 650_000,
 		currency: 'UZS',
 		billingCycle: 'MONTHLY',
-		dueDay: 1,
 		isActive: true,
 		createdAt: '2025-01-11T00:00:00Z',
 		updatedAt: '2025-01-11T00:00:00Z',
-		prorationMethod: 'SESSION',
 	},
 	{
 		id: 3,
@@ -465,12 +461,9 @@ export const MOCK_FEE_PLANS: MockFeePlan[] = [
 		amount: 50_000,
 		currency: 'UZS',
 		billingCycle: 'PER_SESSION',
-		// Inherits the tenant billing-policy defaults (null override).
-		dueDay: null,
 		isActive: true,
 		createdAt: '2025-01-12T00:00:00Z',
 		updatedAt: '2025-01-12T00:00:00Z',
-		prorationMethod: null,
 	},
 	{
 		id: 4,
@@ -480,21 +473,21 @@ export const MOCK_FEE_PLANS: MockFeePlan[] = [
 		amount: 120_000,
 		currency: 'UZS',
 		billingCycle: 'PER_SESSION',
-		dueDay: 1,
 		isActive: false,
 		createdAt: '2025-01-13T00:00:00Z',
 		updatedAt: '2025-01-13T00:00:00Z',
-		prorationMethod: 'NONE',
 	},
 ];
 
 // ─── Billing policy fixture ───────────────────────────────────────────────────
 
-/** One policy per tenant (`GET/PUT /manage/billing-policy`). */
+/** One policy per tenant (`GET /manage/billing-policy` — read-only here). */
 export const MOCK_BILLING_POLICY = {
 	billingMode: 'PREPAID' as const,
+	billingCycleAnchor: 'CALENDAR' as const,
 	billingDay: 1,
 	dueDay: 5,
+	dueOffsetDays: 0,
 	immediateDueDays: 3,
 	graceDays: 7,
 	prorationMethod: 'SESSION' as const,
@@ -1606,8 +1599,9 @@ export const handlers = [
 					amount: body['amount'],
 					currency: body['currency'] ?? 'UZS',
 					billingCycle: body['billingCycle'],
-					prorationMethod: body['prorationMethod'] ?? null,
-					dueDay: body['dueDay'] ?? null,
+					// Deliberately does NOT echo dueDay/prorationMethod: the server's
+					// DTO whitelist drops them, so a stale client cannot see its
+					// override reflected back and think it took effect.
 					isActive: true,
 					createdAt: '2026-07-03T00:00:00Z',
 					updatedAt: '2026-07-03T00:00:00Z',
@@ -1633,40 +1627,11 @@ export const handlers = [
 		return ok({ ...feePlan, ...body, updatedAt: '2026-07-04T00:00:00Z' });
 	}),
 
-	// ── Billing policy (one per tenant, owner-only) ────────────────────────────
+	// ── Billing policy (one per tenant, READ-ONLY on this surface) ─────────────
+	// There is deliberately no PUT: the policy is written from the internal
+	// platform (`PUT /super-admin/tenants/:id/billing-policy`). Mocking a write
+	// here would let a test pass against an endpoint that no longer exists.
 	http.get(`${MANAGE}/billing-policy`, () => ok(MOCK_BILLING_POLICY)),
-
-	http.put(`${MANAGE}/billing-policy`, async ({ request }) => {
-		const body = (await request.json()) as Record<string, unknown>;
-		// Mirror the backend cross-field validators.
-		const lateFeeAmount = body['lateFeeAmount'];
-		if (
-			body['lateFeeType'] === 'PERCENT' &&
-			typeof lateFeeAmount === 'number' &&
-			lateFeeAmount > 100
-		) {
-			return fail(
-				422,
-				'BILLING_POLICY_INVALID_LATE_FEE',
-				'A percentage late fee cannot exceed 100%.',
-			);
-		}
-		const suspend = body['autoSuspendAfterDays'];
-		const cancel = body['autoCancelAfterDays'];
-		if (
-			typeof suspend === 'number' &&
-			typeof cancel === 'number' &&
-			cancel <= suspend
-		) {
-			return fail(
-				422,
-				'BILLING_POLICY_INVALID_DUNNING_DAYS',
-				'Auto-cancel days must exceed auto-suspend days.',
-			);
-		}
-		// Merge-upsert — only the sent fields change.
-		return ok({ ...MOCK_BILLING_POLICY, ...body });
-	}),
 
 	// ── Invoices — manual generate-monthly run ─────────────────────────────────
 	http.post(`${MANAGE}/invoices/generate-monthly`, async ({ request }) => {
@@ -2192,13 +2157,6 @@ export const billingPolicyHandlers = {
 	),
 	serverError: http.get(`${MANAGE}/billing-policy`, () =>
 		fail(500, 'INTERNAL_ERROR', 'Unexpected server error.'),
-	),
-	lateFeeInvalid: http.put(`${MANAGE}/billing-policy`, () =>
-		fail(
-			422,
-			'BILLING_POLICY_INVALID_LATE_FEE',
-			'A percentage late fee cannot exceed 100%.',
-		),
 	),
 };
 

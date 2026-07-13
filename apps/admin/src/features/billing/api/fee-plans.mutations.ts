@@ -3,14 +3,12 @@ import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { manageApi } from '@/api/apiClient';
 
 import { feePlansKeys } from './keys';
-import type {
-	FeePlanBillingCycle,
-	FeePlanProrationMethod,
-	FeePlanResponse,
-} from './fee-plans.queries';
+import type { FeePlanBillingCycle, FeePlanResponse } from './fee-plans.queries';
 
 // ─── Input types ─────────────────────────────────────────────────────────────
-// Mirror the backend `CreateFeePlanDto` / `UpdateFeePlanDto` (api-reference.md §3.12).
+// Mirror the backend `CreateFeePlanDto` / `UpdateFeePlanDto` (api-reference.md
+// §3.12). A plan carries only WHAT to charge: due day and proration come from
+// the tenant billing policy (§3.12a) and a plan cannot override them.
 
 export interface CreateFeePlanInput {
 	branchId?: number | null;
@@ -18,10 +16,6 @@ export interface CreateFeePlanInput {
 	amount: number;
 	currency?: string;
 	billingCycle: FeePlanBillingCycle;
-	/** `null` inherits the tenant billing-policy default (§billing policy). */
-	prorationMethod?: FeePlanProrationMethod | null;
-	/** `null` inherits the tenant billing-policy due-day. */
-	dueDay?: number | null;
 }
 
 /** Setting `isActive: false` while a live course uses the plan returns 409 `FEE_PLAN_IN_USE`. */
@@ -32,10 +26,6 @@ export interface UpdateFeePlanInput {
 	amount?: number;
 	currency?: string;
 	billingCycle?: FeePlanBillingCycle;
-	/** `null` inherits the tenant billing-policy default (§billing policy). */
-	prorationMethod?: FeePlanProrationMethod | null;
-	/** `null` inherits the tenant billing-policy due-day. */
-	dueDay?: number | null;
 	isActive?: boolean;
 }
 

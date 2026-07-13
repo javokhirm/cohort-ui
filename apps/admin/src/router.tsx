@@ -36,6 +36,7 @@ import { PayrollDetailRoute } from '@/routes/_authed.payroll.$id';
 import { ExpensesRoute } from '@/routes/_authed.expenses';
 import { PaymentsRoute } from '@/routes/_authed.payments';
 import { LeadsRoute } from '@/routes/_authed.leads';
+import { AccountRoute } from '@/routes/_authed.account';
 import { useSessionStore } from '@/store/sessionStore';
 
 const rootRoute = createRootRoute({
@@ -150,6 +151,19 @@ const staffEditRoute = createRoute({
 	},
 });
 
+/**
+ * The signed-in member's own account (profile + change password). Deliberately
+ * carries no `requirePermission` — every staff member may manage their own
+ * credential, mirroring the server, where `/manage/me` is the one route with no
+ * permission gate. Resetting *someone else's* password lives on the staff edit
+ * route above, behind `staff.update`.
+ */
+const accountRoute = createRoute({
+	getParentRoute: () => authedRoute,
+	path: '/account',
+	component: AccountRoute,
+});
+
 type RoomStatusSearch = 'active' | 'inactive';
 
 interface RoomSearch {
@@ -202,7 +216,7 @@ const feePlansRoute = createRoute({
 const billingPolicyRoute = createRoute({
 	getParentRoute: () => authedRoute,
 	path: '/billing-policy',
-	beforeLoad: () => requirePermission('billing-policy.manage'),
+	beforeLoad: () => requirePermission('billing-policy.view'),
 	component: BillingPolicyRoute,
 });
 
@@ -666,6 +680,7 @@ const routeTree = rootRoute.addChildren([
 		payrollDetailRoute,
 		expensesRoute,
 		leadsRoute,
+		accountRoute,
 	]),
 ]);
 

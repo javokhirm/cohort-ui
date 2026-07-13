@@ -693,6 +693,353 @@
         ]
       }
     },
+    "/api/v1/super-admin/tenants/{tenantId}/student-imports": {
+      "post": {
+        "operationId": "StudentImportsController_upload",
+        "parameters": [
+          {
+            "name": "tenantId",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "number"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "multipart/form-data": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "file": {
+                    "type": "string",
+                    "format": "binary"
+                  }
+                },
+                "required": [
+                  "file"
+                ]
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": ""
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Upload a student CSV: parse and validate it (writes nothing yet)",
+        "tags": [
+          "Super Admin / Student Imports"
+        ]
+      },
+      "get": {
+        "operationId": "StudentImportsController_list",
+        "parameters": [
+          {
+            "name": "tenantId",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "number"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "List a tenant's recent import sessions (newest first)",
+        "tags": [
+          "Super Admin / Student Imports"
+        ]
+      }
+    },
+    "/api/v1/super-admin/tenants/{tenantId}/student-imports/{sessionId}": {
+      "get": {
+        "operationId": "StudentImportsController_findOne",
+        "parameters": [
+          {
+            "name": "tenantId",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "number"
+            }
+          },
+          {
+            "name": "sessionId",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Import session detail — status and counters (the progress poll target)",
+        "tags": [
+          "Super Admin / Student Imports"
+        ]
+      }
+    },
+    "/api/v1/super-admin/tenants/{tenantId}/student-imports/{sessionId}/rows": {
+      "get": {
+        "operationId": "StudentImportsController_rows",
+        "parameters": [
+          {
+            "name": "tenantId",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "number"
+            }
+          },
+          {
+            "name": "sessionId",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "page",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "minimum": 1,
+              "default": 1,
+              "type": "number"
+            }
+          },
+          {
+            "name": "limit",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "minimum": 1,
+              "maximum": 100,
+              "default": 20,
+              "type": "number"
+            }
+          },
+          {
+            "name": "validationStatus",
+            "required": false,
+            "in": "query",
+            "description": "Show only rows that passed (or failed) validation.",
+            "schema": {
+              "type": "string",
+              "enum": [
+                "VALID",
+                "INVALID"
+              ]
+            }
+          },
+          {
+            "name": "outcome",
+            "required": false,
+            "in": "query",
+            "description": "Show only rows the worker applied with this outcome.",
+            "schema": {
+              "type": "string",
+              "enum": [
+                "CREATED",
+                "SKIPPED_EXISTING",
+                "FAILED"
+              ]
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Paginated row report: each row, its errors/warnings, and its outcome",
+        "tags": [
+          "Super Admin / Student Imports"
+        ]
+      }
+    },
+    "/api/v1/super-admin/tenants/{tenantId}/student-imports/{sessionId}/commit": {
+      "post": {
+        "operationId": "StudentImportsController_commit",
+        "parameters": [
+          {
+            "name": "tenantId",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "number"
+            }
+          },
+          {
+            "name": "sessionId",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CommitStudentImportDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Commit the session — queue the background job that applies the rows",
+        "tags": [
+          "Super Admin / Student Imports"
+        ]
+      }
+    },
+    "/api/v1/super-admin/tenants/{tenantId}/student-imports/{sessionId}/errors.csv": {
+      "get": {
+        "operationId": "StudentImportsController_errorsCsv",
+        "parameters": [
+          {
+            "name": "tenantId",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "number"
+            }
+          },
+          {
+            "name": "sessionId",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Download the invalid and failed rows as a CSV",
+        "tags": [
+          "Super Admin / Student Imports"
+        ]
+      }
+    },
+    "/api/v1/super-admin/tenants/{id}/billing-policy": {
+      "get": {
+        "operationId": "BillingPolicyController_get",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "number"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "A tenant's effective billing policy (its stored row, or the defaults)",
+        "tags": [
+          "Super Admin / Billing Policy"
+        ]
+      },
+      "put": {
+        "operationId": "BillingPolicyController_update",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "number"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/UpdateTenantBillingPolicyDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Merge-upsert a tenant's billing policy (only provided fields change; applies from the next billing run)",
+        "tags": [
+          "Super Admin / Billing Policy"
+        ]
+      }
+    },
     "/api/v1/super-admin/users": {
       "get": {
         "operationId": "UsersController_list",
@@ -1218,6 +1565,9 @@
                 "TENANT_REACTIVATED",
                 "TENANT_CANCELLED",
                 "TENANT_DELETED",
+                "TENANT_BILLING_POLICY_UPDATED",
+                "STUDENT_IMPORT_COMMITTED",
+                "STUDENT_IMPORT_COMPLETED",
                 "PLAN_CREATED",
                 "PLAN_UPDATED",
                 "SUBSCRIPTION_CHANGED",
@@ -1378,6 +1728,36 @@
           }
         ],
         "summary": "The authenticated staff member's profile, roles and resolved permission codes",
+        "tags": [
+          "Manage / Profile"
+        ]
+      }
+    },
+    "/api/v1/manage/me/password": {
+      "patch": {
+        "operationId": "MeController_changePassword",
+        "parameters": [],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ChangeMyPasswordDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Change the authenticated staff member's own password",
         "tags": [
           "Manage / Profile"
         ]
@@ -3342,35 +3722,7 @@
             "bearer": []
           }
         ],
-        "summary": "The tenant's effective billing policy",
-        "tags": [
-          "Manage / Billing Policy"
-        ]
-      },
-      "put": {
-        "operationId": "BillingPolicyController_update",
-        "parameters": [],
-        "requestBody": {
-          "required": true,
-          "content": {
-            "application/json": {
-              "schema": {
-                "$ref": "#/components/schemas/UpdateBillingPolicyDto"
-              }
-            }
-          }
-        },
-        "responses": {
-          "200": {
-            "description": ""
-          }
-        },
-        "security": [
-          {
-            "bearer": []
-          }
-        ],
-        "summary": "Merge-upsert the billing policy (only provided fields change; applies from the next billing run)",
+        "summary": "The tenant's effective billing policy (read-only)",
         "tags": [
           "Manage / Billing Policy"
         ]
@@ -6768,6 +7120,131 @@
           "roleId"
         ]
       },
+      "CommitStudentImportDto": {
+        "type": "object",
+        "properties": {
+          "skipInvalidRows": {
+            "type": "boolean",
+            "default": false,
+            "description": "Apply the valid rows and leave the invalid ones behind. Without it, a session that still holds invalid rows is refused (409 IMPORT_HAS_INVALID_ROWS) — importing a partial file has to be a deliberate choice."
+          }
+        }
+      },
+      "UpdateTenantBillingPolicyDto": {
+        "type": "object",
+        "properties": {
+          "billingMode": {
+            "type": "string",
+            "enum": [
+              "PREPAID",
+              "POSTPAID"
+            ]
+          },
+          "billingCycleAnchor": {
+            "type": "string",
+            "enum": [
+              "CALENDAR",
+              "ENROLLMENT"
+            ],
+            "description": "CALENDAR: one shared calendar month, mid-month joiners prorated. ENROLLMENT: each student rolls on their own join-date anniversary (join Jul 12 → billed Jul 12–Aug 11, then Aug 12–Sep 11), every cycle whole and at full price. PREPAID only; billingDay/dueDay are unread and dueOffsetDays sets the due date. ENROLLMENT is the platform default; a tenant opts into CALENDAR."
+          },
+          "billingDay": {
+            "type": "number",
+            "minimum": 1,
+            "maximum": 28,
+            "description": "CALENDAR anchoring only — the day periodic generation starts"
+          },
+          "dueDay": {
+            "type": "number",
+            "minimum": 1,
+            "maximum": 28,
+            "description": "CALENDAR anchoring only — the day of the month invoices fall due"
+          },
+          "dueOffsetDays": {
+            "type": "number",
+            "minimum": 0,
+            "maximum": 28,
+            "description": "ENROLLMENT anchoring only — days after a cycle starts that its invoice falls due (0 = the cycle’s first day)"
+          },
+          "immediateDueDays": {
+            "type": "number",
+            "minimum": 0,
+            "maximum": 28,
+            "description": "Due offset for immediately-issued invoices (0 = same day)"
+          },
+          "graceDays": {
+            "type": "number",
+            "minimum": 0,
+            "maximum": 60
+          },
+          "prorationMethod": {
+            "type": "string",
+            "enum": [
+              "SESSION",
+              "DAILY",
+              "NONE"
+            ]
+          },
+          "consumptionRule": {
+            "type": "string",
+            "enum": [
+              "ATTENDED_PLUS_UNEXCUSED",
+              "ALL_SCHEDULED",
+              "ATTENDED_ONLY"
+            ]
+          },
+          "chargeOnEnrollment": {
+            "type": "boolean"
+          },
+          "autoApplyCredit": {
+            "type": "boolean"
+          },
+          "remindersEnabled": {
+            "type": "boolean"
+          },
+          "lateFeeEnabled": {
+            "type": "boolean"
+          },
+          "lateFeeType": {
+            "type": "string",
+            "enum": [
+              "FIXED",
+              "PERCENT"
+            ]
+          },
+          "lateFeeAmount": {
+            "type": "number",
+            "minimum": 0,
+            "description": "Fixed amount, or percentage (0–100) when lateFeeType=PERCENT"
+          },
+          "lateFeeRecurrence": {
+            "type": "string",
+            "enum": [
+              "ONE_TIME",
+              "DAILY",
+              "WEEKLY"
+            ]
+          },
+          "lateFeeMaxTotal": {
+            "type": "number",
+            "nullable": true,
+            "minimum": 0,
+            "description": "Cap on total late fees per invoice; null = uncapped"
+          },
+          "autoSuspendAfterDays": {
+            "type": "number",
+            "nullable": true,
+            "minimum": 1,
+            "description": "Auto-suspend N days past due; null = disabled"
+          },
+          "autoCancelAfterDays": {
+            "type": "number",
+            "nullable": true,
+            "minimum": 1,
+            "description": "Auto-cancel N days past due; null = disabled (must exceed suspend)"
+          }
+        }
+      },
       "ResetPasswordDto": {
         "type": "object",
         "properties": {
@@ -6876,6 +7353,19 @@
             "type": "boolean"
           }
         }
+      },
+      "ChangeMyPasswordDto": {
+        "type": "object",
+        "properties": {
+          "newPassword": {
+            "type": "string",
+            "minLength": 8,
+            "maxLength": 128
+          }
+        },
+        "required": [
+          "newPassword"
+        ]
       },
       "EmergencyContactDto": {
         "type": "object",
@@ -7124,6 +7614,12 @@
           "roleName": {
             "type": "string",
             "description": "Default: TEACHER. Also ADMIN or MANAGER."
+          },
+          "password": {
+            "type": "string",
+            "minLength": 8,
+            "maxLength": 128,
+            "description": "The staff member's initial login password. Ignored if the phone is already a user."
           }
         },
         "required": [
@@ -7589,105 +8085,6 @@
           "status"
         ]
       },
-      "UpdateBillingPolicyDto": {
-        "type": "object",
-        "properties": {
-          "billingMode": {
-            "type": "string",
-            "enum": [
-              "PREPAID",
-              "POSTPAID"
-            ]
-          },
-          "billingDay": {
-            "type": "number",
-            "minimum": 1,
-            "maximum": 28
-          },
-          "dueDay": {
-            "type": "number",
-            "minimum": 1,
-            "maximum": 28
-          },
-          "immediateDueDays": {
-            "type": "number",
-            "minimum": 0,
-            "maximum": 28,
-            "description": "Due offset for immediately-issued invoices (0 = same day)"
-          },
-          "graceDays": {
-            "type": "number",
-            "minimum": 0,
-            "maximum": 60
-          },
-          "prorationMethod": {
-            "type": "string",
-            "enum": [
-              "SESSION",
-              "DAILY",
-              "NONE"
-            ]
-          },
-          "consumptionRule": {
-            "type": "string",
-            "enum": [
-              "ATTENDED_PLUS_UNEXCUSED",
-              "ALL_SCHEDULED",
-              "ATTENDED_ONLY"
-            ]
-          },
-          "chargeOnEnrollment": {
-            "type": "boolean"
-          },
-          "autoApplyCredit": {
-            "type": "boolean"
-          },
-          "remindersEnabled": {
-            "type": "boolean"
-          },
-          "lateFeeEnabled": {
-            "type": "boolean"
-          },
-          "lateFeeType": {
-            "type": "string",
-            "enum": [
-              "FIXED",
-              "PERCENT"
-            ]
-          },
-          "lateFeeAmount": {
-            "type": "number",
-            "minimum": 0,
-            "description": "Fixed amount, or percentage (0–100) when lateFeeType=PERCENT"
-          },
-          "lateFeeRecurrence": {
-            "type": "string",
-            "enum": [
-              "ONE_TIME",
-              "DAILY",
-              "WEEKLY"
-            ]
-          },
-          "lateFeeMaxTotal": {
-            "type": "number",
-            "nullable": true,
-            "minimum": 0,
-            "description": "Cap on total late fees per invoice; null = uncapped"
-          },
-          "autoSuspendAfterDays": {
-            "type": "number",
-            "nullable": true,
-            "minimum": 1,
-            "description": "Auto-suspend N days past due; null = disabled"
-          },
-          "autoCancelAfterDays": {
-            "type": "number",
-            "nullable": true,
-            "minimum": 1,
-            "description": "Auto-cancel N days past due; null = disabled (must exceed suspend)"
-          }
-        }
-      },
       "CreateFeePlanDto": {
         "type": "object",
         "properties": {
@@ -7714,23 +8111,6 @@
               "MONTHLY",
               "PER_SESSION"
             ]
-          },
-          "prorationMethod": {
-            "type": "string",
-            "enum": [
-              "SESSION",
-              "DAILY",
-              "NONE"
-            ],
-            "nullable": true,
-            "description": "Override of the tenant billing policy; omit/null to inherit"
-          },
-          "dueDay": {
-            "type": "number",
-            "minimum": 1,
-            "maximum": 28,
-            "nullable": true,
-            "description": "Due-day override of the tenant billing policy; omit/null to inherit"
           }
         },
         "required": [
@@ -7761,23 +8141,6 @@
               "MONTHLY",
               "PER_SESSION"
             ]
-          },
-          "prorationMethod": {
-            "type": "string",
-            "enum": [
-              "SESSION",
-              "DAILY",
-              "NONE"
-            ],
-            "nullable": true,
-            "description": "Override of the tenant billing policy; null clears the override"
-          },
-          "dueDay": {
-            "type": "number",
-            "minimum": 1,
-            "maximum": 28,
-            "nullable": true,
-            "description": "Due-day override of the tenant billing policy; null clears it"
           },
           "isActive": {
             "type": "boolean"

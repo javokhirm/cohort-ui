@@ -24,6 +24,7 @@ import {
 import { isApiError } from '@repo/api-client';
 import { formatPrice, toIsoDate } from '@repo/utils';
 
+import { FormSection } from '@/components/FormSection';
 import { FormSheet } from '@/components/FormSheet';
 import { useBranches } from '@/api/branches';
 import { useActiveBranchIds } from '@/store/branchStore';
@@ -60,10 +61,6 @@ interface EditProps {
 }
 
 type InvoiceFormProps = CreateProps | EditProps;
-
-function Section({ children }: { children: React.ReactNode }) {
-	return <div className="flex flex-col gap-4 rounded-xl bg-white p-4">{children}</div>;
-}
 
 function CreateInvoiceForm({
 	onSuccess,
@@ -176,7 +173,7 @@ function CreateInvoiceForm({
 				onSubmit={(e) => void form.handleSubmit(onSubmit)(e)}
 				className="flex flex-col gap-4"
 			>
-				<Section>
+				<FormSection>
 					<span className="text-sm font-semibold text-muted-foreground">
 						Bill to
 					</span>
@@ -211,9 +208,9 @@ function CreateInvoiceForm({
 							/>
 						</div>
 					</FieldGroup>
-				</Section>
+				</FormSection>
 
-				<Section>
+				<FormSection>
 					<div className="flex items-center justify-between">
 						<span className="text-sm font-semibold text-muted-foreground">
 							Line items
@@ -323,9 +320,9 @@ function CreateInvoiceForm({
 							{form.formState.errors.lineItems.root.message}
 						</p>
 					)}
-				</Section>
+				</FormSection>
 
-				<Section>
+				<FormSection>
 					<FormSelect
 						control={form.control}
 						name="discountId"
@@ -366,9 +363,9 @@ function CreateInvoiceForm({
 							</div>
 						)}
 					</div>
-				</Section>
+				</FormSection>
 
-				<Section>
+				<FormSection>
 					<FormField
 						control={form.control}
 						name="notes"
@@ -382,7 +379,7 @@ function CreateInvoiceForm({
 							</FormItem>
 						)}
 					/>
-				</Section>
+				</FormSection>
 			</form>
 		</Form>
 	);
@@ -428,7 +425,7 @@ function EditInvoiceForm({
 				onSubmit={(e) => void form.handleSubmit(onSubmit)(e)}
 				className="flex flex-col gap-4"
 			>
-				<Section>
+				<FormSection>
 					<FieldGroup>
 						<FormDatePicker
 							control={form.control}
@@ -452,7 +449,7 @@ function EditInvoiceForm({
 							)}
 						/>
 					</FieldGroup>
-				</Section>
+				</FormSection>
 			</form>
 		</Form>
 	);

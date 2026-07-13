@@ -15,6 +15,7 @@ import {
 	FormItem,
 	FormLabel,
 	FormMessage,
+	FormPasswordInput,
 	Input,
 	OtpInput,
 	Spinner,
@@ -219,23 +220,12 @@ export function LoginForm({ onAuthenticated }: LoginFormProps) {
 												</FormItem>
 											)}
 										/>
-										<FormField
+										<FormPasswordInput
 											control={credForm.control}
+											label="Password"
 											name="password"
-											render={({ field }) => (
-												<FormItem>
-													<FormLabel>Password</FormLabel>
-													<FormControl>
-														<Input
-															type="password"
-															autoComplete="current-password"
-															placeholder="••••••••••"
-															{...field}
-														/>
-													</FormControl>
-													<FormMessage />
-												</FormItem>
-											)}
+											autoComplete="current-password"
+											placeholder="••••••••••"
 										/>
 										{requestOtp.isError && (
 											<Alert variant="destructive">

@@ -1,4 +1,13 @@
-import { Button, Card, CardContent, Input, Label } from '@repo/ui';
+import {
+	Button,
+	Card,
+	CardContent,
+	Input,
+	Label,
+	PasswordInput,
+	PhoneInput,
+} from '@repo/ui';
+import { UZ_PHONE_REGEX } from '@repo/utils';
 
 import type { OnboardFormData } from './types';
 
@@ -16,7 +25,7 @@ export function OwnerStep({
 	const canProceed =
 		data.ownerFirstName.trim() &&
 		data.ownerLastName.trim() &&
-		data.ownerPhone.trim() &&
+		UZ_PHONE_REGEX.test(data.ownerPhone) &&
 		data.ownerPassword.length >= 8;
 
 	return (
@@ -56,12 +65,10 @@ export function OwnerStep({
 					</div>
 					<div className="flex flex-col gap-1.5">
 						<Label htmlFor="owner-phone">Phone number</Label>
-						<Input
+						<PhoneInput
 							id="owner-phone"
-							type="tel"
 							value={data.ownerPhone}
-							onChange={(e) => onChange({ ownerPhone: e.target.value })}
-							placeholder="+998 90 123 45 67"
+							onChange={(value) => onChange({ ownerPhone: value })}
 						/>
 					</div>
 					<div className="flex flex-col gap-1.5">
@@ -79,9 +86,8 @@ export function OwnerStep({
 					</div>
 					<div className="flex flex-col gap-1.5">
 						<Label htmlFor="owner-password">Temporary password</Label>
-						<Input
+						<PasswordInput
 							id="owner-password"
-							type="password"
 							value={data.ownerPassword}
 							onChange={(e) => onChange({ ownerPassword: e.target.value })}
 							placeholder="Min. 8 characters"

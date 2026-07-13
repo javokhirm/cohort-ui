@@ -4,7 +4,6 @@ import { DataTable, StatusBadge, type ColumnDef } from '@repo/ui';
 import { formatPrice } from '@repo/utils';
 
 import type { FeePlanResponse } from '../api/fee-plans.queries';
-import { FEE_PLAN_PRORATION_LABELS } from '../lib/fee-plan-options';
 
 interface FeePlanTableProps {
 	feePlans: FeePlanResponse[];
@@ -63,31 +62,6 @@ export function FeePlanTable({ feePlans, isLoading, onEdit }: FeePlanTableProps)
 				/>
 			),
 			size: 120,
-		},
-		{
-			accessorKey: 'prorationMethod',
-			header: 'Proration',
-			cell: ({ getValue }) => {
-				const method = getValue<FeePlanResponse['prorationMethod']>();
-				return (
-					<span className="text-sm text-muted-foreground">
-						{method == null ? 'Inherited' : FEE_PLAN_PRORATION_LABELS[method]}
-					</span>
-				);
-			},
-			size: 130,
-		},
-		{
-			id: 'due',
-			header: 'Due',
-			cell: ({ row }) => (
-				<span className="text-sm text-muted-foreground">
-					{row.original.dueDay == null
-						? 'Inherited'
-						: `Day ${row.original.dueDay}`}
-				</span>
-			),
-			size: 110,
 		},
 		{
 			accessorKey: 'isActive',

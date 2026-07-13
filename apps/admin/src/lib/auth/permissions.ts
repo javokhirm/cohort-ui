@@ -63,8 +63,10 @@ export const PERMISSION_CODES = [
 	'report-card.publish',
 	// fee plan
 	'fee-plan.manage',
-	// billing policy (owner-only, server-side)
-	'billing-policy.manage',
+	// billing policy — read-only on this surface; it is configured from the
+	// internal platform (PUT /super-admin/tenants/:id/billing-policy), so there is
+	// deliberately no `.manage` counterpart to gate against.
+	'billing-policy.view',
 	// invoice
 	'invoice.read',
 	'invoice.create',

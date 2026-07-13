@@ -346,6 +346,110 @@ export interface paths {
 		patch: operations['TenantMembersController_changeRole'];
 		trace?: never;
 	};
+	'/api/v1/super-admin/tenants/{tenantId}/student-imports': {
+		parameters: {
+			query?: never;
+			header?: never;
+			path?: never;
+			cookie?: never;
+		};
+		/** List a tenant's recent import sessions (newest first) */
+		get: operations['StudentImportsController_list'];
+		put?: never;
+		/** Upload a student CSV: parse and validate it (writes nothing yet) */
+		post: operations['StudentImportsController_upload'];
+		delete?: never;
+		options?: never;
+		head?: never;
+		patch?: never;
+		trace?: never;
+	};
+	'/api/v1/super-admin/tenants/{tenantId}/student-imports/{sessionId}': {
+		parameters: {
+			query?: never;
+			header?: never;
+			path?: never;
+			cookie?: never;
+		};
+		/** Import session detail — status and counters (the progress poll target) */
+		get: operations['StudentImportsController_findOne'];
+		put?: never;
+		post?: never;
+		delete?: never;
+		options?: never;
+		head?: never;
+		patch?: never;
+		trace?: never;
+	};
+	'/api/v1/super-admin/tenants/{tenantId}/student-imports/{sessionId}/rows': {
+		parameters: {
+			query?: never;
+			header?: never;
+			path?: never;
+			cookie?: never;
+		};
+		/** Paginated row report: each row, its errors/warnings, and its outcome */
+		get: operations['StudentImportsController_rows'];
+		put?: never;
+		post?: never;
+		delete?: never;
+		options?: never;
+		head?: never;
+		patch?: never;
+		trace?: never;
+	};
+	'/api/v1/super-admin/tenants/{tenantId}/student-imports/{sessionId}/commit': {
+		parameters: {
+			query?: never;
+			header?: never;
+			path?: never;
+			cookie?: never;
+		};
+		get?: never;
+		put?: never;
+		/** Commit the session — queue the background job that applies the rows */
+		post: operations['StudentImportsController_commit'];
+		delete?: never;
+		options?: never;
+		head?: never;
+		patch?: never;
+		trace?: never;
+	};
+	'/api/v1/super-admin/tenants/{tenantId}/student-imports/{sessionId}/errors.csv': {
+		parameters: {
+			query?: never;
+			header?: never;
+			path?: never;
+			cookie?: never;
+		};
+		/** Download the invalid and failed rows as a CSV */
+		get: operations['StudentImportsController_errorsCsv'];
+		put?: never;
+		post?: never;
+		delete?: never;
+		options?: never;
+		head?: never;
+		patch?: never;
+		trace?: never;
+	};
+	'/api/v1/super-admin/tenants/{id}/billing-policy': {
+		parameters: {
+			query?: never;
+			header?: never;
+			path?: never;
+			cookie?: never;
+		};
+		/** A tenant's effective billing policy (its stored row, or the defaults) */
+		get: operations['BillingPolicyController_get'];
+		/** Merge-upsert a tenant's billing policy (only provided fields change; applies from the next billing run) */
+		put: operations['BillingPolicyController_update'];
+		post?: never;
+		delete?: never;
+		options?: never;
+		head?: never;
+		patch?: never;
+		trace?: never;
+	};
 	'/api/v1/super-admin/users': {
 		parameters: {
 			query?: never;
@@ -618,6 +722,23 @@ export interface paths {
 		options?: never;
 		head?: never;
 		patch?: never;
+		trace?: never;
+	};
+	'/api/v1/manage/me/password': {
+		parameters: {
+			query?: never;
+			header?: never;
+			path?: never;
+			cookie?: never;
+		};
+		get?: never;
+		put?: never;
+		post?: never;
+		delete?: never;
+		options?: never;
+		head?: never;
+		/** Change the authenticated staff member's own password */
+		patch: operations['MeController_changePassword'];
 		trace?: never;
 	};
 	'/api/v1/manage/dashboard/stats': {
@@ -1188,10 +1309,9 @@ export interface paths {
 			path?: never;
 			cookie?: never;
 		};
-		/** The tenant's effective billing policy */
+		/** The tenant's effective billing policy (read-only) */
 		get: operations['BillingPolicyController_get'];
-		/** Merge-upsert the billing policy (only provided fields change; applies from the next billing run) */
-		put: operations['BillingPolicyController_update'];
+		put?: never;
 		post?: never;
 		delete?: never;
 		options?: never;
@@ -2175,6 +2295,54 @@ export interface components {
 			/** @description Branch to scope the role to; omit/null = all branches */
 			branchId?: number | null;
 		};
+		CommitStudentImportDto: {
+			/**
+			 * @description Apply the valid rows and leave the invalid ones behind. Without it, a session that still holds invalid rows is refused (409 IMPORT_HAS_INVALID_ROWS) — importing a partial file has to be a deliberate choice.
+			 * @default false
+			 */
+			skipInvalidRows: boolean;
+		};
+		UpdateTenantBillingPolicyDto: {
+			/** @enum {string} */
+			billingMode?: 'PREPAID' | 'POSTPAID';
+			/**
+			 * @description CALENDAR: one shared calendar month, mid-month joiners prorated. ENROLLMENT: each student rolls on their own join-date anniversary (join Jul 12 → billed Jul 12–Aug 11, then Aug 12–Sep 11), every cycle whole and at full price. PREPAID only; billingDay/dueDay are unread and dueOffsetDays sets the due date. ENROLLMENT is the platform default; a tenant opts into CALENDAR.
+			 * @enum {string}
+			 */
+			billingCycleAnchor?: 'CALENDAR' | 'ENROLLMENT';
+			/** @description CALENDAR anchoring only — the day periodic generation starts */
+			billingDay?: number;
+			/** @description CALENDAR anchoring only — the day of the month invoices fall due */
+			dueDay?: number;
+			/** @description ENROLLMENT anchoring only — days after a cycle starts that its invoice falls due (0 = the cycle’s first day) */
+			dueOffsetDays?: number;
+			/** @description Due offset for immediately-issued invoices (0 = same day) */
+			immediateDueDays?: number;
+			graceDays?: number;
+			/** @enum {string} */
+			prorationMethod?: 'SESSION' | 'DAILY' | 'NONE';
+			/** @enum {string} */
+			consumptionRule?:
+				| 'ATTENDED_PLUS_UNEXCUSED'
+				| 'ALL_SCHEDULED'
+				| 'ATTENDED_ONLY';
+			chargeOnEnrollment?: boolean;
+			autoApplyCredit?: boolean;
+			remindersEnabled?: boolean;
+			lateFeeEnabled?: boolean;
+			/** @enum {string} */
+			lateFeeType?: 'FIXED' | 'PERCENT';
+			/** @description Fixed amount, or percentage (0–100) when lateFeeType=PERCENT */
+			lateFeeAmount?: number;
+			/** @enum {string} */
+			lateFeeRecurrence?: 'ONE_TIME' | 'DAILY' | 'WEEKLY';
+			/** @description Cap on total late fees per invoice; null = uncapped */
+			lateFeeMaxTotal?: number | null;
+			/** @description Auto-suspend N days past due; null = disabled */
+			autoSuspendAfterDays?: number | null;
+			/** @description Auto-cancel N days past due; null = disabled (must exceed suspend) */
+			autoCancelAfterDays?: number | null;
+		};
 		ResetPasswordDto: {
 			newPassword: string;
 		};
@@ -2229,6 +2397,9 @@ export interface components {
 			maxBranches?: number | null;
 			features?: Record<string, never>;
 			isActive?: boolean;
+		};
+		ChangeMyPasswordDto: {
+			newPassword: string;
 		};
 		EmergencyContactDto: {
 			name: string;
@@ -2337,6 +2508,8 @@ export interface components {
 			baseSalary?: number;
 			/** @description Default: TEACHER. Also ADMIN or MANAGER. */
 			roleName?: string;
+			/** @description The staff member's initial login password. Ignored if the phone is already a user. */
+			password?: string;
 		};
 		UpdateStaffDto: {
 			branchId?: number;
@@ -2505,38 +2678,6 @@ export interface components {
 			/** @description Required when status = DROPPED */
 			dropReason?: string | null;
 		};
-		UpdateBillingPolicyDto: {
-			/** @enum {string} */
-			billingMode?: 'PREPAID' | 'POSTPAID';
-			billingDay?: number;
-			dueDay?: number;
-			/** @description Due offset for immediately-issued invoices (0 = same day) */
-			immediateDueDays?: number;
-			graceDays?: number;
-			/** @enum {string} */
-			prorationMethod?: 'SESSION' | 'DAILY' | 'NONE';
-			/** @enum {string} */
-			consumptionRule?:
-				| 'ATTENDED_PLUS_UNEXCUSED'
-				| 'ALL_SCHEDULED'
-				| 'ATTENDED_ONLY';
-			chargeOnEnrollment?: boolean;
-			autoApplyCredit?: boolean;
-			remindersEnabled?: boolean;
-			lateFeeEnabled?: boolean;
-			/** @enum {string} */
-			lateFeeType?: 'FIXED' | 'PERCENT';
-			/** @description Fixed amount, or percentage (0–100) when lateFeeType=PERCENT */
-			lateFeeAmount?: number;
-			/** @enum {string} */
-			lateFeeRecurrence?: 'ONE_TIME' | 'DAILY' | 'WEEKLY';
-			/** @description Cap on total late fees per invoice; null = uncapped */
-			lateFeeMaxTotal?: number | null;
-			/** @description Auto-suspend N days past due; null = disabled */
-			autoSuspendAfterDays?: number | null;
-			/** @description Auto-cancel N days past due; null = disabled (must exceed suspend) */
-			autoCancelAfterDays?: number | null;
-		};
 		CreateFeePlanDto: {
 			/** @description Null = applies across branches */
 			branchId?: number | null;
@@ -2548,13 +2689,6 @@ export interface components {
 			currency: string;
 			/** @enum {string} */
 			billingCycle: 'MONTHLY' | 'PER_SESSION';
-			/**
-			 * @description Override of the tenant billing policy; omit/null to inherit
-			 * @enum {string|null}
-			 */
-			prorationMethod?: 'SESSION' | 'DAILY' | 'NONE' | null;
-			/** @description Due-day override of the tenant billing policy; omit/null to inherit */
-			dueDay?: number | null;
 		};
 		UpdateFeePlanDto: {
 			branchId?: number | null;
@@ -2563,13 +2697,6 @@ export interface components {
 			currency?: string;
 			/** @enum {string} */
 			billingCycle?: 'MONTHLY' | 'PER_SESSION';
-			/**
-			 * @description Override of the tenant billing policy; null clears the override
-			 * @enum {string|null}
-			 */
-			prorationMethod?: 'SESSION' | 'DAILY' | 'NONE' | null;
-			/** @description Due-day override of the tenant billing policy; null clears it */
-			dueDay?: number | null;
 			isActive?: boolean;
 		};
 		InvoiceLineItemInputDto: {
@@ -3410,6 +3537,184 @@ export interface operations {
 			};
 		};
 	};
+	StudentImportsController_list: {
+		parameters: {
+			query?: never;
+			header?: never;
+			path: {
+				tenantId: number;
+			};
+			cookie?: never;
+		};
+		requestBody?: never;
+		responses: {
+			200: {
+				headers: {
+					[name: string]: unknown;
+				};
+				content?: never;
+			};
+		};
+	};
+	StudentImportsController_upload: {
+		parameters: {
+			query?: never;
+			header?: never;
+			path: {
+				tenantId: number;
+			};
+			cookie?: never;
+		};
+		requestBody: {
+			content: {
+				'multipart/form-data': {
+					/** Format: binary */
+					file: string;
+				};
+			};
+		};
+		responses: {
+			201: {
+				headers: {
+					[name: string]: unknown;
+				};
+				content?: never;
+			};
+		};
+	};
+	StudentImportsController_findOne: {
+		parameters: {
+			query?: never;
+			header?: never;
+			path: {
+				tenantId: number;
+				sessionId: string;
+			};
+			cookie?: never;
+		};
+		requestBody?: never;
+		responses: {
+			200: {
+				headers: {
+					[name: string]: unknown;
+				};
+				content?: never;
+			};
+		};
+	};
+	StudentImportsController_rows: {
+		parameters: {
+			query?: {
+				page?: number;
+				limit?: number;
+				/** @description Show only rows that passed (or failed) validation. */
+				validationStatus?: 'VALID' | 'INVALID';
+				/** @description Show only rows the worker applied with this outcome. */
+				outcome?: 'CREATED' | 'SKIPPED_EXISTING' | 'FAILED';
+			};
+			header?: never;
+			path: {
+				tenantId: number;
+				sessionId: string;
+			};
+			cookie?: never;
+		};
+		requestBody?: never;
+		responses: {
+			200: {
+				headers: {
+					[name: string]: unknown;
+				};
+				content?: never;
+			};
+		};
+	};
+	StudentImportsController_commit: {
+		parameters: {
+			query?: never;
+			header?: never;
+			path: {
+				tenantId: number;
+				sessionId: string;
+			};
+			cookie?: never;
+		};
+		requestBody: {
+			content: {
+				'application/json': components['schemas']['CommitStudentImportDto'];
+			};
+		};
+		responses: {
+			200: {
+				headers: {
+					[name: string]: unknown;
+				};
+				content?: never;
+			};
+		};
+	};
+	StudentImportsController_errorsCsv: {
+		parameters: {
+			query?: never;
+			header?: never;
+			path: {
+				tenantId: number;
+				sessionId: string;
+			};
+			cookie?: never;
+		};
+		requestBody?: never;
+		responses: {
+			200: {
+				headers: {
+					[name: string]: unknown;
+				};
+				content?: never;
+			};
+		};
+	};
+	BillingPolicyController_get: {
+		parameters: {
+			query?: never;
+			header?: never;
+			path: {
+				id: number;
+			};
+			cookie?: never;
+		};
+		requestBody?: never;
+		responses: {
+			200: {
+				headers: {
+					[name: string]: unknown;
+				};
+				content?: never;
+			};
+		};
+	};
+	BillingPolicyController_update: {
+		parameters: {
+			query?: never;
+			header?: never;
+			path: {
+				id: number;
+			};
+			cookie?: never;
+		};
+		requestBody: {
+			content: {
+				'application/json': components['schemas']['UpdateTenantBillingPolicyDto'];
+			};
+		};
+		responses: {
+			200: {
+				headers: {
+					[name: string]: unknown;
+				};
+				content?: never;
+			};
+		};
+	};
 	UsersController_list: {
 		parameters: {
 			query?: {
@@ -3691,6 +3996,9 @@ export interface operations {
 					| 'TENANT_REACTIVATED'
 					| 'TENANT_CANCELLED'
 					| 'TENANT_DELETED'
+					| 'TENANT_BILLING_POLICY_UPDATED'
+					| 'STUDENT_IMPORT_COMMITTED'
+					| 'STUDENT_IMPORT_COMPLETED'
 					| 'PLAN_CREATED'
 					| 'PLAN_UPDATED'
 					| 'SUBSCRIPTION_CHANGED'
@@ -3787,6 +4095,27 @@ export interface operations {
 			cookie?: never;
 		};
 		requestBody?: never;
+		responses: {
+			200: {
+				headers: {
+					[name: string]: unknown;
+				};
+				content?: never;
+			};
+		};
+	};
+	MeController_changePassword: {
+		parameters: {
+			query?: never;
+			header?: never;
+			path?: never;
+			cookie?: never;
+		};
+		requestBody: {
+			content: {
+				'application/json': components['schemas']['ChangeMyPasswordDto'];
+			};
+		};
 		responses: {
 			200: {
 				headers: {
@@ -4855,27 +5184,6 @@ export interface operations {
 			cookie?: never;
 		};
 		requestBody?: never;
-		responses: {
-			200: {
-				headers: {
-					[name: string]: unknown;
-				};
-				content?: never;
-			};
-		};
-	};
-	BillingPolicyController_update: {
-		parameters: {
-			query?: never;
-			header?: never;
-			path?: never;
-			cookie?: never;
-		};
-		requestBody: {
-			content: {
-				'application/json': components['schemas']['UpdateBillingPolicyDto'];
-			};
-		};
 		responses: {
 			200: {
 				headers: {

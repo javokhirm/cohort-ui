@@ -22,6 +22,7 @@ import { Can } from '@/components/Can';
 import { usePayrollList } from '@/features/payroll/api/payroll.queries';
 
 import { useStaffMember, type StaffResponse } from '../api/staff.queries';
+import { RolesSection } from '../components/RolesSection';
 import { primaryRole, roleLabel } from '../lib/roles';
 
 function employmentLabel(type: StaffResponse['employmentType']): string {
@@ -281,6 +282,7 @@ export function StaffDetailPage({ staffId }: StaffDetailPageProps) {
 					<Tabs defaultValue="overview">
 						<TabsList>
 							<TabsTrigger value="overview">Overview</TabsTrigger>
+							<TabsTrigger value="roles">Roles</TabsTrigger>
 							<TabsTrigger value="payroll">Payroll</TabsTrigger>
 							<TabsTrigger value="activity">Activity</TabsTrigger>
 						</TabsList>
@@ -288,6 +290,12 @@ export function StaffDetailPage({ staffId }: StaffDetailPageProps) {
 						<div className="mt-4">
 							<TabsContent value="overview">
 								<OverviewTab staff={staff} />
+							</TabsContent>
+							<TabsContent value="roles">
+								<RolesSection
+									userId={staff.user.id}
+									staffName={`${staff.user.firstName} ${staff.user.lastName}`}
+								/>
 							</TabsContent>
 							<TabsContent value="payroll">
 								<PayrollTab staff={staff} />

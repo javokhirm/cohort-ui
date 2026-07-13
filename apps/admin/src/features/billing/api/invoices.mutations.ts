@@ -65,23 +65,18 @@ export interface GenerateMonthlyInvoicesInput {
 }
 
 /**
- * A single failure from a generate-monthly run — one enrollment's invoice
- * couldn't be created. Only `message` is guaranteed; the backend contract
- * for this endpoint isn't in the generated OpenAPI spec yet, so the shape is
- * hand-declared and kept defensive (api-reference.md, billing engine phase 2).
- */
-export interface GenerateMonthlyInvoicesError {
-	message: string;
-	[key: string]: unknown;
-}
-
-/**
  * `POST /invoices/generate-monthly` response. For a `POSTPAID` tenant a single
  * call resolves both the `MONTHLY` and `PER_SESSION` legs for the period, so
  * the counts below are the combined total across both legs.
  */
 export interface GenerateMonthlyInvoicesResult {
-	period: { year: number; month: number };
+	/**
+	 * What the run billed: the calendar month as `yyyy-MM` under CALENDAR
+	 * anchoring, or — under ENROLLMENT anchoring, where each student is on their
+	 * own cycle and there is no single billed period — the run's as-of date as
+	 * `yyyy-MM-dd`.
+	 */
+	period: string;
 	/** Invoices created. */
 	generated: number;
 	/** Of `generated`, how many were prorated (mid-cycle enrollment). */
@@ -94,7 +89,8 @@ export interface GenerateMonthlyInvoicesResult {
 	skippedZeroConsumption: number;
 	/** Enrollment was suspended for the entire period. */
 	skippedSuspended: number;
-	errors: GenerateMonthlyInvoicesError[];
+	/** Enrollments whose generation threw; the batch continued past them. */
+	errors: number;
 }
 
 /** `POST /invoices/:id/apply-credit` response — mirrors `ApplyCreditResponseDto`. */

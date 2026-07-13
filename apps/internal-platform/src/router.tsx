@@ -12,6 +12,7 @@ import { LoginRoute } from './routes/login';
 import { AuthedLayout } from './routes/authed-layout';
 import { DashboardPage } from './routes/dashboard';
 import { TenantsPage } from './routes/tenants/index';
+import { ImportSessionPage } from './routes/tenants/$tenantId/imports/$sessionId';
 import { TenantDetailPage } from './routes/tenants/$tenantId/index';
 import { OnboardTenantPage } from './routes/tenants/onboard';
 import { SubscriptionPlansPage } from './routes/subscription-plans/index';
@@ -90,6 +91,16 @@ const tenantOnboardRoute = createRoute({
 	getParentRoute: () => authedRoute,
 	path: '/tenants/onboard',
 	component: OnboardTenantPage,
+});
+
+/**
+ * One CSV student-import session (api-reference §2.9). `sessionId` is a UUID, not
+ * a numeric id — sessions live in Redis under a TTL rather than in a table.
+ */
+const importSessionRoute = createRoute({
+	getParentRoute: () => authedRoute,
+	path: '/tenants/$tenantId/imports/$sessionId',
+	component: ImportSessionPage,
 });
 
 const subscriptionPlansRoute = createRoute({
@@ -178,6 +189,8 @@ const routeTree = rootRoute.addChildren([
 		dashboardRoute,
 		tenantIndexRoute,
 		tenantOnboardRoute,
+		// More specific than `/tenants/$tenantId`, so it is registered before it.
+		importSessionRoute,
 		tenantDetailRoute,
 		subscriptionPlansRoute,
 		subscriptionsRoute,

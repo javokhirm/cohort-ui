@@ -14,6 +14,7 @@ import {
 import { formatPrice } from '@repo/utils';
 import { isApiError } from '@repo/api-client';
 
+import { FormSection } from '@/components/FormSection';
 import { FormSheet } from '@/components/FormSheet';
 import { useBranches } from '@/api/branches';
 import { useFeePlanList } from '@/features/billing/api/fee-plans.queries';
@@ -46,10 +47,6 @@ interface EditProps {
 }
 
 type CourseFormProps = CreateProps | EditProps;
-
-function Section({ children }: { children: React.ReactNode }) {
-	return <div className="flex flex-col gap-4 rounded-xl bg-white p-4">{children}</div>;
-}
 
 /** Branch options with a leading "shared across all branches" choice. */
 function useBranchOptions() {
@@ -179,7 +176,7 @@ function CreateCourseForm({
 				onSubmit={(e) => void form.handleSubmit(onSubmit)(e)}
 				className="flex flex-col gap-4"
 			>
-				<Section>
+				<FormSection>
 					<FieldGroup>
 						<FormInput
 							control={form.control}
@@ -226,7 +223,7 @@ function CreateCourseForm({
 							placeholder="Short summary of the course"
 						/>
 					</FieldGroup>
-				</Section>
+				</FormSection>
 			</form>
 		</Form>
 	);
@@ -315,7 +312,7 @@ function EditCourseForm({
 				onSubmit={(e) => void form.handleSubmit(onSubmit)(e)}
 				className="flex flex-col gap-4"
 			>
-				<Section>
+				<FormSection>
 					<FieldGroup>
 						<FormInput
 							control={form.control}
@@ -373,7 +370,7 @@ function EditCourseForm({
 							options={COURSE_STATUS_OPTIONS}
 						/>
 					</FieldGroup>
-				</Section>
+				</FormSection>
 			</form>
 		</Form>
 	);

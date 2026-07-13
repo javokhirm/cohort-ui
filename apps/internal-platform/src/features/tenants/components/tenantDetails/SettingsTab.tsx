@@ -8,6 +8,7 @@ import {
 	CardTitle,
 	Input,
 	Label,
+	PhoneInput,
 	Select,
 	SelectContent,
 	SelectItem,
@@ -47,12 +48,10 @@ export function SettingsTab({
 					</div>
 					<div className="flex flex-col gap-1.5">
 						<Label htmlFor="settings-phone">Phone</Label>
-						<Input
+						<PhoneInput
 							id="settings-phone"
-							type="tel"
 							value={phone}
-							onChange={(e) => setPhone(e.target.value)}
-							placeholder="+998 90 000 00 00"
+							onChange={setPhone}
 						/>
 					</div>
 					<div className="flex flex-col gap-1.5">

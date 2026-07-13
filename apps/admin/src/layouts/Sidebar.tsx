@@ -178,8 +178,7 @@ const NAV_GROUPS: NavGroupDef[] = [
 				label: 'Billing Policy',
 				Icon: SlidersHorizontal,
 				href: '/billing-policy',
-				badge: 'OWNER',
-				permission: 'billing-policy.manage',
+				permission: 'billing-policy.view',
 			},
 			{
 				id: 'discounts',
@@ -346,6 +345,7 @@ export function Sidebar({ collapsed }: SidebarProps) {
 	const { user, logout } = useAuth();
 	const { can, permissionsLoaded } = usePermissions();
 	const pathname = useRouterState({ select: (s) => s.location.pathname });
+	const navigate = useNavigate();
 
 	// Cosmetic nav filtering — show only what the resolved permissions allow, and
 	// drop a group once all its items are hidden. The backend enforces access.
@@ -482,7 +482,9 @@ export function Sidebar({ collapsed }: SidebarProps) {
 								</button>
 							</DropdownMenuTrigger>
 							<DropdownMenuContent side="top" align="end" className="w-40">
-								<DropdownMenuItem>
+								<DropdownMenuItem
+									onClick={() => void navigate({ to: '/account' })}
+								>
 									<User className="mr-2 size-4" />
 									Profile
 								</DropdownMenuItem>

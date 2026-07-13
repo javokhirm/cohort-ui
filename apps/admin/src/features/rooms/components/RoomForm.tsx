@@ -12,6 +12,7 @@ import {
 	toast,
 } from '@repo/ui';
 
+import { FormSection } from '@/components/FormSection';
 import { FormSheet } from '@/components/FormSheet';
 import { useBranches } from '@/api/branches';
 import { useBranchStore } from '@/store/branchStore';
@@ -40,10 +41,6 @@ interface EditProps {
 }
 
 type RoomFormProps = CreateProps | EditProps;
-
-function Section({ children }: { children: React.ReactNode }) {
-	return <div className="flex flex-col gap-4 rounded-xl bg-white p-4">{children}</div>;
-}
 
 function CreateRoomForm({
 	onSuccess,
@@ -91,7 +88,7 @@ function CreateRoomForm({
 				onSubmit={(e) => void form.handleSubmit(onSubmit)(e)}
 				className="flex flex-col gap-4"
 			>
-				<Section>
+				<FormSection>
 					<FieldGroup>
 						<FormInput
 							control={form.control}
@@ -135,7 +132,7 @@ function CreateRoomForm({
 							/>
 						</div>
 					</FieldGroup>
-				</Section>
+				</FormSection>
 			</form>
 		</Form>
 	);
@@ -195,7 +192,7 @@ function EditRoomForm({
 				onSubmit={(e) => void form.handleSubmit(onSubmit)(e)}
 				className="flex flex-col gap-4"
 			>
-				<Section>
+				<FormSection>
 					<FieldGroup>
 						<FormInput
 							control={form.control}
@@ -245,7 +242,7 @@ function EditRoomForm({
 							options={ROOM_STATUS_OPTIONS}
 						/>
 					</FieldGroup>
-				</Section>
+				</FormSection>
 			</form>
 		</Form>
 	);

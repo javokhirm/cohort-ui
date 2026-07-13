@@ -8,11 +8,14 @@ import {
 	Form,
 	FormDatePicker,
 	FormInput,
+	FormPasswordInput,
+	FormPhoneInput,
 	FormSelect,
 	Spinner,
 	toast,
 } from '@repo/ui';
 
+import { FormSection } from '@/components/FormSection';
 import { FormSheet } from '@/components/FormSheet';
 import { useBranches } from '@/api/branches';
 import { useBranchStore } from '@/store/branchStore';
@@ -41,19 +44,6 @@ const EMPLOYMENT_OPTIONS = [
 	{ value: 'CONTRACTOR', label: 'Contractor' },
 ];
 
-function Section({ heading, children }: { heading?: string; children: React.ReactNode }) {
-	return (
-		<div className="flex flex-col gap-4 rounded-xl bg-white p-4">
-			{heading && (
-				<p className="text-xs font-semibold uppercase tracking-widest text-muted-foreground">
-					{heading}
-				</p>
-			)}
-			{children}
-		</div>
-	);
-}
-
 function CreateStaffForm({
 	onSuccess,
 	onPendingChange,
@@ -74,11 +64,12 @@ function CreateStaffForm({
 			roleName: 'TEACHER',
 			branchId: defaultBranchId,
 			position: '',
-			phone: '+998',
+			phone: '',
 			email: '',
 			employmentType: 'FULL_TIME',
 			hireDate: '',
 			specialization: '',
+			password: '',
 		},
 	});
 
@@ -102,6 +93,7 @@ function CreateStaffForm({
 			hireDate: values.hireDate || undefined,
 			baseSalary: values.baseSalary,
 			specialization: parseSpecialization(values.specialization),
+			password: values.password || undefined,
 		});
 		toast.success('Staff member added');
 		onSuccess();
@@ -114,7 +106,7 @@ function CreateStaffForm({
 				onSubmit={(e) => void form.handleSubmit(onSubmit)(e)}
 				className="flex flex-col gap-4"
 			>
-				<Section heading="Profile">
+				<FormSection title="Profile">
 					<FieldGroup>
 						<div className="grid grid-cols-2 gap-3">
 							<FormInput
@@ -155,16 +147,15 @@ function CreateStaffForm({
 							placeholder="e.g. Senior IELTS Teacher"
 						/>
 					</FieldGroup>
-				</Section>
+				</FormSection>
 
-				<Section heading="Contact">
+				<FormSection title="Contact">
 					<FieldGroup>
 						<div className="grid grid-cols-2 gap-3">
-							<FormInput
+							<FormPhoneInput
 								control={form.control}
 								name="phone"
 								label="Phone *"
-								placeholder="+998"
 							/>
 							<FormInput
 								control={form.control}
@@ -175,9 +166,25 @@ function CreateStaffForm({
 							/>
 						</div>
 					</FieldGroup>
-				</Section>
+				</FormSection>
 
-				<Section heading="Employment">
+				<FormSection title="Access">
+					<FieldGroup>
+						<FormPasswordInput
+							control={form.control}
+							name="password"
+							label="Password"
+							autoComplete="new-password"
+							placeholder="Min. 8 characters"
+						/>
+						<p className="text-xs text-muted-foreground">
+							They sign in with their phone number and this password. Leave
+							blank to set it later.
+						</p>
+					</FieldGroup>
+				</FormSection>
+
+				<FormSection title="Employment">
 					<FieldGroup>
 						<div className="grid grid-cols-2 gap-3">
 							<FormSelect
@@ -215,7 +222,7 @@ function CreateStaffForm({
 							placeholder="e.g. IELTS, General English"
 						/>
 					</FieldGroup>
-				</Section>
+				</FormSection>
 			</form>
 		</Form>
 	);

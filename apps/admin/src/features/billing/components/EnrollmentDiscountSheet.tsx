@@ -19,6 +19,7 @@ import {
 } from '@repo/ui';
 import { formatDate } from '@repo/utils';
 
+import { FormSection } from '@/components/FormSection';
 import { FormSheet } from '@/components/FormSheet';
 
 import { useDiscountList } from '../api/discounts.queries';
@@ -41,10 +42,6 @@ interface EnrollmentDiscountSheetProps {
 	groupName: string;
 	/** The enrollment's current standing assignments. */
 	assignments: EnrollmentDiscountResponse[];
-}
-
-function Section({ children }: { children: React.ReactNode }) {
-	return <div className="flex flex-col gap-3 rounded-xl bg-white p-4">{children}</div>;
 }
 
 const EMPTY_FORM: AssignEnrollmentDiscountFormValues = {
@@ -145,7 +142,7 @@ export function EnrollmentDiscountSheet({
 				</div>
 
 				{assignments.length > 0 && (
-					<Section>
+					<FormSection>
 						<p className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">
 							Current
 						</p>
@@ -183,7 +180,7 @@ export function EnrollmentDiscountSheet({
 								</div>
 							))}
 						</div>
-					</Section>
+					</FormSection>
 				)}
 
 				<Form {...form}>
@@ -192,7 +189,7 @@ export function EnrollmentDiscountSheet({
 						onSubmit={(e) => void form.handleSubmit(onSubmit)(e)}
 						className="flex flex-col gap-4"
 					>
-						<Section>
+						<FormSection>
 							<p className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">
 								Add discount
 							</p>
@@ -243,10 +240,10 @@ export function EnrollmentDiscountSheet({
 									)}
 								/>
 							)}
-						</Section>
+						</FormSection>
 
 						{options.length > 0 && (
-							<Section>
+							<FormSection>
 								<FormDatePicker
 									control={form.control}
 									name="validUntil"
@@ -256,7 +253,7 @@ export function EnrollmentDiscountSheet({
 									Applied to every monthly invoice generated before this
 									date. Leave blank for no end date.
 								</p>
-							</Section>
+							</FormSection>
 						)}
 					</form>
 				</Form>
