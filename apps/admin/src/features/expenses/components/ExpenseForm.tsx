@@ -20,6 +20,7 @@ import {
 } from '@repo/ui';
 import { toIsoDate } from '@repo/utils';
 
+import { FormSection } from '@/components/FormSection';
 import { FormSheet } from '@/components/FormSheet';
 import { useBranches } from '@/api/branches';
 import { useActiveBranchIds } from '@/store/branchStore';
@@ -47,10 +48,6 @@ interface EditProps {
 }
 
 type ExpenseFormProps = CreateProps | EditProps;
-
-function Section({ children }: { children: React.ReactNode }) {
-	return <div className="flex flex-col gap-4 rounded-xl bg-white p-4">{children}</div>;
-}
 
 function CreateExpenseForm({
 	onSuccess,
@@ -104,7 +101,7 @@ function CreateExpenseForm({
 				onSubmit={(e) => void form.handleSubmit(onSubmit)(e)}
 				className="flex flex-col gap-4"
 			>
-				<Section>
+				<FormSection>
 					<FieldGroup>
 						<div className="grid grid-cols-2 gap-3">
 							<FormSelect
@@ -168,7 +165,7 @@ function CreateExpenseForm({
 							)}
 						/>
 					</FieldGroup>
-				</Section>
+				</FormSection>
 			</form>
 		</Form>
 	);
@@ -232,7 +229,7 @@ function EditExpenseForm({
 				onSubmit={(e) => void form.handleSubmit(onSubmit)(e)}
 				className="flex flex-col gap-4"
 			>
-				<Section>
+				<FormSection>
 					<FieldGroup>
 						<div className="grid grid-cols-2 gap-3">
 							<FormSelect
@@ -295,7 +292,7 @@ function EditExpenseForm({
 							)}
 						/>
 					</FieldGroup>
-				</Section>
+				</FormSection>
 			</form>
 		</Form>
 	);

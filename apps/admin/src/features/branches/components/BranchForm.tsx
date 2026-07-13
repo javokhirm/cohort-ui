@@ -15,6 +15,7 @@ import {
 	toast,
 } from '@repo/ui';
 
+import { FormSection } from '@/components/FormSection';
 import { FormSheet } from '@/components/FormSheet';
 import type { Branch } from '@/api/branches';
 
@@ -42,18 +43,6 @@ interface EditProps {
 }
 
 type BranchFormProps = CreateProps | EditProps;
-
-/** A white section block with an uppercase eyebrow heading, matching the design. */
-function Section({ title, children }: { title: string; children: React.ReactNode }) {
-	return (
-		<div className="flex flex-col gap-4 rounded-xl bg-white p-4">
-			<span className="text-[11px] font-semibold uppercase tracking-widest text-muted-foreground">
-				{title}
-			</span>
-			{children}
-		</div>
-	);
-}
 
 /** An RHF-bound switch row: bold label, muted description, toggle on the right. */
 function SwitchField<
@@ -113,7 +102,7 @@ function IdentityAndContact({
 	const c = control as Control<any>;
 	return (
 		<>
-			<Section title="Identity">
+			<FormSection title="Identity">
 				<FieldGroup>
 					<FormInput
 						control={c}
@@ -131,9 +120,9 @@ function IdentityAndContact({
 						/>
 					</div>
 				</FieldGroup>
-			</Section>
+			</FormSection>
 
-			<Section title="Location & contact">
+			<FormSection title="Location & contact">
 				<FieldGroup>
 					<FormInput
 						control={c}
@@ -148,7 +137,7 @@ function IdentityAndContact({
 						placeholder="+998 71 200 00 00"
 					/>
 				</FieldGroup>
-			</Section>
+			</FormSection>
 		</>
 	);
 }
@@ -210,7 +199,7 @@ function CreateBranchForm({
 					}
 				/>
 
-				<Section title="Status">
+				<FormSection title="Status">
 					{/* New branches are always created active (the backend has no create-time
 					    `isActive`), so the Active toggle is shown for parity but locked on. */}
 					<div className="flex flex-row items-center justify-between gap-4">
@@ -231,7 +220,7 @@ function CreateBranchForm({
 						label="Main branch"
 						description="The tenant's primary campus, shown first and used as the default. Turning this on moves the MAIN label off the current main branch."
 					/>
-				</Section>
+				</FormSection>
 			</form>
 		</Form>
 	);
@@ -308,7 +297,7 @@ function EditBranchForm({
 					}
 				/>
 
-				<Section title="Status">
+				<FormSection title="Status">
 					<SwitchField
 						control={form.control}
 						name="isActive"
@@ -326,7 +315,7 @@ function EditBranchForm({
 						}
 						disabled={branch.isMain}
 					/>
-				</Section>
+				</FormSection>
 			</form>
 		</Form>
 	);

@@ -26,6 +26,7 @@ import {
 	createLeadSchema,
 	type CreateLeadFormValues,
 } from '../schemas/lead-form.schema';
+import { FormSection } from '@/components/FormSection';
 
 interface AddLeadSheetProps {
 	open: boolean;
@@ -125,7 +126,7 @@ export function AddLeadSheet({ open, onOpenChange }: AddLeadSheetProps) {
 					onSubmit={(e) => void form.handleSubmit(onSubmit)(e)}
 					className="flex flex-col gap-4"
 				>
-					<div className="flex flex-col gap-4 rounded-xl bg-white p-4">
+					<FormSection>
 						<FieldGroup>
 							<div className="grid grid-cols-2 gap-3">
 								<FormInput
@@ -179,7 +180,7 @@ export function AddLeadSheet({ open, onOpenChange }: AddLeadSheetProps) {
 								valueAsNumber
 							/>
 						</FieldGroup>
-					</div>
+					</FormSection>
 				</form>
 			</Form>
 		</FormSheet>

@@ -20,6 +20,7 @@ import {
 import { isApiError } from '@repo/api-client';
 import { toIsoDate } from '@repo/utils';
 
+import { FormSection } from '@/components/FormSection';
 import { FormSheet } from '@/components/FormSheet';
 import { useStaffList } from '@/features/hr/api/staff.queries';
 
@@ -46,10 +47,6 @@ interface EditProps {
 }
 
 type PayrollFormProps = CreateProps | EditProps;
-
-function Section({ children }: { children: React.ReactNode }) {
-	return <div className="flex flex-col gap-4 rounded-xl bg-white p-4">{children}</div>;
-}
 
 /** Current month [start, end] as YYYY-MM-DD, computed at call time (never module scope). */
 function currentMonthRange(): { start: string; end: string } {
@@ -126,7 +123,7 @@ function CreatePayrollForm({
 				onSubmit={(e) => void form.handleSubmit(onSubmit)(e)}
 				className="flex flex-col gap-4"
 			>
-				<Section>
+				<FormSection>
 					<FieldGroup>
 						<FormSelect
 							control={form.control}
@@ -148,9 +145,9 @@ function CreatePayrollForm({
 							/>
 						</div>
 					</FieldGroup>
-				</Section>
+				</FormSection>
 
-				<Section>
+				<FormSection>
 					<FormField
 						control={form.control}
 						name="autoCalculate"
@@ -209,7 +206,7 @@ function CreatePayrollForm({
 							}
 						/>
 					</div>
-				</Section>
+				</FormSection>
 			</form>
 		</Form>
 	);
@@ -295,7 +292,7 @@ function EditPayrollForm({
 				onSubmit={(e) => void form.handleSubmit(onSubmit)(e)}
 				className="flex flex-col gap-4"
 			>
-				<Section>
+				<FormSection>
 					<FieldGroup>
 						<div className="grid grid-cols-2 gap-3">
 							<FormInput
@@ -316,9 +313,9 @@ function EditPayrollForm({
 							/>
 						</div>
 					</FieldGroup>
-				</Section>
+				</FormSection>
 
-				<Section>
+				<FormSection>
 					<span className="text-sm font-semibold text-muted-foreground">
 						Breakdown
 					</span>
@@ -350,7 +347,7 @@ function EditPayrollForm({
 							/>
 						</div>
 					</FieldGroup>
-				</Section>
+				</FormSection>
 			</form>
 		</Form>
 	);

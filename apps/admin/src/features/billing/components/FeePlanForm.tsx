@@ -13,6 +13,7 @@ import {
 } from '@repo/ui';
 import { isApiError } from '@repo/api-client';
 
+import { FormSection } from '@/components/FormSection';
 import { FormSheet } from '@/components/FormSheet';
 import { useBranches } from '@/api/branches';
 
@@ -48,10 +49,6 @@ interface EditProps {
 }
 
 type FeePlanFormProps = CreateProps | EditProps;
-
-function Section({ children }: { children: React.ReactNode }) {
-	return <div className="flex flex-col gap-4 rounded-xl bg-white p-4">{children}</div>;
-}
 
 /** Branch options with a leading "shared across all branches" choice. */
 function useBranchOptions() {
@@ -107,7 +104,7 @@ function CreateFeePlanForm({
 				onSubmit={(e) => void form.handleSubmit(onSubmit)(e)}
 				className="flex flex-col gap-4"
 			>
-				<Section>
+				<FormSection>
 					<FieldGroup>
 						<FormInput
 							control={form.control}
@@ -151,7 +148,7 @@ function CreateFeePlanForm({
 							/>
 						</div>
 					</FieldGroup>
-				</Section>
+				</FormSection>
 			</form>
 		</Form>
 	);
@@ -230,7 +227,7 @@ function EditFeePlanForm({
 				onSubmit={(e) => void form.handleSubmit(onSubmit)(e)}
 				className="flex flex-col gap-4"
 			>
-				<Section>
+				<FormSection>
 					<FieldGroup>
 						<FormInput
 							control={form.control}
@@ -275,7 +272,7 @@ function EditFeePlanForm({
 							options={FEE_PLAN_STATUS_OPTIONS}
 						/>
 					</FieldGroup>
-				</Section>
+				</FormSection>
 
 				<FeePlanGroupsSection feePlanId={feePlan.id} />
 			</form>

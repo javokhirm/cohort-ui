@@ -19,6 +19,8 @@ import {
 } from '@repo/ui';
 import { formatDate } from '@repo/utils';
 
+import { FormSection } from '@/components/FormSection';
+
 import { useStaffMember, type StaffResponse } from '../api/staff.queries';
 import { useUpdateStaff } from '../api/staff.mutations';
 import {
@@ -38,17 +40,6 @@ const STATUS_OPTIONS = [
 	{ value: 'ON_LEAVE', label: 'On leave' },
 	{ value: 'TERMINATED', label: 'Terminated' },
 ];
-
-function Section({ heading, children }: { heading: string; children: React.ReactNode }) {
-	return (
-		<div className="flex flex-col gap-4 rounded-xl border border-border bg-card p-5 shadow-xs">
-			<p className="text-[11px] font-semibold uppercase tracking-widest text-muted-foreground">
-				{heading}
-			</p>
-			{children}
-		</div>
-	);
-}
 
 /**
  * A labelled, non-editable value. Name, contact and start date live on the user
@@ -119,7 +110,10 @@ function EditStaffForm({
 				onSubmit={(e) => void form.handleSubmit(onSubmit)(e)}
 				className="flex flex-col gap-4"
 			>
-				<Section heading="Profile">
+				<FormSection
+					title="Profile"
+					className="border border-border bg-card p-5 shadow-xs"
+				>
 					<FieldGroup>
 						<ReadOnlyField label="Full name" value={fullName} />
 						<FormInput
@@ -129,9 +123,12 @@ function EditStaffForm({
 							placeholder="e.g. Senior IELTS Teacher"
 						/>
 					</FieldGroup>
-				</Section>
+				</FormSection>
 
-				<Section heading="Contact">
+				<FormSection
+					title="Contact"
+					className="border border-border bg-card p-5 shadow-xs"
+				>
 					<FieldGroup>
 						<div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
 							<ReadOnlyField label="Phone" value={staff.user.phone} />
@@ -141,9 +138,12 @@ function EditStaffForm({
 							/>
 						</div>
 					</FieldGroup>
-				</Section>
+				</FormSection>
 
-				<Section heading="Employment">
+				<FormSection
+					title="Employment"
+					className="border border-border bg-card p-5 shadow-xs"
+				>
 					<FieldGroup>
 						<div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
 							<FormSelect
@@ -188,7 +188,7 @@ function EditStaffForm({
 							placeholder="e.g. IELTS, General English"
 						/>
 					</FieldGroup>
-				</Section>
+				</FormSection>
 			</form>
 		</Form>
 	);

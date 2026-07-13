@@ -13,6 +13,7 @@ import {
 	toast,
 } from '@repo/ui';
 
+import { FormSection } from '@/components/FormSection';
 import { FormSheet } from '@/components/FormSheet';
 
 import {
@@ -40,10 +41,6 @@ interface EditProps {
 }
 
 type DiscountFormProps = CreateProps | EditProps;
-
-function Section({ children }: { children: React.ReactNode }) {
-	return <div className="flex flex-col gap-4 rounded-xl bg-white p-4">{children}</div>;
-}
 
 function CreateDiscountForm({
 	onSuccess,
@@ -89,7 +86,7 @@ function CreateDiscountForm({
 				onSubmit={(e) => void form.handleSubmit(onSubmit)(e)}
 				className="flex flex-col gap-4"
 			>
-				<Section>
+				<FormSection>
 					<FieldGroup>
 						<FormInput
 							control={form.control}
@@ -141,7 +138,7 @@ function CreateDiscountForm({
 							/>
 						</div>
 					</FieldGroup>
-				</Section>
+				</FormSection>
 			</form>
 		</Form>
 	);
@@ -204,7 +201,7 @@ function EditDiscountForm({
 				onSubmit={(e) => void form.handleSubmit(onSubmit)(e)}
 				className="flex flex-col gap-4"
 			>
-				<Section>
+				<FormSection>
 					<FieldGroup>
 						<FormInput
 							control={form.control}
@@ -261,7 +258,7 @@ function EditDiscountForm({
 							options={DISCOUNT_STATUS_OPTIONS}
 						/>
 					</FieldGroup>
-				</Section>
+				</FormSection>
 			</form>
 		</Form>
 	);
