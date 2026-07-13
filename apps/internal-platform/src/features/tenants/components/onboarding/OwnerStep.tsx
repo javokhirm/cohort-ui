@@ -1,4 +1,12 @@
-import { Button, Card, CardContent, Input, Label, PhoneInput } from '@repo/ui';
+import {
+	Button,
+	Card,
+	CardContent,
+	Input,
+	Label,
+	PasswordInput,
+	PhoneInput,
+} from '@repo/ui';
 import { UZ_PHONE_REGEX } from '@repo/utils';
 
 import type { OnboardFormData } from './types';
@@ -78,9 +86,8 @@ export function OwnerStep({
 					</div>
 					<div className="flex flex-col gap-1.5">
 						<Label htmlFor="owner-password">Temporary password</Label>
-						<Input
+						<PasswordInput
 							id="owner-password"
-							type="password"
 							value={data.ownerPassword}
 							onChange={(e) => onChange({ ownerPassword: e.target.value })}
 							placeholder="Min. 8 characters"

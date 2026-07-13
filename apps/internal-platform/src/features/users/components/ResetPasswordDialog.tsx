@@ -11,12 +11,7 @@ import {
 	DialogHeader,
 	DialogTitle,
 	Form,
-	FormControl,
-	FormField,
-	FormItem,
-	FormLabel,
-	FormMessage,
-	Input,
+	FormPasswordInput,
 	Spinner,
 } from '@repo/ui';
 
@@ -69,23 +64,12 @@ export function ResetPasswordDialog({
 						onSubmit={form.handleSubmit((values) => mutation.mutate(values))}
 						className="flex flex-col gap-4"
 					>
-						<FormField
+						<FormPasswordInput
 							control={form.control}
 							name="newPassword"
-							render={({ field }) => (
-								<FormItem>
-									<FormLabel>New password</FormLabel>
-									<FormControl>
-										<Input
-											type="password"
-											placeholder="Min. 8 characters"
-											autoComplete="new-password"
-											{...field}
-										/>
-									</FormControl>
-									<FormMessage />
-								</FormItem>
-							)}
+							label="New password"
+							placeholder="Min. 8 characters"
+							autoComplete="new-password"
 						/>
 						{mutation.isError && (
 							<p className="text-sm text-destructive">

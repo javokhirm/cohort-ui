@@ -8,13 +8,8 @@ import {
 	Button,
 	FieldGroup,
 	Form,
-	FormControl,
-	FormField,
-	FormItem,
-	FormLabel,
-	FormMessage,
+	FormPasswordInput,
 	FormPhoneInput,
-	Input,
 	Spinner,
 } from '@repo/ui';
 
@@ -89,23 +84,12 @@ export function LoginForm({ onAuthenticated }: LoginFormProps) {
 								label="Phone number"
 								autoComplete="username"
 							/>
-							<FormField
+							<FormPasswordInput
 								control={form.control}
 								name="password"
-								render={({ field }) => (
-									<FormItem>
-										<FormLabel>Password</FormLabel>
-										<FormControl>
-											<Input
-												type="password"
-												autoComplete="current-password"
-												placeholder="••••••••••"
-												{...field}
-											/>
-										</FormControl>
-										<FormMessage />
-									</FormItem>
-								)}
+								label="Password"
+								autoComplete="current-password"
+								placeholder="••••••••••"
 							/>
 							{serverError && (
 								<Alert variant="destructive">

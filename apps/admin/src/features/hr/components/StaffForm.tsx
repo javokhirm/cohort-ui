@@ -8,6 +8,7 @@ import {
 	Form,
 	FormDatePicker,
 	FormInput,
+	FormPasswordInput,
 	FormPhoneInput,
 	FormSelect,
 	Spinner,
@@ -169,11 +170,10 @@ function CreateStaffForm({
 
 				<FormSection title="Access">
 					<FieldGroup>
-						<FormInput
+						<FormPasswordInput
 							control={form.control}
 							name="password"
 							label="Password"
-							type="password"
 							autoComplete="new-password"
 							placeholder="Min. 8 characters"
 						/>

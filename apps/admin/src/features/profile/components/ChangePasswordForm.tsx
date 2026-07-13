@@ -11,7 +11,7 @@ import {
 	CardTitle,
 	FieldGroup,
 	Form,
-	FormInput,
+	FormPasswordInput,
 	Spinner,
 	toast,
 } from '@repo/ui';
@@ -57,19 +57,17 @@ export function ChangePasswordForm() {
 						className="flex max-w-sm flex-col gap-4"
 					>
 						<FieldGroup>
-							<FormInput
+							<FormPasswordInput
 								control={form.control}
 								name="newPassword"
 								label="New password"
-								type="password"
 								autoComplete="new-password"
 								placeholder="Min. 8 characters"
 							/>
-							<FormInput
+							<FormPasswordInput
 								control={form.control}
 								name="confirmPassword"
 								label="Confirm new password"
-								type="password"
 								autoComplete="new-password"
 								placeholder="Re-enter the new password"
 							/>
