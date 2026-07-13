@@ -3,8 +3,6 @@ import type { ScheduleDay } from '../api/groups.queries';
 import { hhmm } from '../lib/group-options';
 import { generateSessionDates } from '../lib/session-preview';
 
-const PREVIEW_LIMIT = 7;
-
 interface SessionPreviewCardProps {
 	days: ScheduleDay[];
 	startDate?: string;
@@ -20,11 +18,10 @@ export function SessionPreviewCard({
 	startTime,
 }: SessionPreviewCardProps) {
 	const dates = generateSessionDates(days, startDate, endDate);
-	const visible = dates.slice(0, PREVIEW_LIMIT);
 
 	return (
-		<div className="flex h-fit flex-col gap-3 rounded-xl border border-border bg-card p-4 shadow-xs">
-			<div>
+		<div className="flex h-fit flex-col rounded-xl border border-border bg-card shadow-xs">
+			<div className="p-4">
 				<span className="text-sm font-semibold">Session preview</span>
 				<p className="text-xs text-muted-foreground">
 					{dates.length > 0 ? (
@@ -41,9 +38,9 @@ export function SessionPreviewCard({
 				</p>
 			</div>
 
-			{visible.length > 0 && (
-				<ul className="flex flex-col gap-2">
-					{visible.map((date) => (
+			{dates.length > 0 && (
+				<ul className="flex max-h-96 p-4 flex-col gap-2 overflow-y-auto">
+					{dates.map((date) => (
 						<li
 							key={date}
 							className="flex items-center justify-between text-sm text-foreground"
@@ -58,10 +55,6 @@ export function SessionPreviewCard({
 						</li>
 					))}
 				</ul>
-			)}
-
-			{dates.length > PREVIEW_LIMIT && (
-				<span className="text-center text-xs text-muted-foreground">+ more…</span>
 			)}
 		</div>
 	);
