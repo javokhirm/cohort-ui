@@ -25,6 +25,8 @@ jobs:
             image: cohort-web-admin
           - app: internal-platform
             image: cohort-web-internal
+          - app: teacher
+            image: cohort-web-teach
     steps:
       - uses: actions/checkout@v4
 
@@ -67,8 +69,9 @@ jobs:
             echo "${{ secrets.GITHUB_TOKEN }}" | docker login ghcr.io -u ${{ github.actor }} --password-stdin
             export ADMIN_IMAGE=ghcr.io/${{ github.repository_owner }}/cohort-web-admin:${{ github.sha }}
             export INTERNAL_IMAGE=ghcr.io/${{ github.repository_owner }}/cohort-web-internal:${{ github.sha }}
+            export TEACH_IMAGE=ghcr.io/${{ github.repository_owner }}/cohort-web-teach:${{ github.sha }}
             COMPOSE="docker compose -f docker-compose.web.yml"
 
             $COMPOSE pull
-            $COMPOSE up -d --no-deps --wait web-admin web-internal
+            $COMPOSE up -d --no-deps --wait web-admin web-internal web-teach
             docker image prune -f

@@ -1,19 +1,28 @@
 # Web deployment (single Hetzner VPS)
 
-The two SPAs build into tiny nginx images (see [../Dockerfile](../Dockerfile))
+The three SPAs build into tiny nginx images (see [../Dockerfile](../Dockerfile))
 and run as two Compose stacks on the same VPS as the API, behind the shared
 edge Caddy (`cohort-be/deploy/`), which terminates TLS via Let's Encrypt —
 no certbot, no manual cert work.
 
-| Stack    | Dir                    | Domains                                         | Deploys on     |
-| -------- | ---------------------- | ----------------------------------------------- | -------------- |
-| web-prod | `/opt/cohort/web-prod` | `admin.cohort.uz`, `internal.cohort.uz`         | push to `main` |
-| web-dev  | `/opt/cohort/web-dev`  | `admin-dev.cohort.uz`, `internal-dev.cohort.uz` | push to `dev`  |
+| Stack    | Dir                    | Domains                                                                | Deploys on     |
+| -------- | ---------------------- | ---------------------------------------------------------------------- | -------------- |
+| web-prod | `/opt/cohort/web-prod` | `admin.cohort.uz`, `internal.cohort.uz`, `teach.cohort.uz`             | push to `main` |
+| web-dev  | `/opt/cohort/web-dev`  | `admin-dev.cohort.uz`, `internal-dev.cohort.uz`, `teach-dev.cohort.uz` | push to `dev`  |
 
 Caddy routes hostname → container alias (`web-admin-prod`, `web-internal-prod`,
-`*-dev`) over the external `edge` network. The containers publish no host ports
-and hold no secrets — `VITE_*` config is compile-time and baked into the image
-by CI.
+`web-teach-prod`, `*-dev`) over the external `edge` network. The containers
+publish no host ports and hold no secrets — `VITE_*` config is compile-time and
+baked into the image by CI.
+
+The app dir → image → host mapping (they deliberately differ; the image and host
+follow the API *surface*, not the folder):
+
+| App dir             | Surface       | Image                  | Prod host            |
+| ------------------- | ------------- | ---------------------- | -------------------- |
+| `admin`             | `/manage`     | `cohort-web-admin`     | `admin.cohort.uz`    |
+| `internal-platform` | `/super-admin`| `cohort-web-internal`  | `internal.cohort.uz` |
+| `teacher`           | `/teach`      | `cohort-web-teach`     | `teach.cohort.uz`    |
 
 ## 1. DNS (cohort.uz panel)
 
@@ -21,11 +30,14 @@ by CI.
 | ---- | -------------- | ------ | --- |
 | A    | `admin`        | VPS_IP | 300 |
 | A    | `internal`     | VPS_IP | 300 |
+| A    | `teach`        | VPS_IP | 300 |
 | A    | `admin-dev`    | VPS_IP | 300 |
 | A    | `internal-dev` | VPS_IP | 300 |
+| A    | `teach-dev`    | VPS_IP | 300 |
 
 The CAA record (`@ → 0 issue "letsencrypt.org"`) from the backend setup already
-authorizes issuance. Verify: `dig +short admin.cohort.uz internal.cohort.uz`.
+authorizes issuance. Verify:
+`dig +short admin.cohort.uz internal.cohort.uz teach.cohort.uz`.
 Certs are issued automatically by the edge Caddy once DNS resolves — until
 then it retries with backoff, which is harmless.
 
@@ -69,8 +81,9 @@ gh variable set DEV_API_ORIGIN  --body "https://api-dev.cohort.uz"
 
 ## 4. Deploy flow
 
-Push to `main`/`dev` → the workflow builds both apps (Docker matrix, pushed to
-GHCR as `cohort-web-admin` / `cohort-web-internal`, tagged `latest`|`dev` +
+Push to `main`/`dev` → the workflow builds all three apps (Docker matrix, pushed
+to GHCR as `cohort-web-admin` / `cohort-web-internal` / `cohort-web-teach`,
+tagged `latest`|`dev` +
 git SHA) → SSH to the VPS → `pull` + `up -d --wait`. Healthchecks plus the edge
 Caddy's `lb_try_duration` retries make the ~1s container swap invisible to
 users. Re-run manually (e.g. after changing a `VITE_*` variable) via
@@ -93,14 +106,16 @@ Instant — every deploy is tagged with its git SHA on GHCR:
 cd /opt/cohort/web-prod
 ADMIN_IMAGE=ghcr.io/<owner>/cohort-web-admin:<previous-sha> \
   docker compose -f docker-compose.web.yml up -d --no-deps --wait web-admin
-# same with INTERNAL_IMAGE / web-internal
+# same with INTERNAL_IMAGE / web-internal and TEACH_IMAGE / web-teach
 ```
 
 ## 6. Verify after a deploy
 
 ```bash
-curl -sI https://admin.cohort.uz | head -5                 # HTTP/2 200, valid LE cert
-curl -s https://admin.cohort.uz/some/deep/route -o /dev/null -w '%{http_code}\n'  # 200 (SPA fallback)
+for host in admin.cohort.uz internal.cohort.uz teach.cohort.uz; do
+  curl -sI "https://$host" | head -1                                              # HTTP/2 200, valid LE cert
+  curl -s "https://$host/some/deep/route" -o /dev/null -w "$host deep: %{http_code}\n"  # 200 (SPA fallback)
+done
 ```
 
 Add HTTP monitors for both prod hostnames in Uptime Kuma

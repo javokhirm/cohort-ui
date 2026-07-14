@@ -156,12 +156,17 @@ The backend exposes **four role-gated API surfaces** (plus a shared, unauthentic
 `/public` surface used by every app for auth). Each role-gated surface becomes its own app
 **when its roadmap phase arrives** — today `admin` and `internal-platform` exist:
 
-| App                       | Backend surface         | Roles                 |
-| ------------------------- | ----------------------- | --------------------- |
-| `admin` (now)             | `/api/v1/manage/*`      | OWNER, ADMIN, MANAGER |
-| `internal-platform` (now) | `/api/v1/super-admin/*` | SUPER_ADMIN           |
-| `teacher` (future)        | `/api/v1/teach/*`       | TEACHER               |
-| `portal` (future)         | `/api/v1/portal/*`      | STUDENT, PARENT       |
+| App                       | Backend surface         | Roles                 | Host                 |
+| ------------------------- | ----------------------- | --------------------- | -------------------- |
+| `admin` (now)             | `/api/v1/manage/*`      | OWNER, ADMIN, MANAGER | `admin.cohort.uz`    |
+| `internal-platform` (now) | `/api/v1/super-admin/*` | SUPER_ADMIN           | `internal.cohort.uz` |
+| `teacher` (now)           | `/api/v1/teach/*`       | TEACHER               | `teach.cohort.uz`    |
+| `portal` (future)         | `/api/v1/portal/*`      | STUDENT, PARENT       | —                    |
+
+> The `/api/v1/teach/*` surface is **shipped** (schedule, groups, attendance,
+> assessments, materials, student profiles, grading scales) — the teacher app is
+> not building ahead of it. Note there is **no `/teach/me`**: a teacher's identity
+> comes from the login/refresh `user` summary. `portal` remains unbuilt on both sides.
 
 Every app also talks to `/api/v1/public/*` for login/refresh. Inside an app, `src/features/*`
 folders mirror the backend domains (`people`, `academics`, `billing`, …) — grouped by what
@@ -174,7 +179,8 @@ changes together, so tightly-coupled backend domains may share one feature
 
 Cohort is multi-tenant: one education-center _business_ (tenant) with one or many
 _branches_. **A user belongs to exactly one tenant**, and every frontend is served from one
-fixed host (admin console → `admin.cohort.uz`, super admin console → `internal.cohort.uz`). The backend resolves the tenant from the user's single membership at
+fixed host (admin console → `admin.cohort.uz`, super admin console → `internal.cohort.uz`,
+teacher app → `teach.cohort.uz`). The backend resolves the tenant from the user's single membership at
 login and scopes every request by the JWT `tenantId`. The frontend serves **one build for
 all tenants** — never bake a tenant into the build. Multi-branch
 users pick their view in a global, multi-select **branch selector**; the selection is

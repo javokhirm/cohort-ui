@@ -47,6 +47,7 @@ export * from './components/composed/form-money-input';
 export * from './components/composed/form-password-input';
 export * from './components/composed/form-phone-input';
 export * from './components/composed/form-select';
+export * from './components/composed/login-card';
 export * from './components/composed/money-input';
 export * from './components/composed/locale-switcher';
 export * from './components/composed/otp-input';
