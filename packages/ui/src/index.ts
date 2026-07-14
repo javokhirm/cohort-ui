@@ -64,7 +64,9 @@ export * from './components/shell/app-topbar';
 export * from './components/shell/bottom-tab-bar';
 export * from './components/shell/notification-bell';
 export * from './components/shell/sticky-action-bar';
+export * from './components/shell/theme-toggle';
 
 // ─── Utilities ────────────────────────────────────────────────────────────────
 export { cn } from './lib/utils';
 export * from './lib/status';
+export * from './lib/theme';

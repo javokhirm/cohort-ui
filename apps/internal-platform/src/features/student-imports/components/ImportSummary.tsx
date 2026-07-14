@@ -17,7 +17,7 @@ function Stat({
 		tone === 'danger'
 			? 'text-destructive'
 			: tone === 'warn'
-				? 'text-amber-600 dark:text-amber-500'
+				? 'text-tone-amber-fg'
 				: tone === 'muted'
 					? 'text-muted-foreground'
 					: 'text-foreground';

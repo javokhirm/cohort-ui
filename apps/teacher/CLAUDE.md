@@ -22,7 +22,7 @@ The teacher app is the classroom console for teaching staff. It serves the **`/a
 - The shell is composed from `@repo/ui` shell primitives — **`AppSidebar`, `AppTopbar`, `BottomTabBar`**. Do not hand-roll nav chrome; extend the primitives in `@repo/ui` instead.
 - **One nav list drives both chromes.** `layouts/nav.ts` is the single source: the desktop sidebar (`md:` and up) and the mobile bottom tabs render from it, so they cannot drift.
 - Mobile-first matters here — teachers take attendance on a phone. Every screen must work at 375px.
-- **Theme**: light by default, dark via the `dark` class on `<html>` (`lib/theme.ts`, persisted). Both palettes already exist in `@repo/ui`; never add app-local color tokens.
+- **Theme**: light and dark are both supported, switchable via the `<ThemeToggle />` icon in the topbar (`routes/authed-layout.tsx`). Owned by `@repo/ui` (`initTheme` in `main.tsx`); first visit follows the OS `prefers-color-scheme`, then an explicit toggle persists to `cohort.teacher.theme` in `localStorage` and wins from then on. Both palettes already exist in `@repo/ui`; never add app-local color tokens.
 
 ---
 

@@ -32,6 +32,13 @@ updates on payroll.
 
 ---
 
+## Theme
+
+- Light and dark are both supported, switchable via the `<ThemeToggle />` icon in `layouts/Header.tsx`. Owned by `@repo/ui` (`initTheme` in `main.tsx`); first visit follows the OS `prefers-color-scheme`, then an explicit toggle persists to `cohort.admin.theme` in `localStorage` and wins from then on.
+- Never add app-local color tokens, hardcoded hex, or `white`/`black`/`slate-*` utility classes — every surface must resolve through `@repo/ui`'s semantic tokens (`bg-card`, `text-muted-foreground`, `tone-*`, …) so it repaints correctly in both palettes.
+
+---
+
 ## Conventions quick-reference
 
 - Import UI/utils/client from the `@repo/*` barrels only; the `@/` alias points at `src/`. Never

@@ -2,7 +2,6 @@ import {
 	Bell,
 	ChevronDown,
 	LogOut,
-	Moon,
 	Search,
 	Settings,
 	ShieldCheck,
@@ -17,6 +16,7 @@ import {
 	DropdownMenuLabel,
 	DropdownMenuSeparator,
 	DropdownMenuTrigger,
+	ThemeToggle,
 } from '@repo/ui';
 import { useAuth, useOperator } from '@/features/auth/hooks';
 
@@ -34,29 +34,29 @@ export function Header() {
 		<header className="z-40 flex h-13.5 shrink-0 items-center gap-3 border-b border-(--console-line) bg-(--console) px-4">
 			{/* Logo + context badges */}
 			<div className="flex items-center gap-2.5">
-				<div className="flex size-7.5 shrink-0 items-center justify-center rounded-lg bg-primary text-sm font-extrabold text-white">
+				<div className="flex size-7.5 shrink-0 items-center justify-center rounded-lg bg-primary text-sm font-extrabold text-primary-foreground">
 					E
 				</div>
 				<div className="flex items-center gap-2">
-					<span className="text-sm font-bold text-white">Cohort</span>
-					<span className="flex items-center gap-1.5 rounded-md border border-amber-900 bg-amber-950 px-2 py-0.5 text-[10px] font-bold tracking-wide text-amber-400">
+					<span className="text-sm font-bold text-(--console-fg)">Cohort</span>
+					<span className="flex items-center gap-1.5 rounded-md border border-tone-amber-fg/25 bg-tone-amber-bg px-2 py-0.5 text-[10px] font-bold tracking-wide text-tone-amber-fg">
 						<ShieldCheck className="size-3" />
 						INTERNAL · PLATFORM CONSOLE
 					</span>
-					<span className="flex items-center gap-1 rounded-md border border-green-900 bg-green-950 px-2 py-0.5 text-[10px] font-bold tracking-wide text-green-400">
-						<span className="size-1.5 rounded-full bg-green-400" />
+					<span className="flex items-center gap-1 rounded-md border border-tone-green-fg/25 bg-tone-green-bg px-2 py-0.5 text-[10px] font-bold tracking-wide text-tone-green-fg">
+						<span className="size-1.5 rounded-full bg-tone-green-fg" />
 						PROD
 					</span>
 				</div>
 			</div>
 
 			{/* Global search trigger */}
-			<div className="ml-3 flex h-8.5 max-w-120 flex-1 cursor-text items-center gap-2 rounded-lg border border-(--console-line) bg-white/4 px-3 text-(--console-muted-fg) hover:bg-white/8">
+			<div className="ml-3 flex h-8.5 max-w-120 flex-1 cursor-text items-center gap-2 rounded-lg border border-(--console-line) bg-(--console-field) px-3 text-(--console-muted-fg) hover:bg-(--console-hover)">
 				<Search className="size-3.5 shrink-0" />
 				<span className="flex-1 truncate text-[13px]">
 					Search tenants, users, subscriptions…
 				</span>
-				<kbd className="rounded border border-(--console-line) bg-white/[0.07] px-1.5 py-0.5 text-[11px] font-semibold">
+				<kbd className="rounded border border-(--console-line) bg-(--console-field) px-1.5 py-0.5 text-[11px] font-semibold">
 					⌘K
 				</kbd>
 			</div>
@@ -67,20 +67,14 @@ export function Header() {
 			<button
 				type="button"
 				aria-label="Notifications"
-				className="relative flex size-8.5 items-center justify-center rounded-lg text-slate-300 hover:bg-white/8"
+				className="relative flex size-8.5 items-center justify-center rounded-lg text-(--console-muted-fg) hover:bg-(--console-hover) hover:text-(--console-fg)"
 			>
 				<Bell className="size-4" />
-				<span className="absolute right-1.75 top-1.75 size-1.75 rounded-full border-[1.5px] border-(--console) bg-red-400" />
+				<span className="absolute right-1.75 top-1.75 size-1.75 rounded-full border-[1.5px] border-(--console) bg-destructive" />
 			</button>
 
-			{/* Theme toggle (static for now) */}
-			<button
-				type="button"
-				aria-label="Toggle theme"
-				className="flex size-8.5 items-center justify-center rounded-lg text-slate-300 hover:bg-white/8"
-			>
-				<Moon className="size-4" />
-			</button>
+			{/* Theme toggle */}
+			<ThemeToggle className="size-8.5 rounded-lg text-(--console-muted-fg) hover:bg-(--console-hover) hover:text-(--console-fg)" />
 
 			{/* Divider */}
 			<div className="h-6 w-px bg-(--console-line)" />
@@ -90,14 +84,14 @@ export function Header() {
 				<DropdownMenuTrigger asChild>
 					<button
 						type="button"
-						className="flex cursor-pointer items-center gap-2 rounded-lg px-2 py-1 hover:bg-white/8"
+						className="flex cursor-pointer items-center gap-2 rounded-lg px-2 py-1 hover:bg-(--console-hover)"
 					>
-						<div className="flex size-7.5 shrink-0 items-center justify-center rounded-lg bg-primary text-xs font-bold text-white">
+						<div className="flex size-7.5 shrink-0 items-center justify-center rounded-lg bg-primary text-xs font-bold text-primary-foreground">
 							{initials}
 						</div>
 						{fullName && (
 							<div className="hidden leading-tight sm:block">
-								<div className="text-[12.5px] font-semibold text-white">
+								<div className="text-[12.5px] font-semibold text-(--console-fg)">
 									{fullName}
 								</div>
 								<div className="text-[10px] font-bold tracking-[0.04em] text-(--console-accent-fg)">

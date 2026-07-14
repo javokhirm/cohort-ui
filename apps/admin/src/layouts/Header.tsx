@@ -1,4 +1,4 @@
-import { Check, Globe, PanelLeft, Search, Sun } from 'lucide-react';
+import { Check, Globe, PanelLeft, Search } from 'lucide-react';
 
 import {
 	DropdownMenu,
@@ -7,6 +7,7 @@ import {
 	DropdownMenuSeparator,
 	DropdownMenuTrigger,
 	NotificationBell,
+	ThemeToggle,
 } from '@repo/ui';
 
 import { BranchSelector } from './BranchSelector';
@@ -75,13 +76,7 @@ export function Header({ sidebarCollapsed, onSidebarToggle }: HeaderProps) {
 			<NotificationBell unreadCount={0} />
 
 			{/* Theme toggle */}
-			<button
-				type="button"
-				aria-label="Toggle theme"
-				className="flex size-8 items-center justify-center rounded-lg text-muted-foreground hover:bg-muted"
-			>
-				<Sun className="size-4" />
-			</button>
+			<ThemeToggle className="size-8 rounded-lg" />
 		</header>
 	);
 }

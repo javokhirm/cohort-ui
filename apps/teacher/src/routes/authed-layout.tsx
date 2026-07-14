@@ -1,7 +1,7 @@
 import { useEffect } from 'react';
 import { Outlet, useNavigate, useRouterState } from '@tanstack/react-router';
 
-import { AppSidebar, AppTopbar, BottomTabBar } from '@repo/ui';
+import { AppSidebar, AppTopbar, BottomTabBar, ThemeToggle } from '@repo/ui';
 
 import { useSessionStore } from '@/store/sessionStore';
 import { BranchSelector } from '@/layouts/BranchSelector';
@@ -69,7 +69,12 @@ export function AuthedLayout() {
 					title={active.title}
 					subtitle={active.subtitle}
 					branch={<BranchSelector />}
-					actions={<OverflowMenu />}
+					actions={
+						<>
+							<ThemeToggle />
+							<OverflowMenu />
+						</>
+					}
 				/>
 
 				<main className="flex-1 overflow-y-auto bg-muted px-4 py-5 md:px-6 md:py-7">

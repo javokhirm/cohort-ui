@@ -55,16 +55,16 @@ export function PlanCard({
 
 				<ul className="flex flex-col gap-2">
 					<li className="flex items-center gap-2 text-sm">
-						<Check className="size-4 shrink-0 text-green-600" />
+						<Check className="size-4 shrink-0 text-tone-green-fg" />
 						{limitLabel(plan.maxBranches, 'branches')}
 					</li>
 					<li className="flex items-center gap-2 text-sm">
-						<Check className="size-4 shrink-0 text-green-600" />
+						<Check className="size-4 shrink-0 text-tone-green-fg" />
 						{limitLabel(plan.maxStudents, 'students')}
 					</li>
 					{features.map((f) => (
 						<li key={f} className="flex items-center gap-2 text-sm">
-							<Check className="size-4 shrink-0 text-green-600" />
+							<Check className="size-4 shrink-0 text-tone-green-fg" />
 							{FEATURE_LABELS[f].label}
 						</li>
 					))}

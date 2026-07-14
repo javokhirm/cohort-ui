@@ -41,7 +41,7 @@ export function ProfilePage() {
 			<Card>
 				<CardContent className="flex items-center gap-5 p-6">
 					<Avatar className="size-16 shrink-0 rounded-xl">
-						<AvatarFallback className="rounded-xl bg-primary text-xl font-bold text-white">
+						<AvatarFallback className="rounded-xl bg-primary text-xl font-bold text-primary-foreground">
 							{initials}
 						</AvatarFallback>
 					</Avatar>

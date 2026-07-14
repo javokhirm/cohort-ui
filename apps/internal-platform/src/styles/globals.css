@@ -1,16 +1,33 @@
 /* Internal platform styles. The design system (Tailwind v4 import + Cohort tokens,
-   light & dark) lives in @repo/ui; the app runs in the dark "console" palette
-   (`<html class="dark">`). Scan this app's own sources for utility classes. */
+   light & dark) lives in @repo/ui; the `dark` class on <html> selects the palette
+   (see @repo/ui `lib/theme.ts`). Scan this app's own sources for utility classes. */
 @import '@repo/ui/globals.css';
 
 @source '../**/*.{ts,tsx}';
 
+/* Console chrome — the topbar and sidebar rails, which sit on their own surface
+   rather than the card/background one. Referenced as var(--console-*) through
+   arbitrary Tailwind values (`bg-(--console)`). Both palettes are defined here so
+   the chrome follows the theme; the dark values are the console's original ones. */
 :root {
-	/* Console chrome tokens — referenced via var(--console-*) in arbitrary Tailwind values */
+	--console: #ffffff;
+	--console-line: #e7ebf0;
+	--console-fg: #0f172a;
+	--console-muted-fg: #64748b;
+	--console-accent: #eef2ff;
+	--console-accent-fg: #4338ca;
+	/* Hover wash on chrome controls, and the recessed fill behind the search field. */
+	--console-hover: #f1f5f9;
+	--console-field: #f8fafc;
+}
+
+.dark {
 	--console: #0b1220;
 	--console-line: #1f2c44;
 	--console-fg: #e2e8f0;
 	--console-muted-fg: #64748b;
 	--console-accent: rgba(99, 102, 241, 0.17);
 	--console-accent-fg: #a5b4fc;
+	--console-hover: rgba(255, 255, 255, 0.08);
+	--console-field: rgba(255, 255, 255, 0.04);
 }

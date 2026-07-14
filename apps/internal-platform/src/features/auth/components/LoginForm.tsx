@@ -50,12 +50,12 @@ function BrandLockup({ compact = false }: { compact?: boolean }) {
 }
 
 /**
- * Dark "Platform Console" marketing rail shown beside the form on large screens.
- * Always rendered on the dark console palette — independent of app theme.
+ * "Platform Console" marketing rail shown beside the form on large screens.
+ * Follows the app theme; the indigo wash reads on both palettes.
  */
 function ConsoleRail() {
 	return (
-		<aside className="relative hidden overflow-hidden border-r border-white/6 bg-background lg:flex lg:w-[46%] lg:max-w-140 lg:flex-col lg:justify-between lg:px-11 lg:py-10">
+		<aside className="relative hidden overflow-hidden border-r border-border bg-background lg:flex lg:w-[46%] lg:max-w-140 lg:flex-col lg:justify-between lg:px-11 lg:py-10">
 			<div
 				aria-hidden
 				className="pointer-events-none absolute inset-0 bg-[radial-gradient(700px_380px_at_80%_-5%,var(--color-primary)_0%,transparent_60%)] opacity-40"

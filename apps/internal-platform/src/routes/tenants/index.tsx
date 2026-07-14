@@ -264,7 +264,7 @@ export function TenantsPage() {
 										className={cn(
 											'min-w-5 rounded px-1 text-center text-xs font-semibold tabular-nums',
 											active
-												? 'bg-white/20 text-primary-foreground'
+												? 'bg-primary-foreground/20 text-primary-foreground'
 												: 'bg-muted text-muted-foreground',
 										)}
 									>
