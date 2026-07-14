@@ -21,6 +21,7 @@ FROM base AS deps
 COPY pnpm-lock.yaml pnpm-workspace.yaml package.json turbo.json ./
 COPY apps/internal-platform/package.json           ./apps/internal-platform/
 COPY apps/admin/package.json           ./apps/admin/
+COPY apps/teacher/package.json           ./apps/teacher/
 COPY packages/api-client/package.json  ./packages/api-client/
 COPY packages/ui/package.json          ./packages/ui/
 COPY packages/utils/package.json       ./packages/utils/

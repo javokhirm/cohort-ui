@@ -25,6 +25,8 @@ jobs:
             image: cohort-web-admin
           - app: internal-platform
             image: cohort-web-internal
+          - app: teacher
+            image: cohort-web-teach
     steps:
       - uses: actions/checkout@v4
 
@@ -54,6 +56,21 @@ jobs:
     needs: build
     runs-on: ubuntu-latest
     steps:
+      - uses: actions/checkout@v4
+
+      # See deploy-web-prod.yml — the repo is the source of truth for the stack
+      # definition; the server copy is never assumed to match.
+      - name: Sync compose file to the VPS (web-dev stack)
+        uses: appleboy/scp-action@v1.0.0
+        with:
+          host: ${{ secrets.VPS_HOST }}
+          username: ${{ secrets.DEPLOY_USER }}
+          key: ${{ secrets.DEPLOY_SSH_KEY }}
+          source: deploy/docker-compose.web.yml
+          target: /opt/cohort/web-dev/
+          strip_components: 1
+          overwrite: true
+
       - name: Deploy to VPS (web-dev stack)
         uses: appleboy/ssh-action@v1.2.0
         with:
@@ -65,10 +82,17 @@ jobs:
             set -e
             cd /opt/cohort/web-dev
             echo "${{ secrets.GITHUB_TOKEN }}" | docker login ghcr.io -u ${{ github.actor }} --password-stdin
+
+            # A missing *_ALIAS yields an empty network alias, not an error — the
+            # deploy would go green while the hostname 502s forever. Fail loudly.
+            for var in ADMIN_ALIAS INTERNAL_ALIAS TEACH_ALIAS; do
+              grep -q "^${var}=" .env || { echo "FATAL: ${var} missing from $(pwd)/.env"; exit 1; }
+            done
             export ADMIN_IMAGE=ghcr.io/${{ github.repository_owner }}/cohort-web-admin:${{ github.sha }}
             export INTERNAL_IMAGE=ghcr.io/${{ github.repository_owner }}/cohort-web-internal:${{ github.sha }}
+            export TEACH_IMAGE=ghcr.io/${{ github.repository_owner }}/cohort-web-teach:${{ github.sha }}
             COMPOSE="docker compose -f docker-compose.web.yml"
 
             $COMPOSE pull
-            $COMPOSE up -d --no-deps --wait web-admin web-internal
+            $COMPOSE up -d --no-deps --wait web-admin web-internal web-teach
             docker image prune -f

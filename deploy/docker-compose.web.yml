@@ -4,7 +4,9 @@
 #   COMPOSE_PROJECT_NAME=cohort-web-prod  (or cohort-web-dev)
 #   ADMIN_ALIAS=web-admin-prod            (or web-admin-dev)    -> Caddy upstream
 #   INTERNAL_ALIAS=web-internal-prod      (or web-internal-dev) -> Caddy upstream
-#   ADMIN_IMAGE / INTERNAL_IMAGE          -> overridden per-SHA by the deploy workflow
+#   TEACH_ALIAS=web-teach-prod            (or web-teach-dev)    -> Caddy upstream
+#   ADMIN_IMAGE / INTERNAL_IMAGE / TEACH_IMAGE
+#                                         -> overridden per-SHA by the deploy workflow
 #
 # No host ports — the shared `edge` network + Caddy front everything (TLS via
 # Let's Encrypt lives in cohort-be/deploy/Caddyfile).
@@ -42,3 +44,10 @@ services:
     networks:
       edge:
         aliases: ["${INTERNAL_ALIAS}"]
+
+  web-teach:
+    <<: *web
+    image: ${TEACH_IMAGE}
+    networks:
+      edge:
+        aliases: ["${TEACH_ALIAS}"]
