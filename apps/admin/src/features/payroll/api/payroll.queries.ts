@@ -16,10 +16,63 @@ import {
 // The generated `@repo/api-client` OpenAPI types are stale and do not yet include
 // payroll; regenerate later via the api-client `gen:api` script and reconcile.
 
-export interface PayrollBreakdown {
+/** Days of the requested period excluded because a live payroll already covers them. */
+export interface PayrollSkippedRange {
+	start: string;
+	end: string;
+	reason: 'ALREADY_PAID';
+	payrollId?: number;
+}
+
+/** One student's contribution to a PERCENT payroll gross. */
+export interface PercentPayrollLine {
+	groupId: number;
+	groupName: string;
+	enrollmentId: number;
+	studentId: number;
+	studentName: string;
+	feePlanId: number;
+	feePlanAmount: number;
+	billingCycle: 'MONTHLY' | 'PER_SESSION';
+	sessionsCounted: number;
+	sessionsTotal: number;
+	earnings: number;
+	amount: number;
+}
+
+/** Legacy/FIXED breakdown — rows without a `type` are FIXED. */
+export interface FixedPayrollBreakdown {
+	type?: 'FIXED';
 	hoursTaught?: number;
 	rate?: number;
 	bonuses?: number;
+	/** Set only when a FULL_TIME salary was prorated around already-paid days. */
+	proratedFactor?: number;
+	skippedRanges?: PayrollSkippedRange[];
+}
+
+/** Server-computed breakdown for PERCENT-paid teachers. */
+export interface PercentPayrollBreakdown {
+	type: 'PERCENT';
+	percent: number;
+	lines: PercentPayrollLine[];
+	bonuses?: number;
+	skippedRanges?: PayrollSkippedRange[];
+}
+
+export type PayrollBreakdown = FixedPayrollBreakdown | PercentPayrollBreakdown;
+
+/** `GET /payrolls/preview` — dry-run of create; nothing is written. */
+export interface PayrollPreviewResponse {
+	staffId: number;
+	payrollType: 'FIXED' | 'PERCENT';
+	periodStart: string;
+	periodEnd: string;
+	/** Every day already covered by live payrolls — creation would 409. */
+	fullyCovered: boolean;
+	grossAmount: number;
+	breakdown: PayrollBreakdown | null;
+	skippedRanges: PayrollSkippedRange[];
 }
 
 /** `GET /payrolls/summary` — true aggregate over every matching payroll (not just a page). */
@@ -100,5 +153,23 @@ export function usePayroll(id: number) {
 		queryKey: payrollKeys.detail(id),
 		queryFn: () => manageApi.get<PayrollResponse>(`/payrolls/${id}`),
 		enabled: id > 0,
+	});
+}
+
+/**
+ * Dry-run of `POST /payrolls` for the create form: the would-be gross, the
+ * per-student lines (PERCENT) and any already-paid days that will be skipped.
+ * Enabled only once staff + a valid period are chosen.
+ */
+export function usePayrollPreview(
+	params: { staffId?: number; periodStart?: string; periodEnd?: string },
+	enabled: boolean,
+) {
+	return useQuery({
+		queryKey: payrollKeys.preview(params),
+		queryFn: () =>
+			manageApi.get<PayrollPreviewResponse>('/payrolls/preview', { params }),
+		enabled,
+		placeholderData: keepPreviousData,
 	});
 }

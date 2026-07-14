@@ -5,6 +5,7 @@ import { manageApi } from '@/api/apiClient';
 import { hrKeys } from './keys';
 import type {
 	EmploymentType,
+	PayrollType,
 	StaffResponse,
 	StaffRoleName,
 	StaffStatus,
@@ -24,6 +25,9 @@ export interface CreateStaffInput {
 	hireDate?: string;
 	employmentType?: EmploymentType;
 	baseSalary?: number;
+	payrollType?: PayrollType;
+	/** Required when `payrollType` is `PERCENT`. */
+	payrollPercent?: number;
 	roleName?: StaffRoleName;
 	/**
 	 * Initial login password (8–128). Applied only when `phone` belongs to a new
@@ -41,6 +45,8 @@ export interface UpdateStaffInput {
 	specialization?: string[];
 	employmentType?: EmploymentType;
 	baseSalary?: number;
+	payrollType?: PayrollType;
+	payrollPercent?: number;
 	status?: StaffStatus;
 }
 

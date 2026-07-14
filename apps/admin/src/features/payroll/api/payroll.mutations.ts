@@ -27,6 +27,8 @@ export interface RunPayrollInput {
 
 export interface RunPayrollResult {
 	created: number;
+	/** Members whose period was already fully covered by live payrolls. */
+	skipped: number;
 	payrolls: PayrollResponse[];
 }
 

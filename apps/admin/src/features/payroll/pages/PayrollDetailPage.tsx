@@ -115,21 +115,107 @@ function PayrollHeader({
 	);
 }
 
+/** "Already paid" ranges recorded on the breakdown (never paid twice). */
+function SkippedRangesNote({ payroll }: { payroll: PayrollResponse }) {
+	const skipped = payroll.breakdown?.skippedRanges ?? [];
+	if (skipped.length === 0) return null;
+	return (
+		<div className="border-b border-border bg-muted/40 px-5 py-3 text-sm text-muted-foreground">
+			{skipped.map((range) => (
+				<p key={`${range.start}-${range.end}`}>
+					{formatDate(range.start)} – {formatDate(range.end)} excluded — already
+					covered by record #{range.payrollId}.
+				</p>
+			))}
+		</div>
+	);
+}
+
 function BreakdownCard({ payroll }: { payroll: PayrollResponse }) {
+	const breakdown = payroll.breakdown;
+
+	// PERCENT records carry server-computed per-student lines; everything else
+	// (legacy rows have no `type`) renders the fixed hours/rate/bonuses shape.
+	if (breakdown?.type === 'PERCENT') {
+		return (
+			<Card className="gap-0 overflow-hidden py-0">
+				<div className="border-b border-border px-5 py-3">
+					<h2 className="text-sm font-semibold">
+						Breakdown — {breakdown.percent}% of student fees
+					</h2>
+				</div>
+				<SkippedRangesNote payroll={payroll} />
+				{breakdown.lines.length === 0 ? (
+					<p className="px-5 py-4 text-sm text-muted-foreground">
+						No enrolled students in this teacher&apos;s groups for the period.
+					</p>
+				) : (
+					<div className="flex flex-col">
+						{breakdown.lines.map((line) => (
+							<div
+								key={line.enrollmentId}
+								className="flex items-center justify-between gap-3 border-b border-border px-5 py-3 last:border-0"
+							>
+								<div className="min-w-0">
+									<div className="truncate text-sm font-medium">
+										{line.studentName}
+									</div>
+									<div className="truncate text-xs text-muted-foreground">
+										{line.groupName} · {line.sessionsCounted}/
+										{line.sessionsTotal} lessons ·{' '}
+										{formatMoney(line.earnings)} earned
+									</div>
+								</div>
+								<span className="shrink-0 text-sm font-semibold tabular-nums">
+									{formatMoney(line.amount)}
+								</span>
+							</div>
+						))}
+						{breakdown.bonuses != null && breakdown.bonuses > 0 && (
+							<div className="flex items-center justify-between border-b border-border px-5 py-3 last:border-0">
+								<span className="text-sm font-medium">Bonuses</span>
+								<span className="text-sm font-semibold tabular-nums">
+									{formatMoney(breakdown.bonuses)}
+								</span>
+							</div>
+						)}
+					</div>
+				)}
+				<div className="flex items-center justify-between bg-muted/40 px-5 py-3.5">
+					<span className="text-sm font-medium text-destructive">
+						Deductions
+					</span>
+					<span className="text-sm font-semibold tabular-nums text-destructive">
+						-{formatMoney(payroll.deductions)}
+					</span>
+				</div>
+				<div className="flex items-center justify-between border-t border-border px-5 py-3.5">
+					<span className="text-sm font-bold">Net pay</span>
+					<span className="text-base font-bold tabular-nums">
+						{formatMoney(payroll.netAmount)}
+					</span>
+				</div>
+			</Card>
+		);
+	}
+
+	// The PERCENT variant returned above; what remains is the FIXED/legacy shape.
+	const fixed = breakdown ?? undefined;
 	const rows = [
-		{ label: 'Hours taught', value: payroll.breakdown?.hoursTaught },
+		{ label: 'Hours taught', value: fixed?.hoursTaught },
 		{
 			label: 'Rate',
-			value:
-				payroll.breakdown?.rate != null
-					? formatMoney(payroll.breakdown.rate)
-					: undefined,
+			value: fixed?.rate != null ? formatMoney(fixed.rate) : undefined,
 		},
 		{
 			label: 'Bonuses',
+			value: fixed?.bonuses != null ? formatMoney(fixed.bonuses) : undefined,
+		},
+		{
+			label: 'Paid share of period',
 			value:
-				payroll.breakdown?.bonuses != null
-					? formatMoney(payroll.breakdown.bonuses)
+				fixed?.proratedFactor != null
+					? `${Math.round(fixed.proratedFactor * 100)}%`
 					: undefined,
 		},
 	].filter((r) => r.value != null);
@@ -139,6 +225,7 @@ function BreakdownCard({ payroll }: { payroll: PayrollResponse }) {
 			<div className="border-b border-border px-5 py-3">
 				<h2 className="text-sm font-semibold">Breakdown</h2>
 			</div>
+			<SkippedRangesNote payroll={payroll} />
 			{rows.length === 0 ? (
 				<p className="px-5 py-4 text-sm text-muted-foreground">
 					No breakdown recorded for this record.

@@ -41,6 +41,11 @@ const STATUS_OPTIONS = [
 	{ value: 'TERMINATED', label: 'Terminated' },
 ];
 
+const PAYROLL_TYPE_OPTIONS = [
+	{ value: 'FIXED', label: 'Fixed salary' },
+	{ value: 'PERCENT', label: '% of student fees' },
+];
+
 /**
  * A labelled, non-editable value. Name, contact and start date live on the user
  * record and are not accepted by `PATCH /manage/staff/:id`, so they are shown
@@ -68,6 +73,8 @@ function EditStaffForm({
 		position: s.position ?? '',
 		employmentType: s.employmentType,
 		baseSalary: s.baseSalary ?? undefined,
+		payrollType: s.payrollType,
+		payrollPercent: s.payrollPercent ?? undefined,
 		specialization: s.specialization.join(', '),
 		status: s.status,
 	});
@@ -76,6 +83,12 @@ function EditStaffForm({
 		resolver: zodResolver(editStaffSchema),
 		defaultValues: toDefaults(staff),
 	});
+
+	// The payroll block is teacher-only; PERCENT swaps the salary input for the
+	// percent share of their groups' course fees.
+	const isTeacher = staff.roles.includes('TEACHER');
+	const payrollType = form.watch('payrollType');
+	const showPercent = isTeacher && payrollType === 'PERCENT';
 
 	useEffect(() => {
 		form.reset(toDefaults(staff));
@@ -96,6 +109,9 @@ function EditStaffForm({
 			position: values.position || undefined,
 			employmentType: values.employmentType,
 			baseSalary: values.baseSalary,
+			payrollType: values.payrollType,
+			payrollPercent:
+				values.payrollType === 'PERCENT' ? values.payrollPercent : undefined,
 			specialization: parseSpecialization(values.specialization),
 			status: values.status,
 		});
@@ -146,11 +162,23 @@ function EditStaffForm({
 				>
 					<FieldGroup>
 						<div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
+							<FormInput
+								control={form.control}
+								name="specialization"
+								label="Subjects / specialization"
+								placeholder="e.g. IELTS, General English"
+							/>
 							<FormSelect
 								control={form.control}
 								name="employmentType"
 								label="Contract"
 								options={EMPLOYMENT_OPTIONS}
+							/>
+						</div>
+						<div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
+							<ReadOnlyField
+								label="Start date"
+								value={staff.hireDate ? formatDate(staff.hireDate) : '—'}
 							/>
 							<FormSelect
 								control={form.control}
@@ -160,33 +188,57 @@ function EditStaffForm({
 							/>
 						</div>
 						<div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
-							<ReadOnlyField
-								label="Start date"
-								value={staff.hireDate ? formatDate(staff.hireDate) : '—'}
-							/>
-							<FormInput
-								control={form.control}
-								name="baseSalary"
-								label="Monthly salary (UZS)"
-								type="number"
-								placeholder="0"
-								onChange={(e) =>
-									form.setValue(
-										'baseSalary',
-										e.target.value === ''
-											? undefined
-											: Number(e.target.value),
-										{ shouldValidate: true },
-									)
-								}
-							/>
+							{isTeacher && (
+								<FormSelect
+									control={form.control}
+									name="payrollType"
+									label="Pay model"
+									options={PAYROLL_TYPE_OPTIONS}
+								/>
+							)}
+							{showPercent ? (
+								<>
+									<FormInput
+										control={form.control}
+										name="payrollPercent"
+										label="Share of student fees (%)"
+										type="number"
+										placeholder="e.g. 50"
+										onChange={(e) =>
+											form.setValue(
+												'payrollPercent',
+												e.target.value === ''
+													? undefined
+													: Number(e.target.value),
+												{ shouldValidate: true },
+											)
+										}
+									/>
+									<p className="text-xs text-muted-foreground">
+										The teacher earns this share of the course fees of
+										students in their groups, prorated by lessons for
+										mid-month joiners and leavers.
+									</p>
+								</>
+							) : (
+								<FormInput
+									control={form.control}
+									name="baseSalary"
+									label="Monthly salary (UZS)"
+									type="number"
+									placeholder="0"
+									onChange={(e) =>
+										form.setValue(
+											'baseSalary',
+											e.target.value === ''
+												? undefined
+												: Number(e.target.value),
+											{ shouldValidate: true },
+										)
+									}
+								/>
+							)}
 						</div>
-						<FormInput
-							control={form.control}
-							name="specialization"
-							label="Subjects / specialization"
-							placeholder="e.g. IELTS, General English"
-						/>
 					</FieldGroup>
 				</FormSection>
 			</form>

@@ -20,4 +20,6 @@ export const payrollKeys = {
 	summary: (filters: PayrollSummaryFilters) =>
 		[...payrollKeys.all, 'summary', filters] as const,
 	detail: (id: number) => [...payrollKeys.all, 'detail', id] as const,
+	preview: (params: { staffId?: number; periodStart?: string; periodEnd?: string }) =>
+		[...payrollKeys.all, 'preview', params] as const,
 };

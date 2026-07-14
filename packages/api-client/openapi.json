@@ -2757,6 +2757,129 @@
         ]
       }
     },
+    "/api/v1/manage/roles": {
+      "get": {
+        "operationId": "RolesController_list",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "List the roles available in this tenant",
+        "tags": [
+          "Manage / Roles"
+        ]
+      }
+    },
+    "/api/v1/manage/users/{userId}/role-assignments": {
+      "get": {
+        "operationId": "UserRoleAssignmentsController_list",
+        "parameters": [
+          {
+            "name": "userId",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "number"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "List a user's role assignments in this tenant",
+        "tags": [
+          "Manage / Role Assignments"
+        ]
+      },
+      "post": {
+        "operationId": "UserRoleAssignmentsController_grant",
+        "parameters": [
+          {
+            "name": "userId",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "number"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CreateRoleAssignmentDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": ""
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Grant a role to a user (leaves other roles intact)",
+        "tags": [
+          "Manage / Role Assignments"
+        ]
+      }
+    },
+    "/api/v1/manage/users/{userId}/role-assignments/{assignmentId}": {
+      "delete": {
+        "operationId": "UserRoleAssignmentsController_revoke",
+        "parameters": [
+          {
+            "name": "userId",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "number"
+            }
+          },
+          {
+            "name": "assignmentId",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "number"
+            }
+          }
+        ],
+        "responses": {
+          "204": {
+            "description": ""
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Revoke a single role assignment",
+        "tags": [
+          "Manage / Role Assignments"
+        ]
+      }
+    },
     "/api/v1/manage/branches": {
       "get": {
         "operationId": "BranchesController_list",
@@ -3396,6 +3519,7 @@
         ]
       },
       "post": {
+        "description": "Optionally accepts `enrolledAt` (YYYY-MM-DD) — the day the student really started, which becomes their billing anniversary anchor. Defaults to today in the center’s timezone. 422 `ENROLLMENT_DATE_OUT_OF_RANGE` if it falls outside the current billing period or more than a month ahead.",
         "operationId": "GroupsController_enroll",
         "parameters": [
           {
@@ -7675,6 +7799,23 @@
           }
         }
       },
+      "CreateRoleAssignmentDto": {
+        "type": "object",
+        "properties": {
+          "roleId": {
+            "type": "number",
+            "description": "Role to grant. Must be a system or tenant-custom role."
+          },
+          "branchId": {
+            "type": "number",
+            "nullable": true,
+            "description": "Branch to scope the grant to. Omit or null = all branches."
+          }
+        },
+        "required": [
+          "roleId"
+        ]
+      },
       "CreateBranchDto": {
         "type": "object",
         "properties": {
@@ -8009,6 +8150,11 @@
             "items": {
               "type": "number"
             }
+          },
+          "enrolledAt": {
+            "type": "string",
+            "example": "2026-07-11",
+            "description": "The date the student actually joined (YYYY-MM-DD). This is the billing anniversary anchor, so set it when a student is added to the group later than they really started — otherwise they are billed from the day the record was created. Defaults to today in the center’s timezone. Must fall within the current billing period and no more than one month ahead; anything earlier would skip billing cycles that no job will ever issue."
           }
         },
         "required": [

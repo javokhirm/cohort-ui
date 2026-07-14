@@ -170,11 +170,19 @@ export function PayrollTable({
 		{
 			id: 'hours',
 			header: () => <div className="text-right">Hrs</div>,
-			cell: ({ row }) => (
-				<div className="text-right text-sm tabular-nums text-muted-foreground">
-					{row.original.breakdown?.hoursTaught ?? '—'}
-				</div>
-			),
+			cell: ({ row }) => {
+				const breakdown = row.original.breakdown;
+				// PERCENT rows have no hours — show the share instead.
+				const label =
+					breakdown?.type === 'PERCENT'
+						? `${breakdown.percent}%`
+						: (breakdown?.hoursTaught ?? '—');
+				return (
+					<div className="text-right text-sm tabular-nums text-muted-foreground">
+						{label}
+					</div>
+				);
+			},
 			size: 72,
 		},
 		{

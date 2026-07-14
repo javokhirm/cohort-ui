@@ -30,8 +30,12 @@ import {
 	type CreatePayrollFormValues,
 	type EditPayrollFormValues,
 } from '../schemas/payroll-form.schema';
-import type { PayrollResponse } from '../api/payroll.queries';
+import { usePayrollPreview, type PayrollResponse } from '../api/payroll.queries';
 import { useCreatePayroll, useUpdatePayroll } from '../api/payroll.mutations';
+import { PayrollPreviewPanel } from './PayrollPreviewPanel';
+
+/** Calendar date, no time component. */
+const ISO_DATE = /^\d{4}-\d{2}-\d{2}$/;
 
 interface CreateProps {
 	mode: 'create';
@@ -59,9 +63,11 @@ function currentMonthRange(): { start: string; end: string } {
 function CreatePayrollForm({
 	onSuccess,
 	onPendingChange,
+	onBlockedChange,
 }: {
 	onSuccess: () => void;
 	onPendingChange: (pending: boolean) => void;
+	onBlockedChange: (blocked: boolean) => void;
 }) {
 	const defaults = currentMonthRange();
 	const form = useForm<CreatePayrollFormValues>({
@@ -85,13 +91,37 @@ function CreatePayrollForm({
 
 	const autoCalculate = form.watch('autoCalculate');
 
+	// Live dry-run once staff + a valid period are chosen: shows the would-be
+	// gross, per-student lines (PERCENT teachers) and any already-paid days the
+	// backend will exclude. Payroll is money-critical — the operator must see
+	// what will be created before committing.
+	const staffId = form.watch('staffId');
+	const periodStart = form.watch('periodStart');
+	const periodEnd = form.watch('periodEnd');
+	const previewEnabled =
+		autoCalculate &&
+		Number.isFinite(staffId) &&
+		ISO_DATE.test(periodStart ?? '') &&
+		ISO_DATE.test(periodEnd ?? '') &&
+		periodStart <= periodEnd;
+	const { data: preview } = usePayrollPreview(
+		{ staffId, periodStart, periodEnd },
+		previewEnabled,
+	);
+	const blocked = previewEnabled && preview?.fullyCovered === true;
+
 	const createPayroll = useCreatePayroll();
 
 	useEffect(() => {
 		onPendingChange(createPayroll.isPending);
 	}, [createPayroll.isPending, onPendingChange]);
 
+	useEffect(() => {
+		onBlockedChange(blocked);
+	}, [blocked, onBlockedChange]);
+
 	async function onSubmit(values: CreatePayrollFormValues) {
+		if (blocked) return;
 		const selectedStaff = staff.find((s) => s.id === values.staffId);
 		if (!selectedStaff) {
 			toast.error('Select a staff member');
@@ -207,6 +237,12 @@ function CreatePayrollForm({
 						/>
 					</div>
 				</FormSection>
+
+				{previewEnabled && preview && (
+					<FormSection title="Preview">
+						<PayrollPreviewPanel preview={preview} />
+					</FormSection>
+				)}
 			</form>
 		</Form>
 	);
@@ -221,13 +257,19 @@ function EditPayrollForm({
 	onSuccess: () => void;
 	onPendingChange: (pending: boolean) => void;
 }) {
-	const toDefaults = (p: PayrollResponse): EditPayrollFormValues => ({
-		grossAmount: p.grossAmount,
-		deductions: p.deductions,
-		hoursTaught: p.breakdown?.hoursTaught,
-		rate: p.breakdown?.rate,
-		bonuses: p.breakdown?.bonuses,
-	});
+	// PERCENT breakdowns have no hours/rate — the server only merges `bonuses`
+	// into them on PATCH, so only the legacy FIXED fields prefill here.
+	const toDefaults = (p: PayrollResponse): EditPayrollFormValues => {
+		const fixed =
+			p.breakdown && p.breakdown.type !== 'PERCENT' ? p.breakdown : undefined;
+		return {
+			grossAmount: p.grossAmount,
+			deductions: p.deductions,
+			hoursTaught: fixed?.hoursTaught,
+			rate: fixed?.rate,
+			bonuses: p.breakdown?.bonuses,
+		};
+	};
 
 	const form = useForm<EditPayrollFormValues>({
 		resolver: zodResolver(editPayrollSchema),
@@ -356,6 +398,7 @@ function EditPayrollForm({
 export function PayrollForm(props: PayrollFormProps) {
 	const { open, onOpenChange, mode } = props;
 	const [isPending, setIsPending] = useState(false);
+	const [isBlocked, setIsBlocked] = useState(false);
 
 	const formId = mode === 'create' ? 'create-payroll-form' : 'edit-payroll-form';
 
@@ -378,7 +421,11 @@ export function PayrollForm(props: PayrollFormProps) {
 					<Button type="button" variant="outline" onClick={handleClose}>
 						Cancel
 					</Button>
-					<Button type="submit" form={formId} disabled={isPending}>
+					<Button
+						type="submit"
+						form={formId}
+						disabled={isPending || (mode === 'create' && isBlocked)}
+					>
 						{isPending && <Spinner className="mr-2 size-4" />}
 						{mode === 'create' ? 'Create record' : 'Save changes'}
 					</Button>
@@ -389,6 +436,7 @@ export function PayrollForm(props: PayrollFormProps) {
 				<CreatePayrollForm
 					onSuccess={handleClose}
 					onPendingChange={setIsPending}
+					onBlockedChange={setIsBlocked}
 				/>
 			) : (
 				<EditPayrollForm

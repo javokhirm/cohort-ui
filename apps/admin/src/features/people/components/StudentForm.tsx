@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
+import { Plus, X } from 'lucide-react';
 import { toast } from '@repo/ui';
 
 import {
@@ -82,16 +83,27 @@ function CreateStudentForm({
 	const form = useForm<CreateStudentFormValues>({
 		resolver: zodResolver(createStudentSchema),
 		defaultValues: {
-			fullName: '',
+			firstName: '',
+			lastName: '',
 			dateOfBirth: '',
 			phone: '',
 			branchId: defaultBranchId,
 			address: '',
+			hasGuardian: false,
 			guardianName: '',
 			guardianPhone: '',
 			guardianRelation: 'father',
 		},
 	});
+
+	const hasGuardian = form.watch('hasGuardian');
+
+	function handleRemoveGuardian() {
+		form.setValue('hasGuardian', false);
+		form.resetField('guardianName');
+		form.resetField('guardianPhone');
+		form.resetField('guardianRelation');
+	}
 
 	const { data: branches = [] } = useBranches();
 	const selectedBranchId = form.watch('branchId');
@@ -112,15 +124,12 @@ function CreateStudentForm({
 	}, [isPending, onPendingChange]);
 
 	async function onSubmit(values: CreateStudentFormValues) {
-		const { firstName, lastName } = splitFullName(values.fullName);
-		const { firstName: gFirst, lastName: gLast } = splitFullName(values.guardianName);
-
 		let studentId: number;
 		try {
 			const result = await createStudent.mutateAsync({
 				branchId: values.branchId,
-				firstName,
-				lastName,
+				firstName: values.firstName,
+				lastName: values.lastName,
 				phone: values.phone,
 				dateOfBirth: values.dateOfBirth || undefined,
 				gender: values.gender,
@@ -131,15 +140,20 @@ function CreateStudentForm({
 			return;
 		}
 
-		await addGuardian.mutateAsync({
-			studentId,
-			phone: values.guardianPhone,
-			firstName: gFirst,
-			lastName: gLast,
-			relation: values.guardianRelation,
-			isPrimary: true,
-			canPickup: true,
-		});
+		if (values.hasGuardian) {
+			const { firstName: gFirst, lastName: gLast } = splitFullName(
+				values.guardianName ?? '',
+			);
+			await addGuardian.mutateAsync({
+				studentId,
+				phone: values.guardianPhone ?? '',
+				firstName: gFirst,
+				lastName: gLast,
+				relation: values.guardianRelation ?? 'guardian',
+				isPrimary: true,
+				canPickup: true,
+			});
+		}
 
 		if (values.groupId) {
 			await enrollStudent.mutateAsync({ groupId: values.groupId, studentId });
@@ -159,12 +173,20 @@ function CreateStudentForm({
 				{/* PERSONAL */}
 				<FormSection title="Personal">
 					<FieldGroup>
-						<FormInput
-							control={form.control}
-							name="fullName"
-							label="Full name *"
-							placeholder="e.g. Diyorbek Rustamov"
-						/>
+						<div className="grid grid-cols-2 gap-3">
+							<FormInput
+								control={form.control}
+								name="firstName"
+								label="First name *"
+								placeholder="e.g. Diyorbek"
+							/>
+							<FormInput
+								control={form.control}
+								name="lastName"
+								label="Last name *"
+								placeholder="e.g. Rustamov"
+							/>
+						</div>
 						<div className="grid grid-cols-2 gap-3">
 							<FormDatePicker
 								control={form.control}
@@ -210,30 +232,55 @@ function CreateStudentForm({
 					</FieldGroup>
 				</FormSection>
 
-				{/* GUARDIAN */}
-				<FormSection title="Guardian">
-					<FieldGroup>
-						<div className="grid grid-cols-2 gap-3">
-							<FormInput
+				{/* GUARDIAN — optional, hidden until the user opts in */}
+				{hasGuardian ? (
+					<FormSection
+						title="Guardian"
+						actions={
+							<Button
+								type="button"
+								variant="ghost"
+								size="sm"
+								onClick={handleRemoveGuardian}
+							>
+								<X className="mr-1 size-3.5" />
+								Remove
+							</Button>
+						}
+					>
+						<FieldGroup>
+							<div className="grid grid-cols-2 gap-3">
+								<FormInput
+									control={form.control}
+									name="guardianName"
+									label="Guardian name *"
+									placeholder="e.g. Rustam Olimov"
+								/>
+								<FormSelect
+									control={form.control}
+									name="guardianRelation"
+									label="Relation"
+									options={GUARDIAN_RELATION_OPTIONS}
+								/>
+							</div>
+							<FormPhoneInput
 								control={form.control}
-								name="guardianName"
-								label="Guardian name *"
-								placeholder="e.g. Rustam Olimov"
+								name="guardianPhone"
+								label="Guardian phone *"
 							/>
-							<FormSelect
-								control={form.control}
-								name="guardianRelation"
-								label="Relation"
-								options={GUARDIAN_RELATION_OPTIONS}
-							/>
-						</div>
-						<FormPhoneInput
-							control={form.control}
-							name="guardianPhone"
-							label="Guardian phone *"
-						/>
-					</FieldGroup>
-				</FormSection>
+						</FieldGroup>
+					</FormSection>
+				) : (
+					<Button
+						type="button"
+						variant="outline"
+						onClick={() => form.setValue('hasGuardian', true)}
+						className="w-full border-dashed"
+					>
+						<Plus className="mr-1.5 size-4" />
+						Add guardian
+					</Button>
+				)}
 
 				{/* INITIAL ENROLLMENT — the student bills on the group's course plan. */}
 				{groups.length > 0 && (
@@ -269,7 +316,8 @@ function EditStudentForm({
 	const form = useForm<EditStudentFormValues>({
 		resolver: zodResolver(editStudentSchema),
 		defaultValues: {
-			fullName: `${student.user.firstName} ${student.user.lastName}`,
+			firstName: student.user.firstName,
+			lastName: student.user.lastName,
 			dateOfBirth: student.dateOfBirth ?? '',
 			gender: student.gender ?? undefined,
 			phone: student.user.phone,
@@ -281,7 +329,8 @@ function EditStudentForm({
 
 	useEffect(() => {
 		form.reset({
-			fullName: `${student.user.firstName} ${student.user.lastName}`,
+			firstName: student.user.firstName,
+			lastName: student.user.lastName,
 			dateOfBirth: student.dateOfBirth ?? '',
 			gender: student.gender ?? undefined,
 			phone: student.user.phone,
@@ -321,12 +370,20 @@ function EditStudentForm({
 				{/* PERSONAL */}
 				<FormSection title="Personal">
 					<FieldGroup>
-						<FormInput
-							control={form.control}
-							name="fullName"
-							label="Full name"
-							disabled
-						/>
+						<div className="grid grid-cols-2 gap-3">
+							<FormInput
+								control={form.control}
+								name="firstName"
+								label="First name"
+								disabled
+							/>
+							<FormInput
+								control={form.control}
+								name="lastName"
+								label="Last name"
+								disabled
+							/>
+						</div>
 						<div className="grid grid-cols-2 gap-3">
 							<FormDatePicker
 								control={form.control}

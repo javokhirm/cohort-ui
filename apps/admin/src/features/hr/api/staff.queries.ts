@@ -15,6 +15,8 @@ import { hrKeys, type StaffListFilters } from './keys';
 export type EmploymentType = 'FULL_TIME' | 'PART_TIME' | 'CONTRACTOR';
 export type StaffStatus = 'ACTIVE' | 'ON_LEAVE' | 'TERMINATED';
 export type StaffRoleName = 'TEACHER' | 'ADMIN' | 'MANAGER';
+/** How auto-calculated payroll derives the gross (backend §3.4). */
+export type PayrollType = 'FIXED' | 'PERCENT';
 
 export interface StaffUser {
 	id: number;
@@ -37,6 +39,9 @@ export interface StaffResponse {
 	status: StaffStatus;
 	hireDate: string | null;
 	baseSalary: number | null;
+	payrollType: PayrollType;
+	/** Revenue-share percentage; set only when `payrollType` is `PERCENT`. */
+	payrollPercent: number | null;
 	roles: string[];
 	groupsCount: number;
 	weeklyHours: number;
