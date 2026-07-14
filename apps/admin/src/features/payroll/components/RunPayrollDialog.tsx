@@ -46,7 +46,9 @@ export function RunPayrollDialog({ open, onOpenChange }: RunPayrollDialogProps) 
 			{
 				onSuccess: (result) => {
 					toast.success(
-						`Payroll run created — ${result.created} draft record(s)`,
+						result.skipped > 0
+							? `Payroll run created — ${result.created} draft record(s), ${result.skipped} skipped (period already paid)`
+							: `Payroll run created — ${result.created} draft record(s)`,
 					);
 					onOpenChange(false);
 				},

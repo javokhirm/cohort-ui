@@ -2057,7 +2057,21 @@ export const handlers = [
 			periodStart: body.periodStart,
 			periodEnd: body.periodEnd,
 		}));
-		return ok({ created: payrolls.length, payrolls });
+		return ok({ created: payrolls.length, skipped: 0, payrolls });
+	}),
+
+	http.get(`${MANAGE}/payrolls/preview`, ({ request }) => {
+		const url = new URL(request.url);
+		return ok({
+			staffId: Number(url.searchParams.get('staffId')),
+			payrollType: 'FIXED',
+			periodStart: url.searchParams.get('periodStart'),
+			periodEnd: url.searchParams.get('periodEnd'),
+			fullyCovered: false,
+			grossAmount: MOCK_PAYROLLS[0]?.grossAmount ?? 0,
+			breakdown: MOCK_PAYROLLS[0]?.breakdown ?? null,
+			skippedRanges: [],
+		});
 	}),
 
 	http.post(`${MANAGE}/payrolls`, async ({ request }) => {
