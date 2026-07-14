@@ -4,6 +4,7 @@ import { Search } from 'lucide-react';
 import {
 	Button,
 	Checkbox,
+	DatePicker,
 	Dialog,
 	DialogContent,
 	DialogDescription,
@@ -11,6 +12,7 @@ import {
 	DialogHeader,
 	DialogTitle,
 	Input,
+	Label,
 	Spinner,
 	toast,
 } from '@repo/ui';
@@ -19,6 +21,7 @@ import { isApiError } from '@repo/api-client';
 import { useStudents } from '@/features/people/api/students.queries';
 
 import { useEnrollStudents } from '../api/groups.mutations';
+import { describeEnrollmentDateError } from '../lib/enrollment-date';
 
 interface EnrollStudentsDialogProps {
 	groupId: number;
@@ -70,6 +73,7 @@ function EnrollForm({
 	const [input, setInput] = useState('');
 	const [search, setSearch] = useState('');
 	const [selected, setSelected] = useState<number[]>([]);
+	const [enrolledAt, setEnrolledAt] = useState<string | undefined>(undefined);
 
 	const enrollStudents = useEnrollStudents();
 
@@ -94,14 +98,23 @@ function EnrollForm({
 	}
 
 	async function onEnroll() {
+		if (!enrolledAt) return;
+
 		try {
-			await enrollStudents.mutateAsync({ groupId, studentIds: selected });
+			await enrollStudents.mutateAsync({
+				groupId,
+				studentIds: selected,
+				enrolledAt,
+			});
 			toast.success(
 				`${selected.length} student${selected.length === 1 ? '' : 's'} enrolled`,
 			);
 			onClose();
 		} catch (err) {
-			if (isApiError(err) && err.status === 409) {
+			const badDate = describeEnrollmentDateError(err);
+			if (badDate) {
+				toast.error(badDate);
+			} else if (isApiError(err) && err.status === 409) {
 				toast.error('Group is at capacity — cannot enroll more students.');
 			} else if (isApiError(err)) {
 				toast.error(err.message);
@@ -157,6 +170,21 @@ function EnrollForm({
 						</div>
 					)}
 				</div>
+
+				<div className="flex flex-col gap-1.5 mt-8">
+					<Label htmlFor="enrolledAt">Start date *</Label>
+					<DatePicker
+						id="enrolledAt"
+						value={enrolledAt}
+						onChange={setEnrolledAt}
+						placeholder="Select a start date"
+						disabled={enrollStudents.isPending}
+					/>
+					<p className="text-xs text-muted-foreground">
+						The day the student actually started. This sets their billing
+						anniversary, so back-date it if you are adding them late.
+					</p>
+				</div>
 			</div>
 
 			<DialogFooter>
@@ -169,7 +197,9 @@ function EnrollForm({
 				</Button>
 				<Button
 					onClick={() => void onEnroll()}
-					disabled={selected.length === 0 || enrollStudents.isPending}
+					disabled={
+						selected.length === 0 || !enrolledAt || enrollStudents.isPending
+					}
 				>
 					{enrollStudents.isPending && <Spinner className="mr-2 size-4" />}
 					Enroll {selected.length > 0 ? `(${selected.length})` : ''}

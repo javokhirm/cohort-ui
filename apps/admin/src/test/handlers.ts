@@ -281,7 +281,7 @@ export const MOCK_ENROLLMENTS: MockEnrollment[] = [
 		studentName: 'Aziz Karimov',
 		studentCode: 'STU-2024-001',
 		feePlanId: null,
-		enrolledAt: '2025-03-01T00:00:00Z',
+		enrolledAt: '2025-03-01',
 		status: 'ACTIVE',
 		dropReason: null,
 		completedAt: null,
@@ -293,7 +293,7 @@ export const MOCK_ENROLLMENTS: MockEnrollment[] = [
 		studentName: 'Malika Yusupova',
 		studentCode: 'STU-2024-002',
 		feePlanId: null,
-		enrolledAt: '2025-03-02T00:00:00Z',
+		enrolledAt: '2025-03-02',
 		status: 'ACTIVE',
 		dropReason: null,
 		completedAt: null,
@@ -377,7 +377,7 @@ export const MOCK_STUDENTS = [
 		studentCode: 'STU-2024-001',
 		branchId: 1,
 		status: 'ACTIVE' as const,
-		enrolledAt: '2024-09-01T00:00:00Z',
+		enrolledAt: '2024-09-01',
 		dateOfBirth: null,
 		gender: null,
 		user: {
@@ -394,7 +394,7 @@ export const MOCK_STUDENTS = [
 		studentCode: 'STU-2024-003',
 		branchId: 1,
 		status: 'ACTIVE' as const,
-		enrolledAt: '2024-09-01T00:00:00Z',
+		enrolledAt: '2024-09-01',
 		dateOfBirth: null,
 		gender: null,
 		user: {
@@ -1403,7 +1403,10 @@ export const handlers = [
 	}),
 
 	http.post(`${MANAGE}/groups/:id/enrollments`, async ({ params, request }) => {
-		const body = (await request.json()) as { studentIds: number[] };
+		const body = (await request.json()) as {
+			studentIds: number[];
+			enrolledAt?: string;
+		};
 		const created = body.studentIds.map((studentId, i) => ({
 			id: 600 + i,
 			groupId: Number(params['id']),
@@ -1411,7 +1414,9 @@ export const handlers = [
 			studentName: 'New Student',
 			studentCode: `STU-2024-${String(studentId).padStart(3, '0')}`,
 			feePlanId: null,
-			enrolledAt: '2026-07-01T00:00:00Z',
+			// The billing anniversary anchor: echo back what the client sent, and
+			// otherwise default it the way the server does (today, center timezone).
+			enrolledAt: body.enrolledAt ?? '2026-07-01',
 			status: 'ACTIVE' as const,
 			dropReason: null,
 			completedAt: null,

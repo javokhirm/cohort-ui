@@ -47,6 +47,7 @@ export interface UpdateGroupInput {
 export interface EnrollStudentsInput {
 	groupId: number;
 	studentIds: number[];
+	enrolledAt?: string;
 }
 
 export interface UpdateEnrollmentInput {
@@ -86,9 +87,12 @@ export function useUpdateGroup() {
 export function useEnrollStudents() {
 	const qc = useQueryClient();
 	return useMutation({
-		mutationFn: ({ groupId, studentIds }: EnrollStudentsInput) =>
+		mutationFn: ({ groupId, studentIds, enrolledAt }: EnrollStudentsInput) =>
 			manageApi.post<Enrollment[]>(`/groups/${groupId}/enrollments`, {
 				studentIds,
+				// Omit rather than send `undefined`/`''` — the field is optional and the
+				// server defaults it to today in the center's timezone.
+				...(enrolledAt ? { enrolledAt } : {}),
 			}),
 		onSuccess: (_data, { groupId }) => {
 			void qc.invalidateQueries({ queryKey: groupsKeys.groupEnrollments(groupId) });

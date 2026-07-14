@@ -1071,6 +1071,58 @@ export interface paths {
 		patch: operations['StaffController_update'];
 		trace?: never;
 	};
+	'/api/v1/manage/roles': {
+		parameters: {
+			query?: never;
+			header?: never;
+			path?: never;
+			cookie?: never;
+		};
+		/** List the roles available in this tenant */
+		get: operations['RolesController_list'];
+		put?: never;
+		post?: never;
+		delete?: never;
+		options?: never;
+		head?: never;
+		patch?: never;
+		trace?: never;
+	};
+	'/api/v1/manage/users/{userId}/role-assignments': {
+		parameters: {
+			query?: never;
+			header?: never;
+			path?: never;
+			cookie?: never;
+		};
+		/** List a user's role assignments in this tenant */
+		get: operations['UserRoleAssignmentsController_list'];
+		put?: never;
+		/** Grant a role to a user (leaves other roles intact) */
+		post: operations['UserRoleAssignmentsController_grant'];
+		delete?: never;
+		options?: never;
+		head?: never;
+		patch?: never;
+		trace?: never;
+	};
+	'/api/v1/manage/users/{userId}/role-assignments/{assignmentId}': {
+		parameters: {
+			query?: never;
+			header?: never;
+			path?: never;
+			cookie?: never;
+		};
+		get?: never;
+		put?: never;
+		post?: never;
+		/** Revoke a single role assignment */
+		delete: operations['UserRoleAssignmentsController_revoke'];
+		options?: never;
+		head?: never;
+		patch?: never;
+		trace?: never;
+	};
 	'/api/v1/manage/branches': {
 		parameters: {
 			query?: never;
@@ -1224,7 +1276,10 @@ export interface paths {
 		/** List a group's enrolled students (optional ?status=ACTIVE) */
 		get: operations['GroupsController_listEnrollments'];
 		put?: never;
-		/** Batch-enroll students into a group; returns 409 if group is at capacity */
+		/**
+		 * Batch-enroll students into a group; returns 409 if group is at capacity
+		 * @description Optionally accepts `enrolledAt` (YYYY-MM-DD) — the day the student really started, which becomes their billing anniversary anchor. Defaults to today in the center’s timezone. 422 `ENROLLMENT_DATE_OUT_OF_RANGE` if it falls outside the current billing period or more than a month ahead.
+		 */
 		post: operations['GroupsController_enroll'];
 		delete?: never;
 		options?: never;
@@ -2532,6 +2587,12 @@ export interface components {
 			/** @enum {string} */
 			status?: 'ACTIVE' | 'ON_LEAVE' | 'TERMINATED';
 		};
+		CreateRoleAssignmentDto: {
+			/** @description Role to grant. Must be a system or tenant-custom role. */
+			roleId: number;
+			/** @description Branch to scope the grant to. Omit or null = all branches. */
+			branchId?: number | null;
+		};
 		CreateBranchDto: {
 			name: string;
 			/**
@@ -2645,6 +2706,11 @@ export interface components {
 		EnrollStudentsDto: {
 			/** @description Array of student IDs for batch enrollment */
 			studentIds: number[];
+			/**
+			 * @description The date the student actually joined (YYYY-MM-DD). This is the billing anniversary anchor, so set it when a student is added to the group later than they really started — otherwise they are billed from the day the record was created. Defaults to today in the center’s timezone. Must fall within the current billing period and no more than one month ahead; anything earlier would skip billing cycles that no job will ever issue.
+			 * @example 2026-07-11
+			 */
+			enrolledAt?: string;
 		};
 		UpdateSessionDto: {
 			/**
@@ -4665,6 +4731,85 @@ export interface operations {
 		};
 		responses: {
 			200: {
+				headers: {
+					[name: string]: unknown;
+				};
+				content?: never;
+			};
+		};
+	};
+	RolesController_list: {
+		parameters: {
+			query?: never;
+			header?: never;
+			path?: never;
+			cookie?: never;
+		};
+		requestBody?: never;
+		responses: {
+			200: {
+				headers: {
+					[name: string]: unknown;
+				};
+				content?: never;
+			};
+		};
+	};
+	UserRoleAssignmentsController_list: {
+		parameters: {
+			query?: never;
+			header?: never;
+			path: {
+				userId: number;
+			};
+			cookie?: never;
+		};
+		requestBody?: never;
+		responses: {
+			200: {
+				headers: {
+					[name: string]: unknown;
+				};
+				content?: never;
+			};
+		};
+	};
+	UserRoleAssignmentsController_grant: {
+		parameters: {
+			query?: never;
+			header?: never;
+			path: {
+				userId: number;
+			};
+			cookie?: never;
+		};
+		requestBody: {
+			content: {
+				'application/json': components['schemas']['CreateRoleAssignmentDto'];
+			};
+		};
+		responses: {
+			201: {
+				headers: {
+					[name: string]: unknown;
+				};
+				content?: never;
+			};
+		};
+	};
+	UserRoleAssignmentsController_revoke: {
+		parameters: {
+			query?: never;
+			header?: never;
+			path: {
+				userId: number;
+				assignmentId: number;
+			};
+			cookie?: never;
+		};
+		requestBody?: never;
+		responses: {
+			204: {
 				headers: {
 					[name: string]: unknown;
 				};
