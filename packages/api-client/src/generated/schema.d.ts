@@ -1757,6 +1757,23 @@ export interface paths {
 		patch?: never;
 		trace?: never;
 	};
+	'/api/v1/manage/payrolls/preview': {
+		parameters: {
+			query?: never;
+			header?: never;
+			path?: never;
+			cookie?: never;
+		};
+		/** Dry-run of POST /payrolls: computed gross, breakdown and already-paid days that would be skipped */
+		get: operations['PayrollsController_preview'];
+		put?: never;
+		post?: never;
+		delete?: never;
+		options?: never;
+		head?: never;
+		patch?: never;
+		trace?: never;
+	};
 	'/api/v1/manage/payrolls/{id}': {
 		parameters: {
 			query?: never;
@@ -2027,6 +2044,23 @@ export interface paths {
 		};
 		/** Enriched roster: student contact + per-group attendance rate (must be a group I teach) */
 		get: operations['MyGroupsController_students'];
+		put?: never;
+		post?: never;
+		delete?: never;
+		options?: never;
+		head?: never;
+		patch?: never;
+		trace?: never;
+	};
+	'/api/v1/teach/branches': {
+		parameters: {
+			query?: never;
+			header?: never;
+			path?: never;
+			cookie?: never;
+		};
+		/** List the branches of the groups I teach */
+		get: operations['MyBranchesController_list'];
 		put?: never;
 		post?: never;
 		delete?: never;
@@ -2561,6 +2595,14 @@ export interface components {
 			/** @enum {string} */
 			employmentType?: 'FULL_TIME' | 'PART_TIME' | 'CONTRACTOR';
 			baseSalary?: number;
+			/**
+			 * @description How auto-calculated payroll derives the gross: FIXED (baseSalary / hourly) or PERCENT (share of group fee-plan revenue).
+			 * @default FIXED
+			 * @enum {string}
+			 */
+			payrollType: 'FIXED' | 'PERCENT';
+			/** @description Revenue-share percentage. Required when payrollType is PERCENT. */
+			payrollPercent?: number;
 			/** @description Default: TEACHER. Also ADMIN or MANAGER. */
 			roleName?: string;
 			/** @description The staff member's initial login password. Ignored if the phone is already a user. */
@@ -2584,6 +2626,14 @@ export interface components {
 			/** @enum {string} */
 			employmentType?: 'FULL_TIME' | 'PART_TIME' | 'CONTRACTOR';
 			baseSalary?: number;
+			/**
+			 * @description How auto-calculated payroll derives the gross: FIXED (baseSalary / hourly) or PERCENT (share of group fee-plan revenue).
+			 * @default FIXED
+			 * @enum {string}
+			 */
+			payrollType: 'FIXED' | 'PERCENT';
+			/** @description Revenue-share percentage. Required when payrollType is PERCENT. */
+			payrollPercent?: number;
 			/** @enum {string} */
 			status?: 'ACTIVE' | 'ON_LEAVE' | 'TERMINATED';
 		};
@@ -6049,6 +6099,30 @@ export interface operations {
 			};
 		};
 	};
+	PayrollsController_preview: {
+		parameters: {
+			query: {
+				/** @description FK to staff.id */
+				staffId: number;
+				/** @description YYYY-MM-DD */
+				periodStart: string;
+				/** @description YYYY-MM-DD */
+				periodEnd: string;
+			};
+			header?: never;
+			path?: never;
+			cookie?: never;
+		};
+		requestBody?: never;
+		responses: {
+			200: {
+				headers: {
+					[name: string]: unknown;
+				};
+				content?: never;
+			};
+		};
+	};
 	PayrollsController_findOne: {
 		parameters: {
 			query?: never;
@@ -6526,6 +6600,23 @@ export interface operations {
 			path: {
 				id: number;
 			};
+			cookie?: never;
+		};
+		requestBody?: never;
+		responses: {
+			200: {
+				headers: {
+					[name: string]: unknown;
+				};
+				content?: never;
+			};
+		};
+	};
+	MyBranchesController_list: {
+		parameters: {
+			query?: never;
+			header?: never;
+			path?: never;
 			cookie?: never;
 		};
 		requestBody?: never;

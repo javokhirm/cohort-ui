@@ -50,7 +50,11 @@ export function ProfileRoute() {
 				/>
 			</div>
 
-			<Button variant="outline" className="mt-4 w-full text-destructive" onClick={logout}>
+			<Button
+				variant="outline"
+				className="mt-4 w-full text-destructive"
+				onClick={logout}
+			>
 				<LogOut className="size-4" />
 				Log out
 			</Button>

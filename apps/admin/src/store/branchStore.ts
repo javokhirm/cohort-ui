@@ -46,8 +46,6 @@ interface BranchState {
 	/** Selected branch ids; `null` = all accessible branches. Never `[]`. */
 	activeBranchIds: number[] | null;
 	setActiveBranchIds: (ids: number[] | null) => void;
-	/** Add/remove one branch. Deselecting the last selected branch falls back to "all". */
-	toggleBranch: (id: number) => void;
 	/**
 	 * Drop selected ids that are no longer accessible (branch removed, role
 	 * revoked). Called when the accessible branches load; an emptied selection
@@ -62,16 +60,6 @@ export const useBranchStore = create<BranchState>((set, get) => ({
 		const next = ids && ids.length > 0 ? [...new Set(ids)] : null;
 		writeStoredSelection(next);
 		set({ activeBranchIds: next });
-	},
-	toggleBranch: (id) => {
-		const current = get().activeBranchIds;
-		const next =
-			current === null
-				? [id]
-				: current.includes(id)
-					? current.filter((b) => b !== id)
-					: [...current, id];
-		get().setActiveBranchIds(next);
 	},
 	reconcile: (accessibleIds) => {
 		const current = get().activeBranchIds;
