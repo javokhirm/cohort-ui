@@ -63,6 +63,24 @@ jobs:
     needs: build
     runs-on: ubuntu-latest
     steps:
+      - uses: actions/checkout@v4
+
+      # The stack definition is versioned here, so ship it — never assume the
+      # copy on the server matches this repo. Without this, adding a service
+      # fails the deploy with `no such service: web-<name>` until someone
+      # remembers to scp the file by hand. Secrets stay server-side: only the
+      # compose file is synced, never `.env`.
+      - name: Sync compose file to the VPS (web-prod stack)
+        uses: appleboy/scp-action@v1.0.0
+        with:
+          host: ${{ secrets.VPS_HOST }}
+          username: ${{ secrets.DEPLOY_USER }}
+          key: ${{ secrets.DEPLOY_SSH_KEY }}
+          source: deploy/docker-compose.web.yml
+          target: /opt/cohort/web-prod/
+          strip_components: 1
+          overwrite: true
+
       - name: Zero-downtime deploy to VPS (web-prod stack)
         uses: appleboy/ssh-action@v1.2.0
         with:
@@ -74,6 +92,14 @@ jobs:
             set -e
             cd /opt/cohort/web-prod
             echo "${{ secrets.GITHUB_TOKEN }}" | docker login ghcr.io -u ${{ github.actor }} --password-stdin
+
+            # *_ALIAS lives only in the server-side .env (it is the Caddy upstream
+            # name, and differs prod/dev). A missing one is NOT a compose error —
+            # the service just gets an empty network alias, the deploy goes green,
+            # and the hostname 502s forever. Fail loudly instead.
+            for var in ADMIN_ALIAS INTERNAL_ALIAS TEACH_ALIAS; do
+              grep -q "^${var}=" .env || { echo "FATAL: ${var} missing from $(pwd)/.env"; exit 1; }
+            done
             export ADMIN_IMAGE=ghcr.io/${{ github.repository_owner }}/cohort-web-admin:${{ github.sha }}
             export INTERNAL_IMAGE=ghcr.io/${{ github.repository_owner }}/cohort-web-internal:${{ github.sha }}
             export TEACH_IMAGE=ghcr.io/${{ github.repository_owner }}/cohort-web-teach:${{ github.sha }}

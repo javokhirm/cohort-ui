@@ -46,13 +46,20 @@ then it retries with backoff, which is harmless.
 ```bash
 sudo mkdir -p /opt/cohort/{web-prod,web-dev} && sudo chown -R deploy:deploy /opt/cohort/web-prod /opt/cohort/web-dev
 
-# from your machine:
-scp deploy/docker-compose.web.yml deploy@VPS_IP:/opt/cohort/web-prod/
-scp deploy/docker-compose.web.yml deploy@VPS_IP:/opt/cohort/web-dev/
-
 # on the server: create .env in each dir from .env.server.example
 # (prod values vs the commented dev values), then chmod 600 .env
 ```
+
+`docker-compose.web.yml` does **not** need copying — each deploy `scp`s it from this repo
+before running `docker compose`, so the repo is the source of truth and the server copy can
+never drift. (`.env` is deliberately *not* synced: it is server-side config.)
+
+> **Adding a new app?** After the code + Caddyfile work, the one manual server step is adding
+> `<APP>_ALIAS` (and a fallback `<APP>_IMAGE`) to the `.env` in **both** `/opt/cohort/web-prod`
+> and `/opt/cohort/web-dev`. `*_ALIAS` is the Caddy upstream name and has no default — a
+> missing one is not a Compose error, it just yields an empty network alias, so the deploy
+> would go green while the hostname 502s forever. The deploy script now asserts every
+> `*_ALIAS` is present and fails loudly instead.
 
 ## 3. Required GitHub secrets & variables (this repo)
 
