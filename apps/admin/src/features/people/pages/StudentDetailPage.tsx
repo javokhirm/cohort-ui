@@ -417,7 +417,9 @@ function AttendanceTab({ studentId }: { studentId: number }) {
 				<Card>
 					<CardContent className="flex flex-col items-center justify-center pt-6 text-center">
 						<p className="text-sm text-muted-foreground">Attendance rate</p>
-						<p className="mt-1 text-4xl font-bold text-tone-green-fg">{rate}%</p>
+						<p className="mt-1 text-4xl font-bold text-tone-green-fg">
+							{rate}%
+						</p>
 						<p className="mt-1 text-xs text-muted-foreground">Last 90 days</p>
 					</CardContent>
 				</Card>

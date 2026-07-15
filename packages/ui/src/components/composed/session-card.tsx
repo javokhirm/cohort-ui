@@ -23,7 +23,14 @@ interface SessionCardProps extends Omit<React.ComponentProps<'div'>, 'onClick'> 
 	statusKind?: StatusKind;
 	topic?: string;
 	studentCount?: number;
+	/** A single footer action. Prefer `actions` when there is more than one. */
 	action?: SessionCardAction;
+	/**
+	 * Footer actions. One action renders inline beside the student count; two or
+	 * more stack onto their own full-width row below it. Takes precedence over
+	 * `action`.
+	 */
+	actions?: SessionCardAction[];
 	onClick?: (e: React.MouseEvent) => void;
 }
 
@@ -39,9 +46,13 @@ function SessionCard({
 	topic,
 	studentCount,
 	action,
+	actions,
 	onClick,
 	...props
 }: SessionCardProps) {
+	const resolvedActions = actions ?? (action ? [action] : []);
+	const hasStudentCount = studentCount !== undefined;
+	const stackActions = resolvedActions.length >= 2;
 	return (
 		<div
 			data-slot="session-card"
@@ -100,29 +111,53 @@ function SessionCard({
 				</div>
 			)}
 
-			{(studentCount !== undefined || action) && (
-				<div className="mt-3 flex items-center justify-between">
-					{studentCount !== undefined ? (
-						<span className="flex items-center gap-1.5 text-xs text-muted-foreground">
-							<Users className="size-3.5" />
-							{studentCount} students
-						</span>
-					) : (
-						<span />
-					)}
-					{action && (
-						<Button
-							size="sm"
-							variant={action.variant ?? 'outline'}
-							onClick={action.onClick}
-							className="h-9 gap-1.5"
-						>
-							{action.icon}
-							{action.label}
-						</Button>
-					)}
-				</div>
-			)}
+			{(hasStudentCount || resolvedActions.length > 0) &&
+				(stackActions ? (
+					<div className="mt-3 space-y-3">
+						{hasStudentCount && (
+							<span className="flex items-center gap-1.5 text-xs text-muted-foreground">
+								<Users className="size-3.5" />
+								{studentCount} students
+							</span>
+						)}
+						<div className="flex gap-2">
+							{resolvedActions.map((a, i) => (
+								<Button
+									key={i}
+									size="sm"
+									variant={a.variant ?? 'outline'}
+									onClick={a.onClick}
+									className="h-10 flex-1 gap-1.5"
+								>
+									{a.icon}
+									{a.label}
+								</Button>
+							))}
+						</div>
+					</div>
+				) : (
+					<div className="mt-3 flex items-center justify-between">
+						{hasStudentCount ? (
+							<span className="flex items-center gap-1.5 text-xs text-muted-foreground">
+								<Users className="size-3.5" />
+								{studentCount} students
+							</span>
+						) : (
+							<span />
+						)}
+						{resolvedActions[0] && (
+							<Button
+								size="sm"
+								variant={resolvedActions[0].variant ?? 'outline'}
+								onClick={resolvedActions[0].onClick}
+								className="h-9 gap-1.5"
+							>
+								{resolvedActions[0].icon}
+								{resolvedActions[0].label}
+							</Button>
+						)}
+					</div>
+				))}
 		</div>
 	);
 }

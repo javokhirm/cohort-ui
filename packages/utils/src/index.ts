@@ -20,6 +20,17 @@ export {
 	isExpired,
 	toIsoDate,
 	formatShortDate,
+	formatTime,
+	todayIsoDate,
+	currentHour,
+	addDays,
+	startOfWeek,
+	endOfWeek,
+	weekDates,
+	formatWeekday,
+	formatDayOfMonth,
+	formatFullDate,
+	formatWeekRange,
 } from './date';
 
 export { parseApiCode } from './codes';

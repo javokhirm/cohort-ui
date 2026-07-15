@@ -17,6 +17,9 @@ import { ForbiddenPage } from '@/routes/forbidden';
 import { TodayRoute } from '@/routes/today';
 import { GroupsRoute } from '@/routes/groups';
 import { ProfileRoute } from '@/routes/profile';
+import { SessionDetailRoute } from '@/routes/session-detail';
+import { AttendanceRoute } from '@/routes/attendance';
+import { MarksRoute } from '@/routes/marks';
 
 const rootRoute = createRootRoute({
 	component: () => (
@@ -79,10 +82,35 @@ const profileRoute = createRoute({
 	component: ProfileRoute,
 });
 
+const sessionDetailRoute = createRoute({
+	getParentRoute: () => authedRoute,
+	path: '/sessions/$sessionId',
+	component: SessionDetailRoute,
+});
+
+const attendanceRoute = createRoute({
+	getParentRoute: () => authedRoute,
+	path: '/sessions/$sessionId/attendance',
+	component: AttendanceRoute,
+});
+
+const marksRoute = createRoute({
+	getParentRoute: () => authedRoute,
+	path: '/sessions/$sessionId/marks',
+	component: MarksRoute,
+});
+
 const routeTree = rootRoute.addChildren([
 	loginRoute,
 	forbiddenRoute,
-	authedRoute.addChildren([todayRoute, groupsRoute, profileRoute]),
+	authedRoute.addChildren([
+		todayRoute,
+		groupsRoute,
+		profileRoute,
+		sessionDetailRoute,
+		attendanceRoute,
+		marksRoute,
+	]),
 ]);
 
 export const router = createRouter({

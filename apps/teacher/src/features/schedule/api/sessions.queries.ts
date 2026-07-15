@@ -25,6 +25,7 @@ export interface TeachSession {
 	endTime: string;
 	topic: string | null;
 	status: 'SCHEDULED' | 'COMPLETED' | 'CANCELLED';
+	studentCount: number;
 }
 
 export interface SessionRangeFilters {
