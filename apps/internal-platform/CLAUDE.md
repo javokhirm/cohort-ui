@@ -6,7 +6,14 @@ here in full — read the relevant doc before working in an area. This file reco
 **specific to this app**.
 
 The internal platform app is the platform-operator console. It targets the **`/api/v1/super-admin/*`** surface (plus
-`/api/v1/public/*` for auth) for the single role **SUPER_ADMIN**. React 19 + Vite SPA. Dev server runs on **port 5173**. It uses a **dark "console" theme** (`--console-*` CSS tokens) and depends on **`recharts`** for dashboard charts.
+`/api/v1/public/*` for auth) for the single role **SUPER_ADMIN**. React 19 + Vite SPA. Dev server runs on **port 5173**. It uses a **"console" theme** (`--console-*` CSS tokens, both a light and dark value) and depends on **`recharts`** for dashboard charts.
+
+---
+
+## Theme
+
+- Both light and dark are supported, switchable via the `<ThemeToggle />` icon in `layouts/Header.tsx`. Owned by `@repo/ui` (`initTheme` in `main.tsx`); first visit follows the OS `prefers-color-scheme`, then an explicit toggle persists to `cohort.internal.theme` in `localStorage` and wins from then on.
+- The console chrome (topbar, sidebar) layers its own `--console-*` tokens on top of `@repo/ui`'s — both palettes are defined in `styles/globals.css`. Extend that pattern for new chrome; never hardcode `white`/`slate-*`/hex for chrome surfaces. Route recharts colors through CSS vars too (see `features/dashboard/constants.ts`) rather than hex, so charts follow the theme.
 
 ---
 

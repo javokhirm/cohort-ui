@@ -70,7 +70,7 @@ export function ReviewStep({
 						Back
 					</Button>
 					<Button
-						className="bg-green-600 text-white hover:bg-green-700"
+						className="bg-tone-green-fg text-background hover:bg-tone-green-fg/90"
 						onClick={onSubmit}
 						disabled={submitting}
 					>

@@ -17,7 +17,7 @@ export function FeePlanGroupsSection({ feePlanId }: { feePlanId: number }) {
 	const groups = data?.rows ?? [];
 
 	return (
-		<div className="flex flex-col gap-3 rounded-xl bg-white p-4">
+		<div className="flex flex-col gap-3 rounded-xl bg-card p-4">
 			<div className="flex items-center gap-2">
 				<Users className="size-4 text-muted-foreground" />
 				<span className="text-sm font-medium">Groups using this plan</span>

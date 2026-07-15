@@ -40,10 +40,10 @@ export function FormSheet({
 					{description && <SheetDescription>{description}</SheetDescription>}
 				</SheetHeader>
 
-				<div className="flex-1 overflow-y-auto bg-[#f1f5f9] p-4">{children}</div>
+				<div className="flex-1 overflow-y-auto bg-muted p-4">{children}</div>
 
 				{footer && (
-					<SheetFooter className="flex-row gap-2 border-t bg-white px-6 py-4 *:flex-1">
+					<SheetFooter className="flex-row gap-2 border-t bg-card px-6 py-4 *:flex-1">
 						{footer}
 					</SheetFooter>
 				)}

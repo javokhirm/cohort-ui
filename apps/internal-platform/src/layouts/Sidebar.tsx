@@ -111,7 +111,7 @@ function NavItemLink({
 				collapsed ? 'justify-center' : 'gap-3 px-3',
 				active
 					? 'bg-(--console-accent) font-medium text-(--console-accent-fg)'
-					: 'text-(--console-muted-fg) hover:bg-white/5 hover:text-(--console-fg)',
+					: 'text-(--console-muted-fg) hover:bg-(--console-hover) hover:text-(--console-fg)',
 			)}
 		>
 			<Icon className="size-4 shrink-0" />
@@ -225,7 +225,7 @@ export function Sidebar() {
 					onClick={() => setCollapsed((c) => !c)}
 					aria-label={collapsed ? 'Expand sidebar' : 'Collapse sidebar'}
 					className={cn(
-						'flex h-9 w-full items-center rounded-md text-sm text-(--console-muted-fg) transition-colors hover:bg-white/5 hover:text-(--console-fg)',
+						'flex h-9 w-full items-center rounded-md text-sm text-(--console-muted-fg) transition-colors hover:bg-(--console-hover) hover:text-(--console-fg)',
 						collapsed ? 'justify-center' : 'gap-2 px-3',
 					)}
 				>

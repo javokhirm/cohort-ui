@@ -44,13 +44,13 @@ export type MockDashboard = {
 	tenants: MockTenant[];
 };
 
-/** Dark-mode chart token colours (mirror --chart-* in globals.css). */
+/** Chart colours as design-system tokens, so they follow light and dark. */
 export const CHART_COLORS = {
-	indigo: '#818cf8',
-	blue: '#60a5fa',
-	amber: '#fbbf24',
-	green: '#4ade80',
-	violet: '#a78bfa',
+	indigo: 'var(--chart-1)',
+	green: 'var(--chart-2)',
+	blue: 'var(--chart-3)',
+	amber: 'var(--chart-4)',
+	violet: 'var(--chart-5)',
 } as const;
 
 export const MOCK_DASHBOARD: MockDashboard = {

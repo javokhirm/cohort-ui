@@ -10,7 +10,7 @@ interface FormSectionProps {
 /** A white section block with an optional uppercase eyebrow heading, matching the design. */
 export function FormSection({ title, actions, children, className }: FormSectionProps) {
 	return (
-		<div className={cn('flex flex-col gap-4 rounded-xl bg-white p-4', className)}>
+		<div className={cn('flex flex-col gap-4 rounded-xl bg-card p-4', className)}>
 			{(title || actions) && (
 				<div className="flex items-center justify-between">
 					{title && (

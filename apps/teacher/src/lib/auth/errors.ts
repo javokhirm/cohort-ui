@@ -7,7 +7,9 @@
 export class RoleNotAllowedError extends Error {
 	readonly name = 'RoleNotAllowedError';
 
-	constructor(message = 'This console is for teachers. Use the admin console instead.') {
+	constructor(
+		message = 'This console is for teachers. Use the admin console instead.',
+	) {
 		super(message);
 	}
 }

@@ -1,23 +1,17 @@
-import { LogOut, Moon, MoreHorizontal, Sun } from 'lucide-react';
+import { LogOut, MoreHorizontal } from 'lucide-react';
 
 import {
 	DropdownMenu,
 	DropdownMenuContent,
 	DropdownMenuItem,
-	DropdownMenuSeparator,
 	DropdownMenuTrigger,
 } from '@repo/ui';
 
 import { useAuth } from '@/features/auth/hooks';
-import { useThemeStore } from '@/lib/theme';
 
-/** Topbar overflow menu: appearance toggle + sign out. */
+/** Topbar overflow menu. Appearance lives in the topbar's `ThemeToggle` icon. */
 export function OverflowMenu() {
 	const { logout } = useAuth();
-	const theme = useThemeStore((s) => s.theme);
-	const toggleTheme = useThemeStore((s) => s.toggleTheme);
-
-	const isDark = theme === 'dark';
 
 	return (
 		<DropdownMenu>
@@ -31,15 +25,6 @@ export function OverflowMenu() {
 				</button>
 			</DropdownMenuTrigger>
 			<DropdownMenuContent align="end" className="w-56">
-				<DropdownMenuItem onClick={toggleTheme}>
-					{isDark ? (
-						<Sun className="mr-2 size-4" />
-					) : (
-						<Moon className="mr-2 size-4" />
-					)}
-					Switch to {isDark ? 'light' : 'dark'} theme
-				</DropdownMenuItem>
-				<DropdownMenuSeparator />
 				<DropdownMenuItem
 					className="text-destructive focus:text-destructive"
 					onClick={logout}

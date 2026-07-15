@@ -1,29 +1,127 @@
-import { CalendarDays } from 'lucide-react';
+import { useMemo, useState } from 'react';
+import { useNavigate } from '@tanstack/react-router';
 
-import { EmptyState } from '@repo/ui';
+import {
+	addDays,
+	currentHour,
+	endOfWeek,
+	formatFullDate,
+	formatShortDate,
+	formatWeekRange,
+	startOfWeek,
+	todayIsoDate,
+	weekDates,
+} from '@repo/utils';
 
+import { useSessions } from '@/features/schedule/api/sessions.queries';
+import { TodayGreeting } from '@/features/schedule/components/TodayGreeting';
+import { TodaySessions } from '@/features/schedule/components/TodaySessions';
+import { WeekNav } from '@/features/schedule/components/WeekNav';
+import { WeekStrip } from '@/features/schedule/components/WeekStrip';
+import { useBranchFilter } from '@/store/branchStore';
 import { useSessionStore } from '@/store/sessionStore';
 
+/** Time-of-day greeting for the center's current hour. */
+function greeting(): string {
+	const hour = currentHour();
+	if (hour < 12) return 'Good morning';
+	if (hour < 18) return 'Good afternoon';
+	return 'Good evening';
+}
+
 /**
- * Placeholder. The schedule lands here once this screen is wired to
- * `GET /teach/sessions` (requires `from` + `to`, max a 90-day window).
+ * The teacher's home / Today screen (api-reference §4.1).
+ *
+ * A week browser over `GET /teach/sessions`: one range query per visible week
+ * (Mon–Sun), a day picker that selects within the loaded week without
+ * refetching, and the selected day's sessions as cards. The active branch is a
+ * client-side view filter (see `useBranchFilter`) — `/teach/*` takes no branch
+ * param, so switching branch must never refetch, and the query key stays
+ * branch-free. When the filter hides sessions the empty state says so: a teacher
+ * seeing "No classes" while they are in fact teaching across town is the one
+ * failure this screen must not have.
  */
 export function TodayRoute() {
 	const user = useSessionStore((s) => s.user);
+	const filterByBranch = useBranchFilter();
+	const navigate = useNavigate();
+
+	const today = todayIsoDate();
+	const [selectedDate, setSelectedDate] = useState(today);
+
+	const weekFrom = startOfWeek(selectedDate);
+	const weekTo = endOfWeek(selectedDate);
+	const dates = weekDates(selectedDate);
+
+	const { data, isPending, isError } = useSessions({ from: weekFrom, to: weekTo });
+
+	// Branch-filtered rows for the whole week (drives the strip dots) and for the
+	// selected day (drives the list), plus how many the branch filter hides today.
+	const weekSessions = useMemo(
+		() => (data ? filterByBranch(data) : []),
+		[data, filterByBranch],
+	);
+	const datesWithSessions = useMemo(
+		() => new Set(weekSessions.map((s) => s.sessionDate)),
+		[weekSessions],
+	);
+	const daySessions = weekSessions.filter((s) => s.sessionDate === selectedDate);
+	const daySessionsAllBranches = (data ?? []).filter(
+		(s) => s.sessionDate === selectedDate,
+	);
+	const hiddenByBranch = daySessionsAllBranches.length - daySessions.length;
+
+	const isToday = selectedDate === today;
 
 	return (
-		<div className="mx-auto w-full max-w-5xl">
-			<h1 className="text-[22px] font-bold tracking-tight text-foreground">
-				Good morning{user ? `, ${user.firstName}` : ''}
-			</h1>
+		<div className="mx-auto w-full max-w-3xl">
+			<TodayGreeting
+				greeting={greeting()}
+				firstName={user?.firstName}
+				longDate={formatFullDate(today)}
+			/>
 
-			<div className="mt-5 rounded-2xl border border-border bg-card">
-				<EmptyState
-					icon={<CalendarDays />}
-					title="No classes loaded yet"
-					description="Today's sessions will appear here once this screen is wired to the teach schedule endpoint."
-				/>
-			</div>
+			<WeekNav
+				rangeLabel={formatWeekRange(selectedDate)}
+				onPrevWeek={() => setSelectedDate(addDays(selectedDate, -7))}
+				onNextWeek={() => setSelectedDate(addDays(selectedDate, 7))}
+				showJumpToday={!isToday}
+				onJumpToday={() => setSelectedDate(today)}
+			/>
+
+			<WeekStrip
+				dates={dates}
+				selectedDate={selectedDate}
+				today={today}
+				datesWithSessions={datesWithSessions}
+				onSelect={setSelectedDate}
+			/>
+
+			<TodaySessions
+				isPending={isPending}
+				isError={isError}
+				sessions={daySessions}
+				hiddenByBranch={hiddenByBranch}
+				emptyWhen={isToday ? 'today' : `on ${formatShortDate(selectedDate)}`}
+				onView={(sessionId) =>
+					void navigate({
+						to: '/sessions/$sessionId',
+						params: { sessionId: String(sessionId) },
+					})
+				}
+				onTakeAttendance={(sessionId) =>
+					void navigate({
+						to: '/sessions/$sessionId/attendance',
+						params: { sessionId: String(sessionId) },
+					})
+				}
+				onEnterMarks={(sessionId) =>
+					void navigate({
+						to: '/sessions/$sessionId/marks',
+						params: { sessionId: String(sessionId) },
+					})
+				}
+			/>
 		</div>
 	);
 }

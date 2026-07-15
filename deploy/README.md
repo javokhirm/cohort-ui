@@ -16,13 +16,13 @@ publish no host ports and hold no secrets — `VITE_*` config is compile-time an
 baked into the image by CI.
 
 The app dir → image → host mapping (they deliberately differ; the image and host
-follow the API *surface*, not the folder):
+follow the API _surface_, not the folder):
 
-| App dir             | Surface       | Image                  | Prod host            |
-| ------------------- | ------------- | ---------------------- | -------------------- |
-| `admin`             | `/manage`     | `cohort-web-admin`     | `admin.cohort.uz`    |
-| `internal-platform` | `/super-admin`| `cohort-web-internal`  | `internal.cohort.uz` |
-| `teacher`           | `/teach`      | `cohort-web-teach`     | `teach.cohort.uz`    |
+| App dir             | Surface        | Image                 | Prod host            |
+| ------------------- | -------------- | --------------------- | -------------------- |
+| `admin`             | `/manage`      | `cohort-web-admin`    | `admin.cohort.uz`    |
+| `internal-platform` | `/super-admin` | `cohort-web-internal` | `internal.cohort.uz` |
+| `teacher`           | `/teach`       | `cohort-web-teach`    | `teach.cohort.uz`    |
 
 ## 1. DNS (cohort.uz panel)
 
@@ -52,7 +52,7 @@ sudo mkdir -p /opt/cohort/{web-prod,web-dev} && sudo chown -R deploy:deploy /opt
 
 `docker-compose.web.yml` does **not** need copying — each deploy `scp`s it from this repo
 before running `docker compose`, so the repo is the source of truth and the server copy can
-never drift. (`.env` is deliberately *not* synced: it is server-side config.)
+never drift. (`.env` is deliberately _not_ synced: it is server-side config.)
 
 > **Adding a new app?** After the code + Caddyfile work, the one manual server step is adding
 > `<APP>_ALIAS` (and a fallback `<APP>_IMAGE`) to the `.env` in **both** `/opt/cohort/web-prod`

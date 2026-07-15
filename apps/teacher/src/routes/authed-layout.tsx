@@ -1,10 +1,10 @@
 import { useEffect } from 'react';
 import { Outlet, useNavigate, useRouterState } from '@tanstack/react-router';
 
-import { AppSidebar, AppTopbar, BottomTabBar } from '@repo/ui';
-import { formatDate } from '@repo/utils';
+import { AppSidebar, AppTopbar, BottomTabBar, ThemeToggle } from '@repo/ui';
 
 import { useSessionStore } from '@/store/sessionStore';
+import { BranchSelector } from '@/layouts/BranchSelector';
 import { NAV_ITEMS } from '@/layouts/nav';
 import { OverflowMenu } from '@/layouts/OverflowMenu';
 
@@ -52,10 +52,6 @@ export function AuthedLayout() {
 		onClick: () => void navigate({ to: href }),
 	}));
 
-	// The greeting lives on the page itself; the topbar carries today's date.
-	const subtitle =
-		active.id === 'today' ? formatDate(new Date().toISOString()) : active.subtitle;
-
 	return (
 		<div className="flex h-svh overflow-hidden bg-background text-foreground">
 			<AppSidebar
@@ -71,11 +67,17 @@ export function AuthedLayout() {
 			<div className="flex min-w-0 flex-1 flex-col overflow-hidden">
 				<AppTopbar
 					title={active.title}
-					subtitle={subtitle}
-					actions={<OverflowMenu />}
+					subtitle={active.subtitle}
+					branch={<BranchSelector />}
+					actions={
+						<>
+							<ThemeToggle />
+							<OverflowMenu />
+						</>
+					}
 				/>
 
-				<main className="flex-1 overflow-y-auto bg-muted px-4 py-5 md:px-6 md:py-7">
+				<main className="flex-1 overflow-y-auto bg-muted px-4 pt-5 md:px-6 md:pt-7">
 					<Outlet />
 				</main>
 

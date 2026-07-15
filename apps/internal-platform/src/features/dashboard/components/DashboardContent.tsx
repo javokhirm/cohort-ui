@@ -35,7 +35,14 @@ import {
 } from '@repo/utils';
 import type { DashboardKpis } from '@/api/dashboard/types';
 
-import { SERVICES, TENANT_STATUS_COLORS, TOOLTIP_STYLE } from '../constants';
+import {
+	AXIS_TICK,
+	CHART,
+	SERVICES,
+	TENANT_STATUS_COLORS,
+	TENANT_STATUS_FALLBACK,
+	TOOLTIP_STYLE,
+} from '../constants';
 import { getInitials } from '../utils';
 import { TrendChip } from './TrendChip';
 
@@ -51,7 +58,7 @@ export function DashboardContent({ data }: { data: DashboardKpis }) {
 		.map(([status, count]) => ({
 			name: status.charAt(0) + status.slice(1).toLowerCase(),
 			count,
-			fill: TENANT_STATUS_COLORS[status] ?? '#94a3b8',
+			fill: TENANT_STATUS_COLORS[status] ?? TENANT_STATUS_FALLBACK,
 		}));
 
 	return (
@@ -120,15 +127,18 @@ export function DashboardContent({ data }: { data: DashboardKpis }) {
 					<CardContent className="px-2 py-4">
 						<ResponsiveContainer width="100%" height={180}>
 							<LineChart data={trendData} margin={{ left: 0, right: 8 }}>
-								<CartesianGrid strokeDasharray="3 3" stroke="#1e293b" />
+								<CartesianGrid
+									strokeDasharray="3 3"
+									stroke={CHART.grid}
+								/>
 								<XAxis
 									dataKey="month"
-									tick={{ fill: '#64748b', fontSize: 11 }}
+									tick={AXIS_TICK}
 									axisLine={false}
 									tickLine={false}
 								/>
 								<YAxis
-									tick={{ fill: '#64748b', fontSize: 11 }}
+									tick={AXIS_TICK}
 									axisLine={false}
 									tickLine={false}
 									tickFormatter={(v: number) => formatPriceAxis(v)}
@@ -138,10 +148,10 @@ export function DashboardContent({ data }: { data: DashboardKpis }) {
 								<Line
 									type="monotone"
 									dataKey="revenue"
-									stroke="#818cf8"
+									stroke={CHART.revenue}
 									strokeWidth={2}
 									dot={false}
-									activeDot={{ r: 4, fill: '#818cf8' }}
+									activeDot={{ r: 4, fill: CHART.revenue }}
 								/>
 							</LineChart>
 						</ResponsiveContainer>
@@ -159,15 +169,18 @@ export function DashboardContent({ data }: { data: DashboardKpis }) {
 					<CardContent className="px-2 py-4">
 						<ResponsiveContainer width="100%" height={180}>
 							<BarChart data={trendData} margin={{ left: 0, right: 8 }}>
-								<CartesianGrid strokeDasharray="3 3" stroke="#1e293b" />
+								<CartesianGrid
+									strokeDasharray="3 3"
+									stroke={CHART.grid}
+								/>
 								<XAxis
 									dataKey="month"
-									tick={{ fill: '#64748b', fontSize: 11 }}
+									tick={AXIS_TICK}
 									axisLine={false}
 									tickLine={false}
 								/>
 								<YAxis
-									tick={{ fill: '#64748b', fontSize: 11 }}
+									tick={AXIS_TICK}
 									axisLine={false}
 									tickLine={false}
 									width={24}
@@ -176,7 +189,7 @@ export function DashboardContent({ data }: { data: DashboardKpis }) {
 								<Tooltip contentStyle={TOOLTIP_STYLE} />
 								<Bar
 									dataKey="signups"
-									fill="#60a5fa"
+									fill={CHART.signups}
 									radius={[4, 4, 0, 0]}
 								/>
 							</BarChart>
@@ -216,7 +229,10 @@ export function DashboardContent({ data }: { data: DashboardKpis }) {
 								<Legend
 									iconType="circle"
 									iconSize={8}
-									wrapperStyle={{ color: '#94a3b8', fontSize: 12 }}
+									wrapperStyle={{
+										color: 'var(--muted-foreground)',
+										fontSize: 12,
+									}}
 								/>
 							</PieChart>
 						</ResponsiveContainer>

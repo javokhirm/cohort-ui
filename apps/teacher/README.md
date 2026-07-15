@@ -19,13 +19,13 @@ Requires the `cohort-be` API on `http://localhost:5050`.
 
 ## What's here today
 
-| Area                | Status                                                                  |
-| ------------------- | ----------------------------------------------------------------------- |
-| Login               | **Wired** — phone + password → `POST /public/auth/login`, silent refresh |
-| Shell               | **Wired** — sidebar (desktop) / bottom tabs (mobile), light + dark theme |
-| Today               | Placeholder — pending `GET /teach/sessions`                             |
-| Groups              | Placeholder — pending `GET /teach/groups`                               |
-| Profile             | **Wired** — renders the session user (there is no `/teach/me`)           |
+| Area    | Status                                                                   |
+| ------- | ------------------------------------------------------------------------ |
+| Login   | **Wired** — phone + password → `POST /public/auth/login`, silent refresh |
+| Shell   | **Wired** — sidebar (desktop) / bottom tabs (mobile), light + dark theme |
+| Today   | Placeholder — pending `GET /teach/sessions`                              |
+| Groups  | Placeholder — pending `GET /teach/groups`                                |
+| Profile | **Wired** — renders the session user (there is no `/teach/me`)           |
 
 The sign-in card is `LoginCard` from `@repo/ui`, shared with the admin console.
 

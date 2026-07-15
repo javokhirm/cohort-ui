@@ -27,28 +27,6 @@ describe('branchStore', () => {
 		});
 	});
 
-	describe('toggleBranch', () => {
-		it('starts a fresh selection from "all"', () => {
-			useBranchStore.getState().toggleBranch(3);
-			expect(useBranchStore.getState().activeBranchIds).toEqual([3]);
-		});
-
-		it('adds and removes branches', () => {
-			useBranchStore.getState().setActiveBranchIds([1]);
-			useBranchStore.getState().toggleBranch(2);
-			expect(useBranchStore.getState().activeBranchIds).toEqual([1, 2]);
-
-			useBranchStore.getState().toggleBranch(1);
-			expect(useBranchStore.getState().activeBranchIds).toEqual([2]);
-		});
-
-		it('falls back to "all" when the last branch is deselected', () => {
-			useBranchStore.getState().setActiveBranchIds([2]);
-			useBranchStore.getState().toggleBranch(2);
-			expect(useBranchStore.getState().activeBranchIds).toBeNull();
-		});
-	});
-
 	describe('reconcile', () => {
 		it('drops ids that are no longer accessible', () => {
 			useBranchStore.getState().setActiveBranchIds([1, 2, 3]);

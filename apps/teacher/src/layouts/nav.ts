@@ -17,7 +17,13 @@ export interface TeacherNavItem {
  * drift apart.
  */
 export const NAV_ITEMS: TeacherNavItem[] = [
-	{ id: 'today', label: 'Today', href: '/', Icon: Home, title: 'Today' },
+	{
+		id: 'today',
+		label: 'Today',
+		href: '/',
+		Icon: Home,
+		title: '',
+	},
 	{
 		id: 'groups',
 		label: 'Groups',
@@ -25,5 +31,11 @@ export const NAV_ITEMS: TeacherNavItem[] = [
 		Icon: LayoutGrid,
 		title: 'My Groups',
 	},
-	{ id: 'profile', label: 'Profile', href: '/profile', Icon: User, title: 'Profile' },
+	{
+		id: 'profile',
+		label: 'Profile',
+		href: '/profile',
+		Icon: User,
+		title: 'Profile',
+	},
 ];

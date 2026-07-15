@@ -7,7 +7,12 @@ import {
 	type ScheduleDay,
 	type ScheduleRule,
 } from '../api/groups.queries';
-import type { CreateGroupInput, UpdateGroupInput } from '../api/groups.mutations';
+import { GRADING_CONFIG_TYPES } from '../api/grading-config.queries';
+import type {
+	CreateGroupInput,
+	GradingConfigInput,
+	UpdateGroupInput,
+} from '../api/groups.mutations';
 
 /** Optional teacher/room selects can't use an empty string (Radix reserves it). */
 export const NONE_VALUE = 'none';
@@ -95,7 +100,24 @@ function refineGroup(
 	}
 }
 
-export const createGroupSchema = baseGroupSchema.superRefine(refineGroup);
+export const createGroupSchema = baseGroupSchema
+	.extend({
+		// Initial grading scale (§1.1). `gradingMaxPoints` is a string (raw input),
+		// validated/parsed on submit; ignored for the LETTER type.
+		gradingType: z.enum(GRADING_CONFIG_TYPES),
+		gradingMaxPoints: z.string(),
+		gradingAllowHalf: z.boolean(),
+	})
+	.superRefine((val, ctx) => {
+		refineGroup(val, ctx);
+		if (val.gradingType !== 'LETTER' && !(Number(val.gradingMaxPoints) > 0)) {
+			ctx.addIssue({
+				code: 'custom',
+				path: ['gradingMaxPoints'],
+				message: 'Enter a positive maximum',
+			});
+		}
+	});
 
 export const editGroupSchema = baseGroupSchema
 	.extend({
@@ -113,8 +135,22 @@ function selectToId(value: string): number | null {
 	return value === NONE_VALUE || value === '' ? null : Number(value);
 }
 
-function toScheduleRule(v: CreateGroupFormValues): ScheduleRule {
+function toScheduleRule(v: {
+	days: ScheduleDay[];
+	startTime: string;
+	endTime: string;
+}): ScheduleRule {
 	return { days: v.days, startTime: v.startTime, endTime: v.endTime };
+}
+
+/** Create-form grading fields → the `gradingConfig` payload (LETTER drops the max). */
+function toGradingConfig(v: CreateGroupFormValues): GradingConfigInput {
+	if (v.gradingType === 'LETTER') return { type: 'LETTER' };
+	return {
+		type: v.gradingType,
+		maxPoints: Number(v.gradingMaxPoints),
+		...(v.gradingType === 'POINTS' ? { allowHalf: v.gradingAllowHalf } : {}),
+	};
 }
 
 export function createValuesToPayload(v: CreateGroupFormValues): CreateGroupInput {
@@ -128,6 +164,7 @@ export function createValuesToPayload(v: CreateGroupFormValues): CreateGroupInpu
 		startDate: v.startDate || null,
 		endDate: v.endDate || null,
 		scheduleRule: toScheduleRule(v),
+		gradingConfig: toGradingConfig(v),
 	};
 }
 

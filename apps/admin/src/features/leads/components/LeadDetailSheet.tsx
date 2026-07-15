@@ -347,7 +347,7 @@ export function LeadDetailSheet({ leadId, open, onOpenChange }: LeadDetailSheetP
 						{!isTerminal && (
 							<Can permission="lead.convert">
 								<Button
-									className="bg-tone-green-fg text-white hover:bg-tone-green-fg/90"
+									className="bg-tone-green-fg text-background hover:bg-tone-green-fg/90"
 									onClick={() => setConvertOpen(true)}
 								>
 									<Check className="mr-1.5 size-4" />

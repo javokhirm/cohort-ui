@@ -40,6 +40,8 @@ import {
 	type EditGroupFormValues,
 } from '../schemas/group-form.schema';
 import { ScheduleRuleFields } from '../components/ScheduleRuleFields';
+import { GradingScaleFields } from '../components/GradingScaleFields';
+import { GradingScaleSection } from '../components/GradingScaleSection';
 import { SessionPreviewCard } from '../components/SessionPreviewCard';
 
 // ─── Option hooks ────────────────────────────────────────────────────────────
@@ -86,9 +88,15 @@ function useGroupFormOptions(branchId: string) {
 
 function GroupFields({
 	mode,
+	gradingSection,
 	extraSection,
 }: {
 	mode: 'create' | 'edit';
+	/** The grading-scale editor. On create it's part of this form
+	 * (`GradingScaleFields`, submitted as `gradingConfig`); on edit it's a
+	 * self-contained section wired to the separate, immutable grading-config
+	 * endpoint — injected by the caller, which has the group id. */
+	gradingSection?: React.ReactNode;
 	/** Edit-only sections (e.g. Status) that need `EditGroupFormValues`'s wider
 	 * field set — injected by the caller so this component can stay on the
 	 * shared `CreateGroupFormValues` shape. */
@@ -189,6 +197,17 @@ function GroupFields({
 					<ScheduleRuleFields />
 				</FormSection>
 
+				{mode === 'create' ? (
+					<FormSection
+						title="Grading scale"
+						className="border border-border bg-card shadow-xs"
+					>
+						<GradingScaleFields />
+					</FormSection>
+				) : (
+					gradingSection
+				)}
+
 				{extraSection}
 			</div>
 
@@ -246,6 +265,9 @@ function CreateGroupForm({
 			days: [],
 			startTime: '09:00',
 			endTime: '10:30',
+			gradingType: 'POINTS',
+			gradingMaxPoints: '10',
+			gradingAllowHalf: false,
 		},
 	});
 
@@ -341,6 +363,7 @@ function EditGroupForm({
 			>
 				<GroupFields
 					mode="edit"
+					gradingSection={<GradingScaleSection groupId={group.id} />}
 					extraSection={
 						<FormSection
 							title="Status"

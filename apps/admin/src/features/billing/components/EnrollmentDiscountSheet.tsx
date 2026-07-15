@@ -135,7 +135,7 @@ export function EnrollmentDiscountSheet({
 			}
 		>
 			<div className="flex flex-col gap-4">
-				<div className="rounded-xl bg-white p-4 text-xs leading-relaxed text-muted-foreground">
+				<div className="rounded-xl bg-card p-4 text-xs leading-relaxed text-muted-foreground">
 					Applies automatically to this enrollment&rsquo;s monthly invoice —
 					every month, until it expires. Usage caps on the underlying promo are
 					not consumed by standing assignments.

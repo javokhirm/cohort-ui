@@ -39,6 +39,7 @@ export * from './components/composed/progress-bar';
 export * from './components/composed/session-card';
 export * from './components/composed/week-calendar-grid';
 // Inputs & controls
+export * from './components/composed/branch-switcher';
 export * from './components/composed/confirm-dialog';
 export * from './components/composed/date-picker';
 export * from './components/composed/form-date-picker';
@@ -63,7 +64,9 @@ export * from './components/shell/app-topbar';
 export * from './components/shell/bottom-tab-bar';
 export * from './components/shell/notification-bell';
 export * from './components/shell/sticky-action-bar';
+export * from './components/shell/theme-toggle';
 
 // ─── Utilities ────────────────────────────────────────────────────────────────
 export { cn } from './lib/utils';
 export * from './lib/status';
+export * from './lib/theme';

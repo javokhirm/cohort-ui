@@ -8,19 +8,30 @@ import {
 } from 'lucide-react';
 
 export const TOOLTIP_STYLE: React.CSSProperties = {
-	backgroundColor: '#131c30',
-	border: '1px solid #1e293b',
-	borderRadius: '0.5rem',
-	color: '#f1f5f9',
+	backgroundColor: 'var(--popover)',
+	border: '1px solid var(--border)',
+	borderRadius: 'var(--radius-md)',
+	color: 'var(--popover-foreground)',
 	fontSize: 12,
 };
 
+export const CHART = {
+	grid: 'var(--border)',
+	revenue: 'var(--chart-1)',
+	signups: 'var(--chart-3)',
+} as const;
+
+export const AXIS_TICK = { fill: 'var(--muted-foreground)', fontSize: 11 } as const;
+
 export const TENANT_STATUS_COLORS: Record<string, string> = {
-	ACTIVE: '#22c55e',
-	PENDING: '#60a5fa',
-	SUSPENDED: '#f97316',
-	CANCELLED: '#94a3b8',
+	ACTIVE: 'var(--tone-green-fg)',
+	PENDING: 'var(--tone-blue-fg)',
+	SUSPENDED: 'var(--tone-orange-fg)',
+	CANCELLED: 'var(--tone-slate-fg)',
 };
+
+/** Fallback slice colour for a status the map doesn't know. */
+export const TENANT_STATUS_FALLBACK = 'var(--tone-slate-fg)';
 
 export const SERVICES = [
 	{ name: 'API', icon: Server },
