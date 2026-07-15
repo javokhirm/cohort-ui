@@ -2,10 +2,7 @@ import { useMutation, useQueryClient } from '@tanstack/react-query';
 
 import { teachApi } from '@/api/apiClient';
 
-import {
-	type AttendanceRecord,
-	type AttendanceStatus,
-} from './attendance.queries';
+import { type AttendanceRecord, type AttendanceStatus } from './attendance.queries';
 import { type AttendanceGrid, attendanceGridKeys } from './attendance-grid.queries';
 
 interface UpsertCellVars {

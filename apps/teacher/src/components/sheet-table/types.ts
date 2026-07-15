@@ -39,7 +39,16 @@ export interface SheetInputCell {
 	kind: 'input';
 	value: string;
 	onChange: (e: React.ChangeEvent<HTMLInputElement>) => void;
+	/** Fired on blur and Enter with the field's current value — commit the edit. */
+	onCommit?: (value: string) => void;
 	accent?: boolean;
+	/** Non-editable placeholder (e.g. a past column that only displays a value). */
+	disabled?: boolean;
+	/** Numeric-input constraints for a score cell. */
+	inputMode?: React.HTMLAttributes<HTMLInputElement>['inputMode'];
+	min?: number;
+	max?: number;
+	step?: number;
 }
 
 export type SheetCell = SheetBadgeCell | SheetInputCell;

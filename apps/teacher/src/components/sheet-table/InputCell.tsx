@@ -22,6 +22,16 @@ export function InputCell({
 			<Input
 				value={cell.value}
 				onChange={cell.onChange}
+				onBlur={(e) => cell.onCommit?.(e.currentTarget.value)}
+				onKeyDown={(e) => {
+					if (e.key === 'Enter') e.currentTarget.blur();
+				}}
+				disabled={cell.disabled}
+				type="number"
+				inputMode={cell.inputMode}
+				min={cell.min}
+				max={cell.max}
+				step={cell.step}
 				style={{ fontSize }}
 				className="h-full rounded-none border-0 bg-transparent text-center tabular-nums shadow-none focus-visible:border-transparent focus-visible:bg-primary/10 focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-inset"
 			/>

@@ -21,6 +21,7 @@ import { SessionDetailRoute } from '@/routes/session-detail';
 import { AttendanceRoute } from '@/routes/attendance';
 import { GroupAttendanceRoute } from '@/routes/group-attendance';
 import { MarksRoute } from '@/routes/marks';
+import { GroupMarksRoute } from '@/routes/group-marks';
 
 const rootRoute = createRootRoute({
 	component: () => (
@@ -102,6 +103,10 @@ const attendanceRoute = createRoute({
 const marksRoute = createRoute({
 	getParentRoute: () => authedRoute,
 	path: '/sessions/$sessionId/marks',
+	validateSearch: (search: Record<string, unknown>): { view?: 'list' } => {
+		const view = search.view === 'list' ? 'list' : undefined;
+		return { view };
+	},
 	component: MarksRoute,
 });
 
@@ -122,6 +127,23 @@ const groupAttendanceRoute = createRoute({
 	component: GroupAttendanceRoute,
 });
 
+const groupMarksRoute = createRoute({
+	getParentRoute: () => authedRoute,
+	path: '/groups/$groupId/marks',
+	validateSearch: (
+		search: Record<string, unknown>,
+	): { month?: string; view?: 'table' } => {
+		const month =
+			typeof search.month === 'string' &&
+			/^\d{4}-(0[1-9]|1[0-2])$/.test(search.month)
+				? search.month
+				: undefined;
+		const view = search.view === 'table' ? 'table' : undefined;
+		return { month, view };
+	},
+	component: GroupMarksRoute,
+});
+
 const routeTree = rootRoute.addChildren([
 	loginRoute,
 	forbiddenRoute,
@@ -133,6 +155,7 @@ const routeTree = rootRoute.addChildren([
 		attendanceRoute,
 		marksRoute,
 		groupAttendanceRoute,
+		groupMarksRoute,
 	]),
 ]);
 

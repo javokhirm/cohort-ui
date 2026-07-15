@@ -11,9 +11,9 @@ interface MonthNavProps {
 }
 
 /**
- * Month stepper for the grid — prev / next arrows around the current month, with
- * a "This month" shortcut when the view has moved away from it. Modelled on the
- * schedule feature's `WeekNav`; promote to `@repo/ui` if a second app needs it.
+ * Month stepper for the marks grid — prev / next arrows around the current
+ * month, with a "This month" shortcut when the view has moved away. Feature-local
+ * (attendance has its own); a shared home is a promotion candidate.
  */
 export function MonthNav({ label, onPrev, onNext, showToday, onToday }: MonthNavProps) {
 	return (
