@@ -3,6 +3,7 @@ import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { manageApi } from '@/api/apiClient';
 import { invoicesKeys } from '@/features/billing/api/keys';
 
+import type { GradingType } from './grading-config.queries';
 import { groupsKeys } from './keys';
 import type {
 	Enrollment,
@@ -14,6 +15,13 @@ import type {
 
 // ─── Input types ─────────────────────────────────────────────────────────────
 
+/** Initial grading scale for a new group (`SaveGradingConfigDto`). */
+export interface GradingConfigInput {
+	type: GradingType;
+	maxPoints?: number;
+	allowHalf?: boolean;
+}
+
 export interface CreateGroupInput {
 	branchId: number;
 	courseId: number;
@@ -24,6 +32,8 @@ export interface CreateGroupInput {
 	startDate?: string | null;
 	endDate?: string | null;
 	scheduleRule?: ScheduleRule | null;
+	/** Initial daily-mark grading scale (§1.1); omit → backend default POINTS/10. */
+	gradingConfig?: GradingConfigInput | null;
 }
 
 export interface UpdateGroupInput {

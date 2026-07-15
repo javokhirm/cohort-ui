@@ -8,6 +8,10 @@ import {
 	type ScheduleRule,
 	type SessionStatus,
 } from '../api/groups.queries';
+import {
+	GRADING_CONFIG_TYPES,
+	type GradingType,
+} from '../api/grading-config.queries';
 
 // ─── Group status ─────────────────────────────────────────────────────────────
 // The shared `lib/status.ts` map has no `group` kind, so tones/labels for group
@@ -34,6 +38,47 @@ export const GROUP_STATUS_FILTERS: { value: GroupStatus | undefined; label: stri
 export const GROUP_STATUS_OPTIONS = (Object.keys(GROUP_STATUS_META) as GroupStatus[]).map(
 	(value) => ({ value, label: GROUP_STATUS_META[value].label }),
 );
+
+// ─── Grading scale ────────────────────────────────────────────────────────────
+
+export const GRADING_TYPE_META: Record<GradingType, string> = {
+	POINTS: 'Points',
+	PERCENTAGE: 'Percentage',
+	LETTER: 'Letter',
+};
+
+/** Segmented scale-type options for the grading control. */
+export const GRADING_TYPE_OPTIONS = GRADING_CONFIG_TYPES.map((value) => ({
+	value,
+	label: GRADING_TYPE_META[value],
+}));
+
+/** A short label for a grading scale, e.g. "Points · max 10" / "Letter · A–F". */
+export function formatGradingScale(config: {
+	type: GradingType;
+	maxPoints: number | null;
+}): string {
+	switch (config.type) {
+		case 'POINTS':
+			return `Points · max ${config.maxPoints ?? '—'}`;
+		case 'PERCENTAGE':
+			return `Percentage · 0–${config.maxPoints ?? 100}`;
+		case 'LETTER':
+			return 'Letter grade · A–F';
+	}
+}
+
+/** Preview label for the pending form values (max is still a raw string). */
+export function gradingPreview(type: GradingType, maxPoints: string): string {
+	switch (type) {
+		case 'POINTS':
+			return `Daily points · max ${maxPoints || '—'}`;
+		case 'PERCENTAGE':
+			return `Percentage · 0–${maxPoints || '100'}`;
+		case 'LETTER':
+			return 'Letter grade · A–F';
+	}
+}
 
 // ─── Enrollment status ──────────────────────────────────────────────────────
 

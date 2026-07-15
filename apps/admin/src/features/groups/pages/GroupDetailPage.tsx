@@ -30,6 +30,7 @@ import { useGroup, type GroupDetail } from '../api/groups.queries';
 import { formatScheduleRule, GROUP_STATUS_META } from '../lib/group-options';
 import { RosterSection } from '../components/RosterSection';
 import { GroupSessionsSection } from '../components/GroupSessionsSection';
+import { GradingScaleSection } from '../components/GradingScaleSection';
 
 // ─── Header ──────────────────────────────────────────────────────────────────
 
@@ -187,6 +188,7 @@ export function GroupDetailPage({ groupId }: GroupDetailPageProps) {
 						<TabsList>
 							<TabsTrigger value="roster">Roster</TabsTrigger>
 							<TabsTrigger value="sessions">Sessions</TabsTrigger>
+							<TabsTrigger value="grading">Grading</TabsTrigger>
 							<TabsTrigger value="overview">Overview</TabsTrigger>
 						</TabsList>
 
@@ -195,6 +197,9 @@ export function GroupDetailPage({ groupId }: GroupDetailPageProps) {
 						</TabsContent>
 						<TabsContent value="sessions">
 							<GroupSessionsSection groupId={group.id} />
+						</TabsContent>
+						<TabsContent value="grading">
+							<GradingScaleSection groupId={group.id} />
 						</TabsContent>
 						<TabsContent value="overview">
 							<OverviewTab group={group} />

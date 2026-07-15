@@ -28,6 +28,8 @@ export const groupsKeys = {
 	groupEnrollments: (id: number, status?: string) =>
 		[...groupsKeys.groups(), 'enrollments', id, status ?? 'all'] as const,
 	groupSessions: (id: number) => [...groupsKeys.groups(), 'sessions', id] as const,
+	groupGradingConfig: (id: number) =>
+		[...groupsKeys.groups(), 'grading-config', id] as const,
 
 	sessions: () => [...groupsKeys.all, 'session'] as const,
 	sessionCalendar: (filters: SessionCalendarFilters) =>
