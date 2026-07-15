@@ -77,7 +77,7 @@ export function AuthedLayout() {
 					}
 				/>
 
-				<main className="flex-1 overflow-y-auto bg-muted px-4 py-5 md:px-6 md:py-7">
+				<main className="flex-1 overflow-y-auto bg-muted px-4 pt-5 md:px-6 md:pt-7">
 					<Outlet />
 				</main>
 

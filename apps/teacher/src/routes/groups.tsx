@@ -1,6 +1,7 @@
-import { LayoutGrid } from 'lucide-react';
+import { ClipboardCheck, LayoutGrid } from 'lucide-react';
+import { useNavigate } from '@tanstack/react-router';
 
-import { branchDotClass, cn, EmptyState, Skeleton } from '@repo/ui';
+import { branchDotClass, Button, cn, EmptyState, Skeleton } from '@repo/ui';
 
 import { useTeachBranches } from '@/api/branches';
 import { useGroups } from '@/features/groups/api/groups.queries';
@@ -27,6 +28,7 @@ function scheduleSummary(group: TeachGroup): string | null {
  * this?" is answerable without reading the filter.
  */
 export function GroupsRoute() {
+	const navigate = useNavigate();
 	const { data: branches } = useTeachBranches();
 	const { data, isPending, isError } = useGroups();
 	const filterByBranch = useBranchFilter();
@@ -126,6 +128,24 @@ export function GroupsRoute() {
 									)}
 								</div>
 							)}
+
+							<div className="mt-3 border-t border-border pt-2.5">
+								<Button
+									variant="ghost"
+									size="sm"
+									className="h-auto gap-1.5 px-0 text-[12px] font-medium text-primary hover:bg-transparent hover:underline"
+									onClick={() =>
+										void navigate({
+											to: '/groups/$groupId/attendance',
+											params: { groupId: String(group.id) },
+											search: { month: undefined },
+										})
+									}
+								>
+									<ClipboardCheck className="size-3.5" />
+									Attendance
+								</Button>
+							</div>
 						</div>
 					);
 				})}
