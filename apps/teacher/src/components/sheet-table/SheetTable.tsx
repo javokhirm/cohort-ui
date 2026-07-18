@@ -4,19 +4,33 @@ import { BadgeCell } from './BadgeCell';
 import { InputCell } from './InputCell';
 import type { SheetTableProps } from './types';
 
-const headerCellClass =
-	'flex shrink-0 items-center border-b border-border text-[10.5px] font-bold tracking-[.03em] text-muted-foreground uppercase';
+/** Fallback width for a right-hand summary column that declares none. */
+const DEFAULT_RIGHT_W = '64px';
+
+const headCell =
+	'flex shrink-0 items-center text-[10px] font-bold tracking-[.04em] text-muted-foreground uppercase';
 
 /**
- * A spreadsheet-style grid: a frozen left column of row labels, a
- * horizontally-scrolling middle region of dated columns, and one or more
- * frozen right-hand summary columns. Fully controlled and presentation-only —
- * it renders exactly what it's given and does no fetching, date math, or
- * business logic (marking statuses, computing rates/averages/ranks). The same
- * component serves both the attendance sheet (`kind: 'badge'` cells) and the
- * daily marks sheet (`kind: 'input'` cells); only the props differ. The
- * outer card fills its parent's box — size it from the caller (e.g. a
- * `h-[...]` or `flex-1 min-h-0` wrapper) so the vertical scroll has a bound.
+ * A spreadsheet-style grid with both axes frozen: the header row stays put while
+ * you scroll down, and the student column plus the right-hand summary columns
+ * stay put while you scroll sideways. Everything lives in **one** scroll
+ * container and freezing is done with `position: sticky`, which is what makes
+ * the two axes hold together — a nested scroller per region cannot.
+ *
+ * Fully controlled and presentation-only: it renders exactly what it's given and
+ * does no fetching, date math, or business logic (marking statuses, computing
+ * rates/averages/ranks). The same component serves the attendance sheet
+ * (`kind: 'badge'` cells) and the marks sheet (`kind: 'input'` cells); only the
+ * props differ.
+ *
+ * **Sizing.** The outer card fills its parent's box, so the caller must bound it
+ * — `min-h-0 flex-1` inside a flex column, or an explicit `h-[...]`. Without a
+ * bound the card grows to its content and nothing has room to stick.
+ *
+ * **Opaque surfaces.** Frozen cells paint over the cells scrolling beneath them,
+ * so every sticky surface uses a solid token (`bg-card` / `bg-muted`), never a
+ * translucent one. Tints layered *inside* a frozen cell (today's column, a tone
+ * pill) may be translucent — the opaque parent is behind them.
  *
  * ## Usage — attendance sheet (badge cells + parent-owned popover state)
  * ```tsx
@@ -37,6 +51,7 @@ const headerCellClass =
  *         letter: status ? status[0] : '',
  *         tone: status ? resolveStatus('attendance', status).tone : 'slate',
  *         accent: isTodayIso(col.date),
+ *         label: `${r.studentName}, ${formatFullDate(col.date)}`,
  *         onClick: editable ? () => setOpenCell(cellKey) : undefined,
  *         isOpen: openCell === cellKey,
  *         dropOpts: STATUSES.map((s) => ({
@@ -53,49 +68,21 @@ const headerCellClass =
  *   }));
  *
  *   return (
- *     <div className="relative">
+ *     <>
  *       {openCell && <div className="fixed inset-0 z-40" onClick={() => setOpenCell(null)} />}
  *       <SheetTable
- *         nameW="158px" headH="32px" rowH="30px" nameFont="12.5px"
- *         cellW="56px" cellFont="12.5px" colW={`${56 * grid.columns.length}px`}
+ *         className="min-h-0 flex-1"
+ *         nameW="168px" headH="40px" rowH="44px" nameFont="13px"
+ *         cellW="52px" cellFont="13px"
  *         dates={grid.columns.map((c) => ({
- *           label: formatColumnDate(c.date),
+ *           label: formatDayOfMonth(c.date),
+ *           sublabel: formatWeekday(c.date),
  *           accent: isTodayIso(c.date),
  *         }))}
  *         rows={rows}
- *         rightCols={[{ label: 'Rate' }]}
+ *         rightCols={[{ label: 'Rate', width: '62px' }]}
  *       />
- *     </div>
- *   );
- * }
- * ```
- *
- * ## Usage — daily marks sheet (input cells)
- * ```tsx
- * function MarksSheet({ sessions, students, scores, onScoreChange }: Props) {
- *   const rows: SheetRow[] = students.map((s, i) => ({
- *     key: s.id,
- *     name: s.name,
- *     striped: i % 2 === 1,
- *     right: [
- *       { tone: avgTone(s.avg), disp: s.avg == null ? '—' : s.avg.toFixed(1), emphasis: true },
- *       { tone: 'slate', disp: s.rank == null ? '—' : `#${s.rank}`, pill: false },
- *     ],
- *     cells: sessions.map((sess) => ({
- *       kind: 'input',
- *       value: scores[s.id]?.[sess.id] ?? '',
- *       onChange: (e) => onScoreChange(s.id, sess.id, e.target.value),
- *     })),
- *   }));
- *
- *   return (
- *     <SheetTable
- *       nameW="158px" headH="32px" rowH="30px" nameFont="12.5px"
- *       cellW="56px" cellFont="13px" colW={`${56 * sessions.length}px`}
- *       dates={sessions.map((s) => ({ label: formatColumnDate(s.date) }))}
- *       rows={rows}
- *       rightCols={[{ label: 'Avg', width: '56px' }, { label: 'Rank', width: '52px', divider: true }]}
- *     />
+ *     </>
  *   );
  * }
  * ```
@@ -107,7 +94,6 @@ export function SheetTable({
 	nameFont,
 	cellW,
 	cellFont,
-	colW,
 	dates,
 	rows,
 	rightCols,
@@ -116,74 +102,98 @@ export function SheetTable({
 	return (
 		<div
 			className={cn(
-				'overflow-hidden rounded-[13px] border border-border bg-card shadow-sm',
+				'overflow-hidden rounded-2xl border border-border bg-card shadow-sm',
 				className,
 			)}
 		>
-			<div className="flex h-full overflow-y-auto">
-				{/* Left: frozen row labels */}
-				<div
-					className="flex shrink-0 flex-col border-r border-border"
-					style={{ width: nameW }}
-				>
+			<div className="h-full overflow-auto overscroll-contain">
+				<div className="min-w-max">
+					{/* Header — frozen against vertical scroll. The opaque surface
+					    lives on the row, so a cell tint (today) can be translucent
+					    without the body showing through as it scrolls under. */}
 					<div
-						className={cn(
-							headerCellClass,
-							'sticky top-0 z-10 bg-muted/50 px-3',
-						)}
+						className="sticky top-0 z-30 flex border-b border-border bg-muted"
 						style={{ height: headH }}
 					>
-						Student
-					</div>
-					{rows.map((row) => (
 						<div
-							key={row.key}
 							className={cn(
-								'flex shrink-0 items-center border-b border-border px-3',
-								row.striped && 'bg-muted/40',
+								headCell,
+								'sticky left-0 z-10 border-r border-border bg-muted px-3',
 							)}
-							style={{ height: rowH }}
+							style={{ width: nameW }}
 						>
-							<span
-								className="min-w-0 flex-1 truncate font-semibold text-foreground"
-								style={{ fontSize: nameFont }}
-							>
-								{row.name}
-							</span>
+							Student
 						</div>
-					))}
-				</div>
-
-				{/* Middle: horizontally-scrolling dated columns */}
-				<div className="min-w-0 flex-1 overflow-x-auto">
-					<div className="flex flex-col" style={{ minWidth: colW }}>
-						<div
-							className="sticky top-0 z-10 flex shrink-0 border-b border-border bg-muted/50"
-							style={{ height: headH }}
-						>
-							{dates.map((d, i) => (
+						{dates.map((d, i) => (
+							<div
+								key={i}
+								className={cn(
+									headCell,
+									'flex-col justify-center gap-0.5 border-r border-border/60 tabular-nums',
+									d.accent && 'bg-primary/15 text-primary',
+									d.muted && 'opacity-45',
+								)}
+								style={{ flex: `1 0 ${cellW}` }}
+								title={d.title}
+							>
+								{d.sublabel && (
+									<span className="text-[8.5px] leading-none font-semibold opacity-70">
+										{d.sublabel}
+									</span>
+								)}
+								<span className="text-[11.5px] leading-none">
+									{d.label}
+								</span>
+							</div>
+						))}
+						<div className="sticky right-0 z-10 flex bg-muted">
+							{rightCols.map((rc, i) => (
 								<div
 									key={i}
 									className={cn(
-										headerCellClass,
-										'justify-center border-r border-b-0 border-border/60 tabular-nums',
-										d.accent && 'border-l-2 border-l-primary',
+										headCell,
+										'justify-center border-l border-border/60 bg-primary/10 text-primary',
+										rc.divider && 'border-l-border',
 									)}
-									style={{ width: cellW, opacity: d.opacity ?? 1 }}
+									style={{ width: rc.width ?? DEFAULT_RIGHT_W }}
 								>
-									{d.label}
+									{rc.label}
 								</div>
 							))}
 						</div>
-						{rows.map((row) => (
+					</div>
+
+					{/* Body — the name column and summary block are frozen against
+					    horizontal scroll, so both keep the row's own surface. */}
+					{rows.map((row) => {
+						const surface = row.striped ? 'bg-muted' : 'bg-card';
+						return (
 							<div
 								key={row.key}
 								className={cn(
-									'flex shrink-0 border-b border-border',
-									row.striped && 'bg-muted/40',
+									'group/row flex border-b border-border transition-colors last:border-b-0',
+									surface,
+									'hover:bg-accent',
 								)}
 								style={{ height: rowH }}
 							>
+								<div
+									className={cn(
+										'sticky left-0 z-10 flex shrink-0 items-center border-r border-border px-3 transition-colors',
+										surface,
+										'group-hover/row:bg-accent',
+									)}
+									style={{ width: nameW }}
+								>
+									<span
+										className="min-w-0 flex-1 truncate font-semibold text-foreground"
+										style={{ fontSize: nameFont }}
+										title={row.name}
+									>
+										{row.name}
+									</span>
+								</div>
+
 								{row.cells.map((cell, i) =>
 									cell.kind === 'badge' ? (
 										<BadgeCell
@@ -201,67 +211,52 @@ export function SheetTable({
 										/>
 									),
 								)}
-							</div>
-						))}
-					</div>
-				</div>
 
-				{/* Right: frozen summary column(s), visually separated */}
-				<div className="flex shrink-0 flex-col border-l-2 border-border">
-					<div
-						className="sticky top-0 z-10 flex shrink-0 border-b border-border bg-primary/10"
-						style={{ height: headH }}
-					>
-						{rightCols.map((rc, i) => (
-							<div
-								key={i}
-								className={cn(
-									headerCellClass,
-									'justify-center border-b-0 text-primary',
-									rc.width ? 'shrink-0' : 'flex-1',
-									rc.divider && 'border-l border-border/60',
-								)}
-								style={rc.width ? { width: rc.width } : undefined}
-							>
-								{rc.label}
+								<div
+									className={cn(
+										'sticky right-0 z-10 flex shrink-0 transition-colors',
+										surface,
+										'group-hover/row:bg-accent',
+									)}
+								>
+									{row.right.map((rv, i) => {
+										const rc = rightCols[i];
+										return (
+											<div
+												key={i}
+												className={cn(
+													'flex shrink-0 items-center justify-center border-l border-border/60',
+													rc?.divider && 'border-l-border',
+												)}
+												style={{
+													width: rc?.width ?? DEFAULT_RIGHT_W,
+												}}
+											>
+												<span
+													className={cn(
+														'inline-flex items-center justify-center tabular-nums',
+														rv.pill === false
+															? 'font-bold text-foreground'
+															: cn(
+																	'rounded-md px-1.5 py-0.5 font-bold',
+																	TONE_CLASSES[rv.tone],
+																),
+													)}
+													style={{
+														fontSize: rv.emphasis
+															? '12.5px'
+															: '12px',
+													}}
+												>
+													{rv.disp}
+												</span>
+											</div>
+										);
+									})}
+								</div>
 							</div>
-						))}
-					</div>
-					{rows.map((row) => (
-						<div
-							key={row.key}
-							className={cn(
-								'flex shrink-0 border-b border-border',
-								row.striped && 'bg-muted/40',
-							)}
-							style={{ height: rowH }}
-						>
-							{row.right.map((rv, i) => {
-								const rc = rightCols[i];
-								return (
-									<div
-										key={i}
-										className={cn(
-											'flex items-center justify-center font-bold tabular-nums',
-											rc?.width ? 'shrink-0' : 'flex-1',
-											rc?.divider && 'border-l border-border/60',
-											rv.pill === false
-												? 'text-foreground'
-												: TONE_CLASSES[rv.tone],
-											rv.emphasis
-												? 'text-[13.5px] font-extrabold'
-												: 'text-[12.5px] font-bold',
-										)}
-										style={
-											rc?.width ? { width: rc.width } : undefined
-										}
-									>
-										{rv.disp}
-									</div>
-								);
-							})}
-						</div>
-					))}
+						);
+					})}
 				</div>
 			</div>
 		</div>

@@ -4,11 +4,16 @@ import type { StatusTone } from '@repo/ui';
 
 /** One header in the scrolling middle region (a date or session). */
 export interface SheetDateColumn {
+	/** Primary line — the day of the month, e.g. "3". */
 	label: string;
-	/** 0–1 opacity, e.g. to dim a not-yet-happened date. Defaults to 1. */
-	opacity?: number;
-	/** Marks this column's left edge with a 2px primary accent (e.g. "today"). */
+	/** Secondary line above the label, e.g. the short weekday "Wed". */
+	sublabel?: string;
+	/** Marks this column as today: tinted, emphasised, and the editable one. */
 	accent?: boolean;
+	/** Dims the column, e.g. a cancelled session. */
+	muted?: boolean;
+	/** Accessible/hover description of the column, e.g. "Wednesday, 3 June". */
+	title?: string;
 }
 
 /** One option in a badge cell's status-picker popover. */
@@ -19,19 +24,21 @@ export interface SheetDropOption {
 	onSelect: () => void;
 }
 
-/** A colored, centered letter — the attendance-sheet cell kind. */
+/** A colored chip centered in its cell — the attendance-sheet cell kind. */
 export interface SheetBadgeCell {
 	kind: 'badge';
+	/** The chip's text; `""` renders the unmarked placeholder instead. */
 	letter: string;
 	tone: StatusTone;
-	/** 0–1 opacity, e.g. to dim an unmarked cell. Defaults to 1. */
-	opacity?: number;
+	/** Sits in today's column — tints the cell and invites a tap when empty. */
 	accent?: boolean;
 	/** Present only when this cell is editable; clicking it opens `dropOpts`. */
 	onClick?: () => void;
 	/** Popover open state — owned by the parent, not this component. */
 	isOpen?: boolean;
 	dropOpts?: SheetDropOption[];
+	/** Screen-reader label — the letter alone is meaningless out of context. */
+	label?: string;
 }
 
 /** A borderless centered text input — the daily-marks-sheet cell kind. */
@@ -49,6 +56,8 @@ export interface SheetInputCell {
 	min?: number;
 	max?: number;
 	step?: number;
+	/** Screen-reader label — the cell carries no visible one. */
+	label?: string;
 }
 
 export type SheetCell = SheetBadgeCell | SheetInputCell;
@@ -66,7 +75,7 @@ export interface SheetRightValue {
 /** A right-hand summary column header; its width/divider also apply to that column's values. */
 export interface SheetRightColumn {
 	label: string;
-	/** Fixed width; omit to fill the remaining right-side width (single-column case). */
+	/** Fixed width; defaults to `64px`. The frozen right block is sized from these. */
 	width?: string;
 	divider?: boolean;
 }
@@ -81,18 +90,20 @@ export interface SheetRow {
 }
 
 export interface SheetTableProps {
-	/** Left (row-label) column width, e.g. "158px". */
+	/** Left (row-label) column width, e.g. "168px". */
 	nameW: string;
-	/** Header row height, e.g. "32px". */
+	/** Header row height, e.g. "40px". */
 	headH: string;
-	/** Body row height, e.g. "30px". */
+	/** Body row height, e.g. "44px". */
 	rowH: string;
 	nameFont: string;
-	/** Width of each date/session column. */
+	/**
+	 * Minimum width of each date/session column. Columns share any width left
+	 * over once the frozen columns are placed, so a short month fills the card
+	 * instead of trailing a dead gap before the summary block.
+	 */
 	cellW: string;
 	cellFont: string;
-	/** `cellW * dates.length` — the scrolling middle region's min-width. */
-	colW: string;
 	dates: SheetDateColumn[];
 	rows: SheetRow[];
 	rightCols: SheetRightColumn[];

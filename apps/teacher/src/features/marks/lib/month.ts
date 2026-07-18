@@ -45,9 +45,3 @@ export function formatMonthLabel(month: string): string {
 export function isTodayIso(date: string): boolean {
 	return date === todayIsoDate();
 }
-
-/** Compact grid-column date, e.g. `2026-06-03` → "3 Jun". */
-export function formatColumnDate(date: string): string {
-	const [, m, d] = date.split('-').map(Number);
-	return `${d} ${MONTH_NAMES[m - 1]?.slice(0, 3) ?? ''}`;
-}

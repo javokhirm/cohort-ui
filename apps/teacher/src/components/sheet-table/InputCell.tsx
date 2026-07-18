@@ -2,6 +2,11 @@ import { cn, Input } from '@repo/ui';
 
 import type { SheetInputCell } from './types';
 
+/**
+ * An editable score cell, sized and shaped like `BadgeCell`'s chip so a marks
+ * grid reads as one surface: a dashed field while empty (the same "tap me"
+ * affordance the attendance sheet uses), solid and ringed once focused.
+ */
 export function InputCell({
 	cell,
 	width,
@@ -14,10 +19,10 @@ export function InputCell({
 	return (
 		<div
 			className={cn(
-				'shrink-0 border-r border-border/60',
-				cell.accent && 'border-l-2 border-l-primary',
+				'flex items-center justify-center border-r border-border/60 px-1.5',
+				cell.accent && 'bg-primary/5',
 			)}
-			style={{ width }}
+			style={{ flex: `1 0 ${width}` }}
 		>
 			<Input
 				value={cell.value}
@@ -27,13 +32,20 @@ export function InputCell({
 					if (e.key === 'Enter') e.currentTarget.blur();
 				}}
 				disabled={cell.disabled}
+				aria-label={cell.label}
 				type="number"
 				inputMode={cell.inputMode}
 				min={cell.min}
 				max={cell.max}
 				step={cell.step}
+				placeholder="–"
 				style={{ fontSize }}
-				className="h-full rounded-none border-0 bg-transparent text-center tabular-nums shadow-none focus-visible:border-transparent focus-visible:bg-primary/10 focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-inset"
+				className={cn(
+					'h-7 rounded-lg border-dashed border-primary/45 bg-transparent px-1 text-center font-bold tabular-nums shadow-none',
+					'placeholder:font-normal placeholder:text-muted-foreground/40',
+					'hover:border-primary hover:bg-primary/10',
+					'focus-visible:border-solid focus-visible:border-primary focus-visible:bg-card focus-visible:ring-2 focus-visible:ring-primary/30',
+				)}
 			/>
 		</div>
 	);

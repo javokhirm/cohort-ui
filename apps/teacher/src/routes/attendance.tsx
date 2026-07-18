@@ -3,6 +3,7 @@ import { Ban, ClipboardCheck, LayoutGrid, List } from 'lucide-react';
 import { useNavigate, useParams, useSearch } from '@tanstack/react-router';
 
 import {
+	Button,
 	EmptyState,
 	PageHeader,
 	Skeleton,
@@ -106,6 +107,17 @@ export function AttendanceRoute() {
 		setOverrides((prev) => new Map(prev).set(studentId, status));
 	};
 
+	/**
+	 * The whole-class shortcut. It only ever runs when the draft isn't already
+	 * all-present (the button is disabled then), so it can't dirty a clean form.
+	 */
+	const onAllPresent = () => {
+		if (!detail) return;
+		setOverrides(
+			new Map(detail.roster.map((s) => [s.studentId, 'PRESENT'] as const)),
+		);
+	};
+
 	const onSave = () => {
 		if (!detail) return;
 		const create: AttendanceInput[] = [];
@@ -132,43 +144,45 @@ export function AttendanceRoute() {
 			.catch(() => undefined);
 	};
 
-	const header = (
-		<PageHeader
-			title={detail?.courseName ?? 'Take attendance'}
-			description={
-				detail ? `${formatFullDate(detail.sessionDate)}` : `Session #${sessionId}`
-			}
-		/>
-	);
-
 	const isLoading = detailQuery.isPending || recordsQuery.isPending;
 	const isError = detailQuery.isError || recordsQuery.isError;
 
 	const viewToggle = detail ? (
-		<div className="mt-4 flex justify-end">
-			<Tabs
-				value="list"
-				onValueChange={(v) => {
-					if (v === 'table') {
-						void navigate({
-							to: '/groups/$groupId/attendance',
-							params: { groupId: String(detail.groupId) },
-							search: { month: undefined, view: 'table' },
-						});
-					}
-				}}
-			>
-				<TabsList>
-					<TabsTrigger value="table" aria-label="Table view">
-						<LayoutGrid />
-					</TabsTrigger>
-					<TabsTrigger value="list" aria-label="List view">
-						<List />
-					</TabsTrigger>
-				</TabsList>
-			</Tabs>
-		</div>
+		<Tabs
+			value="list"
+			onValueChange={(v) => {
+				if (v === 'table') {
+					void navigate({
+						to: '/groups/$groupId/attendance',
+						params: { groupId: String(detail.groupId) },
+						search: { month: undefined, view: 'table' },
+					});
+				}
+			}}
+		>
+			<TabsList>
+				<TabsTrigger value="table" aria-label="Table view">
+					<LayoutGrid />
+				</TabsTrigger>
+				<TabsTrigger value="list" aria-label="List view">
+					<List />
+				</TabsTrigger>
+			</TabsList>
+		</Tabs>
 	) : null;
+
+	const header = (
+		<PageHeader
+			className="shrink-0"
+			title={detail?.courseName ?? 'Take attendance'}
+			description={
+				detail
+					? `${detail.groupName} · ${formatFullDate(detail.sessionDate)}`
+					: `Session #${sessionId}`
+			}
+			actions={viewToggle}
+		/>
+	);
 
 	let body: ReactNode;
 	if (isError) {
@@ -178,6 +192,17 @@ export function AttendanceRoute() {
 					icon={<ClipboardCheck />}
 					title="Couldn't load this session"
 					description="Something went wrong. Try again in a moment."
+					action={
+						<Button
+							variant="outline"
+							onClick={() => {
+								void detailQuery.refetch();
+								void recordsQuery.refetch();
+							}}
+						>
+							Try again
+						</Button>
+					}
 				/>
 			</div>
 		);
@@ -219,6 +244,7 @@ export function AttendanceRoute() {
 				isDirty={isDirty}
 				onChangeStatus={setStatus}
 				onTopicChange={setTopicOverride}
+				onMarkAllPresent={onAllPresent}
 				onSave={onSave}
 			/>
 		);
@@ -226,10 +252,7 @@ export function AttendanceRoute() {
 
 	return (
 		<div className="mx-auto flex h-full w-full max-w-3xl flex-col">
-			<div className="shrink-0 flex justify-between items-center">
-				{header}
-				{viewToggle}
-			</div>
+			{header}
 			<div className="flex min-h-0 flex-1 flex-col">{body}</div>
 		</div>
 	);

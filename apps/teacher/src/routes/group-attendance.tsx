@@ -1,21 +1,46 @@
 import { type ReactNode, useEffect } from 'react';
-import { CalendarX, LayoutGrid, List } from 'lucide-react';
+import { CalendarX, CheckCheck, LayoutGrid, List, Users } from 'lucide-react';
 import { useNavigate, useParams, useSearch } from '@tanstack/react-router';
 
-import { EmptyState, PageHeader, Skeleton, Tabs, TabsList, TabsTrigger } from '@repo/ui';
+import {
+	Button,
+	EmptyState,
+	PageHeader,
+	resolveStatus,
+	Skeleton,
+	Tabs,
+	TabsList,
+	TabsTrigger,
+	toast,
+	Tooltip,
+	TooltipContent,
+	TooltipTrigger,
+} from '@repo/ui';
 import { todayIsoDate } from '@repo/utils';
 
 import { useIsMobile } from '@/hooks/use-is-mobile';
+import { type LegendItem, ToneLegend } from '@/components/ToneLegend';
 import { useAttendanceGrid } from '@/features/attendance/api/attendance-grid.queries';
-import { useUpsertAttendanceCell } from '@/features/attendance/api/attendance-grid.mutations';
+import {
+	useMarkAllPresent,
+	useUpsertAttendanceCell,
+} from '@/features/attendance/api/attendance-grid.mutations';
+import { ATTENDANCE_STATUSES } from '@/features/attendance/api/attendance.queries';
 import { AttendanceGrid } from '@/features/attendance/components/AttendanceGrid';
 import { MonthNav } from '@/features/attendance/components/MonthNav';
 import {
 	addMonths,
 	currentMonth,
 	formatMonthLabel,
+	isTodayIso,
 } from '@/features/attendance/lib/month';
 import { useSessions } from '@/features/schedule/api/sessions.queries';
+
+/** The grid's colour key, read straight off the shared attendance status map. */
+const LEGEND: LegendItem[] = ATTENDANCE_STATUSES.map((status) => {
+	const { tone, label } = resolveStatus('attendance', status);
+	return { tone, label };
+});
 
 /**
  * A group's monthly attendance table (`GET /teach/groups/:id/attendance`,
@@ -23,6 +48,12 @@ import { useSessions } from '@/features/schedule/api/sessions.queries';
  * only today's column is editable — each cell saves instantly (optimistic). The
  * month is URL-driven (`?month=YYYY-MM`); the view toggle jumps to today's
  * session for the current-day list.
+ *
+ * The page is a bounded flex column so the grid owns its own scroll: that is
+ * what keeps the date header and the student column pinned while a teacher
+ * scans a 30-student, 20-session month. It runs full-width, unlike the
+ * single-session list, so a wide month gets the room it needs before the sheet
+ * itself has to scroll horizontally.
  *
  * On a phone the grid is hard to work with, so a fresh visit (no `?view=table`)
  * auto-redirects to today's session list — the same page the "List" toggle
@@ -43,6 +74,7 @@ export function GroupAttendanceRoute() {
 
 	const gridQuery = useAttendanceGrid(groupId, month);
 	const upsertCell = useUpsertAttendanceCell(groupId, month);
+	const markAllPresent = useMarkAllPresent(groupId, month);
 
 	// Resolve today's session for this group to enable the "List" toggle.
 	const today = todayIsoDate();
@@ -69,29 +101,84 @@ export function GroupAttendanceRoute() {
 		});
 
 	const grid = gridQuery.data;
+	const rows = grid?.rows ?? [];
+	const columns = grid?.columns ?? [];
+
+	// Today's column is the grid's only editable one — "mark all present" only
+	// makes sense while it's visible (the currently viewed month) and open.
+	const todayColumn = columns.find((col) => isTodayIso(col.date));
+	const canMarkAllPresent =
+		!!todayColumn && todayColumn.status !== 'CANCELLED' && rows.length > 0;
+
+	// Why the button is off (or what it will do) — better than a caption that
+	// says the same thing whether or not it can be pressed.
+	let markAllHint: string;
+	if (!todayColumn) markAllHint = 'No session scheduled today';
+	else if (todayColumn.status === 'CANCELLED')
+		markAllHint = "Today's session is cancelled";
+	else if (rows.length === 0) markAllHint = 'No students enrolled';
+	else markAllHint = "Sets every student to Present for today's session";
+
+	const onMarkAllPresent = () => {
+		if (!grid || !todayColumn) return;
+		const sessionId = todayColumn.sessionId;
+		const studentIds = grid.rows.map((row) => row.studentId);
+		const alreadyMarkedIds = grid.rows
+			.filter((row) => row.cells[sessionId] !== undefined)
+			.map((row) => row.studentId);
+		markAllPresent.mutate(
+			{ sessionId, studentIds, alreadyMarkedIds },
+			{ onSuccess: () => toast.success('Marked everyone present') },
+		);
+	};
+
+	const stateCard = (node: ReactNode) => (
+		<div className="flex min-h-0 flex-1 items-center justify-center rounded-2xl border border-border bg-card">
+			{node}
+		</div>
+	);
 
 	let body: ReactNode;
 	if (gridQuery.isError) {
-		body = (
-			<div className="rounded-2xl border border-border bg-card">
-				<EmptyState
-					icon={<CalendarX />}
-					title="Couldn't load attendance"
-					description="Something went wrong. Try again in a moment."
-				/>
-			</div>
+		body = stateCard(
+			<EmptyState
+				icon={<CalendarX />}
+				title="Couldn't load attendance"
+				description="Something went wrong. Try again in a moment."
+				action={
+					<Button variant="outline" onClick={() => void gridQuery.refetch()}>
+						Try again
+					</Button>
+				}
+			/>,
 		);
 	} else if (gridQuery.isPending || !grid) {
-		body = <Skeleton className="h-72 w-full rounded-2xl" />;
-	} else if (grid.columns.length === 0) {
-		body = (
-			<div className="rounded-2xl border border-border bg-card">
-				<EmptyState
-					icon={<CalendarX />}
-					title="No sessions this month"
-					description="This group has no scheduled sessions in the selected month."
-				/>
-			</div>
+		body = <Skeleton className="min-h-0 w-full flex-1 rounded-2xl" />;
+	} else if (columns.length === 0) {
+		body = stateCard(
+			<EmptyState
+				icon={<CalendarX />}
+				title="No sessions this month"
+				description="This group has no scheduled sessions in the selected month."
+				action={
+					month !== currentMonth() && (
+						<Button
+							variant="outline"
+							onClick={() => goToMonth(currentMonth())}
+						>
+							Go to this month
+						</Button>
+					)
+				}
+			/>,
+		);
+	} else if (rows.length === 0) {
+		body = stateCard(
+			<EmptyState
+				icon={<Users />}
+				title="No students enrolled"
+				description="This group has no active students to mark yet."
+			/>,
 		);
 	} else {
 		body = (
@@ -105,40 +192,41 @@ export function GroupAttendanceRoute() {
 	}
 
 	return (
-		<div className="mx-auto w-full max-w-5xl">
-			<div className="flex justify-between items-center">
-				<PageHeader
-					title={grid?.group.courseName ?? 'Attendance'}
-					description={grid?.group.name ?? `Group #${groupId}`}
-				/>
-				<Tabs
-					value="table"
-					onValueChange={(v) => {
-						if (v === 'list' && todaySession) {
-							void navigate({
-								to: '/sessions/$sessionId/attendance',
-								params: { sessionId: String(todaySession.id) },
-								search: { view: 'list' },
-							});
-						}
-					}}
-				>
-					<TabsList>
-						<TabsTrigger value="table" aria-label="Table view">
-							<LayoutGrid />
-						</TabsTrigger>
-						<TabsTrigger
-							value="list"
-							disabled={!todaySession}
-							aria-label="List view"
-						>
-							<List />
-						</TabsTrigger>
-					</TabsList>
-				</Tabs>
-			</div>
+		<div className="flex h-full w-full flex-col pb-3">
+			<PageHeader
+				className="shrink-0"
+				title={grid?.group.courseName ?? 'Attendance'}
+				description={grid?.group.name ?? `Group #${groupId}`}
+				actions={
+					<Tabs
+						value="table"
+						onValueChange={(v) => {
+							if (v === 'list' && todaySession) {
+								void navigate({
+									to: '/sessions/$sessionId/attendance',
+									params: { sessionId: String(todaySession.id) },
+									search: { view: 'list' },
+								});
+							}
+						}}
+					>
+						<TabsList>
+							<TabsTrigger value="table" aria-label="Table view">
+								<LayoutGrid />
+							</TabsTrigger>
+							<TabsTrigger
+								value="list"
+								disabled={!todaySession}
+								aria-label="List view"
+							>
+								<List />
+							</TabsTrigger>
+						</TabsList>
+					</Tabs>
+				}
+			/>
 
-			<div className="mt-5 flex flex-wrap items-center justify-between gap-3">
+			<div className="mt-3 flex shrink-0 flex-wrap items-center justify-between gap-3">
 				<MonthNav
 					label={formatMonthLabel(month)}
 					onPrev={() => goToMonth(addMonths(month, -1))}
@@ -146,9 +234,33 @@ export function GroupAttendanceRoute() {
 					showToday={month !== currentMonth()}
 					onToday={() => goToMonth(currentMonth())}
 				/>
+				<Tooltip>
+					<TooltipTrigger asChild>
+						{/* Wrapper: a disabled button fires no pointer events, so it
+						    could never surface the reason it is disabled. */}
+						<span className="inline-flex">
+							<Button
+								size="sm"
+								disabled={!canMarkAllPresent || markAllPresent.isPending}
+								onClick={onMarkAllPresent}
+							>
+								<CheckCheck className="size-4" />
+								Mark all present
+							</Button>
+						</span>
+					</TooltipTrigger>
+					<TooltipContent>{markAllHint}</TooltipContent>
+				</Tooltip>
 			</div>
 
-			<div className="mt-3">{body}</div>
+			<div className="mt-2 flex shrink-0 flex-wrap items-center justify-between gap-x-4 gap-y-1.5">
+				<ToneLegend items={LEGEND} />
+				<p className="text-[11px] text-muted-foreground">
+					Only today&apos;s column is editable
+				</p>
+			</div>
+
+			<div className="mt-2 flex min-h-0 flex-1 flex-col">{body}</div>
 		</div>
 	);
 }

@@ -43,13 +43,26 @@ export function isLetterScale(config: MarkConfig): boolean {
 	return config.type === 'LETTER';
 }
 
+/** The percentage below which a mark reads as needing attention. */
+export const WEAK_SCORE_PCT = 75;
+
 /** Tone band for a 0–100 percentage (green ≥ 90, amber ≥ 75, else red; null → slate). */
 export function scoreTone(pct: number | null): StatusTone {
 	if (pct === null) return 'slate';
 	if (pct >= 90) return 'green';
-	if (pct >= 75) return 'amber';
+	if (pct >= WEAK_SCORE_PCT) return 'amber';
 	return 'red';
 }
+
+/**
+ * The same bands as a legend, so the key under the marks grid can never drift
+ * from the tones `scoreTone` actually assigns.
+ */
+export const SCORE_BANDS: { tone: StatusTone; label: string }[] = [
+	{ tone: 'green', label: '90% and up' },
+	{ tone: 'amber', label: `${WEAK_SCORE_PCT}–89%` },
+	{ tone: 'red', label: `Below ${WEAK_SCORE_PCT}%` },
+];
 
 /**
  * The 0–100 normalized percentage a value would produce, for optimistic display

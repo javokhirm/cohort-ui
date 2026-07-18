@@ -1,5 +1,7 @@
 import { useState } from 'react';
 
+import { formatDayOfMonth, formatFullDate, formatWeekday } from '@repo/utils';
+
 import {
 	SheetTable,
 	type SheetDropOption,
@@ -8,7 +10,7 @@ import {
 
 import { LETTER_GRADES } from '../api/marks.queries';
 import type { MarksGrid as GridData } from '../api/marks-grid.queries';
-import { formatColumnDate, isTodayIso } from '../lib/month';
+import { isTodayIso } from '../lib/month';
 import { normalizedPctFor, parseScoreInput, scoreTone } from '../lib/scale';
 
 interface MarkCellValue {
@@ -25,11 +27,15 @@ const CELL_W_PX = 56;
 
 /**
  * The monthly marks matrix, rendered with the shared `SheetTable` grid: a frozen
- * student column, one column per session date (today's is the only editable
- * one), and frozen AVG / RANK summary columns. The editable shape follows the
- * scale — a numeric input for POINTS/PERCENTAGE (committed on blur/Enter) or an
- * A–F popover for LETTER (parent-owned open state, per SheetTable's contract).
- * Past columns display read-only score/letter badges tinted by their band.
+ * student column, one column per session date (today's is tinted and is the only
+ * editable one), and frozen AVG / RANK summary columns. The editable shape
+ * follows the scale — a numeric input for POINTS/PERCENTAGE (committed on
+ * blur/Enter) or an A–F popover for LETTER (parent-owned open state, per
+ * SheetTable's contract). Past columns display read-only score/letter chips
+ * tinted by their band.
+ *
+ * Sized to fill its parent, so render it inside a bounded flex column — the
+ * frozen header and student column need the grid to own its own scroll.
  */
 export function MarksGrid({ grid, onEditCell }: MarksGridProps) {
 	const [openCell, setOpenCell] = useState<string | null>(null);
@@ -59,6 +65,7 @@ export function MarksGrid({ grid, onEditCell }: MarksGridProps) {
 			const cell = row.cells[col.sessionId];
 			const today = isTodayIso(col.date);
 			const editable = today && col.status !== 'CANCELLED';
+			const who = `${row.studentName ?? 'Student'}, ${formatFullDate(col.date)}`;
 
 			if (isLetter) {
 				const dropOpts: SheetDropOption[] | undefined = editable
@@ -76,8 +83,8 @@ export function MarksGrid({ grid, onEditCell }: MarksGridProps) {
 					kind: 'badge' as const,
 					letter: cell?.letter ?? '',
 					tone: cell ? scoreTone(cell.normalizedPct) : 'slate',
-					opacity: cell ? 1 : 0.5,
 					accent: today,
+					label: `${who} — ${cell?.letter ?? 'not marked'}`,
 					onClick: editable
 						? () => setOpenCell((cur) => (cur === cellKey ? null : cellKey))
 						: undefined,
@@ -86,7 +93,7 @@ export function MarksGrid({ grid, onEditCell }: MarksGridProps) {
 				};
 			}
 
-			// Numeric scale: today is an input cell; past columns are read-only badges.
+			// Numeric scale: today is an input cell; past columns are read-only chips.
 			if (editable) {
 				const savedStr = cell?.rawScore != null ? String(cell.rawScore) : '';
 				return {
@@ -97,6 +104,7 @@ export function MarksGrid({ grid, onEditCell }: MarksGridProps) {
 					max,
 					step,
 					inputMode: 'decimal' as const,
+					label: `${who} — score`,
 					onChange: (e) =>
 						setEditing((prev) => ({ ...prev, [cellKey]: e.target.value })),
 					onCommit: (value: string) => {
@@ -116,8 +124,8 @@ export function MarksGrid({ grid, onEditCell }: MarksGridProps) {
 				kind: 'badge' as const,
 				letter: cell?.rawScore != null ? String(cell.rawScore) : '',
 				tone: cell ? scoreTone(cell.normalizedPct) : 'slate',
-				opacity: cell ? 1 : 0.5,
 				accent: false,
+				label: `${who} — ${cell?.rawScore ?? 'not marked'}`,
 			};
 		}),
 	}));
@@ -128,21 +136,25 @@ export function MarksGrid({ grid, onEditCell }: MarksGridProps) {
 				<div className="fixed inset-0 z-40" onClick={() => setOpenCell(null)} />
 			)}
 			<SheetTable
-				nameW="140px"
-				headH="36px"
+				className="min-h-0 flex-1"
+				nameW="168px"
+				headH="42px"
 				rowH="44px"
 				nameFont="13px"
 				cellW={`${CELL_W_PX}px`}
-				cellFont="13px"
-				colW={`${CELL_W_PX * grid.columns.length}px`}
+				cellFont="12.5px"
 				dates={grid.columns.map((col) => ({
-					label: formatColumnDate(col.date),
+					label: formatDayOfMonth(col.date),
+					sublabel: formatWeekday(col.date),
 					accent: isTodayIso(col.date),
-					opacity: col.status === 'CANCELLED' ? 0.5 : 1,
+					muted: col.status === 'CANCELLED',
+					title: `${formatFullDate(col.date)}${
+						col.status === 'CANCELLED' ? ' — cancelled' : ''
+					}`,
 				}))}
 				rows={rows}
 				rightCols={[
-					{ label: 'Avg', width: '58px' },
+					{ label: 'Avg', width: '62px' },
 					{ label: 'Rank', width: '54px', divider: true },
 				]}
 			/>

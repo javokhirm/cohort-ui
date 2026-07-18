@@ -1,10 +1,19 @@
 import { type ReactNode, useEffect } from 'react';
-import { LayoutGrid, List, Star } from 'lucide-react';
+import { LayoutGrid, List, Star, Users } from 'lucide-react';
 import { useNavigate, useParams, useSearch } from '@tanstack/react-router';
 
-import { EmptyState, PageHeader, Skeleton, Tabs, TabsList, TabsTrigger } from '@repo/ui';
+import {
+	Button,
+	EmptyState,
+	PageHeader,
+	Skeleton,
+	Tabs,
+	TabsList,
+	TabsTrigger,
+} from '@repo/ui';
 
 import { useIsMobile } from '@/hooks/use-is-mobile';
+import { ToneLegend } from '@/components/ToneLegend';
 import { useMarksGrid } from '@/features/marks/api/marks-grid.queries';
 import { useUpsertMarkCell } from '@/features/marks/api/marks-grid.mutations';
 import { MarksGrid } from '@/features/marks/components/MarksGrid';
@@ -15,6 +24,7 @@ import {
 	formatMonthLabel,
 	isTodayIso,
 } from '@/features/marks/lib/month';
+import { SCORE_BANDS } from '@/features/marks/lib/scale';
 
 /**
  * A group's monthly marks table (`GET /teach/groups/:id/marks`, §1.1): rows are
@@ -23,6 +33,13 @@ import {
  * are frozen on the right. The month is URL-driven (`?month=YYYY-MM`); the view
  * toggle jumps to today's session for the current-day list. On a phone the grid
  * is hard to work with, so a fresh visit auto-redirects to today's session list.
+ *
+ * The page is a bounded flex column so the grid owns its own scroll and keeps
+ * its header and student column pinned, and runs full-width so a wide month
+ * gets the room it needs before the sheet itself has to scroll horizontally.
+ * The active grading scale is stated in the toolbar and links to the group's
+ * Grading tab — without it a bare "8" in a cell doesn't say whether it's out of
+ * 10 or out of 100.
  */
 export function GroupMarksRoute() {
 	const navigate = useNavigate();
@@ -40,8 +57,11 @@ export function GroupMarksRoute() {
 	const upsertCell = useUpsertMarkCell(groupId, month);
 
 	const grid = gridQuery.data;
+	const rows = grid?.rows ?? [];
+	const columns = grid?.columns ?? [];
+
 	// Today's session comes from the grid itself — no cross-feature session fetch.
-	const todaySession = grid?.columns.find(
+	const todaySession = columns.find(
 		(c) => isTodayIso(c.date) && c.status !== 'CANCELLED',
 	);
 	const todaySessionId = todaySession?.sessionId;
@@ -63,28 +83,53 @@ export function GroupMarksRoute() {
 			search: { month: next, view },
 		});
 
+	const stateCard = (node: ReactNode) => (
+		<div className="flex min-h-0 flex-1 items-center justify-center rounded-2xl border border-border bg-card">
+			{node}
+		</div>
+	);
+
 	let body: ReactNode;
 	if (gridQuery.isError) {
-		body = (
-			<div className="rounded-xl border border-border bg-card">
-				<EmptyState
-					icon={<Star />}
-					title="Couldn't load marks"
-					description="Something went wrong. Try again in a moment."
-				/>
-			</div>
+		body = stateCard(
+			<EmptyState
+				icon={<Star />}
+				title="Couldn't load marks"
+				description="Something went wrong. Try again in a moment."
+				action={
+					<Button variant="outline" onClick={() => void gridQuery.refetch()}>
+						Try again
+					</Button>
+				}
+			/>,
 		);
 	} else if (gridQuery.isPending || !grid) {
-		body = <Skeleton className="h-72 w-full rounded-xl" />;
-	} else if (grid.columns.length === 0) {
-		body = (
-			<div className="rounded-xl border border-border bg-card">
-				<EmptyState
-					icon={<Star />}
-					title="No sessions this month"
-					description="This group has no scheduled sessions in the selected month."
-				/>
-			</div>
+		body = <Skeleton className="min-h-0 w-full flex-1 rounded-2xl" />;
+	} else if (columns.length === 0) {
+		body = stateCard(
+			<EmptyState
+				icon={<Star />}
+				title="No sessions this month"
+				description="This group has no scheduled sessions in the selected month."
+				action={
+					month !== currentMonth() && (
+						<Button
+							variant="outline"
+							onClick={() => goToMonth(currentMonth())}
+						>
+							Go to this month
+						</Button>
+					)
+				}
+			/>,
+		);
+	} else if (rows.length === 0) {
+		body = stateCard(
+			<EmptyState
+				icon={<Users />}
+				title="No students enrolled"
+				description="This group has no active students to mark yet."
+			/>,
 		);
 	} else {
 		body = (
@@ -98,13 +143,12 @@ export function GroupMarksRoute() {
 	}
 
 	return (
-		<div className="mx-auto w-full max-w-5xl">
-			<div className="flex items-center justify-between">
-				<PageHeader
-					title={grid?.group.courseName ?? 'Marks'}
-					description={grid?.group.name ?? `Group #${groupId}`}
-				/>
-				<div className="flex items-center gap-2">
+		<div className="flex h-full w-full flex-col pb-3">
+			<PageHeader
+				className="shrink-0"
+				title={grid?.group.courseName ?? 'Marks'}
+				description={grid?.group.name ?? `Group #${groupId}`}
+				actions={
 					<Tabs
 						value="table"
 						onValueChange={(v) => {
@@ -130,10 +174,10 @@ export function GroupMarksRoute() {
 							</TabsTrigger>
 						</TabsList>
 					</Tabs>
-				</div>
-			</div>
+				}
+			/>
 
-			<div className="mt-5 flex flex-wrap items-center justify-between gap-3">
+			<div className="mt-3 flex shrink-0 flex-wrap items-center justify-between gap-3">
 				<MonthNav
 					label={formatMonthLabel(month)}
 					onPrev={() => goToMonth(addMonths(month, -1))}
@@ -143,7 +187,14 @@ export function GroupMarksRoute() {
 				/>
 			</div>
 
-			<div className="mt-3">{body}</div>
+			<div className="mt-2 flex shrink-0 flex-wrap items-center justify-between gap-x-4 gap-y-1.5">
+				<ToneLegend items={SCORE_BANDS} />
+				<p className="text-[11px] text-muted-foreground">
+					Only today&apos;s column is editable
+				</p>
+			</div>
+
+			<div className="mt-2 flex min-h-0 flex-1 flex-col">{body}</div>
 		</div>
 	);
 }

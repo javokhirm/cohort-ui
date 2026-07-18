@@ -60,7 +60,7 @@ export function StudentDetailRoute() {
 				<ArrowLeft className="size-3.5" />
 				Back
 			</Button>
-			<PageHeader title="Student profile" description="Read-only" />
+			<PageHeader title="Student profile" />
 		</div>
 	);
 
@@ -127,7 +127,7 @@ export function StudentDetailRoute() {
 				/>
 			</div>
 
-			<SectionLabel>Emergency contact</SectionLabel>
+			<SectionLabel>Guardians</SectionLabel>
 			<GuardianList studentId={studentId} />
 		</div>
 	);

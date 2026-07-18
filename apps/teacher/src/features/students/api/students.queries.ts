@@ -30,7 +30,7 @@ export interface TeachStudentProfile {
 }
 
 /**
- * A student's emergency contact (`GET /teach/students/:id/guardians`) — narrower
+ * A student's guardians (`GET /teach/students/:id/guardians`) — narrower
  * than the manage surface's guardian: a name to call, a number, and the
  * relation. Primary first.
  */
