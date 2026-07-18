@@ -37,7 +37,6 @@ export interface Student {
 	user: StudentUser;
 	// Detail-only fields — present on single-student responses (GET /:id, POST, PATCH), absent on list rows
 	address?: string | null;
-	emergencyContact?: { name: string; phone: string; relation: string } | null;
 	notes?: string | null;
 	guardians?: Guardian[];
 	activeEnrollmentsCount?: number;

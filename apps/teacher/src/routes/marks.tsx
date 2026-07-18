@@ -1,9 +1,8 @@
 import { type ReactNode, useEffect, useMemo, useState } from 'react';
-import { Ban, LayoutGrid, List, SlidersHorizontal, Star } from 'lucide-react';
+import { Ban, LayoutGrid, List, Star } from 'lucide-react';
 import { useNavigate, useParams, useSearch } from '@tanstack/react-router';
 
 import {
-	Button,
 	EmptyState,
 	PageHeader,
 	Skeleton,
@@ -18,7 +17,6 @@ import { useIsMobile } from '@/hooks/use-is-mobile';
 import { useSessionDetail, useSessionMarks } from '@/features/marks/api/marks.queries';
 import { type MarkInput, useSaveMarks } from '@/features/marks/api/marks.mutations';
 import { MarksList } from '@/features/marks/components/MarksList';
-import { GradingScaleSheet } from '@/features/marks/components/GradingScaleSheet';
 import { markDisplay, parseScoreInput } from '@/features/marks/lib/scale';
 
 /**
@@ -27,9 +25,10 @@ import { markDisplay, parseScoreInput } from '@/features/marks/lib/scale';
  * list: the editable draft is derived each render (the teacher's edits layered
  * over the saved marks), so there's no state to sync. Saving splits create-only
  * (`POST`) from update-only (`PATCH`) by whether each student already had a mark.
- * The per-student editor's shape follows the group's active grading scale, which
- * the "Grading scale" sheet can switch. On desktop a fresh visit redirects to
- * the group's monthly table (the single-session list is the phone view).
+ * The per-student editor's shape follows the group's active grading scale,
+ * changed from the group's Grading tab, not from here. On desktop a fresh visit
+ * redirects to the group's monthly table (the single-session list is the phone
+ * view).
  */
 export function MarksRoute() {
 	const navigate = useNavigate();
@@ -45,7 +44,6 @@ export function MarksRoute() {
 	const saveMarks = useSaveMarks(sessionId);
 
 	const [overrides, setOverrides] = useState<Map<number, string>>(() => new Map());
-	const [scaleOpen, setScaleOpen] = useState(false);
 
 	const detail = detailQuery.data;
 	const config = marksQuery.data?.config;
@@ -131,18 +129,6 @@ export function MarksRoute() {
 			title={detail?.courseName ?? 'Enter marks'}
 			description={
 				detail ? formatFullDate(detail.sessionDate) : `Session #${sessionId}`
-			}
-			actions={
-				groupId ? (
-					<Button
-						variant="outline"
-						size="sm"
-						onClick={() => setScaleOpen(true)}
-					>
-						<SlidersHorizontal className="size-4" />
-						Grading scale
-					</Button>
-				) : undefined
 			}
 		/>
 	);
@@ -234,13 +220,6 @@ export function MarksRoute() {
 				{viewToggle}
 			</div>
 			<div className="flex min-h-0 flex-1 flex-col">{body}</div>
-			{groupId && (
-				<GradingScaleSheet
-					groupId={groupId}
-					open={scaleOpen}
-					onOpenChange={setScaleOpen}
-				/>
-			)}
 		</div>
 	);
 }

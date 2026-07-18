@@ -17,7 +17,6 @@ export interface CreateStudentInput {
 	dateOfBirth?: string;
 	gender?: 'M' | 'F' | 'O';
 	address?: string;
-	emergencyContact?: { name: string; phone: string; relation: string };
 	notes?: string;
 }
 
@@ -27,7 +26,6 @@ export interface UpdateStudentInput {
 	dateOfBirth?: string;
 	gender?: 'M' | 'F' | 'O';
 	address?: string;
-	emergencyContact?: { name: string; phone: string; relation: string };
 	notes?: string;
 	status?: 'ACTIVE' | 'INACTIVE' | 'GRADUATED' | 'SUSPENDED';
 }

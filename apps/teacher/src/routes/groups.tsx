@@ -1,31 +1,22 @@
-import { ClipboardCheck, LayoutGrid } from 'lucide-react';
+import { LayoutGrid } from 'lucide-react';
 import { useNavigate } from '@tanstack/react-router';
 
-import { branchDotClass, Button, cn, EmptyState, Skeleton } from '@repo/ui';
+import { EmptyState, Skeleton } from '@repo/ui';
 
 import { useTeachBranches } from '@/api/branches';
+import { GroupCard } from '@/features/groups/components/GroupCard';
 import { useGroups } from '@/features/groups/api/groups.queries';
-import type { TeachGroup } from '@/features/groups/api/groups.queries';
 import { useBranchFilter } from '@/store/branchStore';
-
-/** "Mon, Wed, Fri · 09:00–10:30", or nothing when the group has no schedule rule. */
-function scheduleSummary(group: TeachGroup): string | null {
-	const rule = group.scheduleRule;
-	if (!rule) return null;
-	const days = rule.days
-		.map((day) => day.slice(0, 1) + day.slice(1, 3).toLowerCase())
-		.join(', ');
-	return `${days} · ${rule.startTime}–${rule.endTime}`;
-}
 
 /**
  * The groups this teacher teaches (`GET /teach/groups`, api-reference §4.2),
  * narrowed to the branch picked in the topbar switcher — client-side, since the
  * endpoint takes no branch param.
  *
- * Each card carries its branch dot, in the same color the switcher gives that
- * branch (`branchDotClass` keys on the branch id), so "which of my places is
- * this?" is answerable without reading the filter.
+ * Laid out as the design's card grid: one column on a phone, two from `md` up
+ * (where the shell switches to its desktop chrome). Tapping a card opens that
+ * group's screen — roster, schedule and grading — which is also where the
+ * attendance and marks grids are reached from.
  */
 export function GroupsRoute() {
 	const navigate = useNavigate();
@@ -42,18 +33,22 @@ export function GroupsRoute() {
 
 	if (isPending) {
 		return (
-			<div className="mx-auto w-full max-w-5xl space-y-3">
-				<Skeleton className="h-24 w-full rounded-2xl" />
-				<Skeleton className="h-24 w-full rounded-2xl" />
-				<Skeleton className="h-24 w-full rounded-2xl" />
+			<div className="mx-auto w-full max-w-230">
+				<Skeleton className="h-4 w-24" />
+				<div className="mt-4 grid gap-2.75 md:grid-cols-2">
+					<Skeleton className="h-33 w-full rounded-xl" />
+					<Skeleton className="h-33 w-full rounded-xl" />
+					<Skeleton className="h-33 w-full rounded-xl" />
+					<Skeleton className="h-33 w-full rounded-xl" />
+				</div>
 			</div>
 		);
 	}
 
 	if (isError) {
 		return (
-			<div className="mx-auto w-full max-w-5xl">
-				<div className="rounded-2xl border border-border bg-card">
+			<div className="mx-auto w-full max-w-230">
+				<div className="rounded-xl border border-border bg-card">
 					<EmptyState
 						icon={<LayoutGrid />}
 						title="Couldn't load your groups"
@@ -66,8 +61,8 @@ export function GroupsRoute() {
 
 	if (groups.length === 0) {
 		return (
-			<div className="mx-auto w-full max-w-5xl">
-				<div className="rounded-2xl border border-border bg-card">
+			<div className="mx-auto w-full max-w-230">
+				<div className="rounded-xl border border-border bg-card">
 					<EmptyState
 						icon={<LayoutGrid />}
 						title={
@@ -87,68 +82,31 @@ export function GroupsRoute() {
 	}
 
 	return (
-		<div className="mx-auto w-full max-w-5xl">
+		<div className="mx-auto w-full max-w-230 pb-6">
 			<p className="text-[13px] text-muted-foreground">
 				{groups.length === 1 ? '1 group' : `${groups.length} groups`}
 				{hiddenByBranch > 0 && ` · ${hiddenByBranch} hidden by the branch filter`}
 			</p>
 
-			<div className="mt-4 space-y-3">
-				{groups.map((group) => {
-					const schedule = scheduleSummary(group);
-					return (
-						<div
-							key={group.id}
-							className="rounded-2xl border border-border bg-card p-3.5 shadow-sm"
-						>
-							<div className="min-w-0">
-								<div className="truncate text-[15px] font-bold text-foreground">
-									{group.name}
-								</div>
-								<div className="truncate text-[12.5px] text-muted-foreground">
-									{group.courseName}
-									{group.roomName && ` · ${group.roomName}`}
-								</div>
-							</div>
-
-							{(schedule ?? showBranch) && (
-								<div className="mt-2.5 flex flex-wrap items-center gap-x-3 gap-y-1 text-[12px] text-muted-foreground">
-									{schedule && <span>{schedule}</span>}
-									{showBranch && (
-										<span className="flex items-center gap-1.5">
-											<span
-												className={cn(
-													'size-1.75 shrink-0 rounded-full',
-													branchDotClass(group.branchId),
-												)}
-											/>
-											{branchName(group.branchId) ??
-												'Unknown branch'}
-										</span>
-									)}
-								</div>
-							)}
-
-							<div className="mt-3 border-t border-border pt-2.5">
-								<Button
-									variant="ghost"
-									size="sm"
-									className="h-auto gap-1.5 px-0 text-[12px] font-medium text-primary hover:bg-transparent hover:underline"
-									onClick={() =>
-										void navigate({
-											to: '/groups/$groupId/attendance',
-											params: { groupId: String(group.id) },
-											search: { month: undefined },
-										})
-									}
-								>
-									<ClipboardCheck className="size-3.5" />
-									Attendance
-								</Button>
-							</div>
-						</div>
-					);
-				})}
+			<div className="mt-4 grid gap-2.75 md:grid-cols-2">
+				{groups.map((group) => (
+					<GroupCard
+						key={group.id}
+						group={group}
+						branchName={
+							showBranch
+								? (branchName(group.branchId) ?? 'Unknown branch')
+								: undefined
+						}
+						onOpen={() =>
+							void navigate({
+								to: '/groups/$groupId',
+								params: { groupId: String(group.id) },
+								search: { tab: undefined },
+							})
+						}
+					/>
+				))}
 			</div>
 		</div>
 	);

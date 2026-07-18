@@ -23,6 +23,21 @@ export function scaleLabel(config: MarkConfig): string {
 	}
 }
 
+/**
+ * The compact form for a header or list row, e.g. "Points /10", "Percentage /100",
+ * "Letter A–F" — where `scaleLabel` is the fuller sentence used inside the sheet.
+ */
+export function scaleShortLabel(config: MarkConfig): string {
+	switch (config.type) {
+		case 'POINTS':
+			return `Points /${config.maxPoints ?? '—'}`;
+		case 'PERCENTAGE':
+			return `Percentage /${config.maxPoints ?? 100}`;
+		case 'LETTER':
+			return 'Letter A–F';
+	}
+}
+
 /** Whether a config accepts letters (vs a bounded numeric score). */
 export function isLetterScale(config: MarkConfig): boolean {
 	return config.type === 'LETTER';

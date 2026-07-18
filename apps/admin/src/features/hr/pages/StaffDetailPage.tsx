@@ -1,9 +1,18 @@
+import { useState } from 'react';
 import { Link, useNavigate } from '@tanstack/react-router';
-import { ArrowLeft, Building2, Edit, Mail, MessageSquare, Phone } from 'lucide-react';
+import {
+	ArrowLeft,
+	Building2,
+	Edit,
+	KeyRound,
+	Mail,
+	MessageSquare,
+	Phone,
+} from 'lucide-react';
 
 import {
+	ActionsMenu,
 	Badge,
-	Button,
 	Card,
 	CardContent,
 	DetailRows,
@@ -18,10 +27,11 @@ import {
 } from '@repo/ui';
 import { formatDate, formatMoney } from '@repo/utils';
 
-import { Can } from '@/components/Can';
+import { usePermissions } from '@/features/auth/hooks';
 import { usePayrollList } from '@/features/payroll/api/payroll.queries';
 
 import { useStaffMember, type StaffResponse } from '../api/staff.queries';
+import { ChangeStaffPasswordDialog } from '../components/ChangeStaffPasswordDialog';
 import { RolesSection } from '../components/RolesSection';
 import { primaryRole, roleLabel } from '../lib/roles';
 
@@ -39,9 +49,12 @@ function employmentLabel(type: StaffResponse['employmentType']): string {
 // ─── Header ───────────────────────────────────────────────────────────────────
 
 function StaffHeader({ staff, onEdit }: { staff: StaffResponse; onEdit: () => void }) {
+	const [passwordOpen, setPasswordOpen] = useState(false);
+	const { can } = usePermissions();
 	const initials =
 		`${staff.user.firstName?.[0] ?? ''}${staff.user.lastName?.[0] ?? ''}`.toUpperCase();
 	const role = primaryRole(staff.roles);
+	const fullName = `${staff.user.firstName} ${staff.user.lastName}`;
 	const subtitle = [staff.position, staff.staffCode, staff.branch?.name]
 		.filter(Boolean)
 		.join(' · ');
@@ -73,23 +86,36 @@ function StaffHeader({ staff, onEdit }: { staff: StaffResponse; onEdit: () => vo
 					</div>
 				</div>
 
-				<div className="flex items-center gap-2">
-					<Button
-						variant="outline"
-						size="sm"
-						onClick={() => toast.info('Messaging is not available yet')}
-					>
-						<MessageSquare className="mr-1.5 size-3.5" />
-						Message
-					</Button>
-					<Can permission="staff.update">
-						<Button variant="outline" size="sm" onClick={onEdit}>
-							<Edit className="mr-1.5 size-3.5" />
-							Edit
-						</Button>
-					</Can>
-				</div>
+				<ActionsMenu
+					label="Staff actions"
+					items={[
+						{
+							label: 'Edit',
+							icon: Edit,
+							onClick: onEdit,
+							hidden: !can('staff.update'),
+						},
+						{
+							label: 'Change password',
+							icon: KeyRound,
+							onClick: () => setPasswordOpen(true),
+							hidden: !can('staff.update'),
+						},
+						{
+							label: 'Message',
+							icon: MessageSquare,
+							onClick: () => toast.info('Messaging is not available yet'),
+						},
+					]}
+				/>
 			</div>
+
+			<ChangeStaffPasswordDialog
+				open={passwordOpen}
+				onOpenChange={setPasswordOpen}
+				staffId={staff.id}
+				staffName={fullName}
+			/>
 		</div>
 	);
 }

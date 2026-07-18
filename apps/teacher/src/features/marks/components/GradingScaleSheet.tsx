@@ -62,7 +62,11 @@ function defaultMax(type: GradingType): string {
  * config; it is remounted (via `key`) whenever the config changes, so its state
  * initializes from props without a synchronizing effect.
  */
-export function GradingScaleSheet({ groupId, open, onOpenChange }: GradingScaleSheetProps) {
+export function GradingScaleSheet({
+	groupId,
+	open,
+	onOpenChange,
+}: GradingScaleSheetProps) {
 	const configQuery = useGradingConfig(groupId, open);
 	const setConfig = useSetGradingConfig(groupId);
 	const current = configQuery.data?.current ?? null;
@@ -85,17 +89,21 @@ export function GradingScaleSheet({ groupId, open, onOpenChange }: GradingScaleS
 					</SheetDescription>
 				</SheetHeader>
 
-				{current ? (
+				{configQuery.isPending ? (
+					<div className="px-4 pb-4">
+						<Skeleton className="h-40 w-full rounded-xl" />
+					</div>
+				) : (
+					// `current` is null on a group that has never had a scale set. The
+					// form seeds from the backend's default in that case and POSTs the
+					// first config — before, this branch rendered a skeleton forever,
+					// leaving such a group with no way to get a scale at all.
 					<GradingScaleForm
-						key={current.id}
+						key={current?.id ?? 'new'}
 						current={current}
 						submitting={setConfig.isPending}
 						onSave={onSave}
 					/>
-				) : (
-					<div className="px-4 pb-4">
-						<Skeleton className="h-40 w-full rounded-xl" />
-					</div>
 				)}
 			</SheetContent>
 		</Sheet>
@@ -103,18 +111,23 @@ export function GradingScaleSheet({ groupId, open, onOpenChange }: GradingScaleS
 }
 
 interface GradingScaleFormProps {
-	current: GradingConfig;
+	/** The active config, or `null` on a group that has never had one set. */
+	current: GradingConfig | null;
 	submitting: boolean;
 	onSave: (input: SaveGradingConfigInput) => void;
 }
 
-/** The scale-picker form, seeded once from the active config at mount. */
+/**
+ * The scale-picker form, seeded once at mount — from the active config, or from
+ * the backend's default (Points, max 10) when the group has none yet.
+ */
 function GradingScaleForm({ current, submitting, onSave }: GradingScaleFormProps) {
-	const [type, setType] = useState<GradingType>(current.type);
+	const seedType = current?.type ?? 'POINTS';
+	const [type, setType] = useState<GradingType>(seedType);
 	const [maxPoints, setMaxPoints] = useState(
-		current.maxPoints != null ? String(current.maxPoints) : defaultMax(current.type),
+		current?.maxPoints != null ? String(current.maxPoints) : defaultMax(seedType),
 	);
-	const [allowHalf, setAllowHalf] = useState(current.allowHalf);
+	const [allowHalf, setAllowHalf] = useState(current?.allowHalf ?? false);
 
 	const onSelectType = (next: GradingType) => {
 		setType(next);
@@ -137,10 +150,17 @@ function GradingScaleForm({ current, submitting, onSave }: GradingScaleFormProps
 			<div className="flex flex-col gap-5 px-4">
 				<div className="flex flex-col gap-2">
 					<Label className="text-muted-foreground">Scale type</Label>
-					<Tabs value={type} onValueChange={(v) => onSelectType(v as GradingType)}>
+					<Tabs
+						value={type}
+						onValueChange={(v) => onSelectType(v as GradingType)}
+					>
 						<TabsList className="w-full">
 							{TYPE_TABS.map((t) => (
-								<TabsTrigger key={t.value} value={t.value} className="flex-1">
+								<TabsTrigger
+									key={t.value}
+									value={t.value}
+									className="flex-1"
+								>
 									{t.label}
 								</TabsTrigger>
 							))}
@@ -184,7 +204,9 @@ function GradingScaleForm({ current, submitting, onSave }: GradingScaleFormProps
 
 				<div className="rounded-xl border border-border bg-muted/40 px-3 py-2 text-sm text-muted-foreground">
 					Preview ·{' '}
-					<span className="text-foreground">{previewLabel(type, maxPoints)}</span>
+					<span className="text-foreground">
+						{previewLabel(type, maxPoints)}
+					</span>
 				</div>
 			</div>
 

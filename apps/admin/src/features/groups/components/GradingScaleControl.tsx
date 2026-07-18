@@ -1,11 +1,4 @@
-import {
-	Input,
-	Label,
-	Switch,
-	Tabs,
-	TabsList,
-	TabsTrigger,
-} from '@repo/ui';
+import { Input, Label, Switch, Tabs, TabsList, TabsTrigger } from '@repo/ui';
 
 import type { GradingType } from '../api/grading-config.queries';
 import { GRADING_TYPE_OPTIONS, gradingPreview } from '../lib/group-options';
@@ -74,13 +67,17 @@ export function GradingScaleControl({
 						onChange={(e) => onMaxPointsChange(e.target.value)}
 						className="w-32 tabular-nums"
 					/>
-					{maxError && <span className="text-sm text-destructive">{maxError}</span>}
+					{maxError && (
+						<span className="text-sm text-destructive">{maxError}</span>
+					)}
 				</div>
 			)}
 
 			{type === 'POINTS' && (
 				<div className="flex items-center justify-between">
-					<Label htmlFor={`${idPrefix}-grading-half`}>Allow half-point scores</Label>
+					<Label htmlFor={`${idPrefix}-grading-half`}>
+						Allow half-point scores
+					</Label>
 					<Switch
 						id={`${idPrefix}-grading-half`}
 						checked={allowHalf}

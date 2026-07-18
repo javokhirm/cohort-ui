@@ -1266,6 +1266,24 @@ export interface paths {
 		patch: operations['GroupsController_update'];
 		trace?: never;
 	};
+	'/api/v1/manage/groups/{id}/grading-config': {
+		parameters: {
+			query?: never;
+			header?: never;
+			path?: never;
+			cookie?: never;
+		};
+		/** A group's active daily-mark grading scale + history */
+		get: operations['GroupsController_gradingConfig'];
+		put?: never;
+		/** Switch a group's active grading scale (immutable: inserts a new active config, keeps prior marks intact) */
+		post: operations['GroupsController_setGradingConfig'];
+		delete?: never;
+		options?: never;
+		head?: never;
+		patch?: never;
+		trace?: never;
+	};
 	'/api/v1/manage/groups/{id}/enrollments': {
 		parameters: {
 			query?: never;
@@ -1998,7 +2016,8 @@ export interface paths {
 		delete?: never;
 		options?: never;
 		head?: never;
-		patch?: never;
+		/** Set the topic / session note for a session I teach (topic-only; cannot reschedule or cancel) */
+		patch: operations['MySessionsController_setTopic'];
 		trace?: never;
 	};
 	'/api/v1/teach/groups': {
@@ -2025,7 +2044,7 @@ export interface paths {
 			path?: never;
 			cookie?: never;
 		};
-		/** Group detail with full roster (must be a group I teach) */
+		/** Group detail — roster is a separate call (must be a group I teach) */
 		get: operations['MyGroupsController_findOne'];
 		put?: never;
 		post?: never;
@@ -2052,6 +2071,75 @@ export interface paths {
 		patch?: never;
 		trace?: never;
 	};
+	'/api/v1/teach/groups/{id}/sessions': {
+		parameters: {
+			query?: never;
+			header?: never;
+			path?: never;
+			cookie?: never;
+		};
+		/** A group's sessions, newest filter window first (must be a group I teach) */
+		get: operations['MyGroupsController_sessions'];
+		put?: never;
+		post?: never;
+		delete?: never;
+		options?: never;
+		head?: never;
+		patch?: never;
+		trace?: never;
+	};
+	'/api/v1/teach/groups/{id}/attendance': {
+		parameters: {
+			query?: never;
+			header?: never;
+			path?: never;
+			cookie?: never;
+		};
+		/** Monthly attendance grid for a group I teach: students × session dates + per-student RATE (table view) */
+		get: operations['MyGroupsController_attendanceGrid'];
+		put?: never;
+		post?: never;
+		delete?: never;
+		options?: never;
+		head?: never;
+		patch?: never;
+		trace?: never;
+	};
+	'/api/v1/teach/groups/{id}/marks': {
+		parameters: {
+			query?: never;
+			header?: never;
+			path?: never;
+			cookie?: never;
+		};
+		/** Monthly marks grid for a group I teach: students × session dates + per-student AVG% and RANK (table view) */
+		get: operations['MyGroupsController_marksGrid'];
+		put?: never;
+		post?: never;
+		delete?: never;
+		options?: never;
+		head?: never;
+		patch?: never;
+		trace?: never;
+	};
+	'/api/v1/teach/groups/{id}/grading-config': {
+		parameters: {
+			query?: never;
+			header?: never;
+			path?: never;
+			cookie?: never;
+		};
+		/** A group's active grading scale + history (must be a group I teach) */
+		get: operations['MyGroupsController_gradingConfig'];
+		put?: never;
+		/** Switch a group's active grading scale (immutable: inserts a new active config, keeps prior marks intact) */
+		post: operations['MyGroupsController_setGradingConfig'];
+		delete?: never;
+		options?: never;
+		head?: never;
+		patch?: never;
+		trace?: never;
+	};
 	'/api/v1/teach/branches': {
 		parameters: {
 			query?: never;
@@ -2061,6 +2149,23 @@ export interface paths {
 		};
 		/** List the branches of the groups I teach */
 		get: operations['MyBranchesController_list'];
+		put?: never;
+		post?: never;
+		delete?: never;
+		options?: never;
+		head?: never;
+		patch?: never;
+		trace?: never;
+	};
+	'/api/v1/teach/me': {
+		parameters: {
+			query?: never;
+			header?: never;
+			path?: never;
+			cookie?: never;
+		};
+		/** The authenticated teacher's own profile */
+		get: operations['MyProfileController_me'];
 		put?: never;
 		post?: never;
 		delete?: never;
@@ -2086,6 +2191,59 @@ export interface paths {
 		head?: never;
 		/** Batch update previously-submitted attendance for a session I teach */
 		patch: operations['AttendanceController_update'];
+		trace?: never;
+	};
+	'/api/v1/teach/sessions/{id}/attendances/{studentId}': {
+		parameters: {
+			query?: never;
+			header?: never;
+			path?: never;
+			cookie?: never;
+		};
+		get?: never;
+		/** Upsert one student's attendance for today's session (table-view instant save; only today's session is editable) */
+		put: operations['AttendanceController_upsert'];
+		post?: never;
+		delete?: never;
+		options?: never;
+		head?: never;
+		patch?: never;
+		trace?: never;
+	};
+	'/api/v1/teach/sessions/{id}/marks': {
+		parameters: {
+			query?: never;
+			header?: never;
+			path?: never;
+			cookie?: never;
+		};
+		/** A session's marks + its active grading config (session I teach) */
+		get: operations['SessionMarksController_list'];
+		put?: never;
+		/** Batch submit marks for a session I teach (rejects cancelled sessions, non-enrolled or duplicate students, values that do not fit the scale) */
+		post: operations['SessionMarksController_submit'];
+		delete?: never;
+		options?: never;
+		head?: never;
+		/** Batch update previously-submitted marks for a session I teach */
+		patch: operations['SessionMarksController_update'];
+		trace?: never;
+	};
+	'/api/v1/teach/sessions/{id}/marks/{studentId}': {
+		parameters: {
+			query?: never;
+			header?: never;
+			path?: never;
+			cookie?: never;
+		};
+		get?: never;
+		/** Upsert one student's mark for today's session (table-view instant save; only today's session is editable) */
+		put: operations['SessionMarksController_upsert'];
+		post?: never;
+		delete?: never;
+		options?: never;
+		head?: never;
+		patch?: never;
 		trace?: never;
 	};
 	'/api/v1/teach/assessments': {
@@ -2160,41 +2318,6 @@ export interface paths {
 		patch?: never;
 		trace?: never;
 	};
-	'/api/v1/teach/materials': {
-		parameters: {
-			query?: never;
-			header?: never;
-			path?: never;
-			cookie?: never;
-		};
-		/** List materials for my groups (optionally narrowed to one group) */
-		get: operations['MaterialsController_list'];
-		put?: never;
-		/** Upload a material to a group I teach (branchId auto-set from the group) */
-		post: operations['MaterialsController_create'];
-		delete?: never;
-		options?: never;
-		head?: never;
-		patch?: never;
-		trace?: never;
-	};
-	'/api/v1/teach/materials/{id}': {
-		parameters: {
-			query?: never;
-			header?: never;
-			path?: never;
-			cookie?: never;
-		};
-		get?: never;
-		put?: never;
-		post?: never;
-		/** Delete a material I uploaded myself */
-		delete: operations['MaterialsController_remove'];
-		options?: never;
-		head?: never;
-		patch?: never;
-		trace?: never;
-	};
 	'/api/v1/teach/students/{id}': {
 		parameters: {
 			query?: never;
@@ -2212,32 +2335,15 @@ export interface paths {
 		patch?: never;
 		trace?: never;
 	};
-	'/api/v1/teach/students/{id}/attendances': {
+	'/api/v1/teach/students/{id}/guardians': {
 		parameters: {
 			query?: never;
 			header?: never;
 			path?: never;
 			cookie?: never;
 		};
-		/** A student's attendance across my groups (optional date window) */
-		get: operations['StudentProfilesController_attendances'];
-		put?: never;
-		post?: never;
-		delete?: never;
-		options?: never;
-		head?: never;
-		patch?: never;
-		trace?: never;
-	};
-	'/api/v1/teach/students/{id}/results': {
-		parameters: {
-			query?: never;
-			header?: never;
-			path?: never;
-			cookie?: never;
-		};
-		/** A student's assessment results across my groups */
-		get: operations['StudentProfilesController_results'];
+		/** A student's emergency contacts — primary first (student in one of my groups) */
+		get: operations['StudentProfilesController_guardians'];
 		put?: never;
 		post?: never;
 		delete?: never;
@@ -2490,11 +2596,6 @@ export interface components {
 		ChangeMyPasswordDto: {
 			newPassword: string;
 		};
-		EmergencyContactDto: {
-			name: string;
-			phone: string;
-			relation: string;
-		};
 		CreateStudentDto: {
 			branchId: number;
 			firstName: string;
@@ -2513,7 +2614,6 @@ export interface components {
 			/** @enum {string} */
 			gender?: 'M' | 'F' | 'O';
 			address?: string;
-			emergencyContact?: components['schemas']['EmergencyContactDto'];
 			notes?: string;
 		};
 		UpdateStudentDto: {
@@ -2526,7 +2626,6 @@ export interface components {
 			/** @enum {string} */
 			gender?: 'M' | 'F' | 'O';
 			address?: string;
-			emergencyContact?: components['schemas']['EmergencyContactDto'];
 			notes?: string;
 			/** @enum {string} */
 			status?: 'ACTIVE' | 'INACTIVE' | 'GRADUATED' | 'SUSPENDED';
@@ -2634,6 +2733,8 @@ export interface components {
 			payrollType: 'FIXED' | 'PERCENT';
 			/** @description Revenue-share percentage. Required when payrollType is PERCENT. */
 			payrollPercent?: number;
+			/** @description The staff member's initial login password. Ignored if the phone is already a user. */
+			password?: string;
 			/** @enum {string} */
 			status?: 'ACTIVE' | 'ON_LEAVE' | 'TERMINATED';
 		};
@@ -2724,6 +2825,14 @@ export interface components {
 			/** @example 10:30 */
 			endTime: string;
 		};
+		SaveGradingConfigDto: {
+			/** @enum {string} */
+			type: 'POINTS' | 'PERCENTAGE' | 'LETTER';
+			/** @description Required (> 0) for POINTS/PERCENTAGE; ignored for LETTER. */
+			maxPoints?: number | null;
+			/** @description POINTS only — allow .5 steps. */
+			allowHalf?: boolean;
+		};
 		CreateGroupDto: {
 			branchId: number;
 			courseId: number;
@@ -2738,6 +2847,8 @@ export interface components {
 			/** @example 2025-06-30 */
 			endDate?: string | null;
 			scheduleRule?: components['schemas']['ScheduleRuleDto'] | null;
+			/** @description Initial daily-mark grading scale (§1.1). Omit → default (POINTS, max 10). */
+			gradingConfig?: components['schemas']['SaveGradingConfigDto'] | null;
 		};
 		UpdateGroupDto: {
 			/** @description FK to staff.id */
@@ -3124,6 +3235,10 @@ export interface components {
 			firstName?: string;
 			lastName?: string;
 		};
+		UpdateSessionTopicDto: {
+			/** @description Topic covered / session note. Null clears it. */
+			topic?: string | null;
+		};
 		AttendanceRecordDto: {
 			studentId: number;
 			/** @enum {string} */
@@ -3132,6 +3247,35 @@ export interface components {
 		};
 		BatchAttendanceDto: {
 			records: components['schemas']['AttendanceRecordDto'][];
+		};
+		UpsertAttendanceDto: {
+			/** @enum {string} */
+			status: 'PRESENT' | 'ABSENT' | 'LATE' | 'EXCUSED';
+			note?: string | null;
+		};
+		MarkRecordDto: {
+			studentId: number;
+			/** @description Numeric value for POINTS/PERCENTAGE. */
+			rawScore?: number | null;
+			/**
+			 * @description A–F for LETTER.
+			 * @enum {string|null}
+			 */
+			letter?: 'A' | 'B' | 'C' | 'D' | 'F' | null;
+			note?: string | null;
+		};
+		BatchMarksDto: {
+			records: components['schemas']['MarkRecordDto'][];
+		};
+		UpsertMarkDto: {
+			/** @description Numeric value for POINTS/PERCENTAGE. */
+			rawScore?: number | null;
+			/**
+			 * @description A–F for LETTER.
+			 * @enum {string|null}
+			 */
+			letter?: 'A' | 'B' | 'C' | 'D' | 'F' | null;
+			note?: string | null;
 		};
 		CreateAssessmentDto: {
 			/** @description Must be a group the teacher teaches. */
@@ -3166,26 +3310,6 @@ export interface components {
 		};
 		BatchResultsDto: {
 			results: components['schemas']['AssessmentResultDto'][];
-		};
-		CreateMaterialDto: {
-			/** @description Must be a group the teacher teaches. */
-			groupId: number;
-			courseId?: number | null;
-			/** @example Week 3 homework */
-			title: string;
-			description?: string | null;
-			/** @example https://files.example.com/hw3.pdf */
-			fileUrl: string;
-			/**
-			 * @default PDF
-			 * @enum {string}
-			 */
-			materialType: 'PDF' | 'VIDEO' | 'HOMEWORK' | 'LINK';
-			/**
-			 * @default GROUP
-			 * @enum {string}
-			 */
-			visibility: 'GROUP' | 'BRANCH' | 'TENANT';
 		};
 	};
 	responses: never;
@@ -5192,6 +5316,48 @@ export interface operations {
 			};
 		};
 	};
+	GroupsController_gradingConfig: {
+		parameters: {
+			query?: never;
+			header?: never;
+			path: {
+				id: number;
+			};
+			cookie?: never;
+		};
+		requestBody?: never;
+		responses: {
+			200: {
+				headers: {
+					[name: string]: unknown;
+				};
+				content?: never;
+			};
+		};
+	};
+	GroupsController_setGradingConfig: {
+		parameters: {
+			query?: never;
+			header?: never;
+			path: {
+				id: number;
+			};
+			cookie?: never;
+		};
+		requestBody: {
+			content: {
+				'application/json': components['schemas']['SaveGradingConfigDto'];
+			};
+		};
+		responses: {
+			201: {
+				headers: {
+					[name: string]: unknown;
+				};
+				content?: never;
+			};
+		};
+	};
 	GroupsController_listEnrollments: {
 		parameters: {
 			query?: {
@@ -6553,6 +6719,29 @@ export interface operations {
 			};
 		};
 	};
+	MySessionsController_setTopic: {
+		parameters: {
+			query?: never;
+			header?: never;
+			path: {
+				id: number;
+			};
+			cookie?: never;
+		};
+		requestBody: {
+			content: {
+				'application/json': components['schemas']['UpdateSessionTopicDto'];
+			};
+		};
+		responses: {
+			200: {
+				headers: {
+					[name: string]: unknown;
+				};
+				content?: never;
+			};
+		};
+	};
 	MyGroupsController_list: {
 		parameters: {
 			query?: {
@@ -6612,7 +6801,133 @@ export interface operations {
 			};
 		};
 	};
+	MyGroupsController_sessions: {
+		parameters: {
+			query?: {
+				from?: string;
+				to?: string;
+				status?: 'SCHEDULED' | 'COMPLETED' | 'CANCELLED';
+			};
+			header?: never;
+			path: {
+				id: number;
+			};
+			cookie?: never;
+		};
+		requestBody?: never;
+		responses: {
+			200: {
+				headers: {
+					[name: string]: unknown;
+				};
+				content?: never;
+			};
+		};
+	};
+	MyGroupsController_attendanceGrid: {
+		parameters: {
+			query: {
+				/** @description Month to fetch, YYYY-MM (month 01–12). */
+				month: string;
+			};
+			header?: never;
+			path: {
+				id: number;
+			};
+			cookie?: never;
+		};
+		requestBody?: never;
+		responses: {
+			200: {
+				headers: {
+					[name: string]: unknown;
+				};
+				content?: never;
+			};
+		};
+	};
+	MyGroupsController_marksGrid: {
+		parameters: {
+			query: {
+				/** @description Month to fetch, YYYY-MM (month 01–12). */
+				month: string;
+			};
+			header?: never;
+			path: {
+				id: number;
+			};
+			cookie?: never;
+		};
+		requestBody?: never;
+		responses: {
+			200: {
+				headers: {
+					[name: string]: unknown;
+				};
+				content?: never;
+			};
+		};
+	};
+	MyGroupsController_gradingConfig: {
+		parameters: {
+			query?: never;
+			header?: never;
+			path: {
+				id: number;
+			};
+			cookie?: never;
+		};
+		requestBody?: never;
+		responses: {
+			200: {
+				headers: {
+					[name: string]: unknown;
+				};
+				content?: never;
+			};
+		};
+	};
+	MyGroupsController_setGradingConfig: {
+		parameters: {
+			query?: never;
+			header?: never;
+			path: {
+				id: number;
+			};
+			cookie?: never;
+		};
+		requestBody: {
+			content: {
+				'application/json': components['schemas']['SaveGradingConfigDto'];
+			};
+		};
+		responses: {
+			201: {
+				headers: {
+					[name: string]: unknown;
+				};
+				content?: never;
+			};
+		};
+	};
 	MyBranchesController_list: {
+		parameters: {
+			query?: never;
+			header?: never;
+			path?: never;
+			cookie?: never;
+		};
+		requestBody?: never;
+		responses: {
+			200: {
+				headers: {
+					[name: string]: unknown;
+				};
+				content?: never;
+			};
+		};
+	};
+	MyProfileController_me: {
 		parameters: {
 			query?: never;
 			header?: never;
@@ -6683,6 +6998,119 @@ export interface operations {
 		requestBody: {
 			content: {
 				'application/json': components['schemas']['BatchAttendanceDto'];
+			};
+		};
+		responses: {
+			200: {
+				headers: {
+					[name: string]: unknown;
+				};
+				content?: never;
+			};
+		};
+	};
+	AttendanceController_upsert: {
+		parameters: {
+			query?: never;
+			header?: never;
+			path: {
+				id: number;
+				studentId: number;
+			};
+			cookie?: never;
+		};
+		requestBody: {
+			content: {
+				'application/json': components['schemas']['UpsertAttendanceDto'];
+			};
+		};
+		responses: {
+			200: {
+				headers: {
+					[name: string]: unknown;
+				};
+				content?: never;
+			};
+		};
+	};
+	SessionMarksController_list: {
+		parameters: {
+			query?: never;
+			header?: never;
+			path: {
+				id: number;
+			};
+			cookie?: never;
+		};
+		requestBody?: never;
+		responses: {
+			200: {
+				headers: {
+					[name: string]: unknown;
+				};
+				content?: never;
+			};
+		};
+	};
+	SessionMarksController_submit: {
+		parameters: {
+			query?: never;
+			header?: never;
+			path: {
+				id: number;
+			};
+			cookie?: never;
+		};
+		requestBody: {
+			content: {
+				'application/json': components['schemas']['BatchMarksDto'];
+			};
+		};
+		responses: {
+			201: {
+				headers: {
+					[name: string]: unknown;
+				};
+				content?: never;
+			};
+		};
+	};
+	SessionMarksController_update: {
+		parameters: {
+			query?: never;
+			header?: never;
+			path: {
+				id: number;
+			};
+			cookie?: never;
+		};
+		requestBody: {
+			content: {
+				'application/json': components['schemas']['BatchMarksDto'];
+			};
+		};
+		responses: {
+			200: {
+				headers: {
+					[name: string]: unknown;
+				};
+				content?: never;
+			};
+		};
+	};
+	SessionMarksController_upsert: {
+		parameters: {
+			query?: never;
+			header?: never;
+			path: {
+				id: number;
+				studentId: number;
+			};
+			cookie?: never;
+		};
+		requestBody: {
+			content: {
+				'application/json': components['schemas']['UpsertMarkDto'];
 			};
 		};
 		responses: {
@@ -6868,69 +7296,6 @@ export interface operations {
 			};
 		};
 	};
-	MaterialsController_list: {
-		parameters: {
-			query?: {
-				page?: number;
-				limit?: number;
-				/** @description Narrow to one group I teach. */
-				groupId?: number;
-				materialType?: 'PDF' | 'VIDEO' | 'HOMEWORK' | 'LINK';
-			};
-			header?: never;
-			path?: never;
-			cookie?: never;
-		};
-		requestBody?: never;
-		responses: {
-			200: {
-				headers: {
-					[name: string]: unknown;
-				};
-				content?: never;
-			};
-		};
-	};
-	MaterialsController_create: {
-		parameters: {
-			query?: never;
-			header?: never;
-			path?: never;
-			cookie?: never;
-		};
-		requestBody: {
-			content: {
-				'application/json': components['schemas']['CreateMaterialDto'];
-			};
-		};
-		responses: {
-			201: {
-				headers: {
-					[name: string]: unknown;
-				};
-				content?: never;
-			};
-		};
-	};
-	MaterialsController_remove: {
-		parameters: {
-			query?: never;
-			header?: never;
-			path: {
-				id: number;
-			};
-			cookie?: never;
-		};
-		requestBody?: never;
-		responses: {
-			204: {
-				headers: {
-					[name: string]: unknown;
-				};
-				content?: never;
-			};
-		};
-	};
 	StudentProfilesController_findOne: {
 		parameters: {
 			query?: never;
@@ -6950,31 +7315,7 @@ export interface operations {
 			};
 		};
 	};
-	StudentProfilesController_attendances: {
-		parameters: {
-			query?: {
-				/** @description Inclusive lower bound. */
-				from?: string;
-				/** @description Inclusive upper bound. */
-				to?: string;
-			};
-			header?: never;
-			path: {
-				id: number;
-			};
-			cookie?: never;
-		};
-		requestBody?: never;
-		responses: {
-			200: {
-				headers: {
-					[name: string]: unknown;
-				};
-				content?: never;
-			};
-		};
-	};
-	StudentProfilesController_results: {
+	StudentProfilesController_guardians: {
 		parameters: {
 			query?: never;
 			header?: never;

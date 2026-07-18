@@ -14,8 +14,9 @@ const email = z.union([z.literal(''), z.email('Enter a valid email')]).optional(
  * allowed (the member sets their own later, from their account page), but anything
  * typed must clear the backend's 8–128 policy. Same blank-or-valid shape as `email`.
  *
- * There is deliberately no password field on the edit form: a password is only ever
- * set at creation or changed by its owner on `/account`.
+ * Changing it afterwards is not part of the edit form — it is a separate,
+ * confirm-guarded action (see {@link changeStaffPasswordSchema}) so a credential is
+ * never rewritten as a side effect of saving unrelated profile fields.
  */
 const optionalPassword = z
 	.union([
@@ -82,8 +83,28 @@ export const editStaffSchema = z
 	})
 	.superRefine(requirePercentWithPercentType);
 
+/**
+ * Operator reset of a staff member's password (`PATCH /staff/:id` with only
+ * `password`). `confirmPassword` is a client-side guard only — the server takes
+ * just `password` — and matters more here than on `/account`, since the operator
+ * cannot verify the result by signing in. Length mirrors the backend's 8–128 policy.
+ */
+export const changeStaffPasswordSchema = z
+	.object({
+		newPassword: z
+			.string()
+			.min(8, 'Password must be at least 8 characters')
+			.max(128, 'Password must be at most 128 characters'),
+		confirmPassword: z.string().min(1, 'Please confirm the new password'),
+	})
+	.refine((values) => values.newPassword === values.confirmPassword, {
+		message: 'Passwords do not match',
+		path: ['confirmPassword'],
+	});
+
 export type CreateStaffFormValues = z.infer<typeof createStaffSchema>;
 export type EditStaffFormValues = z.infer<typeof editStaffSchema>;
+export type ChangeStaffPasswordFormValues = z.infer<typeof changeStaffPasswordSchema>;
 
 /** Split "Physics, Chemistry" → ['Physics', 'Chemistry'] (empty → []). */
 export function parseSpecialization(input?: string): string[] {

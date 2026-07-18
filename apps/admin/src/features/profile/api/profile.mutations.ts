@@ -9,7 +9,7 @@ export interface ChangeMyPasswordInput {
 /**
  * Change the signed-in staff member's own password (`PATCH /manage/me/password`).
  * The route always acts on the caller, so it takes no id and needs no permission —
- * resetting *another* member's password is done from the staff edit page, which is
+ * changing *another* member's password is done from the staff detail page, which is
  * gated by `staff.update`.
  *
  * Nothing is cached from this call, so there is no query to invalidate: the session

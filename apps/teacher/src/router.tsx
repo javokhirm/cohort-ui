@@ -16,6 +16,8 @@ import { LoginRoute } from '@/routes/login';
 import { ForbiddenPage } from '@/routes/forbidden';
 import { TodayRoute } from '@/routes/today';
 import { GroupsRoute } from '@/routes/groups';
+import { GroupDetailRoute, type GroupTab } from '@/routes/group-detail';
+import { StudentDetailRoute } from '@/routes/student-detail';
 import { ProfileRoute } from '@/routes/profile';
 import { SessionDetailRoute } from '@/routes/session-detail';
 import { AttendanceRoute } from '@/routes/attendance';
@@ -110,6 +112,26 @@ const marksRoute = createRoute({
 	component: MarksRoute,
 });
 
+const GROUP_TABS: GroupTab[] = ['roster', 'schedule', 'grading'];
+
+const groupDetailRoute = createRoute({
+	getParentRoute: () => authedRoute,
+	path: '/groups/$groupId',
+	validateSearch: (search: Record<string, unknown>): { tab?: GroupTab } => {
+		// `roster` is the default and stays out of the URL, the way `month` and
+		// `view` already default to undefined on the grids below.
+		const tab = GROUP_TABS.find((t) => t === search.tab && t !== 'roster');
+		return { tab };
+	},
+	component: GroupDetailRoute,
+});
+
+const studentDetailRoute = createRoute({
+	getParentRoute: () => authedRoute,
+	path: '/students/$studentId',
+	component: StudentDetailRoute,
+});
+
 const groupAttendanceRoute = createRoute({
 	getParentRoute: () => authedRoute,
 	path: '/groups/$groupId/attendance',
@@ -150,6 +172,8 @@ const routeTree = rootRoute.addChildren([
 	authedRoute.addChildren([
 		todayRoute,
 		groupsRoute,
+		groupDetailRoute,
+		studentDetailRoute,
 		profileRoute,
 		sessionDetailRoute,
 		attendanceRoute,
