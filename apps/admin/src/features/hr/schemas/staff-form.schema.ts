@@ -73,6 +73,10 @@ export const createStaffSchema = z
 
 export const editStaffSchema = z
 	.object({
+		firstName: z.string().min(1, 'First name is required'),
+		lastName: z.string().min(1, 'Last name is required'),
+		phone,
+		email,
 		position: z.string().optional(),
 		employmentType: z.enum(['FULL_TIME', 'PART_TIME', 'CONTRACTOR']),
 		baseSalary: z.number().min(0, 'Salary cannot be negative').optional(),

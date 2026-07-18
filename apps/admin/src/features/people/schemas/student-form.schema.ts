@@ -7,6 +7,8 @@ const phone = z
 	.min(1, 'Phone is required')
 	.regex(UZ_PHONE_REGEX, 'Enter a valid phone number');
 
+const email = z.union([z.literal(''), z.email('Enter a valid email')]).optional();
+
 const guardianName = z
 	.string()
 	.min(2, 'Guardian name is required')
@@ -61,6 +63,7 @@ export const editStudentSchema = z.object({
 	dateOfBirth: z.string().optional(),
 	gender: z.enum(['M', 'F', 'O']).optional(),
 	phone,
+	email,
 	branchId: z.number({ error: 'Branch is required' }).min(1, 'Branch is required'),
 	address: z.string().optional(),
 	status: z.enum(['ACTIVE', 'INACTIVE', 'GRADUATED', 'SUSPENDED']).optional(),

@@ -321,6 +321,7 @@ function EditStudentForm({
 			dateOfBirth: student.dateOfBirth ?? '',
 			gender: student.gender ?? undefined,
 			phone: student.user.phone,
+			email: student.user.email ?? '',
 			branchId: student.branchId,
 			address: '',
 			status: student.status,
@@ -334,6 +335,7 @@ function EditStudentForm({
 			dateOfBirth: student.dateOfBirth ?? '',
 			gender: student.gender ?? undefined,
 			phone: student.user.phone,
+			email: student.user.email ?? '',
 			branchId: student.branchId,
 			address: '',
 			status: student.status,
@@ -350,6 +352,10 @@ function EditStudentForm({
 	async function onSubmit(values: EditStudentFormValues) {
 		await updateStudent.mutateAsync({
 			id: student.id,
+			firstName: values.firstName.trim(),
+			lastName: values.lastName.trim(),
+			phone: values.phone,
+			email: values.email ? values.email : null,
 			branchId: values.branchId,
 			dateOfBirth: values.dateOfBirth || undefined,
 			gender: values.gender,
@@ -374,14 +380,14 @@ function EditStudentForm({
 							<FormInput
 								control={form.control}
 								name="firstName"
-								label="First name"
-								disabled
+								label="First name *"
+								placeholder="e.g. Diyorbek"
 							/>
 							<FormInput
 								control={form.control}
 								name="lastName"
-								label="Last name"
-								disabled
+								label="Last name *"
+								placeholder="e.g. Rustamov"
 							/>
 						</div>
 						<div className="grid grid-cols-2 gap-3">
@@ -407,9 +413,17 @@ function EditStudentForm({
 							<FormPhoneInput
 								control={form.control}
 								name="phone"
-								label="Phone"
-								disabled
+								label="Phone *"
 							/>
+							<FormInput
+								control={form.control}
+								name="email"
+								label="Email"
+								type="email"
+								placeholder="name@example.uz"
+							/>
+						</div>
+						<div className="grid grid-cols-2 gap-3">
 							<FormSelect
 								control={form.control}
 								name="branchId"

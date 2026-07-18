@@ -39,6 +39,11 @@ export interface CreateStaffInput {
 
 export interface UpdateStaffInput {
 	id: number;
+	firstName?: string;
+	lastName?: string;
+	phone?: string;
+	/** `null` clears it. */
+	email?: string | null;
 	branchId?: number;
 	position?: string;
 	department?: string;
