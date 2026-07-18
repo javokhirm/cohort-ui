@@ -11,8 +11,8 @@ import {
 } from 'lucide-react';
 
 import {
+	ActionsMenu,
 	Badge,
-	Button,
 	Card,
 	CardContent,
 	DetailRows,
@@ -27,7 +27,7 @@ import {
 } from '@repo/ui';
 import { formatDate, formatMoney } from '@repo/utils';
 
-import { Can } from '@/components/Can';
+import { usePermissions } from '@/features/auth/hooks';
 import { usePayrollList } from '@/features/payroll/api/payroll.queries';
 
 import { useStaffMember, type StaffResponse } from '../api/staff.queries';
@@ -50,6 +50,7 @@ function employmentLabel(type: StaffResponse['employmentType']): string {
 
 function StaffHeader({ staff, onEdit }: { staff: StaffResponse; onEdit: () => void }) {
 	const [passwordOpen, setPasswordOpen] = useState(false);
+	const { can } = usePermissions();
 	const initials =
 		`${staff.user.firstName?.[0] ?? ''}${staff.user.lastName?.[0] ?? ''}`.toUpperCase();
 	const role = primaryRole(staff.roles);
@@ -85,30 +86,28 @@ function StaffHeader({ staff, onEdit }: { staff: StaffResponse; onEdit: () => vo
 					</div>
 				</div>
 
-				<div className="flex items-center gap-2">
-					<Button
-						variant="outline"
-						size="sm"
-						onClick={() => toast.info('Messaging is not available yet')}
-					>
-						<MessageSquare className="mr-1.5 size-3.5" />
-						Message
-					</Button>
-					<Can permission="staff.update">
-						<Button
-							variant="outline"
-							size="sm"
-							onClick={() => setPasswordOpen(true)}
-						>
-							<KeyRound className="mr-1.5 size-3.5" />
-							Change password
-						</Button>
-						<Button variant="outline" size="sm" onClick={onEdit}>
-							<Edit className="mr-1.5 size-3.5" />
-							Edit
-						</Button>
-					</Can>
-				</div>
+				<ActionsMenu
+					label="Staff actions"
+					items={[
+						{
+							label: 'Edit',
+							icon: Edit,
+							onClick: onEdit,
+							hidden: !can('staff.update'),
+						},
+						{
+							label: 'Change password',
+							icon: KeyRound,
+							onClick: () => setPasswordOpen(true),
+							hidden: !can('staff.update'),
+						},
+						{
+							label: 'Message',
+							icon: MessageSquare,
+							onClick: () => toast.info('Messaging is not available yet'),
+						},
+					]}
+				/>
 			</div>
 
 			<ChangeStaffPasswordDialog

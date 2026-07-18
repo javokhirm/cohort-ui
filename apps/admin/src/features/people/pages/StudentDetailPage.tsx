@@ -3,6 +3,7 @@ import { Link } from '@tanstack/react-router';
 import { ArrowLeft, Edit, MessageSquare, Plus, Trash2 } from 'lucide-react';
 
 import {
+	ActionsMenu,
 	Button,
 	Card,
 	CardContent,
@@ -59,6 +60,7 @@ function genderLabel(g?: string | null) {
 function StudentHeader({ studentId, onEdit }: { studentId: number; onEdit: () => void }) {
 	const { data: student, isLoading } = useStudent(studentId);
 	const { data: branches = [] } = useBranches();
+	const { can } = usePermissions();
 
 	if (isLoading || !student) {
 		return (
@@ -102,24 +104,23 @@ function StudentHeader({ studentId, onEdit }: { studentId: number; onEdit: () =>
 					</div>
 				</div>
 
-				<div className="flex items-center gap-2">
-					<Can permission="student.update">
-						<Button variant="outline" size="sm" onClick={onEdit}>
-							<Edit className="mr-1.5 size-3.5" />
-							Edit
-						</Button>
-					</Can>
-					<Button variant="outline" size="sm">
-						<MessageSquare className="mr-1.5 size-3.5" />
-						Message
-					</Button>
-					<Can permission="invoice.create">
-						<Button size="sm">
-							<Plus className="mr-1.5 size-3.5" />
-							Create invoice
-						</Button>
-					</Can>
-				</div>
+				<ActionsMenu
+					label="Student actions"
+					items={[
+						{
+							label: 'Edit',
+							icon: Edit,
+							onClick: onEdit,
+							hidden: !can('student.update'),
+						},
+						{ label: 'Message', icon: MessageSquare },
+						{
+							label: 'Create invoice',
+							icon: Plus,
+							hidden: !can('invoice.create'),
+						},
+					]}
+				/>
 			</div>
 		</div>
 	);
