@@ -1,5 +1,14 @@
+import { useState } from 'react';
 import { Link, useNavigate } from '@tanstack/react-router';
-import { ArrowLeft, Building2, Edit, Mail, MessageSquare, Phone } from 'lucide-react';
+import {
+	ArrowLeft,
+	Building2,
+	Edit,
+	KeyRound,
+	Mail,
+	MessageSquare,
+	Phone,
+} from 'lucide-react';
 
 import {
 	Badge,
@@ -22,6 +31,7 @@ import { Can } from '@/components/Can';
 import { usePayrollList } from '@/features/payroll/api/payroll.queries';
 
 import { useStaffMember, type StaffResponse } from '../api/staff.queries';
+import { ChangeStaffPasswordDialog } from '../components/ChangeStaffPasswordDialog';
 import { RolesSection } from '../components/RolesSection';
 import { primaryRole, roleLabel } from '../lib/roles';
 
@@ -39,9 +49,11 @@ function employmentLabel(type: StaffResponse['employmentType']): string {
 // ─── Header ───────────────────────────────────────────────────────────────────
 
 function StaffHeader({ staff, onEdit }: { staff: StaffResponse; onEdit: () => void }) {
+	const [passwordOpen, setPasswordOpen] = useState(false);
 	const initials =
 		`${staff.user.firstName?.[0] ?? ''}${staff.user.lastName?.[0] ?? ''}`.toUpperCase();
 	const role = primaryRole(staff.roles);
+	const fullName = `${staff.user.firstName} ${staff.user.lastName}`;
 	const subtitle = [staff.position, staff.staffCode, staff.branch?.name]
 		.filter(Boolean)
 		.join(' · ');
@@ -83,6 +95,14 @@ function StaffHeader({ staff, onEdit }: { staff: StaffResponse; onEdit: () => vo
 						Message
 					</Button>
 					<Can permission="staff.update">
+						<Button
+							variant="outline"
+							size="sm"
+							onClick={() => setPasswordOpen(true)}
+						>
+							<KeyRound className="mr-1.5 size-3.5" />
+							Change password
+						</Button>
 						<Button variant="outline" size="sm" onClick={onEdit}>
 							<Edit className="mr-1.5 size-3.5" />
 							Edit
@@ -90,6 +110,13 @@ function StaffHeader({ staff, onEdit }: { staff: StaffResponse; onEdit: () => vo
 					</Can>
 				</div>
 			</div>
+
+			<ChangeStaffPasswordDialog
+				open={passwordOpen}
+				onOpenChange={setPasswordOpen}
+				staffId={staff.id}
+				staffName={fullName}
+			/>
 		</div>
 	);
 }

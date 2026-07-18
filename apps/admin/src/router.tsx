@@ -155,8 +155,8 @@ const staffEditRoute = createRoute({
  * The signed-in member's own account (profile + change password). Deliberately
  * carries no `requirePermission` — every staff member may manage their own
  * credential, mirroring the server, where `/manage/me` is the one route with no
- * permission gate. Resetting *someone else's* password lives on the staff edit
- * route above, behind `staff.update`.
+ * permission gate. Changing *someone else's* password is a separate action on the
+ * staff detail route, behind `staff.update`.
  */
 const accountRoute = createRoute({
 	getParentRoute: () => authedRoute,

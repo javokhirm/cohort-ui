@@ -75,6 +75,23 @@ export function useUpdateStaff() {
 	});
 }
 
+/**
+ * Operator reset of a staff member's login password. Same `PATCH /staff/:id`
+ * endpoint and `staff.update` permission as {@link useUpdateStaff}, sent on its own
+ * so a reset is never bundled with an unrelated profile save.
+ *
+ * No cache invalidation: the password appears in no response, so nothing cached
+ * goes stale. The server refuses a non-OWNER resetting an OWNER with a 403
+ * `STAFF_PASSWORD_RESET_FORBIDDEN`, and does not revoke the member's existing
+ * sessions — the new password applies from their next login.
+ */
+export function useChangeStaffPassword(staffId: number) {
+	return useMutation({
+		mutationFn: (password: string) =>
+			manageApi.patch<StaffResponse>(`/staff/${staffId}`, { password }),
+	});
+}
+
 export function useDeleteStaff() {
 	const qc = useQueryClient();
 	return useMutation({
