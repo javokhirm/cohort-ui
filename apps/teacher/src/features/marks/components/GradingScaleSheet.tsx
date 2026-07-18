@@ -89,17 +89,21 @@ export function GradingScaleSheet({
 					</SheetDescription>
 				</SheetHeader>
 
-				{current ? (
+				{configQuery.isPending ? (
+					<div className="px-4 pb-4">
+						<Skeleton className="h-40 w-full rounded-xl" />
+					</div>
+				) : (
+					// `current` is null on a group that has never had a scale set. The
+					// form seeds from the backend's default in that case and POSTs the
+					// first config — before, this branch rendered a skeleton forever,
+					// leaving such a group with no way to get a scale at all.
 					<GradingScaleForm
-						key={current.id}
+						key={current?.id ?? 'new'}
 						current={current}
 						submitting={setConfig.isPending}
 						onSave={onSave}
 					/>
-				) : (
-					<div className="px-4 pb-4">
-						<Skeleton className="h-40 w-full rounded-xl" />
-					</div>
 				)}
 			</SheetContent>
 		</Sheet>
@@ -107,18 +111,23 @@ export function GradingScaleSheet({
 }
 
 interface GradingScaleFormProps {
-	current: GradingConfig;
+	/** The active config, or `null` on a group that has never had one set. */
+	current: GradingConfig | null;
 	submitting: boolean;
 	onSave: (input: SaveGradingConfigInput) => void;
 }
 
-/** The scale-picker form, seeded once from the active config at mount. */
+/**
+ * The scale-picker form, seeded once at mount — from the active config, or from
+ * the backend's default (Points, max 10) when the group has none yet.
+ */
 function GradingScaleForm({ current, submitting, onSave }: GradingScaleFormProps) {
-	const [type, setType] = useState<GradingType>(current.type);
+	const seedType = current?.type ?? 'POINTS';
+	const [type, setType] = useState<GradingType>(seedType);
 	const [maxPoints, setMaxPoints] = useState(
-		current.maxPoints != null ? String(current.maxPoints) : defaultMax(current.type),
+		current?.maxPoints != null ? String(current.maxPoints) : defaultMax(seedType),
 	);
-	const [allowHalf, setAllowHalf] = useState(current.allowHalf);
+	const [allowHalf, setAllowHalf] = useState(current?.allowHalf ?? false);
 
 	const onSelectType = (next: GradingType) => {
 		setType(next);

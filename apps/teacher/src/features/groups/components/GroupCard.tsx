@@ -4,22 +4,7 @@ import { CalendarDays, ChevronRight, MapPin } from 'lucide-react';
 import { branchDotClass, cn } from '@repo/ui';
 
 import type { TeachGroup } from '../api/groups.queries';
-
-/**
- * The "filled / capacity" figure turns amber as the group approaches full and
- * red once it is full — the teacher reads pressure off the color, not the math.
- */
-function capacityToneClass(filled: number, capacity: number | null): string {
-	if (capacity === null || capacity <= 0) return 'text-primary';
-	if (filled >= capacity) return 'text-tone-red-fg';
-	return filled / capacity > 0.85 ? 'text-tone-amber-fg' : 'text-primary';
-}
-
-/** Attendance bands from the design: ≥90 healthy, ≥80 watch, below that a problem. */
-function attendanceToneClass(rate: number): string {
-	if (rate >= 90) return 'text-tone-green-fg';
-	return rate >= 80 ? 'text-tone-amber-fg' : 'text-tone-red-fg';
-}
+import { attendanceToneClass, capacityLabel, capacityToneClass } from '../lib/capacity';
 
 interface GroupCardProps {
 	group: TeachGroup;
@@ -38,10 +23,7 @@ interface GroupCardProps {
  */
 export function GroupCard({ group, branchName, onOpen }: GroupCardProps) {
 	const rule = group.scheduleRule;
-	const capacityLabel =
-		group.capacity === null
-			? String(group.activeEnrollmentsCount)
-			: `${group.activeEnrollmentsCount}/${group.capacity}`;
+	const filledLabel = capacityLabel(group.activeEnrollmentsCount, group.capacity);
 
 	const onKeyDown = (event: KeyboardEvent<HTMLDivElement>) => {
 		if (event.key !== 'Enter' && event.key !== ' ') return;
@@ -55,7 +37,7 @@ export function GroupCard({ group, branchName, onOpen }: GroupCardProps) {
 			tabIndex={0}
 			onClick={onOpen}
 			onKeyDown={onKeyDown}
-			className="cursor-pointer rounded-2xl border border-border bg-card p-3.5 shadow-sm transition-colors hover:border-primary active:bg-muted/60 focus-visible:border-primary focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ring"
+			className="cursor-pointer rounded-xl border border-border bg-card p-3.5 shadow-sm transition-colors hover:border-primary active:bg-muted/60 focus-visible:border-primary focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ring"
 		>
 			<div className="flex items-start gap-2.5">
 				<div className="min-w-0 flex-1">
@@ -73,7 +55,7 @@ export function GroupCard({ group, branchName, onOpen }: GroupCardProps) {
 									),
 								)}
 							>
-								{capacityLabel}
+								{filledLabel}
 							</span>
 							<ChevronRight className="size-3.5 text-muted-foreground/50" />
 						</span>

@@ -38,6 +38,7 @@ export const scheduleKeys = {
 	all: ['sessions'] as const,
 	range: (filters: SessionRangeFilters) =>
 		[...scheduleKeys.all, 'range', filters] as const,
+	group: (groupId: number) => [...scheduleKeys.all, 'group', groupId] as const,
 };
 
 /**
@@ -52,5 +53,21 @@ export function useSessions(filters: SessionRangeFilters) {
 	return useQuery({
 		queryKey: scheduleKeys.range(filters),
 		queryFn: () => teachApi.get<TeachSession[]>('/sessions', { params: filters }),
+	});
+}
+
+/**
+ * Every session of one group (`GET /teach/groups/:id/sessions`, api-reference
+ * §4.2) — the group screen's Schedule tab.
+ *
+ * Unlike `useSessions`, no date window is required: a group's sessions are
+ * already bounded by its own start and end dates, so the whole course comes
+ * back. Same row shape, so `TeachSession` is reused rather than re-declared.
+ */
+export function useGroupSessions(groupId: number) {
+	return useQuery({
+		queryKey: scheduleKeys.group(groupId),
+		queryFn: () => teachApi.get<TeachSession[]>(`/groups/${groupId}/sessions`),
+		enabled: groupId > 0,
 	});
 }

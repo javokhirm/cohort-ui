@@ -161,12 +161,6 @@ function OverviewTab({ studentId }: { studentId: number }) {
 								{formatDate(student.enrolledAt)}
 							</p>
 						</div>
-						<div>
-							<p className="text-muted-foreground">Emergency contact</p>
-							<p className="mt-0.5 font-medium">
-								{student.emergencyContact?.phone ?? '—'}
-							</p>
-						</div>
 					</div>
 				</CardContent>
 			</Card>

@@ -15,8 +15,8 @@ import { useBranchFilter } from '@/store/branchStore';
  *
  * Laid out as the design's card grid: one column on a phone, two from `md` up
  * (where the shell switches to its desktop chrome). Tapping a card opens that
- * group's attendance — there is no group-detail screen on this surface yet, and
- * attendance is what the card is reached for.
+ * group's screen — roster, schedule and grading — which is also where the
+ * attendance and marks grids are reached from.
  */
 export function GroupsRoute() {
 	const navigate = useNavigate();
@@ -36,10 +36,10 @@ export function GroupsRoute() {
 			<div className="mx-auto w-full max-w-230">
 				<Skeleton className="h-4 w-24" />
 				<div className="mt-4 grid gap-2.75 md:grid-cols-2">
-					<Skeleton className="h-33 w-full rounded-3.5" />
-					<Skeleton className="h-33 w-full rounded-3.5" />
-					<Skeleton className="h-33 w-full rounded-3.5" />
-					<Skeleton className="h-33 w-full rounded-3.5" />
+					<Skeleton className="h-33 w-full rounded-xl" />
+					<Skeleton className="h-33 w-full rounded-xl" />
+					<Skeleton className="h-33 w-full rounded-xl" />
+					<Skeleton className="h-33 w-full rounded-xl" />
 				</div>
 			</div>
 		);
@@ -48,7 +48,7 @@ export function GroupsRoute() {
 	if (isError) {
 		return (
 			<div className="mx-auto w-full max-w-230">
-				<div className="rounded-3.5 border border-border bg-card">
+				<div className="rounded-xl border border-border bg-card">
 					<EmptyState
 						icon={<LayoutGrid />}
 						title="Couldn't load your groups"
@@ -62,7 +62,7 @@ export function GroupsRoute() {
 	if (groups.length === 0) {
 		return (
 			<div className="mx-auto w-full max-w-230">
-				<div className="rounded-3.5 border border-border bg-card">
+				<div className="rounded-xl border border-border bg-card">
 					<EmptyState
 						icon={<LayoutGrid />}
 						title={
@@ -100,9 +100,9 @@ export function GroupsRoute() {
 						}
 						onOpen={() =>
 							void navigate({
-								to: '/groups/$groupId/attendance',
+								to: '/groups/$groupId',
 								params: { groupId: String(group.id) },
-								search: { month: undefined },
+								search: { tab: undefined },
 							})
 						}
 					/>
