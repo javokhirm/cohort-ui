@@ -22,6 +22,11 @@ export interface CreateStudentInput {
 
 export interface UpdateStudentInput {
 	id: number;
+	firstName?: string;
+	lastName?: string;
+	phone?: string;
+	/** `null` clears it. */
+	email?: string | null;
 	branchId?: number;
 	dateOfBirth?: string;
 	gender?: 'M' | 'F' | 'O';

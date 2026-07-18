@@ -8,7 +8,7 @@ import {
 	type ColumnDef,
 	type RowSelectionState,
 } from '@repo/ui';
-import { formatPrice } from '@repo/utils';
+import { formatDate } from '@repo/utils';
 
 import { useBranches } from '@/api/branches';
 import type { Student, StudentUser } from '../api/students.queries';
@@ -94,19 +94,17 @@ export function StudentTable({ students, isLoading }: StudentTableProps) {
 			},
 		},
 		{
-			id: 'groups',
-			header: 'Group(s)',
+			id: 'dateOfBirth',
+			header: 'Date of Birth',
 			cell: ({ row }) => {
-				const groupsText = row.original.groups?.map((g) => g.code).join(', ');
+				const { dateOfBirth } = row.original;
 				return (
-					<span
-						className="max-w-40 truncate text-sm text-muted-foreground"
-						title={groupsText}
-					>
-						{groupsText ?? '—'}
+					<span className="text-sm text-muted-foreground">
+						{dateOfBirth ? formatDate(dateOfBirth) : '—'}
 					</span>
 				);
 			},
+			size: 144,
 		},
 		{
 			accessorKey: 'status',
@@ -114,41 +112,7 @@ export function StudentTable({ students, isLoading }: StudentTableProps) {
 			cell: ({ getValue }) => (
 				<StatusBadge kind="student" status={getValue<string>()} />
 			),
-			size: 112,
-		},
-		{
-			id: 'guardian',
-			header: 'Guardian',
-			cell: ({ row }) => (
-				<span className="text-sm text-muted-foreground">
-					{row.original.primaryGuardian?.name ?? '—'}
-				</span>
-			),
-		},
-		{
-			id: 'balance',
-			header: () => <div className="text-right">Balance</div>,
-			cell: ({ row }) => {
-				const { balance } = row.original;
-				return (
-					<div className="text-right text-sm tabular-nums">
-						{balance !== undefined ? (
-							<span
-								className={
-									balance > 0
-										? 'font-medium text-destructive'
-										: 'text-muted-foreground'
-								}
-							>
-								{formatPrice(balance)}
-							</span>
-						) : (
-							<span className="text-muted-foreground">—</span>
-						)}
-					</div>
-				);
-			},
-			size: 144,
+			size: 102,
 		},
 	];
 

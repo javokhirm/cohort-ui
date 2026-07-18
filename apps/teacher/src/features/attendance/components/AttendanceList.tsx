@@ -1,15 +1,25 @@
-import { Check } from 'lucide-react';
+import { Check, CheckCheck } from 'lucide-react';
 
 import {
 	Avatar,
 	AvatarFallback,
 	Button,
+	cn,
 	Label,
+	resolveStatus,
 	StickyActionBar,
 	Textarea,
+	TONE_ACCENT_CLASSES,
+	TONE_CLASSES,
 } from '@repo/ui';
 
-import type { AttendanceStatus, SessionDetail } from '../api/attendance.queries';
+import { initialsFromName } from '@/lib/initials';
+
+import {
+	ATTENDANCE_STATUSES,
+	type AttendanceStatus,
+	type SessionDetail,
+} from '../api/attendance.queries';
 import { StatusToggle } from './StatusToggle';
 
 interface AttendanceListProps {
@@ -21,21 +31,19 @@ interface AttendanceListProps {
 	isDirty: boolean;
 	onChangeStatus: (studentId: number, status: AttendanceStatus) => void;
 	onTopicChange: (topic: string) => void;
+	onMarkAllPresent: () => void;
 	onSave: () => void;
 }
 
-/** "First Last" → "FL"; a single-word name → its first letter. */
-function initials(name: string): string {
-	const parts = name.trim().split(/\s+/);
-	const two = (parts[0]?.[0] ?? '') + (parts[1]?.[0] ?? '');
-	return two.toUpperCase() || '?';
-}
-
 /**
- * The current-day attendance sheet: a live present/absent summary with an
- * "All present" shortcut, a topic note, and one Present/Absent/Late/Excused
- * selector per rostered student. Fills its parent as a flex column — the roster
- * scrolls while a docked footer bar saves the whole class in a batch.
+ * The current-day attendance sheet: a live per-status tally with an "All
+ * present" shortcut, a topic note, and one Present/Absent/Late/Excused selector
+ * per rostered student. Fills its parent as a flex column — the roster scrolls
+ * while a docked footer bar saves the whole class in a batch.
+ *
+ * Each row carries its current status as a tone stripe down its left edge, so a
+ * teacher can find the two absentees in a class of thirty by scanning the margin
+ * instead of reading every selector.
  */
 export function AttendanceList({
 	detail,
@@ -45,18 +53,48 @@ export function AttendanceList({
 	isDirty,
 	onChangeStatus,
 	onTopicChange,
+	onMarkAllPresent,
 	onSave,
 }: AttendanceListProps) {
-	const present = detail.roster.filter(
-		(s) => draft.get(s.studentId) === 'PRESENT',
-	).length;
-	const absent = detail.roster.filter(
-		(s) => draft.get(s.studentId) === 'ABSENT',
-	).length;
+	const tally = ATTENDANCE_STATUSES.map((status) => ({
+		status,
+		...resolveStatus('attendance', status),
+		count: detail.roster.filter((s) => draft.get(s.studentId) === status).length,
+	}));
+	const present = tally.find((t) => t.status === 'PRESENT')?.count ?? 0;
+	const absent = tally.find((t) => t.status === 'ABSENT')?.count ?? 0;
 
 	return (
 		<div className="flex min-h-0 flex-1 flex-col">
-			<div className="mt-4 shrink-0">
+			<div className="mt-4 flex shrink-0 flex-wrap items-center justify-between gap-3 rounded-2xl border border-border bg-card p-3">
+				<ul className="flex flex-wrap items-center gap-1.5">
+					{tally.map((t) => (
+						<li
+							key={t.status}
+							className={cn(
+								'inline-flex items-center gap-1.5 rounded-lg px-2 py-1 text-xs font-semibold',
+								t.count > 0
+									? TONE_CLASSES[t.tone]
+									: 'bg-muted text-muted-foreground',
+							)}
+						>
+							{t.label}
+							<span className="tabular-nums">{t.count}</span>
+						</li>
+					))}
+				</ul>
+				<Button
+					variant="outline"
+					size="sm"
+					onClick={onMarkAllPresent}
+					disabled={present === detail.roster.length}
+				>
+					<CheckCheck className="size-4" />
+					All present
+				</Button>
+			</div>
+
+			<div className="mt-3 shrink-0">
 				<Label
 					htmlFor="attendance-topic"
 					className="mb-1.5 block text-muted-foreground"
@@ -72,27 +110,41 @@ export function AttendanceList({
 				/>
 			</div>
 
-			<div className="mt-4 min-h-0 flex-1 space-y-3 overflow-y-auto pb-2">
-				{detail.roster.map((s) => (
-					<div
-						key={s.studentId}
-						className="rounded-2xl border border-border bg-card p-3"
-					>
-						<div className="mb-3 flex items-center gap-3">
-							<Avatar className="size-9">
-								<AvatarFallback>{initials(s.studentName)}</AvatarFallback>
-							</Avatar>
-							<div className="min-w-0 truncate font-medium">
-								{s.studentName}
+			<ul className="mt-4 min-h-0 flex-1 space-y-2.5 overflow-y-auto pb-2">
+				{detail.roster.map((s, i) => {
+					const status = draft.get(s.studentId) ?? null;
+					const tone = status
+						? resolveStatus('attendance', status).tone
+						: 'slate';
+					return (
+						<li
+							key={s.studentId}
+							className={cn(
+								'rounded-2xl border border-l-4 border-border bg-card p-3',
+								TONE_ACCENT_CLASSES[tone].borderLeft,
+							)}
+						>
+							<div className="mb-2.5 flex items-center gap-3">
+								<span className="w-4 shrink-0 text-right text-[11px] font-semibold tabular-nums text-muted-foreground">
+									{i + 1}
+								</span>
+								<Avatar className="size-9">
+									<AvatarFallback>
+										{initialsFromName(s.studentName)}
+									</AvatarFallback>
+								</Avatar>
+								<div className="min-w-0 flex-1 truncate font-medium">
+									{s.studentName}
+								</div>
 							</div>
-						</div>
-						<StatusToggle
-							value={draft.get(s.studentId) ?? null}
-							onChange={(status) => onChangeStatus(s.studentId, status)}
-						/>
-					</div>
-				))}
-			</div>
+							<StatusToggle
+								value={status}
+								onChange={(next) => onChangeStatus(s.studentId, next)}
+							/>
+						</li>
+					);
+				})}
+			</ul>
 
 			<StickyActionBar
 				className="-mx-4 shrink-0 rounded-t-2xl md:-mx-6"

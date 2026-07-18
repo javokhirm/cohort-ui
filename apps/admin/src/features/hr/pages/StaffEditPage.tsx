@@ -9,6 +9,7 @@ import {
 	FieldGroup,
 	Form,
 	FormInput,
+	FormPhoneInput,
 	FormSelect,
 	Input,
 	Label,
@@ -47,9 +48,9 @@ const PAYROLL_TYPE_OPTIONS = [
 ];
 
 /**
- * A labelled, non-editable value. Name, contact and start date live on the user
- * record and are not accepted by `PATCH /manage/staff/:id`, so they are shown
- * for context but cannot be changed here.
+ * A labelled, non-editable value. `hireDate` is not accepted by
+ * `PATCH /manage/staff/:id`, so it is shown for context but cannot be changed
+ * here.
  */
 function ReadOnlyField({ label, value }: { label: string; value: string }) {
 	return (
@@ -70,6 +71,10 @@ function EditStaffForm({
 	onPendingChange: (pending: boolean) => void;
 }) {
 	const toDefaults = (s: StaffResponse): EditStaffFormValues => ({
+		firstName: s.user.firstName,
+		lastName: s.user.lastName,
+		phone: s.user.phone,
+		email: s.user.email ?? '',
 		position: s.position ?? '',
 		employmentType: s.employmentType,
 		baseSalary: s.baseSalary ?? undefined,
@@ -101,11 +106,13 @@ function EditStaffForm({
 		onPendingChange(updateStaff.isPending);
 	}, [updateStaff.isPending, onPendingChange]);
 
-	const fullName = `${staff.user.firstName} ${staff.user.lastName}`.trim();
-
 	async function onSubmit(values: EditStaffFormValues) {
 		await updateStaff.mutateAsync({
 			id: staff.id,
+			firstName: values.firstName.trim(),
+			lastName: values.lastName.trim(),
+			phone: values.phone,
+			email: values.email ? values.email : null,
 			position: values.position || undefined,
 			employmentType: values.employmentType,
 			baseSalary: values.baseSalary,
@@ -131,7 +138,20 @@ function EditStaffForm({
 					className="border border-border bg-card p-5 shadow-xs"
 				>
 					<FieldGroup>
-						<ReadOnlyField label="Full name" value={fullName} />
+						<div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
+							<FormInput
+								control={form.control}
+								name="firstName"
+								label="First name *"
+								placeholder="e.g. Diyorbek"
+							/>
+							<FormInput
+								control={form.control}
+								name="lastName"
+								label="Last name *"
+								placeholder="e.g. Rustamov"
+							/>
+						</div>
 						<FormInput
 							control={form.control}
 							name="position"
@@ -147,10 +167,17 @@ function EditStaffForm({
 				>
 					<FieldGroup>
 						<div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
-							<ReadOnlyField label="Phone" value={staff.user.phone} />
-							<ReadOnlyField
+							<FormPhoneInput
+								control={form.control}
+								name="phone"
+								label="Phone *"
+							/>
+							<FormInput
+								control={form.control}
+								name="email"
 								label="Email"
-								value={staff.user.email ?? '—'}
+								type="email"
+								placeholder="name@center.uz"
 							/>
 						</div>
 					</FieldGroup>

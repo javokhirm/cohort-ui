@@ -1,6 +1,7 @@
 import { useState } from 'react';
 
-import { resolveStatus, type StatusTone } from '@repo/ui';
+import { resolveStatus } from '@repo/ui';
+import { formatDayOfMonth, formatFullDate, formatWeekday } from '@repo/utils';
 
 import {
 	SheetTable,
@@ -10,7 +11,8 @@ import {
 
 import { ATTENDANCE_STATUSES, type AttendanceStatus } from '../api/attendance.queries';
 import type { AttendanceGrid as GridData } from '../api/attendance-grid.queries';
-import { formatColumnDate, isTodayIso } from '../lib/month';
+import { isTodayIso } from '../lib/month';
+import { rateTone } from '../lib/rate';
 
 interface AttendanceGridProps {
 	grid: GridData;
@@ -19,19 +21,16 @@ interface AttendanceGridProps {
 
 const CELL_W_PX = 52;
 
-function rateTone(rate: number): StatusTone {
-	if (rate >= 90) return 'green';
-	if (rate >= 75) return 'amber';
-	return 'red';
-}
-
 /**
  * The monthly attendance matrix, rendered with the shared `SheetTable` grid: a
- * frozen student column, one column per session date (today's is bracketed in
- * the primary colour and is the only editable one, via a status popover), and
- * a frozen RATE column banded green/amber/red. Popover state is lifted here
- * (one cell open at a time) with a full-screen click-catcher to close it on an
- * outside click, per SheetTable's controlled-popover contract.
+ * frozen student column, one column per session date (today's is tinted and is
+ * the only editable one, via a status popover), and a frozen RATE column banded
+ * green/amber/red. Popover state is lifted here (one cell open at a time) with a
+ * full-screen click-catcher to close it on an outside click, per SheetTable's
+ * controlled-popover contract.
+ *
+ * Sized to fill its parent, so render it inside a bounded flex column — the
+ * frozen header and student column need the grid to own its own scroll.
  */
 export function AttendanceGrid({ grid, onEditCell }: AttendanceGridProps) {
 	const [openCell, setOpenCell] = useState<string | null>(null);
@@ -42,7 +41,7 @@ export function AttendanceGrid({ grid, onEditCell }: AttendanceGridProps) {
 		striped: i % 2 === 1,
 		right: [
 			{
-				tone: row.rate === null ? 'slate' : rateTone(row.rate),
+				tone: rateTone(row.rate),
 				disp: row.rate === null ? '—' : `${row.rate}%`,
 				emphasis: true,
 			},
@@ -54,25 +53,29 @@ export function AttendanceGrid({ grid, onEditCell }: AttendanceGridProps) {
 			const editable = today && col.status !== 'CANCELLED';
 			const descriptor = status ? resolveStatus('attendance', status) : null;
 
-			const dropOpts: SheetDropOption[] = ATTENDANCE_STATUSES.map((s) => {
-				const { tone, label } = resolveStatus('attendance', s);
-				return {
-					label,
-					tone,
-					selected: status === s,
-					onSelect: () => {
-						onEditCell(col.sessionId, row.studentId, s);
-						setOpenCell(null);
-					},
-				};
-			});
+			const dropOpts: SheetDropOption[] | undefined = editable
+				? ATTENDANCE_STATUSES.map((s) => {
+						const { tone, label } = resolveStatus('attendance', s);
+						return {
+							label,
+							tone,
+							selected: status === s,
+							onSelect: () => {
+								onEditCell(col.sessionId, row.studentId, s);
+								setOpenCell(null);
+							},
+						};
+					})
+				: undefined;
 
 			return {
 				kind: 'badge' as const,
 				letter: descriptor?.label[0] ?? '',
 				tone: descriptor?.tone ?? 'slate',
-				opacity: descriptor ? 1 : 0.5,
 				accent: today,
+				label: `${row.studentName ?? 'Student'}, ${formatFullDate(col.date)} — ${
+					descriptor?.label ?? 'not marked'
+				}`,
 				onClick: editable
 					? () => setOpenCell((cur) => (cur === cellKey ? null : cellKey))
 					: undefined,
@@ -88,20 +91,24 @@ export function AttendanceGrid({ grid, onEditCell }: AttendanceGridProps) {
 				<div className="fixed inset-0 z-40" onClick={() => setOpenCell(null)} />
 			)}
 			<SheetTable
-				nameW="140px"
-				headH="36px"
+				className="min-h-0 flex-1"
+				nameW="168px"
+				headH="42px"
 				rowH="44px"
 				nameFont="13px"
 				cellW={`${CELL_W_PX}px`}
-				cellFont="13px"
-				colW={`${CELL_W_PX * grid.columns.length}px`}
+				cellFont="12.5px"
 				dates={grid.columns.map((col) => ({
-					label: formatColumnDate(col.date),
+					label: formatDayOfMonth(col.date),
+					sublabel: formatWeekday(col.date),
 					accent: isTodayIso(col.date),
-					opacity: col.status === 'CANCELLED' ? 0.5 : 1,
+					muted: col.status === 'CANCELLED',
+					title: `${formatFullDate(col.date)}${
+						col.status === 'CANCELLED' ? ' — cancelled' : ''
+					}`,
 				}))}
 				rows={rows}
-				rightCols={[{ label: 'Rate' }]}
+				rightCols={[{ label: 'Rate', width: '64px' }]}
 			/>
 		</>
 	);

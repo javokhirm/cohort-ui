@@ -10,7 +10,7 @@ interface GuardianListProps {
 }
 
 /**
- * The student's emergency contacts (`GET /teach/students/:id/guardians`) —
+ * The student's guardians (`GET /teach/students/:id/guardians`) —
  * primary first, as the backend orders them.
  *
  * The red-tinted phone chip is hand-built rather than using `DetailRows`: that
@@ -29,7 +29,7 @@ export function GuardianList({ studentId }: GuardianListProps) {
 			<div className="rounded-xl border border-border bg-card">
 				<EmptyState
 					icon={<ShieldAlert />}
-					title="Couldn't load emergency contacts"
+					title="Couldn't load guardians"
 					description="Something went wrong fetching this student's guardians. Try again in a moment."
 				/>
 			</div>
@@ -41,7 +41,7 @@ export function GuardianList({ studentId }: GuardianListProps) {
 			<div className="rounded-xl border border-border bg-card">
 				<EmptyState
 					icon={<ShieldAlert />}
-					title="No emergency contact on file"
+					title="No guardians on file"
 					description="Ask the front desk to add a guardian for this student."
 				/>
 			</div>

@@ -3,6 +3,7 @@ import { Ban, LayoutGrid, List, Star } from 'lucide-react';
 import { useNavigate, useParams, useSearch } from '@tanstack/react-router';
 
 import {
+	Button,
 	EmptyState,
 	PageHeader,
 	Skeleton,
@@ -124,40 +125,42 @@ export function MarksRoute() {
 	const isLoading = detailQuery.isPending || marksQuery.isPending;
 	const isError = detailQuery.isError || marksQuery.isError;
 
+	const viewToggle = detail ? (
+		<Tabs
+			value="list"
+			onValueChange={(v) => {
+				if (v === 'table') {
+					void navigate({
+						to: '/groups/$groupId/marks',
+						params: { groupId: String(detail.groupId) },
+						search: { month: undefined, view: 'table' },
+					});
+				}
+			}}
+		>
+			<TabsList>
+				<TabsTrigger value="table" aria-label="Table view">
+					<LayoutGrid />
+				</TabsTrigger>
+				<TabsTrigger value="list" aria-label="List view">
+					<List />
+				</TabsTrigger>
+			</TabsList>
+		</Tabs>
+	) : null;
+
 	const header = (
 		<PageHeader
+			className="shrink-0"
 			title={detail?.courseName ?? 'Enter marks'}
 			description={
-				detail ? formatFullDate(detail.sessionDate) : `Session #${sessionId}`
+				detail
+					? `${detail.groupName} · ${formatFullDate(detail.sessionDate)}`
+					: `Session #${sessionId}`
 			}
+			actions={viewToggle}
 		/>
 	);
-
-	const viewToggle = detail ? (
-		<div className="mt-4 flex justify-end">
-			<Tabs
-				value="list"
-				onValueChange={(v) => {
-					if (v === 'table') {
-						void navigate({
-							to: '/groups/$groupId/marks',
-							params: { groupId: String(detail.groupId) },
-							search: { month: undefined, view: 'table' },
-						});
-					}
-				}}
-			>
-				<TabsList>
-					<TabsTrigger value="table" aria-label="Table view">
-						<LayoutGrid />
-					</TabsTrigger>
-					<TabsTrigger value="list" aria-label="List view">
-						<List />
-					</TabsTrigger>
-				</TabsList>
-			</Tabs>
-		</div>
-	) : null;
 
 	let body: ReactNode;
 	if (isError) {
@@ -167,6 +170,17 @@ export function MarksRoute() {
 					icon={<Star />}
 					title="Couldn't load this session"
 					description="Something went wrong. Try again in a moment."
+					action={
+						<Button
+							variant="outline"
+							onClick={() => {
+								void detailQuery.refetch();
+								void marksQuery.refetch();
+							}}
+						>
+							Try again
+						</Button>
+					}
 				/>
 			</div>
 		);
@@ -215,10 +229,7 @@ export function MarksRoute() {
 
 	return (
 		<div className="mx-auto flex h-full w-full max-w-3xl flex-col">
-			<div className="flex shrink-0 items-center justify-between">
-				{header}
-				{viewToggle}
-			</div>
+			{header}
 			<div className="flex min-h-0 flex-1 flex-col">{body}</div>
 		</div>
 	);

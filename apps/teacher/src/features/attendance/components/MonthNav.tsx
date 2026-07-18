@@ -17,20 +17,24 @@ interface MonthNavProps {
  */
 export function MonthNav({ label, onPrev, onNext, showToday, onToday }: MonthNavProps) {
 	return (
-		<div className="flex items-center justify-between gap-2">
-			<div className="flex items-center gap-1">
+		<div className="flex items-center gap-2">
+			<div className="flex items-center gap-0.5 rounded-lg border border-border bg-muted p-1">
 				<Button
 					variant="ghost"
 					size="icon"
+					className="size-7 text-muted-foreground hover:bg-card"
 					aria-label="Previous month"
 					onClick={onPrev}
 				>
 					<ChevronLeft className="size-4" />
 				</Button>
-				<div className="min-w-32 text-center font-semibold">{label}</div>
+				<div className="min-w-32 text-center text-xs font-semibold text-foreground">
+					{label}
+				</div>
 				<Button
 					variant="ghost"
 					size="icon"
+					className="size-7 text-muted-foreground hover:bg-card"
 					aria-label="Next month"
 					onClick={onNext}
 				>
