@@ -62,7 +62,11 @@ function defaultMax(type: GradingType): string {
  * config; it is remounted (via `key`) whenever the config changes, so its state
  * initializes from props without a synchronizing effect.
  */
-export function GradingScaleSheet({ groupId, open, onOpenChange }: GradingScaleSheetProps) {
+export function GradingScaleSheet({
+	groupId,
+	open,
+	onOpenChange,
+}: GradingScaleSheetProps) {
 	const configQuery = useGradingConfig(groupId, open);
 	const setConfig = useSetGradingConfig(groupId);
 	const current = configQuery.data?.current ?? null;
@@ -137,10 +141,17 @@ function GradingScaleForm({ current, submitting, onSave }: GradingScaleFormProps
 			<div className="flex flex-col gap-5 px-4">
 				<div className="flex flex-col gap-2">
 					<Label className="text-muted-foreground">Scale type</Label>
-					<Tabs value={type} onValueChange={(v) => onSelectType(v as GradingType)}>
+					<Tabs
+						value={type}
+						onValueChange={(v) => onSelectType(v as GradingType)}
+					>
 						<TabsList className="w-full">
 							{TYPE_TABS.map((t) => (
-								<TabsTrigger key={t.value} value={t.value} className="flex-1">
+								<TabsTrigger
+									key={t.value}
+									value={t.value}
+									className="flex-1"
+								>
 									{t.label}
 								</TabsTrigger>
 							))}
@@ -184,7 +195,9 @@ function GradingScaleForm({ current, submitting, onSave }: GradingScaleFormProps
 
 				<div className="rounded-xl border border-border bg-muted/40 px-3 py-2 text-sm text-muted-foreground">
 					Preview ·{' '}
-					<span className="text-foreground">{previewLabel(type, maxPoints)}</span>
+					<span className="text-foreground">
+						{previewLabel(type, maxPoints)}
+					</span>
 				</div>
 			</div>
 

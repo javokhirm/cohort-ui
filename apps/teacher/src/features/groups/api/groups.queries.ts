@@ -15,8 +15,7 @@ export interface TeachScheduleRule {
  *
  * Hand-mirrored from the backend's `TeachGroupListItemDto` — the teach
  * controllers declare no `@ApiOkResponse`, so there is no response schema in the
- * OpenAPI document to generate from. Note it carries no student count, despite
- * what §4.2's prose says; don't render one.
+ * OpenAPI document to generate from.
  */
 export interface TeachGroup {
 	id: number;
@@ -33,6 +32,13 @@ export interface TeachGroup {
 	endDate: string | null;
 	scheduleRule: TeachScheduleRule | null;
 	status: GroupStatus;
+	/** Students currently enrolled (ACTIVE). Shown against `capacity`. */
+	activeEnrollmentsCount: number;
+	/**
+	 * Whole-group attendance %, or `null` when nothing has been marked yet.
+	 * `null` is "no data" — render it as absent, never as 0%.
+	 */
+	attendanceRate: number | null;
 }
 
 export interface GroupListFilters {

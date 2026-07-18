@@ -8,10 +8,7 @@ import {
 	type ScheduleRule,
 	type SessionStatus,
 } from '../api/groups.queries';
-import {
-	GRADING_CONFIG_TYPES,
-	type GradingType,
-} from '../api/grading-config.queries';
+import { GRADING_CONFIG_TYPES, type GradingType } from '../api/grading-config.queries';
 
 // ─── Group status ─────────────────────────────────────────────────────────────
 // The shared `lib/status.ts` map has no `group` kind, so tones/labels for group
