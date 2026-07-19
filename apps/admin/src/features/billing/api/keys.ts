@@ -56,6 +56,8 @@ export interface InvoiceListFilters {
 	limit?: number;
 	branchIds?: number[];
 	studentId?: number;
+	/** Invoices whose originating enrollment is in this group (one-off invoices never match). */
+	groupId?: number;
 	status?: 'DRAFT' | 'UNPAID' | 'PARTIAL' | 'PAID' | 'OVERDUE' | 'VOID';
 	from?: string;
 	to?: string;
