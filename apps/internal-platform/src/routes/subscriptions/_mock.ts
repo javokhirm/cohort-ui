@@ -4,11 +4,7 @@
  */
 
 export type SubscriptionStatus =
-	| 'active'
-	| 'trialing'
-	| 'past_due'
-	| 'suspended'
-	| 'cancelled';
+	'active' | 'trialing' | 'past_due' | 'suspended' | 'cancelled';
 
 export type MockSubscription = {
 	id: string;

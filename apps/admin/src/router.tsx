@@ -305,13 +305,7 @@ const invoiceDetailRoute = createRoute({
 });
 
 type PaymentMethodSearch =
-	| 'CASH'
-	| 'CLICK'
-	| 'PAYME'
-	| 'UZUM'
-	| 'CARD'
-	| 'BANK_TRANSFER'
-	| 'CREDIT';
+	'CASH' | 'CLICK' | 'PAYME' | 'UZUM' | 'CARD' | 'BANK_TRANSFER' | 'CREDIT';
 type PaymentStatusSearch = 'PENDING' | 'SUCCEEDED' | 'FAILED' | 'REFUNDED';
 
 const PAYMENT_METHODS: PaymentMethodSearch[] = [
@@ -593,12 +587,7 @@ const expensesRoute = createRoute({
 });
 
 type LeadSourceSearch =
-	| 'INSTAGRAM'
-	| 'TELEGRAM'
-	| 'REFERRAL'
-	| 'WALK_IN'
-	| 'WEBSITE'
-	| 'OTHER';
+	'INSTAGRAM' | 'TELEGRAM' | 'REFERRAL' | 'WALK_IN' | 'WEBSITE' | 'OTHER';
 
 const LEAD_SOURCE_SEARCH: LeadSourceSearch[] = [
 	'INSTAGRAM',

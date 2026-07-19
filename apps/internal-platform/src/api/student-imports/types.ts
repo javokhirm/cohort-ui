@@ -14,11 +14,7 @@
  * `FAILED` — the run aborted; `errorMessage` says why.
  */
 export type StudentImportStatus =
-	| 'VALIDATED'
-	| 'QUEUED'
-	| 'APPLYING'
-	| 'COMPLETED'
-	| 'FAILED';
+	'VALIDATED' | 'QUEUED' | 'APPLYING' | 'COMPLETED' | 'FAILED';
 
 /** Statuses in which the worker is still running — the UI polls while in these. */
 export const IN_FLIGHT_STATUSES: StudentImportStatus[] = ['QUEUED', 'APPLYING'];

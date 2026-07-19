@@ -4,11 +4,7 @@
  */
 
 export type PlanFeature =
-	| 'billing'
-	| 'payroll'
-	| 'assessments'
-	| 'telegram_bot'
-	| 'api_access';
+	'billing' | 'payroll' | 'assessments' | 'telegram_bot' | 'api_access';
 
 export type MockPlan = {
 	id: string;

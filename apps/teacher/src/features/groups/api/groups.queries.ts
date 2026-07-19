@@ -54,11 +54,7 @@ export interface TeachGroupDetail extends TeachGroup {
 }
 
 export type EnrollmentStatus =
-	| 'ACTIVE'
-	| 'SUSPENDED'
-	| 'DROPPED'
-	| 'COMPLETED'
-	| 'TRANSFERRED';
+	'ACTIVE' | 'SUSPENDED' | 'DROPPED' | 'COMPLETED' | 'TRANSFERRED';
 
 /**
  * A roster entry from `GET /teach/groups/:id/students` — the enriched roster,
