@@ -1,9 +1,5 @@
 export type FeatureKey =
-	| 'billing'
-	| 'payroll'
-	| 'assessments'
-	| 'telegram_bot'
-	| 'api_access';
+	'billing' | 'payroll' | 'assessments' | 'telegram_bot' | 'api_access';
 
 export const FEATURE_LABELS: Record<FeatureKey, { label: string; description: string }> =
 	{

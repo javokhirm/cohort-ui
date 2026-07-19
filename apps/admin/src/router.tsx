@@ -256,6 +256,7 @@ interface InvoiceSearch {
 	page?: number;
 	status?: InvoiceStatusSearch;
 	studentId?: number;
+	groupId?: number;
 	from?: string;
 	to?: string;
 	dueBefore?: string;
@@ -269,6 +270,7 @@ const invoicesRoute = createRoute({
 		const page = Number(search.page);
 		const status = search.status;
 		const studentId = Number(search.studentId);
+		const groupId = Number(search.groupId);
 		const from = search.from;
 		const to = search.to;
 		const dueBefore = search.dueBefore;
@@ -279,6 +281,7 @@ const invoicesRoute = createRoute({
 				: undefined,
 			studentId:
 				Number.isFinite(studentId) && studentId > 0 ? studentId : undefined,
+			groupId: Number.isFinite(groupId) && groupId > 0 ? groupId : undefined,
 			from:
 				typeof from === 'string' && ISO_DATE_SEARCH.test(from) ? from : undefined,
 			to: typeof to === 'string' && ISO_DATE_SEARCH.test(to) ? to : undefined,
@@ -302,13 +305,7 @@ const invoiceDetailRoute = createRoute({
 });
 
 type PaymentMethodSearch =
-	| 'CASH'
-	| 'CLICK'
-	| 'PAYME'
-	| 'UZUM'
-	| 'CARD'
-	| 'BANK_TRANSFER'
-	| 'CREDIT';
+	'CASH' | 'CLICK' | 'PAYME' | 'UZUM' | 'CARD' | 'BANK_TRANSFER' | 'CREDIT';
 type PaymentStatusSearch = 'PENDING' | 'SUCCEEDED' | 'FAILED' | 'REFUNDED';
 
 const PAYMENT_METHODS: PaymentMethodSearch[] = [
@@ -590,12 +587,7 @@ const expensesRoute = createRoute({
 });
 
 type LeadSourceSearch =
-	| 'INSTAGRAM'
-	| 'TELEGRAM'
-	| 'REFERRAL'
-	| 'WALK_IN'
-	| 'WEBSITE'
-	| 'OTHER';
+	'INSTAGRAM' | 'TELEGRAM' | 'REFERRAL' | 'WALK_IN' | 'WEBSITE' | 'OTHER';
 
 const LEAD_SOURCE_SEARCH: LeadSourceSearch[] = [
 	'INSTAGRAM',

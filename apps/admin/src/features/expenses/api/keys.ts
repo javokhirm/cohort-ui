@@ -1,9 +1,5 @@
 export type ExpenseCategoryFilter =
-	| 'RENT'
-	| 'UTILITIES'
-	| 'MARKETING'
-	| 'SALARY'
-	| 'OTHER';
+	'RENT' | 'UTILITIES' | 'MARKETING' | 'SALARY' | 'OTHER';
 
 export interface ExpenseListFilters {
 	page?: number;

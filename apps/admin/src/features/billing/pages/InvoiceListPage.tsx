@@ -25,6 +25,7 @@ import { InvoiceTable } from '../components/InvoiceTable';
 import { InvoiceForm } from '../components/InvoiceForm';
 import { GenerateInvoicesDialog } from '../components/GenerateInvoicesDialog';
 import { StudentPicker } from '../components/StudentPicker';
+import { GroupPicker } from '../components/GroupPicker';
 
 const PAGE_SIZE = 20;
 
@@ -34,6 +35,7 @@ export function InvoiceListPage() {
 		page = 1,
 		status,
 		studentId,
+		groupId,
 		from,
 		to,
 		dueBefore,
@@ -49,6 +51,7 @@ export function InvoiceListPage() {
 		limit: PAGE_SIZE,
 		status,
 		studentId,
+		groupId,
 		from,
 		to,
 		dueBefore,
@@ -63,6 +66,7 @@ export function InvoiceListPage() {
 	const summaryFilters: InvoiceSummaryFilters = {
 		status,
 		studentId,
+		groupId,
 		from,
 		to,
 		dueBefore,
@@ -72,7 +76,8 @@ export function InvoiceListPage() {
 	const statValue = (amount: number) =>
 		isSummaryLoading ? '—' : `${formatPrice(amount)} UZS`;
 
-	const hasExtraFilters = studentId != null || !!from || !!to || !!dueBefore;
+	const hasExtraFilters =
+		studentId != null || groupId != null || !!from || !!to || !!dueBefore;
 
 	function handleStatusChange(value: (typeof INVOICE_STATUS_FILTERS)[number]['value']) {
 		void navigate({
@@ -83,6 +88,12 @@ export function InvoiceListPage() {
 	function handleStudentChange(value: number | undefined) {
 		void navigate({
 			search: (prev) => ({ ...prev, studentId: value, page: undefined }),
+		});
+	}
+
+	function handleGroupChange(value: number | undefined) {
+		void navigate({
+			search: (prev) => ({ ...prev, groupId: value, page: undefined }),
 		});
 	}
 
@@ -97,6 +108,7 @@ export function InvoiceListPage() {
 			search: (prev) => ({
 				...prev,
 				studentId: undefined,
+				groupId: undefined,
 				from: undefined,
 				to: undefined,
 				dueBefore: undefined,
@@ -189,6 +201,12 @@ export function InvoiceListPage() {
 								value={studentId}
 								onChange={handleStudentChange}
 							/>
+						</div>
+					</div>
+					<div className="flex flex-col gap-1.5">
+						<Label className="text-xs text-muted-foreground">Group</Label>
+						<div className="w-56">
+							<GroupPicker value={groupId} onChange={handleGroupChange} />
 						</div>
 					</div>
 					<div className="flex flex-col gap-1.5">
