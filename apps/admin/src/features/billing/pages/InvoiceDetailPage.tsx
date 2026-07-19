@@ -2,7 +2,7 @@ import { useState } from 'react';
 import { Link } from '@tanstack/react-router';
 import {
 	ArrowLeft,
-	Ban,
+	BadgePercent,
 	Download,
 	Edit,
 	Landmark,
@@ -35,6 +35,7 @@ import { formatDate, formatPrice } from '@repo/utils';
 import { Can } from '@/components/Can';
 import { useInvoice, type InvoiceDetail } from '../api/invoices.queries';
 import { useApplyWalletCredit, useUpdateInvoice } from '../api/invoices.mutations';
+import { ApplyDiscountDialog } from '../components/ApplyDiscountDialog';
 import { CreditNotesCard } from '../components/CreditNotesCard';
 import { InvoiceForm } from '../components/InvoiceForm';
 import { RecordPaymentDialog } from '../components/RecordPaymentDialog';
@@ -65,6 +66,7 @@ function InvoiceHeader({
 	onIssue,
 	onRecordPayment,
 	onApplyCredit,
+	onApplyDiscount,
 	onVoid,
 	actionPending,
 	applyCreditPending,
@@ -74,6 +76,7 @@ function InvoiceHeader({
 	onIssue: () => void;
 	onRecordPayment: () => void;
 	onApplyCredit: () => void;
+	onApplyDiscount: () => void;
 	onVoid: () => void;
 	actionPending: boolean;
 	applyCreditPending: boolean;
@@ -81,6 +84,11 @@ function InvoiceHeader({
 	const canRecordPayment =
 		invoice.amountDue > 0 && invoice.status !== 'VOID' && invoice.status !== 'DRAFT';
 	const canApplyCredit =
+		invoice.status === 'UNPAID' ||
+		invoice.status === 'PARTIAL' ||
+		invoice.status === 'OVERDUE';
+	const canApplyDiscount =
+		invoice.status === 'DRAFT' ||
 		invoice.status === 'UNPAID' ||
 		invoice.status === 'PARTIAL' ||
 		invoice.status === 'OVERDUE';
@@ -154,6 +162,15 @@ function InvoiceHeader({
 						</Can>
 					)}
 
+					{canApplyDiscount && (
+						<Can permission="invoice.discount.apply">
+							<Button variant="outline" onClick={onApplyDiscount}>
+								<BadgePercent className="mr-1.5 size-4" />
+								Apply discount
+							</Button>
+						</Can>
+					)}
+
 					{invoice.status === 'DRAFT' && (
 						<Can permission="invoice.update">
 							<Button variant="outline" onClick={onEdit}>
@@ -184,11 +201,11 @@ function InvoiceHeader({
 					{canVoid && (
 						<Can permission="invoice.void">
 							<Button
-								variant="destructive"
+								variant="outline"
 								onClick={onVoid}
 								disabled={actionPending}
+								className="border-tone-red-fg/30 font-bold text-tone-red-fg shadow-none"
 							>
-								<Ban className="mr-1.5 size-4" />
 								Void
 							</Button>
 						</Can>
@@ -348,6 +365,7 @@ export function InvoiceDetailPage({ invoiceId }: InvoiceDetailPageProps) {
 
 	const [editOpen, setEditOpen] = useState(false);
 	const [paymentOpen, setPaymentOpen] = useState(false);
+	const [discountOpen, setDiscountOpen] = useState(false);
 	const [voidOpen, setVoidOpen] = useState(false);
 
 	const updateInvoice = useUpdateInvoice();
@@ -412,6 +430,7 @@ export function InvoiceDetailPage({ invoiceId }: InvoiceDetailPageProps) {
 						onIssue={() => void handleIssue()}
 						onRecordPayment={() => setPaymentOpen(true)}
 						onApplyCredit={() => void handleApplyCredit()}
+						onApplyDiscount={() => setDiscountOpen(true)}
 						onVoid={() => setVoidOpen(true)}
 						actionPending={updateInvoice.isPending}
 						applyCreditPending={applyWalletCredit.isPending}
@@ -437,6 +456,11 @@ export function InvoiceDetailPage({ invoiceId }: InvoiceDetailPageProps) {
 						invoice={invoice}
 						open={paymentOpen}
 						onOpenChange={setPaymentOpen}
+					/>
+					<ApplyDiscountDialog
+						invoice={invoice}
+						open={discountOpen}
+						onOpenChange={setDiscountOpen}
 					/>
 					<ConfirmDialog
 						open={voidOpen}
