@@ -103,7 +103,7 @@ function PayrollHeader({
 					</Can>
 				)}
 				{payroll.status === 'DRAFT' && (
-					<Can permission="payroll.create">
+					<Can permission="payroll.update">
 						<Button variant="outline" onClick={onEdit}>
 							<Edit className="mr-1.5 size-4" />
 							Edit
@@ -371,7 +371,7 @@ export function PayrollDetailPage({ payrollId }: PayrollDetailPageProps) {
 						<DetailsCard payroll={payroll} branchName={branchName} />
 					</div>
 
-					{can('payroll.create') && (
+					{can('payroll.update') && (
 						<PayrollForm
 							mode="edit"
 							payroll={payroll}

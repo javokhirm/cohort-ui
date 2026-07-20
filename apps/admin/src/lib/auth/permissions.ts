@@ -95,6 +95,7 @@ export const PERMISSION_CODES = [
 	// payroll
 	'payroll.read',
 	'payroll.create',
+	'payroll.update',
 	'payroll.approve',
 	'payroll.pay',
 	// lead
