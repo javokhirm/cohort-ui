@@ -18,6 +18,7 @@ import { TodayRoute } from '@/routes/today';
 import { GroupsRoute } from '@/routes/groups';
 import { GroupDetailRoute, type GroupTab } from '@/routes/group-detail';
 import { StudentDetailRoute } from '@/routes/student-detail';
+import { PayrollRoute } from '@/routes/payroll';
 import { ProfileRoute } from '@/routes/profile';
 import { SessionDetailRoute } from '@/routes/session-detail';
 import { AttendanceRoute } from '@/routes/attendance';
@@ -78,6 +79,12 @@ const groupsRoute = createRoute({
 	getParentRoute: () => authedRoute,
 	path: '/groups',
 	component: GroupsRoute,
+});
+
+const payrollRoute = createRoute({
+	getParentRoute: () => authedRoute,
+	path: '/payroll',
+	component: PayrollRoute,
 });
 
 const profileRoute = createRoute({
@@ -174,6 +181,7 @@ const routeTree = rootRoute.addChildren([
 		groupsRoute,
 		groupDetailRoute,
 		studentDetailRoute,
+		payrollRoute,
 		profileRoute,
 		sessionDetailRoute,
 		attendanceRoute,

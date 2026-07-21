@@ -2232,15 +2232,14 @@ export const handlers = [
 
 	http.post(`${MANAGE}/payrolls/advances`, async ({ request }) => {
 		const body = (await request.json()) as Record<string, unknown>;
-		return ok(
-			{
-				id: 2,
-				payrollId: null,
-				removable: true,
-				label: null,
-				createdAt: '2026-07-20T09:00:00Z',
-				...body,
-			});
+		return ok({
+			id: 2,
+			payrollId: null,
+			removable: true,
+			label: null,
+			createdAt: '2026-07-20T09:00:00Z',
+			...body,
+		});
 	}),
 
 	http.delete(`${MANAGE}/payrolls/advances/:id`, ({ params }) => {
@@ -2291,16 +2290,15 @@ export const handlers = [
 
 	http.post(`${MANAGE}/staff/:staffId/payroll-configs`, async ({ params, request }) => {
 		const body = (await request.json()) as Record<string, unknown>;
-		return ok(
-			{
-				id: 4,
-				staffId: Number(params['staffId']),
-				baseSalary: null,
-				payrollPercent: null,
-				effectiveTo: null,
-				createdAt: '2026-08-01T09:00:00Z',
-				...body,
-			});
+		return ok({
+			id: 4,
+			staffId: Number(params['staffId']),
+			baseSalary: null,
+			payrollPercent: null,
+			effectiveTo: null,
+			createdAt: '2026-08-01T09:00:00Z',
+			...body,
+		});
 	}),
 
 	http.patch(`${MANAGE}/payroll-configs/:id`, async ({ params, request }) => {
@@ -2449,7 +2447,11 @@ export const payrollHandlers = {
 	),
 	/** Removing an advance already settled by a snapshot. */
 	advanceLinked: http.delete(`${MANAGE}/payrolls/advances/:id`, () =>
-		fail(409, 'ADVANCE_LINKED', 'This advance has been settled by a finalized payroll.'),
+		fail(
+			409,
+			'ADVANCE_LINKED',
+			'This advance has been settled by a finalized payroll.',
+		),
 	),
 	emptyHistory: http.get(`${MANAGE}/payrolls`, () => okPaged([], 1, 20, 0)),
 	noConfigs: http.get(`${MANAGE}/staff/:staffId/payroll-configs`, () => ok([])),

@@ -192,7 +192,9 @@ describe('useFinalizePeriod', () => {
 
 describe('useMarkPayrollPaid', () => {
 	it('settles a finalized snapshot', async () => {
-		const { result } = renderHook(() => useMarkPayrollPaid(10), { wrapper: wrapper() });
+		const { result } = renderHook(() => useMarkPayrollPaid(10), {
+			wrapper: wrapper(),
+		});
 
 		const paid = await result.current.mutateAsync();
 		expect(paid.status).toBe('PAID');

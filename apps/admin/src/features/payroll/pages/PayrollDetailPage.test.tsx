@@ -82,7 +82,9 @@ describe('PayrollDetailPage', () => {
 		resetSession(['payroll.read']);
 		renderDetail(999);
 
-		expect(await screen.findByText(/no payroll figure for this teacher/i)).toBeInTheDocument();
+		expect(
+			await screen.findByText(/no payroll figure for this teacher/i),
+		).toBeInTheDocument();
 	});
 
 	it('shows the frozen snapshot meta once finalized', async () => {

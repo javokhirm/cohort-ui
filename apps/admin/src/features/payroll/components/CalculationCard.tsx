@@ -78,16 +78,17 @@ export function CalculationCard({ period }: { period: PayrollStaffPeriodResponse
 			</div>
 
 			<div className="mt-3.5 flex flex-wrap items-center gap-x-5 gap-y-3">
-				{period.rateType === 'PERCENT' && (
-					<div>
-						<div className="text-xs text-muted-foreground">
-							Revenue base (prorated)
+				{period.rateType === 'PERCENT' &&
+					calculation.revenueBaseTotalExact !== null && (
+						<div>
+							<div className="text-xs text-muted-foreground">
+								Revenue base (prorated)
+							</div>
+							<div className="mt-0.5 text-sm font-semibold tabular-nums">
+								{formatMoney(calculation.revenueBaseTotalExact)}
+							</div>
 						</div>
-						<div className="mt-0.5 text-sm font-semibold tabular-nums">
-							{formatMoney(calculation.revenueBaseTotalExact)}
-						</div>
-					</div>
-				)}
+					)}
 				<div>
 					<div className="text-xs text-muted-foreground">Full precision</div>
 					<div className="mt-0.5 text-sm font-semibold tabular-nums text-muted-foreground">
