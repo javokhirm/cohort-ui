@@ -125,9 +125,15 @@ export const STATUS_MAPS = {
 		published: { tone: 'green', label: 'Published' },
 	},
 	payroll: {
-		draft: { tone: 'slate', label: 'Draft' },
-		approved: { tone: 'blue', label: 'Approved' },
+		live: { tone: 'blue', label: 'Live' },
+		finalized: { tone: 'violet', label: 'Finalized' },
 		paid: { tone: 'green', label: 'Paid' },
+	},
+	/** How a teacher's pay is computed (payroll period rows / pay configs). */
+	payroll_rate: {
+		fixed: { tone: 'indigo', label: 'Fixed' },
+		hourly: { tone: 'amber', label: 'Hourly' },
+		percent: { tone: 'cyan', label: 'Percent' },
 	},
 	notification: {
 		queued: { tone: 'amber', label: 'Queued' },

@@ -19,7 +19,7 @@ describe('manage profile + loadPermissions', () => {
 	it('fetchManageProfile returns the profile with resolved permissions', async () => {
 		const profile = await fetchManageProfile();
 		expect(profile.roles).toContain('OWNER');
-		expect(profile.permissions).toContain('payroll.approve');
+		expect(profile.permissions).toContain('payroll.finalize');
 	});
 
 	it('loadPermissions pushes the resolved codes into the store', async () => {

@@ -1,6 +1,7 @@
 import { MoreHorizontal } from 'lucide-react';
 
 import {
+	Badge,
 	Button,
 	DataTable,
 	DropdownMenu,
@@ -94,8 +95,13 @@ export function ExpenseTable({
 			id: 'vendor',
 			header: 'Vendor / Description',
 			cell: ({ row }) => (
-				<span className="text-sm font-medium">
+				<span className="flex items-center gap-2 text-sm font-medium">
 					{vendorDescriptionLabel(row.original)}
+					{row.original.sourceType !== null && (
+						<Badge variant="secondary" className="text-xs">
+							Payroll
+						</Badge>
+					)}
 				</span>
 			),
 		},
@@ -125,7 +131,13 @@ export function ExpenseTable({
 		columns.push({
 			id: 'actions',
 			header: () => <span className="sr-only">Actions</span>,
-			cell: ({ row }) => <RowActions expense={row.original} onDelete={onDelete} />,
+			// Auto rows (payroll-sourced) are managed from payroll — no actions.
+			cell: ({ row }) =>
+				row.original.sourceType !== null ? (
+					<span className="text-muted-foreground">—</span>
+				) : (
+					<RowActions expense={row.original} onDelete={onDelete} />
+				),
 			size: 56,
 		});
 	}
@@ -136,7 +148,14 @@ export function ExpenseTable({
 			data={expenses}
 			isLoading={isLoading}
 			getRowId={(row) => String(row.id)}
-			onRowClick={onEdit ? (row) => onEdit(row) : undefined}
+			onRowClick={
+				onEdit
+					? (row) => {
+							// Payroll-sourced rows are read-only here.
+							if (row.sourceType === null) onEdit(row);
+						}
+					: undefined
+			}
 			emptyState={
 				<div className="py-16 text-center text-sm text-muted-foreground">
 					No expenses match this filter.

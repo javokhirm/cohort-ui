@@ -10,7 +10,7 @@ describe('permission catalog', () => {
 	it('includes representative codes from each surface', () => {
 		for (const code of [
 			'student.read',
-			'payroll.approve',
+			'payroll.finalize',
 			'invoice.void',
 			'branch.update',
 			'dashboard.read',

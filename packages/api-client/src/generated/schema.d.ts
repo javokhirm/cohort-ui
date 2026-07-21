@@ -1723,50 +1723,15 @@ export interface paths {
 		patch?: never;
 		trace?: never;
 	};
-	'/api/v1/manage/payrolls': {
+	'/api/v1/manage/payrolls/period': {
 		parameters: {
 			query?: never;
 			header?: never;
 			path?: never;
 			cookie?: never;
 		};
-		/** List payroll records (paginated, filterable) */
-		get: operations['PayrollsController_list'];
-		put?: never;
-		/** Create a single payroll record */
-		post: operations['PayrollsController_create'];
-		delete?: never;
-		options?: never;
-		head?: never;
-		patch?: never;
-		trace?: never;
-	};
-	'/api/v1/manage/payrolls/run': {
-		parameters: {
-			query?: never;
-			header?: never;
-			path?: never;
-			cookie?: never;
-		};
-		get?: never;
-		put?: never;
-		/** Generate DRAFT payrolls for all active staff in a period */
-		post: operations['PayrollsController_run'];
-		delete?: never;
-		options?: never;
-		head?: never;
-		patch?: never;
-		trace?: never;
-	};
-	'/api/v1/manage/payrolls/summary': {
-		parameters: {
-			query?: never;
-			header?: never;
-			path?: never;
-			cookie?: never;
-		};
-		/** Payroll totals for the summary strip (true aggregate, not just the current page) */
-		get: operations['PayrollsController_summary'];
+		/** The payroll period view: live-computed rows for the open month merged with finalized snapshots */
+		get: operations['PayrollsController_period'];
 		put?: never;
 		post?: never;
 		delete?: never;
@@ -1775,15 +1740,84 @@ export interface paths {
 		patch?: never;
 		trace?: never;
 	};
-	'/api/v1/manage/payrolls/preview': {
+	'/api/v1/manage/payrolls/period/{staffId}': {
 		parameters: {
 			query?: never;
 			header?: never;
 			path?: never;
 			cookie?: never;
 		};
-		/** Dry-run of POST /payrolls: computed gross, breakdown and already-paid days that would be skipped */
-		get: operations['PayrollsController_preview'];
+		/** One staff member's month: calculation story, per-student breakdown and advances (live or frozen) */
+		get: operations['PayrollsController_staffPeriod'];
+		put?: never;
+		post?: never;
+		delete?: never;
+		options?: never;
+		head?: never;
+		patch?: never;
+		trace?: never;
+	};
+	'/api/v1/manage/payrolls/finalize': {
+		parameters: {
+			query?: never;
+			header?: never;
+			path?: never;
+			cookie?: never;
+		};
+		get?: never;
+		put?: never;
+		/** Finalize a month: persist one frozen snapshot per staff member and link advances */
+		post: operations['PayrollsController_finalize'];
+		delete?: never;
+		options?: never;
+		head?: never;
+		patch?: never;
+		trace?: never;
+	};
+	'/api/v1/manage/payrolls/advances': {
+		parameters: {
+			query?: never;
+			header?: never;
+			path?: never;
+			cookie?: never;
+		};
+		/** List mid-month salary advances */
+		get: operations['PayrollsController_listAdvances'];
+		put?: never;
+		/** Record a mid-month salary advance (also writes its SALARY expense) */
+		post: operations['PayrollsController_createAdvance'];
+		delete?: never;
+		options?: never;
+		head?: never;
+		patch?: never;
+		trace?: never;
+	};
+	'/api/v1/manage/payrolls/advances/{id}': {
+		parameters: {
+			query?: never;
+			header?: never;
+			path?: never;
+			cookie?: never;
+		};
+		get?: never;
+		put?: never;
+		post?: never;
+		/** Remove an unlinked advance (soft), together with its mirrored expense */
+		delete: operations['PayrollsController_removeAdvance'];
+		options?: never;
+		head?: never;
+		patch?: never;
+		trace?: never;
+	};
+	'/api/v1/manage/payrolls': {
+		parameters: {
+			query?: never;
+			header?: never;
+			path?: never;
+			cookie?: never;
+		};
+		/** Payslip history: persisted snapshots only (paginated) */
+		get: operations['PayrollsController_history'];
 		put?: never;
 		post?: never;
 		delete?: never;
@@ -1799,28 +1833,10 @@ export interface paths {
 			path?: never;
 			cookie?: never;
 		};
-		/** Get a payroll record */
+		/** Deep link: a snapshot id → its staff-period view */
 		get: operations['PayrollsController_findOne'];
 		put?: never;
 		post?: never;
-		delete?: never;
-		options?: never;
-		head?: never;
-		/** Update a DRAFT payroll record */
-		patch: operations['PayrollsController_update'];
-		trace?: never;
-	};
-	'/api/v1/manage/payrolls/{id}/approve': {
-		parameters: {
-			query?: never;
-			header?: never;
-			path?: never;
-			cookie?: never;
-		};
-		get?: never;
-		put?: never;
-		/** Approve a payroll record (DRAFT → APPROVED) */
-		post: operations['PayrollsController_approve'];
 		delete?: never;
 		options?: never;
 		head?: never;
@@ -1836,12 +1852,65 @@ export interface paths {
 		};
 		get?: never;
 		put?: never;
-		/** Mark a payroll record paid (APPROVED → PAID) */
+		/** Mark a snapshot paid (FINALIZED → PAID); writes the cash-basis SALARY expense for the net */
 		post: operations['PayrollsController_markPaid'];
 		delete?: never;
 		options?: never;
 		head?: never;
 		patch?: never;
+		trace?: never;
+	};
+	'/api/v1/manage/payrolls/{id}/unfinalize': {
+		parameters: {
+			query?: never;
+			header?: never;
+			path?: never;
+			cookie?: never;
+		};
+		get?: never;
+		put?: never;
+		/** Reopen a FINALIZED snapshot (soft-delete + unlink advances); blocked once PAID */
+		post: operations['PayrollsController_unfinalize'];
+		delete?: never;
+		options?: never;
+		head?: never;
+		patch?: never;
+		trace?: never;
+	};
+	'/api/v1/manage/staff/{staffId}/payroll-configs': {
+		parameters: {
+			query?: never;
+			header?: never;
+			path?: never;
+			cookie?: never;
+		};
+		/** A staff member's payroll config history, newest first */
+		get: operations['StaffPayrollConfigsController_list'];
+		put?: never;
+		/** Open a new pay config effective from a day (closes the previous one) */
+		post: operations['StaffPayrollConfigsController_create'];
+		delete?: never;
+		options?: never;
+		head?: never;
+		patch?: never;
+		trace?: never;
+	};
+	'/api/v1/manage/payroll-configs/{id}': {
+		parameters: {
+			query?: never;
+			header?: never;
+			path?: never;
+			cookie?: never;
+		};
+		get?: never;
+		put?: never;
+		post?: never;
+		/** Delete the newest unreferenced config and reopen its predecessor */
+		delete: operations['StaffPayrollConfigsController_remove'];
+		options?: never;
+		head?: never;
+		/** Edit an unreferenced config (amounts or start day) */
+		patch: operations['StaffPayrollConfigsController_update'];
 		trace?: never;
 	};
 	'/api/v1/manage/expenses/summary': {
@@ -2149,6 +2218,40 @@ export interface paths {
 		};
 		/** List the branches of the groups I teach */
 		get: operations['MyBranchesController_list'];
+		put?: never;
+		post?: never;
+		delete?: never;
+		options?: never;
+		head?: never;
+		patch?: never;
+		trace?: never;
+	};
+	'/api/v1/teach/payroll/periods': {
+		parameters: {
+			query?: never;
+			header?: never;
+			path?: never;
+			cookie?: never;
+		};
+		/** My recent payroll months: finalized snapshots plus the live current month */
+		get: operations['MyPayrollController_periods'];
+		put?: never;
+		post?: never;
+		delete?: never;
+		options?: never;
+		head?: never;
+		patch?: never;
+		trace?: never;
+	};
+	'/api/v1/teach/payroll': {
+		parameters: {
+			query?: never;
+			header?: never;
+			path?: never;
+			cookie?: never;
+		};
+		/** My month: calculation story, per-student breakdown and advances (live until finalized) */
+		get: operations['MyPayrollController_month'];
 		put?: never;
 		post?: never;
 		delete?: never;
@@ -2616,6 +2719,14 @@ export interface components {
 		};
 		UpdateStudentDto: {
 			branchId?: number;
+			firstName?: string;
+			lastName?: string;
+			/**
+			 * @description E.164 phone number
+			 * @example +998901234567
+			 */
+			phone?: string;
+			email?: string;
 			/**
 			 * @description YYYY-MM-DD
 			 * @example 2008-05-01
@@ -2691,15 +2802,6 @@ export interface components {
 			hireDate?: string;
 			/** @enum {string} */
 			employmentType?: 'FULL_TIME' | 'PART_TIME' | 'CONTRACTOR';
-			baseSalary?: number;
-			/**
-			 * @description How auto-calculated payroll derives the gross: FIXED (baseSalary / hourly) or PERCENT (share of group fee-plan revenue).
-			 * @default FIXED
-			 * @enum {string}
-			 */
-			payrollType: 'FIXED' | 'PERCENT';
-			/** @description Revenue-share percentage. Required when payrollType is PERCENT. */
-			payrollPercent?: number;
 			/** @description Default: TEACHER. Also ADMIN or MANAGER. */
 			roleName?: string;
 			/** @description The staff member's initial login password. Ignored if the phone is already a user. */
@@ -2707,6 +2809,14 @@ export interface components {
 		};
 		UpdateStaffDto: {
 			branchId?: number;
+			firstName?: string;
+			lastName?: string;
+			/**
+			 * @description E.164 phone number
+			 * @example +998901234567
+			 */
+			phone?: string;
+			email?: string;
 			/**
 			 * @description Job title
 			 * @example Senior IELTS Instructor
@@ -2722,15 +2832,6 @@ export interface components {
 			specialization?: string[];
 			/** @enum {string} */
 			employmentType?: 'FULL_TIME' | 'PART_TIME' | 'CONTRACTOR';
-			baseSalary?: number;
-			/**
-			 * @description How auto-calculated payroll derives the gross: FIXED (baseSalary / hourly) or PERCENT (share of group fee-plan revenue).
-			 * @default FIXED
-			 * @enum {string}
-			 */
-			payrollType: 'FIXED' | 'PERCENT';
-			/** @description Revenue-share percentage. Required when payrollType is PERCENT. */
-			payrollPercent?: number;
 			/** @description The staff member's initial login password. Ignored if the phone is already a user. */
 			password?: string;
 			/** @enum {string} */
@@ -3079,56 +3180,54 @@ export interface components {
 			 */
 			validUntil?: string | null;
 		};
-		PayrollBreakdownDto: {
-			/** @example 40 */
-			hoursTaught?: number;
-			/** @example 50000 */
-			rate?: number;
-			/** @example 100000 */
-			bonuses?: number;
-		};
-		CreatePayrollDto: {
-			branchId: number;
-			/** @description FK to staff.id */
-			staffId: number;
+		FinalizePeriodDto: {
 			/**
-			 * @description YYYY-MM-DD
-			 * @example 2026-06-01
+			 * @description Calendar month, YYYY-MM
+			 * @example 2026-07
 			 */
-			periodStart: string;
-			/**
-			 * @description YYYY-MM-DD
-			 * @example 2026-06-30
-			 */
-			periodEnd: string;
-			/** @default true */
-			autoCalculate: boolean;
-			/** @description Required when autoCalculate is false */
-			grossAmount?: number;
-			/** @default 0 */
-			deductions: number;
-			breakdown?: components['schemas']['PayrollBreakdownDto'];
-		};
-		RunPayrollDto: {
-			/** @description Restrict the run to one branch */
+			month: string;
+			/** @description Finalize only this branch; omitted = every accessible branch */
 			branchId?: number;
-			/**
-			 * @description YYYY-MM-DD
-			 * @example 2026-06-01
-			 */
-			periodStart: string;
-			/**
-			 * @description YYYY-MM-DD
-			 * @example 2026-06-30
-			 */
-			periodEnd: string;
-			/** @default true */
-			autoCalculate: boolean;
 		};
-		UpdatePayrollDto: {
-			grossAmount?: number;
-			deductions?: number;
-			breakdown?: components['schemas']['PayrollBreakdownDto'];
+		CreateAdvanceDto: {
+			staffId: number;
+			branchId: number;
+			/** @description Cash drawn, UZS. Must be positive. */
+			amount: number;
+			/**
+			 * @description Free-text reason
+			 * @example cash advance
+			 */
+			label?: string;
+			/**
+			 * @description YYYY-MM-DD
+			 * @example 2026-07-15
+			 */
+			advanceDate: string;
+		};
+		CreatePayrollConfigDto: {
+			/** @enum {string} */
+			payrollType: 'FIXED' | 'PERCENT';
+			/** @description Monthly base salary, UZS. Required for FIXED. */
+			baseSalary?: number;
+			/** @description Revenue share % in (0, 100]. Required for PERCENT. */
+			payrollPercent?: number;
+			/**
+			 * @description First day this config prices
+			 * @example 2026-08-01
+			 */
+			effectiveFrom: string;
+		};
+		UpdatePayrollConfigDto: {
+			/** @description Monthly base salary, UZS */
+			baseSalary?: number;
+			/** @description Revenue share % in (0, 100] */
+			payrollPercent?: number;
+			/**
+			 * @description YYYY-MM-DD
+			 * @example 2026-08-01
+			 */
+			effectiveFrom?: string;
 		};
 		CreateExpenseDto: {
 			branchId: number;
@@ -5639,6 +5738,8 @@ export interface operations {
 				/** @description Filter to these branch ids (comma-separated or repeated); must be within your branch scope */
 				branchIds?: number[];
 				studentId?: number;
+				/** @description Filter to invoices whose originating enrollment is in this group. One-off invoices (no enrollment) never match. */
+				groupId?: number;
 				status?: 'DRAFT' | 'UNPAID' | 'PARTIAL' | 'PAID' | 'OVERDUE' | 'VOID';
 				/** @description Issue-date range start (YYYY-MM-DD) */
 				from?: string;
@@ -5713,6 +5814,8 @@ export interface operations {
 				/** @description Filter to these branch ids (comma-separated or repeated); must be within your branch scope */
 				branchIds?: number[];
 				studentId?: number;
+				/** @description Filter to invoices whose originating enrollment is in this group. One-off invoices (no enrollment) never match. */
+				groupId?: number;
 				status?: 'DRAFT' | 'UNPAID' | 'PARTIAL' | 'PAID' | 'OVERDUE' | 'VOID';
 				/** @description Issue-date range start (YYYY-MM-DD) */
 				from?: string;
@@ -6157,7 +6260,137 @@ export interface operations {
 			};
 		};
 	};
-	PayrollsController_list: {
+	PayrollsController_period: {
+		parameters: {
+			query: {
+				/** @description Calendar month, YYYY-MM */
+				month: string;
+				/** @description Filter to these branch ids (comma-separated or repeated); must be within your branch scope */
+				branchIds?: number[];
+				staffId?: number;
+				status?: 'LIVE' | 'FINALIZED' | 'PAID';
+			};
+			header?: never;
+			path?: never;
+			cookie?: never;
+		};
+		requestBody?: never;
+		responses: {
+			200: {
+				headers: {
+					[name: string]: unknown;
+				};
+				content?: never;
+			};
+		};
+	};
+	PayrollsController_staffPeriod: {
+		parameters: {
+			query: {
+				/** @description Calendar month, YYYY-MM */
+				month: string;
+			};
+			header?: never;
+			path: {
+				staffId: number;
+			};
+			cookie?: never;
+		};
+		requestBody?: never;
+		responses: {
+			200: {
+				headers: {
+					[name: string]: unknown;
+				};
+				content?: never;
+			};
+		};
+	};
+	PayrollsController_finalize: {
+		parameters: {
+			query?: never;
+			header?: never;
+			path?: never;
+			cookie?: never;
+		};
+		requestBody: {
+			content: {
+				'application/json': components['schemas']['FinalizePeriodDto'];
+			};
+		};
+		responses: {
+			200: {
+				headers: {
+					[name: string]: unknown;
+				};
+				content?: never;
+			};
+		};
+	};
+	PayrollsController_listAdvances: {
+		parameters: {
+			query?: {
+				/** @description Calendar month, YYYY-MM */
+				month?: string;
+				staffId?: number;
+				/** @description Filter to these branch ids (comma-separated or repeated); must be within your branch scope */
+				branchIds?: number[];
+			};
+			header?: never;
+			path?: never;
+			cookie?: never;
+		};
+		requestBody?: never;
+		responses: {
+			200: {
+				headers: {
+					[name: string]: unknown;
+				};
+				content?: never;
+			};
+		};
+	};
+	PayrollsController_createAdvance: {
+		parameters: {
+			query?: never;
+			header?: never;
+			path?: never;
+			cookie?: never;
+		};
+		requestBody: {
+			content: {
+				'application/json': components['schemas']['CreateAdvanceDto'];
+			};
+		};
+		responses: {
+			201: {
+				headers: {
+					[name: string]: unknown;
+				};
+				content?: never;
+			};
+		};
+	};
+	PayrollsController_removeAdvance: {
+		parameters: {
+			query?: never;
+			header?: never;
+			path: {
+				id: number;
+			};
+			cookie?: never;
+		};
+		requestBody?: never;
+		responses: {
+			204: {
+				headers: {
+					[name: string]: unknown;
+				};
+				content?: never;
+			};
+		};
+	};
+	PayrollsController_history: {
 		parameters: {
 			query?: {
 				page?: number;
@@ -6165,103 +6398,11 @@ export interface operations {
 				/** @description Filter to these branch ids (comma-separated or repeated); must be within your branch scope */
 				branchIds?: number[];
 				staffId?: number;
-				status?: 'DRAFT' | 'APPROVED' | 'PAID';
-				/** @description YYYY-MM-DD */
-				periodFrom?: string;
-				/** @description YYYY-MM-DD */
-				periodTo?: string;
-			};
-			header?: never;
-			path?: never;
-			cookie?: never;
-		};
-		requestBody?: never;
-		responses: {
-			200: {
-				headers: {
-					[name: string]: unknown;
-				};
-				content?: never;
-			};
-		};
-	};
-	PayrollsController_create: {
-		parameters: {
-			query?: never;
-			header?: never;
-			path?: never;
-			cookie?: never;
-		};
-		requestBody: {
-			content: {
-				'application/json': components['schemas']['CreatePayrollDto'];
-			};
-		};
-		responses: {
-			201: {
-				headers: {
-					[name: string]: unknown;
-				};
-				content?: never;
-			};
-		};
-	};
-	PayrollsController_run: {
-		parameters: {
-			query?: never;
-			header?: never;
-			path?: never;
-			cookie?: never;
-		};
-		requestBody: {
-			content: {
-				'application/json': components['schemas']['RunPayrollDto'];
-			};
-		};
-		responses: {
-			201: {
-				headers: {
-					[name: string]: unknown;
-				};
-				content?: never;
-			};
-		};
-	};
-	PayrollsController_summary: {
-		parameters: {
-			query?: {
-				/** @description Filter to these branch ids (comma-separated or repeated); must be within your branch scope */
-				branchIds?: number[];
-				staffId?: number;
-				status?: 'DRAFT' | 'APPROVED' | 'PAID';
-				/** @description YYYY-MM-DD */
-				periodFrom?: string;
-				/** @description YYYY-MM-DD */
-				periodTo?: string;
-			};
-			header?: never;
-			path?: never;
-			cookie?: never;
-		};
-		requestBody?: never;
-		responses: {
-			200: {
-				headers: {
-					[name: string]: unknown;
-				};
-				content?: never;
-			};
-		};
-	};
-	PayrollsController_preview: {
-		parameters: {
-			query: {
-				/** @description FK to staff.id */
-				staffId: number;
-				/** @description YYYY-MM-DD */
-				periodStart: string;
-				/** @description YYYY-MM-DD */
-				periodEnd: string;
+				status?: 'FINALIZED' | 'PAID';
+				/** @description YYYY-MM, inclusive */
+				monthFrom?: string;
+				/** @description YYYY-MM, inclusive */
+				monthTo?: string;
 			};
 			header?: never;
 			path?: never;
@@ -6296,48 +6437,6 @@ export interface operations {
 			};
 		};
 	};
-	PayrollsController_update: {
-		parameters: {
-			query?: never;
-			header?: never;
-			path: {
-				id: number;
-			};
-			cookie?: never;
-		};
-		requestBody: {
-			content: {
-				'application/json': components['schemas']['UpdatePayrollDto'];
-			};
-		};
-		responses: {
-			200: {
-				headers: {
-					[name: string]: unknown;
-				};
-				content?: never;
-			};
-		};
-	};
-	PayrollsController_approve: {
-		parameters: {
-			query?: never;
-			header?: never;
-			path: {
-				id: number;
-			};
-			cookie?: never;
-		};
-		requestBody?: never;
-		responses: {
-			200: {
-				headers: {
-					[name: string]: unknown;
-				};
-				content?: never;
-			};
-		};
-	};
 	PayrollsController_markPaid: {
 		parameters: {
 			query?: never;
@@ -6348,6 +6447,109 @@ export interface operations {
 			cookie?: never;
 		};
 		requestBody?: never;
+		responses: {
+			200: {
+				headers: {
+					[name: string]: unknown;
+				};
+				content?: never;
+			};
+		};
+	};
+	PayrollsController_unfinalize: {
+		parameters: {
+			query?: never;
+			header?: never;
+			path: {
+				id: number;
+			};
+			cookie?: never;
+		};
+		requestBody?: never;
+		responses: {
+			204: {
+				headers: {
+					[name: string]: unknown;
+				};
+				content?: never;
+			};
+		};
+	};
+	StaffPayrollConfigsController_list: {
+		parameters: {
+			query?: never;
+			header?: never;
+			path: {
+				staffId: number;
+			};
+			cookie?: never;
+		};
+		requestBody?: never;
+		responses: {
+			200: {
+				headers: {
+					[name: string]: unknown;
+				};
+				content?: never;
+			};
+		};
+	};
+	StaffPayrollConfigsController_create: {
+		parameters: {
+			query?: never;
+			header?: never;
+			path: {
+				staffId: number;
+			};
+			cookie?: never;
+		};
+		requestBody: {
+			content: {
+				'application/json': components['schemas']['CreatePayrollConfigDto'];
+			};
+		};
+		responses: {
+			201: {
+				headers: {
+					[name: string]: unknown;
+				};
+				content?: never;
+			};
+		};
+	};
+	StaffPayrollConfigsController_remove: {
+		parameters: {
+			query?: never;
+			header?: never;
+			path: {
+				id: number;
+			};
+			cookie?: never;
+		};
+		requestBody?: never;
+		responses: {
+			204: {
+				headers: {
+					[name: string]: unknown;
+				};
+				content?: never;
+			};
+		};
+	};
+	StaffPayrollConfigsController_update: {
+		parameters: {
+			query?: never;
+			header?: never;
+			path: {
+				id: number;
+			};
+			cookie?: never;
+		};
+		requestBody: {
+			content: {
+				'application/json': components['schemas']['UpdatePayrollConfigDto'];
+			};
+		};
 		responses: {
 			200: {
 				headers: {
@@ -6901,6 +7103,45 @@ export interface operations {
 	MyBranchesController_list: {
 		parameters: {
 			query?: never;
+			header?: never;
+			path?: never;
+			cookie?: never;
+		};
+		requestBody?: never;
+		responses: {
+			200: {
+				headers: {
+					[name: string]: unknown;
+				};
+				content?: never;
+			};
+		};
+	};
+	MyPayrollController_periods: {
+		parameters: {
+			query?: {
+				limit?: number;
+			};
+			header?: never;
+			path?: never;
+			cookie?: never;
+		};
+		requestBody?: never;
+		responses: {
+			200: {
+				headers: {
+					[name: string]: unknown;
+				};
+				content?: never;
+			};
+		};
+	};
+	MyPayrollController_month: {
+		parameters: {
+			query: {
+				/** @description Calendar month, YYYY-MM */
+				month: string;
+			};
 			header?: never;
 			path?: never;
 			cookie?: never;

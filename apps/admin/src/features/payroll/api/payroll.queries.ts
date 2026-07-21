@@ -6,170 +6,255 @@ import type { PaginatedResult } from '@repo/api-client';
 
 import {
 	payrollKeys,
-	type PayrollListFilters,
-	type PayrollStatus,
-	type PayrollSummaryFilters,
+	type AdvanceListFilters,
+	type PayrollHistoryFilters,
+	type PayrollPeriodFilters,
+	type PayrollPeriodStatus,
+	type PayrollRowStatus,
+	type RateType,
 } from './keys';
 
 // ─── Domain types ────────────────────────────────────────────────────────────
-// Hand-written to match the backend contract for the `/manage` payroll endpoints.
-// The generated `@repo/api-client` OpenAPI types are stale and do not yet include
-// payroll; regenerate later via the api-client `gen:api` script and reconcile.
+// Hand-written to match the backend contract for the period-snapshot payroll
+// endpoints (api-reference §3.17), mirroring the generated OpenAPI shapes.
 
-/** Days of the requested period excluded because a live payroll already covers them. */
-export interface PayrollSkippedRange {
-	start: string;
-	end: string;
-	reason: 'ALREADY_PAID';
-	payrollId?: number;
+/** One teacher's row in the period view (`GET /payrolls/period`). */
+export interface PayrollPeriodRow {
+	staffId: number;
+	staffCode: string;
+	staffName: string;
+	position: string | null;
+	branchId: number;
+	rateType: RateType;
+	/** Revenue-share percentage; set only for `PERCENT` teachers. */
+	percent: number | null;
+	sessionsTaught: number;
+	studentsCount: number;
+	hoursTaught: number;
+	grossAmount: number;
+	advancesTotal: number;
+	netAmount: number;
+	/** Net was clamped to 0 — advances exceed the computed gross. */
+	advancesExceedGross: boolean;
+	status: PayrollRowStatus;
+	/** Set once the row is finalized into a snapshot. */
+	payrollId: number | null;
+	finalizedAt: string | null;
+	paidAt: string | null;
 }
 
-/** One student's contribution to a PERCENT payroll gross. */
-export interface PercentPayrollLine {
+export interface PayrollPeriodSummary {
+	currency: string;
+	totalComputed: number;
+	totalAdvances: number;
+	totalNetPayable: number;
+	staffCount: number;
+}
+
+/** `GET /payrolls/period` — the whole month, computed on each load. */
+export interface PayrollPeriodResponse {
+	month: string;
+	periodStart: string;
+	periodEnd: string;
+	periodStatus: PayrollPeriodStatus;
+	summary: PayrollPeriodSummary;
+	rows: PayrollPeriodRow[];
+	/** Staff with no active payroll config this month (not in `rows`). */
+	excludedCount: number;
+}
+
+/** One pay-config window that applied during the period. */
+export interface PayrollBreakdownSegment {
+	payrollConfigId: number;
+	payrollType: 'FIXED' | 'PERCENT';
+	baseSalary: number | null;
+	payrollPercent: number | null;
+	from: string;
+	to: string;
+}
+
+/** Server-computed inputs of the gross figure (breakdown v2). */
+export interface PayrollCalculation {
+	percent: number | null;
+	baseSalary: number | null;
+	hourlyRate: number | null;
+	sessionsTaught: number;
+	hoursTaught: number;
+	studentsCount: number;
+	/** Full-precision prorated revenue base; null for FIXED/HOURLY. */
+	revenueBaseTotalExact: number | null;
+	/** Paid-days factor when configs cover only part of the month; null otherwise. */
+	prorationFactor: number | null;
+	/** Full-precision gross before rounding. */
+	grossExact: number;
+	gross: number;
+	rounding: 'BANKERS_2DP';
+}
+
+/** One student's audit line in the breakdown. */
+export interface PayrollBreakdownLine {
 	groupId: number;
 	groupName: string;
 	enrollmentId: number;
 	studentId: number;
 	studentName: string;
-	feePlanId: number;
-	feePlanAmount: number;
-	billingCycle: 'MONTHLY' | 'PER_SESSION';
-	sessionsCounted: number;
-	sessionsTotal: number;
-	earnings: number;
-	amount: number;
+	feePlanId: number | null;
+	feePlanAmount: number | null;
+	billingCycle: 'MONTHLY' | 'PER_SESSION' | null;
+	monthlyTuition: number | null;
+	sessionsTaught: number;
+	/** The student's completed sessions across ALL teachers (the denominator). */
+	sessionsTotalCompleted: number;
+	/** `sessionsTaught / sessionsTotalCompleted`; null for PER_SESSION plans. */
+	prorationFactor: number | null;
+	hours: number;
+	revenueBaseExact: number;
+	revenueBase: number;
+	/** The teacher's cut; null on audit-only lines (FIXED/HOURLY teachers). */
+	shareExact: number | null;
+	share: number | null;
 }
 
-/** Legacy/FIXED breakdown — rows without a `type` are FIXED. */
-export interface FixedPayrollBreakdown {
-	type?: 'FIXED';
-	hoursTaught?: number;
-	rate?: number;
-	bonuses?: number;
-	/** Set only when a FULL_TIME salary was prorated around already-paid days. */
-	proratedFactor?: number;
-	skippedRanges?: PayrollSkippedRange[];
+export interface PayrollBreakdown {
+	version: 2;
+	rateType: RateType;
+	segments: PayrollBreakdownSegment[];
+	calculation: PayrollCalculation;
+	lines: PayrollBreakdownLine[];
 }
 
-/** Server-computed breakdown for PERCENT-paid teachers. */
-export interface PercentPayrollBreakdown {
-	type: 'PERCENT';
-	percent: number;
-	lines: PercentPayrollLine[];
-	bonuses?: number;
-	skippedRanges?: PayrollSkippedRange[];
-}
-
-export type PayrollBreakdown = FixedPayrollBreakdown | PercentPayrollBreakdown;
-
-/** `GET /payrolls/preview` — dry-run of create; nothing is written. */
-export interface PayrollPreviewResponse {
+/** A mid-month advance (salary drawn before the run). */
+export interface PayrollAdvance {
+	id: number;
 	staffId: number;
-	payrollType: 'FIXED' | 'PERCENT';
+	branchId: number;
+	amount: number;
+	label: string | null;
+	advanceDate: string;
+	/** Set once the advance is locked into a finalized snapshot. */
+	payrollId: number | null;
+	removable: boolean;
+	createdAt: string;
+}
+
+/**
+ * One staff member's full period figure — `GET /payrolls/period/:staffId`,
+ * `GET /payrolls/:id`, and the `mark-paid` response all share this shape.
+ */
+export interface PayrollStaffPeriodResponse {
+	month: string;
 	periodStart: string;
 	periodEnd: string;
-	/** Every day already covered by live payrolls — creation would 409. */
-	fullyCovered: boolean;
-	grossAmount: number;
-	breakdown: PayrollBreakdown | null;
-	skippedRanges: PayrollSkippedRange[];
-}
-
-/** `GET /payrolls/summary` — true aggregate over every matching payroll (not just a page). */
-export interface PayrollSummaryResponse {
-	currency: string;
-	totalGross: number;
-	totalDeductions: number;
-	totalNetPayable: number;
-}
-
-export interface PayrollResponse {
-	id: number;
-	branchId: number;
 	staffId: number;
-	staff: {
-		id: number;
-		staffCode: string;
-		firstName: string;
-		lastName: string;
-	} | null;
+	staffCode: string;
+	staffName: string;
+	position: string | null;
+	branchId: number;
+	status: PayrollRowStatus;
+	rateType: RateType;
+	grossAmount: number;
+	advancesTotal: number;
+	netAmount: number;
+	advancesExceedGross: boolean;
+	breakdown: PayrollBreakdown;
+	advances: PayrollAdvance[];
+	payrollId: number | null;
+	finalizedAt: string | null;
+	finalizedByName: string | null;
+	paidAt: string | null;
+}
+
+/** `GET /payrolls` row — finalized/paid payslip history. */
+export interface PayrollHistoryRow {
+	id: number;
+	staffId: number;
+	staffCode: string;
+	staffName: string;
+	branchId: number;
+	month: string;
 	periodStart: string;
 	periodEnd: string;
 	grossAmount: number;
 	deductions: number;
 	netAmount: number;
-	status: PayrollStatus;
-	breakdown: PayrollBreakdown | null;
-	approvedByUserId: number | null;
+	status: 'FINALIZED' | 'PAID';
+	finalizedAt: string | null;
 	paidAt: string | null;
-	createdAt: string;
-	updatedAt: string;
 }
 
 // ─── Queries ─────────────────────────────────────────────────────────────────
 
-export function usePayrollList(filters: PayrollListFilters) {
-	// The global branch selection is part of the effective filters (and thus the
-	// query key), so changing the selector refetches. An explicit caller value
-	// still wins.
+/**
+ * The period view for a month — computed on each load so live rows track
+ * completed sessions: `staleTime: 0` + refetch on focus, with the previous
+ * month's rows held as placeholder while stepping periods.
+ *
+ * The global branch selection is part of the effective filters (and thus the
+ * query key), so changing the selector refetches. An explicit caller value
+ * still wins.
+ */
+export function usePayrollPeriod(month: string, filters: PayrollPeriodFilters = {}) {
 	const activeBranchIds = useActiveBranchIds();
-	const effectiveFilters: PayrollListFilters = {
+	const effectiveFilters: PayrollPeriodFilters = {
 		...filters,
 		branchIds: filters.branchIds ?? activeBranchIds,
 	};
 	return useQuery({
-		queryKey: payrollKeys.list(effectiveFilters),
+		queryKey: payrollKeys.period(month, effectiveFilters),
 		queryFn: () =>
-			manageApi.getPaginated<PayrollResponse>('/payrolls', {
-				params: effectiveFilters,
-			}) as Promise<PaginatedResult<PayrollResponse>>,
+			manageApi.get<PayrollPeriodResponse>('/payrolls/period', {
+				params: { month, ...effectiveFilters },
+			}),
+		enabled: month.length > 0,
+		staleTime: 0,
+		refetchOnWindowFocus: true,
 		placeholderData: keepPreviousData,
 	});
 }
 
 /**
- * Totals for the summary strip above the payroll list — the same filters as
- * the list (branch scope, status, staff, period), minus pagination, so the
- * strip reads as "totals for what's on screen".
+ * One staff member's live/snapshot figure for a month — the detail page.
+ * Same freshness policy as the period list: live rows recompute on each load.
  */
-export function usePayrollSummary(filters: PayrollSummaryFilters = {}) {
-	const activeBranchIds = useActiveBranchIds();
-	const effectiveFilters: PayrollSummaryFilters = {
-		...filters,
-		branchIds: filters.branchIds ?? activeBranchIds,
-	};
+export function usePayrollStaffPeriod(month: string, staffId: number) {
 	return useQuery({
-		queryKey: payrollKeys.summary(effectiveFilters),
+		queryKey: payrollKeys.periodDetail(month, staffId),
 		queryFn: () =>
-			manageApi.get<PayrollSummaryResponse>('/payrolls/summary', {
-				params: effectiveFilters,
+			manageApi.get<PayrollStaffPeriodResponse>(`/payrolls/period/${staffId}`, {
+				params: { month },
 			}),
+		enabled: month.length > 0 && staffId > 0,
+		staleTime: 0,
+		refetchOnWindowFocus: true,
+	});
+}
+
+/** Finalized/paid payslip history (e.g. the staff detail Payroll tab). */
+export function usePayrollHistory(filters: PayrollHistoryFilters = {}) {
+	return useQuery({
+		queryKey: payrollKeys.history(filters),
+		queryFn: () =>
+			manageApi.getPaginated<PayrollHistoryRow>('/payrolls', {
+				params: filters,
+			}) as Promise<PaginatedResult<PayrollHistoryRow>>,
 		placeholderData: keepPreviousData,
 	});
 }
 
+/** A finalized snapshot by payroll id (deep links from history/expenses). */
 export function usePayroll(id: number) {
 	return useQuery({
 		queryKey: payrollKeys.detail(id),
-		queryFn: () => manageApi.get<PayrollResponse>(`/payrolls/${id}`),
+		queryFn: () => manageApi.get<PayrollStaffPeriodResponse>(`/payrolls/${id}`),
 		enabled: id > 0,
 	});
 }
 
-/**
- * Dry-run of `POST /payrolls` for the create form: the would-be gross, the
- * per-student lines (PERCENT) and any already-paid days that will be skipped.
- * Enabled only once staff + a valid period are chosen.
- */
-export function usePayrollPreview(
-	params: { staffId?: number; periodStart?: string; periodEnd?: string },
-	enabled: boolean,
-) {
+/** Mid-month advances for a filter window (list/reporting use). */
+export function usePayrollAdvances(filters: AdvanceListFilters = {}) {
 	return useQuery({
-		queryKey: payrollKeys.preview(params),
+		queryKey: payrollKeys.advances(filters),
 		queryFn: () =>
-			manageApi.get<PayrollPreviewResponse>('/payrolls/preview', { params }),
-		enabled,
-		placeholderData: keepPreviousData,
+			manageApi.get<PayrollAdvance[]>('/payrolls/advances', { params: filters }),
 	});
 }

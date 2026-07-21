@@ -1,14 +1,12 @@
 import { useState } from 'react';
 import { useNavigate, useSearch } from '@tanstack/react-router';
-import { Plus, Wallet, X } from 'lucide-react';
+import { Check, Download, Lock } from 'lucide-react';
 
 import {
 	Button,
 	Card,
-	DatePicker,
 	Label,
 	PageHeader,
-	Pagination,
 	SearchFilterBar,
 	Select,
 	SelectContent,
@@ -19,82 +17,58 @@ import {
 } from '@repo/ui';
 import { formatMoney } from '@repo/utils';
 
-import { useAuth } from '@/features/auth/hooks';
+import { usePermissions } from '@/features/auth/hooks';
 import { useStaffList } from '@/features/hr/api/staff.queries';
+import { useActiveBranchIds } from '@/store/branchStore';
 
-import { usePayrollList, usePayrollSummary } from '../api/payroll.queries';
-import type {
-	PayrollListFilters,
-	PayrollStatus,
-	PayrollSummaryFilters,
-} from '../api/keys';
-import { PayrollTable } from '../components/PayrollTable';
-import { PayrollForm } from '../components/PayrollForm';
-import { RunPayrollDialog } from '../components/RunPayrollDialog';
+import { usePayrollPeriod } from '../api/payroll.queries';
+import type { PayrollRowStatus } from '../api/keys';
+import { FinalizePeriodDialog } from '../components/FinalizePeriodDialog';
+import { PayrollPeriodTable } from '../components/PayrollPeriodTable';
+import { PeriodSelector } from '../components/PeriodSelector';
+import { buildPayrollCsv, downloadCsv } from '../lib/export-csv';
+import { currentMonth, formatMonthLabel } from '../lib/month';
 
-const PAGE_SIZE = 20;
 const ALL_STAFF = 'all';
 
-const STATUS_FILTERS: { value: PayrollStatus | undefined; label: string }[] = [
+const STATUS_FILTERS: { value: PayrollRowStatus | undefined; label: string }[] = [
 	{ value: undefined, label: 'All' },
-	{ value: 'DRAFT', label: 'Draft' },
-	{ value: 'APPROVED', label: 'Approved' },
+	{ value: 'LIVE', label: 'Live' },
+	{ value: 'FINALIZED', label: 'Finalized' },
 	{ value: 'PAID', label: 'Paid' },
 ];
 
 export function PayrollPage() {
 	const navigate = useNavigate({ from: '/payroll' });
-	const {
-		page = 1,
-		status,
-		staffId,
-		periodFrom,
-		periodTo,
-	} = useSearch({
-		from: '/_authed/payroll',
-	});
-	const { can } = useAuth();
-	const canRun = can('payroll.create');
-	const canApprove = can('payroll.approve');
-	const canPay = can('payroll.pay');
+	const search = useSearch({ from: '/_authed/payroll' });
+	const month = search.month ?? currentMonth();
+	const { status, staffId } = search;
 
-	const [runOpen, setRunOpen] = useState(false);
-	const [addOpen, setAddOpen] = useState(false);
+	const { can } = usePermissions();
+	const activeBranchIds = useActiveBranchIds();
+	const [finalizeOpen, setFinalizeOpen] = useState(false);
 
 	const { data: staffData } = useStaffList({ limit: 100 });
 	const staffOptions = staffData?.rows ?? [];
 
-	const filters: PayrollListFilters = {
-		page,
-		limit: PAGE_SIZE,
-		status,
-		staffId,
-		periodFrom,
-		periodTo,
-	};
+	const { data, isLoading, isError } = usePayrollPeriod(month, { status, staffId });
+	const rows = data?.rows ?? [];
+	const summary = data?.summary;
+	const periodFinalized = data?.periodStatus === 'FINALIZED';
+	const statValue = (amount: number | undefined) =>
+		amount == null ? '—' : formatMoney(amount);
 
-	const { data, isLoading, isError } = usePayrollList(filters);
-	const payrolls = data?.rows ?? [];
-	const total = data?.total ?? 0;
-
-	// The strip mirrors the currently applied filters (minus pagination), same
-	// as the list — so it reads as "totals for what's on screen".
-	const summaryFilters: PayrollSummaryFilters = {
-		status,
-		staffId,
-		periodFrom,
-		periodTo,
-	};
-	const { data: summary, isLoading: isSummaryLoading } =
-		usePayrollSummary(summaryFilters);
-	const statValue = (amount: number) => (isSummaryLoading ? '—' : formatMoney(amount));
-
-	const hasExtraFilters = staffId != null || !!periodFrom || !!periodTo;
-
-	function handleStatusChange(value: PayrollStatus | undefined) {
+	function handleMonthChange(value: string) {
 		void navigate({
-			search: (prev) => ({ ...prev, status: value, page: undefined }),
+			search: (prev) => ({
+				...prev,
+				month: value === currentMonth() ? undefined : value,
+			}),
 		});
+	}
+
+	function handleStatusChange(value: PayrollRowStatus | undefined) {
+		void navigate({ search: (prev) => ({ ...prev, status: value }) });
 	}
 
 	function handleStaffChange(value: string) {
@@ -102,51 +76,45 @@ export function PayrollPage() {
 			search: (prev) => ({
 				...prev,
 				staffId: value === ALL_STAFF ? undefined : Number(value),
-				page: undefined,
 			}),
 		});
 	}
 
-	function handleDateChange(field: 'periodFrom' | 'periodTo', value: string) {
-		void navigate({
-			search: (prev) => ({ ...prev, [field]: value || undefined, page: undefined }),
-		});
-	}
-
-	function handleClearExtraFilters() {
-		void navigate({
-			search: (prev) => ({
-				...prev,
-				staffId: undefined,
-				periodFrom: undefined,
-				periodTo: undefined,
-				page: undefined,
-			}),
-		});
-	}
-
-	function handlePage(newPage: number) {
-		void navigate({ search: (prev) => ({ ...prev, page: newPage }) });
+	function handleExport() {
+		downloadCsv(`payroll-${month}.csv`, buildPayrollCsv(rows));
 	}
 
 	return (
 		<div className="mx-auto flex max-w-7xl flex-col gap-6">
 			<PageHeader
 				title="Payroll"
-				description="Gross, deductions and net by staff member"
+				description={`${formatMonthLabel(month)} · computed per teacher from sessions taught & students`}
 				actions={
-					<div className="flex gap-2">
-						{canRun && (
-							<Button variant="outline" onClick={() => setAddOpen(true)}>
-								<Plus className="mr-1.5 size-4" />
-								Add payroll
-							</Button>
-						)}
-						{canRun && (
-							<Button onClick={() => setRunOpen(true)}>
-								<Wallet className="mr-1.5 size-4" />
-								Run payroll
-							</Button>
+					<div className="flex flex-wrap items-center gap-2">
+						<PeriodSelector month={month} onMonthChange={handleMonthChange} />
+						<Button
+							variant="outline"
+							onClick={handleExport}
+							disabled={rows.length === 0}
+						>
+							<Download className="mr-1.5 size-4" />
+							Export
+						</Button>
+						{periodFinalized ? (
+							<div className="flex h-9 items-center gap-1.5 rounded-lg border border-border bg-muted px-3 text-sm font-semibold text-muted-foreground">
+								<Check className="size-4" />
+								Finalized
+							</div>
+						) : (
+							can('payroll.finalize') && (
+								<Button
+									onClick={() => setFinalizeOpen(true)}
+									disabled={!summary || rows.length === 0}
+								>
+									<Lock className="mr-1.5 size-4" />
+									Finalize period
+								</Button>
+							)
 						)}
 					</div>
 				}
@@ -154,38 +122,37 @@ export function PayrollPage() {
 
 			<div className="grid grid-cols-1 gap-4 sm:grid-cols-3">
 				<StatCard
-					label="Total gross"
-					value={statValue(summary?.totalGross ?? 0)}
+					label="Total computed"
+					value={statValue(summary?.totalComputed)}
 				/>
 				<StatCard
-					label="Total deductions"
+					label="Mid-month advances"
 					value={
 						<span className="text-tone-red-fg">
-							{statValue(summary?.totalDeductions ?? 0)}
+							{statValue(summary?.totalAdvances)}
 						</span>
 					}
 				/>
 				<StatCard
-					label="Total net payable"
+					label="Net payable"
 					value={
 						<span className="text-tone-green-fg">
-							{statValue(summary?.totalNetPayable ?? 0)}
+							{statValue(summary?.totalNetPayable)}
 						</span>
 					}
 				/>
 			</div>
 
 			<div className="flex flex-col gap-4">
-				<SearchFilterBar
-					filters={STATUS_FILTERS.map((f) => ({
-						id: f.value ?? 'ALL',
-						label: f.label,
-						active: status === f.value,
-						onClick: () => handleStatusChange(f.value),
-					}))}
-				/>
-
 				<div className="flex flex-wrap items-end gap-4">
+					<SearchFilterBar
+						filters={STATUS_FILTERS.map((f) => ({
+							id: f.value ?? 'ALL',
+							label: f.label,
+							active: status === f.value,
+							onClick: () => handleStatusChange(f.value),
+						}))}
+					/>
 					<div className="flex flex-col gap-1.5">
 						<Label className="text-xs text-muted-foreground">Staff</Label>
 						<Select
@@ -205,49 +172,14 @@ export function PayrollPage() {
 							</SelectContent>
 						</Select>
 					</div>
-					<div className="flex flex-col gap-1.5">
-						<Label
-							htmlFor="payroll-period-from"
-							className="text-xs text-muted-foreground"
-						>
-							Period from
-						</Label>
-						<DatePicker
-							id="payroll-period-from"
-							value={periodFrom}
-							onChange={(value) =>
-								handleDateChange('periodFrom', value ?? '')
-							}
-							className="h-9 w-37.5"
-						/>
-					</div>
-					<div className="flex flex-col gap-1.5">
-						<Label
-							htmlFor="payroll-period-to"
-							className="text-xs text-muted-foreground"
-						>
-							Period to
-						</Label>
-						<DatePicker
-							id="payroll-period-to"
-							value={periodTo}
-							onChange={(value) =>
-								handleDateChange('periodTo', value ?? '')
-							}
-							className="h-9 w-37.5"
-						/>
-					</div>
-					{hasExtraFilters && (
-						<Button
-							variant="ghost"
-							size="sm"
-							onClick={handleClearExtraFilters}
-						>
-							<X className="mr-1.5 size-3.5" />
-							Clear filters
-						</Button>
-					)}
 				</div>
+
+				{data != null && data.excludedCount > 0 && (
+					<p className="text-sm text-muted-foreground">
+						{data.excludedCount} staff excluded — no active payroll config
+						this month.
+					</p>
+				)}
 
 				{isError && (
 					<div className="rounded-lg border border-destructive/30 bg-destructive/5 px-4 py-3 text-sm text-destructive">
@@ -256,32 +188,30 @@ export function PayrollPage() {
 				)}
 
 				<Card className="gap-0 overflow-hidden py-0">
-					<PayrollTable
-						payrolls={payrolls}
+					<PayrollPeriodTable
+						rows={rows}
 						isLoading={isLoading}
-						canApprove={canApprove}
-						canPay={canPay}
-						onRowClick={(payroll) =>
+						onRowClick={(row) =>
 							void navigate({
-								to: '/payroll/$id',
-								params: { id: String(payroll.id) },
+								to: '/payroll/$staffId',
+								params: { staffId: String(row.staffId) },
+								search: { month },
 							})
 						}
 					/>
-					<div className="border-t border-border px-4 py-3">
-						<Pagination
-							page={page}
-							pageSize={PAGE_SIZE}
-							total={total}
-							onPageChange={handlePage}
-						/>
-					</div>
 				</Card>
 			</div>
 
-			{canRun && <RunPayrollDialog open={runOpen} onOpenChange={setRunOpen} />}
-			{canRun && (
-				<PayrollForm mode="create" open={addOpen} onOpenChange={setAddOpen} />
+			{summary && (
+				<FinalizePeriodDialog
+					open={finalizeOpen}
+					onOpenChange={setFinalizeOpen}
+					month={month}
+					summary={summary}
+					branchId={
+						activeBranchIds?.length === 1 ? activeBranchIds[0] : undefined
+					}
+				/>
 			)}
 		</div>
 	);

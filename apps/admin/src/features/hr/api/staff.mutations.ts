@@ -5,13 +5,14 @@ import { manageApi } from '@/api/apiClient';
 import { hrKeys } from './keys';
 import type {
 	EmploymentType,
-	PayrollType,
 	StaffResponse,
 	StaffRoleName,
 	StaffStatus,
 } from './staff.queries';
 
 // ─── Input types ─────────────────────────────────────────────────────────────
+// Pay-model fields were dropped from the staff DTOs — configure pay via the
+// payroll feature's `POST /staff/:id/payroll-configs` instead.
 
 export interface CreateStaffInput {
 	branchId: number;
@@ -24,10 +25,6 @@ export interface CreateStaffInput {
 	specialization?: string[];
 	hireDate?: string;
 	employmentType?: EmploymentType;
-	baseSalary?: number;
-	payrollType?: PayrollType;
-	/** Required when `payrollType` is `PERCENT`. */
-	payrollPercent?: number;
 	roleName?: StaffRoleName;
 	/**
 	 * Initial login password (8–128). Applied only when `phone` belongs to a new
@@ -49,9 +46,6 @@ export interface UpdateStaffInput {
 	department?: string;
 	specialization?: string[];
 	employmentType?: EmploymentType;
-	baseSalary?: number;
-	payrollType?: PayrollType;
-	payrollPercent?: number;
 	status?: StaffStatus;
 }
 

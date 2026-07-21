@@ -17,6 +17,12 @@ vi.mock('@tanstack/react-router', () => ({
 	),
 }));
 
+const MONTH = '2026-07';
+/** The live PERCENT teacher in the MSW fixtures. */
+const LIVE_STAFF_ID = 1;
+/** The finalized FIXED teacher in the MSW fixtures. */
+const FINALIZED_STAFF_ID = 2;
+
 function resetSession(permissions: string[] = []) {
 	useSessionStore.setState({
 		accessToken: null,
@@ -33,13 +39,13 @@ function resetSession(permissions: string[] = []) {
 	});
 }
 
-function renderDetail(payrollId: number) {
+function renderDetail(staffId: number) {
 	const queryClient = new QueryClient({
 		defaultOptions: { queries: { retry: false }, mutations: { retry: false } },
 	});
 	render(
 		<QueryClientProvider client={queryClient}>
-			<PayrollDetailPage payrollId={payrollId} />
+			<PayrollDetailPage staffId={staffId} month={MONTH} />
 		</QueryClientProvider>,
 	);
 	return { user: userEvent.setup() };
@@ -48,82 +54,102 @@ function renderDetail(payrollId: number) {
 describe('PayrollDetailPage', () => {
 	beforeEach(() => resetSession());
 
-	it('renders the record — staff, status, gross/deductions/net', async () => {
+	it('renders the live figure — teacher, Live badge and the calculation story', async () => {
 		resetSession(['payroll.read']);
-		renderDetail(1);
+		renderDetail(LIVE_STAFF_ID);
 
-		expect(await screen.findByText('Diyorbek Rustamov')).toBeInTheDocument();
-		expect(screen.getByText('Draft')).toBeInTheDocument();
-		expect(screen.getByText('72')).toBeInTheDocument(); // hours taught
+		expect(
+			await screen.findByRole('heading', { name: 'Diyorbek Rustamov' }),
+		).toBeInTheDocument();
+		expect(screen.getByText('Live')).toBeInTheDocument();
+		expect(screen.getByText(/how this is calculated/i)).toBeInTheDocument();
+		// Full-precision figure and its banker's-rounded result are both shown.
+		expect(screen.getByText(/banker's rounding/i)).toBeInTheDocument();
 	});
 
-	it('shows "not found" for an unknown id', async () => {
+	it('lists the per-student breakdown with the shared-student note', async () => {
+		resetSession(['payroll.read']);
+		renderDetail(LIVE_STAFF_ID);
+
+		expect(await screen.findByText('Sardor Alimov')).toBeInTheDocument();
+		expect(screen.getByText('Malika Karimova')).toBeInTheDocument();
+		// Both students were taught 6 of the group's 8 completed sessions.
+		expect(screen.getAllByText('6/8')).toHaveLength(2);
+		expect(screen.getByText(/never double-paid/i)).toBeInTheDocument();
+	});
+
+	it('shows an empty state for a teacher with no figure this month', async () => {
 		resetSession(['payroll.read']);
 		renderDetail(999);
 
-		expect(await screen.findByText('Payroll record not found.')).toBeInTheDocument();
+		expect(await screen.findByText(/no payroll figure for this teacher/i)).toBeInTheDocument();
 	});
 
-	it('approves a DRAFT record when the user holds payroll.approve', async () => {
-		resetSession(['payroll.read', 'payroll.approve']);
-		const { user } = renderDetail(1);
-
-		const approveButton = await screen.findByRole('button', { name: /approve/i });
-		await user.click(approveButton);
-
-		// The click round-trips through the real POST /payrolls/1/approve mutation
-		// (MSW-backed) — once it settles, the button is no longer pending-disabled.
-		await waitFor(() => expect(approveButton).not.toBeDisabled());
-	});
-
-	it('hides Approve without payroll.approve, and Mark as paid only shows for APPROVED', async () => {
+	it('shows the frozen snapshot meta once finalized', async () => {
 		resetSession(['payroll.read']);
-		renderDetail(1);
+		renderDetail(FINALIZED_STAFF_ID);
 
-		await screen.findByText('Diyorbek Rustamov');
 		expect(
-			screen.queryByRole('button', { name: /approve/i }),
+			await screen.findByRole('heading', { name: 'Nilufar Karimova' }),
+		).toBeInTheDocument();
+		expect(screen.getByText(/snapshot finalized/i)).toBeInTheDocument();
+		expect(screen.getByText(/Aziz Yusupov/)).toBeInTheDocument();
+	});
+
+	it('hides Mark as paid and Unfinalize without the permissions', async () => {
+		resetSession(['payroll.read']);
+		renderDetail(FINALIZED_STAFF_ID);
+
+		await screen.findByRole('heading', { name: 'Nilufar Karimova' });
+		expect(
+			screen.queryByRole('button', { name: /mark as paid/i }),
 		).not.toBeInTheDocument();
+		expect(
+			screen.queryByRole('button', { name: /unfinalize/i }),
+		).not.toBeInTheDocument();
+	});
+
+	it('does not offer Mark as paid on a live row even with payroll.pay', async () => {
+		resetSession(['payroll.read', 'payroll.pay']);
+		renderDetail(LIVE_STAFF_ID);
+
+		await screen.findByRole('heading', { name: 'Diyorbek Rustamov' });
 		expect(
 			screen.queryByRole('button', { name: /mark as paid/i }),
 		).not.toBeInTheDocument();
 	});
 
-	it('does not show Mark as paid for a DRAFT record even with payroll.pay', async () => {
+	it('settles a finalized snapshot when the user holds payroll.pay', async () => {
 		resetSession(['payroll.read', 'payroll.pay']);
-		renderDetail(1);
+		const { user } = renderDetail(FINALIZED_STAFF_ID);
 
-		await screen.findByText('Diyorbek Rustamov');
-		expect(
-			screen.queryByRole('button', { name: /mark as paid/i }),
-		).not.toBeInTheDocument();
+		await user.click(await screen.findByRole('button', { name: /mark as paid/i }));
+		// Confirm in the dialog — money actions are never one-click.
+		const confirm = await screen.findByRole('button', { name: /^mark as paid$/i });
+		await user.click(confirm);
+
+		await waitFor(() => expect(confirm).not.toBeDisabled());
 	});
 
-	it('marks an APPROVED record paid when the user holds payroll.pay', async () => {
-		resetSession(['payroll.read', 'payroll.pay']);
-		const { user } = renderDetail(2);
+	it('records a mid-month advance on a live row with payroll.manage', async () => {
+		resetSession(['payroll.read', 'payroll.manage']);
+		const { user } = renderDetail(LIVE_STAFF_ID);
 
-		const payButton = await screen.findByRole('button', { name: /mark as paid/i });
-		await user.click(payButton);
+		expect(await screen.findByText(/mid-month advances/i)).toBeInTheDocument();
+		expect(screen.getByText('cash advance')).toBeInTheDocument();
 
-		await waitFor(() => expect(payButton).not.toBeDisabled());
+		const amount = await screen.findByPlaceholderText(/amount/i);
+		await user.type(amount, '300000');
+		await user.click(screen.getByRole('button', { name: /record/i }));
+
+		await waitFor(() => expect(amount).toHaveValue(''));
 	});
 
-	it('edits a DRAFT record via the edit sheet', async () => {
-		resetSession(['payroll.read', 'payroll.create']);
-		const { user } = renderDetail(1);
+	it('hides the advance form without payroll.manage', async () => {
+		resetSession(['payroll.read']);
+		renderDetail(LIVE_STAFF_ID);
 
-		await user.click(await screen.findByRole('button', { name: /^edit$/i }));
-
-		const grossInput = await screen.findByLabelText(/gross amount/i);
-		await user.clear(grossInput);
-		await user.type(grossInput, '9000000');
-		await user.click(screen.getByRole('button', { name: /save changes/i }));
-
-		await waitFor(() =>
-			expect(
-				screen.queryByRole('button', { name: /save changes/i }),
-			).not.toBeInTheDocument(),
-		);
+		await screen.findByText(/mid-month advances/i);
+		expect(screen.queryByRole('button', { name: /record/i })).not.toBeInTheDocument();
 	});
 });
