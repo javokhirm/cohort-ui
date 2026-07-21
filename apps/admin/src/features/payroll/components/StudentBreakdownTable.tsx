@@ -58,7 +58,7 @@ export function StudentBreakdownTable({
 			header: () => <div className="text-right">Sessions</div>,
 			cell: ({ row }) => (
 				<div className="text-right text-sm tabular-nums text-muted-foreground">
-					{row.original.sessionsTaught}/{row.original.sessionsTotalCompleted}
+					{row.original.sessionsTaught}/{row.original.sessionsTotalPlanned}
 				</div>
 			),
 			size: 92,
@@ -130,9 +130,13 @@ export function StudentBreakdownTable({
 			<div className="border-t border-border bg-muted/40 px-5 py-3 text-xs text-muted-foreground">
 				{isPercent ? (
 					<>
-						Denominator is the student&apos;s completed sessions across{' '}
-						<b>all</b> teachers — shared students are split, never
-						double-paid.
+						Denominator is <b>every class the group holds this month</b>{' '}
+						across all teachers — taught, still scheduled or cancelled. So
+						tuition is earned per class actually delivered: shared students
+						are split and never double-paid, a student who joined or left
+						mid-month funds only the classes they were enrolled for, an open
+						month accrues rather than paying the full fee up front, and a
+						cancelled class is earned by nobody.
 					</>
 				) : (
 					<>

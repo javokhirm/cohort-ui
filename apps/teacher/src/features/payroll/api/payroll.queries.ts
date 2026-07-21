@@ -56,8 +56,8 @@ export interface MyPayrollLine {
 	billingCycle: 'MONTHLY' | 'PER_SESSION' | null;
 	monthlyTuition: number | null;
 	sessionsTaught: number;
-	/** The student's completed sessions across ALL teachers — the denominator. */
-	sessionsTotalCompleted: number;
+	/** The group's classes for the month, any status (the denominator). */
+	sessionsTotalPlanned: number;
 	prorationFactor: number | null;
 	hours: number;
 	revenueBaseExact: number;

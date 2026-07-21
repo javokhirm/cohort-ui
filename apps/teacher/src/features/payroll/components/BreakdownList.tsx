@@ -51,8 +51,7 @@ export function BreakdownList({ lines, rateType }: BreakdownListProps) {
 								{line.groupName}
 							</p>
 							<p className="mt-1 text-[12px] tabular-nums text-muted-foreground">
-								{line.sessionsTaught}/{line.sessionsTotalCompleted}{' '}
-								sessions
+								{line.sessionsTaught}/{line.sessionsTotalPlanned} sessions
 								{line.monthlyTuition !== null &&
 									` · ${formatMoney(line.monthlyTuition)} tuition`}
 							</p>
@@ -69,7 +68,7 @@ export function BreakdownList({ lines, rateType }: BreakdownListProps) {
 
 			<p className="border-t border-border p-4 text-[12px] text-muted-foreground">
 				{isRevenueShare
-					? "Each student's tuition is split by the sessions you taught out of their completed sessions across all teachers — shared students are never double-paid."
+					? "Each student's tuition is split across all of the group's classes for the month, and you earn the ones you taught. Classes still ahead of you are not paid yet, a cancelled class is not paid at all, and a student who joined mid-month counts only from the day they joined."
 					: 'Listed for reference. You are paid on the basis shown above, not per student.'}
 			</p>
 		</div>

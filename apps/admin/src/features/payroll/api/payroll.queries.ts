@@ -103,9 +103,9 @@ export interface PayrollBreakdownLine {
 	billingCycle: 'MONTHLY' | 'PER_SESSION' | null;
 	monthlyTuition: number | null;
 	sessionsTaught: number;
-	/** The student's completed sessions across ALL teachers (the denominator). */
-	sessionsTotalCompleted: number;
-	/** `sessionsTaught / sessionsTotalCompleted`; null for PER_SESSION plans. */
+	/** The group's classes for the month, any status (the denominator). */
+	sessionsTotalPlanned: number;
+	/** `sessionsTaught / sessionsTotalPlanned`; null for PER_SESSION plans. */
 	prorationFactor: number | null;
 	hours: number;
 	revenueBaseExact: number;
