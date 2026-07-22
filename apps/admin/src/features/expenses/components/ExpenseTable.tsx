@@ -1,6 +1,7 @@
 import { MoreHorizontal } from 'lucide-react';
 
 import {
+	Badge,
 	Button,
 	DataTable,
 	DropdownMenu,
@@ -23,6 +24,15 @@ interface ExpenseTableProps {
 	onEdit?: (expense: ExpenseResponse) => void;
 	/** Omit to hide the delete action (no `expense.delete`). */
 	onDelete?: (expense: ExpenseResponse) => void;
+}
+
+/**
+ * True only for rows a source flow owns (payroll mark-paid / advances). Uses a
+ * loose null check on purpose: an absent `sourceType` must read as "manual", so
+ * a field missing from the response can never lock the whole table.
+ */
+function isSourceOwned(expense: ExpenseResponse): boolean {
+	return expense.sourceType != null;
 }
 
 /** "description — vendor" when both are set, otherwise whichever one is present. */
@@ -94,8 +104,13 @@ export function ExpenseTable({
 			id: 'vendor',
 			header: 'Vendor / Description',
 			cell: ({ row }) => (
-				<span className="text-sm font-medium">
+				<span className="flex items-center gap-2 text-sm font-medium">
 					{vendorDescriptionLabel(row.original)}
+					{isSourceOwned(row.original) && (
+						<Badge variant="secondary" className="text-xs">
+							Payroll
+						</Badge>
+					)}
 				</span>
 			),
 		},
@@ -125,7 +140,13 @@ export function ExpenseTable({
 		columns.push({
 			id: 'actions',
 			header: () => <span className="sr-only">Actions</span>,
-			cell: ({ row }) => <RowActions expense={row.original} onDelete={onDelete} />,
+			// Auto rows (payroll-sourced) are managed from payroll — no actions.
+			cell: ({ row }) =>
+				isSourceOwned(row.original) ? (
+					<span className="text-muted-foreground">—</span>
+				) : (
+					<RowActions expense={row.original} onDelete={onDelete} />
+				),
 			size: 56,
 		});
 	}
@@ -136,7 +157,14 @@ export function ExpenseTable({
 			data={expenses}
 			isLoading={isLoading}
 			getRowId={(row) => String(row.id)}
-			onRowClick={onEdit ? (row) => onEdit(row) : undefined}
+			onRowClick={
+				onEdit
+					? (row) => {
+							// Payroll-sourced rows are read-only here.
+							if (!isSourceOwned(row)) onEdit(row);
+						}
+					: undefined
+			}
 			emptyState={
 				<div className="py-16 text-center text-sm text-muted-foreground">
 					No expenses match this filter.

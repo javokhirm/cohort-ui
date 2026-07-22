@@ -103,12 +103,6 @@ export function TodayRoute() {
 				sessions={daySessions}
 				hiddenByBranch={hiddenByBranch}
 				emptyWhen={isToday ? 'today' : `on ${formatShortDate(selectedDate)}`}
-				onView={(sessionId) =>
-					void navigate({
-						to: '/sessions/$sessionId',
-						params: { sessionId: String(sessionId) },
-					})
-				}
 				onTakeAttendance={(sessionId) =>
 					void navigate({
 						to: '/sessions/$sessionId/attendance',

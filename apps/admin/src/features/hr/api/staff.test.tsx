@@ -72,7 +72,6 @@ describe('useCreateStaff', () => {
 			phone: '+998905556677',
 			roleName: 'TEACHER',
 			employmentType: 'FULL_TIME',
-			baseSalary: 6_000_000,
 			specialization: ['Math'],
 		});
 

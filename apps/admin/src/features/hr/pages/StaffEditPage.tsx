@@ -42,11 +42,6 @@ const STATUS_OPTIONS = [
 	{ value: 'TERMINATED', label: 'Terminated' },
 ];
 
-const PAYROLL_TYPE_OPTIONS = [
-	{ value: 'FIXED', label: 'Fixed salary' },
-	{ value: 'PERCENT', label: '% of student fees' },
-];
-
 /**
  * A labelled, non-editable value. `hireDate` is not accepted by
  * `PATCH /manage/staff/:id`, so it is shown for context but cannot be changed
@@ -77,9 +72,6 @@ function EditStaffForm({
 		email: s.user.email ?? '',
 		position: s.position ?? '',
 		employmentType: s.employmentType,
-		baseSalary: s.baseSalary ?? undefined,
-		payrollType: s.payrollType,
-		payrollPercent: s.payrollPercent ?? undefined,
 		specialization: s.specialization.join(', '),
 		status: s.status,
 	});
@@ -88,12 +80,6 @@ function EditStaffForm({
 		resolver: zodResolver(editStaffSchema),
 		defaultValues: toDefaults(staff),
 	});
-
-	// The payroll block is teacher-only; PERCENT swaps the salary input for the
-	// percent share of their groups' course fees.
-	const isTeacher = staff.roles.includes('TEACHER');
-	const payrollType = form.watch('payrollType');
-	const showPercent = isTeacher && payrollType === 'PERCENT';
 
 	useEffect(() => {
 		form.reset(toDefaults(staff));
@@ -115,10 +101,6 @@ function EditStaffForm({
 			email: values.email ? values.email : null,
 			position: values.position || undefined,
 			employmentType: values.employmentType,
-			baseSalary: values.baseSalary,
-			payrollType: values.payrollType,
-			payrollPercent:
-				values.payrollType === 'PERCENT' ? values.payrollPercent : undefined,
 			specialization: parseSpecialization(values.specialization),
 			status: values.status,
 		});
@@ -214,58 +196,10 @@ function EditStaffForm({
 								options={STATUS_OPTIONS}
 							/>
 						</div>
-						<div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
-							{isTeacher && (
-								<FormSelect
-									control={form.control}
-									name="payrollType"
-									label="Pay model"
-									options={PAYROLL_TYPE_OPTIONS}
-								/>
-							)}
-							{showPercent ? (
-								<>
-									<FormInput
-										control={form.control}
-										name="payrollPercent"
-										label="Share of student fees (%)"
-										type="number"
-										placeholder="e.g. 50"
-										onChange={(e) =>
-											form.setValue(
-												'payrollPercent',
-												e.target.value === ''
-													? undefined
-													: Number(e.target.value),
-												{ shouldValidate: true },
-											)
-										}
-									/>
-									<p className="text-xs text-muted-foreground">
-										The teacher earns this share of the course fees of
-										students in their groups, prorated by lessons for
-										mid-month joiners and leavers.
-									</p>
-								</>
-							) : (
-								<FormInput
-									control={form.control}
-									name="baseSalary"
-									label="Monthly salary (UZS)"
-									type="number"
-									placeholder="0"
-									onChange={(e) =>
-										form.setValue(
-											'baseSalary',
-											e.target.value === ''
-												? undefined
-												: Number(e.target.value),
-											{ shouldValidate: true },
-										)
-									}
-								/>
-							)}
-						</div>
+						<p className="text-xs text-muted-foreground">
+							The pay model moved to the member&apos;s Payroll tab — change
+							it there so payroll history stays dated.
+						</p>
 					</FieldGroup>
 				</FormSection>
 			</form>

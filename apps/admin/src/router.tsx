@@ -32,7 +32,7 @@ import { GroupDetailRoute } from '@/routes/_authed.groups.$id';
 import { GroupEditRoute } from '@/routes/_authed.groups.$id.edit';
 import { ScheduleRoute } from '@/routes/_authed.schedule';
 import { PayrollRoute } from '@/routes/_authed.payroll';
-import { PayrollDetailRoute } from '@/routes/_authed.payroll.$id';
+import { PayrollDetailRoute } from '@/routes/_authed.payroll.$staffId';
 import { ExpensesRoute } from '@/routes/_authed.expenses';
 import { PaymentsRoute } from '@/routes/_authed.payments';
 import { LeadsRoute } from '@/routes/_authed.leads';
@@ -493,14 +493,17 @@ const scheduleRoute = createRoute({
 	component: ScheduleRoute,
 });
 
-type PayrollStatusSearch = 'DRAFT' | 'APPROVED' | 'PAID';
+type PayrollStatusSearch = 'LIVE' | 'FINALIZED' | 'PAID';
+
+const PAYROLL_STATUSES: PayrollStatusSearch[] = ['LIVE', 'FINALIZED', 'PAID'];
+
+/** `YYYY-MM` payroll period key. */
+const MONTH_SEARCH = /^\d{4}-(0[1-9]|1[0-2])$/;
 
 interface PayrollSearch {
-	page?: number;
+	month?: string;
 	status?: PayrollStatusSearch;
 	staffId?: number;
-	periodFrom?: string;
-	periodTo?: string;
 }
 
 const payrollRoute = createRoute({
@@ -508,26 +511,17 @@ const payrollRoute = createRoute({
 	path: '/payroll',
 	beforeLoad: () => requirePermission('payroll.read'),
 	validateSearch: (search: Record<string, unknown>): PayrollSearch => {
-		const page = Number(search.page);
+		const month = search.month;
 		const status = search.status;
 		const staffId = Number(search.staffId);
-		const periodFrom = search.periodFrom;
-		const periodTo = search.periodTo;
 		return {
-			page: Number.isFinite(page) && page > 0 ? page : undefined,
-			status:
-				status === 'DRAFT' || status === 'APPROVED' || status === 'PAID'
-					? status
-					: undefined,
+			// The page falls back to the current Tashkent month when absent.
+			month:
+				typeof month === 'string' && MONTH_SEARCH.test(month) ? month : undefined,
+			status: PAYROLL_STATUSES.includes(status as PayrollStatusSearch)
+				? (status as PayrollStatusSearch)
+				: undefined,
 			staffId: Number.isFinite(staffId) && staffId > 0 ? staffId : undefined,
-			periodFrom:
-				typeof periodFrom === 'string' && ISO_DATE_SEARCH.test(periodFrom)
-					? periodFrom
-					: undefined,
-			periodTo:
-				typeof periodTo === 'string' && ISO_DATE_SEARCH.test(periodTo)
-					? periodTo
-					: undefined,
 		};
 	},
 	component: PayrollRoute,
@@ -535,11 +529,19 @@ const payrollRoute = createRoute({
 
 const payrollDetailRoute = createRoute({
 	getParentRoute: () => authedRoute,
-	path: '/payroll/$id',
+	path: '/payroll/$staffId',
 	beforeLoad: () => requirePermission('payroll.read'),
+	validateSearch: (search: Record<string, unknown>): { month?: string } => {
+		const month = search.month;
+		return {
+			month:
+				typeof month === 'string' && MONTH_SEARCH.test(month) ? month : undefined,
+		};
+	},
 	component: () => {
-		const { id } = payrollDetailRoute.useParams();
-		return <PayrollDetailRoute id={id} />;
+		const { staffId } = payrollDetailRoute.useParams();
+		const { month } = payrollDetailRoute.useSearch();
+		return <PayrollDetailRoute staffId={staffId} month={month} />;
 	},
 });
 

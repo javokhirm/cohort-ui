@@ -761,6 +761,7 @@ const MOCK_CREDIT_NOTES = new Map<number, MockCreditNote[]>();
 
 // ─── Staff fixtures ───────────────────────────────────────────────────────────
 
+// No pay fields here — the pay model lives on the payroll-config timeline.
 interface MockStaff {
 	id: number;
 	staffCode: string;
@@ -772,7 +773,6 @@ interface MockStaff {
 	employmentType: 'FULL_TIME' | 'PART_TIME' | 'CONTRACTOR';
 	status: 'ACTIVE' | 'ON_LEAVE' | 'TERMINATED';
 	hireDate: string | null;
-	baseSalary: number | null;
 	roles: string[];
 	groupsCount: number;
 	weeklyHours: number;
@@ -798,7 +798,6 @@ export const MOCK_STAFF: MockStaff[] = [
 		employmentType: 'FULL_TIME',
 		status: 'ACTIVE',
 		hireDate: '2023-09-01',
-		baseSalary: 8_000_000,
 		roles: ['TEACHER'],
 		groupsCount: 3,
 		weeklyHours: 18,
@@ -822,7 +821,6 @@ export const MOCK_STAFF: MockStaff[] = [
 		employmentType: 'FULL_TIME',
 		status: 'ACTIVE',
 		hireDate: '2022-03-15',
-		baseSalary: 10_000_000,
 		roles: ['MANAGER'],
 		groupsCount: 0,
 		weeklyHours: 40,
@@ -846,7 +844,6 @@ export const MOCK_STAFF: MockStaff[] = [
 		employmentType: 'PART_TIME',
 		status: 'ON_LEAVE',
 		hireDate: '2024-01-10',
-		baseSalary: 5_000_000,
 		roles: ['ADMIN'],
 		groupsCount: 0,
 		weeklyHours: 20,
@@ -863,89 +860,289 @@ export const MOCK_STAFF: MockStaff[] = [
 
 // ─── Payroll fixtures ─────────────────────────────────────────────────────────
 
-interface MockPayroll {
-	id: number;
-	branchId: number;
-	staffId: number;
-	staff: { id: number; staffCode: string; firstName: string; lastName: string } | null;
-	periodStart: string;
-	periodEnd: string;
-	grossAmount: number;
-	deductions: number;
-	netAmount: number;
-	status: 'DRAFT' | 'APPROVED' | 'PAID';
-	breakdown: { hoursTaught?: number; rate?: number; bonuses?: number } | null;
-	approvedByUserId: number | null;
-	paidAt: string | null;
-	createdAt: string;
-	updatedAt: string;
-}
+/**
+ * Period-snapshot payroll: the open month is computed live (virtual `LIVE`
+ * rows), finalizing freezes a snapshot, mark-paid settles it. `MOCK_PERIOD`
+ * is the July-2026 month — one live PERCENT teacher with two student lines and
+ * an unlinked advance, plus one finalized FIXED teacher.
+ */
+export const MOCK_PAYROLL_MONTH = '2026-07';
 
-export const MOCK_PAYROLLS: MockPayroll[] = [
+export const MOCK_ADVANCES = [
 	{
 		id: 1,
-		branchId: 1,
 		staffId: 1,
-		staff: {
-			id: 1,
-			staffCode: 'STF-001',
-			firstName: 'Diyorbek',
-			lastName: 'Rustamov',
-		},
-		periodStart: '2026-06-01',
-		periodEnd: '2026-06-30',
-		grossAmount: 8_000_000,
-		deductions: 960_000,
-		netAmount: 7_040_000,
-		status: 'DRAFT',
-		breakdown: { hoursTaught: 72, rate: 100_000, bonuses: 800_000 },
-		approvedByUserId: null,
-		paidAt: null,
-		createdAt: '2026-06-30T00:00:00Z',
-		updatedAt: '2026-06-30T00:00:00Z',
-	},
-	{
-		id: 2,
 		branchId: 1,
-		staffId: 2,
-		staff: {
-			id: 2,
-			staffCode: 'STF-002',
-			firstName: 'Nilufar',
-			lastName: 'Karimova',
-		},
-		periodStart: '2026-06-01',
-		periodEnd: '2026-06-30',
-		grossAmount: 10_000_000,
-		deductions: 1_200_000,
-		netAmount: 8_800_000,
-		status: 'APPROVED',
-		breakdown: null,
-		approvedByUserId: 1,
-		paidAt: null,
-		createdAt: '2026-06-30T00:00:00Z',
-		updatedAt: '2026-06-30T00:00:00Z',
-	},
-	{
-		id: 3,
-		branchId: 2,
-		staffId: 3,
-		staff: { id: 3, staffCode: 'STF-003', firstName: 'Aziz', lastName: 'Yusupov' },
-		periodStart: '2026-05-01',
-		periodEnd: '2026-05-31',
-		grossAmount: 5_000_000,
-		deductions: 600_000,
-		netAmount: 4_400_000,
-		status: 'PAID',
-		breakdown: { hoursTaught: 40 },
-		approvedByUserId: 1,
-		paidAt: '2026-06-05T00:00:00Z',
-		createdAt: '2026-05-31T00:00:00Z',
-		updatedAt: '2026-06-05T00:00:00Z',
+		amount: 500_000,
+		label: 'cash advance',
+		advanceDate: '2026-07-15',
+		payrollId: null,
+		removable: true,
+		createdAt: '2026-07-15T09:00:00Z',
 	},
 ];
 
-// ─── Handlers (happy-path defaults) ───────────────────────────────────────────
+const PERCENT_BREAKDOWN = {
+	version: 2 as const,
+	rateType: 'PERCENT' as const,
+	segments: [
+		{
+			payrollConfigId: 1,
+			payrollType: 'PERCENT' as const,
+			baseSalary: null,
+			payrollPercent: 50,
+			from: '2026-07-01',
+			to: '2026-07-31',
+		},
+	],
+	calculation: {
+		percent: 50,
+		baseSalary: null,
+		hourlyRate: null,
+		sessionsTaught: 8,
+		hoursTaught: 12,
+		studentsCount: 2,
+		revenueBaseTotalExact: 1_800_000,
+		prorationFactor: null,
+		grossExact: 900_000,
+		gross: 900_000,
+		rounding: 'BANKERS_2DP' as const,
+	},
+	lines: [
+		{
+			groupId: 1,
+			groupName: 'IELTS Prep · GRP-EN-IE-02',
+			enrollmentId: 1,
+			studentId: 1,
+			studentName: 'Sardor Alimov',
+			feePlanId: 1,
+			feePlanAmount: 1_200_000,
+			billingCycle: 'MONTHLY' as const,
+			monthlyTuition: 1_200_000,
+			sessionsTaught: 6,
+			sessionsTotalPlanned: 8,
+			prorationFactor: 0.75,
+			hours: 9,
+			revenueBaseExact: 900_000,
+			revenueBase: 900_000,
+			shareExact: 450_000,
+			share: 450_000,
+		},
+		{
+			groupId: 1,
+			groupName: 'IELTS Prep · GRP-EN-IE-02',
+			enrollmentId: 2,
+			studentId: 2,
+			studentName: 'Malika Karimova',
+			feePlanId: 1,
+			feePlanAmount: 1_200_000,
+			billingCycle: 'MONTHLY' as const,
+			monthlyTuition: 1_200_000,
+			sessionsTaught: 6,
+			sessionsTotalPlanned: 8,
+			prorationFactor: 0.75,
+			hours: 9,
+			revenueBaseExact: 900_000,
+			revenueBase: 900_000,
+			shareExact: 450_000,
+			share: 450_000,
+		},
+	],
+};
+
+const FIXED_BREAKDOWN = {
+	version: 2 as const,
+	rateType: 'FIXED' as const,
+	segments: [
+		{
+			payrollConfigId: 2,
+			payrollType: 'FIXED' as const,
+			baseSalary: 8_000_000,
+			payrollPercent: null,
+			from: '2026-07-01',
+			to: '2026-07-31',
+		},
+	],
+	calculation: {
+		percent: null,
+		baseSalary: 8_000_000,
+		hourlyRate: null,
+		sessionsTaught: 20,
+		hoursTaught: 30,
+		studentsCount: 0,
+		revenueBaseTotalExact: null,
+		prorationFactor: null,
+		grossExact: 8_000_000,
+		gross: 8_000_000,
+		rounding: 'BANKERS_2DP' as const,
+	},
+	lines: [],
+};
+
+export const MOCK_PERIOD = {
+	month: MOCK_PAYROLL_MONTH,
+	periodStart: '2026-07-01',
+	periodEnd: '2026-07-31',
+	periodStatus: 'PARTIALLY_FINALIZED' as const,
+	summary: {
+		currency: 'UZS',
+		totalComputed: 8_900_000,
+		totalAdvances: 500_000,
+		totalNetPayable: 8_400_000,
+		staffCount: 2,
+	},
+	rows: [
+		{
+			staffId: 2,
+			staffCode: 'STF-002',
+			staffName: 'Nilufar Karimova',
+			position: 'Senior IELTS Instructor',
+			branchId: 1,
+			rateType: 'FIXED' as const,
+			percent: null,
+			sessionsTaught: 20,
+			studentsCount: 0,
+			hoursTaught: 30,
+			grossAmount: 8_000_000,
+			advancesTotal: 0,
+			netAmount: 8_000_000,
+			advancesExceedGross: false,
+			status: 'FINALIZED' as const,
+			payrollId: 10,
+			finalizedAt: '2026-08-01T09:00:00Z',
+			paidAt: null,
+		},
+		{
+			staffId: 1,
+			staffCode: 'STF-001',
+			staffName: 'Diyorbek Rustamov',
+			position: 'IELTS Instructor',
+			branchId: 1,
+			rateType: 'PERCENT' as const,
+			percent: 50,
+			sessionsTaught: 8,
+			studentsCount: 2,
+			hoursTaught: 12,
+			grossAmount: 900_000,
+			advancesTotal: 500_000,
+			netAmount: 400_000,
+			advancesExceedGross: false,
+			status: 'LIVE' as const,
+			payrollId: null,
+			finalizedAt: null,
+			paidAt: null,
+		},
+	],
+	excludedCount: 1,
+};
+
+/** The live PERCENT teacher's detail — `GET /payrolls/period/1`. */
+export const MOCK_STAFF_PERIOD_LIVE = {
+	month: MOCK_PAYROLL_MONTH,
+	periodStart: '2026-07-01',
+	periodEnd: '2026-07-31',
+	staffId: 1,
+	staffCode: 'STF-001',
+	staffName: 'Diyorbek Rustamov',
+	position: 'IELTS Instructor',
+	branchId: 1,
+	status: 'LIVE' as const,
+	rateType: 'PERCENT' as const,
+	grossAmount: 900_000,
+	advancesTotal: 500_000,
+	netAmount: 400_000,
+	advancesExceedGross: false,
+	breakdown: PERCENT_BREAKDOWN,
+	advances: MOCK_ADVANCES,
+	payrollId: null,
+	finalizedAt: null,
+	finalizedByName: null,
+	paidAt: null,
+};
+
+/** The finalized FIXED teacher's detail — `GET /payrolls/period/2`. */
+export const MOCK_STAFF_PERIOD_FINALIZED = {
+	month: MOCK_PAYROLL_MONTH,
+	periodStart: '2026-07-01',
+	periodEnd: '2026-07-31',
+	staffId: 2,
+	staffCode: 'STF-002',
+	staffName: 'Nilufar Karimova',
+	position: 'Senior IELTS Instructor',
+	branchId: 1,
+	status: 'FINALIZED' as const,
+	rateType: 'FIXED' as const,
+	grossAmount: 8_000_000,
+	advancesTotal: 0,
+	netAmount: 8_000_000,
+	advancesExceedGross: false,
+	breakdown: FIXED_BREAKDOWN,
+	advances: [],
+	payrollId: 10,
+	finalizedAt: '2026-08-01T09:00:00Z',
+	finalizedByName: 'Aziz Yusupov',
+	paidAt: null,
+};
+
+/** Payslip history rows — `GET /payrolls` (persisted snapshots only). */
+export const MOCK_PAYROLL_HISTORY = [
+	{
+		id: 10,
+		staffId: 2,
+		staffCode: 'STF-002',
+		staffName: 'Nilufar Karimova',
+		branchId: 1,
+		month: '2026-07',
+		periodStart: '2026-07-01',
+		periodEnd: '2026-07-31',
+		grossAmount: 8_000_000,
+		deductions: 0,
+		netAmount: 8_000_000,
+		status: 'FINALIZED' as const,
+		finalizedAt: '2026-08-01T09:00:00Z',
+		paidAt: null,
+	},
+	{
+		id: 9,
+		staffId: 2,
+		staffCode: 'STF-002',
+		staffName: 'Nilufar Karimova',
+		branchId: 1,
+		month: '2026-06',
+		periodStart: '2026-06-01',
+		periodEnd: '2026-06-30',
+		grossAmount: 8_000_000,
+		deductions: 500_000,
+		netAmount: 7_500_000,
+		status: 'PAID' as const,
+		finalizedAt: '2026-07-01T09:00:00Z',
+		paidAt: '2026-07-05T09:00:00Z',
+	},
+];
+
+/** Effective-dated pay configs — `GET /staff/:id/payroll-configs`. */
+export const MOCK_PAYROLL_CONFIGS = [
+	{
+		id: 1,
+		staffId: 1,
+		payrollType: 'PERCENT' as const,
+		baseSalary: null,
+		payrollPercent: 50,
+		effectiveFrom: '2026-07-01',
+		effectiveTo: null,
+		createdAt: '2026-06-28T09:00:00Z',
+	},
+	{
+		id: 3,
+		staffId: 1,
+		payrollType: 'FIXED' as const,
+		baseSalary: 6_000_000,
+		payrollPercent: null,
+		effectiveFrom: '2026-01-01',
+		effectiveTo: '2026-06-30',
+		createdAt: '2026-01-01T09:00:00Z',
+	},
+];
 
 // ─── Lead fixtures ────────────────────────────────────────────────────────────
 
@@ -1966,7 +2163,6 @@ export const handlers = [
 			employmentType: body['employmentType'] ?? 'FULL_TIME',
 			status: 'ACTIVE',
 			hireDate: body['hireDate'] ?? null,
-			baseSalary: body['baseSalary'] ?? null,
 			roles: body['roleName'] ? [body['roleName']] : [],
 			groupsCount: 0,
 			weeklyHours: 0,
@@ -2001,116 +2197,121 @@ export const handlers = [
 	}),
 
 	// ── Payroll ──────────────────────────────────────────────────────────────
-	http.get(`${MANAGE}/payrolls`, ({ request }) => {
+	// Static segments before ':id' — mirrors the controller's route ordering.
+	http.get(`${MANAGE}/payrolls/period`, ({ request }) => {
 		const url = new URL(request.url);
-		const branchIds = readBranchIds(url);
 		const status = url.searchParams.get('status');
 		const staffId = url.searchParams.get('staffId');
-		const periodFrom = url.searchParams.get('periodFrom');
-		const periodTo = url.searchParams.get('periodTo');
-		const page = Number(url.searchParams.get('page') ?? 1);
-		const limit = Number(url.searchParams.get('limit') ?? 20);
-
-		let rows = MOCK_PAYROLLS;
-		if (branchIds) rows = rows.filter((p) => branchIds.includes(p.branchId));
-		if (status) rows = rows.filter((p) => p.status === status);
-		if (staffId) rows = rows.filter((p) => p.staffId === Number(staffId));
-		if (periodFrom) rows = rows.filter((p) => p.periodStart >= periodFrom);
-		if (periodTo) rows = rows.filter((p) => p.periodEnd <= periodTo);
-
-		const total = rows.length;
-		const start = (page - 1) * limit;
-		return okPaged(rows.slice(start, start + limit), page, limit, total);
+		let rows = MOCK_PERIOD.rows;
+		if (status) rows = rows.filter((r) => r.status === status);
+		if (staffId) rows = rows.filter((r) => r.staffId === Number(staffId));
+		// The summary always reflects the whole period; chips narrow rows only.
+		return ok({ ...MOCK_PERIOD, rows });
 	}),
 
-	http.get(`${MANAGE}/payrolls/summary`, ({ request }) => {
+	http.get(`${MANAGE}/payrolls/period/:staffId`, ({ params }) => {
+		const staffId = Number(params['staffId']);
+		if (staffId === 1) return ok(MOCK_STAFF_PERIOD_LIVE);
+		if (staffId === 2) return ok(MOCK_STAFF_PERIOD_FINALIZED);
+		return fail(404, 'PAYROLL_NOT_FOUND', 'Payroll record not found.');
+	}),
+
+	http.post(`${MANAGE}/payrolls/finalize`, async ({ request }) => {
+		await request.json();
+		return ok({ finalized: 1, skipped: 1, payrollIds: [11] });
+	}),
+
+	http.get(`${MANAGE}/payrolls/advances`, ({ request }) => {
 		const url = new URL(request.url);
-		const branchIds = readBranchIds(url);
-		const status = url.searchParams.get('status');
 		const staffId = url.searchParams.get('staffId');
-		const periodFrom = url.searchParams.get('periodFrom');
-		const periodTo = url.searchParams.get('periodTo');
-
-		let rows = MOCK_PAYROLLS;
-		if (branchIds) rows = rows.filter((p) => branchIds.includes(p.branchId));
-		if (status) rows = rows.filter((p) => p.status === status);
-		if (staffId) rows = rows.filter((p) => p.staffId === Number(staffId));
-		if (periodFrom) rows = rows.filter((p) => p.periodStart >= periodFrom);
-		if (periodTo) rows = rows.filter((p) => p.periodEnd <= periodTo);
-
-		return ok({
-			currency: 'UZS',
-			totalGross: rows.reduce((sum, p) => sum + p.grossAmount, 0),
-			totalDeductions: rows.reduce((sum, p) => sum + p.deductions, 0),
-			totalNetPayable: rows.reduce((sum, p) => sum + p.netAmount, 0),
-		});
+		const advances = staffId
+			? MOCK_ADVANCES.filter((a) => a.staffId === Number(staffId))
+			: MOCK_ADVANCES;
+		return ok(advances);
 	}),
 
-	http.post(`${MANAGE}/payrolls/run`, async ({ request }) => {
-		const body = (await request.json()) as {
-			periodStart: string;
-			periodEnd: string;
-		};
-		const payrolls = MOCK_PAYROLLS.map((p) => ({
-			...p,
-			status: 'DRAFT' as const,
-			periodStart: body.periodStart,
-			periodEnd: body.periodEnd,
-		}));
-		return ok({ created: payrolls.length, skipped: 0, payrolls });
-	}),
-
-	http.get(`${MANAGE}/payrolls/preview`, ({ request }) => {
-		const url = new URL(request.url);
-		return ok({
-			staffId: Number(url.searchParams.get('staffId')),
-			payrollType: 'FIXED',
-			periodStart: url.searchParams.get('periodStart'),
-			periodEnd: url.searchParams.get('periodEnd'),
-			fullyCovered: false,
-			grossAmount: MOCK_PAYROLLS[0]?.grossAmount ?? 0,
-			breakdown: MOCK_PAYROLLS[0]?.breakdown ?? null,
-			skippedRanges: [],
-		});
-	}),
-
-	http.post(`${MANAGE}/payrolls`, async ({ request }) => {
+	http.post(`${MANAGE}/payrolls/advances`, async ({ request }) => {
 		const body = (await request.json()) as Record<string, unknown>;
 		return ok({
-			...MOCK_PAYROLLS[0],
-			id: 88,
+			id: 2,
+			payrollId: null,
+			removable: true,
+			label: null,
+			createdAt: '2026-07-20T09:00:00Z',
 			...body,
-			status: 'DRAFT',
 		});
+	}),
+
+	http.delete(`${MANAGE}/payrolls/advances/:id`, ({ params }) => {
+		const advance = MOCK_ADVANCES.find((a) => a.id === Number(params['id']));
+		if (!advance) return fail(404, 'ADVANCE_NOT_FOUND', 'Salary advance not found.');
+		return new HttpResponse(null, { status: 204 });
+	}),
+
+	http.get(`${MANAGE}/payrolls`, ({ request }) => {
+		const url = new URL(request.url);
+		const staffId = url.searchParams.get('staffId');
+		const status = url.searchParams.get('status');
+		let rows = MOCK_PAYROLL_HISTORY;
+		if (staffId) rows = rows.filter((r) => r.staffId === Number(staffId));
+		if (status) rows = rows.filter((r) => r.status === status);
+		return okPaged(rows, 1, 20, rows.length);
 	}),
 
 	http.get(`${MANAGE}/payrolls/:id`, ({ params }) => {
-		const payroll = MOCK_PAYROLLS.find((p) => p.id === Number(params['id']));
-		if (!payroll) return fail(404, 'NOT_FOUND', 'Payroll not found.');
-		return ok(payroll);
-	}),
-
-	http.patch(`${MANAGE}/payrolls/:id`, async ({ params, request }) => {
-		const payroll = MOCK_PAYROLLS.find((p) => p.id === Number(params['id']));
-		if (!payroll) return fail(404, 'NOT_FOUND', 'Payroll not found.');
-		const body = (await request.json()) as Record<string, unknown>;
-		return ok({ ...payroll, ...body });
-	}),
-
-	http.post(`${MANAGE}/payrolls/:id/approve`, ({ params }) => {
-		const payroll = MOCK_PAYROLLS.find((p) => p.id === Number(params['id']));
-		if (!payroll) return fail(404, 'NOT_FOUND', 'Payroll not found.');
-		return ok({ ...payroll, status: 'APPROVED', approvedByUserId: 1 });
+		if (Number(params['id']) === 10) return ok(MOCK_STAFF_PERIOD_FINALIZED);
+		return fail(404, 'PAYROLL_NOT_FOUND', 'Payroll record not found.');
 	}),
 
 	http.post(`${MANAGE}/payrolls/:id/mark-paid`, ({ params }) => {
-		const payroll = MOCK_PAYROLLS.find((p) => p.id === Number(params['id']));
-		if (!payroll) return fail(404, 'NOT_FOUND', 'Payroll not found.');
+		if (Number(params['id']) !== 10) {
+			return fail(404, 'PAYROLL_NOT_FOUND', 'Payroll record not found.');
+		}
 		return ok({
-			...payroll,
-			status: 'PAID',
-			paidAt: '2026-07-01T00:00:00Z',
+			...MOCK_STAFF_PERIOD_FINALIZED,
+			status: 'PAID' as const,
+			paidAt: '2026-08-02T09:00:00Z',
 		});
+	}),
+
+	http.post(`${MANAGE}/payrolls/:id/unfinalize`, ({ params }) => {
+		if (Number(params['id']) !== 10) {
+			return fail(404, 'PAYROLL_NOT_FOUND', 'Payroll record not found.');
+		}
+		// 200 with a null payload — the snapshot is gone, so there is no
+		// resource left to return.
+		return ok(null);
+	}),
+
+	// ── Payroll configs (effective-dated pay models) ──────────────────────────
+	http.get(`${MANAGE}/staff/:staffId/payroll-configs`, ({ params }) =>
+		ok(MOCK_PAYROLL_CONFIGS.filter((c) => c.staffId === Number(params['staffId']))),
+	),
+
+	http.post(`${MANAGE}/staff/:staffId/payroll-configs`, async ({ params, request }) => {
+		const body = (await request.json()) as Record<string, unknown>;
+		return ok({
+			id: 4,
+			staffId: Number(params['staffId']),
+			baseSalary: null,
+			payrollPercent: null,
+			effectiveTo: null,
+			createdAt: '2026-08-01T09:00:00Z',
+			...body,
+		});
+	}),
+
+	http.patch(`${MANAGE}/payroll-configs/:id`, async ({ params, request }) => {
+		const config = MOCK_PAYROLL_CONFIGS.find((c) => c.id === Number(params['id']));
+		if (!config) return fail(404, 'PAYROLL_CONFIG_NOT_FOUND', 'Config not found.');
+		const body = (await request.json()) as Record<string, unknown>;
+		return ok({ ...config, ...body });
+	}),
+
+	http.delete(`${MANAGE}/payroll-configs/:id`, ({ params }) => {
+		const config = MOCK_PAYROLL_CONFIGS.find((c) => c.id === Number(params['id']));
+		if (!config) return fail(404, 'PAYROLL_CONFIG_NOT_FOUND', 'Config not found.');
+		return new HttpResponse(null, { status: 204 });
 	}),
 ];
 
@@ -2210,13 +2411,50 @@ export const courseHandlers = {
 };
 
 export const payrollHandlers = {
-	empty: http.get(`${MANAGE}/payrolls`, () => okPaged([], 1, 20, 0)),
-	forbidden: http.get(`${MANAGE}/payrolls`, () =>
+	/** A month with no teachers in scope (no configs, no sessions). */
+	emptyPeriod: http.get(`${MANAGE}/payrolls/period`, () =>
+		ok({
+			...MOCK_PERIOD,
+			periodStatus: 'OPEN' as const,
+			summary: {
+				currency: 'UZS',
+				totalComputed: 0,
+				totalAdvances: 0,
+				totalNetPayable: 0,
+				staffCount: 0,
+			},
+			rows: [],
+			excludedCount: 0,
+		}),
+	),
+	/** Every row still live — the month can be finalized. */
+	openPeriod: http.get(`${MANAGE}/payrolls/period`, () =>
+		ok({
+			...MOCK_PERIOD,
+			periodStatus: 'OPEN' as const,
+			rows: MOCK_PERIOD.rows.filter((r) => r.status === 'LIVE'),
+		}),
+	),
+	forbidden: http.get(`${MANAGE}/payrolls/period`, () =>
 		fail(403, 'FORBIDDEN', 'You do not have permission.'),
 	),
-	approveForbidden: http.post(`${MANAGE}/payrolls/:id/approve`, () =>
+	finalizeForbidden: http.post(`${MANAGE}/payrolls/finalize`, () =>
 		fail(403, 'FORBIDDEN', 'You do not have permission.'),
 	),
+	/** Recording an advance into an already-finalized month. */
+	advanceMonthFinalized: http.post(`${MANAGE}/payrolls/advances`, () =>
+		fail(409, 'PAYROLL_PERIOD_FINALIZED', 'This month has already been finalized.'),
+	),
+	/** Removing an advance already settled by a snapshot. */
+	advanceLinked: http.delete(`${MANAGE}/payrolls/advances/:id`, () =>
+		fail(
+			409,
+			'ADVANCE_LINKED',
+			'This advance has been settled by a finalized payroll.',
+		),
+	),
+	emptyHistory: http.get(`${MANAGE}/payrolls`, () => okPaged([], 1, 20, 0)),
+	noConfigs: http.get(`${MANAGE}/staff/:staffId/payroll-configs`, () => ok([])),
 };
 
 export const groupHandlers = {

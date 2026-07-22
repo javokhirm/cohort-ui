@@ -43,7 +43,7 @@ export function SubscriptionTab({
 		<div className="flex flex-col gap-6">
 			<div className="grid grid-cols-1 gap-4 md:grid-cols-2">
 				<Card className="gap-0 py-0">
-					<CardHeader className="px-5 pt-5 pb-0">
+					<CardHeader className="px-5 pb-0">
 						<p className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">
 							Current Plan
 						</p>

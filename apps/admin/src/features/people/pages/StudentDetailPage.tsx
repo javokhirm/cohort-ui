@@ -135,7 +135,7 @@ function OverviewTab({ studentId }: { studentId: number }) {
 	return (
 		<div className="grid gap-4 lg:grid-cols-3">
 			<Card className="lg:col-span-2">
-				<CardContent className="pt-5">
+				<CardContent>
 					<p className="mb-4 font-semibold">Personal details</p>
 					<div className="grid grid-cols-2 gap-x-8 gap-y-4 text-sm">
 						<div>

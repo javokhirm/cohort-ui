@@ -44,11 +44,6 @@ const EMPLOYMENT_OPTIONS = [
 	{ value: 'CONTRACTOR', label: 'Contractor' },
 ];
 
-const PAYROLL_TYPE_OPTIONS = [
-	{ value: 'FIXED', label: 'Fixed salary' },
-	{ value: 'PERCENT', label: '% of student fees' },
-];
-
 function CreateStaffForm({
 	onSuccess,
 	onPendingChange,
@@ -73,17 +68,10 @@ function CreateStaffForm({
 			email: '',
 			employmentType: 'FULL_TIME',
 			hireDate: '',
-			payrollType: 'FIXED',
 			specialization: '',
 			password: '',
 		},
 	});
-
-	// The payroll block is teacher-only; PERCENT swaps the salary input for the
-	// percent share of their groups' course fees.
-	const isTeacher = form.watch('roleName') === 'TEACHER';
-	const payrollType = form.watch('payrollType');
-	const showPercent = isTeacher && payrollType === 'PERCENT';
 
 	const { data: branches = [] } = useBranches();
 	const createStaff = useCreateStaff();
@@ -103,10 +91,6 @@ function CreateStaffForm({
 			roleName: values.roleName,
 			employmentType: values.employmentType,
 			hireDate: values.hireDate || undefined,
-			baseSalary: values.baseSalary,
-			payrollType: values.payrollType,
-			payrollPercent:
-				values.payrollType === 'PERCENT' ? values.payrollPercent : undefined,
 			specialization: parseSpecialization(values.specialization),
 			password: values.password || undefined,
 		});
@@ -214,62 +198,16 @@ function CreateStaffForm({
 								label="Start date"
 							/>
 						</div>
-						{isTeacher && (
-							<FormSelect
-								control={form.control}
-								name="payrollType"
-								label="Pay model"
-								options={PAYROLL_TYPE_OPTIONS}
-							/>
-						)}
-						{showPercent ? (
-							<>
-								<FormInput
-									control={form.control}
-									name="payrollPercent"
-									label="Share of student fees (%)"
-									type="number"
-									placeholder="e.g. 50"
-									onChange={(e) =>
-										form.setValue(
-											'payrollPercent',
-											e.target.value === ''
-												? undefined
-												: Number(e.target.value),
-											{ shouldValidate: true },
-										)
-									}
-								/>
-								<p className="text-xs text-muted-foreground">
-									The teacher earns this share of the course fees of
-									students in their groups, prorated by lessons for
-									mid-month joiners and leavers.
-								</p>
-							</>
-						) : (
-							<FormInput
-								control={form.control}
-								name="baseSalary"
-								label="Monthly salary (UZS)"
-								type="number"
-								placeholder="0"
-								onChange={(e) =>
-									form.setValue(
-										'baseSalary',
-										e.target.value === ''
-											? undefined
-											: Number(e.target.value),
-										{ shouldValidate: true },
-									)
-								}
-							/>
-						)}
 						<FormInput
 							control={form.control}
 							name="specialization"
 							label="Subjects / specialization"
 							placeholder="e.g. IELTS, General English"
 						/>
+						<p className="text-xs text-muted-foreground">
+							Pay is configured after saving — from the member&apos;s
+							Payroll tab (&quot;Change pay model&quot;).
+						</p>
 					</FieldGroup>
 				</FormSection>
 			</form>

@@ -28,10 +28,11 @@ import {
 import { formatDate, formatMoney } from '@repo/utils';
 
 import { usePermissions } from '@/features/auth/hooks';
-import { usePayrollList } from '@/features/payroll/api/payroll.queries';
+import { usePayrollHistory } from '@/features/payroll/api/payroll.queries';
 
 import { useStaffMember, type StaffResponse } from '../api/staff.queries';
 import { ChangeStaffPasswordDialog } from '../components/ChangeStaffPasswordDialog';
+import { PayrollConfigCard } from '../components/PayrollConfigCard';
 import { RolesSection } from '../components/RolesSection';
 import { primaryRole, roleLabel } from '../lib/roles';
 
@@ -129,7 +130,7 @@ function OverviewTab({ staff }: { staff: StaffResponse }) {
 	return (
 		<div className="grid gap-4 lg:grid-cols-2">
 			<Card>
-				<CardContent className="pt-5">
+				<CardContent>
 					<p className="mb-1 font-semibold">Contact</p>
 					<DetailRows
 						rows={[
@@ -154,7 +155,7 @@ function OverviewTab({ staff }: { staff: StaffResponse }) {
 			</Card>
 
 			<Card>
-				<CardContent className="pt-5">
+				<CardContent>
 					<p className="mb-1 font-semibold">Employment</p>
 					<DetailRows
 						rows={[
@@ -183,25 +184,15 @@ function OverviewTab({ staff }: { staff: StaffResponse }) {
 
 function PayrollTab({ staff }: { staff: StaffResponse }) {
 	const navigate = useNavigate();
-	const { data, isLoading } = usePayrollList({ staffId: staff.id, limit: 12 });
+	const { data, isLoading } = usePayrollHistory({ staffId: staff.id, limit: 12 });
 	const payslips = data?.rows ?? [];
 
 	return (
 		<div className="grid gap-4 lg:grid-cols-3">
-			<Card>
-				<CardContent className="flex flex-col gap-1 pt-5">
-					<p className="text-sm text-muted-foreground">Monthly salary</p>
-					<p className="text-2xl font-bold">
-						{staff.baseSalary != null ? formatMoney(staff.baseSalary) : '—'}
-					</p>
-					<p className="text-xs text-muted-foreground">
-						{employmentLabel(staff.employmentType)} · paid monthly
-					</p>
-				</CardContent>
-			</Card>
+			<PayrollConfigCard staffId={staff.id} />
 
 			<Card className="lg:col-span-2">
-				<CardContent className="pt-5">
+				<CardContent>
 					<p className="mb-3 font-semibold">Recent payslips</p>
 					{isLoading ? (
 						<div className="flex flex-col gap-2">
@@ -222,8 +213,11 @@ function PayrollTab({ staff }: { staff: StaffResponse }) {
 										type="button"
 										onClick={() =>
 											void navigate({
-												to: '/payroll/$id',
-												params: { id: String(p.id) },
+												to: '/payroll/$staffId',
+												params: {
+													staffId: String(p.staffId),
+												},
+												search: { month: p.month },
 											})
 										}
 										className="flex w-full items-center justify-between rounded-md py-3 text-left hover:bg-muted/50"

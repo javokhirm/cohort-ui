@@ -28,64 +28,34 @@ const optionalPassword = z
 	])
 	.optional();
 
-/**
- * A PERCENT payroll type without a percentage is incomplete — mirror the
- * backend's `STAFF_PAYROLL_PERCENT_REQUIRED` rule so it fails client-side.
- */
-function requirePercentWithPercentType(
-	data: { payrollType: 'FIXED' | 'PERCENT'; payrollPercent?: number },
-	ctx: z.RefinementCtx,
-) {
-	if (data.payrollType === 'PERCENT' && data.payrollPercent == null) {
-		ctx.addIssue({
-			code: 'custom',
-			path: ['payrollPercent'],
-			message: 'Percent is required for percentage pay',
-		});
-	}
-}
+// The pay model (fixed/percent, salary, share) is no longer part of the staff
+// forms — it lives on the dated payroll-config timeline (see
+// `payroll-config-form.schema.ts` and the staff detail Payroll tab).
 
-const payrollType = z.enum(['FIXED', 'PERCENT']);
-const payrollPercent = z
-	.number()
-	.gt(0, 'Percent must be greater than 0')
-	.max(100, 'Percent cannot exceed 100')
-	.optional();
+export const createStaffSchema = z.object({
+	firstName: z.string().min(1, 'First name is required'),
+	lastName: z.string().min(1, 'Last name is required'),
+	roleName: z.enum(['TEACHER', 'MANAGER', 'ADMIN'], { error: 'Role is required' }),
+	branchId: z.number({ error: 'Branch is required' }).min(1, 'Branch is required'),
+	position: z.string().optional(),
+	phone,
+	email,
+	employmentType: z.enum(['FULL_TIME', 'PART_TIME', 'CONTRACTOR']),
+	hireDate: z.string().optional(),
+	specialization: z.string().optional(),
+	password: optionalPassword,
+});
 
-export const createStaffSchema = z
-	.object({
-		firstName: z.string().min(1, 'First name is required'),
-		lastName: z.string().min(1, 'Last name is required'),
-		roleName: z.enum(['TEACHER', 'MANAGER', 'ADMIN'], { error: 'Role is required' }),
-		branchId: z.number({ error: 'Branch is required' }).min(1, 'Branch is required'),
-		position: z.string().optional(),
-		phone,
-		email,
-		employmentType: z.enum(['FULL_TIME', 'PART_TIME', 'CONTRACTOR']),
-		hireDate: z.string().optional(),
-		baseSalary: z.number().min(0, 'Salary cannot be negative').optional(),
-		payrollType,
-		payrollPercent,
-		specialization: z.string().optional(),
-		password: optionalPassword,
-	})
-	.superRefine(requirePercentWithPercentType);
-
-export const editStaffSchema = z
-	.object({
-		firstName: z.string().min(1, 'First name is required'),
-		lastName: z.string().min(1, 'Last name is required'),
-		phone,
-		email,
-		position: z.string().optional(),
-		employmentType: z.enum(['FULL_TIME', 'PART_TIME', 'CONTRACTOR']),
-		baseSalary: z.number().min(0, 'Salary cannot be negative').optional(),
-		payrollType,
-		payrollPercent,
-		specialization: z.string().optional(),
-		status: z.enum(['ACTIVE', 'ON_LEAVE', 'TERMINATED']),
-	})
-	.superRefine(requirePercentWithPercentType);
+export const editStaffSchema = z.object({
+	firstName: z.string().min(1, 'First name is required'),
+	lastName: z.string().min(1, 'Last name is required'),
+	phone,
+	email,
+	position: z.string().optional(),
+	employmentType: z.enum(['FULL_TIME', 'PART_TIME', 'CONTRACTOR']),
+	specialization: z.string().optional(),
+	status: z.enum(['ACTIVE', 'ON_LEAVE', 'TERMINATED']),
+});
 
 /**
  * Operator reset of a staff member's password (`PATCH /staff/:id` with only

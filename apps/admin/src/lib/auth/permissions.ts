@@ -92,10 +92,11 @@ export const PERMISSION_CODES = [
 	'expense.create',
 	'expense.update',
 	'expense.delete',
-	// payroll
+	// payroll — period-snapshot model: `finalize` covers finalize + unfinalize,
+	// `manage` covers pay configs + mid-month advances.
 	'payroll.read',
-	'payroll.create',
-	'payroll.approve',
+	'payroll.finalize',
+	'payroll.manage',
 	'payroll.pay',
 	// lead
 	'lead.read',

@@ -6,14 +6,22 @@ import type { ReactNode } from 'react';
 import { server } from '@/test/server';
 import { payrollHandlers } from '@/test/handlers';
 
-import { usePayrollList, usePayrollSummary } from './payroll.queries';
 import {
-	useApprovePayroll,
-	useCreatePayroll,
+	usePayroll,
+	usePayrollAdvances,
+	usePayrollHistory,
+	usePayrollPeriod,
+	usePayrollStaffPeriod,
+} from './payroll.queries';
+import {
+	useCreateAdvance,
+	useFinalizePeriod,
 	useMarkPayrollPaid,
-	useRunPayroll,
-	useUpdatePayroll,
+	useRemoveAdvance,
+	useUnfinalizePayroll,
 } from './payroll.mutations';
+
+const MONTH = '2026-07';
 
 function wrapper() {
 	const queryClient = new QueryClient({
@@ -24,125 +32,225 @@ function wrapper() {
 	};
 }
 
-describe('usePayrollList', () => {
-	it('fetches all payroll records', async () => {
-		const { result } = renderHook(() => usePayrollList({ page: 1, limit: 20 }), {
+describe('usePayrollPeriod', () => {
+	it('fetches the period view with its summary and rows', async () => {
+		const { result } = renderHook(() => usePayrollPeriod(MONTH), {
 			wrapper: wrapper(),
 		});
 
 		await waitFor(() => expect(result.current.isSuccess).toBe(true));
-		expect(result.current.data?.total).toBe(3);
+		expect(result.current.data?.month).toBe(MONTH);
+		expect(result.current.data?.rows).toHaveLength(2);
+		expect(result.current.data?.summary.totalNetPayable).toBe(8_400_000);
+		expect(result.current.data?.periodStatus).toBe('PARTIALLY_FINALIZED');
 	});
 
-	it('filters by status', async () => {
-		const { result } = renderHook(
-			() => usePayrollList({ page: 1, limit: 20, status: 'DRAFT' }),
-			{ wrapper: wrapper() },
-		);
+	it('surfaces live rows so the open month is distinguishable from snapshots', async () => {
+		const { result } = renderHook(() => usePayrollPeriod(MONTH), {
+			wrapper: wrapper(),
+		});
 
 		await waitFor(() => expect(result.current.isSuccess).toBe(true));
-		expect(result.current.data?.total).toBe(1);
-		expect(result.current.data?.rows[0]?.status).toBe('DRAFT');
+		const live = result.current.data?.rows.find((row) => row.status === 'LIVE');
+		expect(live?.payrollId).toBeNull();
+		expect(live?.rateType).toBe('PERCENT');
+		expect(live?.advancesTotal).toBe(500_000);
 	});
 
-	it('filters by staffId (payslips for one staff member)', async () => {
-		const { result } = renderHook(
-			() => usePayrollList({ page: 1, limit: 20, staffId: 3 }),
-			{ wrapper: wrapper() },
-		);
+	it('filters rows by status without changing the period summary', async () => {
+		const { result } = renderHook(() => usePayrollPeriod(MONTH, { status: 'LIVE' }), {
+			wrapper: wrapper(),
+		});
 
 		await waitFor(() => expect(result.current.isSuccess).toBe(true));
-		expect(result.current.data?.rows.every((p) => p.staffId === 3)).toBe(true);
+		expect(result.current.data?.rows).toHaveLength(1);
+		// The strip still reports the whole period.
+		expect(result.current.data?.summary.staffCount).toBe(2);
 	});
 
-	it('surfaces empty results', async () => {
-		server.use(payrollHandlers.empty);
-		const { result } = renderHook(() => usePayrollList({ page: 1, limit: 20 }), {
+	it('reports staff excluded for want of a payroll config', async () => {
+		const { result } = renderHook(() => usePayrollPeriod(MONTH), {
+			wrapper: wrapper(),
+		});
+
+		await waitFor(() => expect(result.current.isSuccess).toBe(true));
+		expect(result.current.data?.excludedCount).toBe(1);
+	});
+
+	it('surfaces an empty month', async () => {
+		server.use(payrollHandlers.emptyPeriod);
+		const { result } = renderHook(() => usePayrollPeriod(MONTH), {
 			wrapper: wrapper(),
 		});
 
 		await waitFor(() => expect(result.current.isSuccess).toBe(true));
 		expect(result.current.data?.rows).toHaveLength(0);
+		expect(result.current.data?.periodStatus).toBe('OPEN');
+	});
+
+	it('surfaces a permission error', async () => {
+		server.use(payrollHandlers.forbidden);
+		const { result } = renderHook(() => usePayrollPeriod(MONTH), {
+			wrapper: wrapper(),
+		});
+
+		await waitFor(() => expect(result.current.isError).toBe(true));
+	});
+
+	it('stays idle without a month', () => {
+		const { result } = renderHook(() => usePayrollPeriod(''), { wrapper: wrapper() });
+
+		expect(result.current.fetchStatus).toBe('idle');
 	});
 });
 
-describe('usePayrollSummary', () => {
-	it('reports true aggregates, not just the current page', async () => {
-		const { result } = renderHook(() => usePayrollSummary(), { wrapper: wrapper() });
-
-		await waitFor(() => expect(result.current.isSuccess).toBe(true));
-		// 8,000,000 + 10,000,000 + 5,000,000 gross across all three fixtures.
-		expect(result.current.data?.totalGross).toBe(23_000_000);
-		expect(result.current.data?.totalNetPayable).toBe(20_240_000);
-	});
-
-	it('scopes to a single staff member when filtered', async () => {
-		const { result } = renderHook(() => usePayrollSummary({ staffId: 3 }), {
+describe('usePayrollStaffPeriod', () => {
+	it('fetches the live detail with its per-student breakdown and advances', async () => {
+		const { result } = renderHook(() => usePayrollStaffPeriod(MONTH, 1), {
 			wrapper: wrapper(),
 		});
 
 		await waitFor(() => expect(result.current.isSuccess).toBe(true));
-		expect(result.current.data?.totalGross).toBe(5_000_000);
+		expect(result.current.data?.status).toBe('LIVE');
+		expect(result.current.data?.breakdown.lines).toHaveLength(2);
+		expect(result.current.data?.breakdown.calculation.percent).toBe(50);
+		expect(result.current.data?.advances).toHaveLength(1);
+	});
+
+	it('fetches a frozen snapshot with its finalize meta', async () => {
+		const { result } = renderHook(() => usePayrollStaffPeriod(MONTH, 2), {
+			wrapper: wrapper(),
+		});
+
+		await waitFor(() => expect(result.current.isSuccess).toBe(true));
+		expect(result.current.data?.status).toBe('FINALIZED');
+		expect(result.current.data?.finalizedByName).toBe('Aziz Yusupov');
+		expect(result.current.data?.payrollId).toBe(10);
 	});
 });
 
-describe('payroll workflow mutations', () => {
-	it('approves a draft payroll (DRAFT → APPROVED)', async () => {
-		const { result } = renderHook(() => useApprovePayroll(), { wrapper: wrapper() });
+describe('usePayrollHistory', () => {
+	it('lists persisted snapshots for one staff member', async () => {
+		const { result } = renderHook(() => usePayrollHistory({ staffId: 2 }), {
+			wrapper: wrapper(),
+		});
 
-		const approved = await result.current.mutateAsync(1);
-		expect(approved.status).toBe('APPROVED');
-		expect(approved.approvedByUserId).toBe(1);
+		await waitFor(() => expect(result.current.isSuccess).toBe(true));
+		expect(result.current.data?.total).toBe(2);
+		expect(result.current.data?.rows.every((row) => row.staffId === 2)).toBe(true);
 	});
 
-	it('marks an approved payroll as paid (APPROVED → PAID)', async () => {
-		const { result } = renderHook(() => useMarkPayrollPaid(), { wrapper: wrapper() });
+	it('surfaces an empty history', async () => {
+		server.use(payrollHandlers.emptyHistory);
+		const { result } = renderHook(() => usePayrollHistory({ staffId: 2 }), {
+			wrapper: wrapper(),
+		});
 
-		const paid = await result.current.mutateAsync(2);
+		await waitFor(() => expect(result.current.isSuccess).toBe(true));
+		expect(result.current.data?.total).toBe(0);
+	});
+});
+
+describe('usePayroll', () => {
+	it('resolves a snapshot id to its staff-period view', async () => {
+		const { result } = renderHook(() => usePayroll(10), { wrapper: wrapper() });
+
+		await waitFor(() => expect(result.current.isSuccess).toBe(true));
+		expect(result.current.data?.staffId).toBe(2);
+		expect(result.current.data?.month).toBe(MONTH);
+	});
+});
+
+describe('usePayrollAdvances', () => {
+	it('lists the advances of one staff member', async () => {
+		const { result } = renderHook(() => usePayrollAdvances({ staffId: 1 }), {
+			wrapper: wrapper(),
+		});
+
+		await waitFor(() => expect(result.current.isSuccess).toBe(true));
+		expect(result.current.data).toHaveLength(1);
+		expect(result.current.data?.[0]?.removable).toBe(true);
+	});
+});
+
+describe('useFinalizePeriod', () => {
+	it('reports what was finalized and what was already frozen', async () => {
+		const { result } = renderHook(() => useFinalizePeriod(), { wrapper: wrapper() });
+
+		const outcome = await result.current.mutateAsync({ month: MONTH });
+		expect(outcome.finalized).toBe(1);
+		expect(outcome.skipped).toBe(1);
+	});
+
+	it('surfaces a permission error', async () => {
+		server.use(payrollHandlers.finalizeForbidden);
+		const { result } = renderHook(() => useFinalizePeriod(), { wrapper: wrapper() });
+
+		await expect(result.current.mutateAsync({ month: MONTH })).rejects.toBeDefined();
+	});
+});
+
+describe('useMarkPayrollPaid', () => {
+	it('settles a finalized snapshot', async () => {
+		const { result } = renderHook(() => useMarkPayrollPaid(10), {
+			wrapper: wrapper(),
+		});
+
+		const paid = await result.current.mutateAsync();
 		expect(paid.status).toBe('PAID');
 		expect(paid.paidAt).not.toBeNull();
 	});
+});
 
-	it('runs payroll and reports created draft count', async () => {
-		const { result } = renderHook(() => useRunPayroll(), { wrapper: wrapper() });
-
-		const run = await result.current.mutateAsync({
-			periodStart: '2026-07-01',
-			periodEnd: '2026-07-31',
-			autoCalculate: true,
+describe('useUnfinalizePayroll', () => {
+	it('reopens a finalized snapshot', async () => {
+		const { result } = renderHook(() => useUnfinalizePayroll(10), {
+			wrapper: wrapper(),
 		});
 
-		expect(run.created).toBe(3);
-		expect(run.payrolls.every((p) => p.status === 'DRAFT')).toBe(true);
+		await expect(result.current.mutateAsync()).resolves.toBeNull();
 	});
+});
 
-	it('creates a single ad-hoc payroll record', async () => {
-		const { result } = renderHook(() => useCreatePayroll(), { wrapper: wrapper() });
+describe('advance mutations', () => {
+	it('records an advance', async () => {
+		const { result } = renderHook(() => useCreateAdvance(), { wrapper: wrapper() });
 
-		const created = await result.current.mutateAsync({
-			branchId: 1,
+		const advance = await result.current.mutateAsync({
 			staffId: 1,
-			periodStart: '2026-07-01',
-			periodEnd: '2026-07-31',
-			autoCalculate: false,
-			grossAmount: 6_000_000,
-			deductions: 0,
+			branchId: 1,
+			amount: 300_000,
+			label: 'cash advance',
+			advanceDate: '2026-07-20',
 		});
-
-		expect(created.status).toBe('DRAFT');
-		expect(created.grossAmount).toBe(6_000_000);
+		expect(advance.amount).toBe(300_000);
+		expect(advance.payrollId).toBeNull();
 	});
 
-	it('updates a draft payroll record', async () => {
-		const { result } = renderHook(() => useUpdatePayroll(), { wrapper: wrapper() });
+	it('refuses an advance once the month is finalized', async () => {
+		server.use(payrollHandlers.advanceMonthFinalized);
+		const { result } = renderHook(() => useCreateAdvance(), { wrapper: wrapper() });
 
-		const updated = await result.current.mutateAsync({
-			id: 1,
-			grossAmount: 9_000_000,
-			deductions: 1_000_000,
-		});
+		await expect(
+			result.current.mutateAsync({
+				staffId: 1,
+				branchId: 1,
+				amount: 300_000,
+				advanceDate: '2026-07-20',
+			}),
+		).rejects.toBeDefined();
+	});
 
-		expect(updated.grossAmount).toBe(9_000_000);
-		expect(updated.deductions).toBe(1_000_000);
+	it('removes an unlinked advance', async () => {
+		const { result } = renderHook(() => useRemoveAdvance(), { wrapper: wrapper() });
+
+		await expect(result.current.mutateAsync(1)).resolves.toBeNull();
+	});
+
+	it('refuses to remove an advance already settled by a snapshot', async () => {
+		server.use(payrollHandlers.advanceLinked);
+		const { result } = renderHook(() => useRemoveAdvance(), { wrapper: wrapper() });
+
+		await expect(result.current.mutateAsync(1)).rejects.toBeDefined();
 	});
 });
