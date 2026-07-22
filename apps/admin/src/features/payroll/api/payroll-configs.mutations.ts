@@ -15,9 +15,16 @@ export interface CreatePayrollConfigInput {
 	effectiveFrom: string;
 }
 
+/**
+ * `payrollType` is deliberately absent: the backend pins it for the life of a
+ * window (`UpdatePayrollConfigDto` has no such field, and the service reads the
+ * type off the stored row). The global pipe runs `whitelist: true` without
+ * `forbidNonWhitelisted`, so sending it would be silently stripped and the
+ * request would report success having changed nothing. Switching FIXED ↔
+ * PERCENT means opening a new window.
+ */
 export interface UpdatePayrollConfigInput {
 	id: number;
-	payrollType?: 'FIXED' | 'PERCENT';
 	baseSalary?: number;
 	payrollPercent?: number;
 	effectiveFrom?: string;

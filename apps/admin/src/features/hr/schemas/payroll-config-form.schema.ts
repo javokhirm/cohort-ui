@@ -1,10 +1,13 @@
 import { z } from 'zod';
 
 /**
- * "Change pay model" sheet on the staff detail Payroll tab — creates a new
- * payroll-config window (`POST /staff/:id/payroll-configs`). Mirrors the
- * backend rules: a FIXED window needs a salary, a PERCENT window needs a share
- * in (0, 100], and the window starts on `effectiveFrom`.
+ * The pay-window sheet on the staff detail Payroll tab, in both modes —
+ * creating a window (`POST /staff/:id/payroll-configs`) and correcting one
+ * (`PATCH /payroll-configs/:id`). Mirrors the backend rules: a FIXED window
+ * needs a salary, a PERCENT window needs a share in (0, 100], and the window
+ * starts on `effectiveFrom`. `payrollType` is captured in edit mode too — it
+ * drives the pairing rules below — but is never sent on a PATCH, since the
+ * backend keeps a window's type immutable.
  */
 export const payrollConfigFormSchema = z
 	.object({

@@ -1,20 +1,16 @@
 import { useState } from 'react';
-import { useForm } from 'react-hook-form';
-import { zodResolver } from '@hookform/resolvers/zod';
-import { Pencil } from 'lucide-react';
+import { MoreHorizontal, Pencil, Trash2 } from 'lucide-react';
 
 import {
 	Button,
 	Card,
 	CardContent,
-	FieldGroup,
-	Form,
-	FormDatePicker,
-	FormInput,
-	FormMoneyInput,
-	FormSelect,
+	ConfirmDialog,
+	DropdownMenu,
+	DropdownMenuContent,
+	DropdownMenuItem,
+	DropdownMenuTrigger,
 	Skeleton,
-	Spinner,
 	StatusBadge,
 	toast,
 } from '@repo/ui';
@@ -22,20 +18,11 @@ import { isApiError } from '@repo/api-client';
 import { formatDate, formatMoney, todayIsoDate } from '@repo/utils';
 
 import { Can } from '@/components/Can';
-import { FormSheet } from '@/components/FormSheet';
 import { usePayrollConfigs } from '@/features/payroll/api/payroll-configs.queries';
-import { useCreatePayrollConfig } from '@/features/payroll/api/payroll-configs.mutations';
+import { useDeletePayrollConfig } from '@/features/payroll/api/payroll-configs.mutations';
 import type { PayrollConfigResponse } from '@/features/payroll/api/payroll-configs.queries';
 
-import {
-	payrollConfigFormSchema,
-	type PayrollConfigFormValues,
-} from '../schemas/payroll-config-form.schema';
-
-const PAYROLL_TYPE_OPTIONS = [
-	{ value: 'FIXED', label: 'Fixed salary' },
-	{ value: 'PERCENT', label: '% of student fees' },
-];
+import { PayrollConfigSheet } from './PayrollConfigSheet';
 
 function configValueLabel(config: PayrollConfigResponse): string {
 	return config.payrollType === 'PERCENT'
@@ -57,148 +44,102 @@ function findCurrentConfig(
 		.sort((a, b) => b.effectiveFrom.localeCompare(a.effectiveFrom))[0];
 }
 
-function ChangePayModelSheet({
-	staffId,
-	open,
-	onOpenChange,
+/** The last window on the timeline — the only one the API lets you delete. */
+function findNewestConfig(
+	configs: PayrollConfigResponse[],
+): PayrollConfigResponse | undefined {
+	return [...configs].sort(
+		(a, b) => b.effectiveFrom.localeCompare(a.effectiveFrom) || b.id - a.id,
+	)[0];
+}
+
+function ConfigActions({
+	config,
+	isNewest,
+	onEdit,
+	onDelete,
 }: {
-	staffId: number;
-	open: boolean;
-	onOpenChange: (open: boolean) => void;
+	config: PayrollConfigResponse;
+	isNewest: boolean;
+	onEdit: (config: PayrollConfigResponse) => void;
+	onDelete: (config: PayrollConfigResponse) => void;
 }) {
-	const createConfig = useCreatePayrollConfig(staffId);
-	const form = useForm<PayrollConfigFormValues>({
-		resolver: zodResolver(payrollConfigFormSchema),
-		defaultValues: {
-			payrollType: 'FIXED',
-			baseSalary: undefined,
-			payrollPercent: undefined,
-			effectiveFrom: todayIsoDate(),
-		},
-	});
-	const payrollType = form.watch('payrollType');
-
-	async function onSubmit(values: PayrollConfigFormValues) {
-		try {
-			await createConfig.mutateAsync({
-				payrollType: values.payrollType,
-				baseSalary:
-					values.payrollType === 'FIXED' ? values.baseSalary : undefined,
-				payrollPercent:
-					values.payrollType === 'PERCENT' ? values.payrollPercent : undefined,
-				effectiveFrom: values.effectiveFrom,
-			});
-			toast.success('Pay model updated');
-			onOpenChange(false);
-			form.reset({
-				payrollType: 'FIXED',
-				baseSalary: undefined,
-				payrollPercent: undefined,
-				effectiveFrom: todayIsoDate(),
-			});
-		} catch (err) {
-			toast.error(isApiError(err) ? err.message : 'Failed to update the pay model');
-		}
-	}
-
 	return (
-		<FormSheet
-			open={open}
-			onOpenChange={onOpenChange}
-			title="Change pay model"
-			description="Opens a new pay window; earlier periods keep the model they were computed with."
-			footer={
-				<>
-					<Button
-						type="button"
-						variant="outline"
-						onClick={() => onOpenChange(false)}
-					>
-						Cancel
-					</Button>
-					<Button
-						type="submit"
-						form="payroll-config-form"
-						disabled={createConfig.isPending}
-					>
-						{createConfig.isPending && <Spinner className="mr-2 size-4" />}
-						Save
-					</Button>
-				</>
-			}
-		>
-			<Form {...form}>
-				<form
-					id="payroll-config-form"
-					onSubmit={(e) => void form.handleSubmit(onSubmit)(e)}
-					className="flex flex-col gap-4"
+		<DropdownMenu>
+			<DropdownMenuTrigger asChild>
+				<Button
+					variant="ghost"
+					size="sm"
+					className="size-8 shrink-0 p-0"
+					// Several of these sit on one card — name the window so they
+					// stay distinguishable to a screen reader.
+					aria-label={`Actions for the pay window from ${formatDate(config.effectiveFrom)}`}
 				>
-					<FieldGroup>
-						<FormSelect
-							control={form.control}
-							name="payrollType"
-							label="Pay model *"
-							options={PAYROLL_TYPE_OPTIONS}
-						/>
-						{payrollType === 'PERCENT' ? (
-							<>
-								<FormInput
-									control={form.control}
-									name="payrollPercent"
-									label="Share of student fees (%) *"
-									type="number"
-									placeholder="e.g. 50"
-									onChange={(e) =>
-										form.setValue(
-											'payrollPercent',
-											e.target.value === ''
-												? undefined
-												: Number(e.target.value),
-											{ shouldValidate: true },
-										)
-									}
-								/>
-								<p className="text-xs text-muted-foreground">
-									The teacher earns this share of the tuition of
-									students in their groups, prorated by completed
-									sessions.
-								</p>
-							</>
-						) : (
-							<FormMoneyInput
-								control={form.control}
-								name="baseSalary"
-								label="Monthly salary *"
-								placeholder="0"
-							/>
-						)}
-						<FormDatePicker
-							control={form.control}
-							name="effectiveFrom"
-							label="Effective from *"
-						/>
-						<p className="text-xs text-muted-foreground">
-							Payroll from this date uses the new pay model.
-						</p>
-					</FieldGroup>
-				</form>
-			</Form>
-		</FormSheet>
+					<MoreHorizontal className="size-4" />
+				</Button>
+			</DropdownMenuTrigger>
+			<DropdownMenuContent align="end">
+				<DropdownMenuItem onClick={() => onEdit(config)}>
+					<Pencil className="size-4" />
+					Edit
+				</DropdownMenuItem>
+				{/* Only the newest window is removable — deleting a middle one would
+				    tear a hole in the priced timeline, and the API 409s. */}
+				{isNewest && (
+					<DropdownMenuItem
+						variant="destructive"
+						onClick={() => onDelete(config)}
+					>
+						<Trash2 className="size-4" />
+						Delete
+					</DropdownMenuItem>
+				)}
+			</DropdownMenuContent>
+		</DropdownMenu>
 	);
 }
 
 /**
  * The staff member's pay model — current window, past windows, and the
- * `payroll.manage`-gated "Change pay model" action. Replaces the old
- * monthly-salary card: pay now lives on a dated config timeline, so historic
- * payroll never changes retroactively.
+ * `payroll.manage`-gated actions. Pay lives on a dated config timeline, so
+ * historic payroll never changes retroactively: "Change pay model" opens a new
+ * window, while edit/delete correct a window that no finalized payroll has
+ * priced yet (the API is the judge — it 409s otherwise).
  */
 export function PayrollConfigCard({ staffId }: { staffId: number }) {
 	const { data: configs, isLoading, isError } = usePayrollConfigs(staffId);
 	const [changeOpen, setChangeOpen] = useState(false);
+	const [editingConfig, setEditingConfig] = useState<PayrollConfigResponse | null>(
+		null,
+	);
+	const [deletingConfig, setDeletingConfig] = useState<PayrollConfigResponse | null>(
+		null,
+	);
+
+	const deleteMutation = useDeletePayrollConfig(staffId);
 
 	const current = configs ? findCurrentConfig(configs) : undefined;
+	const newest = configs ? findNewestConfig(configs) : undefined;
 	const history = (configs ?? []).filter((c) => c.id !== current?.id);
+	// Delete is only offered on the newest window, so anything else on the
+	// timeline is necessarily its predecessor and will reopen in its place.
+	const hasPredecessor = (configs?.length ?? 0) > 1;
+
+	function handleDeleteConfirm() {
+		if (!deletingConfig) return;
+		deleteMutation.mutate(deletingConfig.id, {
+			onSuccess: () => {
+				toast.success('Pay window deleted');
+				setDeletingConfig(null);
+			},
+			onError: (err) => {
+				toast.error(
+					isApiError(err) ? err.message : 'Failed to delete the pay window',
+				);
+				setDeletingConfig(null);
+			},
+		});
+	}
 
 	return (
 		<Card>
@@ -228,14 +169,27 @@ export function PayrollConfigCard({ staffId }: { staffId: number }) {
 						No pay configured — this member is excluded from payroll.
 					</p>
 				) : (
-					<div className="flex flex-col gap-1.5">
-						<StatusBadge kind="payroll_rate" status={current.payrollType} />
-						<p className="text-xl font-bold tabular-nums">
-							{configValueLabel(current)}
-						</p>
-						<p className="text-xs text-muted-foreground">
-							since {formatDate(current.effectiveFrom)}
-						</p>
+					<div className="flex items-start justify-between gap-2">
+						<div className="flex flex-col gap-1.5">
+							<StatusBadge
+								kind="payroll_rate"
+								status={current.payrollType}
+							/>
+							<p className="text-xl font-bold tabular-nums">
+								{configValueLabel(current)}
+							</p>
+							<p className="text-xs text-muted-foreground">
+								since {formatDate(current.effectiveFrom)}
+							</p>
+						</div>
+						<Can permission="payroll.manage">
+							<ConfigActions
+								config={current}
+								isNewest={current.id === newest?.id}
+								onEdit={setEditingConfig}
+								onDelete={setDeletingConfig}
+							/>
+						</Can>
 					</div>
 				)}
 
@@ -253,12 +207,22 @@ export function PayrollConfigCard({ staffId }: { staffId: number }) {
 									<span className="text-muted-foreground">
 										{configValueLabel(config)}
 									</span>
-									<span className="shrink-0 text-xs text-muted-foreground">
-										{formatDate(config.effectiveFrom)} –{' '}
-										{config.effectiveTo
-											? formatDate(config.effectiveTo)
-											: 'now'}
-									</span>
+									<div className="flex items-center gap-1">
+										<span className="shrink-0 text-xs text-muted-foreground">
+											{formatDate(config.effectiveFrom)} –{' '}
+											{config.effectiveTo
+												? formatDate(config.effectiveTo)
+												: 'now'}
+										</span>
+										<Can permission="payroll.manage">
+											<ConfigActions
+												config={config}
+												isNewest={config.id === newest?.id}
+												onEdit={setEditingConfig}
+												onDelete={setDeletingConfig}
+											/>
+										</Can>
+									</div>
 								</div>
 							))}
 						</div>
@@ -266,10 +230,37 @@ export function PayrollConfigCard({ staffId }: { staffId: number }) {
 				)}
 			</CardContent>
 
-			<ChangePayModelSheet
+			<PayrollConfigSheet
+				mode="create"
 				staffId={staffId}
 				open={changeOpen}
 				onOpenChange={setChangeOpen}
+			/>
+			{editingConfig && (
+				<PayrollConfigSheet
+					mode="edit"
+					config={editingConfig}
+					open={editingConfig !== null}
+					onOpenChange={(open) => {
+						if (!open) setEditingConfig(null);
+					}}
+				/>
+			)}
+			<ConfirmDialog
+				open={deletingConfig !== null}
+				onOpenChange={(open) => {
+					if (!open) setDeletingConfig(null);
+				}}
+				title="Delete this pay window?"
+				description={
+					hasPredecessor
+						? 'The previous pay window reopens and prices every day from here on. Finalized payroll is unaffected.'
+						: 'This member will have no pay model and will be excluded from payroll until you add one.'
+				}
+				confirmLabel="Delete window"
+				variant="destructive"
+				loading={deleteMutation.isPending}
+				onConfirm={handleDeleteConfirm}
 			/>
 		</Card>
 	);
