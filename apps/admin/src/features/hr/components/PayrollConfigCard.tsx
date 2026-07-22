@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { MoreHorizontal, Pencil, Trash2 } from 'lucide-react';
+import { MoreHorizontal, Pencil, RefreshCw, Trash2 } from 'lucide-react';
 
 import {
 	Button,
@@ -58,11 +58,13 @@ function ConfigActions({
 	isNewest,
 	onEdit,
 	onDelete,
+	onChangePayModel,
 }: {
 	config: PayrollConfigResponse;
 	isNewest: boolean;
 	onEdit: (config: PayrollConfigResponse) => void;
 	onDelete: (config: PayrollConfigResponse) => void;
+	onChangePayModel?: () => void;
 }) {
 	return (
 		<DropdownMenu>
@@ -83,6 +85,14 @@ function ConfigActions({
 					<Pencil className="size-4" />
 					Edit
 				</DropdownMenuItem>
+				{/* Only offered on the current window — it opens a new window
+				    starting today, so it doesn't make sense on a past one. */}
+				{onChangePayModel && (
+					<DropdownMenuItem onClick={onChangePayModel}>
+						<RefreshCw className="size-4" />
+						Change pay model
+					</DropdownMenuItem>
+				)}
 				{/* Only the newest window is removable — deleting a middle one would
 				    tear a hole in the priced timeline, and the API 409s. */}
 				{isNewest && (
@@ -143,19 +153,34 @@ export function PayrollConfigCard({ staffId }: { staffId: number }) {
 
 	return (
 		<Card>
-			<CardContent className="flex flex-col gap-3 pt-5">
+			<CardContent className="flex flex-col gap-3">
 				<div className="flex items-center justify-between">
 					<p className="font-semibold">Pay model</p>
-					<Can permission="payroll.manage">
-						<Button
-							variant="outline"
-							size="sm"
-							onClick={() => setChangeOpen(true)}
-						>
-							<Pencil className="mr-1.5 size-3.5" />
-							Change pay model
-						</Button>
-					</Can>
+					{/* Actions for the current window live here, beside the title.
+					    With no window yet there is nothing to act on, so the header
+					    falls back to the one action that applies: opening the first. */}
+					{!isLoading && !isError && (
+						<Can permission="payroll.manage">
+							{current ? (
+								<ConfigActions
+									config={current}
+									isNewest={current.id === newest?.id}
+									onEdit={setEditingConfig}
+									onDelete={setDeletingConfig}
+									onChangePayModel={() => setChangeOpen(true)}
+								/>
+							) : (
+								<Button
+									variant="outline"
+									size="sm"
+									onClick={() => setChangeOpen(true)}
+								>
+									<Pencil className="mr-1.5 size-3.5" />
+									Change pay model
+								</Button>
+							)}
+						</Can>
+					)}
 				</div>
 
 				{isLoading ? (
@@ -169,27 +194,14 @@ export function PayrollConfigCard({ staffId }: { staffId: number }) {
 						No pay configured — this member is excluded from payroll.
 					</p>
 				) : (
-					<div className="flex items-start justify-between gap-2">
-						<div className="flex flex-col gap-1.5">
-							<StatusBadge
-								kind="payroll_rate"
-								status={current.payrollType}
-							/>
-							<p className="text-xl font-bold tabular-nums">
-								{configValueLabel(current)}
-							</p>
-							<p className="text-xs text-muted-foreground">
-								since {formatDate(current.effectiveFrom)}
-							</p>
-						</div>
-						<Can permission="payroll.manage">
-							<ConfigActions
-								config={current}
-								isNewest={current.id === newest?.id}
-								onEdit={setEditingConfig}
-								onDelete={setDeletingConfig}
-							/>
-						</Can>
+					<div className="flex flex-col gap-1.5">
+						<StatusBadge kind="payroll_rate" status={current.payrollType} />
+						<p className="text-xl font-bold tabular-nums">
+							{configValueLabel(current)}
+						</p>
+						<p className="text-xs text-muted-foreground">
+							since {formatDate(current.effectiveFrom)}
+						</p>
 					</div>
 				)}
 

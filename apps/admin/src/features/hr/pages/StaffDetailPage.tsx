@@ -130,7 +130,7 @@ function OverviewTab({ staff }: { staff: StaffResponse }) {
 	return (
 		<div className="grid gap-4 lg:grid-cols-2">
 			<Card>
-				<CardContent className="pt-5">
+				<CardContent>
 					<p className="mb-1 font-semibold">Contact</p>
 					<DetailRows
 						rows={[
@@ -155,7 +155,7 @@ function OverviewTab({ staff }: { staff: StaffResponse }) {
 			</Card>
 
 			<Card>
-				<CardContent className="pt-5">
+				<CardContent>
 					<p className="mb-1 font-semibold">Employment</p>
 					<DetailRows
 						rows={[
@@ -192,7 +192,7 @@ function PayrollTab({ staff }: { staff: StaffResponse }) {
 			<PayrollConfigCard staffId={staff.id} />
 
 			<Card className="lg:col-span-2">
-				<CardContent className="pt-5">
+				<CardContent>
 					<p className="mb-3 font-semibold">Recent payslips</p>
 					{isLoading ? (
 						<div className="flex flex-col gap-2">
