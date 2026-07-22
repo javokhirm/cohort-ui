@@ -35,6 +35,14 @@ export interface ExpenseResponse {
 	description: string | null;
 	receiptUrl: string | null;
 	recordedByUserId: number | null;
+	/**
+	 * Set when the row was written by another feature (payroll mark-paid /
+	 * advances create SALARY expenses). Such rows are managed from their source
+	 * — the UI hides edit/delete for them (the server rejects with
+	 * `EXPENSE_LOCKED` regardless).
+	 */
+	sourceType: string | null;
+	sourceId: number | null;
 	createdAt: string;
 	updatedAt: string;
 }

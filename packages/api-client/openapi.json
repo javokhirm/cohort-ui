@@ -4143,6 +4143,15 @@
             }
           },
           {
+            "name": "groupId",
+            "required": false,
+            "in": "query",
+            "description": "Filter to invoices whose originating enrollment is in this group. One-off invoices (no enrollment) never match.",
+            "schema": {
+              "type": "number"
+            }
+          },
+          {
             "name": "status",
             "required": false,
             "in": "query",
@@ -4311,6 +4320,15 @@
             "name": "studentId",
             "required": false,
             "in": "query",
+            "schema": {
+              "type": "number"
+            }
+          },
+          {
+            "name": "groupId",
+            "required": false,
+            "in": "query",
+            "description": "Filter to invoices whose originating enrollment is in this group. One-off invoices (no enrollment) never match.",
             "schema": {
               "type": "number"
             }
@@ -5156,9 +5174,250 @@
         ]
       }
     },
+    "/api/v1/manage/payrolls/period": {
+      "get": {
+        "operationId": "PayrollsController_period",
+        "parameters": [
+          {
+            "name": "month",
+            "required": true,
+            "in": "query",
+            "description": "Calendar month, YYYY-MM",
+            "schema": {
+              "example": "2026-07",
+              "type": "string"
+            }
+          },
+          {
+            "name": "branchIds",
+            "required": false,
+            "in": "query",
+            "description": "Filter to these branch ids (comma-separated or repeated); must be within your branch scope",
+            "schema": {
+              "type": "array",
+              "items": {
+                "type": "number"
+              }
+            }
+          },
+          {
+            "name": "staffId",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "type": "number"
+            }
+          },
+          {
+            "name": "status",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "type": "string",
+              "enum": [
+                "LIVE",
+                "FINALIZED",
+                "PAID"
+              ]
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "The payroll period view: live-computed rows for the open month merged with finalized snapshots",
+        "tags": [
+          "Manage / Payroll"
+        ]
+      }
+    },
+    "/api/v1/manage/payrolls/period/{staffId}": {
+      "get": {
+        "operationId": "PayrollsController_staffPeriod",
+        "parameters": [
+          {
+            "name": "staffId",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "number"
+            }
+          },
+          {
+            "name": "month",
+            "required": true,
+            "in": "query",
+            "description": "Calendar month, YYYY-MM",
+            "schema": {
+              "example": "2026-07",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "One staff member's month: calculation story, per-student breakdown and advances (live or frozen)",
+        "tags": [
+          "Manage / Payroll"
+        ]
+      }
+    },
+    "/api/v1/manage/payrolls/finalize": {
+      "post": {
+        "operationId": "PayrollsController_finalize",
+        "parameters": [],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/FinalizePeriodDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Finalize a month: persist one frozen snapshot per staff member and link advances",
+        "tags": [
+          "Manage / Payroll"
+        ]
+      }
+    },
+    "/api/v1/manage/payrolls/advances": {
+      "get": {
+        "operationId": "PayrollsController_listAdvances",
+        "parameters": [
+          {
+            "name": "month",
+            "required": false,
+            "in": "query",
+            "description": "Calendar month, YYYY-MM",
+            "schema": {
+              "example": "2026-07",
+              "type": "string"
+            }
+          },
+          {
+            "name": "staffId",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "type": "number"
+            }
+          },
+          {
+            "name": "branchIds",
+            "required": false,
+            "in": "query",
+            "description": "Filter to these branch ids (comma-separated or repeated); must be within your branch scope",
+            "schema": {
+              "type": "array",
+              "items": {
+                "type": "number"
+              }
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "List mid-month salary advances",
+        "tags": [
+          "Manage / Payroll"
+        ]
+      },
+      "post": {
+        "operationId": "PayrollsController_createAdvance",
+        "parameters": [],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CreateAdvanceDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": ""
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Record a mid-month salary advance (also writes its SALARY expense)",
+        "tags": [
+          "Manage / Payroll"
+        ]
+      }
+    },
+    "/api/v1/manage/payrolls/advances/{id}": {
+      "delete": {
+        "operationId": "PayrollsController_removeAdvance",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "number"
+            }
+          }
+        ],
+        "responses": {
+          "204": {
+            "description": ""
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Remove an unlinked advance (soft), together with its mirrored expense",
+        "tags": [
+          "Manage / Payroll"
+        ]
+      }
+    },
     "/api/v1/manage/payrolls": {
       "get": {
-        "operationId": "PayrollsController_list",
+        "operationId": "PayrollsController_history",
         "parameters": [
           {
             "name": "page",
@@ -5208,161 +5467,28 @@
             "schema": {
               "type": "string",
               "enum": [
-                "DRAFT",
-                "APPROVED",
+                "FINALIZED",
                 "PAID"
               ]
             }
           },
           {
-            "name": "periodFrom",
+            "name": "monthFrom",
             "required": false,
             "in": "query",
-            "description": "YYYY-MM-DD",
+            "description": "YYYY-MM, inclusive",
             "schema": {
-              "example": "2026-01-01",
+              "example": "2026-01",
               "type": "string"
             }
           },
           {
-            "name": "periodTo",
+            "name": "monthTo",
             "required": false,
             "in": "query",
-            "description": "YYYY-MM-DD",
+            "description": "YYYY-MM, inclusive",
             "schema": {
-              "example": "2026-12-31",
-              "type": "string"
-            }
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": ""
-          }
-        },
-        "security": [
-          {
-            "bearer": []
-          }
-        ],
-        "summary": "List payroll records (paginated, filterable)",
-        "tags": [
-          "Manage / Payroll"
-        ]
-      },
-      "post": {
-        "operationId": "PayrollsController_create",
-        "parameters": [],
-        "requestBody": {
-          "required": true,
-          "content": {
-            "application/json": {
-              "schema": {
-                "$ref": "#/components/schemas/CreatePayrollDto"
-              }
-            }
-          }
-        },
-        "responses": {
-          "201": {
-            "description": ""
-          }
-        },
-        "security": [
-          {
-            "bearer": []
-          }
-        ],
-        "summary": "Create a single payroll record",
-        "tags": [
-          "Manage / Payroll"
-        ]
-      }
-    },
-    "/api/v1/manage/payrolls/run": {
-      "post": {
-        "operationId": "PayrollsController_run",
-        "parameters": [],
-        "requestBody": {
-          "required": true,
-          "content": {
-            "application/json": {
-              "schema": {
-                "$ref": "#/components/schemas/RunPayrollDto"
-              }
-            }
-          }
-        },
-        "responses": {
-          "201": {
-            "description": ""
-          }
-        },
-        "security": [
-          {
-            "bearer": []
-          }
-        ],
-        "summary": "Generate DRAFT payrolls for all active staff in a period",
-        "tags": [
-          "Manage / Payroll"
-        ]
-      }
-    },
-    "/api/v1/manage/payrolls/summary": {
-      "get": {
-        "operationId": "PayrollsController_summary",
-        "parameters": [
-          {
-            "name": "branchIds",
-            "required": false,
-            "in": "query",
-            "description": "Filter to these branch ids (comma-separated or repeated); must be within your branch scope",
-            "schema": {
-              "type": "array",
-              "items": {
-                "type": "number"
-              }
-            }
-          },
-          {
-            "name": "staffId",
-            "required": false,
-            "in": "query",
-            "schema": {
-              "type": "number"
-            }
-          },
-          {
-            "name": "status",
-            "required": false,
-            "in": "query",
-            "schema": {
-              "type": "string",
-              "enum": [
-                "DRAFT",
-                "APPROVED",
-                "PAID"
-              ]
-            }
-          },
-          {
-            "name": "periodFrom",
-            "required": false,
-            "in": "query",
-            "description": "YYYY-MM-DD",
-            "schema": {
-              "example": "2026-01-01",
-              "type": "string"
-            }
-          },
-          {
-            "name": "periodTo",
-            "required": false,
-            "in": "query",
-            "description": "YYYY-MM-DD",
-            "schema": {
-              "example": "2026-12-31",
+              "example": "2026-12",
               "type": "string"
             }
           }
@@ -5377,57 +5503,7 @@
             "bearer": []
           }
         ],
-        "summary": "Payroll totals for the summary strip (true aggregate, not just the current page)",
-        "tags": [
-          "Manage / Payroll"
-        ]
-      }
-    },
-    "/api/v1/manage/payrolls/preview": {
-      "get": {
-        "operationId": "PayrollsController_preview",
-        "parameters": [
-          {
-            "name": "staffId",
-            "required": true,
-            "in": "query",
-            "description": "FK to staff.id",
-            "schema": {
-              "type": "number"
-            }
-          },
-          {
-            "name": "periodStart",
-            "required": true,
-            "in": "query",
-            "description": "YYYY-MM-DD",
-            "schema": {
-              "example": "2026-06-01",
-              "type": "string"
-            }
-          },
-          {
-            "name": "periodEnd",
-            "required": true,
-            "in": "query",
-            "description": "YYYY-MM-DD",
-            "schema": {
-              "example": "2026-06-30",
-              "type": "string"
-            }
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": ""
-          }
-        },
-        "security": [
-          {
-            "bearer": []
-          }
-        ],
-        "summary": "Dry-run of POST /payrolls: computed gross, breakdown and already-paid days that would be skipped",
+        "summary": "Payslip history: persisted snapshots only (paginated)",
         "tags": [
           "Manage / Payroll"
         ]
@@ -5456,73 +5532,7 @@
             "bearer": []
           }
         ],
-        "summary": "Get a payroll record",
-        "tags": [
-          "Manage / Payroll"
-        ]
-      },
-      "patch": {
-        "operationId": "PayrollsController_update",
-        "parameters": [
-          {
-            "name": "id",
-            "required": true,
-            "in": "path",
-            "schema": {
-              "type": "number"
-            }
-          }
-        ],
-        "requestBody": {
-          "required": true,
-          "content": {
-            "application/json": {
-              "schema": {
-                "$ref": "#/components/schemas/UpdatePayrollDto"
-              }
-            }
-          }
-        },
-        "responses": {
-          "200": {
-            "description": ""
-          }
-        },
-        "security": [
-          {
-            "bearer": []
-          }
-        ],
-        "summary": "Update a DRAFT payroll record",
-        "tags": [
-          "Manage / Payroll"
-        ]
-      }
-    },
-    "/api/v1/manage/payrolls/{id}/approve": {
-      "post": {
-        "operationId": "PayrollsController_approve",
-        "parameters": [
-          {
-            "name": "id",
-            "required": true,
-            "in": "path",
-            "schema": {
-              "type": "number"
-            }
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": ""
-          }
-        },
-        "security": [
-          {
-            "bearer": []
-          }
-        ],
-        "summary": "Approve a payroll record (DRAFT → APPROVED)",
+        "summary": "Deep link: a snapshot id → its staff-period view",
         "tags": [
           "Manage / Payroll"
         ]
@@ -5551,9 +5561,170 @@
             "bearer": []
           }
         ],
-        "summary": "Mark a payroll record paid (APPROVED → PAID)",
+        "summary": "Mark a snapshot paid (FINALIZED → PAID); writes the cash-basis SALARY expense for the net",
         "tags": [
           "Manage / Payroll"
+        ]
+      }
+    },
+    "/api/v1/manage/payrolls/{id}/unfinalize": {
+      "post": {
+        "operationId": "PayrollsController_unfinalize",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "number"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Reopen a FINALIZED snapshot (soft-delete + unlink advances); blocked once PAID",
+        "tags": [
+          "Manage / Payroll"
+        ]
+      }
+    },
+    "/api/v1/manage/staff/{staffId}/payroll-configs": {
+      "get": {
+        "operationId": "StaffPayrollConfigsController_list",
+        "parameters": [
+          {
+            "name": "staffId",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "number"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "A staff member's payroll config history, newest first",
+        "tags": [
+          "Manage / Payroll configs"
+        ]
+      },
+      "post": {
+        "operationId": "StaffPayrollConfigsController_create",
+        "parameters": [
+          {
+            "name": "staffId",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "number"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CreatePayrollConfigDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": ""
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Open a new pay config effective from a day (closes the previous one)",
+        "tags": [
+          "Manage / Payroll configs"
+        ]
+      }
+    },
+    "/api/v1/manage/payroll-configs/{id}": {
+      "patch": {
+        "operationId": "StaffPayrollConfigsController_update",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "number"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/UpdatePayrollConfigDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Edit an unreferenced config (amounts or start day)",
+        "tags": [
+          "Manage / Payroll configs"
+        ]
+      },
+      "delete": {
+        "operationId": "StaffPayrollConfigsController_remove",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "number"
+            }
+          }
+        ],
+        "responses": {
+          "204": {
+            "description": ""
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Delete the newest unreferenced config and reopen its predecessor",
+        "tags": [
+          "Manage / Payroll configs"
         ]
       }
     },
@@ -6645,6 +6816,69 @@
         "summary": "List the branches of the groups I teach",
         "tags": [
           "Teach / My Branches"
+        ]
+      }
+    },
+    "/api/v1/teach/payroll/periods": {
+      "get": {
+        "operationId": "MyPayrollController_periods",
+        "parameters": [
+          {
+            "name": "limit",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "minimum": 1,
+              "maximum": 24,
+              "default": 12,
+              "type": "number"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "My recent payroll months: finalized snapshots plus the live current month",
+        "tags": [
+          "Teach / My Payroll"
+        ]
+      }
+    },
+    "/api/v1/teach/payroll": {
+      "get": {
+        "operationId": "MyPayrollController_month",
+        "parameters": [
+          {
+            "name": "month",
+            "required": true,
+            "in": "query",
+            "description": "Calendar month, YYYY-MM",
+            "schema": {
+              "example": "2026-07",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "My month: calculation story, per-student breakdown and advances (live until finalized)",
+        "tags": [
+          "Teach / My Payroll"
         ]
       }
     },
@@ -7967,6 +8201,20 @@
           "branchId": {
             "type": "number"
           },
+          "firstName": {
+            "type": "string"
+          },
+          "lastName": {
+            "type": "string"
+          },
+          "phone": {
+            "type": "string",
+            "example": "+998901234567",
+            "description": "E.164 phone number"
+          },
+          "email": {
+            "type": "string"
+          },
           "dateOfBirth": {
             "type": "string",
             "example": "2008-05-01",
@@ -8129,25 +8377,6 @@
               "CONTRACTOR"
             ]
           },
-          "baseSalary": {
-            "type": "number",
-            "minimum": 0
-          },
-          "payrollType": {
-            "type": "string",
-            "enum": [
-              "FIXED",
-              "PERCENT"
-            ],
-            "default": "FIXED",
-            "description": "How auto-calculated payroll derives the gross: FIXED (baseSalary / hourly) or PERCENT (share of group fee-plan revenue)."
-          },
-          "payrollPercent": {
-            "type": "number",
-            "minimum": 0.01,
-            "maximum": 100,
-            "description": "Revenue-share percentage. Required when payrollType is PERCENT."
-          },
           "roleName": {
             "type": "string",
             "description": "Default: TEACHER. Also ADMIN or MANAGER."
@@ -8171,6 +8400,20 @@
         "properties": {
           "branchId": {
             "type": "number"
+          },
+          "firstName": {
+            "type": "string"
+          },
+          "lastName": {
+            "type": "string"
+          },
+          "phone": {
+            "type": "string",
+            "example": "+998901234567",
+            "description": "E.164 phone number"
+          },
+          "email": {
+            "type": "string"
           },
           "position": {
             "type": "string",
@@ -8197,25 +8440,6 @@
               "PART_TIME",
               "CONTRACTOR"
             ]
-          },
-          "baseSalary": {
-            "type": "number",
-            "minimum": 0
-          },
-          "payrollType": {
-            "type": "string",
-            "enum": [
-              "FIXED",
-              "PERCENT"
-            ],
-            "default": "FIXED",
-            "description": "How auto-calculated payroll derives the gross: FIXED (baseSalary / hourly) or PERCENT (share of group fee-plan revenue)."
-          },
-          "payrollPercent": {
-            "type": "number",
-            "minimum": 0.01,
-            "maximum": 100,
-            "description": "Revenue-share percentage. Required when payrollType is PERCENT."
           },
           "password": {
             "type": "string",
@@ -9121,111 +9345,98 @@
           "discountId"
         ]
       },
-      "PayrollBreakdownDto": {
+      "FinalizePeriodDto": {
         "type": "object",
         "properties": {
-          "hoursTaught": {
-            "type": "number",
-            "minimum": 0,
-            "example": 40
+          "month": {
+            "type": "string",
+            "example": "2026-07",
+            "description": "Calendar month, YYYY-MM"
           },
-          "rate": {
+          "branchId": {
             "type": "number",
-            "minimum": 0,
-            "example": 50000
-          },
-          "bonuses": {
-            "type": "number",
-            "minimum": 0,
-            "example": 100000
+            "description": "Finalize only this branch; omitted = every accessible branch"
           }
-        }
+        },
+        "required": [
+          "month"
+        ]
       },
-      "CreatePayrollDto": {
+      "CreateAdvanceDto": {
         "type": "object",
         "properties": {
+          "staffId": {
+            "type": "number"
+          },
           "branchId": {
             "type": "number"
           },
-          "staffId": {
+          "amount": {
             "type": "number",
-            "description": "FK to staff.id"
+            "description": "Cash drawn, UZS. Must be positive."
           },
-          "periodStart": {
+          "label": {
             "type": "string",
-            "example": "2026-06-01",
-            "description": "YYYY-MM-DD"
+            "example": "cash advance",
+            "description": "Free-text reason"
           },
-          "periodEnd": {
+          "advanceDate": {
             "type": "string",
-            "example": "2026-06-30",
+            "example": "2026-07-15",
             "description": "YYYY-MM-DD"
-          },
-          "autoCalculate": {
-            "type": "boolean",
-            "default": true
-          },
-          "grossAmount": {
-            "type": "number",
-            "minimum": 0,
-            "description": "Required when autoCalculate is false"
-          },
-          "deductions": {
-            "type": "number",
-            "minimum": 0,
-            "default": 0
-          },
-          "breakdown": {
-            "$ref": "#/components/schemas/PayrollBreakdownDto"
           }
         },
         "required": [
-          "branchId",
           "staffId",
-          "periodStart",
-          "periodEnd"
+          "branchId",
+          "amount",
+          "advanceDate"
         ]
       },
-      "RunPayrollDto": {
+      "CreatePayrollConfigDto": {
         "type": "object",
         "properties": {
-          "branchId": {
+          "payrollType": {
+            "type": "string",
+            "enum": [
+              "FIXED",
+              "PERCENT"
+            ]
+          },
+          "baseSalary": {
             "type": "number",
-            "description": "Restrict the run to one branch"
+            "description": "Monthly base salary, UZS. Required for FIXED."
           },
-          "periodStart": {
+          "payrollPercent": {
+            "type": "number",
+            "description": "Revenue share % in (0, 100]. Required for PERCENT."
+          },
+          "effectiveFrom": {
             "type": "string",
-            "example": "2026-06-01",
-            "description": "YYYY-MM-DD"
-          },
-          "periodEnd": {
-            "type": "string",
-            "example": "2026-06-30",
-            "description": "YYYY-MM-DD"
-          },
-          "autoCalculate": {
-            "type": "boolean",
-            "default": true
+            "example": "2026-08-01",
+            "description": "First day this config prices"
           }
         },
         "required": [
-          "periodStart",
-          "periodEnd"
+          "payrollType",
+          "effectiveFrom"
         ]
       },
-      "UpdatePayrollDto": {
+      "UpdatePayrollConfigDto": {
         "type": "object",
         "properties": {
-          "grossAmount": {
+          "baseSalary": {
             "type": "number",
-            "minimum": 0
+            "description": "Monthly base salary, UZS"
           },
-          "deductions": {
+          "payrollPercent": {
             "type": "number",
-            "minimum": 0
+            "description": "Revenue share % in (0, 100]"
           },
-          "breakdown": {
-            "$ref": "#/components/schemas/PayrollBreakdownDto"
+          "effectiveFrom": {
+            "type": "string",
+            "example": "2026-08-01",
+            "description": "YYYY-MM-DD"
           }
         }
       },

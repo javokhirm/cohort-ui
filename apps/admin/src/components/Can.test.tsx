@@ -69,10 +69,10 @@ describe('<Can>', () => {
 				branchScope: null,
 			},
 		});
-		useSessionStore.getState().setPermissions(['payroll.approve']);
+		useSessionStore.getState().setPermissions(['payroll.finalize']);
 
 		render(
-			<Can role={['OWNER']} permission="payroll.approve">
+			<Can role={['OWNER']} permission="payroll.finalize">
 				<button>Approve</button>
 			</Can>,
 		);

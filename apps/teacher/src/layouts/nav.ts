@@ -1,10 +1,10 @@
-import { Home, LayoutGrid, User } from 'lucide-react';
+import { Home, LayoutGrid, User, Wallet } from 'lucide-react';
 import type { LucideIcon } from 'lucide-react';
 
 export interface TeacherNavItem {
 	id: string;
 	label: string;
-	href: '/' | '/groups' | '/profile';
+	href: '/' | '/groups' | '/payroll' | '/profile';
 	Icon: LucideIcon;
 	/** Topbar title for this destination. */
 	title: string;
@@ -12,7 +12,7 @@ export interface TeacherNavItem {
 }
 
 /**
- * The teacher console's whole navigation: three destinations, driving the
+ * The teacher console's whole navigation: four destinations, driving the
  * desktop sidebar and the mobile bottom tabs from one list so they can never
  * drift apart.
  */
@@ -30,6 +30,13 @@ export const NAV_ITEMS: TeacherNavItem[] = [
 		href: '/groups',
 		Icon: LayoutGrid,
 		title: 'My Groups',
+	},
+	{
+		id: 'payroll',
+		label: 'Pay',
+		href: '/payroll',
+		Icon: Wallet,
+		title: 'My Pay',
 	},
 	{
 		id: 'profile',
