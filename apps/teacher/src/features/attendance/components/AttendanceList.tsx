@@ -5,10 +5,8 @@ import {
 	AvatarFallback,
 	Button,
 	cn,
-	Label,
 	resolveStatus,
 	StickyActionBar,
-	Textarea,
 	TONE_ACCENT_CLASSES,
 	TONE_CLASSES,
 } from '@repo/ui';
@@ -26,11 +24,9 @@ interface AttendanceListProps {
 	detail: SessionDetail;
 	/** Draft status per studentId (the editable form state). */
 	draft: Map<number, AttendanceStatus>;
-	topic: string;
 	isSaving: boolean;
 	isDirty: boolean;
 	onChangeStatus: (studentId: number, status: AttendanceStatus) => void;
-	onTopicChange: (topic: string) => void;
 	onMarkAllPresent: () => void;
 	onSave: () => void;
 }
@@ -48,11 +44,9 @@ interface AttendanceListProps {
 export function AttendanceList({
 	detail,
 	draft,
-	topic,
 	isSaving,
 	isDirty,
 	onChangeStatus,
-	onTopicChange,
 	onMarkAllPresent,
 	onSave,
 }: AttendanceListProps) {
@@ -92,22 +86,6 @@ export function AttendanceList({
 					<CheckCheck className="size-4" />
 					All present
 				</Button>
-			</div>
-
-			<div className="mt-3 shrink-0">
-				<Label
-					htmlFor="attendance-topic"
-					className="mb-1.5 block text-muted-foreground"
-				>
-					Topic covered / session note
-				</Label>
-				<Textarea
-					id="attendance-topic"
-					value={topic}
-					onChange={(e) => onTopicChange(e.target.value)}
-					placeholder="What did you cover today?"
-					rows={2}
-				/>
 			</div>
 
 			<ul className="mt-4 min-h-0 flex-1 space-y-2.5 overflow-y-auto pb-2">

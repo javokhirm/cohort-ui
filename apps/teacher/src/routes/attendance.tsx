@@ -239,11 +239,9 @@ export function AttendanceRoute() {
 			<AttendanceList
 				detail={detail}
 				draft={draft}
-				topic={topic}
 				isSaving={saveAttendance.isPending || setSessionTopic.isPending}
 				isDirty={isDirty}
 				onChangeStatus={setStatus}
-				onTopicChange={setTopicOverride}
 				onMarkAllPresent={onAllPresent}
 				onSave={onSave}
 			/>
