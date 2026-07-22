@@ -41,7 +41,7 @@ export interface ExpenseResponse {
 	 * — the UI hides edit/delete for them (the server rejects with
 	 * `EXPENSE_LOCKED` regardless).
 	 */
-	sourceType: string | null;
+	sourceType: 'PAYROLL' | 'PAYROLL_ADVANCE' | null;
 	sourceId: number | null;
 	createdAt: string;
 	updatedAt: string;

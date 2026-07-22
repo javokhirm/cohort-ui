@@ -26,6 +26,15 @@ interface ExpenseTableProps {
 	onDelete?: (expense: ExpenseResponse) => void;
 }
 
+/**
+ * True only for rows a source flow owns (payroll mark-paid / advances). Uses a
+ * loose null check on purpose: an absent `sourceType` must read as "manual", so
+ * a field missing from the response can never lock the whole table.
+ */
+function isSourceOwned(expense: ExpenseResponse): boolean {
+	return expense.sourceType != null;
+}
+
 /** "description — vendor" when both are set, otherwise whichever one is present. */
 function vendorDescriptionLabel(expense: ExpenseResponse): string {
 	if (expense.vendor && expense.description) {
@@ -97,7 +106,7 @@ export function ExpenseTable({
 			cell: ({ row }) => (
 				<span className="flex items-center gap-2 text-sm font-medium">
 					{vendorDescriptionLabel(row.original)}
-					{row.original.sourceType !== null && (
+					{isSourceOwned(row.original) && (
 						<Badge variant="secondary" className="text-xs">
 							Payroll
 						</Badge>
@@ -133,7 +142,7 @@ export function ExpenseTable({
 			header: () => <span className="sr-only">Actions</span>,
 			// Auto rows (payroll-sourced) are managed from payroll — no actions.
 			cell: ({ row }) =>
-				row.original.sourceType !== null ? (
+				isSourceOwned(row.original) ? (
 					<span className="text-muted-foreground">—</span>
 				) : (
 					<RowActions expense={row.original} onDelete={onDelete} />
@@ -152,7 +161,7 @@ export function ExpenseTable({
 				onEdit
 					? (row) => {
 							// Payroll-sourced rows are read-only here.
-							if (row.sourceType === null) onEdit(row);
+							if (!isSourceOwned(row)) onEdit(row);
 						}
 					: undefined
 			}
