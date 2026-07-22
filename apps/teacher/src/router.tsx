@@ -20,7 +20,6 @@ import { GroupDetailRoute, type GroupTab } from '@/routes/group-detail';
 import { StudentDetailRoute } from '@/routes/student-detail';
 import { PayrollRoute } from '@/routes/payroll';
 import { ProfileRoute } from '@/routes/profile';
-import { SessionDetailRoute } from '@/routes/session-detail';
 import { AttendanceRoute } from '@/routes/attendance';
 import { GroupAttendanceRoute } from '@/routes/group-attendance';
 import { MarksRoute } from '@/routes/marks';
@@ -91,12 +90,6 @@ const profileRoute = createRoute({
 	getParentRoute: () => authedRoute,
 	path: '/profile',
 	component: ProfileRoute,
-});
-
-const sessionDetailRoute = createRoute({
-	getParentRoute: () => authedRoute,
-	path: '/sessions/$sessionId',
-	component: SessionDetailRoute,
 });
 
 const attendanceRoute = createRoute({
@@ -183,7 +176,6 @@ const routeTree = rootRoute.addChildren([
 		studentDetailRoute,
 		payrollRoute,
 		profileRoute,
-		sessionDetailRoute,
 		attendanceRoute,
 		marksRoute,
 		groupAttendanceRoute,
