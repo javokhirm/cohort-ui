@@ -14,7 +14,6 @@ interface TodaySessionsProps {
 	hiddenByBranch: number;
 	/** When the selected day has no shown sessions, e.g. "today" or "on Fri, 18 Jul". */
 	emptyWhen: string;
-	onView: (sessionId: number) => void;
 	onTakeAttendance: (sessionId: number) => void;
 	onEnterMarks: (sessionId: number) => void;
 }
@@ -31,7 +30,6 @@ export function TodaySessions({
 	sessions,
 	hiddenByBranch,
 	emptyWhen,
-	onView,
 	onTakeAttendance,
 	onEnterMarks,
 }: TodaySessionsProps) {
@@ -92,7 +90,6 @@ export function TodaySessions({
 						topic={session.topic ?? undefined}
 						status={session.status}
 						studentCount={session.studentCount}
-						onClick={() => onView(session.id)}
 						className={isCancelled ? 'opacity-60' : undefined}
 						actions={
 							isCancelled
