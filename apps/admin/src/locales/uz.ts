@@ -239,10 +239,10 @@ export const uz = {
 			clear: 'Filtrlarni tozalash',
 		},
 		window: {
-			'24h': 'Soʻnggi 24 soat',
-			'7d': 'Soʻnggi 7 kun',
-			'30d': 'Soʻnggi 30 kun',
-			'90d': 'Soʻnggi 90 kun',
+			'24h': 'Soʻngi 24 soat',
+			'7d': 'Soʻngi 7 kun',
+			'30d': 'Soʻngi 30 kun',
+			'90d': 'Soʻngi 90 kun',
 		},
 		activityType: {
 			CALL: 'Qoʻngʻiroq',
@@ -424,7 +424,7 @@ export const uz = {
 			attendance: {
 				empty: 'Davomat yozuvlari yoʻq',
 				rate: 'Davomat koʻrsatkichi',
-				rateWindow: 'Soʻnggi 90 kun',
+				rateWindow: 'SoʻngSoʻngii 90 kun',
 			},
 			grades: {
 				empty: 'Baholar qayd etilmagan',
@@ -443,7 +443,7 @@ export const uz = {
 			balance: 'Hamyon balansi',
 			deposit: 'Hisobni toʻldirish',
 			adjust: 'Balansni tuzatish',
-			recent: 'Soʻnggi tranzaksiyalar',
+			recent: 'Soʻngi tranzaksiyalar',
 			emptyTitle: 'Hali tranzaksiyalar yoʻq',
 			emptyDescription:
 				'Toʻldirishlar, tuzatishlar va invoys harakatlari shu yerda koʻrinadi.',
@@ -588,10 +588,10 @@ export const uz = {
 				subjects: 'Fanlar',
 			},
 			weeklyHours: '{{count}} soat / hafta',
-			recentPayslips: 'Soʻnggi hisob varaqalari',
+			recentPayslips: 'Soʻngi hisob varaqalari',
 			noPayslips: 'Hali hisob varaqalari yoʻq',
 			net: 'Sof: {{amount}}',
-			noActivity: 'Soʻnggi faoliyat yoʻq',
+			noActivity: 'Soʻngi faoliyat yoʻq',
 		},
 		roles: {
 			heading: 'Rollar',
@@ -1627,7 +1627,7 @@ export const uz = {
 			todaySessions: 'Bugungi darslar',
 			noSessionsTitle: 'Bugun darslar yoʻq',
 			noSessionsDescription: 'Bugunga hech narsa rejalashtirilmagan.',
-			recentPayments: 'Soʻnggi toʻlovlar',
+			recentPayments: 'Soʻngi toʻlovlar',
 			noPaymentsTitle: 'Hali toʻlovlar yoʻq',
 			noPaymentsDescription: 'Qayd etilgan toʻlovlar shu yerda koʻrinadi.',
 			overdueInvoices: 'Muddati oʻtgan invoyslar',
@@ -1638,9 +1638,9 @@ export const uz = {
 			noLeadActivityDescription:
 				'Shu haftadagi lid bosqichi oʻzgarishlari shu yerda koʻrinadi.',
 			revenueTrend: 'Daromad dinamikasi',
-			revenueTrendSubtitle: 'Oylik, soʻnggi 12 oy',
+			revenueTrendSubtitle: 'Oylik, Soʻngi 12 oy',
 			attendanceTrend: 'Davomat dinamikasi',
-			attendanceTrendSubtitle: 'Kunlik koʻrsatkich, soʻnggi 14 kun',
+			attendanceTrendSubtitle: 'Kunlik koʻrsatkich, Soʻngi 14 kun',
 			enrollmentTrend: 'Qabul dinamikasi',
 			enrollmentTrendSubtitle: 'Oyiga yangi qabullar',
 		},
