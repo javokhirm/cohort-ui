@@ -1,10 +1,12 @@
 import { zodResolver } from '@hookform/resolvers/zod';
 
 import { isApiError } from '@repo/api-client';
-import { LoginCard, type LoginCredentials } from '@repo/ui';
+import { LoginCard, LocaleSwitcher, type LoginCredentials } from '@repo/ui';
+import { useT } from '@repo/i18n';
 
 import { loginSchema } from '../schemas';
 import { useLogin } from '../hooks';
+import { useLocalePreference } from '@/hooks/useLocalePreference';
 
 interface LoginFormProps {
 	onAuthenticated: () => void;
@@ -16,7 +18,9 @@ interface LoginFormProps {
  * the shared `@repo/ui` `LoginCard` — this owns only the mutation and session.
  */
 export function LoginForm({ onAuthenticated }: LoginFormProps) {
+	const t = useT('auth');
 	const loginMutation = useLogin();
+	const { locale, changeLocale } = useLocalePreference();
 
 	async function onSubmit(values: LoginCredentials) {
 		try {
@@ -30,16 +34,24 @@ export function LoginForm({ onAuthenticated }: LoginFormProps) {
 	const serverError = loginMutation.isError
 		? isApiError(loginMutation.error)
 			? loginMutation.error.message
-			: 'Invalid phone number or password.'
+			: t('invalidCredentials')
 		: null;
 
 	return (
 		<LoginCard
-			brand={{ initial: 'C', title: 'Cohort', subtitle: 'Staff console' }}
+			brand={{ initial: 'C', title: 'Cohort', subtitle: t('staffConsole') }}
 			resolver={zodResolver(loginSchema)}
 			onSubmit={onSubmit}
 			isPending={loginMutation.isPending}
 			error={serverError}
+			labels={{
+				phone: t('phone'),
+				password: t('password'),
+				signIn: t('signIn'),
+				signingIn: t('signingIn'),
+				poweredBy: t('poweredBy'),
+			}}
+			topRight={<LocaleSwitcher locale={locale} onLocaleChange={changeLocale} />}
 		/>
 	);
 }

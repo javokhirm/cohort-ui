@@ -3,6 +3,7 @@ import { createRoot } from 'react-dom/client';
 import { QueryClientProvider } from '@tanstack/react-query';
 
 import { initTheme } from '@repo/ui';
+import { I18nProvider, initI18n } from '@repo/i18n';
 
 import './styles/globals.css';
 import './lib/env'; // validate env at boot — throws with a clear message if invalid
@@ -11,11 +12,16 @@ import { App } from './App';
 
 // Key must match the pre-paint bootstrap script in index.html.
 initTheme({ storageKey: 'cohort.admin.theme' });
+// Resolves localStorage → 'uz' now; the signed-in user's stored preference
+// arrives on the login/refresh response and the session store applies it.
+initI18n({ storageKey: 'cohort.admin.locale' });
 
 createRoot(document.getElementById('root')!).render(
 	<StrictMode>
-		<QueryClientProvider client={queryClient}>
-			<App />
-		</QueryClientProvider>
+		<I18nProvider>
+			<QueryClientProvider client={queryClient}>
+				<App />
+			</QueryClientProvider>
+		</I18nProvider>
 	</StrictMode>,
 );

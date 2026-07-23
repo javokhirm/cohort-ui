@@ -1,4 +1,5 @@
 import { createApiClient } from '@repo/api-client';
+import { getLocale } from '@repo/i18n';
 
 import { env } from '@/lib/env';
 import { getAccessToken, useSessionStore } from '@/store/sessionStore';
@@ -10,11 +11,13 @@ const apiBase = `${env.VITE_API_ORIGIN}/api/v1`;
 /**
  * Unauthenticated surface: staff login and token refresh.
  * No bearer token and no refresh-on-401 — these *are* the auth endpoints.
+ * Still sends `x-lang` so pre-login errors (bad credentials) come back localised.
  */
 export const publicApi = createApiClient({
 	baseUrl: `${apiBase}/public`,
 	getAccessToken: () => null,
 	onUnauthorized: async () => false,
+	getLocale,
 });
 
 /**
@@ -48,4 +51,5 @@ export const manageApi = createApiClient({
 	baseUrl: `${apiBase}/manage`,
 	getAccessToken,
 	onUnauthorized: runRefresh,
+	getLocale,
 });

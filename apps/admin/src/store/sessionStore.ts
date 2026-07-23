@@ -1,5 +1,7 @@
 import { create } from 'zustand';
 
+import { setLocale } from '@repo/i18n';
+
 import type { AuthResult, AuthUserSummary } from '@/lib/auth/types';
 import { permitted, type PermissionRequirement } from '@/lib/auth/permissions';
 import { clearStoredRefreshToken, setStoredRefreshToken } from '@/lib/auth/tokenStorage';
@@ -33,6 +35,11 @@ export const useSessionStore = create<SessionState>((set) => ({
 	permissionsLoaded: false,
 	setSession: (result) => {
 		setStoredRefreshToken(result.refreshToken);
+		// Completes the user → tenant → localStorage → 'uz' chain: the server
+		// already applied the tenant fallback, so a non-null value here is the
+		// user's own choice and should win over what `initI18n` resolved from
+		// localStorage. A `null` preference is ignored (setLocale no-ops).
+		setLocale(result.user.preferredLanguage);
 		set({
 			accessToken: result.accessToken,
 			user: result.user,

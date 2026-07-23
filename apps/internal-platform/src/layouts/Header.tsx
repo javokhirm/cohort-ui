@@ -18,11 +18,15 @@ import {
 	DropdownMenuTrigger,
 	ThemeToggle,
 } from '@repo/ui';
+import { useT } from '@repo/i18n';
 import { useAuth, useOperator } from '@/features/auth/hooks';
+import { LanguageMenu } from './LanguageMenu';
 
 export function Header() {
 	const { user, logout } = useAuth();
 	const { data: profile } = useOperator();
+	const t = useT('nav');
+	const tAuth = useT('auth');
 
 	const fullName = user ? `${user.firstName} ${user.lastName}`.trim() : '';
 	const initials = user
@@ -54,7 +58,7 @@ export function Header() {
 			<div className="ml-3 flex h-8.5 max-w-120 flex-1 cursor-text items-center gap-2 rounded-lg border border-(--console-line) bg-(--console-field) px-3 text-(--console-muted-fg) hover:bg-(--console-hover)">
 				<Search className="size-3.5 shrink-0" />
 				<span className="flex-1 truncate text-[13px]">
-					Search tenants, users, subscriptions…
+					{t('shell.searchPlatform')}
 				</span>
 				<kbd className="rounded border border-(--console-line) bg-(--console-field) px-1.5 py-0.5 text-[11px] font-semibold">
 					⌘K
@@ -66,12 +70,15 @@ export function Header() {
 			{/* Notification bell */}
 			<button
 				type="button"
-				aria-label="Notifications"
+				aria-label={t('shell.notifications')}
 				className="relative flex size-8.5 items-center justify-center rounded-lg text-(--console-muted-fg) hover:bg-(--console-hover) hover:text-(--console-fg)"
 			>
 				<Bell className="size-4" />
 				<span className="absolute right-1.75 top-1.75 size-1.75 rounded-full border-[1.5px] border-(--console) bg-destructive" />
 			</button>
+
+			{/* Language picker */}
+			<LanguageMenu />
 
 			{/* Theme toggle */}
 			<ThemeToggle className="size-8.5 rounded-lg text-(--console-muted-fg) hover:bg-(--console-hover) hover:text-(--console-fg)" />
@@ -122,13 +129,13 @@ export function Header() {
 					<DropdownMenuItem asChild>
 						<Link to="/profile">
 							<User className="mr-2 size-4" />
-							Profile &amp; security
+							{t('item.profileSecurity')}
 						</Link>
 					</DropdownMenuItem>
 					<DropdownMenuItem asChild>
 						<Link to="/">
 							<Settings className="mr-2 size-4" />
-							Console settings
+							{t('item.consoleSettings')}
 						</Link>
 					</DropdownMenuItem>
 					<DropdownMenuSeparator />
@@ -137,7 +144,7 @@ export function Header() {
 						onClick={logout}
 					>
 						<LogOut className="mr-2 size-4" />
-						Sign out
+						{tAuth('signOut')}
 					</DropdownMenuItem>
 				</DropdownMenuContent>
 			</DropdownMenu>

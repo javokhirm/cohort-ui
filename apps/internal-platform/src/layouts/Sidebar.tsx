@@ -15,10 +15,24 @@ import {
 import type { LucideIcon } from 'lucide-react';
 
 import { cn, Separator, Tooltip, TooltipContent, TooltipTrigger } from '@repo/ui';
+import { useT } from '@repo/i18n';
+
+/** Leaf key under `nav:item.*` — resolved with `t()` at render (typed, not `string`). */
+type NavItemKey =
+	| 'platformDashboard'
+	| 'tenants'
+	| 'userDirectory'
+	| 'subscriptionPlans'
+	| 'subscriptions'
+	| 'roleTemplates'
+	| 'auditLog'
+	| 'settings';
+/** Leaf key under `nav:group.*`. */
+type NavGroupKey = 'overview' | 'customers' | 'revenue' | 'platform';
 
 type NavItemDef = {
 	id: string;
-	label: string;
+	label: NavItemKey;
 	Icon: LucideIcon;
 	href: string;
 	match: string;
@@ -27,7 +41,7 @@ type NavItemDef = {
 const OVERVIEW_ITEMS: NavItemDef[] = [
 	{
 		id: 'dashboard',
-		label: 'Platform Dashboard',
+		label: 'platformDashboard',
 		Icon: LayoutDashboard,
 		href: '/',
 		match: '/',
@@ -37,14 +51,14 @@ const OVERVIEW_ITEMS: NavItemDef[] = [
 const CUSTOMERS_ITEMS: NavItemDef[] = [
 	{
 		id: 'tenants',
-		label: 'Tenants',
+		label: 'tenants',
 		Icon: Building2,
 		href: '/tenants',
 		match: '/tenants',
 	},
 	{
 		id: 'users',
-		label: 'User Directory',
+		label: 'userDirectory',
 		Icon: Users,
 		href: '/users',
 		match: '/users',
@@ -54,14 +68,14 @@ const CUSTOMERS_ITEMS: NavItemDef[] = [
 const REVENUE_ITEMS: NavItemDef[] = [
 	{
 		id: 'subscription-plans',
-		label: 'Subscription Plans',
+		label: 'subscriptionPlans',
 		Icon: CreditCard,
 		href: '/subscription-plans',
 		match: '/subscription-plans',
 	},
 	{
 		id: 'subscriptions',
-		label: 'Subscriptions',
+		label: 'subscriptions',
 		Icon: Receipt,
 		href: '/subscriptions',
 		match: '/subscriptions',
@@ -71,14 +85,14 @@ const REVENUE_ITEMS: NavItemDef[] = [
 const PLATFORM_ITEMS: NavItemDef[] = [
 	{
 		id: 'roles',
-		label: 'Role Templates',
+		label: 'roleTemplates',
 		Icon: Shield,
 		href: '/roles',
 		match: '/roles',
 	},
 	{
 		id: 'audit-log',
-		label: 'Audit Log',
+		label: 'auditLog',
 		Icon: ScrollText,
 		href: '/audit-log',
 		match: '/audit-log',
@@ -86,7 +100,7 @@ const PLATFORM_ITEMS: NavItemDef[] = [
 	// TODO: href → '/settings' once route exists
 	{
 		id: 'settings',
-		label: 'Settings',
+		label: 'settings',
 		Icon: Settings,
 		href: '/',
 		match: '/settings',
@@ -103,6 +117,7 @@ function NavItemLink({
 	active: boolean;
 }) {
 	const { Icon } = item;
+	const t = useT('nav');
 	return (
 		<Link
 			to={item.href}
@@ -115,7 +130,7 @@ function NavItemLink({
 			)}
 		>
 			<Icon className="size-4 shrink-0" />
-			{!collapsed && <span className="truncate">{item.label}</span>}
+			{!collapsed && <span className="truncate">{t(`item.${item.label}`)}</span>}
 		</Link>
 	);
 }
@@ -130,6 +145,7 @@ function NavItem({
 	pathname: string;
 }) {
 	const active = pathname === item.match;
+	const t = useT('nav');
 
 	if (collapsed) {
 		return (
@@ -138,7 +154,7 @@ function NavItem({
 					<NavItemLink item={item} collapsed={collapsed} active={active} />
 				</TooltipTrigger>
 				<TooltipContent side="right" sideOffset={8}>
-					{item.label}
+					{t(`item.${item.label}`)}
 				</TooltipContent>
 			</Tooltip>
 		);
@@ -180,6 +196,9 @@ function NavGroup({
 export function Sidebar() {
 	const [collapsed, setCollapsed] = useState(false);
 	const pathname = useRouterState({ select: (s) => s.location.pathname });
+	const t = useT('nav');
+
+	const groupLabel = (key: NavGroupKey) => t(`group.${key}`);
 
 	return (
 		<aside
@@ -190,19 +209,19 @@ export function Sidebar() {
 		>
 			<nav className="flex flex-1 flex-col gap-4 overflow-y-auto p-3">
 				<NavGroup
-					label="Overview"
+					label={groupLabel('overview')}
 					items={OVERVIEW_ITEMS}
 					collapsed={collapsed}
 					pathname={pathname}
 				/>
 				<NavGroup
-					label="Customers"
+					label={groupLabel('customers')}
 					items={CUSTOMERS_ITEMS}
 					collapsed={collapsed}
 					pathname={pathname}
 				/>
 				<NavGroup
-					label="Revenue"
+					label={groupLabel('revenue')}
 					items={REVENUE_ITEMS}
 					collapsed={collapsed}
 					pathname={pathname}
@@ -210,7 +229,7 @@ export function Sidebar() {
 				<div className="mt-auto flex flex-col gap-4">
 					<Separator className="bg-(--console-line)" />
 					<NavGroup
-						label="Platform"
+						label={groupLabel('platform')}
 						items={PLATFORM_ITEMS}
 						collapsed={collapsed}
 						pathname={pathname}
@@ -223,7 +242,9 @@ export function Sidebar() {
 				<button
 					type="button"
 					onClick={() => setCollapsed((c) => !c)}
-					aria-label={collapsed ? 'Expand sidebar' : 'Collapse sidebar'}
+					aria-label={
+						collapsed ? t('shell.expandSidebar') : t('shell.collapseSidebar')
+					}
 					className={cn(
 						'flex h-9 w-full items-center rounded-md text-sm text-(--console-muted-fg) transition-colors hover:bg-(--console-hover) hover:text-(--console-fg)',
 						collapsed ? 'justify-center' : 'gap-2 px-3',
@@ -234,7 +255,7 @@ export function Sidebar() {
 					) : (
 						<>
 							<ChevronLeft className="size-4 shrink-0" />
-							<span>Collapse</span>
+							<span>{t('shell.collapse')}</span>
 						</>
 					)}
 				</button>

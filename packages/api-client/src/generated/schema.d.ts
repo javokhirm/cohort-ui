@@ -140,6 +140,23 @@ export interface paths {
 		patch?: never;
 		trace?: never;
 	};
+	'/api/v1/super-admin/me/preferences': {
+		parameters: {
+			query?: never;
+			header?: never;
+			path?: never;
+			cookie?: never;
+		};
+		get?: never;
+		put?: never;
+		post?: never;
+		delete?: never;
+		options?: never;
+		head?: never;
+		/** Update the authenticated operator's language preference */
+		patch: operations['MeController_updatePreferences'];
+		trace?: never;
+	};
 	'/api/v1/super-admin/tenants/summary': {
 		parameters: {
 			query?: never;
@@ -739,6 +756,23 @@ export interface paths {
 		head?: never;
 		/** Change the authenticated staff member's own password */
 		patch: operations['MeController_changePassword'];
+		trace?: never;
+	};
+	'/api/v1/manage/me/preferences': {
+		parameters: {
+			query?: never;
+			header?: never;
+			path?: never;
+			cookie?: never;
+		};
+		get?: never;
+		put?: never;
+		post?: never;
+		delete?: never;
+		options?: never;
+		head?: never;
+		/** Update the authenticated staff member's language preference */
+		patch: operations['MeController_updatePreferences'];
 		trace?: never;
 	};
 	'/api/v1/manage/dashboard/stats': {
@@ -2277,6 +2311,23 @@ export interface paths {
 		patch?: never;
 		trace?: never;
 	};
+	'/api/v1/teach/me/preferences': {
+		parameters: {
+			query?: never;
+			header?: never;
+			path?: never;
+			cookie?: never;
+		};
+		get?: never;
+		put?: never;
+		post?: never;
+		delete?: never;
+		options?: never;
+		head?: never;
+		/** Update the authenticated teacher's language preference */
+		patch: operations['MyProfileController_updatePreferences'];
+		trace?: never;
+	};
 	'/api/v1/teach/sessions/{id}/attendances': {
 		parameters: {
 			query?: never;
@@ -2503,6 +2554,10 @@ export interface components {
 			 * @example 123456
 			 */
 			code: string;
+		};
+		UpdateMyPreferencesDto: {
+			/** @enum {string} */
+			preferredLanguage: 'uz' | 'ru' | 'en';
 		};
 		OnboardBranchDto: {
 			name: string;
@@ -2988,10 +3043,10 @@ export interface components {
 			teacherId?: number | null;
 			topic?: string | null;
 			/**
-			 * @description CANCELLED requires cancellationReason
+			 * @description CANCELLED requires cancellationReason; SCHEDULED reactivates a cancelled session. COMPLETED is not settable — the system sets it once the session’s end time passes.
 			 * @enum {string}
 			 */
-			status?: 'SCHEDULED' | 'COMPLETED' | 'CANCELLED';
+			status?: 'SCHEDULED' | 'CANCELLED';
 			/** @description Required when status = CANCELLED */
 			cancellationReason?: string | null;
 		};
@@ -3556,6 +3611,27 @@ export interface operations {
 			cookie?: never;
 		};
 		requestBody?: never;
+		responses: {
+			200: {
+				headers: {
+					[name: string]: unknown;
+				};
+				content?: never;
+			};
+		};
+	};
+	MeController_updatePreferences: {
+		parameters: {
+			query?: never;
+			header?: never;
+			path?: never;
+			cookie?: never;
+		};
+		requestBody: {
+			content: {
+				'application/json': components['schemas']['UpdateMyPreferencesDto'];
+			};
+		};
 		responses: {
 			200: {
 				headers: {
@@ -4441,6 +4517,27 @@ export interface operations {
 		requestBody: {
 			content: {
 				'application/json': components['schemas']['ChangeMyPasswordDto'];
+			};
+		};
+		responses: {
+			200: {
+				headers: {
+					[name: string]: unknown;
+				};
+				content?: never;
+			};
+		};
+	};
+	MeController_updatePreferences: {
+		parameters: {
+			query?: never;
+			header?: never;
+			path?: never;
+			cookie?: never;
+		};
+		requestBody: {
+			content: {
+				'application/json': components['schemas']['UpdateMyPreferencesDto'];
 			};
 		};
 		responses: {
@@ -7164,6 +7261,27 @@ export interface operations {
 			cookie?: never;
 		};
 		requestBody?: never;
+		responses: {
+			200: {
+				headers: {
+					[name: string]: unknown;
+				};
+				content?: never;
+			};
+		};
+	};
+	MyProfileController_updatePreferences: {
+		parameters: {
+			query?: never;
+			header?: never;
+			path?: never;
+			cookie?: never;
+		};
+		requestBody: {
+			content: {
+				'application/json': components['schemas']['UpdateMyPreferencesDto'];
+			};
+		};
 		responses: {
 			200: {
 				headers: {

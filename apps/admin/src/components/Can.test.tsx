@@ -67,6 +67,7 @@ describe('<Can>', () => {
 				lastName: 'M',
 				roles: ['MANAGER'],
 				branchScope: null,
+				preferredLanguage: null,
 			},
 		});
 		useSessionStore.getState().setPermissions(['payroll.finalize']);

@@ -131,16 +131,38 @@ const form = useForm<StudentForm>({ resolver: zodResolver(schema) });
 ## 7. i18n, money, dates, numbers
 
 - **All user-facing text is translated.** No hardcoded strings in components — use `useT()`
-  from `packages/i18n`. Add keys to **all three locales** (`uz` default, `ru`, `en`); where a
-  string corresponds to a backend message/error code, key it by that code.
-- **Money:** `numeric(14,2)`, default **UZS**. Always format via `formatMoney(amount,
-currency)` from `i18n`/`utils`. Never `toFixed`, never string-concat a currency symbol.
-  Treat amounts as numbers from the API (the backend transforms `numeric` → JS number).
+  from `@repo/i18n`. Add keys to **all three catalogs** (`uz` is the source of truth, then
+  `ru`, `en`); the typed `resources` declaration means a key missing from a catalog, or a typo
+  in `t()`, fails `check-types`.
+- **Money:** `numeric(14,2)`, default **UZS**. Always format via `formatMoney`/`formatPrice`
+  from `@repo/utils`. Never `toFixed`, never string-concat a currency symbol. Treat amounts as
+  numbers from the API (the backend transforms `numeric` → JS number).
 - **Dates/times:** default timezone **`Asia/Tashkent`**. Format via the shared
-  `formatDate`/`formatDateTime` helpers; parse API timestamps (ISO with offset) — don't
-  `new Date(str)` and render raw.
-- **Locale selection:** from the user's preference when available, else tenant default, else
-  `uz`. Persist the chosen locale in client state.
+  `formatDate`/`formatDateTime` helpers in `@repo/utils`; parse API timestamps (ISO with
+  offset) — don't `new Date(str)` and render raw. (Region formatting lives in `utils`, not
+  `i18n` — the market is fixed, only the message language switches.)
+- **Locale selection:** `user.preferredLanguage` → tenant default (already applied server-side)
+  → `localStorage` → `uz`. `initI18n({ storageKey })` resolves localStorage at boot; the
+  session store calls `setLocale(user.preferredLanguage)` on sign-in. Every request carries the
+  active locale as the `x-lang` header (injected into `@repo/api-client` via `getLocale`), so
+  backend `error.message` comes back translated — surface it directly, don't re-map it.
+
+**Migrating strings (the phase-1 rule):**
+
+- `const t = useT('nav')` at the top of the component; call `t('item.students')`. Shared shell
+  text (nav, auth, common actions, table empty/error, enum labels, validation) lives in
+  `@repo/i18n`; feature-screen text stays in the app under `apps/<app>/src/locales/…` and is
+  registered with `i18n.addResourceBundle` — promote a string to the package only when a second
+  app needs it.
+- **No string concatenation** — use interpolation: `t('greeting', { name })`, not
+  `` `Hi ${name}` ``. Counts use i18next plurals (`_one`/`_other`, plus `_many` for `ru`).
+- **Module-level nav/config arrays hold keys, not display text** — resolve with `t()` at
+  render, never at module load, so a language switch re-translates. Type the key fields as leaf
+  unions (not `string`) so `t()` stays key-checked.
+- **`@repo/ui` never imports `@repo/i18n`** (they are peers). Presentational components take
+  copy as props (e.g. `LoginCard`'s `labels`); the app passes its `useT(...)` values in.
+- **Tests** initialise i18next to English in the app's `test/setup.ts`
+  (`initI18n(...) ; setLocale('en')`), so assertions read the English catalog.
 
 ---
 

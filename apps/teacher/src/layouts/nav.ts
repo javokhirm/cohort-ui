@@ -1,48 +1,51 @@
 import { Home, LayoutGrid, User, Wallet } from 'lucide-react';
 import type { LucideIcon } from 'lucide-react';
 
+/** Leaf keys under the `nav:item.*` catalog — resolved with `t()` at render. */
+type NavKey = 'today' | 'groups' | 'pay' | 'profile' | 'myGroups' | 'myPay';
+
 export interface TeacherNavItem {
 	id: string;
-	label: string;
+	/** i18n key for the sidebar / bottom-tab label. */
+	label: NavKey;
 	href: '/' | '/groups' | '/payroll' | '/profile';
 	Icon: LucideIcon;
-	/** Topbar title for this destination. */
-	title: string;
+	/** i18n key for the topbar title; omitted where the screen shows none. */
+	title?: NavKey;
 	subtitle?: string;
 }
 
 /**
  * The teacher console's whole navigation: four destinations, driving the
  * desktop sidebar and the mobile bottom tabs from one list so they can never
- * drift apart.
+ * drift apart. Labels/titles are catalog keys, translated at render.
  */
 export const NAV_ITEMS: TeacherNavItem[] = [
 	{
 		id: 'today',
-		label: 'Today',
+		label: 'today',
 		href: '/',
 		Icon: Home,
-		title: '',
 	},
 	{
 		id: 'groups',
-		label: 'Groups',
+		label: 'groups',
 		href: '/groups',
 		Icon: LayoutGrid,
-		title: 'My Groups',
+		title: 'myGroups',
 	},
 	{
 		id: 'payroll',
-		label: 'Pay',
+		label: 'pay',
 		href: '/payroll',
 		Icon: Wallet,
-		title: 'My Pay',
+		title: 'myPay',
 	},
 	{
 		id: 'profile',
-		label: 'Profile',
+		label: 'profile',
 		href: '/profile',
 		Icon: User,
-		title: 'Profile',
+		title: 'profile',
 	},
 ];

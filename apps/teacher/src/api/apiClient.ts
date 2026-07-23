@@ -1,4 +1,5 @@
 import { createApiClient } from '@repo/api-client';
+import { getLocale } from '@repo/i18n';
 
 import { env } from '@/lib/env';
 import { getAccessToken, useSessionStore } from '@/store/sessionStore';
@@ -12,11 +13,13 @@ const apiBase = `${env.VITE_API_ORIGIN}/api/v1`;
  * console — a TEACHER signs in through the same endpoint as an admin, and the
  * backend gates by role at the API surface, not at login.
  * No bearer token and no refresh-on-401 — these *are* the auth endpoints.
+ * Still sends `x-lang` so pre-login errors come back localised.
  */
 export const publicApi = createApiClient({
 	baseUrl: `${apiBase}/public`,
 	getAccessToken: () => null,
 	onUnauthorized: async () => false,
+	getLocale,
 });
 
 /**
@@ -50,4 +53,5 @@ export const teachApi = createApiClient({
 	baseUrl: `${apiBase}/teach`,
 	getAccessToken,
 	onUnauthorized: runRefresh,
+	getLocale,
 });

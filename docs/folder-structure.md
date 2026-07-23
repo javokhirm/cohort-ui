@@ -160,11 +160,17 @@ packages/auth/
 ```
 packages/i18n/
 ├── src/
-│   ├── index.ts
-│   ├── messages/{uz,ru,en}/...   # message catalogs (keys mirror backend i18n where shared)
-│   ├── provider.tsx              # I18nProvider + useT()
-│   └── format.ts                 # money (UZS), date/time (Asia/Tashkent), number formatters
+│   ├── index.ts                  # barrel: initI18n, I18nProvider, useT, useLocale, setLocale, …
+│   ├── config.ts                 # initI18n({storageKey}) + locale state (mirrors ui/theme.ts)
+│   ├── hooks.ts                  # useT(ns), useLocale()
+│   ├── provider.tsx              # I18nProvider (wraps react-i18next's I18nextProvider)
+│   ├── types.ts                  # i18next module augmentation → typed t() keys (uz = source of truth)
+│   └── messages/{uz,ru,en}.ts    # shared catalogs: common, auth, nav, enums, validation
 ```
+
+Region formatters (money/UZS, date/Asia/Tashkent) live in `packages/utils`, not here — `i18n`
+is message translation only. App-specific/feature strings stay in the app
+(`apps/<app>/src/locales/…`, registered via `i18n.addResourceBundle`), not in this package.
 
 ```
 packages/utils/   src/index.ts + pure helpers (money.ts, date.ts, codes.ts, ...) + shared types

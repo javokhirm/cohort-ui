@@ -4,10 +4,12 @@
  * password (no 2FA step); the tenant is resolved by the backend from the user's
  * single membership (one user = one business) — it is never sent by the client.
  *
- * There is no `/teach/me`: `/manage/me` is gated to OWNER/ADMIN/MANAGER and 403s
- * for a teacher. The signed-in teacher's identity therefore comes from this
- * `user` summary on the login/refresh response and nowhere else.
+ * The signed-in teacher's identity comes from this `user` summary on the
+ * login/refresh response — there is no boot profile fetch on this surface. The
+ * teach surface does expose `PATCH /teach/me/preferences` (used only to persist
+ * a language change); it is a write, not the identity source.
  */
+import type { Locale } from '@repo/utils';
 
 export interface AuthUserSummary {
 	id: number;
@@ -16,6 +18,8 @@ export interface AuthUserSummary {
 	roles: string[];
 	/** null = all branches; array = restricted to those branch ids. */
 	branchScope: number[] | null;
+	/** Stored UI language, or `null` if never chosen. Applied on sign-in. */
+	preferredLanguage: Locale | null;
 }
 
 export interface AuthResult {
