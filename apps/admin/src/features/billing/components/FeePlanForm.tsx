@@ -17,14 +17,12 @@ import { useAppT } from '@/locales';
 
 import { FormSection } from '@/components/FormSection';
 import { FormSheet } from '@/components/FormSheet';
-import { useBranches } from '@/api/branches';
+import { BranchSelectField } from '@/components/BranchSelectField';
+import { SHARED_BRANCH_VALUE, branchToForm, branchToPayload } from '@/lib/branch';
 
 import {
-	branchToForm,
-	branchToPayload,
 	createFeePlanSchema,
 	editFeePlanSchema,
-	SHARED_BRANCH_VALUE,
 	type CreateFeePlanFormValues,
 	type EditFeePlanFormValues,
 } from '../schemas/fee-plan-form.schema';
@@ -52,16 +50,6 @@ interface EditProps {
 
 type FeePlanFormProps = CreateProps | EditProps;
 
-/** Branch options with a leading "shared across all branches" choice. */
-function useBranchOptions() {
-	const t = useAppT('billing');
-	const { data: branches = [] } = useBranches();
-	return [
-		{ value: SHARED_BRANCH_VALUE, label: t('feePlanForm.sharedOption') },
-		...branches.map((b) => ({ value: String(b.id), label: b.name })),
-	];
-}
-
 function CreateFeePlanForm({
 	onSuccess,
 	onPendingChange,
@@ -79,7 +67,6 @@ function CreateFeePlanForm({
 		},
 	});
 
-	const branchOptions = useBranchOptions();
 	const createFeePlan = useCreateFeePlan();
 
 	// `useWatch` over `form.watch()`: the latter hands back a fresh function the
@@ -116,11 +103,11 @@ function CreateFeePlanForm({
 							label={t('feePlans.field.name')}
 							placeholder={t('invoiceExtra.linePlaceholder')}
 						/>
-						<FormSelect
+						<BranchSelectField
 							control={form.control}
 							name="branch"
 							label={t('feePlans.field.branch')}
-							options={branchOptions}
+							sharedLabel={t('feePlanForm.sharedOption')}
 						/>
 						<p className="text-xs text-muted-foreground">
 							{t('feePlanForm.standaloneHint')}
@@ -191,7 +178,6 @@ function EditFeePlanForm({
 		// eslint-disable-next-line react-hooks/exhaustive-deps
 	}, [feePlan]);
 
-	const branchOptions = useBranchOptions();
 	const updateFeePlan = useUpdateFeePlan();
 
 	// `useWatch` over `form.watch()`: the latter hands back a fresh function the
@@ -245,11 +231,11 @@ function EditFeePlanForm({
 							label={t('feePlans.field.name')}
 							placeholder={t('invoiceExtra.linePlaceholder')}
 						/>
-						<FormSelect
+						<BranchSelectField
 							control={form.control}
 							name="branch"
 							label={t('feePlans.field.branch')}
-							options={branchOptions}
+							sharedLabel={t('feePlanForm.sharedOption')}
 						/>
 						<div className="grid grid-cols-2 gap-3">
 							<FormInput

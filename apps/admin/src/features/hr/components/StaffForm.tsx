@@ -18,8 +18,8 @@ import { useStatusLabel, useT } from '@repo/i18n';
 
 import { FormSection } from '@/components/FormSection';
 import { FormSheet } from '@/components/FormSheet';
+import { BranchSelectField } from '@/components/BranchSelectField';
 import { useAppT } from '@/locales';
-import { useBranches } from '@/api/branches';
 import { useBranchStore } from '@/store/branchStore';
 
 import {
@@ -82,7 +82,6 @@ function CreateStaffForm({
 		},
 	});
 
-	const { data: branches = [] } = useBranches();
 	const createStaff = useCreateStaff();
 
 	useEffect(() => {
@@ -140,15 +139,11 @@ function CreateStaffForm({
 									label: statusLabel('role', o.value),
 								}))}
 							/>
-							<FormSelect
+							<BranchSelectField
 								control={form.control}
 								name="branchId"
 								label={t('form.field.branch')}
 								valueAsNumber
-								options={branches.map((b) => ({
-									value: String(b.id),
-									label: b.name,
-								}))}
 							/>
 						</div>
 						<FormInput

@@ -16,6 +16,7 @@ import {
 import { useStatusLabel, useT } from '@repo/i18n';
 
 import { FormSheet } from '@/components/FormSheet';
+import { BranchSelectField } from '@/components/BranchSelectField';
 import { useAppT } from '@/locales';
 import { useBranches } from '@/api/branches';
 import { useActiveBranchIds } from '@/store/branchStore';
@@ -73,7 +74,6 @@ export function AddLeadSheet({ open, onOpenChange }: AddLeadSheetProps) {
 		}
 	}, [branches, form]);
 
-	const branchOptions = branches.map((b) => ({ value: String(b.id), label: b.name }));
 	const courseOptions = (coursesData?.rows ?? []).map((c) => ({
 		value: String(c.id),
 		label: c.name,
@@ -166,11 +166,10 @@ export function AddLeadSheet({ open, onOpenChange }: AddLeadSheetProps) {
 										label: statusLabel('lead_source', o.value),
 									}))}
 								/>
-								<FormSelect
+								<BranchSelectField
 									control={form.control}
 									name="branchId"
 									label={t('field.branch')}
-									options={branchOptions}
 									valueAsNumber
 								/>
 							</div>
