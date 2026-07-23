@@ -1597,6 +1597,12 @@ export const en: TranslationsOf<typeof uz> = {
 			attendanceToday: 'Attendance today',
 			newLeads: 'New leads',
 			outstanding: 'Outstanding',
+			hintThisMonth: 'this month',
+			hintThisWeek: 'this week',
+			hintVsLastWeek: 'vs last week',
+			hintCurrency: 'UZS',
+			overdue_one: '{{count}} overdue',
+			overdue_other: '{{count}} overdue',
 		},
 		card: {
 			todaySessions: 'Today’s sessions',

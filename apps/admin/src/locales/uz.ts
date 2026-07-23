@@ -1630,6 +1630,12 @@ export const uz = {
 			attendanceToday: 'Bugungi davomat',
 			newLeads: 'Yangi lidlar',
 			outstanding: 'Qoldiq',
+			hintThisMonth: 'shu oy',
+			hintThisWeek: 'shu hafta',
+			hintVsLastWeek: 'oʻtgan haftaga nisbatan',
+			hintCurrency: 'UZS',
+			overdue_one: '{{count}} muddati oʻtgan',
+			overdue_other: '{{count}} muddati oʻtgan',
 		},
 		card: {
 			todaySessions: 'Bugungi darslar',
