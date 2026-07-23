@@ -247,6 +247,14 @@ export const ru: TranslationsOf<typeof uz> = {
 			logged: 'Активность записана',
 			failed: 'Не удалось записать активность.',
 			placeholder: 'Что произошло?',
+			// System timeline events, keyed by the lead's status as of the entry.
+			event: {
+				NEW: 'Лид добавлен',
+				CONTACTED: 'Связались с лидом',
+				TRIAL_BOOKED: 'Записан на пробное занятие',
+				ENROLLED: 'Переведён в ученика',
+				LOST: 'Отмечен как потерянный',
+			},
 		},
 		detail: {
 			title: 'Детали лида',
