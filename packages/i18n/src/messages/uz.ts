@@ -160,7 +160,7 @@ export const uz = {
 			rooms: 'Xonalar',
 			groups: 'Guruhlar',
 			schedule: 'Dars jadvali',
-			invoices: 'Hisob-fakturalar',
+			invoices: 'Invoyslar',
 			payments: 'Toʻlovlar',
 			feePlans: 'Toʻlov rejalari',
 			billingPolicy: 'Billing siyosati',
@@ -189,7 +189,7 @@ export const uz = {
 		shell: {
 			expandSidebar: 'Yon panelni ochish',
 			collapseSidebar: 'Yon panelni yigʻish',
-			searchPlaceholder: 'Oʻquvchi, hisob-faktura, guruh qidirish…',
+			searchPlaceholder: 'Oʻquvchi, invoys, guruh qidirish…',
 			searchPlatform: 'Tashkilot, foydalanuvchi, obuna qidirish…',
 			notifications: 'Bildirishnomalar',
 			moreOptions: 'Boshqa amallar',

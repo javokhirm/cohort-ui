@@ -55,7 +55,7 @@ export const uz = {
 			needsAttention: 'Eʼtibor talab qiladi',
 			newSignups: 'Yangi roʻyxatdan oʻtishlar',
 			revenueTrend: 'Daromad dinamikasi',
-			recentInvoices: 'Soʻnggi hisob-fakturalar',
+			recentInvoices: 'Soʻnggi invoyslar',
 			tenantStatus: 'Tashkilotlar holati',
 			lifecycleBreakdown: 'Hayotiy sikl boʻyicha taqsimot',
 			systemServices: 'Tizim xizmatlari',
@@ -267,13 +267,13 @@ export const uz = {
 				'Bu tashkilotning billing siyosatini yuklab boʻlmadi. Sahifani yangilang.',
 			warningTitle: 'Bu tashkilotning pul generatsiyasini boshqaradi.',
 			warningBody:
-				'Oʻzgarishlar keyingi billing ishidan boshlab qoʻllanadi — allaqachon chiqarilgan hisob-fakturalar hech qachon oʻzgartirilmaydi. Har bir saqlash platforma audit izida sizning hisobingizga yoziladi. Tashkilot bu siyosatni koʻra oladi, lekin oʻzgartira olmaydi.',
+				'Oʻzgarishlar keyingi billing ishidan boshlab qoʻllanadi — allaqachon chiqarilgan invoyslar hech qachon oʻzgartirilmaydi. Har bir saqlash platforma audit izida sizning hisobingizga yoziladi. Tashkilot bu siyosatni koʻra oladi, lekin oʻzgartira olmaydi.',
 			reset: 'Tozalash',
 			billingMode: 'Billing rejimi',
 			prepaid: 'Oldindan toʻlov',
 			postpaid: 'Keyin toʻlov (qarz)',
 			billingModeHint:
-				'Hisob-faktura chiqarish uchun standart qiymatlar. Fee-rejalar toʻlov kuni va qismli hisoblashni har bir reja uchun oʻzgartirishi mumkin.',
+				'Invoys chiqarish uchun standart qiymatlar. Fee-rejalar toʻlov kuni va qismli hisoblashni har bir reja uchun oʻzgartirishi mumkin.',
 			prepaidHint: 'Joriy oyni boshlanishidan oldin, oldindan hisoblaydi.',
 			postpaidHint:
 				'Toʻliq oʻtgan oldingi oyni qarzga hisoblaydi, ikki mustaqil qism orqali: Oylik fee-rejalar uchun vaqtga asoslangan qism va Har bir dars rejalari uchun (quyidagi hisoblash qoidasi boʻyicha, haqiqatan isteʼmol qilingan darslar boʻyicha) isteʼmolga asoslangan qism. Har bir qabul aynan bitta qism boʻyicha hisoblanadi — hech qachon ikkalasi ham emas.',
@@ -281,28 +281,26 @@ export const uz = {
 			calendarMonth: 'Kalendar oyi',
 			enrollmentAnniversary: 'Qabul sanasi boʻyicha',
 			calendarHint:
-				'Hamma bitta kalendar oyini boʻlishadi (1-dan oyning oxirgi kunigacha). Oy oʻrtasida qoʻshilgan oʻquvchi haqiqatan qatnashadigan qism uchun qismli birinchi hisob-fakturaga tortiladi, keyin umumiy siklga tushadi.',
+				'Hamma bitta kalendar oyini boʻlishadi (1-dan oyning oxirgi kunigacha). Oy oʻrtasida qoʻshilgan oʻquvchi haqiqatan qatnashadigan qism uchun qismli birinchi invoysga tortiladi, keyin umumiy siklga tushadi.',
 			enrollmentHint:
 				'Har bir oʻquvchi oʻz qoʻshilgan sanasidan boradi: 12-iyulda qoʻshilsa, 12-iyul – 11-avgust uchun hisoblanadi, keyin yana 12-avgustda va hokazo. Har bir sikl toʻliq oy, shuning uchun hech kim kirishda qismli hisoblanmaydi — birinchi kundan toʻliq narx toʻlaydi. Faqat oldindan toʻlov.',
 			billingDay: 'Hisob-kitob kuni (1–28)',
-			billingDayHint:
-				'Kunlik sikl oʻsha davr hisob-fakturalarini chiqaradigan kun.',
+			billingDayHint: 'Kunlik sikl oʻsha davr invoyslarini chiqaradigan kun.',
 			defaultDueDay: 'Standart toʻlov kuni (1–28)',
 			dueOffset: 'Toʻlov muddati (davr boshidan kunlar)',
 			dueOffsetHint:
-				'Oʻquvchining sikli boshlangach hisob-fakturasi toʻlanishi kerak boʻlgan kunlar soni; 0 = sikl boshlangan kuni.',
+				'Oʻquvchining sikli boshlangach invoyssi toʻlanishi kerak boʻlgan kunlar soni; 0 = sikl boshlangan kuni.',
 			immediateDueOffset: 'Darhol toʻlov muddati (kunlar)',
-			immediateDueHint:
-				'Qabulda hisoblash hisob-fakturalari uchun muddat; 0 = oʻsha kun.',
+			immediateDueHint: 'Qabulda hisoblash invoyslari uchun muddat; 0 = oʻsha kun.',
 			defaultProration: 'Standart qismli hisoblash',
 			chargeOnEnrollment: 'Qabulda hisoblash',
 			chargeOnEnrollmentHintAnniversary:
-				'Oʻquvchi oylik fee-rejaga qabul qilinganda birinchi toʻliq sikl hisob-fakturasini oʻsha tungi ishni kutmasdan darhol chiqaradi.',
+				'Oʻquvchi oylik fee-rejaga qabul qilinganda birinchi toʻliq sikl invoyssini oʻsha tungi ishni kutmasdan darhol chiqaradi.',
 			chargeOnEnrollmentHint:
-				'Oʻquvchi oylik fee-rejaga qabul qilinganda darhol qismli hisob-faktura chiqaradi.',
+				'Oʻquvchi oylik fee-rejaga qabul qilinganda darhol qismli invoys chiqaradi.',
 			consumptionRule: 'Hisoblash qoidasi',
 			consumptionRuleHint:
-				'Har bir dars fee-rejasi hisob-fakturasida qaysi darslar hisoblanadi: qatnashgan darslar va sababsiz qoldirishlar, har bir rejalashtirilgan dars yoki faqat haqiqatan qatnashilgan darslar.',
+				'Har bir dars fee-rejasi invoyssida qaysi darslar hisoblanadi: qatnashgan darslar va sababsiz qoldirishlar, har bir rejalashtirilgan dars yoki faqat haqiqatan qatnashilgan darslar.',
 			attendedOnly: 'Faqat qatnashganlar',
 			attendedUnexcused: 'Qatnashgan + sababsiz',
 			allScheduled: 'Barcha rejalashtirilganlar',
@@ -310,10 +308,10 @@ export const uz = {
 			daily: 'Har kuni',
 			autoApplyWalletCredit: 'Hamyon mablagʻini avtomatik qoʻllash',
 			autoApplyDescription:
-				'Hisob-faktura chiqarilganda mavjud hamyon mablagʻini avtomatik qoʻllaydi.',
+				'Invoys chiqarilganda mavjud hamyon mablagʻini avtomatik qoʻllaydi.',
 			paymentReminders: 'Toʻlov eslatmalari',
 			paymentRemindersDescription:
-				'Hisob-fakturalar toʻlov muddatiga yaqinlashganda va oʻtganda tashkilot sozlagan eslatma qoidalarini ishga tushiradi.',
+				'Invoyslar toʻlov muddatiga yaqinlashganda va oʻtganda tashkilot sozlagan eslatma qoidalarini ishga tushiradi.',
 			enableLateFees: 'Kechikish jarimalarini yoqish',
 			lateFeeType: 'Jarima turi',
 			lateFeeAmount: 'Jarima summasi',
@@ -321,8 +319,7 @@ export const uz = {
 			percentage: 'Foiz (%)',
 			fixedAmount: 'Belgilangan summa (UZS)',
 			graceDays: 'Imtiyozli kunlar (0–60)',
-			graceDaysHint:
-				'Hisob-faktura MUDDATI OʻTGAN holatiga oʻtishidan oldingi kunlar.',
+			graceDaysHint: 'Invoys MUDDATI OʻTGAN holatiga oʻtishidan oldingi kunlar.',
 			recurrence: 'Takrorlanish',
 			none: 'Yoʻq',
 			oneTime: 'Bir marta',
@@ -332,21 +329,21 @@ export const uz = {
 			disabledPlaceholder: 'Oʻchirilgan',
 			autoSuspendAfter: 'Necha kundan keyin toʻxtatish',
 			autoSuspendHint:
-				'Hisob-faktura toʻlov muddatidan oʻtgach, uning qabuli avtomatik toʻxtatilishidan oldingi kunlar.',
+				'Invoys toʻlov muddatidan oʻtgach, uning qabuli avtomatik toʻxtatilishidan oldingi kunlar.',
 			autoCancelAfter: 'Necha kundan keyin bekor qilish',
 			autoCancelHint:
-				'Hisob-faktura toʻlov muddatidan oʻtgach, uning qabuli avtomatik bekor qilinishidan oldingi kunlar.',
+				'Invoys toʻlov muddatidan oʻtgach, uning qabuli avtomatik bekor qilinishidan oldingi kunlar.',
 			dunningHint:
-				'Hisob-faktura muddati oʻtgach, tungi eslatma jarayoni tomonidan avtomatik qoʻllanadi',
-			billingModeSection: 'Hisob-faktura chiqarish standartlari',
+				'Invoys muddati oʻtgach, tungi eslatma jarayoni tomonidan avtomatik qoʻllanadi',
+			billingModeSection: 'Invoys chiqarish standartlari',
 			enrollmentAnniversaryNote:
-				'Har bir oʻquvchining sikli oʻz qoʻshilgan sanasidan boshlanadi, shuning uchun umumiy hisob-kitob kuni yoki toʻlov kuni yoʻq — kunlik ish har bir oʻquvchi joriy siklda qaysi boʻlsa, oʻshani chiqaradi. Har bir sikl toʻliq oy boʻlgani uchun bu sikl tanlangan holda yuqoridagi qismli hisoblash sozlamasi tuition hisob-fakturalariga taʼsir qilmaydi.',
+				'Har bir oʻquvchining sikli oʻz qoʻshilgan sanasidan boshlanadi, shuning uchun umumiy hisob-kitob kuni yoki toʻlov kuni yoʻq — kunlik ish har bir oʻquvchi joriy siklda qaysi boʻlsa, oʻshani chiqaradi. Har bir sikl toʻliq oy boʻlgani uchun bu sikl tanlangan holda yuqoridagi qismli hisoblash sozlamasi tuition invoyslariga taʼsir qilmaydi.',
 			dunningSection:
-				'Har bir tashkilot uchun tunda ishlaydi: hisob-fakturalari toʻlanmagan qabullarni avval toʻxtatadi, keyin bekor qiladi. Avtobekor kunlari avtotoʻxtatish kunlaridan koʻp boʻlishi kerak.',
+				'Har bir tashkilot uchun tunda ishlaydi: invoyslari toʻlanmagan qabullarni avval toʻxtatadi, keyin bekor qiladi. Avtobekor kunlari avtotoʻxtatish kunlaridan koʻp boʻlishi kerak.',
 			dunningNote:
-				'Imtiyozli kunlar, avtotoʻxtatish va avtobekor barchasi hisob-fakturaning haqiqiy toʻlov muddatidan sanaladi — imtiyoz faqat MUDDATI OʻTGAN holatiga oʻtishini kechiktiradi, toʻxtatish/bekor qilish soatini qayta boshlamaydi.',
+				'Imtiyozli kunlar, avtotoʻxtatish va avtobekor barchasi invoysning haqiqiy toʻlov muddatidan sanaladi — imtiyoz faqat MUDDATI OʻTGAN holatiga oʻtishini kechiktiradi, toʻxtatish/bekor qilish soatini qayta boshlamaydi.',
 			consumptionSection:
-				'Har bir dars billingi uchun hisoblash qoidasi, hamda hamyon mablagʻi hisob-fakturalarga qanday qoʻllanishi.',
+				'Har bir dars billingi uchun hisoblash qoidasi, hamda hamyon mablagʻi invoyslarga qanday qoʻllanishi.',
 		},
 	},
 
@@ -416,7 +413,7 @@ export const uz = {
 		to: 'Gacha',
 		renews: 'Yangilanadi',
 		periodStart: 'Davr boshlanishi',
-		recentInvoices: 'Soʻnggi hisob-fakturalar',
+		recentInvoices: 'Soʻnggi invoyslar',
 		view: 'Koʻrish',
 		current: 'Joriy',
 		loadError: 'Obunalarni yuklab boʻlmadi. Sahifani yangilang.',
@@ -425,7 +422,7 @@ export const uz = {
 		mrr: 'MRR',
 		noSubscription: 'Obuna qaydlari yoʻq.',
 		perMonth: '/oy',
-		invoiceHistorySoon: 'Hisob-faktura tarixi tez orada.',
+		invoiceHistorySoon: 'Invoys tarixi tez orada.',
 		planHistory: 'Reja tarixi',
 		planHistorySoon: 'Reja tarixi tez orada.',
 		tenantRef: 'Tashkilot #{{id}}',
@@ -498,7 +495,7 @@ export const uz = {
 		perMonthUZS: 'UZS / oy',
 		feature: {
 			billing: 'Billing moduli',
-			billingDesc: 'Hisob-fakturalar, toʻlovlar va daromad hisobi',
+			billingDesc: 'Invoyslar, toʻlovlar va daromad hisobi',
 			payroll: 'Ish haqi moduli',
 			payrollDesc: 'Xodimlar maoshi va oylik varaqalarini boshqarish',
 			assessments: 'Baholashlar',
@@ -580,13 +577,13 @@ export const uz = {
 			'Har bir oʻquvchi va guruh uchun bitta qator. Fayl import qilishdan oldin ushbu markazga tekshiriladi — tasdiqlashdan avval nima boʻlishini aniq koʻrasiz.',
 		columns: 'Ustunlar',
 		nextBillingHint:
-			'bu oʻquvchining oldingi markazi keyingi marta hisob chiqaradigan kun. Bu yerda uning billing sanasiga aylanadi — birinchi hisob-fakturasi bugun emas, oʻsha sanada chiqariladi.',
+			'bu oʻquvchining oldingi markazi keyingi marta hisob chiqaradigan kun. Bu yerda uning billing sanasiga aylanadi — birinchi invoyssi bugun emas, oʻsha sanada chiqariladi.',
 		uploadAndCheck: 'Yuklash va tekshirish',
 		checking: 'Tekshirilmoqda…',
 		uploadError: 'Faylni oʻqib boʻlmadi. Uni tekshirib, qayta urinib koʻring.',
 		commitTitle: '{{count}} oʻquvchini import qilishmi?',
 		commitDescription:
-			'Bu ushbu markazda {{count}} ta qabul yaratadi. Har bir oʻquvchi birinchi marta oʻzining keyingi billing sanasida hisoblanadi — hozir hech qanday hisob-faktura chiqarilmaydi.',
+			'Bu ushbu markazda {{count}} ta qabul yaratadi. Har bir oʻquvchi birinchi marta oʻzining keyingi billing sanasida hisoblanadi — hozir hech qanday invoys chiqarilmaydi.',
 		invalidRowsWarning:
 			'{{count}} ta qator tekshiruvdan oʻtmadi va import qilinmaydi. Faylni tuzatib qayta yuklang yoki qolganlarini ularsiz import qiling.',
 		skipInvalidLabel: 'Yaroqli {{count}} qatorni import qilib, qolganini qoldirish',
