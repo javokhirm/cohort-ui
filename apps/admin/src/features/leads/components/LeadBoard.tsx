@@ -4,6 +4,8 @@ import { Users } from 'lucide-react';
 import { isApiError } from '@repo/api-client';
 import { cn, EmptyState, Skeleton, toast } from '@repo/ui';
 
+import { useAppT } from '@/locales';
+
 import type { LeadListFilters } from '../api/keys';
 import {
 	LEAD_STATUSES,
@@ -31,6 +33,7 @@ export function LeadBoard({
 	filters,
 	onOpenLead,
 }: LeadBoardProps) {
+	const t = useAppT('leads');
 	const moveStatus = useMoveLeadStatus();
 	const [dragging, setDragging] = useState<{ id: number; from: LeadStatus } | null>(
 		null,
@@ -96,9 +99,7 @@ export function LeadBoard({
 			{ id, status: target },
 			{
 				onError: (err) =>
-					toast.error(
-						isApiError(err) ? err.message : 'Could not move the lead.',
-					),
+					toast.error(isApiError(err) ? err.message : t('board.moveFailed')),
 			},
 		);
 	}
@@ -110,7 +111,7 @@ export function LeadBoard({
 	if (isError && !board) {
 		return (
 			<div className="rounded-lg border border-destructive/30 bg-destructive/5 px-4 py-3 text-sm text-destructive">
-				Failed to load the pipeline. Please refresh.
+				{t('board.loadError')}
 			</div>
 		);
 	}
@@ -122,8 +123,8 @@ export function LeadBoard({
 		return (
 			<EmptyState
 				icon={<Users />}
-				title="No leads match your filters."
-				description="Try clearing a filter or capture a new lead to start the pipeline."
+				title={t('board.emptyTitle')}
+				description={t('board.emptyDescription')}
 			/>
 		);
 	}

@@ -9,6 +9,7 @@ import { useInvoiceList } from '@/features/billing/api/invoices.queries';
 import { PanelSkeleton } from './DashboardSkeletons';
 import { PanelCard } from './PanelCard';
 import { PanelError } from './PanelError';
+import { useAppT } from '@/locales';
 
 /** Whole days a due date is past, in the local clock. Never negative. */
 function daysOverdue(dueDate: string): number {
@@ -22,6 +23,7 @@ function daysOverdue(dueDate: string): number {
  * `status=OVERDUE&sort=dueDate&order=asc`.
  */
 export function OverdueInvoicesCard() {
+	const t = useAppT('dashboard');
 	const { data, isLoading, isError, refetch } = useInvoiceList({
 		status: 'OVERDUE',
 		sort: 'dueDate',
@@ -31,26 +33,26 @@ export function OverdueInvoicesCard() {
 
 	if (isLoading) return <PanelSkeleton />;
 	if (isError || !data)
-		return <PanelError title="Overdue invoices" onRetry={refetch} />;
+		return <PanelError title={t('card.overdueInvoices')} onRetry={refetch} />;
 
 	return (
 		<PanelCard
-			title="Overdue invoices"
+			title={t('card.overdueInvoices')}
 			flush
 			headerRight={
 				<Link
 					to="/invoices"
 					className="text-sm font-medium text-primary hover:underline"
 				>
-					View all
+					{t('viewAll')}
 				</Link>
 			}
 		>
 			{data.rows.length === 0 ? (
 				<EmptyState
 					icon={<CheckCircle2 />}
-					title="Nothing overdue"
-					description="Every invoice is on track."
+					title={t('card.nothingOverdueTitle')}
+					description={t('card.nothingOverdueDescription')}
 				/>
 			) : (
 				<ul>

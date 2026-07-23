@@ -6,6 +6,12 @@
  * domain documented in the backend `project-overview.md` (invoice/payment/lead/
  * session/attendance lifecycles, etc.). They are presentation metadata only —
  * when the generated OpenAPI enums land, reconcile the keys here against them.
+ *
+ * **`tone` is what this table is for; `label` is only an untranslated fallback.**
+ * Screens pass the localized label in as `children` — it comes from
+ * `useStatusLabel()` in `@repo/i18n`, whose `enums.domain.*` catalog is keyed
+ * exactly like `STATUS_MAPS` below. This package must not import `@repo/i18n`
+ * (they are peers), so adding a status here means adding it there too.
  */
 
 export const STATUS_TONES = [

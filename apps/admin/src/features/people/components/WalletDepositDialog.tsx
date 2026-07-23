@@ -1,3 +1,4 @@
+import { useMemo } from 'react';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 
@@ -21,6 +22,9 @@ import {
 	toast,
 } from '@repo/ui';
 import { isApiError } from '@repo/api-client';
+import { useT } from '@repo/i18n';
+
+import { useAppT } from '@/locales';
 
 import { useDepositToWallet } from '../api/wallet.mutations';
 import { WALLET_DEPOSIT_METHOD_OPTIONS } from '../lib/wallet-options';
@@ -37,13 +41,15 @@ export function WalletDepositDialog({
 	open,
 	onOpenChange,
 }: WalletDepositDialogProps) {
+	const t = useAppT('people');
+
 	return (
 		<Dialog open={open} onOpenChange={onOpenChange}>
 			<DialogContent className="max-w-md">
 				<DialogHeader>
-					<DialogTitle>Deposit to wallet</DialogTitle>
+					<DialogTitle>{t('wallet.depositDialog.title')}</DialogTitle>
 					<DialogDescription>
-						Top up the student&apos;s wallet balance.
+						{t('wallet.depositDialog.description')}
 					</DialogDescription>
 				</DialogHeader>
 
@@ -61,8 +67,13 @@ export function WalletDepositDialog({
 }
 
 function DepositForm({ studentId, onClose }: { studentId: number; onClose: () => void }) {
+	const t = useAppT('people');
+	const tc = useT('common');
+	const tv = useT('validation');
+	const schema = useMemo(() => depositSchema(tv), [tv]);
+
 	const form = useForm<DepositFormValues>({
-		resolver: zodResolver(depositSchema),
+		resolver: zodResolver(schema),
 		defaultValues: { amount: undefined, method: 'CASH', notes: '' },
 	});
 
@@ -76,10 +87,10 @@ function DepositForm({ studentId, onClose }: { studentId: number; onClose: () =>
 				method: values.method,
 				notes: values.notes === '' ? null : values.notes,
 			});
-			toast.success('Deposit recorded');
+			toast.success(t('wallet.depositDialog.success'));
 			onClose();
 		} catch (err) {
-			toast.error(isApiError(err) ? err.message : 'Failed to record deposit');
+			toast.error(isApiError(err) ? err.message : t('wallet.depositDialog.failed'));
 		}
 	}
 
@@ -93,7 +104,7 @@ function DepositForm({ studentId, onClose }: { studentId: number; onClose: () =>
 					<FormInput
 						control={form.control}
 						name="amount"
-						label="Amount *"
+						label={t('wallet.depositDialog.amount')}
 						type="number"
 						min={1}
 						onChange={(e) =>
@@ -112,7 +123,7 @@ function DepositForm({ studentId, onClose }: { studentId: number; onClose: () =>
 						name="method"
 						render={({ field }) => (
 							<FormItem>
-								<FormLabel>Method *</FormLabel>
+								<FormLabel>{t('wallet.depositDialog.method')}</FormLabel>
 								<div className="grid grid-cols-3 gap-2">
 									{WALLET_DEPOSIT_METHOD_OPTIONS.map((opt) => (
 										<Button
@@ -126,7 +137,7 @@ function DepositForm({ studentId, onClose }: { studentId: number; onClose: () =>
 											)}
 											onClick={() => field.onChange(opt.value)}
 										>
-											{opt.label}
+											{t(`wallet.method.${opt.value}`)}
 										</Button>
 									))}
 								</div>
@@ -138,8 +149,8 @@ function DepositForm({ studentId, onClose }: { studentId: number; onClose: () =>
 					<FormInput
 						control={form.control}
 						name="notes"
-						label="Notes"
-						placeholder="Optional"
+						label={t('wallet.depositDialog.notes')}
+						placeholder={t('wallet.depositDialog.notesPlaceholder')}
 					/>
 				</FieldGroup>
 
@@ -150,11 +161,11 @@ function DepositForm({ studentId, onClose }: { studentId: number; onClose: () =>
 						onClick={onClose}
 						disabled={deposit.isPending}
 					>
-						Cancel
+						{tc('action.cancel')}
 					</Button>
 					<Button type="submit" disabled={deposit.isPending}>
 						{deposit.isPending && <Spinner className="mr-2 size-4" />}
-						Confirm deposit
+						{t('wallet.depositDialog.confirm')}
 					</Button>
 				</DialogFooter>
 			</form>

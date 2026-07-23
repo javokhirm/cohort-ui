@@ -2,7 +2,9 @@ import { useNavigate } from '@tanstack/react-router';
 import { BookOpen } from 'lucide-react';
 
 import { DataTable, StatusBadge, type ColumnDef } from '@repo/ui';
+import { useT } from '@repo/i18n';
 
+import { useAppT } from '@/locales';
 import { useBranches } from '@/api/branches';
 
 import type { CourseResponse } from '../api/courses.queries';
@@ -13,15 +15,17 @@ interface CourseTableProps {
 }
 
 export function CourseTable({ courses, isLoading }: CourseTableProps) {
+	const t = useAppT('courses');
+	const tc = useT('common');
 	const navigate = useNavigate();
 	const { data: branches = [] } = useBranches();
 	const branchName = (id: number | null) =>
-		id == null ? 'Shared' : (branches.find((b) => b.id === id)?.name ?? '—');
+		id == null ? t('shared') : (branches.find((b) => b.id === id)?.name ?? '—');
 
 	const columns: ColumnDef<CourseResponse>[] = [
 		{
 			id: 'name',
-			header: 'Course',
+			header: t('column.name'),
 			cell: ({ row }) => (
 				<div className="flex gap-2.5">
 					<span className="flex size-8 shrink-0 items-center justify-center rounded-lg bg-primary/10 text-primary">
@@ -40,7 +44,7 @@ export function CourseTable({ courses, isLoading }: CourseTableProps) {
 		},
 		{
 			accessorKey: 'level',
-			header: 'Level',
+			header: t('column.level'),
 			cell: ({ getValue }) => (
 				<span className="text-sm text-muted-foreground">
 					{getValue<string | null>() ?? '—'}
@@ -50,12 +54,12 @@ export function CourseTable({ courses, isLoading }: CourseTableProps) {
 		},
 		{
 			accessorKey: 'defaultDurationWeeks',
-			header: 'Duration',
+			header: t('column.duration'),
 			cell: ({ getValue }) => {
 				const weeks = getValue<number | null>();
 				return (
 					<span className="text-sm tabular-nums text-muted-foreground">
-						{weeks == null ? '—' : `${weeks} wks`}
+						{weeks == null ? '—' : t('weeksShort', { count: weeks })}
 					</span>
 				);
 			},
@@ -63,7 +67,7 @@ export function CourseTable({ courses, isLoading }: CourseTableProps) {
 		},
 		{
 			id: 'branch',
-			header: 'Branch',
+			header: t('column.branch'),
 			cell: ({ row }) => (
 				<span className="text-sm text-muted-foreground">
 					{branchName(row.original.branchId)}
@@ -73,12 +77,12 @@ export function CourseTable({ courses, isLoading }: CourseTableProps) {
 		},
 		{
 			accessorKey: 'isActive',
-			header: 'Status',
+			header: t('column.status'),
 			cell: ({ getValue }) =>
 				getValue<boolean>() ? (
-					<StatusBadge tone="green">Active</StatusBadge>
+					<StatusBadge tone="green">{tc('state.active')}</StatusBadge>
 				) : (
-					<StatusBadge tone="slate">Inactive</StatusBadge>
+					<StatusBadge tone="slate">{tc('state.inactive')}</StatusBadge>
 				),
 			size: 100,
 		},
@@ -98,7 +102,7 @@ export function CourseTable({ courses, isLoading }: CourseTableProps) {
 			}
 			emptyState={
 				<div className="py-16 text-center text-sm text-muted-foreground">
-					No courses match this filter.
+					{t('emptyFiltered')}
 				</div>
 			}
 			className="rounded-none border-0"

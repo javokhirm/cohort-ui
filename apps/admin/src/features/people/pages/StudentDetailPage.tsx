@@ -24,8 +24,10 @@ import {
 	type ColumnDef,
 } from '@repo/ui';
 import { formatDate, formatMoney } from '@repo/utils';
+import { useStatusLabel, useT } from '@repo/i18n';
 
 import { Can } from '@/components/Can';
+import { useAppT } from '@/locales';
 import { usePermissions } from '@/features/auth/hooks';
 import { StandingDiscountCell } from '@/features/billing';
 import { useBranches } from '@/api/branches';
@@ -48,16 +50,18 @@ import { useRemoveGuardian } from '../api/students.mutations';
 import { StudentForm } from '../components/StudentForm';
 import { WalletSection } from '../components/WalletSection';
 
-function genderLabel(g?: string | null) {
-	if (g === 'M') return 'Male';
-	if (g === 'F') return 'Female';
-	if (g === 'O') return 'Other';
+type PeopleT = ReturnType<typeof useAppT<'people'>>;
+
+function genderLabel(t: PeopleT, g?: string | null): string {
+	if (g === 'M' || g === 'F' || g === 'O') return t(`gender.${g}`);
 	return '—';
 }
 
 // ─── Student header ───────────────────────────────────────────────────────────
 
 function StudentHeader({ studentId, onEdit }: { studentId: number; onEdit: () => void }) {
+	const t = useAppT('people');
+	const statusLabel = useStatusLabel();
 	const { data: student, isLoading } = useStudent(studentId);
 	const { data: branches = [] } = useBranches();
 	const { can } = usePermissions();
@@ -92,7 +96,9 @@ function StudentHeader({ studentId, onEdit }: { studentId: number; onEdit: () =>
 							<h1 className="text-lg font-bold">
 								{student.user.firstName} {student.user.lastName}
 							</h1>
-							<StatusBadge kind="student" status={student.status} />
+							<StatusBadge kind="student" status={student.status}>
+								{statusLabel('student', student.status)}
+							</StatusBadge>
 						</div>
 						<div className="mt-0.5 flex items-center gap-1.5 text-sm text-muted-foreground">
 							<span>{student.studentCode}</span>
@@ -105,17 +111,17 @@ function StudentHeader({ studentId, onEdit }: { studentId: number; onEdit: () =>
 				</div>
 
 				<ActionsMenu
-					label="Student actions"
+					label={t('detail.actionsLabel')}
 					items={[
 						{
-							label: 'Edit',
+							label: t('detail.action.edit'),
 							icon: Edit,
 							onClick: onEdit,
 							hidden: !can('student.update'),
 						},
-						{ label: 'Message', icon: MessageSquare },
+						{ label: t('detail.action.message'), icon: MessageSquare },
 						{
-							label: 'Create invoice',
+							label: t('detail.action.createInvoice'),
 							icon: Plus,
 							hidden: !can('invoice.create'),
 						},
@@ -129,6 +135,7 @@ function StudentHeader({ studentId, onEdit }: { studentId: number; onEdit: () =>
 // ─── Overview tab ─────────────────────────────────────────────────────────────
 
 function OverviewTab({ studentId }: { studentId: number }) {
+	const t = useAppT('people');
 	const { data: student } = useStudent(studentId);
 	if (!student) return null;
 
@@ -136,10 +143,12 @@ function OverviewTab({ studentId }: { studentId: number }) {
 		<div className="grid gap-4 lg:grid-cols-3">
 			<Card className="lg:col-span-2">
 				<CardContent>
-					<p className="mb-4 font-semibold">Personal details</p>
+					<p className="mb-4 font-semibold">{t('detail.overview.title')}</p>
 					<div className="grid grid-cols-2 gap-x-8 gap-y-4 text-sm">
 						<div>
-							<p className="text-muted-foreground">Date of birth</p>
+							<p className="text-muted-foreground">
+								{t('detail.overview.dateOfBirth')}
+							</p>
 							<p className="mt-0.5 font-medium">
 								{student.dateOfBirth
 									? formatDate(student.dateOfBirth)
@@ -147,17 +156,23 @@ function OverviewTab({ studentId }: { studentId: number }) {
 							</p>
 						</div>
 						<div>
-							<p className="text-muted-foreground">Address</p>
+							<p className="text-muted-foreground">
+								{t('detail.overview.address')}
+							</p>
 							<p className="mt-0.5 font-medium">{student.address ?? '—'}</p>
 						</div>
 						<div>
-							<p className="text-muted-foreground">Gender</p>
+							<p className="text-muted-foreground">
+								{t('detail.overview.gender')}
+							</p>
 							<p className="mt-0.5 font-medium">
-								{genderLabel(student.gender)}
+								{genderLabel(t, student.gender)}
 							</p>
 						</div>
 						<div>
-							<p className="text-muted-foreground">Enrollment date</p>
+							<p className="text-muted-foreground">
+								{t('detail.overview.enrolledAt')}
+							</p>
 							<p className="mt-0.5 font-medium">
 								{formatDate(student.enrolledAt)}
 							</p>
@@ -172,20 +187,23 @@ function OverviewTab({ studentId }: { studentId: number }) {
 // ─── Guardians tab ────────────────────────────────────────────────────────────
 
 function GuardiansTab({ studentId }: { studentId: number }) {
+	const t = useAppT('people');
 	const { data: guardians = [], isLoading } = useStudentGuardians(studentId);
 	const removeGuardian = useRemoveGuardian();
 
 	function handleRemove(guardian: Guardian) {
 		if (
 			!confirm(
-				`Remove ${guardian.user.firstName} ${guardian.user.lastName} as guardian?`,
+				t('detail.guardians.removeConfirm', {
+					name: `${guardian.user.firstName} ${guardian.user.lastName}`,
+				}),
 			)
 		)
 			return;
 		removeGuardian.mutate(
 			{ studentId, guardianId: guardian.id },
 			{
-				onSuccess: () => toast.success('Guardian removed'),
+				onSuccess: () => toast.success(t('detail.guardians.removed')),
 			},
 		);
 	}
@@ -203,7 +221,7 @@ function GuardiansTab({ studentId }: { studentId: number }) {
 	if (guardians.length === 0) {
 		return (
 			<div className="flex min-h-32 items-center justify-center rounded-xl border text-sm text-muted-foreground">
-				No guardians linked
+				{t('detail.guardians.empty')}
 			</div>
 		);
 	}
@@ -213,8 +231,9 @@ function GuardiansTab({ studentId }: { studentId: number }) {
 			{guardians.map((g, i) => {
 				const initials =
 					`${g.user.firstName[0] ?? ''}${g.user.lastName[0] ?? ''}`.toUpperCase();
-				const relationLabel =
-					g.relation.charAt(0).toUpperCase() + g.relation.slice(1);
+				const relationLabel = t(
+					`relation.${g.relation as 'father' | 'mother' | 'guardian'}`,
+				);
 				return (
 					<div key={g.id}>
 						{i > 0 && <Separator />}
@@ -233,12 +252,12 @@ function GuardiansTab({ studentId }: { studentId: number }) {
 										</span>
 										{g.isPrimary && (
 											<StatusBadge tone="indigo">
-												Primary
+												{t('detail.guardians.primary')}
 											</StatusBadge>
 										)}
 										{g.canPickup && (
 											<StatusBadge tone="green">
-												Pickup OK
+												{t('detail.guardians.pickup')}
 											</StatusBadge>
 										)}
 									</div>
@@ -269,31 +288,39 @@ function GuardiansTab({ studentId }: { studentId: number }) {
 
 const ENROLLMENT_STATUS_ALL = 'all';
 
-const ENROLLMENT_STATUS_FILTER_OPTIONS: { value: string; label: string }[] = [
-	{ value: ENROLLMENT_STATUS_ALL, label: 'All' },
-	{ value: 'ACTIVE', label: 'Active' },
-	{ value: 'SUSPENDED', label: 'Suspended' },
-	{ value: 'DROPPED', label: 'Dropped' },
-	{ value: 'COMPLETED', label: 'Completed' },
-	{ value: 'TRANSFERRED', label: 'Transferred' },
+/** Values only — labels resolve at render (conventions.md §7). */
+const ENROLLMENT_STATUS_FILTER_OPTIONS: { value: string }[] = [
+	{ value: ENROLLMENT_STATUS_ALL },
+	{ value: 'ACTIVE' },
+	{ value: 'SUSPENDED' },
+	{ value: 'DROPPED' },
+	{ value: 'COMPLETED' },
+	{ value: 'TRANSFERRED' },
 ];
 
-const baseEnrollmentColumns: ColumnDef<Enrollment>[] = [
+/**
+ * Column tables are built per render rather than held at module scope: their
+ * headers are user-facing, so they must re-resolve when the language changes.
+ */
+const buildEnrollmentColumns = (
+	t: PeopleT,
+	statusLabel: ReturnType<typeof useStatusLabel>,
+): ColumnDef<Enrollment>[] => [
 	{
 		accessorKey: 'groupName',
-		header: 'Group',
+		header: t('detail.enrollments.column.group'),
 		cell: ({ getValue }) => (
 			<span className="text-muted-foreground text-xs">{getValue<string>()}</span>
 		),
 	},
 	{
 		accessorKey: 'courseName',
-		header: 'Course',
+		header: t('detail.enrollments.column.course'),
 		cell: ({ getValue }) => <span className="font-medium">{getValue<string>()}</span>,
 	},
 	{
 		accessorKey: 'enrolledAt',
-		header: 'From',
+		header: t('detail.enrollments.column.from'),
 		cell: ({ getValue }) => (
 			<span className="text-muted-foreground">
 				{formatDate(getValue<string>())}
@@ -302,26 +329,31 @@ const baseEnrollmentColumns: ColumnDef<Enrollment>[] = [
 	},
 	{
 		accessorKey: 'status',
-		header: 'Status',
+		header: t('detail.enrollments.column.status'),
 		cell: ({ getValue }) => (
-			<StatusBadge kind="enrollment" status={getValue<string>()} />
+			<StatusBadge kind="enrollment" status={getValue<string>()}>
+				{statusLabel('enrollment', getValue<string>())}
+			</StatusBadge>
 		),
 	},
 ];
 
 /** Standing per-enrollment discount column — gated to `enrollment.discount.manage`. */
-const standingDiscountColumn: ColumnDef<Enrollment> = {
+const buildStandingDiscountColumn = (t: PeopleT): ColumnDef<Enrollment> => ({
 	id: 'standingDiscount',
-	header: 'Standing discount',
+	header: t('detail.enrollments.column.standingDiscount'),
 	cell: ({ row }) => (
 		<StandingDiscountCell
 			enrollmentId={row.original.id}
 			groupName={row.original.groupName}
 		/>
 	),
-};
+});
 
 function EnrollmentsTab({ studentId }: { studentId: number }) {
+	const t = useAppT('people');
+	const tc = useT('common');
+	const statusLabel = useStatusLabel();
 	const { data: enrollments = [], isLoading } = useStudentEnrollments(studentId);
 	const { can } = usePermissions();
 	const [statusFilter, setStatusFilter] = useState<Enrollment['status'] | undefined>(
@@ -331,9 +363,10 @@ function EnrollmentsTab({ studentId }: { studentId: number }) {
 	// The discount endpoints require `enrollment.discount.manage` (OWNER/ADMIN, not
 	// MANAGER), so drop the whole column for users without it — showing it would
 	// only 403 on fetch.
+	const baseColumns = buildEnrollmentColumns(t, statusLabel);
 	const columns = can('enrollment.discount.manage')
-		? [...baseEnrollmentColumns, standingDiscountColumn]
-		: baseEnrollmentColumns;
+		? [...baseColumns, buildStandingDiscountColumn(t)]
+		: baseColumns;
 
 	if (isLoading) {
 		return <Skeleton className="h-32 rounded-xl" />;
@@ -359,12 +392,14 @@ function EnrollmentsTab({ studentId }: { studentId: number }) {
 					}
 				>
 					<SelectTrigger className="h-9 w-36" size="sm">
-						<SelectValue placeholder="All statuses" />
+						<SelectValue placeholder={t('detail.enrollments.allStatuses')} />
 					</SelectTrigger>
 					<SelectContent>
 						{ENROLLMENT_STATUS_FILTER_OPTIONS.map((opt) => (
 							<SelectItem key={opt.value} value={opt.value}>
-								{opt.label}
+								{opt.value === ENROLLMENT_STATUS_ALL
+									? tc('state.all')
+									: statusLabel('enrollment', opt.value)}
 							</SelectItem>
 						))}
 					</SelectContent>
@@ -377,8 +412,8 @@ function EnrollmentsTab({ studentId }: { studentId: number }) {
 				emptyState={
 					<div className="flex min-h-32 items-center justify-center text-sm text-muted-foreground">
 						{statusFilter
-							? 'No enrollments with this status'
-							: 'No enrollments'}
+							? t('detail.enrollments.emptyFiltered')
+							: t('detail.enrollments.empty')}
 					</div>
 				}
 			/>
@@ -389,6 +424,8 @@ function EnrollmentsTab({ studentId }: { studentId: number }) {
 // ─── Attendance tab ───────────────────────────────────────────────────────────
 
 function AttendanceTab({ studentId }: { studentId: number }) {
+	const t = useAppT('people');
+	const statusLabel = useStatusLabel();
 	const { data: attendance, isLoading } = useStudentAttendances(studentId);
 
 	if (isLoading) {
@@ -401,7 +438,7 @@ function AttendanceTab({ studentId }: { studentId: number }) {
 	if (records.length === 0) {
 		return (
 			<div className="flex min-h-32 items-center justify-center rounded-xl border text-sm text-muted-foreground">
-				No attendance records
+				{t('detail.attendance.empty')}
 			</div>
 		);
 	}
@@ -411,11 +448,15 @@ function AttendanceTab({ studentId }: { studentId: number }) {
 			{rate != null && (
 				<Card>
 					<CardContent className="flex flex-col items-center justify-center pt-6 text-center">
-						<p className="text-sm text-muted-foreground">Attendance rate</p>
+						<p className="text-sm text-muted-foreground">
+							{t('detail.attendance.rate')}
+						</p>
 						<p className="mt-1 text-4xl font-bold text-tone-green-fg">
 							{rate}%
 						</p>
-						<p className="mt-1 text-xs text-muted-foreground">Last 90 days</p>
+						<p className="mt-1 text-xs text-muted-foreground">
+							{t('detail.attendance.rateWindow')}
+						</p>
 					</CardContent>
 				</Card>
 			)}
@@ -432,7 +473,9 @@ function AttendanceTab({ studentId }: { studentId: number }) {
 									{formatDate(r.sessionDate)}
 								</p>
 							</div>
-							<StatusBadge kind="attendance" status={r.status} />
+							<StatusBadge kind="attendance" status={r.status}>
+								{statusLabel('attendance', r.status)}
+							</StatusBadge>
 						</div>
 					</div>
 				))}
@@ -444,6 +487,7 @@ function AttendanceTab({ studentId }: { studentId: number }) {
 // ─── Grades tab ───────────────────────────────────────────────────────────────
 
 function GradesTab({ studentId }: { studentId: number }) {
+	const t = useAppT('people');
 	const { data: grades = [], isLoading } = useStudentResults(studentId);
 
 	if (isLoading) {
@@ -453,7 +497,7 @@ function GradesTab({ studentId }: { studentId: number }) {
 	if (grades.length === 0) {
 		return (
 			<div className="flex min-h-32 items-center justify-center rounded-xl border text-sm text-muted-foreground">
-				No grades recorded
+				{t('detail.grades.empty')}
 			</div>
 		);
 	}
@@ -486,17 +530,20 @@ function GradesTab({ studentId }: { studentId: number }) {
 
 // ─── Billing tab ──────────────────────────────────────────────────────────────
 
-const invoiceColumns: ColumnDef<Invoice>[] = [
+const buildInvoiceColumns = (
+	t: PeopleT,
+	statusLabel: ReturnType<typeof useStatusLabel>,
+): ColumnDef<Invoice>[] => [
 	{
 		accessorKey: 'invoiceCode',
-		header: 'Invoice',
+		header: t('detail.billing.column.invoice'),
 		cell: ({ getValue }) => (
 			<span className="font-mono text-xs">{getValue<string>()}</span>
 		),
 	},
 	{
 		accessorKey: 'date',
-		header: 'Date',
+		header: t('detail.billing.column.date'),
 		cell: ({ getValue }) => (
 			<span className="text-muted-foreground">
 				{formatDate(getValue<string>())}
@@ -505,7 +552,9 @@ const invoiceColumns: ColumnDef<Invoice>[] = [
 	},
 	{
 		accessorKey: 'total',
-		header: () => <div className="text-right">Total</div>,
+		header: () => (
+			<div className="text-right">{t('detail.billing.column.total')}</div>
+		),
 		cell: ({ getValue }) => (
 			<div className="text-right font-medium">
 				{formatMoney(getValue<number>())}
@@ -514,14 +563,18 @@ const invoiceColumns: ColumnDef<Invoice>[] = [
 	},
 	{
 		accessorKey: 'status',
-		header: 'Status',
+		header: t('detail.billing.column.status'),
 		cell: ({ getValue }) => (
-			<StatusBadge kind="invoice" status={getValue<string>()} />
+			<StatusBadge kind="invoice" status={getValue<string>()}>
+				{statusLabel('invoice', getValue<string>())}
+			</StatusBadge>
 		),
 	},
 ];
 
 function BillingTab({ studentId }: { studentId: number }) {
+	const t = useAppT('people');
+	const statusLabel = useStatusLabel();
 	const { data: invoices = [], isLoading } = useStudentInvoices(studentId);
 
 	if (isLoading) {
@@ -530,12 +583,12 @@ function BillingTab({ studentId }: { studentId: number }) {
 
 	return (
 		<DataTable
-			columns={invoiceColumns}
+			columns={buildInvoiceColumns(t, statusLabel)}
 			data={invoices as Invoice[]}
 			getRowId={(row) => String(row.id)}
 			emptyState={
 				<div className="flex min-h-32 items-center justify-center text-sm text-muted-foreground">
-					No invoices
+					{t('detail.billing.empty')}
 				</div>
 			}
 		/>
@@ -553,6 +606,7 @@ interface StudentDetailPageProps {
 }
 
 export function StudentDetailPage({ studentId }: StudentDetailPageProps) {
+	const t = useAppT('people');
 	const [editOpen, setEditOpen] = useState(false);
 	const { data: student } = useStudent(studentId);
 
@@ -563,21 +617,27 @@ export function StudentDetailPage({ studentId }: StudentDetailPageProps) {
 				className="flex w-fit items-center gap-1.5 text-sm text-muted-foreground hover:text-foreground"
 			>
 				<ArrowLeft className="size-3.5" />
-				Back to students
+				{t('detail.back')}
 			</Link>
 
 			<StudentHeader studentId={studentId} onEdit={() => setEditOpen(true)} />
 
 			<Tabs defaultValue="overview">
 				<TabsList>
-					<TabsTrigger value="overview">Overview</TabsTrigger>
-					<TabsTrigger value="guardians">Guardians</TabsTrigger>
-					<TabsTrigger value="enrollments">Enrollments</TabsTrigger>
-					<TabsTrigger value="attendance">Attendance</TabsTrigger>
-					<TabsTrigger value="grades">Grades</TabsTrigger>
-					<TabsTrigger value="billing">Billing</TabsTrigger>
+					<TabsTrigger value="overview">{t('detail.tab.overview')}</TabsTrigger>
+					<TabsTrigger value="guardians">
+						{t('detail.tab.guardians')}
+					</TabsTrigger>
+					<TabsTrigger value="enrollments">
+						{t('detail.tab.enrollments')}
+					</TabsTrigger>
+					<TabsTrigger value="attendance">
+						{t('detail.tab.attendance')}
+					</TabsTrigger>
+					<TabsTrigger value="grades">{t('detail.tab.grades')}</TabsTrigger>
+					<TabsTrigger value="billing">{t('detail.tab.billing')}</TabsTrigger>
 					<Can permission="wallet.read">
-						<TabsTrigger value="wallet">Wallet</TabsTrigger>
+						<TabsTrigger value="wallet">{t('detail.tab.wallet')}</TabsTrigger>
 					</Can>
 				</TabsList>
 

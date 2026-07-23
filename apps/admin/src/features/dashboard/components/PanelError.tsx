@@ -3,9 +3,11 @@ import { AlertTriangle } from 'lucide-react';
 import { Button } from '@repo/ui';
 
 import { PanelCard } from './PanelCard';
+import { useAppT } from '@/locales';
 
 /** A panel's error state: a short message and a retry button. */
 export function PanelError({ title, onRetry }: { title: string; onRetry: () => void }) {
+	const t = useAppT('dashboard');
 	return (
 		<PanelCard title={title}>
 			<div className="flex flex-col items-center gap-3 py-8 text-center">
@@ -14,7 +16,7 @@ export function PanelError({ title, onRetry }: { title: string; onRetry: () => v
 				</span>
 				<p className="text-sm text-muted-foreground">Couldn’t load this panel.</p>
 				<Button variant="outline" size="sm" onClick={onRetry}>
-					Retry
+					{t('retry')}
 				</Button>
 			</div>
 		</PanelCard>

@@ -16,6 +16,8 @@ import { formatMoney } from '@repo/utils';
 import { useFinalizePeriod } from '../api/payroll.mutations';
 import type { PayrollPeriodSummary } from '../api/payroll.queries';
 import { currentMonth, formatMonthLabel } from '../lib/month';
+import { useAppT } from '@/locales';
+import { useT } from '@repo/i18n';
 
 interface FinalizePeriodDialogProps {
 	open: boolean;
@@ -38,6 +40,8 @@ export function FinalizePeriodDialog({
 	summary,
 	branchId,
 }: FinalizePeriodDialogProps) {
+	const t = useAppT('payroll');
+	const tc = useT('common');
 	const finalizePeriod = useFinalizePeriod();
 	const isCurrentMonth = month === currentMonth();
 
@@ -110,10 +114,10 @@ export function FinalizePeriodDialog({
 						onClick={() => onOpenChange(false)}
 						disabled={finalizePeriod.isPending}
 					>
-						Cancel
+						{tc('action.cancel')}
 					</Button>
 					<Button onClick={handleConfirm} disabled={finalizePeriod.isPending}>
-						{finalizePeriod.isPending ? 'Finalizing…' : 'Finalize period'}
+						{finalizePeriod.isPending ? t('finalizing') : t('finalizePeriod')}
 					</Button>
 				</DialogFooter>
 			</DialogContent>

@@ -5,6 +5,7 @@ import { Button } from '@repo/ui';
 import { TASHKENT_TZ } from '@repo/utils';
 
 import { useSessionStore } from '@/store/sessionStore';
+import { useAppT } from '@/locales';
 
 /** Time-of-day greeting for the given hour (0–23) in the tenant timezone. */
 function greeting(hour: number): string {
@@ -19,6 +20,7 @@ function greeting(hour: number): string {
  * extra date dependency in the app).
  */
 export function DashboardHeader() {
+	const t = useAppT('dashboard');
 	const navigate = useNavigate();
 	const user = useSessionStore((s) => s.user);
 
@@ -55,7 +57,7 @@ export function DashboardHeader() {
 					onClick={() => void navigate({ to: '/students' })}
 				>
 					<UsersRound className="size-4" />
-					Add student
+					{t('addStudent')}
 				</Button>
 				<Button
 					variant="outline"
@@ -63,11 +65,11 @@ export function DashboardHeader() {
 					onClick={() => void navigate({ to: '/groups/new' })}
 				>
 					<Plus className="size-4" />
-					New group
+					{t('newGroup')}
 				</Button>
 				<Button size="sm" onClick={() => void navigate({ to: '/invoices' })}>
 					<FilePlus2 className="size-4" />
-					Create invoice
+					{t('createInvoice')}
 				</Button>
 			</div>
 		</div>

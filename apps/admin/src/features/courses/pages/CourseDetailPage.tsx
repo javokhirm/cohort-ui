@@ -3,8 +3,10 @@ import { Link } from '@tanstack/react-router';
 import { ArrowLeft, BookOpen, CalendarDays, Edit } from 'lucide-react';
 
 import { Button, Card, Separator, Skeleton, StatusBadge } from '@repo/ui';
+import { useT } from '@repo/i18n';
 
 import { Can } from '@/components/Can';
+import { useAppT } from '@/locales';
 import { useCourse, useCourseGroups, type CourseGroup } from '../api/courses.queries';
 import type { CourseResponse } from '../api/courses.queries';
 import { CourseForm } from '../components/CourseForm';
@@ -29,10 +31,13 @@ function CourseHeader({
 	activeGroups: number;
 	onEdit: () => void;
 }) {
+	const t = useAppT('courses');
+	const tc = useT('common');
+
 	const subtitle = [
 		course.level,
 		course.defaultDurationWeeks != null
-			? `${course.defaultDurationWeeks} weeks`
+			? t('weeks', { count: course.defaultDurationWeeks })
 			: null,
 	]
 		.filter(Boolean)
@@ -49,9 +54,13 @@ function CourseHeader({
 						<div className="flex items-center gap-2.5">
 							<h1 className="text-lg font-bold">{course.name}</h1>
 							{course.isActive ? (
-								<StatusBadge tone="green">Active</StatusBadge>
+								<StatusBadge tone="green">
+									{tc('state.active')}
+								</StatusBadge>
 							) : (
-								<StatusBadge tone="slate">Inactive</StatusBadge>
+								<StatusBadge tone="slate">
+									{tc('state.inactive')}
+								</StatusBadge>
 							)}
 						</div>
 						{subtitle && (
@@ -65,7 +74,7 @@ function CourseHeader({
 				<Can permission="course.update">
 					<Button variant="outline" size="sm" onClick={onEdit}>
 						<Edit className="mr-1.5 size-3.5" />
-						Edit course
+						{t('edit')}
 					</Button>
 				</Can>
 			</div>
@@ -73,16 +82,16 @@ function CourseHeader({
 			<Separator className="my-4" />
 
 			<div className="grid grid-cols-3 gap-4">
-				<Stat label="Level" value={course.level ?? '—'} />
+				<Stat label={t('detail.statLevel')} value={course.level ?? '—'} />
 				<Stat
-					label="Default duration"
+					label={t('detail.statDuration')}
 					value={
 						course.defaultDurationWeeks != null
-							? `${course.defaultDurationWeeks} weeks`
+							? t('weeks', { count: course.defaultDurationWeeks })
 							: '—'
 					}
 				/>
-				<Stat label="Active groups" value={String(activeGroups)} />
+				<Stat label={t('detail.statActiveGroups')} value={String(activeGroups)} />
 			</div>
 		</div>
 	);
@@ -91,6 +100,8 @@ function CourseHeader({
 // ─── Groups running this course ─────────────────────────────────────────────
 
 function GroupRow({ group }: { group: CourseGroup }) {
+	const t = useAppT('courses');
+
 	return (
 		<div className="flex items-center justify-between gap-4 px-4 py-3.5">
 			<div className="flex items-center gap-3">
@@ -100,17 +111,17 @@ function GroupRow({ group }: { group: CourseGroup }) {
 				<div className="flex flex-col">
 					<span className="text-sm font-semibold">{group.name}</span>
 					<span className="text-xs text-muted-foreground">
-						{group.roomName ?? 'No room assigned'}
+						{group.roomName ?? t('detail.noRoom')}
 					</span>
 				</div>
 			</div>
 			<div className="flex flex-col items-end">
 				<span className="text-sm font-medium">
-					{group.defaultTeacherName ?? 'Unassigned'}
+					{group.defaultTeacherName ?? t('detail.unassigned')}
 				</span>
 				{group.capacity != null && (
 					<span className="text-xs text-muted-foreground tabular-nums">
-						{group.capacity} seats
+						{t('seats', { count: group.capacity })}
 					</span>
 				)}
 			</div>
@@ -119,12 +130,13 @@ function GroupRow({ group }: { group: CourseGroup }) {
 }
 
 function GroupsSection({ courseId }: { courseId: number }) {
+	const t = useAppT('courses');
 	const { data, isLoading } = useCourseGroups(courseId);
 	const groups = data?.rows ?? [];
 
 	return (
 		<div className="flex flex-col gap-3">
-			<h2 className="text-sm font-semibold">Groups running this course</h2>
+			<h2 className="text-sm font-semibold">{t('detail.groupsTitle')}</h2>
 			{isLoading ? (
 				<Card className="gap-0 divide-y divide-border py-0">
 					{[1, 2].map((i) => (
@@ -136,7 +148,7 @@ function GroupsSection({ courseId }: { courseId: number }) {
 			) : groups.length === 0 ? (
 				<Card className="py-0">
 					<div className="py-12 text-center text-sm text-muted-foreground">
-						No active groups are running this course yet.
+						{t('detail.groupsEmpty')}
 					</div>
 				</Card>
 			) : (
@@ -157,6 +169,7 @@ interface CourseDetailPageProps {
 }
 
 export function CourseDetailPage({ courseId }: CourseDetailPageProps) {
+	const t = useAppT('courses');
 	const [editOpen, setEditOpen] = useState(false);
 	const { data: course, isLoading, isError } = useCourse(courseId);
 	const { data: groupsData } = useCourseGroups(courseId);
@@ -169,7 +182,7 @@ export function CourseDetailPage({ courseId }: CourseDetailPageProps) {
 				className="flex w-fit items-center gap-1.5 text-sm text-muted-foreground hover:text-foreground"
 			>
 				<ArrowLeft className="size-3.5" />
-				Back to courses
+				{t('detail.back')}
 			</Link>
 
 			{isLoading ? (
@@ -184,7 +197,7 @@ export function CourseDetailPage({ courseId }: CourseDetailPageProps) {
 				</div>
 			) : isError || !course ? (
 				<div className="flex min-h-40 items-center justify-center rounded-xl border text-sm text-muted-foreground">
-					Course not found.
+					{t('detail.notFound')}
 				</div>
 			) : (
 				<>

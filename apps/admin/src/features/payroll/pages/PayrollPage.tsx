@@ -28,6 +28,7 @@ import { PayrollPeriodTable } from '../components/PayrollPeriodTable';
 import { PeriodSelector } from '../components/PeriodSelector';
 import { buildPayrollCsv, downloadCsv } from '../lib/export-csv';
 import { currentMonth, formatMonthLabel } from '../lib/month';
+import { useAppT } from '@/locales';
 
 const ALL_STAFF = 'all';
 
@@ -39,6 +40,7 @@ const STATUS_FILTERS: { value: PayrollRowStatus | undefined; label: string }[] =
 ];
 
 export function PayrollPage() {
+	const t = useAppT('payroll');
 	const navigate = useNavigate({ from: '/payroll' });
 	const search = useSearch({ from: '/_authed/payroll' });
 	const month = search.month ?? currentMonth();
@@ -87,7 +89,7 @@ export function PayrollPage() {
 	return (
 		<div className="mx-auto flex max-w-7xl flex-col gap-6">
 			<PageHeader
-				title="Payroll"
+				title={t('title')}
 				description={`${formatMonthLabel(month)} · computed per teacher from sessions taught & students`}
 				actions={
 					<div className="flex flex-wrap items-center gap-2">
@@ -98,12 +100,12 @@ export function PayrollPage() {
 							disabled={rows.length === 0}
 						>
 							<Download className="mr-1.5 size-4" />
-							Export
+							{t('export')}
 						</Button>
 						{periodFinalized ? (
 							<div className="flex h-9 items-center gap-1.5 rounded-lg border border-border bg-muted px-3 text-sm font-semibold text-muted-foreground">
 								<Check className="size-4" />
-								Finalized
+								{t('finalized')}
 							</div>
 						) : (
 							can('payroll.finalize') && (
@@ -112,7 +114,7 @@ export function PayrollPage() {
 									disabled={!summary || rows.length === 0}
 								>
 									<Lock className="mr-1.5 size-4" />
-									Finalize period
+									{t('finalizePeriod')}
 								</Button>
 							)
 						)}
@@ -122,11 +124,11 @@ export function PayrollPage() {
 
 			<div className="grid grid-cols-1 gap-4 sm:grid-cols-3">
 				<StatCard
-					label="Total computed"
+					label={t('stat.totalComputed')}
 					value={statValue(summary?.totalComputed)}
 				/>
 				<StatCard
-					label="Mid-month advances"
+					label={t('stat.advances')}
 					value={
 						<span className="text-tone-red-fg">
 							{statValue(summary?.totalAdvances)}
@@ -134,7 +136,7 @@ export function PayrollPage() {
 					}
 				/>
 				<StatCard
-					label="Net payable"
+					label={t('stat.netPayable')}
 					value={
 						<span className="text-tone-green-fg">
 							{statValue(summary?.totalNetPayable)}
@@ -160,7 +162,7 @@ export function PayrollPage() {
 							onValueChange={handleStaffChange}
 						>
 							<SelectTrigger className="h-9 w-52" size="sm">
-								<SelectValue placeholder="All staff" />
+								<SelectValue placeholder={t('allStaff')} />
 							</SelectTrigger>
 							<SelectContent>
 								<SelectItem value={ALL_STAFF}>All staff</SelectItem>

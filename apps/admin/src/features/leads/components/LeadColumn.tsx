@@ -1,6 +1,9 @@
 import { useState } from 'react';
 
 import { Button, cn, resolveStatus, Spinner, TONE_ACCENT_CLASSES } from '@repo/ui';
+import { useStatusLabel } from '@repo/i18n';
+
+import { useAppT } from '@/locales';
 
 import type { LeadListFilters } from '../api/keys';
 import {
@@ -38,6 +41,8 @@ export function LeadColumn({
 	onDragEndLead,
 	onDropLead,
 }: LeadColumnProps) {
+	const t = useAppT('leads');
+	const statusLabel = useStatusLabel();
 	const [expanded, setExpanded] = useState(false);
 	const [isOver, setIsOver] = useState(false);
 
@@ -103,7 +108,9 @@ export function LeadColumn({
 							TONE_ACCENT_CLASSES[descriptor.tone].dot,
 						)}
 					/>
-					<span className="text-sm font-bold">{descriptor.label}</span>
+					<span className="text-sm font-bold">
+						{statusLabel('lead', status)}
+					</span>
 				</div>
 				<span className="rounded-md border border-border bg-card px-2 py-0.5 text-xs font-semibold text-muted-foreground tabular-nums">
 					{total}
@@ -125,7 +132,7 @@ export function LeadColumn({
 
 				{total === 0 && (
 					<p className="px-1 py-6 text-center text-xs text-muted-foreground">
-						No leads
+						{t('column.empty')}
 					</p>
 				)}
 
@@ -137,7 +144,11 @@ export function LeadColumn({
 						onClick={handleLoadMore}
 						disabled={isFetching}
 					>
-						{isFetching ? <Spinner className="size-4" /> : 'Load more'}
+						{isFetching ? (
+							<Spinner className="size-4" />
+						) : (
+							t('column.loadMore')
+						)}
 					</Button>
 				)}
 			</div>

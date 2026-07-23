@@ -17,6 +17,7 @@ import { LiveBadge } from '../components/LiveBadge';
 import { RateTypeBadge } from '../components/RateTypeBadge';
 import { StudentBreakdownTable } from '../components/StudentBreakdownTable';
 import { formatMonthLabel } from '../lib/month';
+import { useAppT } from '@/locales';
 
 function initials(name: string): string {
 	const [first, last] = name.split(' ');
@@ -36,6 +37,7 @@ function actionErrorMessage(err: unknown, fallback: string): string {
 }
 
 function HeaderCard({ period }: { period: PayrollStaffPeriodResponse }) {
+	const t = useAppT('payroll');
 	const { can } = usePermissions();
 	const [payOpen, setPayOpen] = useState(false);
 	const [unfinalizeOpen, setUnfinalizeOpen] = useState(false);
@@ -47,7 +49,7 @@ function HeaderCard({ period }: { period: PayrollStaffPeriodResponse }) {
 	function handleMarkPaid() {
 		markPaid.mutate(undefined, {
 			onSuccess: () => {
-				toast.success('Payroll marked as paid');
+				toast.success(t('markPaid.done'));
 				setPayOpen(false);
 			},
 			onError: (err) => {
@@ -59,7 +61,7 @@ function HeaderCard({ period }: { period: PayrollStaffPeriodResponse }) {
 	function handleUnfinalize() {
 		unfinalize.mutate(undefined, {
 			onSuccess: () => {
-				toast.success('Snapshot discarded — figures are live again');
+				toast.success(t('unfinalizeDialog.done'));
 				setUnfinalizeOpen(false);
 			},
 			onError: (err) => {
@@ -131,7 +133,7 @@ function HeaderCard({ period }: { period: PayrollStaffPeriodResponse }) {
 						disabled={markPaid.isPending}
 					>
 						<Wallet className="mr-1.5 size-4" />
-						Mark as paid
+						{t('markAsPaid')}
 					</Button>
 				)}
 				{period.status === 'FINALIZED' && can('payroll.finalize') && (
@@ -141,7 +143,7 @@ function HeaderCard({ period }: { period: PayrollStaffPeriodResponse }) {
 						disabled={unfinalize.isPending}
 					>
 						<Undo2 className="mr-1.5 size-4" />
-						Unfinalize
+						{t('unfinalize')}
 					</Button>
 				)}
 				{period.status === 'LIVE' && (
@@ -166,7 +168,7 @@ function HeaderCard({ period }: { period: PayrollStaffPeriodResponse }) {
 				onOpenChange={setPayOpen}
 				title={`Mark ${formatMonthLabel(period.month)} as paid?`}
 				description={`${formatMoney(period.netAmount)} net for ${period.staffName} is recorded as paid out. This cannot be undone.`}
-				confirmLabel="Mark as paid"
+				confirmLabel={t('markPaid.confirm')}
 				loading={markPaid.isPending}
 				onConfirm={handleMarkPaid}
 			/>
@@ -174,9 +176,9 @@ function HeaderCard({ period }: { period: PayrollStaffPeriodResponse }) {
 			<ConfirmDialog
 				open={unfinalizeOpen}
 				onOpenChange={setUnfinalizeOpen}
-				title="Unfinalize this payroll?"
-				description="The frozen snapshot is discarded and the figures go live again — they will recompute from completed sessions and may change before the next finalize."
-				confirmLabel="Unfinalize"
+				title={t('unfinalizeDialog.title')}
+				description={t('unfinalizeDialog.description')}
+				confirmLabel={t('unfinalizeDialog.confirm')}
 				variant="destructive"
 				loading={unfinalize.isPending}
 				onConfirm={handleUnfinalize}
@@ -192,6 +194,7 @@ interface PayrollDetailPageProps {
 }
 
 export function PayrollDetailPage({ staffId, month }: PayrollDetailPageProps) {
+	const t = useAppT('payroll');
 	const { data: period, isLoading, isError } = usePayrollStaffPeriod(month, staffId);
 
 	return (
@@ -202,7 +205,7 @@ export function PayrollDetailPage({ staffId, month }: PayrollDetailPageProps) {
 				className="flex w-fit items-center gap-1.5 text-sm text-muted-foreground hover:text-foreground"
 			>
 				<ArrowLeft className="size-3.5" />
-				Back to payroll
+				{t('back')}
 			</Link>
 
 			{isLoading ? (

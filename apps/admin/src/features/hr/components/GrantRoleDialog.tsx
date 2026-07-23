@@ -18,12 +18,13 @@ import {
 	toast,
 } from '@repo/ui';
 import { isApiError } from '@repo/api-client';
+import { useStatusLabel, useT } from '@repo/i18n';
 
+import { useAppT } from '@/locales';
 import { useBranches } from '@/api/branches';
 
 import { useGrantRole } from '../api/roles.mutations';
 import { useRoleCatalog } from '../api/roles.queries';
-import { roleLabel } from '../lib/roles';
 
 /** Sentinel for the "all branches" option — a Select value must be a string. */
 const ALL_BRANCHES = 'all';
@@ -46,6 +47,9 @@ export function GrantRoleDialog({
 	userId,
 	staffName,
 }: GrantRoleDialogProps) {
+	const t = useAppT('hr');
+	const tc = useT('common');
+	const statusLabel = useStatusLabel();
 	const { data: roles = [], isLoading: rolesLoading } = useRoleCatalog();
 	const { data: branches = [] } = useBranches();
 	const grantRole = useGrantRole();
@@ -69,15 +73,15 @@ export function GrantRoleDialog({
 				roleId: Number(roleId),
 				branchId: branchId === ALL_BRANCHES ? null : Number(branchId),
 			});
-			toast.success('Role granted');
+			toast.success(t('roles.granted'));
 			close();
 		} catch (err) {
 			if (isApiError(err) && err.code === 'ROLE_ASSIGNMENT_EXISTS') {
-				toast.error('They already hold this role in that branch.');
+				toast.error(t('roles.alreadyHeld'));
 			} else if (isApiError(err)) {
 				toast.error(err.message);
 			} else {
-				toast.error('Something went wrong');
+				toast.error(tc('error.unknown'));
 			}
 		}
 	}
@@ -86,28 +90,29 @@ export function GrantRoleDialog({
 		<Dialog open={open} onOpenChange={(o) => !o && close()}>
 			<DialogContent className="max-w-sm">
 				<DialogHeader>
-					<DialogTitle>Grant a role</DialogTitle>
+					<DialogTitle>{t('roles.dialog.title')}</DialogTitle>
 					<DialogDescription>
-						{staffName} keeps the roles they already hold — this one is added
-						alongside them.
+						{t('roles.dialog.description', { name: staffName })}
 					</DialogDescription>
 				</DialogHeader>
 
 				<div className="flex flex-col gap-4">
 					<div className="flex flex-col gap-2">
-						<Label htmlFor="role">Role</Label>
+						<Label htmlFor="role">{t('roles.dialog.role')}</Label>
 						<Select value={roleId} onValueChange={setRoleId}>
 							<SelectTrigger id="role" className="w-full">
 								<SelectValue
 									placeholder={
-										rolesLoading ? 'Loading…' : 'Select a role'
+										rolesLoading
+											? t('roles.dialog.loading')
+											: t('roles.dialog.rolePlaceholder')
 									}
 								/>
 							</SelectTrigger>
 							<SelectContent>
 								{assignableRoles.map((role) => (
 									<SelectItem key={role.id} value={String(role.id)}>
-										{roleLabel(role.name)}
+										{statusLabel('role', role.name)}
 									</SelectItem>
 								))}
 							</SelectContent>
@@ -115,13 +120,15 @@ export function GrantRoleDialog({
 					</div>
 
 					<div className="flex flex-col gap-2">
-						<Label htmlFor="branch">Branch</Label>
+						<Label htmlFor="branch">{t('roles.dialog.branch')}</Label>
 						<Select value={branchId} onValueChange={setBranchId}>
 							<SelectTrigger id="branch" className="w-full">
 								<SelectValue />
 							</SelectTrigger>
 							<SelectContent>
-								<SelectItem value={ALL_BRANCHES}>All branches</SelectItem>
+								<SelectItem value={ALL_BRANCHES}>
+									{t('roles.allBranches')}
+								</SelectItem>
 								{branches.map((branch) => (
 									<SelectItem key={branch.id} value={String(branch.id)}>
 										{branch.name}
@@ -134,14 +141,14 @@ export function GrantRoleDialog({
 
 				<DialogFooter>
 					<Button variant="outline" onClick={close}>
-						Cancel
+						{tc('action.cancel')}
 					</Button>
 					<Button
 						disabled={!roleId || grantRole.isPending}
 						onClick={() => void onGrant()}
 					>
 						{grantRole.isPending && <Spinner className="mr-2 size-4" />}
-						Grant role
+						{t('roles.dialog.submit')}
 					</Button>
 				</DialogFooter>
 			</DialogContent>

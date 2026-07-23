@@ -1,8 +1,9 @@
 import { Users } from 'lucide-react';
 
 import { Spinner, StatusBadge } from '@repo/ui';
+import { useAppT } from '@/locales';
 
-import { GROUP_STATUS_META } from '@/features/groups/lib/group-options';
+import { GROUP_STATUS_TONES } from '@/features/groups/lib/group-options';
 
 import { useFeePlanGroups } from '../api/fee-plans.queries';
 
@@ -13,6 +14,8 @@ import { useFeePlanGroups } from '../api/fee-plans.queries';
  * answers "what does changing this plan affect?" and nothing more.
  */
 export function FeePlanGroupsSection({ feePlanId }: { feePlanId: number }) {
+	const t = useAppT('billing');
+	const tg = useAppT('groups');
 	const { data, isLoading, isError } = useFeePlanGroups(feePlanId);
 	const groups = data?.rows ?? [];
 
@@ -20,7 +23,9 @@ export function FeePlanGroupsSection({ feePlanId }: { feePlanId: number }) {
 		<div className="flex flex-col gap-3 rounded-xl bg-card p-4">
 			<div className="flex items-center gap-2">
 				<Users className="size-4 text-muted-foreground" />
-				<span className="text-sm font-medium">Groups using this plan</span>
+				<span className="text-sm font-medium">
+					{t('feePlanExtra.groupsUsing')}
+				</span>
 			</div>
 
 			{isLoading ? (
@@ -53,8 +58,8 @@ export function FeePlanGroupsSection({ feePlanId }: { feePlanId: number }) {
 										{g.courseName}
 									</span>
 								</div>
-								<StatusBadge tone={GROUP_STATUS_META[g.status].tone}>
-									{GROUP_STATUS_META[g.status].label}
+								<StatusBadge tone={GROUP_STATUS_TONES[g.status]}>
+									{tg(`status.${g.status}`)}
 								</StatusBadge>
 							</li>
 						))}

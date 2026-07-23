@@ -3,8 +3,10 @@ import { useNavigate, useSearch } from '@tanstack/react-router';
 import { Plus } from 'lucide-react';
 
 import { Button, Card, PageHeader, Pagination, SearchFilterBar } from '@repo/ui';
+import { useT } from '@repo/i18n';
 
 import { Can } from '@/components/Can';
+import { useAppT } from '@/locales';
 import { useCourseList } from '../api/courses.queries';
 import type { CourseListFilters } from '../api/keys';
 import { COURSE_STATUS_FILTERS } from '../lib/course-options';
@@ -14,6 +16,8 @@ import { CourseForm } from '../components/CourseForm';
 const PAGE_SIZE = 20;
 
 export function CourseListPage() {
+	const t = useAppT('courses');
+	const tc = useT('common');
 	const navigate = useNavigate({ from: '/courses' });
 	const {
 		page = 1,
@@ -66,13 +70,13 @@ export function CourseListPage() {
 	return (
 		<div className="mx-auto flex max-w-7xl flex-col gap-6">
 			<PageHeader
-				title="Courses"
-				description="Course catalog — levels, durations and branch scope"
+				title={t('title')}
+				description={t('description')}
 				actions={
 					<Can permission="course.create">
 						<Button onClick={() => setAddOpen(true)}>
 							<Plus className="mr-1.5 size-4" />
-							New course
+							{t('add')}
 						</Button>
 					</Can>
 				}
@@ -82,10 +86,10 @@ export function CourseListPage() {
 				<SearchFilterBar
 					searchValue={inputValue}
 					onSearchChange={setInputValue}
-					searchPlaceholder="Search courses…"
+					searchPlaceholder={t('searchPlaceholder')}
 					filters={COURSE_STATUS_FILTERS.map((f) => ({
 						id: f.value ?? 'ALL',
-						label: f.label,
+						label: tc(`state.${f.labelKey}`),
 						active: status === f.value,
 						onClick: () => handleStatusChange(f.value),
 					}))}
@@ -93,7 +97,7 @@ export function CourseListPage() {
 
 				{isError && (
 					<div className="rounded-lg border border-destructive/30 bg-destructive/5 px-4 py-3 text-sm text-destructive">
-						Failed to load courses. Please refresh.
+						{t('loadError')}
 					</div>
 				)}
 

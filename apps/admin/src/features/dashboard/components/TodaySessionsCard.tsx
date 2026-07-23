@@ -9,12 +9,14 @@ import { useSessionCalendar } from '@/features/groups/api/sessions.queries';
 import { PanelSkeleton } from './DashboardSkeletons';
 import { PanelCard } from './PanelCard';
 import { PanelError } from './PanelError';
+import { useAppT } from '@/locales';
 
 /**
  * Today's sessions — reuses the existing session-calendar endpoint with a
  * single-day window. Ordered by the backend (start time within the day).
  */
 export function TodaySessionsCard() {
+	const t = useAppT('dashboard');
 	const today = toIsoDate(new Date());
 	const { data, isLoading, isError, refetch } = useSessionCalendar({
 		from: today,
@@ -23,26 +25,26 @@ export function TodaySessionsCard() {
 
 	if (isLoading) return <PanelSkeleton />;
 	if (isError || !data)
-		return <PanelError title="Today’s sessions" onRetry={refetch} />;
+		return <PanelError title={t('card.todaySessions')} onRetry={refetch} />;
 
 	return (
 		<PanelCard
-			title="Today’s sessions"
+			title={t('card.todaySessions')}
 			flush
 			headerRight={
 				<Link
 					to="/schedule"
 					className="text-sm font-medium text-primary hover:underline"
 				>
-					View calendar
+					{t('viewCalendar')}
 				</Link>
 			}
 		>
 			{data.length === 0 ? (
 				<EmptyState
 					icon={<CalendarDays />}
-					title="No sessions today"
-					description="Nothing is scheduled for today."
+					title={t('card.noSessionsTitle')}
+					description={t('card.noSessionsDescription')}
 				/>
 			) : (
 				<ul>

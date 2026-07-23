@@ -17,6 +17,8 @@ import {
 	toast,
 } from '@repo/ui';
 import { isApiError } from '@repo/api-client';
+import { useT } from '@repo/i18n';
+import { useAppT } from '@/locales';
 
 import { useStudents } from '@/features/people/api/students.queries';
 
@@ -37,14 +39,13 @@ export function EnrollStudentsDialog({
 	onOpenChange,
 	enrolledStudentIds,
 }: EnrollStudentsDialogProps) {
+	const t = useAppT('groups');
 	return (
 		<Dialog open={open} onOpenChange={onOpenChange}>
 			<DialogContent className="max-w-lg">
 				<DialogHeader>
-					<DialogTitle>Enroll students</DialogTitle>
-					<DialogDescription>
-						Search active students and add them to this group.
-					</DialogDescription>
+					<DialogTitle>{t('roster.enroll')}</DialogTitle>
+					<DialogDescription>{t('roster.enrollSearchHint')}</DialogDescription>
 				</DialogHeader>
 
 				{/* Mounts fresh on each open (DialogContent unmounts on close), so the
@@ -70,6 +71,8 @@ function EnrollForm({
 	enrolledStudentIds: number[];
 	onClose: () => void;
 }) {
+	const t = useAppT('groups');
+	const tc = useT('common');
 	const [input, setInput] = useState('');
 	const [search, setSearch] = useState('');
 	const [selected, setSelected] = useState<number[]>([]);
@@ -111,15 +114,15 @@ function EnrollForm({
 			);
 			onClose();
 		} catch (err) {
-			const badDate = describeEnrollmentDateError(err);
+			const badDate = describeEnrollmentDateError(t, err);
 			if (badDate) {
 				toast.error(badDate);
 			} else if (isApiError(err) && err.status === 409) {
-				toast.error('Group is at capacity — cannot enroll more students.');
+				toast.error(t('roster.atCapacity'));
 			} else if (isApiError(err)) {
 				toast.error(err.message);
 			} else {
-				toast.error('Something went wrong');
+				toast.error(tc('error.unknown'));
 			}
 		}
 	}
@@ -132,7 +135,7 @@ function EnrollForm({
 					<Input
 						value={input}
 						onChange={(e) => setInput(e.target.value)}
-						placeholder="Search by name or code…"
+						placeholder={t('searchPlaceholder')}
 						className="pl-9"
 					/>
 				</div>
@@ -172,12 +175,12 @@ function EnrollForm({
 				</div>
 
 				<div className="flex flex-col gap-1.5 mt-8">
-					<Label htmlFor="enrolledAt">Start date *</Label>
+					<Label htmlFor="enrolledAt">{t('form.field.startDate')}</Label>
 					<DatePicker
 						id="enrolledAt"
 						value={enrolledAt}
 						onChange={setEnrolledAt}
-						placeholder="Select a start date"
+						placeholder={t('form.field.startDatePlaceholder')}
 						disabled={enrollStudents.isPending}
 					/>
 					<p className="text-xs text-muted-foreground">
@@ -193,7 +196,7 @@ function EnrollForm({
 					onClick={onClose}
 					disabled={enrollStudents.isPending}
 				>
-					Cancel
+					{tc('action.cancel')}
 				</Button>
 				<Button
 					onClick={() => void onEnroll()}

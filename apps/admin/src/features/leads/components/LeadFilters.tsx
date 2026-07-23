@@ -10,7 +10,9 @@ import {
 	SelectTrigger,
 	SelectValue,
 } from '@repo/ui';
+import { useStatusLabel } from '@repo/i18n';
 
+import { useAppT } from '@/locales';
 import { useCourseList } from '@/features/courses/api/courses.queries';
 import { useStaffList } from '@/features/hr/api/staff.queries';
 
@@ -38,6 +40,8 @@ interface LeadFiltersProps {
 const ALL = 'ALL';
 
 export function LeadFilters({ values, onChange, onClear }: LeadFiltersProps) {
+	const t = useAppT('leads');
+	const statusLabel = useStatusLabel();
 	const { data: staffData } = useStaffList({ limit: 100 });
 	const { data: coursesData } = useCourseList({ limit: 100 });
 
@@ -75,7 +79,7 @@ export function LeadFilters({ values, onChange, onClear }: LeadFiltersProps) {
 				<Input
 					value={input}
 					onChange={(e) => setInput(e.target.value)}
-					placeholder="Search name or phone…"
+					placeholder={t('filters.searchPlaceholder')}
 					className="h-9 pl-9"
 				/>
 			</div>
@@ -88,13 +92,13 @@ export function LeadFilters({ values, onChange, onClear }: LeadFiltersProps) {
 				}
 			>
 				<SelectTrigger size="sm" className="w-36">
-					<SelectValue placeholder="All sources" />
+					<SelectValue placeholder={t('filters.allSources')} />
 				</SelectTrigger>
 				<SelectContent>
-					<SelectItem value={ALL}>All sources</SelectItem>
+					<SelectItem value={ALL}>{t('filters.allSources')}</SelectItem>
 					{LEAD_SOURCE_OPTIONS.map((o) => (
 						<SelectItem key={o.value} value={o.value}>
-							{o.label}
+							{statusLabel('lead_source', o.value)}
 						</SelectItem>
 					))}
 				</SelectContent>
@@ -112,10 +116,10 @@ export function LeadFilters({ values, onChange, onClear }: LeadFiltersProps) {
 				}
 			>
 				<SelectTrigger size="sm" className="w-40">
-					<SelectValue placeholder="All staff" />
+					<SelectValue placeholder={t('filters.allStaff')} />
 				</SelectTrigger>
 				<SelectContent>
-					<SelectItem value={ALL}>All staff</SelectItem>
+					<SelectItem value={ALL}>{t('filters.allStaff')}</SelectItem>
 					{staff.map((s) => (
 						<SelectItem key={s.id} value={String(s.id)}>
 							{s.user.firstName} {s.user.lastName}
@@ -136,10 +140,10 @@ export function LeadFilters({ values, onChange, onClear }: LeadFiltersProps) {
 				}
 			>
 				<SelectTrigger size="sm" className="w-40">
-					<SelectValue placeholder="All courses" />
+					<SelectValue placeholder={t('filters.allCourses')} />
 				</SelectTrigger>
 				<SelectContent>
-					<SelectItem value={ALL}>All courses</SelectItem>
+					<SelectItem value={ALL}>{t('filters.allCourses')}</SelectItem>
 					{courses.map((c) => (
 						<SelectItem key={c.id} value={String(c.id)}>
 							{c.name}
@@ -156,13 +160,13 @@ export function LeadFilters({ values, onChange, onClear }: LeadFiltersProps) {
 				}
 			>
 				<SelectTrigger size="sm" className="w-36">
-					<SelectValue placeholder="All time" />
+					<SelectValue placeholder={t('filters.allTime')} />
 				</SelectTrigger>
 				<SelectContent>
-					<SelectItem value={ALL}>All time</SelectItem>
+					<SelectItem value={ALL}>{t('filters.allTime')}</SelectItem>
 					{TIME_WINDOW_OPTIONS.map((o) => (
 						<SelectItem key={o.value} value={o.value}>
-							{o.label}
+							{t(`window.${o.value}`)}
 						</SelectItem>
 					))}
 				</SelectContent>
@@ -178,7 +182,7 @@ export function LeadFilters({ values, onChange, onClear }: LeadFiltersProps) {
 						onClear();
 					}}
 				>
-					Clear filters
+					{t('filters.clear')}
 				</Button>
 			)}
 		</div>

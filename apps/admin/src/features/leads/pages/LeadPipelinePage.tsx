@@ -5,6 +5,7 @@ import { Plus } from 'lucide-react';
 import { Button, PageHeader } from '@repo/ui';
 
 import { Can } from '@/components/Can';
+import { useAppT } from '@/locales';
 import { useBranches } from '@/api/branches';
 import { useActiveBranchIds } from '@/store/branchStore';
 
@@ -17,6 +18,7 @@ import { LeadDetailSheet } from '../components/LeadDetailSheet';
 import { LeadFilters, type LeadFilterValues } from '../components/LeadFilters';
 
 export function LeadPipelinePage() {
+	const t = useAppT('leads');
 	const navigate = useNavigate({ from: '/leads' });
 	const search = useSearch({ from: '/_authed/leads' });
 	const activeBranchIds = useActiveBranchIds();
@@ -37,10 +39,11 @@ export function LeadPipelinePage() {
 	const totalLeads = board?.columns.reduce((sum, c) => sum + c.total, 0) ?? 0;
 
 	const scopeLabel = !activeBranchIds
-		? 'All branches'
+		? t('scopeAllBranches')
 		: activeBranchIds.length === 1
-			? (branches.find((b) => b.id === activeBranchIds[0])?.name ?? '1 branch')
-			: `${activeBranchIds.length} branches`;
+			? (branches.find((b) => b.id === activeBranchIds[0])?.name ??
+				t('scopeBranches', { count: 1 }))
+			: t('scopeBranches', { count: activeBranchIds.length });
 
 	const filterValues: LeadFilterValues = {
 		search: search.search,
@@ -61,13 +64,16 @@ export function LeadPipelinePage() {
 	return (
 		<div className="mx-auto flex h-full w-full max-w-[1400px] flex-col gap-5">
 			<PageHeader
-				title="Leads / Pipeline"
-				description={`${scopeLabel} · ${totalLeads} leads · drag prospects from first contact to enrollment`}
+				title={t('title')}
+				description={t('headerDescription', {
+					scope: scopeLabel,
+					leads: t('leadCount', { count: totalLeads }),
+				})}
 				actions={
 					<Can permission="lead.create">
 						<Button onClick={() => setAddOpen(true)}>
 							<Plus className="mr-1.5 size-4" />
-							Add lead
+							{t('add')}
 						</Button>
 					</Can>
 				}

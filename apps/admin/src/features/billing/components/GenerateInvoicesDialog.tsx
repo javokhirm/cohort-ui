@@ -22,6 +22,8 @@ import {
 	toast,
 } from '@repo/ui';
 import { isApiError } from '@repo/api-client';
+import { useT } from '@repo/i18n';
+import { useAppT } from '@/locales';
 
 import { useBranches } from '@/api/branches';
 import { useBillingPolicy } from '../api/billing-policy.queries';
@@ -95,6 +97,8 @@ export function GenerateInvoicesDialog({
 }
 
 function GenerateInvoicesForm({ onClose }: { onClose: () => void }) {
+	const t = useAppT('billing');
+	const tc = useT('common');
 	const { data: policy } = useBillingPolicy();
 	const { data: branches = [] } = useBranches();
 	const billingMode = policy?.billingMode;
@@ -175,13 +179,15 @@ function GenerateInvoicesForm({ onClose }: { onClose: () => void }) {
 					</div>
 				)}
 				<div className="flex flex-col gap-1.5">
-					<Label htmlFor="generate-branch">Branch</Label>
+					<Label htmlFor="generate-branch">{t('feePlans.column.branch')}</Label>
 					<Select value={branchId} onValueChange={setBranchId}>
 						<SelectTrigger id="generate-branch">
 							<SelectValue />
 						</SelectTrigger>
 						<SelectContent>
-							<SelectItem value={ALL_BRANCHES}>All branches</SelectItem>
+							<SelectItem value={ALL_BRANCHES}>
+								{t('allBranches')}
+							</SelectItem>
 							{branches.map((b) => (
 								<SelectItem key={b.id} value={String(b.id)}>
 									{b.name}
@@ -207,11 +213,11 @@ function GenerateInvoicesForm({ onClose }: { onClose: () => void }) {
 					onClick={onClose}
 					disabled={generate.isPending}
 				>
-					Cancel
+					{tc('action.cancel')}
 				</Button>
 				<Button type="submit" disabled={generate.isPending}>
 					{generate.isPending && <Spinner className="mr-2 size-4" />}
-					Generate invoices
+					{t('invoices.generate')}
 				</Button>
 			</DialogFooter>
 		</form>
@@ -236,6 +242,7 @@ function GenerationResult({
 	onClose: () => void;
 	onRunAnother: () => void;
 }) {
+	const t = useAppT('billing');
 	return (
 		<div className="flex flex-col gap-5">
 			<DialogHeader>
@@ -249,22 +256,22 @@ function GenerationResult({
 			</DialogHeader>
 
 			<div className="grid grid-cols-2 gap-3 sm:grid-cols-3">
-				<ResultStat label="Generated" value={result.generated} />
-				<ResultStat label="Prorated" value={result.prorated} />
+				<ResultStat label={t('generate.generated')} value={result.generated} />
+				<ResultStat label={t('generate.prorated')} value={result.prorated} />
 				<ResultStat
-					label="Skipped — already invoiced"
+					label={t('generate.skippedAlreadyInvoiced')}
 					value={result.skippedExisting}
 				/>
 				<ResultStat
-					label="Skipped — no fee plan"
+					label={t('generate.skippedNoFeePlan')}
 					value={result.skippedNoFeePlan}
 				/>
 				<ResultStat
-					label="Skipped — no sessions consumed this period"
+					label={t('generate.skippedNoSessions')}
 					value={result.skippedZeroConsumption}
 				/>
 				<ResultStat
-					label="Skipped — suspended for the full period"
+					label={t('generate.skippedSuspended')}
 					value={result.skippedSuspended}
 				/>
 			</div>
@@ -284,10 +291,10 @@ function GenerationResult({
 
 			<DialogFooter>
 				<Button type="button" variant="outline" onClick={onRunAnother}>
-					Run another period
+					{t('misc.runAnotherPeriod')}
 				</Button>
 				<Button type="button" onClick={onClose}>
-					Done
+					{t('misc.done')}
 				</Button>
 			</DialogFooter>
 		</div>

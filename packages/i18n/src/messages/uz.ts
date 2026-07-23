@@ -51,6 +51,8 @@ export const uz = {
 			yes: 'Ha',
 			no: 'Yoʻq',
 			optional: 'Ixtiyoriy',
+			active: 'Faol',
+			inactive: 'Nofaol',
 		},
 		table: {
 			empty: 'Bu yerda hali maʼlumot yoʻq',
@@ -191,31 +193,176 @@ export const uz = {
 		},
 	},
 
+	/**
+	 * Domain enum labels, keyed exactly like `@repo/ui`'s `STATUS_MAPS` — one
+	 * group per `StatusKind`, values normalized (lowercase, `_`-joined).
+	 *
+	 * `@repo/ui` owns the *tone* of a status pill; the *words* are content and
+	 * belong here. `StatusBadge` takes the label as `children`, so nothing in
+	 * `ui` needs to know this file exists (conventions.md §7 — presentational
+	 * components take copy as props). Reach them through `useStatusLabel()`,
+	 * which normalizes the raw backend value and falls back gracefully when the
+	 * API grows a status the catalog hasn't caught up with.
+	 */
 	enums: {
-		role: {
-			OWNER: 'Egasi',
-			ADMIN: 'Administrator',
-			MANAGER: 'Menejer',
-			TEACHER: 'Oʻqituvchi',
-			SUPER_ADMIN: 'Super admin',
-			STUDENT: 'Oʻquvchi',
-			PARENT: 'Ota-ona',
-		},
-		status: {
-			ACTIVE: 'Faol',
-			INACTIVE: 'Nofaol',
-			PENDING: 'Kutilmoqda',
-			SUSPENDED: 'Toʻxtatilgan',
-			CANCELLED: 'Bekor qilingan',
-			COMPLETED: 'Yakunlangan',
-			SCHEDULED: 'Rejalashtirilgan',
-			DRAFT: 'Qoralama',
-			APPROVED: 'Tasdiqlangan',
-			PAID: 'Toʻlangan',
-			UNPAID: 'Toʻlanmagan',
-			PARTIAL: 'Qisman toʻlangan',
-			OVERDUE: 'Muddati oʻtgan',
-			VOID: 'Bekor qilingan',
+		domain: {
+			invoice: {
+				draft: 'Qoralama',
+				unpaid: 'Toʻlanmagan',
+				partial: 'Qisman',
+				paid: 'Toʻlangan',
+				overdue: 'Muddati oʻtgan',
+				void: 'Bekor qilingan',
+			},
+			payment: {
+				success: 'Muvaffaqiyatli',
+				succeeded: 'Muvaffaqiyatli',
+				completed: 'Yakunlangan',
+				pending: 'Kutilmoqda',
+				failed: 'Xatolik',
+				refunded: 'Qaytarilgan',
+			},
+			session: {
+				scheduled: 'Rejalashtirilgan',
+				completed: 'Yakunlangan',
+				cancelled: 'Bekor qilingan',
+				rescheduled: 'Koʻchirilgan',
+				substitute: 'Oʻrinbosar',
+			},
+			attendance: {
+				present: 'Kelgan',
+				absent: 'Kelmagan',
+				late: 'Kechikkan',
+				excused: 'Sababli',
+			},
+			student: {
+				active: 'Faol',
+				inactive: 'Nofaol',
+				graduated: 'Bitirgan',
+				suspended: 'Toʻxtatilgan',
+			},
+			enrollment: {
+				active: 'Faol',
+				suspended: 'Toʻxtatilgan',
+				dropped: 'Tark etgan',
+				completed: 'Yakunlangan',
+				transferred: 'Koʻchirilgan',
+			},
+			staff: {
+				active: 'Faol',
+				on_leave: 'Taʼtilda',
+				inactive: 'Nofaol',
+			},
+			lead: {
+				new: 'Yangi',
+				contacted: 'Bogʻlanildi',
+				trial_booked: 'Sinov darsi belgilandi',
+				enrolled: 'Qabul qilindi',
+				lost: 'Yoʻqotildi',
+			},
+			lead_source: {
+				instagram: 'Instagram',
+				telegram: 'Telegram',
+				referral: 'Tavsiya',
+				walk_in: 'Oʻzi kelgan',
+				website: 'Veb-sayt',
+				other: 'Boshqa',
+			},
+			assessment: {
+				quiz: 'Test',
+				midterm: 'Oraliq nazorat',
+				final: 'Yakuniy nazorat',
+				mock: 'Sinov imtihoni',
+				homework: 'Uy vazifasi',
+			},
+			report_card: {
+				draft: 'Qoralama',
+				published: 'Chop etilgan',
+			},
+			payroll: {
+				live: 'Joriy',
+				finalized: 'Yakunlangan',
+				paid: 'Toʻlangan',
+			},
+			payroll_rate: {
+				fixed: 'Belgilangan',
+				hourly: 'Soatbay',
+				percent: 'Foizli',
+			},
+			notification: {
+				queued: 'Navbatda',
+				sent: 'Yuborilgan',
+				delivered: 'Yetkazilgan',
+				failed: 'Xatolik',
+			},
+			notification_type: {
+				payment: 'Toʻlov',
+				grade: 'Baho',
+				schedule: 'Jadval',
+				absence: 'Davomat',
+				broadcast: 'Eʼlon',
+			},
+			material: {
+				pdf: 'PDF',
+				video: 'Video',
+				homework: 'Uy vazifasi',
+				link: 'Havola',
+			},
+			visibility: {
+				group: 'Guruh',
+				branch: 'Filial',
+				tenant: 'Tashkilot',
+			},
+			room: {
+				classroom: 'Sinfxona',
+				lab: 'Laboratoriya',
+				online: 'Onlayn',
+			},
+			channel: {
+				sms: 'SMS',
+				telegram: 'Telegram',
+				email: 'Elektron pochta',
+				push: 'Push',
+			},
+			fee_cycle: {
+				monthly: 'Oylik',
+				per_session: 'Har dars uchun',
+			},
+			invoice_line_item: {
+				tuition: 'Oʻqish toʻlovi',
+				late_fee: 'Kechikish jarimasi',
+				adjustment: 'Tuzatish',
+				package: 'Paket',
+				other: 'Boshqa',
+			},
+			expense: {
+				rent: 'Ijara',
+				utilities: 'Kommunal xarajatlar',
+				marketing: 'Marketing',
+				salary: 'Ish haqi',
+				other: 'Boshqa',
+			},
+			role: {
+				owner: 'Egasi',
+				admin: 'Administrator',
+				manager: 'Menejer',
+				teacher: 'Oʻqituvchi',
+				student: 'Oʻquvchi',
+				parent: 'Ota-ona',
+				super_admin: 'Super admin',
+			},
+			tenant: {
+				active: 'Faol',
+				trialing: 'Sinov muddati',
+				past_due: 'Muddati oʻtgan',
+				suspended: 'Toʻxtatilgan',
+				cancelled: 'Bekor qilingan',
+			},
+			system: {
+				healthy: 'Sogʻlom',
+				degraded: 'Sekinlashgan',
+				down: 'Ishlamayapti',
+			},
 		},
 	},
 
@@ -228,6 +375,17 @@ export const uz = {
 		passwordMin: 'Parol kamida {{count}} ta belgidan iborat boʻlishi kerak',
 		numberInvalid: 'Son kiriting',
 		numberPositive: 'Musbat son kiriting',
+		integerInvalid: 'Butun son kiriting',
 		dateInvalid: 'Sana notoʻgʻri',
+		minValue: 'Qiymat kamida {{min}} boʻlishi kerak',
+		maxValue: 'Qiymat koʻpi bilan {{max}} boʻlishi mumkin',
+		amountPositive: 'Summa noldan katta boʻlishi kerak',
+		amountMax: 'Summa {{max}} dan oshmasligi kerak',
+		percentRange: '0 va 100 orasida qiymat kiriting',
+		selectRequired: 'Tanlov qiling',
+		selectOne: 'Kamida bitta variantni tanlang',
+		dateRangeInvalid: 'Tugash sanasi boshlanish sanasidan keyin boʻlishi kerak',
+		timeRangeInvalid: 'Tugash vaqti boshlanish vaqtidan keyin boʻlishi kerak',
+		passwordMismatch: 'Parollar mos kelmadi',
 	},
 } as const;

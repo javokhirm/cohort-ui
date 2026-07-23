@@ -22,6 +22,8 @@ import {
 } from '@repo/ui';
 import { isApiError } from '@repo/api-client';
 import { formatPrice } from '@repo/utils';
+import { useT } from '@repo/i18n';
+import { useAppT } from '@/locales';
 
 import { useRefundPayment } from '../api/payments.mutations';
 import {
@@ -55,11 +57,12 @@ export function RefundPaymentDialog({
 	open,
 	onOpenChange,
 }: RefundPaymentDialogProps) {
+	const t = useAppT('billing');
 	return (
 		<Dialog open={open} onOpenChange={onOpenChange}>
 			<DialogContent className="max-w-md">
 				<DialogHeader>
-					<DialogTitle>Refund payment</DialogTitle>
+					<DialogTitle>{t('payments.refund.title')}</DialogTitle>
 					<DialogDescription>This can&apos;t be undone.</DialogDescription>
 				</DialogHeader>
 
@@ -85,6 +88,8 @@ function RefundPaymentForm({
 }) {
 	const canUseWallet = payment.invoiceId != null;
 
+	const t = useAppT('billing');
+	const tc = useT('common');
 	const form = useForm<RefundPaymentFormValues>({
 		resolver: zodResolver(refundPaymentSchema),
 		defaultValues: {
@@ -106,7 +111,7 @@ function RefundPaymentForm({
 				invoiceId: payment.invoiceId,
 				studentId: payment.studentId,
 			});
-			toast.success('Payment refunded');
+			toast.success(t('payments.refund.done'));
 			onClose();
 		} catch (err) {
 			toast.error(isApiError(err) ? err.message : 'Failed to refund payment');
@@ -120,7 +125,9 @@ function RefundPaymentForm({
 				className="flex flex-col gap-4"
 			>
 				<div className="flex items-center justify-between rounded-lg border border-border bg-muted/40 px-3 py-2.5">
-					<span className="text-sm text-muted-foreground">Original amount</span>
+					<span className="text-sm text-muted-foreground">
+						{t('invoiceExtra.originalAmount')}
+					</span>
 					<span className="text-sm font-bold tabular-nums">
 						{formatPrice(payment.amount)} {payment.currency}
 					</span>
@@ -130,7 +137,7 @@ function RefundPaymentForm({
 					<FormInput
 						control={form.control}
 						name="amount"
-						label="Amount *"
+						label={t('payments.record.amount')}
 						type="number"
 						min={1}
 						onChange={(e) =>
@@ -186,8 +193,8 @@ function RefundPaymentForm({
 					<FormInput
 						control={form.control}
 						name="notes"
-						label="Notes"
-						placeholder="Optional"
+						label={t('discountExtra.notesPlaceholder')}
+						placeholder={t('payments.record.referencePlaceholder')}
 					/>
 				</FieldGroup>
 
@@ -198,7 +205,7 @@ function RefundPaymentForm({
 						onClick={onClose}
 						disabled={refundPayment.isPending}
 					>
-						Cancel
+						{tc('action.cancel')}
 					</Button>
 					<Button
 						type="submit"
@@ -206,7 +213,7 @@ function RefundPaymentForm({
 						disabled={refundPayment.isPending}
 					>
 						{refundPayment.isPending && <Spinner className="mr-2 size-4" />}
-						Confirm refund
+						{t('payments.refund.confirm')}
 					</Button>
 				</DialogFooter>
 			</form>

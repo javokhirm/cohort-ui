@@ -18,6 +18,17 @@ export function useT<N extends Namespace>(ns: N) {
 	return t;
 }
 
+/**
+ * The translator `useT(ns)` hands back, as a standalone type.
+ *
+ * Zod schemas cannot call a hook, so any schema carrying user-facing messages is
+ * a factory that takes the translator instead of holding literals at module load
+ * (conventions.md §7 — a module-level literal would never re-translate on a
+ * language switch). Those factories type their parameter as
+ * `Translator<'validation'>`, which keeps the message keys checked.
+ */
+export type Translator<N extends Namespace> = ReturnType<typeof useT<N>>;
+
 interface UseLocaleResult {
 	locale: Locale;
 	setLocale: (next: Locale) => void;

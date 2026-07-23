@@ -24,18 +24,20 @@ import {
 	TabsTrigger,
 } from '@repo/ui';
 import { formatDate } from '@repo/utils';
+import { useAppT } from '@/locales';
 
 import { Can } from '@/components/Can';
 import { useGroup, type GroupDetail } from '../api/groups.queries';
-import { formatScheduleRule, GROUP_STATUS_META } from '../lib/group-options';
+import { formatScheduleRule, GROUP_STATUS_TONES } from '../lib/group-options';
 import { RosterSection } from '../components/RosterSection';
 import { GroupSessionsSection } from '../components/GroupSessionsSection';
 
 // ─── Header ──────────────────────────────────────────────────────────────────
 
 function GroupHeader({ group, onEdit }: { group: GroupDetail; onEdit: () => void }) {
-	const meta = GROUP_STATUS_META[group.status];
-	const schedule = formatScheduleRule(group.scheduleRule);
+	const t = useAppT('groups');
+	const tone = GROUP_STATUS_TONES[group.status];
+	const schedule = formatScheduleRule(t, group.scheduleRule);
 
 	return (
 		<div className="rounded-xl border bg-card p-5">
@@ -47,7 +49,9 @@ function GroupHeader({ group, onEdit }: { group: GroupDetail; onEdit: () => void
 					<div>
 						<div className="flex items-center gap-2.5">
 							<h1 className="text-lg font-bold">{group.name}</h1>
-							<StatusBadge tone={meta.tone}>{meta.label}</StatusBadge>
+							<StatusBadge tone={tone}>
+								{t(`status.${group.status}`)}
+							</StatusBadge>
 						</div>
 						<div className="mt-0.5 text-sm text-muted-foreground">
 							{group.courseName}
@@ -59,7 +63,7 @@ function GroupHeader({ group, onEdit }: { group: GroupDetail; onEdit: () => void
 				<Can permission="group.update">
 					<Button variant="outline" size="sm" onClick={onEdit}>
 						<Edit className="mr-1.5 size-3.5" />
-						Edit group
+						{t('edit')}
 					</Button>
 				</Can>
 			</div>
@@ -68,19 +72,19 @@ function GroupHeader({ group, onEdit }: { group: GroupDetail; onEdit: () => void
 
 			<div className="grid grid-cols-2 gap-4 sm:grid-cols-4">
 				<StatCard
-					label="Teacher"
-					value={group.defaultTeacherName ?? 'Unassigned'}
+					label={t('column.teacher')}
+					value={group.defaultTeacherName ?? t('unassigned')}
 					icon={<UserCog />}
 					className="border"
 				/>
 				<StatCard
-					label="Room"
+					label={t('column.room')}
 					value={group.roomName ?? '—'}
 					icon={<DoorOpen />}
 					className="border"
 				/>
 				<StatCard
-					label="Enrolled"
+					label={t('detail.stat.enrolled')}
 					value={
 						group.capacity != null
 							? `${group.activeEnrollmentsCount}/${group.capacity}`
@@ -90,7 +94,7 @@ function GroupHeader({ group, onEdit }: { group: GroupDetail; onEdit: () => void
 					className="border"
 				/>
 				<StatCard
-					label="Sessions"
+					label={t('detail.stat.sessions')}
 					value={group.sessionCount}
 					icon={<CalendarClock />}
 					className="border"
@@ -103,31 +107,32 @@ function GroupHeader({ group, onEdit }: { group: GroupDetail; onEdit: () => void
 // ─── Overview tab ────────────────────────────────────────────────────────────
 
 function OverviewTab({ group }: { group: GroupDetail }) {
-	const schedule = formatScheduleRule(group.scheduleRule);
+	const t = useAppT('groups');
+	const schedule = formatScheduleRule(t, group.scheduleRule);
 	return (
 		<Card className="p-5">
 			<DetailRows
 				rows={[
 					{
-						label: 'Course',
+						label: t('column.course'),
 						value: group.courseName,
 						icon: <GraduationCap />,
 					},
 					{
-						label: 'Weekly schedule',
-						value: schedule ?? 'Not set',
+						label: t('form.field.weeklySchedule'),
+						value: schedule ?? t('notSet'),
 						icon: <CalendarClock />,
 					},
 					{
-						label: 'Date range',
+						label: t('form.field.dateRange'),
 						value:
 							group.startDate && group.endDate
 								? `${formatDate(group.startDate)} → ${formatDate(group.endDate)}`
-								: 'Not set',
+								: t('notSet'),
 						icon: <CalendarDays />,
 					},
 					{
-						label: 'Capacity',
+						label: t('column.capacity'),
 						value: group.capacity != null ? `${group.capacity} seats` : '—',
 						icon: <Users />,
 					},
@@ -144,6 +149,7 @@ interface GroupDetailPageProps {
 }
 
 export function GroupDetailPage({ groupId }: GroupDetailPageProps) {
+	const t = useAppT('groups');
 	const navigate = useNavigate();
 	const { data: group, isLoading, isError } = useGroup(groupId);
 
@@ -154,7 +160,7 @@ export function GroupDetailPage({ groupId }: GroupDetailPageProps) {
 				className="flex w-fit items-center gap-1.5 text-sm text-muted-foreground hover:text-foreground"
 			>
 				<ArrowLeft className="size-3.5" />
-				Back to groups
+				{t('back')}
 			</Link>
 
 			{isLoading ? (
@@ -185,9 +191,15 @@ export function GroupDetailPage({ groupId }: GroupDetailPageProps) {
 
 					<Tabs defaultValue="roster" className="gap-4">
 						<TabsList>
-							<TabsTrigger value="roster">Roster</TabsTrigger>
-							<TabsTrigger value="sessions">Sessions</TabsTrigger>
-							<TabsTrigger value="overview">Overview</TabsTrigger>
+							<TabsTrigger value="roster">
+								{t('detail.tab.roster')}
+							</TabsTrigger>
+							<TabsTrigger value="sessions">
+								{t('detail.tab.sessions')}
+							</TabsTrigger>
+							<TabsTrigger value="overview">
+								{t('detail.tab.overview')}
+							</TabsTrigger>
 						</TabsList>
 
 						<TabsContent value="roster">

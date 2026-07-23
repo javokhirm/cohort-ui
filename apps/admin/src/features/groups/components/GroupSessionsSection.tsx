@@ -4,6 +4,8 @@ import { CalendarDays, MapPin, UserCog } from 'lucide-react';
 import { Card, EmptyState, Skeleton, StatusBadge } from '@repo/ui';
 import { formatDate } from '@repo/utils';
 
+import { useAppT } from '@/locales';
+
 import { useGroupSessions, type SessionCalendarItem } from '../api/groups.queries';
 import { hhmm } from '../lib/group-options';
 import { SessionDetailSheet } from './SessionDetailSheet';
@@ -13,6 +15,7 @@ interface GroupSessionsSectionProps {
 }
 
 export function GroupSessionsSection({ groupId }: GroupSessionsSectionProps) {
+	const t = useAppT('groups');
 	const { data: sessions = [], isLoading } = useGroupSessions(groupId);
 	const [openSessionId, setOpenSessionId] = useState<number | null>(null);
 
@@ -39,8 +42,8 @@ export function GroupSessionsSection({ groupId }: GroupSessionsSectionProps) {
 				<Card className="py-0">
 					<EmptyState
 						icon={<CalendarDays />}
-						title="No sessions yet"
-						description="Set a start date, end date and weekly schedule on the group to generate sessions."
+						title={t('sessions.emptyTitle')}
+						description={t('sessions.emptyDescription')}
 					/>
 				</Card>
 			) : (

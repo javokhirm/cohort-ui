@@ -18,6 +18,8 @@ import {
 	toast,
 } from '@repo/ui';
 import { formatDate } from '@repo/utils';
+import { useT } from '@repo/i18n';
+import { useAppT } from '@/locales';
 
 import { FormSection } from '@/components/FormSection';
 import { FormSheet } from '@/components/FormSheet';
@@ -62,6 +64,8 @@ export function EnrollmentDiscountSheet({
 	groupName,
 	assignments,
 }: EnrollmentDiscountSheetProps) {
+	const tc = useT('common');
+	const t = useAppT('billing');
 	const form = useForm<AssignEnrollmentDiscountFormValues>({
 		resolver: zodResolver(assignEnrollmentDiscountSchema),
 		defaultValues: EMPTY_FORM,
@@ -95,7 +99,7 @@ export function EnrollmentDiscountSheet({
 			discountId: Number(values.discountId),
 			validUntil: values.validUntil === '' ? null : values.validUntil,
 		});
-		toast.success('Standing discount assigned');
+		toast.success(t('discountExtra.standingAssigned'));
 		form.reset(EMPTY_FORM);
 	}
 
@@ -104,7 +108,7 @@ export function EnrollmentDiscountSheet({
 			return;
 		revoke.mutate(
 			{ enrollmentId, assignmentId: assignment.id },
-			{ onSuccess: () => toast.success('Standing discount removed') },
+			{ onSuccess: () => toast.success(t('discountExtra.standingRemoved')) },
 		);
 	}
 
@@ -112,7 +116,7 @@ export function EnrollmentDiscountSheet({
 		<FormSheet
 			open={open}
 			onOpenChange={onOpenChange}
-			title="Standing discount"
+			title={t('discounts.standing.title')}
 			description={groupName}
 			footer={
 				<>
@@ -121,7 +125,7 @@ export function EnrollmentDiscountSheet({
 						variant="outline"
 						onClick={() => onOpenChange(false)}
 					>
-						Cancel
+						{tc('action.cancel')}
 					</Button>
 					<Button
 						type="submit"
@@ -129,7 +133,7 @@ export function EnrollmentDiscountSheet({
 						disabled={assign.isPending || options.length === 0}
 					>
 						{assign.isPending && <Spinner className="mr-2 size-4" />}
-						Save discount
+						{t('misc.saveDiscount')}
 					</Button>
 				</>
 			}
@@ -144,7 +148,7 @@ export function EnrollmentDiscountSheet({
 				{assignments.length > 0 && (
 					<FormSection>
 						<p className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">
-							Current
+							{t('misc.current')}
 						</p>
 						<div className="flex flex-col gap-2">
 							{assignments.map((a) => (
@@ -191,7 +195,7 @@ export function EnrollmentDiscountSheet({
 					>
 						<FormSection>
 							<p className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">
-								Add discount
+								{t('discounts.add')}
 							</p>
 							{isLoading ? (
 								<Skeleton className="h-24 rounded-lg" />
@@ -247,10 +251,10 @@ export function EnrollmentDiscountSheet({
 								<FormDatePicker
 									control={form.control}
 									name="validUntil"
-									label="Valid until"
+									label={t('discountExtra.validUntil')}
 								/>
 								<p className="text-xs text-muted-foreground">
-									Applied to every monthly invoice generated before this
+									{t('misc.appliedBeforeThis')}
 									date. Leave blank for no end date.
 								</p>
 							</FormSection>

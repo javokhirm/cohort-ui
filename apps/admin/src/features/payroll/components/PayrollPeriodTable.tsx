@@ -4,6 +4,7 @@ import { formatMoney } from '@repo/utils';
 import type { PayrollPeriodRow } from '../api/payroll.queries';
 import { LiveBadge } from './LiveBadge';
 import { RateTypeBadge } from './RateTypeBadge';
+import { useAppT } from '@/locales';
 
 interface PayrollPeriodTableProps {
 	rows: PayrollPeriodRow[];
@@ -22,10 +23,11 @@ export function PayrollPeriodTable({
 	isLoading,
 	onRowClick,
 }: PayrollPeriodTableProps) {
+	const t = useAppT('payroll');
 	const columns: ColumnDef<PayrollPeriodRow>[] = [
 		{
 			id: 'teacher',
-			header: 'Teacher',
+			header: t('column.staff'),
 			cell: ({ row }) => {
 				const { staffName, staffCode, position } = row.original;
 				return (
@@ -47,7 +49,7 @@ export function PayrollPeriodTable({
 		},
 		{
 			id: 'type',
-			header: 'Type',
+			header: t('column.type'),
 			cell: ({ row }) => (
 				<RateTypeBadge
 					rateType={row.original.rateType}

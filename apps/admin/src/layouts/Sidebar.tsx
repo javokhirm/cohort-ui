@@ -36,6 +36,7 @@ import {
 import { useT } from '@repo/i18n';
 import { useAuth, usePermissions } from '@/features/auth/hooks';
 import type { PermissionRequirement } from '@/lib/auth/permissions';
+import { useAppT } from '@/locales';
 
 /** Leaf keys under the `nav` namespace's `group.*` / `item.*` — resolved at
  * render, not module load, so language switches re-translate the sidebar. Typed
@@ -376,6 +377,7 @@ export function Sidebar({ collapsed }: SidebarProps) {
 	const navigate = useNavigate();
 	const t = useT('nav');
 	const tAuth = useT('auth');
+	const tApp = useAppT('shell');
 
 	// Cosmetic nav filtering — show only what the resolved permissions allow, and
 	// drop a group once all its items are hidden. The backend enforces access.
@@ -424,7 +426,7 @@ export function Sidebar({ collapsed }: SidebarProps) {
 						{tenantName}
 					</div>
 					<div className="font-mono text-[10px] text-muted-foreground">
-						MANAGE
+						{tApp('brandSurface')}
 					</div>
 				</div>
 			</div>

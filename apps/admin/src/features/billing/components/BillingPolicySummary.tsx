@@ -7,6 +7,7 @@ import {
 	type DetailRow,
 } from '@repo/ui';
 import { formatPrice } from '@repo/utils';
+import { useAppT } from '@/locales';
 
 import type {
 	BillingCycleAnchor,
@@ -76,6 +77,7 @@ function Section({ title, rows }: { title: string; rows: DetailRow[] }) {
  * (see `BillingPolicyPage`).
  */
 export function BillingPolicySummary({ policy }: { policy: BillingPolicyResponse }) {
+	const t = useAppT('billing');
 	const isAnniversary = policy.billingCycleAnchor === 'ENROLLMENT';
 
 	const basics: DetailRow[] = [
@@ -187,11 +189,11 @@ export function BillingPolicySummary({ policy }: { policy: BillingPolicyResponse
 
 	return (
 		<div className="flex flex-col gap-6">
-			<Section title="Billing basics" rows={basics} />
-			<Section title="Enrollment" rows={enrollment} />
-			<Section title="Late fees" rows={lateFees} />
-			<Section title="Dunning" rows={dunning} />
-			<Section title="Advanced" rows={advanced} />
+			<Section title={t('policySections.basics')} rows={basics} />
+			<Section title={t('policySections.enrollment')} rows={enrollment} />
+			<Section title={t('policySections.lateFees')} rows={lateFees} />
+			<Section title={t('policySections.dunning')} rows={dunning} />
+			<Section title={t('policySections.advanced')} rows={advanced} />
 		</div>
 	);
 }

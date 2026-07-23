@@ -16,6 +16,8 @@ import {
 	TooltipTrigger,
 } from '@repo/ui';
 import { formatPrice } from '@repo/utils';
+import { useStatusLabel, useT } from '@repo/i18n';
+import { useAppT } from '@/locales';
 
 import { Can } from '@/components/Can';
 import { useInvoiceList, useInvoiceSummary } from '../api/invoices.queries';
@@ -30,6 +32,9 @@ import { GroupPicker } from '../components/GroupPicker';
 const PAGE_SIZE = 20;
 
 export function InvoiceListPage() {
+	const t = useAppT('billing');
+	const tc = useT('common');
+	const statusLabel = useStatusLabel();
 	const navigate = useNavigate({ from: '/invoices' });
 	const {
 		page = 1,
@@ -124,8 +129,8 @@ export function InvoiceListPage() {
 	return (
 		<div className="mx-auto flex max-w-7xl flex-col gap-6">
 			<PageHeader
-				title="Invoices"
-				description="Billing and outstanding balances"
+				title={t('invoices.title')}
+				description={t('invoices.description')}
 				actions={
 					<>
 						<Can permission="invoice.generate">
@@ -134,13 +139,13 @@ export function InvoiceListPage() {
 								onClick={() => setGenerateOpen(true)}
 							>
 								<CalendarClock className="mr-1.5 size-4" />
-								Generate monthly invoices
+								{t('misc.generateMonthly')}
 							</Button>
 						</Can>
 						<Can permission="invoice.create">
 							<Button onClick={() => setCreateOpen(true)}>
 								<Plus className="mr-1.5 size-4" />
-								Create invoice
+								{t('invoices.create')}
 							</Button>
 						</Can>
 					</>
@@ -149,11 +154,11 @@ export function InvoiceListPage() {
 
 			<div className="grid grid-cols-1 gap-4 sm:grid-cols-3">
 				<StatCard
-					label="Total invoiced"
+					label={t('generate.totalInvoiced')}
 					value={statValue(summary?.totalInvoiced ?? 0)}
 				/>
 				<StatCard
-					label="Collected"
+					label={t('feePlanExtra.collected')}
 					value={
 						<span className="text-tone-green-fg">
 							{statValue(summary?.collected ?? 0)}
@@ -161,7 +166,7 @@ export function InvoiceListPage() {
 					}
 				/>
 				<StatCard
-					label="Outstanding"
+					label={t('feePlanExtra.outstanding')}
 					value={
 						<span className="text-tone-red-fg">
 							{statValue(summary?.outstanding ?? 0)}
@@ -174,7 +179,9 @@ export function InvoiceListPage() {
 				<SearchFilterBar
 					filters={INVOICE_STATUS_FILTERS.map((f) => ({
 						id: f.value ?? 'ALL',
-						label: f.label,
+						label: f.value
+							? statusLabel('invoice', f.value)
+							: tc('state.all'),
 						active: status === f.value,
 						onClick: () => handleStatusChange(f.value),
 					}))}
@@ -184,18 +191,22 @@ export function InvoiceListPage() {
 								<span className="inline-flex">
 									<Button variant="outline" disabled>
 										<Download className="mr-1.5 size-4" />
-										Export
+										{t('misc.total')}
 									</Button>
 								</span>
 							</TooltipTrigger>
-							<TooltipContent>Not available yet</TooltipContent>
+							<TooltipContent>
+								{t('invoiceExtra.notAvailableYet')}
+							</TooltipContent>
 						</Tooltip>
 					}
 				/>
 
 				<div className="flex flex-wrap items-end gap-4">
 					<div className="flex flex-col gap-1.5">
-						<Label className="text-xs text-muted-foreground">Student</Label>
+						<Label className="text-xs text-muted-foreground">
+							{t('payments.column.student')}
+						</Label>
 						<div className="w-56">
 							<StudentPicker
 								value={studentId}
@@ -204,7 +215,9 @@ export function InvoiceListPage() {
 						</div>
 					</div>
 					<div className="flex flex-col gap-1.5">
-						<Label className="text-xs text-muted-foreground">Group</Label>
+						<Label className="text-xs text-muted-foreground">
+							{t('discounts.standing.title')}
+						</Label>
 						<div className="w-56">
 							<GroupPicker value={groupId} onChange={handleGroupChange} />
 						</div>
@@ -214,7 +227,7 @@ export function InvoiceListPage() {
 							htmlFor="invoice-from"
 							className="text-xs text-muted-foreground"
 						>
-							Issued from
+							{t('misc.issuedFrom')}
 						</Label>
 						<DatePicker
 							id="invoice-from"
@@ -228,7 +241,7 @@ export function InvoiceListPage() {
 							htmlFor="invoice-to"
 							className="text-xs text-muted-foreground"
 						>
-							Issued to
+							{t('misc.issuedTo')}
 						</Label>
 						<DatePicker
 							id="invoice-to"
@@ -242,7 +255,7 @@ export function InvoiceListPage() {
 							htmlFor="invoice-due-before"
 							className="text-xs text-muted-foreground"
 						>
-							Due before
+							{t('misc.dueBefore')}
 						</Label>
 						<DatePicker
 							id="invoice-due-before"
@@ -260,7 +273,7 @@ export function InvoiceListPage() {
 							onClick={handleClearExtraFilters}
 						>
 							<X className="mr-1.5 size-3.5" />
-							Clear filters
+							{t('misc.clearFilters')}
 						</Button>
 					)}
 				</div>

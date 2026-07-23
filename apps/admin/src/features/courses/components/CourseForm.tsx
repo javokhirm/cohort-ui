@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import { useForm, type Control, type FieldPath, type FieldValues } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 
@@ -13,9 +13,11 @@ import {
 } from '@repo/ui';
 import { formatPrice } from '@repo/utils';
 import { isApiError } from '@repo/api-client';
+import { useT } from '@repo/i18n';
 
 import { FormSection } from '@/components/FormSection';
 import { FormSheet } from '@/components/FormSheet';
+import { useAppT } from '@/locales';
 import { useBranches } from '@/api/branches';
 import { useFeePlanList } from '@/features/billing/api/fee-plans.queries';
 
@@ -50,9 +52,10 @@ type CourseFormProps = CreateProps | EditProps;
 
 /** Branch options with a leading "shared across all branches" choice. */
 function useBranchOptions() {
+	const t = useAppT('courses');
 	const { data: branches = [] } = useBranches();
 	return [
-		{ value: SHARED_BRANCH_VALUE, label: 'Shared — all branches' },
+		{ value: SHARED_BRANCH_VALUE, label: t('sharedOption') },
 		...branches.map((b) => ({ value: String(b.id), label: b.name })),
 	];
 }
@@ -85,14 +88,14 @@ function FeePlanField<T extends FieldValues>({
 	control: Control<T>;
 	options: { value: string; label: string }[];
 }) {
+	const t = useAppT('courses');
+
 	if (options.length === 0) {
 		return (
 			<div className="flex flex-col gap-1.5">
-				<span className="text-sm font-medium">Fee plan *</span>
+				<span className="text-sm font-medium">{t('field.feePlan')}</span>
 				<p className="rounded-lg border border-border bg-muted/40 p-3 text-xs text-muted-foreground">
-					No active fee plan is available for this branch. Create one on the Fee
-					plans page first — a course cannot exist without the plan its groups
-					bill on.
+					{t('feePlanEmpty')}
 				</p>
 			</div>
 		);
@@ -101,7 +104,7 @@ function FeePlanField<T extends FieldValues>({
 		<FormSelect
 			control={control}
 			name={'feePlan' as FieldPath<T>}
-			label="Fee plan *"
+			label={t('field.feePlan')}
 			options={options}
 		/>
 	);
@@ -114,8 +117,13 @@ function CreateCourseForm({
 	onSuccess: () => void;
 	onPendingChange: (pending: boolean) => void;
 }) {
+	const t = useAppT('courses');
+	const tc = useT('common');
+	const tv = useT('validation');
+	const schema = useMemo(() => createCourseSchema(tv, t), [tv, t]);
+
 	const form = useForm<CreateCourseFormValues>({
-		resolver: zodResolver(createCourseSchema),
+		resolver: zodResolver(schema),
 		defaultValues: {
 			name: '',
 			branch: SHARED_BRANCH_VALUE,
@@ -162,10 +170,10 @@ function CreateCourseForm({
 				defaultDurationWeeks: values.defaultDurationWeeks ?? null,
 			});
 		} catch (err) {
-			toast.error(isApiError(err) ? err.message : 'Something went wrong');
+			toast.error(isApiError(err) ? err.message : tc('error.unknown'));
 			return;
 		}
-		toast.success('Course added');
+		toast.success(t('created'));
 		onSuccess();
 	}
 
@@ -181,13 +189,13 @@ function CreateCourseForm({
 						<FormInput
 							control={form.control}
 							name="name"
-							label="Course name *"
-							placeholder="e.g. IELTS Prep"
+							label={t('field.name')}
+							placeholder={t('field.namePlaceholder')}
 						/>
 						<FormSelect
 							control={form.control}
 							name="branch"
-							label="Branch"
+							label={t('field.branch')}
 							options={branchOptions}
 						/>
 						<FeePlanField control={form.control} options={feePlanOptions} />
@@ -195,16 +203,16 @@ function CreateCourseForm({
 							<FormInput
 								control={form.control}
 								name="level"
-								label="Level"
-								placeholder="e.g. Upper-Intermediate"
+								label={t('field.level')}
+								placeholder={t('field.levelPlaceholder')}
 							/>
 							<FormInput
 								control={form.control}
 								name="defaultDurationWeeks"
-								label="Default duration (weeks)"
+								label={t('field.duration')}
 								type="number"
 								min={1}
-								placeholder="e.g. 12"
+								placeholder={t('field.durationPlaceholder')}
 								onChange={(e) =>
 									form.setValue(
 										'defaultDurationWeeks',
@@ -219,8 +227,8 @@ function CreateCourseForm({
 						<FormInput
 							control={form.control}
 							name="description"
-							label="Description"
-							placeholder="Short summary of the course"
+							label={t('field.description')}
+							placeholder={t('field.descriptionPlaceholder')}
 						/>
 					</FieldGroup>
 				</FormSection>
@@ -248,8 +256,13 @@ function EditCourseForm({
 		status: c.isActive ? 'active' : 'inactive',
 	});
 
+	const t = useAppT('courses');
+	const tc = useT('common');
+	const tv = useT('validation');
+	const schema = useMemo(() => editCourseSchema(tv, t), [tv, t]);
+
 	const form = useForm<EditCourseFormValues>({
-		resolver: zodResolver(editCourseSchema),
+		resolver: zodResolver(schema),
 		defaultValues: toDefaults(course),
 	});
 
@@ -298,10 +311,10 @@ function EditCourseForm({
 				isActive: values.status === 'active',
 			});
 		} catch (err) {
-			toast.error(isApiError(err) ? err.message : 'Something went wrong');
+			toast.error(isApiError(err) ? err.message : tc('error.unknown'));
 			return;
 		}
-		toast.success('Course updated');
+		toast.success(t('updated'));
 		onSuccess();
 	}
 
@@ -317,35 +330,33 @@ function EditCourseForm({
 						<FormInput
 							control={form.control}
 							name="name"
-							label="Course name *"
-							placeholder="e.g. IELTS Prep"
+							label={t('field.name')}
+							placeholder={t('field.namePlaceholder')}
 						/>
 						<FormSelect
 							control={form.control}
 							name="branch"
-							label="Branch"
+							label={t('field.branch')}
 							options={branchOptions}
 						/>
 						<FeePlanField control={form.control} options={feePlanOptions} />
 						<p className="text-xs text-muted-foreground">
-							Changing the plan re-prices every future invoice for this
-							course&apos;s groups. Invoices already issued keep their
-							original plan.
+							{t('planChangeWarning')}
 						</p>
 						<div className="grid grid-cols-2 gap-3">
 							<FormInput
 								control={form.control}
 								name="level"
-								label="Level"
-								placeholder="e.g. Upper-Intermediate"
+								label={t('field.level')}
+								placeholder={t('field.levelPlaceholder')}
 							/>
 							<FormInput
 								control={form.control}
 								name="defaultDurationWeeks"
-								label="Default duration (weeks)"
+								label={t('field.duration')}
 								type="number"
 								min={1}
-								placeholder="e.g. 12"
+								placeholder={t('field.durationPlaceholder')}
 								onChange={(e) =>
 									form.setValue(
 										'defaultDurationWeeks',
@@ -360,14 +371,17 @@ function EditCourseForm({
 						<FormInput
 							control={form.control}
 							name="description"
-							label="Description"
-							placeholder="Short summary of the course"
+							label={t('field.description')}
+							placeholder={t('field.descriptionPlaceholder')}
 						/>
 						<FormSelect
 							control={form.control}
 							name="status"
-							label="Status"
-							options={COURSE_STATUS_OPTIONS}
+							label={t('field.status')}
+							options={COURSE_STATUS_OPTIONS.map((o) => ({
+								value: o.value,
+								label: tc(`state.${o.labelKey}`),
+							}))}
 						/>
 					</FieldGroup>
 				</FormSection>
@@ -378,6 +392,8 @@ function EditCourseForm({
 
 export function CourseForm(props: CourseFormProps) {
 	const { open, onOpenChange, mode } = props;
+	const t = useAppT('courses');
+	const tc = useT('common');
 	const [isPending, setIsPending] = useState(false);
 
 	const formId = mode === 'create' ? 'create-course-form' : 'edit-course-form';
@@ -390,16 +406,16 @@ export function CourseForm(props: CourseFormProps) {
 		<FormSheet
 			open={open}
 			onOpenChange={onOpenChange}
-			title={mode === 'create' ? 'Add course' : 'Edit course'}
-			description="Fields marked * are required"
+			title={mode === 'create' ? t('addSheet') : t('edit')}
+			description={t('requiredHint')}
 			footer={
 				<>
 					<Button type="button" variant="outline" onClick={handleClose}>
-						Cancel
+						{tc('action.cancel')}
 					</Button>
 					<Button type="submit" form={formId} disabled={isPending}>
 						{isPending && <Spinner className="mr-2 size-4" />}
-						Save course
+						{t('save')}
 					</Button>
 				</>
 			}

@@ -24,6 +24,8 @@ import {
 } from '@repo/ui';
 import { isApiError } from '@repo/api-client';
 import { formatPrice } from '@repo/utils';
+import { useT } from '@repo/i18n';
+import { useAppT } from '@/locales';
 
 import { useCreateCreditNote } from '../api/credit-notes.mutations';
 import {
@@ -44,11 +46,12 @@ export function IssueCreditNoteDialog({
 	open,
 	onOpenChange,
 }: IssueCreditNoteDialogProps) {
+	const t = useAppT('billing');
 	return (
 		<Dialog open={open} onOpenChange={onOpenChange}>
 			<DialogContent className="max-w-md">
 				<DialogHeader>
-					<DialogTitle>Issue credit note</DialogTitle>
+					<DialogTitle>{t('creditNotes.issue')}</DialogTitle>
 					<DialogDescription>
 						Reverses part of this invoice&apos;s charges. This can&apos;t be
 						undone.
@@ -78,6 +81,8 @@ function IssueCreditNoteForm({
 	maxAmount: number;
 	onClose: () => void;
 }) {
+	const t = useAppT('billing');
+	const tc = useT('common');
 	const form = useForm<CreditNoteFormValues>({
 		resolver: zodResolver(creditNoteSchema(maxAmount)),
 		defaultValues: { amount: undefined, reason: '' },
@@ -92,7 +97,7 @@ function IssueCreditNoteForm({
 				amount: values.amount,
 				reason: values.reason,
 			});
-			toast.success('Credit note issued');
+			toast.success(t('creditNotes.done'));
 			onClose();
 		} catch (err) {
 			toast.error(isApiError(err) ? err.message : 'Failed to issue credit note');
@@ -139,8 +144,8 @@ function IssueCreditNoteForm({
 					<FormInput
 						control={form.control}
 						name="reason"
-						label="Reason *"
-						placeholder="Why is this credit note being issued?"
+						label={t('creditNotes.reason')}
+						placeholder={t('creditNotes.reasonPlaceholder')}
 					/>
 				</FieldGroup>
 
@@ -151,13 +156,13 @@ function IssueCreditNoteForm({
 						onClick={onClose}
 						disabled={createCreditNote.isPending}
 					>
-						Cancel
+						{tc('action.cancel')}
 					</Button>
 					<Button type="submit" disabled={createCreditNote.isPending}>
 						{createCreditNote.isPending && (
 							<Spinner className="mr-2 size-4" />
 						)}
-						Issue credit note
+						{t('creditNotes.issue')}
 					</Button>
 				</DialogFooter>
 			</form>

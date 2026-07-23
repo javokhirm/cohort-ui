@@ -4,6 +4,7 @@ import { cleanup } from '@testing-library/react';
 
 import { initI18n, setLocale } from '@repo/i18n';
 
+import { initAppLocales } from '@/locales';
 import { useSessionStore } from '@/store/sessionStore';
 import { useBranchStore } from '@/store/branchStore';
 import { server } from './server';
@@ -11,6 +12,7 @@ import { server } from './server';
 // Components render copy via `useT`; without an initialised i18next, `t()` yields
 // raw keys. Tests assert against the English catalog, so pin English.
 initI18n({ storageKey: 'cohort.admin.locale' });
+initAppLocales();
 setLocale('en');
 
 // jsdom has no ResizeObserver; Radix's Sheet/Dialog/Select primitives need one.

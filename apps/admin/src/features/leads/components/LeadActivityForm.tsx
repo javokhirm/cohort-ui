@@ -1,8 +1,12 @@
+import { useMemo } from 'react';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 
 import { isApiError } from '@repo/api-client';
 import { Button, Spinner, Tabs, TabsList, TabsTrigger, Textarea, toast } from '@repo/ui';
+import { useT } from '@repo/i18n';
+
+import { useAppT } from '@/locales';
 
 import { useLogLeadActivity } from '../api/leads.mutations';
 import type { LeadLoggableActivityType } from '../api/leads.queries';
@@ -21,8 +25,12 @@ interface LeadActivityFormProps {
 
 /** Inline "log a touchpoint" form shown inside the lead detail sheet. */
 export function LeadActivityForm({ leadId, onDone, onCancel }: LeadActivityFormProps) {
+	const t = useAppT('leads');
+	const tc = useT('common');
+	const schema = useMemo(() => logActivitySchema(), []);
+
 	const form = useForm<LogActivityFormValues>({
-		resolver: zodResolver(logActivitySchema),
+		resolver: zodResolver(schema),
 		defaultValues: { type: 'CALL', notes: '' },
 	});
 	const logActivity = useLogLeadActivity();
@@ -35,11 +43,11 @@ export function LeadActivityForm({ leadId, onDone, onCancel }: LeadActivityFormP
 				type: values.type,
 				notes: blankToUndefined(values.notes),
 			});
-			toast.success('Activity logged');
+			toast.success(t('activity.logged'));
 			form.reset({ type: 'CALL', notes: '' });
 			onDone();
 		} catch (err) {
-			toast.error(isApiError(err) ? err.message : 'Failed to log activity.');
+			toast.error(isApiError(err) ? err.message : t('activity.failed'));
 		}
 	}
 
@@ -57,14 +65,14 @@ export function LeadActivityForm({ leadId, onDone, onCancel }: LeadActivityFormP
 				<TabsList className="w-full">
 					{ACTIVITY_TYPE_OPTIONS.map((opt) => (
 						<TabsTrigger key={opt.value} value={opt.value}>
-							{opt.label}
+							{t(`activityType.${opt.value}`)}
 						</TabsTrigger>
 					))}
 				</TabsList>
 			</Tabs>
 
 			<Textarea
-				placeholder="What happened?"
+				placeholder={t('activity.placeholder')}
 				className="min-h-15"
 				{...form.register('notes')}
 			/>
@@ -77,7 +85,7 @@ export function LeadActivityForm({ leadId, onDone, onCancel }: LeadActivityFormP
 					className="flex-1"
 					onClick={onCancel}
 				>
-					Cancel
+					{tc('action.cancel')}
 				</Button>
 				<Button
 					type="submit"
@@ -86,7 +94,7 @@ export function LeadActivityForm({ leadId, onDone, onCancel }: LeadActivityFormP
 					disabled={logActivity.isPending}
 				>
 					{logActivity.isPending && <Spinner className="mr-2 size-4" />}
-					Save
+					{tc('action.save')}
 				</Button>
 			</div>
 		</form>

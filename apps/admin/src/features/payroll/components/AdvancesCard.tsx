@@ -25,6 +25,7 @@ import {
 	advanceFormSchema,
 	type AdvanceFormValues,
 } from '../schemas/advance-form.schema';
+import { useAppT } from '@/locales';
 
 /** Backend error codes worth translating for the operator. */
 function advanceErrorMessage(err: unknown, fallback: string): string {
@@ -42,6 +43,7 @@ function advanceErrorMessage(err: unknown, fallback: string): string {
 }
 
 function AddAdvanceForm({ period }: { period: PayrollStaffPeriodResponse }) {
+	const t = useAppT('payroll');
 	const createAdvance = useCreateAdvance();
 	const form = useForm<AdvanceFormValues>({
 		resolver: zodResolver(advanceFormSchema),
@@ -57,7 +59,7 @@ function AddAdvanceForm({ period }: { period: PayrollStaffPeriodResponse }) {
 				label: values.label?.trim() || undefined,
 				advanceDate: values.advanceDate,
 			});
-			toast.success('Advance recorded');
+			toast.success(t('advance.recorded'));
 			form.reset({ label: '', amount: undefined, advanceDate: todayIsoDate() });
 		} catch (err) {
 			toast.error(advanceErrorMessage(err, 'Failed to record the advance'));
@@ -73,14 +75,14 @@ function AddAdvanceForm({ period }: { period: PayrollStaffPeriodResponse }) {
 				<FormInput
 					control={form.control}
 					name="label"
-					placeholder="Reason (e.g. cash advance)"
+					placeholder={t('advance.reasonPlaceholder')}
 				/>
 				<div className="flex items-start gap-2">
 					<div className="flex-1">
 						<FormMoneyInput
 							control={form.control}
 							name="amount"
-							placeholder="Amount"
+							placeholder={t('advance.amountPlaceholder')}
 						/>
 					</div>
 					<FormDatePicker
@@ -90,7 +92,7 @@ function AddAdvanceForm({ period }: { period: PayrollStaffPeriodResponse }) {
 					/>
 					<Button type="submit" disabled={createAdvance.isPending}>
 						<Plus className="mr-1 size-4" />
-						Record
+						{t('record')}
 					</Button>
 				</div>
 			</form>
@@ -104,6 +106,7 @@ function AddAdvanceForm({ period }: { period: PayrollStaffPeriodResponse }) {
  * only while the row is LIVE; a finalized snapshot locks its advances.
  */
 export function AdvancesCard({ period }: { period: PayrollStaffPeriodResponse }) {
+	const t = useAppT('payroll');
 	const { can } = usePermissions();
 	const removeAdvance = useRemoveAdvance();
 	const [advanceToRemove, setAdvanceToRemove] = useState<PayrollAdvance | null>(null);
@@ -115,7 +118,7 @@ export function AdvancesCard({ period }: { period: PayrollStaffPeriodResponse })
 		if (!advanceToRemove) return;
 		removeAdvance.mutate(advanceToRemove.id, {
 			onSuccess: () => {
-				toast.success('Advance removed');
+				toast.success(t('advance.removed'));
 				setAdvanceToRemove(null);
 			},
 			onError: (err) => {
@@ -210,7 +213,7 @@ export function AdvancesCard({ period }: { period: PayrollStaffPeriodResponse })
 				onOpenChange={(open) => {
 					if (!open) setAdvanceToRemove(null);
 				}}
-				title="Remove this advance?"
+				title={t('advance.removeTitle')}
 				description={
 					advanceToRemove
 						? `${formatMoney(advanceToRemove.amount)} recorded ${formatDate(
@@ -218,7 +221,7 @@ export function AdvancesCard({ period }: { period: PayrollStaffPeriodResponse })
 							)} is deleted and no longer deducted from net.`
 						: undefined
 				}
-				confirmLabel="Remove"
+				confirmLabel={t('advance.removeConfirm')}
 				variant="destructive"
 				loading={removeAdvance.isPending}
 				onConfirm={handleRemoveConfirm}

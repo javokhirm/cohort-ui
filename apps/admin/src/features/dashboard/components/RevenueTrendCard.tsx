@@ -16,6 +16,7 @@ import { ChartSkeleton } from './DashboardSkeletons';
 import { PanelCard } from './PanelCard';
 import { PanelError } from './PanelError';
 import { TrendChip } from './TrendChip';
+import { useAppT } from '@/locales';
 
 /** `YYYY-MM` → short month label (`Jul`). */
 function monthLabel(month: string): string {
@@ -25,10 +26,12 @@ function monthLabel(month: string): string {
 
 /** Revenue trend — settled payments per month, last 12 months. */
 export function RevenueTrendCard() {
+	const t = useAppT('dashboard');
 	const { data, isLoading, isError, refetch } = useRevenueTrend(12);
 
 	if (isLoading) return <ChartSkeleton />;
-	if (isError || !data) return <PanelError title="Revenue trend" onRetry={refetch} />;
+	if (isError || !data)
+		return <PanelError title={t('card.revenueTrend')} onRetry={refetch} />;
 
 	const chartData = data.points.map((p) => ({
 		month: monthLabel(p.month),
@@ -37,8 +40,8 @@ export function RevenueTrendCard() {
 
 	return (
 		<PanelCard
-			title="Revenue trend"
-			subtitle="Monthly, last 12 months"
+			title={t('card.revenueTrend')}
+			subtitle={t('card.revenueTrendSubtitle')}
 			headerRight={
 				data.changePct != null ? (
 					<TrendChip value={data.changePct * 100} />

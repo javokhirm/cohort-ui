@@ -4,12 +4,14 @@ import { Plus } from 'lucide-react';
 import { Button, PageHeader, Spinner } from '@repo/ui';
 
 import { Can } from '@/components/Can';
+import { useAppT } from '@/locales';
 import { useBranches, type Branch } from '@/api/branches';
 
 import { BranchCard } from '../components/BranchCard';
 import { BranchForm } from '../components/BranchForm';
 
 export function BranchListPage() {
+	const t = useAppT('branches');
 	const { data: branches, isLoading, isError } = useBranches();
 
 	const [addOpen, setAddOpen] = useState(false);
@@ -18,13 +20,13 @@ export function BranchListPage() {
 	return (
 		<div className="mx-auto flex max-w-7xl flex-col gap-6">
 			<PageHeader
-				title="Branches"
-				description="Physical campuses — addresses, contacts and capacity"
+				title={t('title')}
+				description={t('description')}
 				actions={
 					<Can permission="branch.create">
 						<Button onClick={() => setAddOpen(true)}>
 							<Plus className="mr-1.5 size-4" />
-							Add branch
+							{t('add')}
 						</Button>
 					</Can>
 				}
@@ -32,7 +34,7 @@ export function BranchListPage() {
 
 			{isError && (
 				<div className="rounded-lg border border-destructive/30 bg-destructive/5 px-4 py-3 text-sm text-destructive">
-					Failed to load branches. Please refresh.
+					{t('loadError')}
 				</div>
 			)}
 
@@ -53,7 +55,7 @@ export function BranchListPage() {
 			) : (
 				!isError && (
 					<div className="rounded-lg border border-dashed border-border py-16 text-center text-sm text-muted-foreground">
-						No branches yet. Add your first campus to get started.
+						{t('empty')}
 					</div>
 				)
 			)}

@@ -14,6 +14,7 @@ import { ChartSkeleton } from './DashboardSkeletons';
 import { PanelCard } from './PanelCard';
 import { PanelError } from './PanelError';
 import { TrendChip } from './TrendChip';
+import { useAppT } from '@/locales';
 
 /** `YYYY-MM` → short month label (`Jul`). */
 function monthLabel(month: string): string {
@@ -23,11 +24,12 @@ function monthLabel(month: string): string {
 
 /** Enrollment trend — new enrollments per month, last 12 months. */
 export function EnrollmentTrendCard() {
+	const t = useAppT('dashboard');
 	const { data, isLoading, isError, refetch } = useEnrollmentTrend(12);
 
 	if (isLoading) return <ChartSkeleton />;
 	if (isError || !data)
-		return <PanelError title="Enrollment trend" onRetry={refetch} />;
+		return <PanelError title={t('card.enrollmentTrend')} onRetry={refetch} />;
 
 	const chartData = data.points.map((p) => ({
 		month: monthLabel(p.month),
@@ -36,8 +38,8 @@ export function EnrollmentTrendCard() {
 
 	return (
 		<PanelCard
-			title="Enrollment trend"
-			subtitle="New enrollments / month"
+			title={t('card.enrollmentTrend')}
+			subtitle={t('card.enrollmentTrendSubtitle')}
 			headerRight={
 				data.changePct != null ? (
 					<TrendChip value={data.changePct * 100} />

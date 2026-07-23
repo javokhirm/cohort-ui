@@ -4,6 +4,7 @@ import { Card } from '@repo/ui';
 import { formatDate, formatMoney, formatPrice } from '@repo/utils';
 
 import type { PayrollStaffPeriodResponse } from '../api/payroll.queries';
+import { useAppT } from '@/locales';
 
 /**
  * Full-precision figure (the pre-rounding gross / exact revenue base). Not a
@@ -59,13 +60,14 @@ function formulaLine(period: PayrollStaffPeriodResponse): string {
  * figure → rounded gross) and, once finalized, names the frozen snapshot.
  */
 export function CalculationCard({ period }: { period: PayrollStaffPeriodResponse }) {
+	const t = useAppT('payroll');
 	const { calculation } = period.breakdown;
 
 	return (
 		<Card className="gap-0 p-5">
 			<div className="mb-3 flex flex-wrap items-center gap-2.5">
 				<h2 className="text-xs font-bold uppercase tracking-wide text-muted-foreground">
-					How this is calculated
+					{t('howCalculated')}
 				</h2>
 				<span className="text-xs text-muted-foreground">
 					{rateDescription(period)} · {calculation.sessionsTaught} sessions ·{' '}

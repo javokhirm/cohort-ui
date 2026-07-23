@@ -1,4 +1,4 @@
-import { useEffect } from 'react';
+import { useEffect, useMemo } from 'react';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 
@@ -13,8 +13,10 @@ import {
 	Spinner,
 	toast,
 } from '@repo/ui';
+import { useStatusLabel, useT } from '@repo/i18n';
 
 import { FormSheet } from '@/components/FormSheet';
+import { useAppT } from '@/locales';
 import { useBranches } from '@/api/branches';
 import { useActiveBranchIds } from '@/store/branchStore';
 import { useCourseList } from '@/features/courses/api/courses.queries';
@@ -36,6 +38,12 @@ interface AddLeadSheetProps {
 
 /** Capture a new lead — `POST /manage/leads` (defaults status to NEW). */
 export function AddLeadSheet({ open, onOpenChange }: AddLeadSheetProps) {
+	const t = useAppT('leads');
+	const tc = useT('common');
+	const tv = useT('validation');
+	const statusLabel = useStatusLabel();
+	const schema = useMemo(() => createLeadSchema(tv), [tv]);
+
 	const activeBranchIds = useActiveBranchIds();
 	const { data: branches = [] } = useBranches();
 	const { data: coursesData } = useCourseList({ limit: 100 });
@@ -43,7 +51,7 @@ export function AddLeadSheet({ open, onOpenChange }: AddLeadSheetProps) {
 	const createLead = useCreateLead();
 
 	const form = useForm<CreateLeadFormValues>({
-		resolver: zodResolver(createLeadSchema),
+		resolver: zodResolver(schema),
 		defaultValues: {
 			firstName: '',
 			lastName: '',
@@ -87,11 +95,11 @@ export function AddLeadSheet({ open, onOpenChange }: AddLeadSheetProps) {
 				courseInterestId: values.courseInterestId,
 				assignedToStaffId: values.assignedToStaffId,
 			});
-			toast.success('Lead captured');
+			toast.success(t('toast.created'));
 			form.reset();
 			onOpenChange(false);
 		} catch (err) {
-			toast.error(isApiError(err) ? err.message : 'Failed to capture the lead.');
+			toast.error(isApiError(err) ? err.message : t('toast.createFailed'));
 		}
 	}
 
@@ -99,8 +107,8 @@ export function AddLeadSheet({ open, onOpenChange }: AddLeadSheetProps) {
 		<FormSheet
 			open={open}
 			onOpenChange={onOpenChange}
-			title="Add lead"
-			description="Fields marked * are required"
+			title={t('addSheet.title')}
+			description={t('addSheet.requiredHint')}
 			footer={
 				<>
 					<Button
@@ -108,7 +116,7 @@ export function AddLeadSheet({ open, onOpenChange }: AddLeadSheetProps) {
 						variant="outline"
 						onClick={() => onOpenChange(false)}
 					>
-						Cancel
+						{tc('action.cancel')}
 					</Button>
 					<Button
 						type="submit"
@@ -116,7 +124,7 @@ export function AddLeadSheet({ open, onOpenChange }: AddLeadSheetProps) {
 						disabled={createLead.isPending}
 					>
 						{createLead.isPending && <Spinner className="mr-2 size-4" />}
-						Add lead
+						{t('addSheet.submit')}
 					</Button>
 				</>
 			}
@@ -133,32 +141,35 @@ export function AddLeadSheet({ open, onOpenChange }: AddLeadSheetProps) {
 								<FormInput
 									control={form.control}
 									name="firstName"
-									label="First name *"
-									placeholder="e.g. Sevara"
+									label={t('field.firstName')}
+									placeholder={t('field.firstNamePlaceholder')}
 								/>
 								<FormInput
 									control={form.control}
 									name="lastName"
-									label="Last name"
-									placeholder="e.g. Mirzayeva"
+									label={t('field.lastName')}
+									placeholder={t('field.lastNamePlaceholder')}
 								/>
 							</div>
 							<FormPhoneInput
 								control={form.control}
 								name="phoneNumber"
-								label="Phone *"
+								label={t('field.phone')}
 							/>
 							<div className="grid grid-cols-2 gap-3">
 								<FormSelect
 									control={form.control}
 									name="source"
-									label="Source"
-									options={LEAD_SOURCE_OPTIONS}
+									label={t('field.source')}
+									options={LEAD_SOURCE_OPTIONS.map((o) => ({
+										value: o.value,
+										label: statusLabel('lead_source', o.value),
+									}))}
 								/>
 								<FormSelect
 									control={form.control}
 									name="branchId"
-									label="Branch"
+									label={t('field.branch')}
 									options={branchOptions}
 									valueAsNumber
 								/>
@@ -166,16 +177,16 @@ export function AddLeadSheet({ open, onOpenChange }: AddLeadSheetProps) {
 							<FormSelect
 								control={form.control}
 								name="courseInterestId"
-								label="Course interest"
-								placeholder="Select a course"
+								label={t('field.courseInterest')}
+								placeholder={t('field.courseInterestPlaceholder')}
 								options={courseOptions}
 								valueAsNumber
 							/>
 							<FormSelect
 								control={form.control}
 								name="assignedToStaffId"
-								label="Assign to"
-								placeholder="Assign a staff member"
+								label={t('field.assignTo')}
+								placeholder={t('field.assignToPlaceholder')}
 								options={staffOptions}
 								valueAsNumber
 							/>

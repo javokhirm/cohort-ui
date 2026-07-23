@@ -26,6 +26,8 @@ import {
 } from '@repo/ui';
 import { isApiError } from '@repo/api-client';
 import { formatDate } from '@repo/utils';
+import { useT } from '@repo/i18n';
+import { useAppT } from '@/locales';
 
 import { Can } from '@/components/Can';
 import {
@@ -45,6 +47,8 @@ interface RosterSectionProps {
 }
 
 export function RosterSection({ groupId, capacity }: RosterSectionProps) {
+	const t = useAppT('groups');
+	const tc = useT('common');
 	const { data: enrollments = [], isLoading } = useGroupEnrollments(groupId);
 	const [enrollOpen, setEnrollOpen] = useState(false);
 	const [dropTarget, setDropTarget] = useState<Enrollment | null>(null);
@@ -84,7 +88,7 @@ export function RosterSection({ groupId, capacity }: RosterSectionProps) {
 						}
 					>
 						<SelectTrigger className="h-9 w-36" size="sm">
-							<SelectValue placeholder="All statuses" />
+							<SelectValue placeholder={t('allStatuses')} />
 						</SelectTrigger>
 						<SelectContent>
 							{ENROLLMENT_STATUS_FILTERS.map((f) => (
@@ -92,7 +96,9 @@ export function RosterSection({ groupId, capacity }: RosterSectionProps) {
 									key={f.value ?? ALL_STATUSES}
 									value={f.value ?? ALL_STATUSES}
 								>
-									{f.label}
+									{f.value
+										? t(`enrollmentStatus.${f.value}`)
+										: tc('state.all')}
 								</SelectItem>
 							))}
 						</SelectContent>
@@ -100,7 +106,7 @@ export function RosterSection({ groupId, capacity }: RosterSectionProps) {
 					<Can permission="enrollment.create">
 						<Button size="sm" onClick={() => setEnrollOpen(true)}>
 							<Plus className="mr-1.5 size-4" />
-							Enroll students
+							{t('roster.enroll')}
 						</Button>
 					</Can>
 				</div>
@@ -118,13 +124,13 @@ export function RosterSection({ groupId, capacity }: RosterSectionProps) {
 				<Card className="py-0">
 					<EmptyState
 						icon={<Users />}
-						title="No students enrolled"
-						description="Enroll active students to build this group's roster."
+						title={t('roster.emptyTitle')}
+						description={t('roster.enrollDescription')}
 						action={
 							<Can permission="enrollment.create">
 								<Button size="sm" onClick={() => setEnrollOpen(true)}>
 									<Plus className="mr-1.5 size-4" />
-									Enroll students
+									{t('roster.enroll')}
 								</Button>
 							</Can>
 						}
@@ -163,7 +169,7 @@ export function RosterSection({ groupId, capacity }: RosterSectionProps) {
 													onClick={() => setReactivateTarget(e)}
 												>
 													<RotateCcw className="mr-1.5 size-3.5" />
-													Reactivate
+													{t('actions.reactivate')}
 												</Button>
 											)}
 											{transitions.includes('SUSPENDED') && (
@@ -173,7 +179,7 @@ export function RosterSection({ groupId, capacity }: RosterSectionProps) {
 													onClick={() => setSuspendTarget(e)}
 												>
 													<Pause className="mr-1.5 size-3.5" />
-													Suspend
+													{t('actions.suspend')}
 												</Button>
 											)}
 											{transitions.includes('DROPPED') && (
@@ -184,7 +190,7 @@ export function RosterSection({ groupId, capacity }: RosterSectionProps) {
 													onClick={() => setDropTarget(e)}
 												>
 													<UserMinus className="mr-1.5 size-3.5" />
-													Drop
+													{t('actions.drop')}
 												</Button>
 											)}
 										</div>
@@ -235,6 +241,8 @@ function DropStudentDialog({
 	enrollment: Enrollment | null;
 	onClose: () => void;
 }) {
+	const t = useAppT('groups');
+	const tc = useT('common');
 	const [reason, setReason] = useState('');
 	const updateEnrollment = useUpdateEnrollment();
 
@@ -247,11 +255,11 @@ function DropStudentDialog({
 				status: 'DROPPED',
 				dropReason: reason.trim(),
 			});
-			toast.success('Student dropped from group');
+			toast.success(t('roster.dropped'));
 			onClose();
 			setReason('');
 		} catch (err) {
-			toast.error(isApiError(err) ? err.message : 'Something went wrong');
+			toast.error(isApiError(err) ? err.message : tc('error.unknown'));
 		}
 	}
 
@@ -267,19 +275,21 @@ function DropStudentDialog({
 		>
 			<DialogContent className="max-w-sm">
 				<DialogHeader>
-					<DialogTitle>Drop student</DialogTitle>
+					<DialogTitle>{t('roster.drop')}</DialogTitle>
 					<DialogDescription>
 						{enrollment
-							? `Remove ${enrollment.studentName} from this group.`
+							? t('roster.dropDescription', {
+									name: enrollment.studentName,
+								})
 							: ''}
 					</DialogDescription>
 				</DialogHeader>
 				<div className="flex flex-col gap-1.5">
-					<Label>Reason *</Label>
+					<Label>{t('roster.dropReason')}</Label>
 					<Textarea
 						value={reason}
 						onChange={(e) => setReason(e.target.value)}
-						placeholder="e.g. Transferred, stopped attending…"
+						placeholder={t('roster.dropPlaceholder')}
 						rows={3}
 					/>
 				</div>
@@ -292,7 +302,7 @@ function DropStudentDialog({
 						}}
 						disabled={updateEnrollment.isPending}
 					>
-						Cancel
+						{tc('action.cancel')}
 					</Button>
 					<Button
 						variant="destructive"
@@ -304,7 +314,7 @@ function DropStudentDialog({
 						{updateEnrollment.isPending && (
 							<Spinner className="mr-2 size-4" />
 						)}
-						Drop student
+						{t('roster.drop')}
 					</Button>
 				</DialogFooter>
 			</DialogContent>
@@ -323,6 +333,8 @@ function SuspendStudentDialog({
 	enrollment: Enrollment | null;
 	onClose: () => void;
 }) {
+	const t = useAppT('groups');
+	const tc = useT('common');
 	const updateEnrollment = useUpdateEnrollment();
 
 	async function onSuspend() {
@@ -333,10 +345,10 @@ function SuspendStudentDialog({
 				groupId,
 				status: 'SUSPENDED',
 			});
-			toast.success('Enrollment suspended');
+			toast.success(t('roster.suspend.done'));
 			onClose();
 		} catch (err) {
-			toast.error(isApiError(err) ? err.message : 'Something went wrong');
+			toast.error(isApiError(err) ? err.message : tc('error.unknown'));
 		}
 	}
 
@@ -344,13 +356,15 @@ function SuspendStudentDialog({
 		<ConfirmDialog
 			open={enrollment != null}
 			onOpenChange={(o) => !o && onClose()}
-			title="Suspend this enrollment?"
+			title={t('roster.suspend.title')}
 			description={
 				enrollment
-					? `${enrollment.studentName} keeps their seat while suspended — it still counts against group capacity and blocks re-enrolling.`
+					? t('roster.suspendDescription', {
+							name: enrollment.studentName,
+						})
 					: ''
 			}
-			confirmLabel="Suspend"
+			confirmLabel={t('roster.suspend.confirm')}
 			loading={updateEnrollment.isPending}
 			onConfirm={() => void onSuspend()}
 		/>
@@ -366,6 +380,8 @@ function ReactivateStudentDialog({
 	enrollment: Enrollment | null;
 	onClose: () => void;
 }) {
+	const t = useAppT('groups');
+	const tc = useT('common');
 	const updateEnrollment = useUpdateEnrollment();
 
 	async function onReactivate() {
@@ -376,10 +392,10 @@ function ReactivateStudentDialog({
 				groupId,
 				status: 'ACTIVE',
 			});
-			toast.success('Enrollment reactivated');
+			toast.success(t('roster.reactivate.done'));
 			onClose();
 		} catch (err) {
-			toast.error(isApiError(err) ? err.message : 'Something went wrong');
+			toast.error(isApiError(err) ? err.message : tc('error.unknown'));
 		}
 	}
 
@@ -387,11 +403,15 @@ function ReactivateStudentDialog({
 		<ConfirmDialog
 			open={enrollment != null}
 			onOpenChange={(o) => !o && onClose()}
-			title="Reactivate this enrollment?"
+			title={t('roster.reactivate.title')}
 			description={
-				enrollment ? `Restore ${enrollment.studentName} to active status.` : ''
+				enrollment
+					? t('roster.reactivateDescription', {
+							name: enrollment.studentName,
+						})
+					: ''
 			}
-			confirmLabel="Reactivate"
+			confirmLabel={t('roster.reactivate.confirm')}
 			loading={updateEnrollment.isPending}
 			onConfirm={() => void onReactivate()}
 		/>

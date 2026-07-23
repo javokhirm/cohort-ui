@@ -16,6 +16,8 @@ import {
 	type WeekCalendarDay,
 } from '@repo/ui';
 import { formatDate } from '@repo/utils';
+import { useT } from '@repo/i18n';
+import { useAppT } from '@/locales';
 
 import { useSessionCalendar } from '../api/sessions.queries';
 import type { SessionCalendarFilters } from '../api/keys';
@@ -65,6 +67,8 @@ function parseDate(value: string | undefined): Date {
 }
 
 export function SchedulePage() {
+	const t = useAppT('groups');
+	const tc = useT('common');
 	const navigate = useNavigate({ from: '/schedule' });
 	const { date, status, view = 'week' } = useSearch({ from: '/_authed/schedule' });
 
@@ -160,15 +164,15 @@ export function SchedulePage() {
 	return (
 		<div className="mx-auto flex max-w-6xl flex-col gap-6">
 			<PageHeader
-				title="Schedule"
-				description="Session calendar across all groups"
+				title={t('schedule.title')}
+				description={t('schedule.description')}
 			/>
 
 			<div className="flex flex-col gap-4">
 				<SearchFilterBar
 					filters={SESSION_STATUS_FILTERS.map((f) => ({
 						id: f.value ?? 'ALL',
-						label: f.label,
+						label: f.value ? t(`sessionStatus.${f.value}`) : tc('state.all'),
 						active: status === f.value,
 						onClick: () => setSearch({ status: f.value }),
 					}))}

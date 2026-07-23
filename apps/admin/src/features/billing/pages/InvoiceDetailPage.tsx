@@ -31,6 +31,8 @@ import {
 } from '@repo/ui';
 import { isApiError } from '@repo/api-client';
 import { formatDate, formatPrice } from '@repo/utils';
+import { useStatusLabel, useT } from '@repo/i18n';
+import { useAppT } from '@/locales';
 
 import { Can } from '@/components/Can';
 import { useInvoice, type InvoiceDetail } from '../api/invoices.queries';
@@ -45,6 +47,7 @@ import {
 } from '../components/RefundPaymentDialog';
 
 function DisabledAction({ label, icon }: { label: string; icon: React.ReactNode }) {
+	const t = useAppT('billing');
 	return (
 		<Tooltip>
 			<TooltipTrigger asChild>
@@ -55,7 +58,7 @@ function DisabledAction({ label, icon }: { label: string; icon: React.ReactNode 
 					</Button>
 				</span>
 			</TooltipTrigger>
-			<TooltipContent>Not available yet</TooltipContent>
+			<TooltipContent>{t('invoiceExtra.notAvailableYet')}</TooltipContent>
 		</Tooltip>
 	);
 }
@@ -81,6 +84,9 @@ function InvoiceHeader({
 	actionPending: boolean;
 	applyCreditPending: boolean;
 }) {
+	const tc = useT('common');
+	const t = useAppT('billing');
+	const statusLabel = useStatusLabel();
 	const canRecordPayment =
 		invoice.amountDue > 0 && invoice.status !== 'VOID' && invoice.status !== 'DRAFT';
 	const canApplyCredit =
@@ -100,7 +106,9 @@ function InvoiceHeader({
 				<div>
 					<div className="flex items-center gap-2.5">
 						<h1 className="text-lg font-bold">{invoice.invoiceNumber}</h1>
-						<StatusBadge kind="invoice" status={invoice.status} />
+						<StatusBadge kind="invoice" status={invoice.status}>
+							{statusLabel('invoice', invoice.status)}
+						</StatusBadge>
 					</div>
 					<div className="mt-1 text-sm text-muted-foreground">
 						{invoice.studentName} · Issued {formatDate(invoice.issueDate)} ·
@@ -110,19 +118,25 @@ function InvoiceHeader({
 
 				<div className="flex gap-6">
 					<div className="text-right">
-						<div className="text-xs text-muted-foreground">Total</div>
+						<div className="text-xs text-muted-foreground">
+							{t('invoices.detail.total')}
+						</div>
 						<div className="text-base font-bold tabular-nums">
 							{formatPrice(invoice.total)} UZS
 						</div>
 					</div>
 					<div className="text-right">
-						<div className="text-xs text-muted-foreground">Paid</div>
+						<div className="text-xs text-muted-foreground">
+							{t('invoices.detail.paid')}
+						</div>
 						<div className="text-base font-bold tabular-nums text-tone-green-fg">
 							{formatPrice(invoice.amountPaid)} UZS
 						</div>
 					</div>
 					<div className="text-right">
-						<div className="text-xs text-muted-foreground">Balance</div>
+						<div className="text-xs text-muted-foreground">
+							{t('invoices.detail.balance')}
+						</div>
 						<div
 							className={
 								invoice.amountDue > 0
@@ -144,7 +158,7 @@ function InvoiceHeader({
 						<Can permission="payment.record">
 							<Button onClick={onRecordPayment}>
 								<Wallet className="mr-1.5 size-4" />
-								Record payment
+								{t('invoices.detail.recordPayment')}
 							</Button>
 						</Can>
 					)}
@@ -157,7 +171,7 @@ function InvoiceHeader({
 								disabled={applyCreditPending}
 							>
 								<Landmark className="mr-1.5 size-4" />
-								Apply wallet credit
+								{t('misc.applyWalletCredit')}
 							</Button>
 						</Can>
 					)}
@@ -166,7 +180,7 @@ function InvoiceHeader({
 						<Can permission="invoice.discount.apply">
 							<Button variant="outline" onClick={onApplyDiscount}>
 								<BadgePercent className="mr-1.5 size-4" />
-								Apply discount
+								{t('discounts.apply.confirm')}
 							</Button>
 						</Can>
 					)}
@@ -175,24 +189,24 @@ function InvoiceHeader({
 						<Can permission="invoice.update">
 							<Button variant="outline" onClick={onEdit}>
 								<Edit className="mr-1.5 size-4" />
-								Edit
+								{tc('action.edit')}
 							</Button>
 							<Button
 								variant="outline"
 								onClick={onIssue}
 								disabled={actionPending}
 							>
-								Issue invoice
+								{t('misc.issueInvoice')}
 							</Button>
 						</Can>
 					)}
 
 					<DisabledAction
-						label="Send reminder"
+						label={t('invoiceExtra.sendReminder')}
 						icon={<MessageSquareWarning className="mr-1.5 size-4" />}
 					/>
 					<DisabledAction
-						label="Download PDF"
+						label={t('invoiceExtra.downloadPdf')}
 						icon={<Download className="mr-1.5 size-4" />}
 					/>
 				</div>
@@ -206,7 +220,7 @@ function InvoiceHeader({
 								disabled={actionPending}
 								className="border-tone-red-fg/30 font-bold text-tone-red-fg shadow-none"
 							>
-								Void
+								{t('misc.void')}
 							</Button>
 						</Can>
 					)}
@@ -217,21 +231,31 @@ function InvoiceHeader({
 }
 
 function LineItemsCard({ invoice }: { invoice: InvoiceDetail }) {
+	const t = useAppT('billing');
+	const statusLabel = useStatusLabel();
 	const { lineItems, discounts, taxAmount } = invoice;
 
 	return (
 		<Card className="gap-0 overflow-hidden py-0">
 			<div className="border-b border-border px-5 py-3">
-				<h2 className="text-sm font-semibold">Line items</h2>
+				<h2 className="text-sm font-semibold">
+					{t('invoices.detail.lineItems')}
+				</h2>
 			</div>
 			<Table>
 				<TableHeader>
 					<TableRow>
-						<TableHead>Description</TableHead>
-						<TableHead>Type</TableHead>
-						<TableHead className="text-right">Qty</TableHead>
-						<TableHead className="text-right">Unit</TableHead>
-						<TableHead className="text-right">Amount</TableHead>
+						<TableHead>{t('invoices.detail.description')}</TableHead>
+						<TableHead>{t('invoices.form.lineType')}</TableHead>
+						<TableHead className="text-right">
+							{t('invoices.detail.qty')}
+						</TableHead>
+						<TableHead className="text-right">
+							{t('invoices.detail.unit')}
+						</TableHead>
+						<TableHead className="text-right">
+							{t('invoices.detail.amount')}
+						</TableHead>
 					</TableRow>
 				</TableHeader>
 				<TableBody>
@@ -239,7 +263,9 @@ function LineItemsCard({ invoice }: { invoice: InvoiceDetail }) {
 						<TableRow key={li.id}>
 							<TableCell>{li.description}</TableCell>
 							<TableCell>
-								<StatusBadge kind="invoice_line_item" status={li.type} />
+								<StatusBadge kind="invoice_line_item" status={li.type}>
+									{statusLabel('invoice_line_item', li.type)}
+								</StatusBadge>
 							</TableCell>
 							<TableCell className="text-right tabular-nums text-muted-foreground">
 								{li.quantity}
@@ -265,7 +291,7 @@ function LineItemsCard({ invoice }: { invoice: InvoiceDetail }) {
 					{taxAmount > 0 && (
 						<TableRow>
 							<TableCell colSpan={4} className="text-muted-foreground">
-								Tax
+								{t('misc.tax')}
 							</TableCell>
 							<TableCell className="text-right tabular-nums text-muted-foreground">
 								{formatPrice(taxAmount)} UZS
@@ -274,7 +300,7 @@ function LineItemsCard({ invoice }: { invoice: InvoiceDetail }) {
 					)}
 					<TableRow>
 						<TableCell colSpan={4} className="text-base font-bold">
-							Total
+							{t('misc.total')}
 						</TableCell>
 						<TableCell className="text-right text-base font-bold tabular-nums">
 							{formatPrice(invoice.total)} UZS
@@ -287,6 +313,8 @@ function LineItemsCard({ invoice }: { invoice: InvoiceDetail }) {
 }
 
 function PaymentHistoryCard({ invoice }: { invoice: InvoiceDetail }) {
+	const t = useAppT('billing');
+	const statusLabel = useStatusLabel();
 	const { payments } = invoice;
 	const [refundTarget, setRefundTarget] = useState<
 		InvoiceDetail['payments'][number] | null
@@ -302,7 +330,9 @@ function PaymentHistoryCard({ invoice }: { invoice: InvoiceDetail }) {
 
 	return (
 		<Card className="p-5">
-			<h2 className="mb-3 text-sm font-semibold">Payment history</h2>
+			<h2 className="mb-3 text-sm font-semibold">
+				{t('invoiceExtra.paymentHistory')}
+			</h2>
 			{payments.length === 0 ? (
 				<p className="text-sm text-muted-foreground">
 					{invoice.amountDue > 0
@@ -325,14 +355,16 @@ function PaymentHistoryCard({ invoice }: { invoice: InvoiceDetail }) {
 								</div>
 							</div>
 							<div className="flex items-center gap-2">
-								<StatusBadge kind="payment" status={p.status} />
+								<StatusBadge kind="payment" status={p.status}>
+									{statusLabel('payment', p.status)}
+								</StatusBadge>
 								{p.status === 'SUCCEEDED' && p.method !== 'CREDIT' && (
 									<Can permission="payment.refund">
 										<Button
 											variant="ghost"
 											size="sm"
 											className="size-8 p-0"
-											aria-label="Refund payment"
+											aria-label={t('payments.refund.title')}
 											onClick={() => setRefundTarget(p)}
 										>
 											<RotateCcw className="size-4" />
@@ -361,6 +393,7 @@ interface InvoiceDetailPageProps {
 }
 
 export function InvoiceDetailPage({ invoiceId }: InvoiceDetailPageProps) {
+	const t = useAppT('billing');
 	const { data: invoice, isLoading, isError } = useInvoice(invoiceId);
 
 	const [editOpen, setEditOpen] = useState(false);
@@ -375,7 +408,7 @@ export function InvoiceDetailPage({ invoiceId }: InvoiceDetailPageProps) {
 		if (!invoice) return;
 		try {
 			await updateInvoice.mutateAsync({ id: invoice.id, status: 'UNPAID' });
-			toast.success('Invoice issued');
+			toast.success(t('invoiceExtra.issued'));
 		} catch (err) {
 			toast.error(isApiError(err) ? err.message : 'Failed to issue invoice');
 		}
@@ -399,7 +432,7 @@ export function InvoiceDetailPage({ invoiceId }: InvoiceDetailPageProps) {
 		if (!invoice) return;
 		try {
 			await updateInvoice.mutateAsync({ id: invoice.id, status: 'VOID' });
-			toast.success('Invoice voided');
+			toast.success(t('invoiceExtra.voided'));
 			setVoidOpen(false);
 		} catch (err) {
 			toast.error(isApiError(err) ? err.message : 'Failed to void invoice');
@@ -413,7 +446,7 @@ export function InvoiceDetailPage({ invoiceId }: InvoiceDetailPageProps) {
 				className="flex w-fit items-center gap-1.5 text-sm text-muted-foreground hover:text-foreground"
 			>
 				<ArrowLeft className="size-3.5" />
-				Back to invoices
+				{t('invoices.back')}
 			</Link>
 
 			{isLoading ? (
@@ -465,9 +498,9 @@ export function InvoiceDetailPage({ invoiceId }: InvoiceDetailPageProps) {
 					<ConfirmDialog
 						open={voidOpen}
 						onOpenChange={setVoidOpen}
-						title="Void this invoice?"
-						description="Voiding is irreversible. Payments already recorded on this invoice are not automatically refunded."
-						confirmLabel="Void invoice"
+						title={t('invoiceExtra.voidTitle')}
+						description={t('invoiceExtra.voidDescription')}
+						confirmLabel={t('invoiceExtra.void')}
 						variant="destructive"
 						loading={updateInvoice.isPending}
 						onConfirm={() => void handleVoidConfirm()}

@@ -8,6 +8,7 @@ import { I18nProvider, initI18n } from '@repo/i18n';
 import './styles/globals.css';
 import './lib/env'; // validate env at boot — throws with a clear message if invalid
 import { queryClient } from './api/queryClient';
+import { initAppLocales } from './locales';
 import { App } from './App';
 
 // Key must match the pre-paint bootstrap script in index.html.
@@ -15,6 +16,8 @@ initTheme({ storageKey: 'cohort.admin.theme' });
 // Resolves localStorage → 'uz' now; the signed-in user's stored preference
 // arrives on the login/refresh response and the session store applies it.
 initI18n({ storageKey: 'cohort.admin.locale' });
+// Feature-screen catalogs — must follow initI18n, which creates the resource store.
+initAppLocales();
 
 createRoot(document.getElementById('root')!).render(
 	<StrictMode>

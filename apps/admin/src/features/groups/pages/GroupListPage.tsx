@@ -13,6 +13,8 @@ import {
 	SelectValue,
 	SearchFilterBar,
 } from '@repo/ui';
+import { useT } from '@repo/i18n';
+import { useAppT } from '@/locales';
 
 import { Can } from '@/components/Can';
 import { useCourseList } from '@/features/courses/api/courses.queries';
@@ -26,6 +28,8 @@ const PAGE_SIZE = 20;
 const ALL = 'all';
 
 export function GroupListPage() {
+	const t = useAppT('groups');
+	const tc = useT('common');
 	const navigate = useNavigate({ from: '/groups' });
 	const { page = 1, courseId, status } = useSearch({ from: '/_authed/groups' });
 
@@ -56,13 +60,13 @@ export function GroupListPage() {
 	return (
 		<div className="mx-auto flex max-w-7xl flex-col gap-6">
 			<PageHeader
-				title="Groups"
-				description="Class groups — teacher, room, capacity and weekly schedule"
+				title={t('title')}
+				description={t('description')}
 				actions={
 					<Can permission="group.create">
 						<Button onClick={() => void navigate({ to: '/groups/new' })}>
 							<Plus className="mr-1.5 size-4" />
-							Create group
+							{t('create')}
 						</Button>
 					</Can>
 				}
@@ -72,7 +76,7 @@ export function GroupListPage() {
 				<SearchFilterBar
 					filters={GROUP_STATUS_FILTERS.map((f) => ({
 						id: f.value ?? 'ALL',
-						label: f.label,
+						label: f.value ? t(`status.${f.value}`) : tc('state.all'),
 						active: status === f.value,
 						onClick: () => setSearch({ status: f.value }),
 					}))}
@@ -87,10 +91,10 @@ export function GroupListPage() {
 								}
 							>
 								<SelectTrigger className="h-9 w-44" size="sm">
-									<SelectValue placeholder="All courses" />
+									<SelectValue placeholder={t('allCourses')} />
 								</SelectTrigger>
 								<SelectContent>
-									<SelectItem value={ALL}>All courses</SelectItem>
+									<SelectItem value={ALL}>{t('allCourses')}</SelectItem>
 									{courses.map((c) => (
 										<SelectItem key={c.id} value={String(c.id)}>
 											{c.name}

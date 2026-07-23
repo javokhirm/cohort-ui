@@ -3,6 +3,7 @@ import { Plus } from 'lucide-react';
 
 import { Button, Card, Skeleton } from '@repo/ui';
 import { formatDate, formatPrice } from '@repo/utils';
+import { useAppT } from '@/locales';
 
 import { Can } from '@/components/Can';
 import { useCreditNotes } from '../api/credit-notes.queries';
@@ -15,6 +16,7 @@ interface CreditNotesCardProps {
 }
 
 export function CreditNotesCard({ invoice }: CreditNotesCardProps) {
+	const t = useAppT('billing');
 	const { data: creditNotes = [], isLoading } = useCreditNotes(invoice.id);
 	const [issueOpen, setIssueOpen] = useState(false);
 
@@ -25,7 +27,9 @@ export function CreditNotesCard({ invoice }: CreditNotesCardProps) {
 	return (
 		<Card className="p-5">
 			<div className="mb-3 flex items-center justify-between">
-				<h2 className="text-sm font-semibold">Credit notes</h2>
+				<h2 className="text-sm font-semibold">
+					{t('invoices.detail.creditNotes')}
+				</h2>
 				{canIssue && (
 					<Can permission="credit-note.create">
 						<Button
@@ -34,7 +38,7 @@ export function CreditNotesCard({ invoice }: CreditNotesCardProps) {
 							onClick={() => setIssueOpen(true)}
 						>
 							<Plus className="mr-1.5 size-3.5" />
-							Issue credit note
+							{t('creditNotes.issue')}
 						</Button>
 					</Can>
 				)}
@@ -43,7 +47,9 @@ export function CreditNotesCard({ invoice }: CreditNotesCardProps) {
 			{isLoading ? (
 				<Skeleton className="h-16 rounded-lg" />
 			) : creditNotes.length === 0 ? (
-				<p className="text-sm text-muted-foreground">No credit notes issued.</p>
+				<p className="text-sm text-muted-foreground">
+					{t('invoiceExtra.noCreditNotesIssued')}
+				</p>
 			) : (
 				<div className="flex flex-col gap-3">
 					{creditNotes.map((cn) => (

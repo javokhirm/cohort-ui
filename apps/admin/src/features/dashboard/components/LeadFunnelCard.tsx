@@ -7,6 +7,7 @@ import type { LeadFunnelStatus } from '../api/types';
 import { PanelSkeleton } from './DashboardSkeletons';
 import { PanelCard } from './PanelCard';
 import { PanelError } from './PanelError';
+import { useAppT } from '@/locales';
 
 const STAGE_META: Record<LeadFunnelStatus, { label: string; tone: StatusTone }> = {
 	NEW: { label: 'New', tone: 'slate' },
@@ -18,21 +19,23 @@ const STAGE_META: Record<LeadFunnelStatus, { label: string; tone: StatusTone }> 
 
 /** Lead funnel — stage-entry counts for the current week, as relative bars. */
 export function LeadFunnelCard() {
+	const t = useAppT('dashboard');
 	const { data, isLoading, isError, refetch } = useLeadFunnel();
 
 	if (isLoading) return <PanelSkeleton rows={5} />;
-	if (isError || !data) return <PanelError title="Lead funnel" onRetry={refetch} />;
+	if (isError || !data)
+		return <PanelError title={t('card.leadFunnel')} onRetry={refetch} />;
 
 	const max = Math.max(1, ...data.stages.map((s) => s.count));
 	const hasAny = data.stages.some((s) => s.count > 0);
 
 	return (
-		<PanelCard title="Lead funnel" subtitle="This week">
+		<PanelCard title={t('card.leadFunnel')} subtitle={t('thisWeek')}>
 			{!hasAny ? (
 				<EmptyState
 					icon={<Users />}
-					title="No lead activity"
-					description="Lead stage changes this week will show here."
+					title={t('card.noLeadActivityTitle')}
+					description={t('card.noLeadActivityDescription')}
 				/>
 			) : (
 				<div className="flex flex-col gap-4">

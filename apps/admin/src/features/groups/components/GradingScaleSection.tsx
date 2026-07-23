@@ -1,6 +1,7 @@
 import { useState } from 'react';
 
 import { Button, Card, Skeleton, Spinner, toast } from '@repo/ui';
+import { useAppT } from '@/locales';
 
 import { Can } from '@/components/Can';
 
@@ -30,17 +31,20 @@ interface GradingScaleSectionProps {
  * editing the group itself. Gated by `group.update`.
  */
 export function GradingScaleSection({ groupId }: GradingScaleSectionProps) {
+	const t = useAppT('groups');
 	const query = useGroupGradingConfig(groupId);
 	const current = query.data?.current ?? null;
 
 	return (
 		<Card className="flex flex-col gap-4 p-5">
 			<div>
-				<h2 className="text-sm font-semibold">Grading scale</h2>
+				<h2 className="text-sm font-semibold">{t('grading.title')}</h2>
 				<p className="mt-0.5 text-sm text-muted-foreground">
 					{current
-						? `Daily marks use ${formatGradingScale(current)}.`
-						: 'How daily marks are entered for this group.'}
+						? t('grading.appliesTo', {
+								scale: formatGradingScale(t, current),
+							})
+						: t('grading.description')}
 				</p>
 			</div>
 
@@ -49,13 +53,14 @@ export function GradingScaleSection({ groupId }: GradingScaleSectionProps) {
 			) : current ? (
 				<GradingScaleForm key={current.id} groupId={groupId} current={current} />
 			) : (
-				<p className="text-sm text-muted-foreground">No grading scale set.</p>
+				<p className="text-sm text-muted-foreground">{t('grading.none')}</p>
 			)}
 
 			{query.data && query.data.history.length > 0 && (
 				<p className="text-xs text-muted-foreground">
-					{query.data.history.length} previous scale
-					{query.data.history.length === 1 ? '' : 's'} kept for past marks.
+					{t('grading.historyKept', {
+						count: query.data.history.length,
+					})}
 				</p>
 			)}
 		</Card>
@@ -69,6 +74,7 @@ interface GradingScaleFormProps {
 
 /** The scale editor, seeded once from the active config at mount. */
 function GradingScaleForm({ groupId, current }: GradingScaleFormProps) {
+	const t = useAppT('groups');
 	const setConfig = useSetGroupGradingConfig(groupId);
 	const [type, setType] = useState<GradingType>(current.type);
 	const [maxPoints, setMaxPoints] = useState(
@@ -86,7 +92,7 @@ function GradingScaleForm({ groupId, current }: GradingScaleFormProps) {
 		if (type !== 'LETTER') input.maxPoints = numericMax;
 		if (type === 'POINTS') input.allowHalf = allowHalf;
 		setConfig.mutate(input, {
-			onSuccess: () => toast.success('Grading scale updated'),
+			onSuccess: () => toast.success(t('grading.updated')),
 		});
 	};
 
@@ -111,7 +117,7 @@ function GradingScaleForm({ groupId, current }: GradingScaleFormProps) {
 				<div className="flex justify-end">
 					<Button onClick={onSave} disabled={invalid || setConfig.isPending}>
 						{setConfig.isPending && <Spinner className="mr-2 size-4" />}
-						Save grading scale
+						{t('actions.saveGradingScale')}
 					</Button>
 				</div>
 			</Can>

@@ -12,6 +12,8 @@ import {
 	toast,
 } from '@repo/ui';
 import { isApiError } from '@repo/api-client';
+import { useT } from '@repo/i18n';
+import { useAppT } from '@/locales';
 
 import { FormSection } from '@/components/FormSection';
 import { FormSheet } from '@/components/FormSheet';
@@ -29,7 +31,7 @@ import {
 import type { FeePlanResponse } from '../api/fee-plans.queries';
 import { useCreateFeePlan, useUpdateFeePlan } from '../api/fee-plans.mutations';
 import {
-	FEE_PLAN_AMOUNT_LABELS,
+	FEE_PLAN_AMOUNT_LABEL_KEYS,
 	FEE_PLAN_BILLING_CYCLE_OPTIONS,
 	FEE_PLAN_STATUS_OPTIONS,
 } from '../lib/fee-plan-options';
@@ -66,6 +68,7 @@ function CreateFeePlanForm({
 	onSuccess: () => void;
 	onPendingChange: (pending: boolean) => void;
 }) {
+	const t = useAppT('billing');
 	const form = useForm<CreateFeePlanFormValues>({
 		resolver: zodResolver(createFeePlanSchema),
 		defaultValues: {
@@ -93,7 +96,7 @@ function CreateFeePlanForm({
 			amount: values.amount,
 			billingCycle: values.billingCycle,
 		});
-		toast.success('Fee plan added');
+		toast.success(t('feePlanExtra.added'));
 		onSuccess();
 	}
 
@@ -109,13 +112,13 @@ function CreateFeePlanForm({
 						<FormInput
 							control={form.control}
 							name="name"
-							label="Plan name *"
-							placeholder="e.g. Monthly Tuition — IELTS"
+							label={t('feePlans.field.name')}
+							placeholder={t('invoiceExtra.linePlaceholder')}
 						/>
 						<FormSelect
 							control={form.control}
 							name="branch"
-							label="Branch"
+							label={t('feePlans.field.branch')}
 							options={branchOptions}
 						/>
 						<p className="text-xs text-muted-foreground">
@@ -126,10 +129,12 @@ function CreateFeePlanForm({
 							<FormInput
 								control={form.control}
 								name="amount"
-								label={FEE_PLAN_AMOUNT_LABELS[billingCycle]}
+								label={t(
+									`feePlans.field.${FEE_PLAN_AMOUNT_LABEL_KEYS[billingCycle]}`,
+								)}
 								type="number"
 								min={1}
-								placeholder="e.g. 1 300 000"
+								placeholder={t('invoiceExtra.amountPlaceholder')}
 								onChange={(e) =>
 									form.setValue(
 										'amount',
@@ -143,8 +148,11 @@ function CreateFeePlanForm({
 							<FormSelect
 								control={form.control}
 								name="billingCycle"
-								label="Billing cycle"
-								options={FEE_PLAN_BILLING_CYCLE_OPTIONS}
+								label={t('feePlans.field.cycle')}
+								options={FEE_PLAN_BILLING_CYCLE_OPTIONS.map((o) => ({
+									value: o.value,
+									label: t(`billingCycle.${o.value}`),
+								}))}
 							/>
 						</div>
 					</FieldGroup>
@@ -163,6 +171,8 @@ function EditFeePlanForm({
 	onSuccess: () => void;
 	onPendingChange: (pending: boolean) => void;
 }) {
+	const t = useAppT('billing');
+	const tc = useT('common');
 	const toDefaults = (p: FeePlanResponse): EditFeePlanFormValues => ({
 		name: p.name,
 		branch: branchToForm(p.branchId),
@@ -212,11 +222,11 @@ function EditFeePlanForm({
 			} else if (isApiError(err)) {
 				toast.error(err.message);
 			} else {
-				toast.error('Something went wrong');
+				toast.error(tc('error.unknown'));
 			}
 			return;
 		}
-		toast.success('Fee plan updated');
+		toast.success(t('feePlans.updated'));
 		onSuccess();
 	}
 
@@ -232,20 +242,22 @@ function EditFeePlanForm({
 						<FormInput
 							control={form.control}
 							name="name"
-							label="Plan name *"
-							placeholder="e.g. Monthly Tuition — IELTS"
+							label={t('feePlans.field.name')}
+							placeholder={t('invoiceExtra.linePlaceholder')}
 						/>
 						<FormSelect
 							control={form.control}
 							name="branch"
-							label="Branch"
+							label={t('feePlans.field.branch')}
 							options={branchOptions}
 						/>
 						<div className="grid grid-cols-2 gap-3">
 							<FormInput
 								control={form.control}
 								name="amount"
-								label={FEE_PLAN_AMOUNT_LABELS[billingCycle]}
+								label={t(
+									`feePlans.field.${FEE_PLAN_AMOUNT_LABEL_KEYS[billingCycle]}`,
+								)}
 								type="number"
 								min={1}
 								onChange={(e) =>
@@ -261,15 +273,21 @@ function EditFeePlanForm({
 							<FormSelect
 								control={form.control}
 								name="billingCycle"
-								label="Billing cycle"
-								options={FEE_PLAN_BILLING_CYCLE_OPTIONS}
+								label={t('feePlans.field.cycle')}
+								options={FEE_PLAN_BILLING_CYCLE_OPTIONS.map((o) => ({
+									value: o.value,
+									label: t(`billingCycle.${o.value}`),
+								}))}
 							/>
 						</div>
 						<FormSelect
 							control={form.control}
 							name="status"
-							label="Status"
-							options={FEE_PLAN_STATUS_OPTIONS}
+							label={t('feePlans.field.status')}
+							options={FEE_PLAN_STATUS_OPTIONS.map((o) => ({
+								value: o.value,
+								label: tc(`state.${o.labelKey}`),
+							}))}
 						/>
 					</FieldGroup>
 				</FormSection>
@@ -281,6 +299,8 @@ function EditFeePlanForm({
 }
 
 export function FeePlanForm(props: FeePlanFormProps) {
+	const t = useAppT('billing');
+	const tc = useT('common');
 	const { open, onOpenChange, mode } = props;
 	const [isPending, setIsPending] = useState(false);
 
@@ -295,15 +315,15 @@ export function FeePlanForm(props: FeePlanFormProps) {
 			open={open}
 			onOpenChange={onOpenChange}
 			title={mode === 'create' ? 'New fee plan' : 'Edit fee plan'}
-			description="Fields marked * are required"
+			description={t('feePlans.requiredHint')}
 			footer={
 				<>
 					<Button type="button" variant="outline" onClick={handleClose}>
-						Cancel
+						{tc('action.cancel')}
 					</Button>
 					<Button type="submit" form={formId} disabled={isPending}>
 						{isPending && <Spinner className="mr-2 size-4" />}
-						Save fee plan
+						{t('misc.saveFeePlan')}
 					</Button>
 				</>
 			}

@@ -2,6 +2,7 @@ import { useMemo, useState } from 'react';
 import { Search } from 'lucide-react';
 
 import { Button, cn, Input, Popover, PopoverContent, PopoverTrigger } from '@repo/ui';
+import { useAppT } from '@/locales';
 
 import { useGroup, useGroupList } from '@/features/groups/api/groups.queries';
 
@@ -18,6 +19,7 @@ interface GroupPickerProps {
  * invoices can belong to a completed group's historical enrollments too.
  */
 export function GroupPicker({ value, onChange, disabled }: GroupPickerProps) {
+	const t = useAppT('billing');
 	const [open, setOpen] = useState(false);
 	const [input, setInput] = useState('');
 
@@ -68,7 +70,7 @@ export function GroupPicker({ value, onChange, disabled }: GroupPickerProps) {
 					<Input
 						value={input}
 						onChange={(e) => setInput(e.target.value)}
-						placeholder="Search by group or course…"
+						placeholder={t('discountExtra.searchGroupPlaceholder')}
 						className="h-8 border-0 px-0 shadow-none focus-visible:ring-0"
 						autoFocus
 					/>

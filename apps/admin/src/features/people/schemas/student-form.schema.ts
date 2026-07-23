@@ -1,76 +1,93 @@
 import { z } from 'zod';
 
+import type { Translator } from '@repo/i18n';
 import { UZ_PHONE_REGEX } from '@repo/utils';
 
-const phone = z
-	.string()
-	.min(1, 'Phone is required')
-	.regex(UZ_PHONE_REGEX, 'Enter a valid phone number');
+import type { useAppT } from '@/locales';
 
-const email = z.union([z.literal(''), z.email('Enter a valid email')]).optional();
+type PeopleT = ReturnType<typeof useAppT<'people'>>;
 
-const guardianName = z
-	.string()
-	.min(2, 'Guardian name is required')
-	.refine((v) => v.trim().includes(' '), {
-		message: 'Please enter both first and last name',
-	});
+/**
+ * Student form schemas. Factories rather than module constants because their
+ * messages are user-facing — a literal captured at module load would never
+ * re-translate on a language switch (conventions.md §7). Callers memoise on the
+ * translator.
+ */
+function phoneField(t: Translator<'validation'>) {
+	return z.string().min(1, t('required')).regex(UZ_PHONE_REGEX, t('phoneInvalid'));
+}
 
-export const createStudentSchema = z
-	.object({
-		firstName: z.string().min(1, 'First name is required'),
-		lastName: z.string().min(1, 'Last name is required'),
+function guardianNameField(t: Translator<'validation'>, tp: PeopleT) {
+	return z
+		.string()
+		.min(2, t('required'))
+		.refine((v) => v.trim().includes(' '), {
+			message: tp('form.validation.guardianFullName'),
+		});
+}
+
+export function createStudentSchema(t: Translator<'validation'>, tp: PeopleT) {
+	const phone = phoneField(t);
+	const guardianName = guardianNameField(t, tp);
+
+	return z
+		.object({
+			firstName: z.string().min(1, t('required')),
+			lastName: z.string().min(1, t('required')),
+			dateOfBirth: z.string().optional(),
+			gender: z.enum(['M', 'F', 'O']).optional(),
+			phone,
+			branchId: z.number({ error: t('required') }).min(1, t('required')),
+			address: z.string().optional(),
+
+			// Guardian section is optional and hidden until the user opts in.
+			hasGuardian: z.boolean(),
+			guardianName: z.string().optional(),
+			guardianPhone: z.string().optional(),
+			guardianRelation: z.enum(['mother', 'father', 'guardian']).optional(),
+
+			// No fee plan: the student bills on the plan attached to the group's course.
+			groupId: z.number().optional(),
+		})
+		.superRefine((values, ctx) => {
+			if (!values.hasGuardian) return;
+
+			const nameResult = guardianName.safeParse(values.guardianName ?? '');
+			if (!nameResult.success) {
+				ctx.addIssue({
+					code: 'custom',
+					path: ['guardianName'],
+					message: nameResult.error.issues[0]?.message,
+				});
+			}
+
+			const phoneResult = phone.safeParse(values.guardianPhone ?? '');
+			if (!phoneResult.success) {
+				ctx.addIssue({
+					code: 'custom',
+					path: ['guardianPhone'],
+					message: phoneResult.error.issues[0]?.message,
+				});
+			}
+		});
+}
+
+export function editStudentSchema(t: Translator<'validation'>) {
+	return z.object({
+		firstName: z.string().min(1, t('required')),
+		lastName: z.string().min(1, t('required')),
 		dateOfBirth: z.string().optional(),
 		gender: z.enum(['M', 'F', 'O']).optional(),
-		phone,
-		branchId: z.number({ error: 'Branch is required' }).min(1, 'Branch is required'),
+		phone: phoneField(t),
+		email: z.union([z.literal(''), z.email(t('emailInvalid'))]).optional(),
+		branchId: z.number({ error: t('required') }).min(1, t('required')),
 		address: z.string().optional(),
-
-		// Guardian section is optional and hidden until the user opts in.
-		hasGuardian: z.boolean(),
-		guardianName: z.string().optional(),
-		guardianPhone: z.string().optional(),
-		guardianRelation: z.enum(['mother', 'father', 'guardian']).optional(),
-
-		// No fee plan: the student bills on the plan attached to the group's course.
-		groupId: z.number().optional(),
-	})
-	.superRefine((values, ctx) => {
-		if (!values.hasGuardian) return;
-
-		const nameResult = guardianName.safeParse(values.guardianName ?? '');
-		if (!nameResult.success) {
-			ctx.addIssue({
-				code: 'custom',
-				path: ['guardianName'],
-				message: nameResult.error.issues[0]?.message,
-			});
-		}
-
-		const phoneResult = phone.safeParse(values.guardianPhone ?? '');
-		if (!phoneResult.success) {
-			ctx.addIssue({
-				code: 'custom',
-				path: ['guardianPhone'],
-				message: phoneResult.error.issues[0]?.message,
-			});
-		}
+		status: z.enum(['ACTIVE', 'INACTIVE', 'GRADUATED', 'SUSPENDED']).optional(),
 	});
+}
 
-export const editStudentSchema = z.object({
-	firstName: z.string().min(1, 'First name is required'),
-	lastName: z.string().min(1, 'Last name is required'),
-	dateOfBirth: z.string().optional(),
-	gender: z.enum(['M', 'F', 'O']).optional(),
-	phone,
-	email,
-	branchId: z.number({ error: 'Branch is required' }).min(1, 'Branch is required'),
-	address: z.string().optional(),
-	status: z.enum(['ACTIVE', 'INACTIVE', 'GRADUATED', 'SUSPENDED']).optional(),
-});
-
-export type CreateStudentFormValues = z.infer<typeof createStudentSchema>;
-export type EditStudentFormValues = z.infer<typeof editStudentSchema>;
+export type CreateStudentFormValues = z.infer<ReturnType<typeof createStudentSchema>>;
+export type EditStudentFormValues = z.infer<ReturnType<typeof editStudentSchema>>;
 
 /** Split "Firstname Lastname Other" → { firstName, lastName } */
 export function splitFullName(fullName: string): {
