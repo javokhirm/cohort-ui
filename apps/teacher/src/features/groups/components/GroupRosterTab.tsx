@@ -2,6 +2,7 @@ import type { KeyboardEvent } from 'react';
 import { ChevronRight, Users } from 'lucide-react';
 
 import { Avatar, AvatarFallback, cn, EmptyState, Skeleton, StatusBadge } from '@repo/ui';
+import { useStatusLabel } from '@repo/i18n';
 
 import { useGroupStudents, type TeachGroupStudent } from '../api/groups.queries';
 import { attendanceToneClass } from '../lib/capacity';
@@ -19,7 +20,10 @@ interface RosterRowProps {
 }
 
 function RosterRow({ student, onOpen }: RosterRowProps) {
-	const name = fullName(student.firstName, student.lastName);
+	const t = useAppT('groups');
+	const tAttendance = useAppT('attendance');
+	const statusLabel = useStatusLabel();
+	const name = fullName(student.firstName, student.lastName, t('unnamedStudent'));
 
 	const onKeyDown = (event: KeyboardEvent<HTMLDivElement>) => {
 		if (event.key !== 'Enter' && event.key !== ' ') return;
@@ -51,10 +55,14 @@ function RosterRow({ student, onOpen }: RosterRowProps) {
 			</div>
 
 			<div className="shrink-0 text-right">
-				<StatusBadge kind="enrollment" status={student.enrollmentStatus} />
+				<StatusBadge kind="enrollment" status={student.enrollmentStatus}>
+					{statusLabel('enrollment', student.enrollmentStatus)}
+				</StatusBadge>
 				<div className="mt-0.75 text-[11px] font-semibold">
 					{student.attendanceRate === null ? (
-						<span className="text-muted-foreground">No attendance yet</span>
+						<span className="text-muted-foreground">
+							{tAttendance('emptyTitle')}
+						</span>
 					) : (
 						<span
 							className={cn(
@@ -62,7 +70,7 @@ function RosterRow({ student, onOpen }: RosterRowProps) {
 								attendanceToneClass(student.attendanceRate),
 							)}
 						>
-							{student.attendanceRate}% att.
+							{t('attendanceRateShort', { rate: student.attendanceRate })}
 						</span>
 					)}
 				</div>

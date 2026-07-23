@@ -14,7 +14,7 @@ export function PanelError({ title, onRetry }: { title: string; onRetry: () => v
 				<span className="flex size-10 items-center justify-center rounded-xl bg-tone-red-bg text-tone-red-fg">
 					<AlertTriangle className="size-5" />
 				</span>
-				<p className="text-sm text-muted-foreground">Couldn’t load this panel.</p>
+				<p className="text-sm text-muted-foreground">{t('panelError')}</p>
 				<Button variant="outline" size="sm" onClick={onRetry}>
 					{t('retry')}
 				</Button>

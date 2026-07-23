@@ -2,6 +2,7 @@ import { useMemo, useState } from 'react';
 import { Search } from 'lucide-react';
 
 import { Button, cn, Input, Popover, PopoverContent, PopoverTrigger } from '@repo/ui';
+import { useT } from '@repo/i18n';
 import { useAppT } from '@/locales';
 
 import { useGroup, useGroupList } from '@/features/groups/api/groups.queries';
@@ -20,6 +21,7 @@ interface GroupPickerProps {
  */
 export function GroupPicker({ value, onChange, disabled }: GroupPickerProps) {
 	const t = useAppT('billing');
+	const tc = useT('common');
 	const [open, setOpen] = useState(false);
 	const [input, setInput] = useState('');
 
@@ -58,7 +60,7 @@ export function GroupPicker({ value, onChange, disabled }: GroupPickerProps) {
 				>
 					{selected
 						? `${selected.name} · ${selected.courseName}`
-						: 'Select group…'}
+						: t('pickerExtra.selectGroup')}
 				</Button>
 			</PopoverTrigger>
 			<PopoverContent
@@ -78,11 +80,11 @@ export function GroupPicker({ value, onChange, disabled }: GroupPickerProps) {
 				<div className="max-h-64 overflow-y-auto p-1">
 					{isLoading ? (
 						<div className="px-3 py-4 text-sm text-muted-foreground">
-							Loading…
+							{tc('state.loading')}
 						</div>
 					) : filtered.length === 0 ? (
 						<div className="px-3 py-4 text-center text-sm text-muted-foreground">
-							No matching groups.
+							{t('picker.noGroups')}
 						</div>
 					) : (
 						filtered.map((g) => (

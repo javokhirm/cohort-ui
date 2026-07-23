@@ -47,10 +47,16 @@ interface RefundPaymentDialogProps {
 	onOpenChange: (open: boolean) => void;
 }
 
-const DESTINATION_OPTIONS: { value: 'WALLET' | 'CASH_OUT'; label: string }[] = [
-	{ value: 'WALLET', label: 'Wallet' },
-	{ value: 'CASH_OUT', label: 'Cash out' },
-];
+type BillingT = ReturnType<typeof useAppT<'billing'>>;
+
+function destinationOptions(
+	t: BillingT,
+): { value: 'WALLET' | 'CASH_OUT'; label: string }[] {
+	return [
+		{ value: 'WALLET', label: t('refundForm.destinationWallet') },
+		{ value: 'CASH_OUT', label: t('refundForm.destinationCashOut') },
+	];
+}
 
 export function RefundPaymentDialog({
 	payment,
@@ -63,7 +69,7 @@ export function RefundPaymentDialog({
 			<DialogContent className="max-w-md">
 				<DialogHeader>
 					<DialogTitle>{t('payments.refund.title')}</DialogTitle>
-					<DialogDescription>This can&apos;t be undone.</DialogDescription>
+					<DialogDescription>{t('refundForm.cannotUndo')}</DialogDescription>
 				</DialogHeader>
 
 				{/* Mounts fresh on each open (DialogContent unmounts on close), so the
@@ -90,6 +96,7 @@ function RefundPaymentForm({
 
 	const t = useAppT('billing');
 	const tc = useT('common');
+	const options = destinationOptions(t);
 	const form = useForm<RefundPaymentFormValues>({
 		resolver: zodResolver(refundPaymentSchema),
 		defaultValues: {
@@ -114,7 +121,7 @@ function RefundPaymentForm({
 			toast.success(t('payments.refund.done'));
 			onClose();
 		} catch (err) {
-			toast.error(isApiError(err) ? err.message : 'Failed to refund payment');
+			toast.error(isApiError(err) ? err.message : t('payments.refund.failed'));
 		}
 	}
 
@@ -156,9 +163,9 @@ function RefundPaymentForm({
 						name="destination"
 						render={({ field }) => (
 							<FormItem>
-								<FormLabel>Destination *</FormLabel>
+								<FormLabel>{t('refundForm.destination')}</FormLabel>
 								<div className="grid grid-cols-2 gap-2">
-									{DESTINATION_OPTIONS.map((opt) => {
+									{options.map((opt) => {
 										const disabled =
 											opt.value === 'WALLET' && !canUseWallet;
 										return (
@@ -181,8 +188,7 @@ function RefundPaymentForm({
 								</div>
 								{!canUseWallet && (
 									<p className="text-xs text-muted-foreground">
-										This payment isn&apos;t linked to an invoice, so
-										it can only be refunded as cash.
+										{t('refundForm.walletOnlyHint')}
 									</p>
 								)}
 								<FormMessage />

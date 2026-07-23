@@ -3,6 +3,7 @@ import { CalendarX, ChevronRight } from 'lucide-react';
 
 import { EmptyState, Separator, Skeleton, StatusBadge } from '@repo/ui';
 import { formatTime, formatWeekday } from '@repo/utils';
+import { useStatusLabel } from '@repo/i18n';
 
 import { useGroupSessions, type TeachSession } from '../api/sessions.queries';
 import { formatDayMonth } from '../lib/session-date';
@@ -19,6 +20,8 @@ interface SessionRowProps {
 }
 
 function SessionRow({ session, onOpen }: SessionRowProps) {
+	const t = useAppT('schedule');
+	const statusLabel = useStatusLabel();
 	const onKeyDown = (event: KeyboardEvent<HTMLDivElement>) => {
 		if (event.key !== 'Enter' && event.key !== ' ') return;
 		event.preventDefault();
@@ -49,11 +52,13 @@ function SessionRow({ session, onOpen }: SessionRowProps) {
 					{formatTime(session.startTime)}–{formatTime(session.endTime)}
 				</div>
 				<div className="truncate text-[11.5px] text-muted-foreground">
-					{session.roomName ?? 'No room set'}
+					{session.roomName ?? t('noRoom')}
 				</div>
 			</div>
 
-			<StatusBadge kind="session" status={session.status} />
+			<StatusBadge kind="session" status={session.status}>
+				{statusLabel('session', session.status)}
+			</StatusBadge>
 
 			<ChevronRight className="size-4 shrink-0 text-muted-foreground/50" />
 		</div>

@@ -15,6 +15,7 @@ import type { StudentImportSessionView } from '@/api/student-imports/types';
 
 import { useCommitStudentImport } from '../hooks';
 import { useT } from '@repo/i18n';
+import { useAppT } from '@/locales';
 
 interface CommitImportDialogProps {
 	tenantId: number;
@@ -35,6 +36,7 @@ export function CommitImportDialog({
 	onOpenChange,
 }: CommitImportDialogProps) {
 	const tc = useT('common');
+	const t = useAppT('imports');
 	const [skipInvalidRows, setSkipInvalidRows] = useState(false);
 	const { counters } = session;
 	const hasInvalidRows = counters.invalidRows > 0;
@@ -59,22 +61,18 @@ export function CommitImportDialog({
 		<Dialog open={open} onOpenChange={handleOpenChange}>
 			<DialogContent>
 				<DialogHeader>
-					<DialogTitle>Import {counters.validRows} students?</DialogTitle>
+					<DialogTitle>
+						{t('commitTitle', { count: counters.validRows })}
+					</DialogTitle>
 					<DialogDescription>
-						This creates {counters.validRows} enrollment
-						{counters.validRows === 1 ? '' : 's'} in this center. Each student
-						will be billed for the first time on their own next billing date —
-						no invoices are raised now.
+						{t('commitDescription', { count: counters.validRows })}
 					</DialogDescription>
 				</DialogHeader>
 
 				{hasInvalidRows && (
 					<div className="flex flex-col gap-3 rounded-lg border border-destructive/30 bg-destructive/5 p-3">
 						<p className="text-sm text-destructive">
-							{counters.invalidRows} row
-							{counters.invalidRows === 1 ? '' : 's'} failed validation and
-							cannot be imported. Fix the file and upload it again, or
-							import the rest without them.
+							{t('invalidRowsWarning', { count: counters.invalidRows })}
 						</p>
 						<div className="flex items-center gap-2">
 							<Checkbox
@@ -85,8 +83,7 @@ export function CommitImportDialog({
 								}
 							/>
 							<Label htmlFor="skip-invalid" className="text-sm">
-								Import the {counters.validRows} valid rows and leave the
-								rest out
+								{t('skipInvalidLabel', { count: counters.validRows })}
 							</Label>
 						</div>
 					</div>
@@ -96,7 +93,7 @@ export function CommitImportDialog({
 					<p className="text-sm text-destructive">
 						{mutation.error instanceof Error
 							? mutation.error.message
-							: 'Failed to start the import. Please try again.'}
+							: t('commitError')}
 					</p>
 				)}
 
@@ -109,8 +106,8 @@ export function CommitImportDialog({
 						onClick={() => mutation.mutate({ skipInvalidRows })}
 					>
 						{mutation.isPending
-							? 'Starting…'
-							: `Import ${counters.validRows} students`}
+							? t('starting')
+							: t('commitButton', { count: counters.validRows })}
 					</Button>
 				</DialogFooter>
 			</DialogContent>

@@ -16,30 +16,34 @@ const EXACT_FORMATTER = new Intl.NumberFormat('ru-RU', {
 	maximumFractionDigits: 6,
 });
 
-function rateDescription(period: PayrollStaffPeriodResponse): string {
+type PayrollT = ReturnType<typeof useAppT<'payroll'>>;
+
+function rateDescription(t: PayrollT, period: PayrollStaffPeriodResponse): string {
 	const { calculation } = period.breakdown;
 	switch (period.rateType) {
 		case 'PERCENT':
-			return `${calculation.percent ?? 0}% of student fees`;
+			return t('calc.rateDescPercent', { percent: calculation.percent ?? 0 });
 		case 'HOURLY':
-			return 'Hourly rate';
+			return t('calc.rateDescHourly');
 		case 'FIXED':
-			return 'Fixed monthly salary';
+			return t('calc.rateDescFixed');
 	}
 }
 
 /** The client-composed monospace formula line, from the server's inputs. */
-function formulaLine(period: PayrollStaffPeriodResponse): string {
+function formulaLine(t: PayrollT, period: PayrollStaffPeriodResponse): string {
 	const { calculation } = period.breakdown;
 	switch (period.rateType) {
 		case 'PERCENT':
-			return `${calculation.percent ?? 0}% × ${formatPrice(
-				calculation.revenueBaseTotalExact ?? 0,
-			)} UZS revenue base`;
+			return t('calc.formulaPercent', {
+				percent: calculation.percent ?? 0,
+				base: formatPrice(calculation.revenueBaseTotalExact ?? 0),
+			});
 		case 'HOURLY':
-			return `${calculation.hoursTaught}h × ${formatPrice(
-				calculation.hourlyRate ?? 0,
-			)} UZS/h`;
+			return t('calc.formulaHourly', {
+				hours: calculation.hoursTaught,
+				rate: formatPrice(calculation.hourlyRate ?? 0),
+			});
 		case 'FIXED': {
 			const base = formatPrice(calculation.baseSalary ?? 0);
 			// A factor is sent only when the configs cover part of the month;
@@ -47,9 +51,9 @@ function formulaLine(period: PayrollStaffPeriodResponse): string {
 			const factor = calculation.prorationFactor;
 			if (factor !== null && factor < 1) {
 				const pct = Math.round(factor * 1000) / 10;
-				return `${base} UZS monthly × ${pct}% of month`;
+				return t('calc.formulaFixedProrated', { base, pct });
 			}
-			return `${base} UZS monthly salary`;
+			return t('calc.formulaFixed', { base });
 		}
 	}
 }
@@ -70,13 +74,16 @@ export function CalculationCard({ period }: { period: PayrollStaffPeriodResponse
 					{t('howCalculated')}
 				</h2>
 				<span className="text-xs text-muted-foreground">
-					{rateDescription(period)} · {calculation.sessionsTaught} sessions ·{' '}
-					{calculation.studentsCount} students
+					{rateDescription(t, period)} ·{' '}
+					{t('calc.summary', {
+						sessions: calculation.sessionsTaught,
+						students: calculation.studentsCount,
+					})}
 				</span>
 			</div>
 
 			<div className="rounded-lg bg-muted/60 px-3.5 py-3 font-mono text-sm text-foreground/80">
-				{formulaLine(period)}
+				{formulaLine(t, period)}
 			</div>
 
 			<div className="mt-3.5 flex flex-wrap items-center gap-x-5 gap-y-3">
@@ -84,7 +91,7 @@ export function CalculationCard({ period }: { period: PayrollStaffPeriodResponse
 					calculation.revenueBaseTotalExact !== null && (
 						<div>
 							<div className="text-xs text-muted-foreground">
-								Revenue base (prorated)
+								{t('calc.revenueBase')}
 							</div>
 							<div className="mt-0.5 text-sm font-semibold tabular-nums">
 								{formatMoney(calculation.revenueBaseTotalExact)}
@@ -92,7 +99,9 @@ export function CalculationCard({ period }: { period: PayrollStaffPeriodResponse
 						</div>
 					)}
 				<div>
-					<div className="text-xs text-muted-foreground">Full precision</div>
+					<div className="text-xs text-muted-foreground">
+						{t('calc.fullPrecision')}
+					</div>
 					<div className="mt-0.5 text-sm font-semibold tabular-nums text-muted-foreground">
 						{EXACT_FORMATTER.format(calculation.grossExact)}
 					</div>
@@ -100,9 +109,9 @@ export function CalculationCard({ period }: { period: PayrollStaffPeriodResponse
 				<ChevronRight className="size-4 text-muted-foreground/60" />
 				<div>
 					<div className="text-xs text-muted-foreground">
-						Computed{' '}
+						{t('column.computed')}{' '}
 						<span className="text-muted-foreground/70">
-							· banker&apos;s rounding
+							· {t('calc.rounding')}
 						</span>
 					</div>
 					<div className="mt-0.5 text-base font-bold tabular-nums text-primary">
@@ -113,9 +122,14 @@ export function CalculationCard({ period }: { period: PayrollStaffPeriodResponse
 
 			{period.finalizedAt && (
 				<div className="mt-3.5 border-t border-border pt-3 text-xs text-muted-foreground">
-					Snapshot finalized {formatDate(period.finalizedAt)}
-					{period.finalizedByName ? ` by ${period.finalizedByName}` : ''} —
-					frozen, never recomputed.
+					{period.finalizedByName
+						? t('calc.snapshotFinalizedBy', {
+								date: formatDate(period.finalizedAt),
+								name: period.finalizedByName,
+							})
+						: t('calc.snapshotFinalized', {
+								date: formatDate(period.finalizedAt),
+							})}
 				</div>
 			)}
 		</Card>

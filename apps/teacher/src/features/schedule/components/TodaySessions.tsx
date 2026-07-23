@@ -64,13 +64,13 @@ export function TodaySessions({
 					icon={<CalendarDays />}
 					title={
 						hiddenByBranch > 0
-							? 'No classes at this branch'
-							: `No classes ${emptyWhen}`
+							? t('emptyBranch')
+							: t('emptyDay', { when: emptyWhen })
 					}
 					description={
 						hiddenByBranch > 0
-							? 'You do teach elsewhere — switch to "All branches" in the topbar to see those.'
-							: 'Enjoy the break. Your next teaching day is dotted on the strip above.'
+							? t('emptyBranchDescription')
+							: t('emptyDayDescription')
 					}
 				/>
 			</div>
@@ -98,7 +98,7 @@ export function TodaySessions({
 								? undefined
 								: [
 										{
-											label: 'Attendance',
+											label: t('attendanceAction'),
 											icon: <ClipboardCheck className="size-4" />,
 											variant: 'outline',
 											onClick: (e) => {
@@ -107,7 +107,7 @@ export function TodaySessions({
 											},
 										},
 										{
-											label: 'Marks',
+											label: t('marksAction'),
 											icon: <Star className="size-4" />,
 											variant: 'default',
 											onClick: (e) => {

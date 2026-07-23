@@ -27,9 +27,9 @@ export function PlanStep({
 		<Card>
 			<CardContent className="flex flex-col gap-6 pt-6">
 				<div>
-					<p className="text-base font-semibold">Select a plan tier</p>
+					<p className="text-base font-semibold">{t('onboarding.planTitle')}</p>
 					<p className="text-sm text-muted-foreground">
-						The center starts with a 14-day trial of the selected tier.
+						{t('onboarding.planSubtitle')}
 					</p>
 				</div>
 
@@ -40,8 +40,7 @@ export function PlanStep({
 						))
 					) : plans.length === 0 ? (
 						<p className="text-sm text-muted-foreground">
-							No active plans available. Create one first in Subscription
-							Plans.
+							{t('onboarding.noPlans')}
 						</p>
 					) : (
 						plans.map((plan) => {
@@ -63,7 +62,7 @@ export function PlanStep({
 											{plan.name}
 										</p>
 										<p className="text-xs text-muted-foreground">
-											{planLimits(plan)}
+											{planLimits(t, plan)}
 										</p>
 									</div>
 									<div className="flex items-center gap-3">
@@ -72,7 +71,7 @@ export function PlanStep({
 											{plan.priceMonthly > 0 && (
 												<span className="text-xs font-normal text-muted-foreground">
 													{' '}
-													/ mo
+													{t('onboarding.perMonth')}
 												</span>
 											)}
 										</span>

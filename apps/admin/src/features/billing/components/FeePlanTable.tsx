@@ -2,7 +2,7 @@ import { Layers } from 'lucide-react';
 
 import { DataTable, StatusBadge, type ColumnDef } from '@repo/ui';
 import { formatPrice } from '@repo/utils';
-import { useT } from '@repo/i18n';
+import { useStatusLabel, useT } from '@repo/i18n';
 import { useAppT } from '@/locales';
 
 import type { FeePlanResponse } from '../api/fee-plans.queries';
@@ -17,6 +17,7 @@ interface FeePlanTableProps {
 export function FeePlanTable({ feePlans, isLoading, onEdit }: FeePlanTableProps) {
 	const t = useAppT('billing');
 	const tc = useT('common');
+	const statusLabel = useStatusLabel();
 	const columns: ColumnDef<FeePlanResponse>[] = [
 		{
 			id: 'name',
@@ -39,8 +40,8 @@ export function FeePlanTable({ feePlans, isLoading, onEdit }: FeePlanTableProps)
 				return (
 					<span className="text-sm text-muted-foreground">
 						{count === 0
-							? 'Not in use'
-							: `${count} group${count === 1 ? '' : 's'}`}
+							? t('feePlanExtra.notInUse')
+							: t('feePlanExtra.groupCount', { count })}
 					</span>
 				);
 			},
@@ -59,12 +60,14 @@ export function FeePlanTable({ feePlans, isLoading, onEdit }: FeePlanTableProps)
 		{
 			accessorKey: 'billingCycle',
 			header: t('feePlans.column.cycle'),
-			cell: ({ getValue }) => (
-				<StatusBadge
-					kind="fee_cycle"
-					status={getValue<FeePlanResponse['billingCycle']>()}
-				/>
-			),
+			cell: ({ getValue }) => {
+				const cycle = getValue<FeePlanResponse['billingCycle']>();
+				return (
+					<StatusBadge kind="fee_cycle" status={cycle}>
+						{statusLabel('fee_cycle', cycle)}
+					</StatusBadge>
+				);
+			},
 			size: 120,
 		},
 		{
@@ -89,7 +92,7 @@ export function FeePlanTable({ feePlans, isLoading, onEdit }: FeePlanTableProps)
 			onRowClick={onEdit ? (row) => onEdit(row) : undefined}
 			emptyState={
 				<div className="py-16 text-center text-sm text-muted-foreground">
-					No fee plans match this filter.
+					{t('feePlans.emptyFiltered')}
 				</div>
 			}
 			className="rounded-none border-0"

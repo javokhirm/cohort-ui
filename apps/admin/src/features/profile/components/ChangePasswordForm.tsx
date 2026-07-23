@@ -46,11 +46,8 @@ export function ChangePasswordForm() {
 	return (
 		<Card>
 			<CardHeader>
-				<CardTitle>Change password</CardTitle>
-				<CardDescription>
-					Set a new password for your own account. You stay signed in — the new
-					password is needed the next time you sign in.
-				</CardDescription>
+				<CardTitle>{t('changePassword')}</CardTitle>
+				<CardDescription>{t('changeDescription')}</CardDescription>
 			</CardHeader>
 			<CardContent>
 				<Form {...form}>
@@ -79,7 +76,7 @@ export function ChangePasswordForm() {
 							<p className="text-sm text-destructive">
 								{isApiError(changePassword.error)
 									? changePassword.error.message
-									: 'Failed to change password. Please try again.'}
+									: t('changeFailed')}
 							</p>
 						)}
 

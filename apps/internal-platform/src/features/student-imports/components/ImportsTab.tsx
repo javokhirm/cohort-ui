@@ -4,7 +4,7 @@ import { formatDateTime } from '@repo/utils';
 
 import type { StudentImportSessionView } from '@/api/student-imports/types';
 
-import { IMPORT_STATUS_LABEL, IMPORT_STATUS_TONE } from '../constants';
+import { importStatusLabel, IMPORT_STATUS_TONE } from '../constants';
 import { useStudentImports } from '../hooks';
 import { UploadImportCard } from './UploadImportCard';
 import { useAppT } from '@/locales';
@@ -29,7 +29,7 @@ function buildColumns(
 			header: t('column.status'),
 			cell: ({ row }) => (
 				<StatusBadge tone={IMPORT_STATUS_TONE[row.original.status]}>
-					{IMPORT_STATUS_LABEL[row.original.status]}
+					{importStatusLabel(t, row.original.status)}
 				</StatusBadge>
 			),
 		},
@@ -41,17 +41,24 @@ function buildColumns(
 				if (status === 'COMPLETED') {
 					return (
 						<span className="text-sm text-muted-foreground">
-							{counters.createdCount} imported
+							{t('resultImported', { count: counters.createdCount })}
 							{counters.skippedCount > 0 &&
-								`, ${counters.skippedCount} already enrolled`}
+								t('resultAlreadyEnrolledSuffix', {
+									count: counters.skippedCount,
+								})}
 							{counters.failedCount > 0 &&
-								`, ${counters.failedCount} failed`}
+								t('resultFailedSuffix', {
+									count: counters.failedCount,
+								})}
 						</span>
 					);
 				}
 				return (
 					<span className="text-sm text-muted-foreground">
-						{counters.validRows} of {counters.totalRows} rows valid
+						{t('resultValid', {
+							valid: counters.validRows,
+							total: counters.totalRows,
+						})}
 					</span>
 				);
 			},
@@ -93,11 +100,11 @@ export function ImportsTab({ tenantId }: { tenantId: number }) {
 			/>
 
 			<div className="flex flex-col gap-3">
-				<h3 className="text-sm font-semibold">Recent imports</h3>
+				<h3 className="text-sm font-semibold">{t('recentImports')}</h3>
 
 				{isError ? (
 					<div className="rounded-lg border border-destructive/30 bg-destructive/5 px-4 py-3 text-sm text-destructive">
-						Failed to load this center&apos;s imports. Please refresh.
+						{t('importsLoadError')}
 					</div>
 				) : isLoading ? (
 					<Skeleton className="h-40 w-full" />
@@ -110,8 +117,7 @@ export function ImportsTab({ tenantId }: { tenantId: number }) {
 							onRowClick={(row) => openSession(row.sessionId)}
 							emptyState={
 								<div className="py-16 text-center text-sm text-muted-foreground">
-									No imports yet. Upload a CSV to migrate this
-									center&apos;s students.
+									{t('importsEmpty')}
 								</div>
 							}
 							className="rounded-none border-0"

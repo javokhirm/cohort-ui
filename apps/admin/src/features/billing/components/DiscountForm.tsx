@@ -294,7 +294,7 @@ export function DiscountForm(props: DiscountFormProps) {
 		<FormSheet
 			open={open}
 			onOpenChange={onOpenChange}
-			title={mode === 'create' ? 'New discount' : 'Edit discount'}
+			title={mode === 'create' ? t('discounts.add') : t('discounts.edit')}
 			description={t('feePlans.requiredHint')}
 			footer={
 				<>

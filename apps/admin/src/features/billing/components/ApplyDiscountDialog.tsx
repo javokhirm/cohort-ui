@@ -130,7 +130,7 @@ function ApplyDiscountForm({
 			toast.success(t('discounts.apply.done'));
 			onClose();
 		} catch (err) {
-			toast.error(isApiError(err) ? err.message : 'Failed to apply discount');
+			toast.error(isApiError(err) ? err.message : t('discounts.apply.failed'));
 		}
 	}
 
@@ -138,7 +138,7 @@ function ApplyDiscountForm({
 		return (
 			<div className="flex items-center justify-center py-8 text-sm text-muted-foreground">
 				<Spinner className="mr-2 size-4" />
-				Loading discounts…
+				{tc('state.loading')}
 			</div>
 		);
 	}
@@ -148,8 +148,8 @@ function ApplyDiscountForm({
 			<div className="flex flex-col gap-4">
 				<p className="text-sm text-muted-foreground">
 					{invoice.discounts.length > 0
-						? 'Every active discount is already applied to this invoice.'
-						: 'No active discounts are available. Create one under Discounts first.'}
+						? t('applyDiscount.allApplied')
+						: t('applyDiscount.noneAvailable')}
 				</p>
 				<DialogFooter>
 					<Button type="button" variant="outline" onClick={onClose}>
@@ -201,10 +201,7 @@ function ApplyDiscountForm({
 					{selected && invoice.total > 0 && newTotal === 0 && (
 						<div className="mt-1 flex items-start gap-1.5 text-xs text-tone-amber-fg">
 							<AlertTriangle className="mt-0.5 size-3.5 shrink-0" />
-							<span>
-								This discount brings the total to 0 UZS — nothing more
-								will be owed.
-							</span>
+							<span>{t('applyDiscount.zeroTotalWarning')}</span>
 						</div>
 					)}
 				</div>

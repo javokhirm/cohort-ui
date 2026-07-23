@@ -28,6 +28,7 @@ export function DeactivateDialog({
 	onOpenChange: (open: boolean) => void;
 }) {
 	const tt = useAppT('tenants');
+	const t = useAppT('users');
 	const tc = useT('common');
 	const mutation = useDeactivateUser(userId, {
 		onSuccess: () => onOpenChange(false),
@@ -42,10 +43,9 @@ export function DeactivateDialog({
 		<Dialog open={open} onOpenChange={handleOpenChange}>
 			<DialogContent className="max-w-sm">
 				<DialogHeader>
-					<DialogTitle>Deactivate user</DialogTitle>
+					<DialogTitle>{t('deactivateTitle')}</DialogTitle>
 					<DialogDescription>
-						This will revoke <strong>{fullName}</strong>'s access across all
-						tenants. They will not be able to log in until reactivated.
+						{t('deactivateDescription', { name: fullName })}
 					</DialogDescription>
 				</DialogHeader>
 				<Separator />
@@ -53,7 +53,7 @@ export function DeactivateDialog({
 					<p className="text-sm text-destructive">
 						{isApiError(mutation.error)
 							? mutation.error.message
-							: 'Failed to deactivate user. Please try again.'}
+							: t('deactivateError')}
 					</p>
 				)}
 				<DialogFooter>

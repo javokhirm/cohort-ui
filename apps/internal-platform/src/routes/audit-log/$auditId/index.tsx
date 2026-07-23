@@ -20,13 +20,13 @@ export function AuditLogDetailPage() {
 	const { data: entry, isLoading, isError, error } = useAuditLogEntry(id, validId);
 
 	if (!validId || (isError && isApiError(error) && error.status === 404)) {
-		return <CenteredNotice message="Audit log entry not found." />;
+		return <CenteredNotice message={t('notFound')} />;
 	}
 
 	if (isLoading) return <DetailSkeleton />;
 
 	if (isError || !entry) {
-		return <CenteredNotice message="Failed to load this entry. Please try again." />;
+		return <CenteredNotice message={t('loadDetailError')} />;
 	}
 
 	return (
@@ -36,12 +36,12 @@ export function AuditLogDetailPage() {
 				to={'/audit-log' as any}
 				className="inline-flex w-fit items-center gap-1 text-sm text-muted-foreground transition-colors hover:text-foreground"
 			>
-				← Audit Log
+				← {t('backToList')}
 			</Link>
 
 			<div>
 				<h1 className="text-xl font-semibold tracking-tight">
-					Audit Entry #{entry.id}
+					{t('entryTitle', { id: entry.id })}
 				</h1>
 				<p className="text-sm text-muted-foreground">
 					{formatTimestamp(entry.timestamp)}
@@ -83,7 +83,7 @@ export function AuditLogDetailPage() {
 								</Link>
 							) : (
 								<span className="italic text-muted-foreground">
-									Platform (no tenant)
+									{t('platformNoTenant')}
 								</span>
 							)}
 						</FieldRow>
@@ -103,7 +103,7 @@ export function AuditLogDetailPage() {
 
 			<div className="flex flex-col gap-3">
 				<h2 className="text-xs font-semibold uppercase tracking-widest text-muted-foreground">
-					Before / After
+					{t('beforeAfter')}
 				</h2>
 				<div className="grid gap-4 md:grid-cols-2">
 					<div className="flex flex-col gap-2">
@@ -113,7 +113,9 @@ export function AuditLogDetailPage() {
 						<JsonBlock value={entry.details.before} />
 					</div>
 					<div className="flex flex-col gap-2">
-						<p className="text-xs font-medium text-muted-foreground">After</p>
+						<p className="text-xs font-medium text-muted-foreground">
+							{t('after')}
+						</p>
 						<JsonBlock value={entry.details.after} />
 					</div>
 				</div>

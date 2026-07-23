@@ -37,7 +37,7 @@ export function PermissionMatrix({
 								{role.name}
 								{!role.editable && (
 									<span className="ml-1 text-[10px] font-normal normal-case text-muted-foreground/60">
-										locked
+										{t('locked')}
 									</span>
 								)}
 							</th>

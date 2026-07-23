@@ -16,12 +16,24 @@ const SUB_STATUS_TONE: Record<string, StatusTone> = {
 	CANCELLED: 'slate',
 };
 
-const SUB_STATUS_LABEL: Record<string, string> = {
-	TRIALING: 'Trialing',
-	ACTIVE: 'Active',
-	PAST_DUE: 'Past due',
-	CANCELLED: 'Cancelled',
-};
+/** Localized subscription-status label — keeps the enum→key mapping type-safe. */
+function subStatusLabel(
+	ts: ReturnType<typeof useAppT<'subscriptions'>>,
+	status: string,
+): string {
+	switch (status) {
+		case 'TRIALING':
+			return ts('statusLabel.trialing');
+		case 'ACTIVE':
+			return ts('statusLabel.active');
+		case 'PAST_DUE':
+			return ts('statusLabel.pastDue');
+		case 'CANCELLED':
+			return ts('statusLabel.cancelled');
+		default:
+			return status;
+	}
+}
 
 export function SubscriptionTab({
 	tenant,
@@ -55,7 +67,8 @@ export function SubscriptionTab({
 							<p className="text-2xl font-bold">{plan?.name ?? '—'}</p>
 							{plan && (
 								<p className="text-sm text-muted-foreground">
-									{formatPrice(plan.priceMonthly)}/mo
+									{formatPrice(plan.priceMonthly)}
+									{ts('perMonth')}
 								</p>
 							)}
 						</div>
@@ -63,7 +76,7 @@ export function SubscriptionTab({
 							<dl className="flex flex-col gap-2 text-sm">
 								{[
 									{
-										label: 'Status',
+										label: ts('column.status'),
 										value: (
 											<StatusBadge
 												tone={
@@ -72,23 +85,22 @@ export function SubscriptionTab({
 													] ?? 'slate'
 												}
 											>
-												{SUB_STATUS_LABEL[subscription.status] ??
-													subscription.status}
+												{subStatusLabel(ts, subscription.status)}
 											</StatusBadge>
 										),
 									},
 									{
-										label: 'MRR',
+										label: ts('mrr'),
 										value: formatPrice(stats.monthlyRevenue),
 									},
 									{
-										label: 'Period start',
+										label: ts('periodStart'),
 										value: formatDate(
 											subscription.currentPeriodStart,
 										),
 									},
 									{
-										label: 'Renews',
+										label: ts('renews'),
 										value: formatDate(subscription.currentPeriodEnd),
 									},
 								].map(({ label, value }) => (
@@ -103,7 +115,7 @@ export function SubscriptionTab({
 							</dl>
 						) : (
 							<p className="text-sm text-muted-foreground">
-								No subscription on record.
+								{ts('noSubscription')}
 							</p>
 						)}
 						<Button className="w-full" onClick={onChangePlan}>
@@ -119,17 +131,19 @@ export function SubscriptionTab({
 						</CardTitle>
 					</CardHeader>
 					<CardContent className="py-10 text-center text-sm text-muted-foreground">
-						Invoice history coming soon.
+						{ts('invoiceHistorySoon')}
 					</CardContent>
 				</Card>
 			</div>
 
 			<Card className="gap-0 py-0">
 				<CardHeader className="border-b border-border px-5 py-4">
-					<CardTitle className="text-sm font-semibold">Plan History</CardTitle>
+					<CardTitle className="text-sm font-semibold">
+						{ts('planHistory')}
+					</CardTitle>
 				</CardHeader>
 				<CardContent className="py-10 text-center text-sm text-muted-foreground">
-					Plan history coming soon.
+					{ts('planHistorySoon')}
 				</CardContent>
 			</Card>
 		</div>

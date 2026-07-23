@@ -113,7 +113,7 @@ export function GroupTable({ groups, isLoading }: GroupTableProps) {
 			}
 			emptyState={
 				<div className="py-16 text-center text-sm text-muted-foreground">
-					No groups match these filters.
+					{t('emptyFiltered')}
 				</div>
 			}
 			className="rounded-none border-0"

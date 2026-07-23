@@ -4,7 +4,7 @@ import { Badge, Button, Card, CardContent, Separator, cn } from '@repo/ui';
 import { formatPrice } from '@repo/utils';
 import type { PlanView } from '@/api/plans/types';
 
-import { FEATURE_LABELS } from '../constants';
+import { featureLabel } from '../constants';
 import { limitLabel, planFeatures } from '../utils';
 import { useAppT } from '@/locales';
 import { useT } from '@repo/i18n';
@@ -52,7 +52,7 @@ export function PlanCard({
 						<p className="text-2xl font-bold tabular-nums leading-none">
 							{formatPrice(plan.priceMonthly)}{' '}
 							<span className="text-sm font-normal text-muted-foreground">
-								UZS / month
+								{t('perMonthUZS')}
 							</span>
 						</p>
 					)}
@@ -61,16 +61,16 @@ export function PlanCard({
 				<ul className="flex flex-col gap-2">
 					<li className="flex items-center gap-2 text-sm">
 						<Check className="size-4 shrink-0 text-tone-green-fg" />
-						{limitLabel(plan.maxBranches, 'branches')}
+						{limitLabel(tt, plan.maxBranches, 'branches')}
 					</li>
 					<li className="flex items-center gap-2 text-sm">
 						<Check className="size-4 shrink-0 text-tone-green-fg" />
-						{limitLabel(plan.maxStudents, 'students')}
+						{limitLabel(tt, plan.maxStudents, 'students')}
 					</li>
 					{features.map((f) => (
 						<li key={f} className="flex items-center gap-2 text-sm">
 							<Check className="size-4 shrink-0 text-tone-green-fg" />
-							{FEATURE_LABELS[f].label}
+							{featureLabel(t, f)}
 						</li>
 					))}
 				</ul>

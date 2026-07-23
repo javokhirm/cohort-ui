@@ -83,7 +83,7 @@ function buildColumns(t: ReturnType<typeof useAppT<'users'>>): ColumnDef<UserRow
 		},
 		{
 			accessorKey: 'membershipCount',
-			header: () => <div className="text-right">Count</div>,
+			header: () => <div className="text-right">{t('column.count')}</div>,
 			cell: ({ getValue }) => (
 				<div className="text-right text-sm font-medium tabular-nums">
 					{getValue<number>()}
@@ -126,11 +126,8 @@ export function UserDirectoryPage() {
 	return (
 		<div className="flex flex-col gap-6">
 			<div>
-				<h1 className="text-xl font-semibold tracking-tight">User Directory</h1>
-				<p className="text-sm text-muted-foreground">
-					Every person across all tenants. A user can belong to multiple
-					centers.
-				</p>
+				<h1 className="text-xl font-semibold tracking-tight">{t('title')}</h1>
+				<p className="text-sm text-muted-foreground">{t('listSubtitle')}</p>
 			</div>
 
 			<div className="flex items-center gap-3">
@@ -146,14 +143,14 @@ export function UserDirectoryPage() {
 				</div>
 				{!isLoading && (
 					<span className="text-sm text-muted-foreground">
-						{total} {total === 1 ? 'user' : 'users'}
+						{t('count', { count: total })}
 					</span>
 				)}
 			</div>
 
 			{isError && (
 				<div className="rounded-lg border border-destructive/30 bg-destructive/5 px-4 py-3 text-sm text-destructive">
-					Failed to load users. Please refresh.
+					{t('loadError')}
 				</div>
 			)}
 
@@ -171,7 +168,7 @@ export function UserDirectoryPage() {
 					}
 					emptyState={
 						<div className="py-16 text-center text-sm text-muted-foreground">
-							No users match your search.
+							{t('empty')}
 						</div>
 					}
 					className="rounded-none border-0"

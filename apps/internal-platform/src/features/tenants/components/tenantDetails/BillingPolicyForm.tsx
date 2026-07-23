@@ -35,51 +35,62 @@ import {
 } from '../../schemas/billing-policy-form.schema';
 import { useAppT } from '@/locales';
 
-const BILLING_MODE_OPTIONS = [
-	{ value: 'PREPAID', label: 'Prepaid' },
-	{ value: 'POSTPAID', label: 'Postpaid (arrears)' },
-];
+// Option lists and hints hold user-facing text, so they are built from the
+// translator at render rather than held as module-scope literals.
+type PolicyT = ReturnType<typeof useAppT<'tenants'>>;
 
-const BILLING_MODE_HINTS: Record<BillingMode, string> = {
-	PREPAID: 'Bills the current month in advance, before it starts.',
-	POSTPAID:
-		"Bills the previous, fully-elapsed month in arrears, via two independent legs: a time-based leg for Monthly fee plans and a consumption-based leg for Per-session plans (billed by sessions actually consumed, per the consumption rule below). Each enrollment is billed by exactly one leg, based on its fee plan's billing cycle — never both.",
-};
+function billingModeOptions(t: PolicyT) {
+	return [
+		{ value: 'PREPAID', label: t('policy.prepaid') },
+		{ value: 'POSTPAID', label: t('policy.postpaid') },
+	];
+}
 
-const BILLING_CYCLE_ANCHOR_OPTIONS = [
-	{ value: 'CALENDAR', label: 'Calendar month' },
-	{ value: 'ENROLLMENT', label: 'Enrollment anniversary' },
-];
+function billingModeHint(t: PolicyT, mode: BillingMode): string {
+	return mode === 'PREPAID' ? t('policy.prepaidHint') : t('policy.postpaidHint');
+}
 
-const BILLING_CYCLE_ANCHOR_HINTS: Record<BillingCycleAnchor, string> = {
-	CALENDAR:
-		"Everyone shares one calendar month (the 1st to the last day). A student who joins mid-month is charged a prorated first invoice for the part of the month they'll actually attend, then falls into the shared cycle.",
-	ENROLLMENT:
-		'Each student rolls on their own join date: join on 12 July and they are billed 12 July – 11 August, then again on 12 August, and so on. Every cycle is a whole month, so nobody is ever prorated on the way in — they pay the full price from the day they start. Prepaid only.',
-};
+function billingCycleAnchorOptions(t: PolicyT) {
+	return [
+		{ value: 'CALENDAR', label: t('policy.calendarMonth') },
+		{ value: 'ENROLLMENT', label: t('policy.enrollmentAnniversary') },
+	];
+}
 
-const PRORATION_OPTIONS = [
-	{ value: 'SESSION', label: 'Session-based' },
-	{ value: 'DAILY', label: 'Daily' },
-	{ value: 'NONE', label: 'None' },
-];
+function billingCycleAnchorHint(t: PolicyT, anchor: BillingCycleAnchor): string {
+	return anchor === 'CALENDAR' ? t('policy.calendarHint') : t('policy.enrollmentHint');
+}
 
-const CONSUMPTION_OPTIONS = [
-	{ value: 'ATTENDED_PLUS_UNEXCUSED', label: 'Attended + unexcused' },
-	{ value: 'ALL_SCHEDULED', label: 'All scheduled' },
-	{ value: 'ATTENDED_ONLY', label: 'Attended only' },
-];
+function prorationOptions(t: PolicyT) {
+	return [
+		{ value: 'SESSION', label: t('policy.sessionBased') },
+		{ value: 'DAILY', label: t('policy.daily') },
+		{ value: 'NONE', label: t('policy.none') },
+	];
+}
 
-const LATE_FEE_TYPE_OPTIONS = [
-	{ value: 'FIXED', label: 'Fixed amount (UZS)' },
-	{ value: 'PERCENT', label: 'Percentage (%)' },
-];
+function consumptionOptions(t: PolicyT) {
+	return [
+		{ value: 'ATTENDED_PLUS_UNEXCUSED', label: t('policy.attendedUnexcused') },
+		{ value: 'ALL_SCHEDULED', label: t('policy.allScheduled') },
+		{ value: 'ATTENDED_ONLY', label: t('policy.attendedOnly') },
+	];
+}
 
-const LATE_FEE_RECURRENCE_OPTIONS = [
-	{ value: 'ONE_TIME', label: 'One-time' },
-	{ value: 'DAILY', label: 'Daily' },
-	{ value: 'WEEKLY', label: 'Weekly' },
-];
+function lateFeeTypeOptions(t: PolicyT) {
+	return [
+		{ value: 'FIXED', label: t('policy.fixedAmount') },
+		{ value: 'PERCENT', label: t('policy.percentage') },
+	];
+}
+
+function lateFeeRecurrenceOptions(t: PolicyT) {
+	return [
+		{ value: 'ONE_TIME', label: t('policy.oneTime') },
+		{ value: 'DAILY', label: t('policy.daily') },
+		{ value: 'WEEKLY', label: t('policy.weekly') },
+	];
+}
 
 const CARD_CLASS = 'gap-0 py-0';
 const CARD_HEADER_CLASS = 'border-b border-border px-5 py-4';
@@ -276,7 +287,7 @@ export function BillingPolicyForm({
 		} catch (err) {
 			// The server re-validates the cross-field rules against the merged
 			// result and is the source of truth — surface its message verbatim.
-			toast.error(isApiError(err) ? err.message : 'Failed to save billing policy');
+			toast.error(isApiError(err) ? err.message : t('policy.saveError'));
 		}
 	}
 
@@ -292,8 +303,7 @@ export function BillingPolicyForm({
 							{t('policy.billingMode')}
 						</CardTitle>
 						<p className="text-xs text-muted-foreground">
-							Defaults for invoice generation. Fee plans may override the
-							due-day and proration per plan.
+							{t('policy.billingModeHint')}
 						</p>
 					</CardHeader>
 					<CardContent className={CARD_CONTENT_CLASS}>
@@ -302,10 +312,10 @@ export function BillingPolicyForm({
 								control={form.control}
 								name="billingMode"
 								label={t('policy.billingMode')}
-								options={BILLING_MODE_OPTIONS}
+								options={billingModeOptions(t)}
 							/>
 							<p className="text-xs text-muted-foreground">
-								{BILLING_MODE_HINTS[billingMode]}
+								{billingModeHint(t, billingMode)}
 							</p>
 						</div>
 						<div className="flex flex-col gap-1.5">
@@ -313,10 +323,10 @@ export function BillingPolicyForm({
 								control={form.control}
 								name="billingCycleAnchor"
 								label={t('policy.billingCycle')}
-								options={BILLING_CYCLE_ANCHOR_OPTIONS}
+								options={billingCycleAnchorOptions(t)}
 							/>
 							<p className="text-xs text-muted-foreground">
-								{BILLING_CYCLE_ANCHOR_HINTS[billingCycleAnchor]}
+								{billingCycleAnchorHint(t, billingCycleAnchor)}
 							</p>
 						</div>
 						<div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
@@ -324,7 +334,7 @@ export function BillingPolicyForm({
 								control={form.control}
 								name="prorationMethod"
 								label={t('policy.defaultProration')}
-								options={PRORATION_OPTIONS}
+								options={prorationOptions(t)}
 							/>
 							{isAnniversary ? (
 								<NumberField
@@ -333,7 +343,7 @@ export function BillingPolicyForm({
 									label={t('policy.dueOffset')}
 									min={0}
 									max={28}
-									hint="Days after a student's cycle starts that their invoice falls due; 0 = due on the day the cycle begins."
+									hint={t('policy.dueOffsetHint')}
 								/>
 							) : (
 								<>
@@ -343,7 +353,7 @@ export function BillingPolicyForm({
 										label={t('policy.billingDay')}
 										min={1}
 										max={28}
-										hint="Day the daily cycle generates that period's invoices."
+										hint={t('policy.billingDayHint')}
 									/>
 									<NumberField
 										control={form.control}
@@ -360,7 +370,7 @@ export function BillingPolicyForm({
 								label={t('policy.immediateDueOffset')}
 								min={0}
 								max={28}
-								hint="Due offset for charge-on-enrollment invoices; 0 = same day."
+								hint={t('policy.immediateDueHint')}
 							/>
 							<NumberField
 								control={form.control}
@@ -368,17 +378,12 @@ export function BillingPolicyForm({
 								label={t('policy.graceDays')}
 								min={0}
 								max={60}
-								hint="Days past due before an invoice flips to OVERDUE."
+								hint={t('policy.graceDaysHint')}
 							/>
 						</div>
 						{isAnniversary && (
 							<p className="text-xs text-muted-foreground">
-								Each student's cycle starts on their own join date, so
-								there is no shared billing day or due day — the daily run
-								issues whichever cycle each student is currently in.
-								Because every cycle is a whole month, the proration
-								setting above has no effect on tuition invoices while this
-								cycle is selected.
+								{t('policy.enrollmentAnniversaryNote')}
 							</p>
 						)}
 					</CardContent>
@@ -397,8 +402,8 @@ export function BillingPolicyForm({
 							label={t('policy.chargeOnEnrollment')}
 							description={
 								isAnniversary
-									? "Issue the first full-cycle invoice immediately when a student is enrolled onto a monthly fee plan, instead of waiting for that night's run."
-									: 'Issue a prorated invoice immediately when a student is enrolled onto a monthly fee plan.'
+									? t('policy.chargeOnEnrollmentHintAnniversary')
+									: t('policy.chargeOnEnrollmentHint')
 							}
 						/>
 					</CardContent>
@@ -424,7 +429,7 @@ export function BillingPolicyForm({
 								control={form.control}
 								name="lateFeeType"
 								label={t('policy.lateFeeType')}
-								options={LATE_FEE_TYPE_OPTIONS}
+								options={lateFeeTypeOptions(t)}
 								disabled={!lateFeeEnabled}
 							/>
 							<NumberField
@@ -432,14 +437,14 @@ export function BillingPolicyForm({
 								name="lateFeeAmount"
 								label={t('policy.lateFeeAmount')}
 								min={0}
-								hint="A percentage must be ≤ 100."
+								hint={t('policy.lateFeeAmountHint')}
 								disabled={!lateFeeEnabled}
 							/>
 							<FormSelect
 								control={form.control}
 								name="lateFeeRecurrence"
 								label={t('policy.recurrence')}
-								options={LATE_FEE_RECURRENCE_OPTIONS}
+								options={lateFeeRecurrenceOptions(t)}
 								disabled={!lateFeeEnabled}
 							/>
 							<NumberField
@@ -461,9 +466,7 @@ export function BillingPolicyForm({
 							{t('policy.recurrence')}
 						</CardTitle>
 						<p className="text-xs text-muted-foreground">
-							Runs nightly per tenant: suspends, then cancels, enrollments
-							whose invoices stay unpaid. Auto-cancel days must exceed
-							auto-suspend days.
+							{t('policy.dunningSection')}
 						</p>
 					</CardHeader>
 					<CardContent className={CARD_CONTENT_CLASS}>
@@ -475,7 +478,7 @@ export function BillingPolicyForm({
 								min={1}
 								nullable
 								placeholder={t('policy.disabledPlaceholder')}
-								hint="Days past the invoice's due date before its enrollment is auto-suspended."
+								hint={t('policy.autoSuspendHint')}
 							/>
 							<NumberField
 								control={form.control}
@@ -484,14 +487,11 @@ export function BillingPolicyForm({
 								min={1}
 								nullable
 								placeholder={t('policy.disabledPlaceholder')}
-								hint="Days past the invoice's due date before its enrollment is auto-dropped."
+								hint={t('policy.autoCancelHint')}
 							/>
 						</div>
 						<p className="text-xs text-muted-foreground">
-							Grace days, auto-suspend, and auto-cancel are all counted from
-							the invoice's actual due date — grace only delays when it
-							flips to OVERDUE, it doesn't reset the clock for
-							suspend/cancel.
+							{t('policy.dunningNote')}
 						</p>
 						<SwitchField
 							control={form.control}
@@ -508,8 +508,7 @@ export function BillingPolicyForm({
 							{t('policy.consumptionRule')}
 						</CardTitle>
 						<p className="text-xs text-muted-foreground">
-							Consumption rule for per-session billing, plus how wallet
-							credit is applied to invoices.
+							{t('policy.consumptionSection')}
 						</p>
 					</CardHeader>
 					<CardContent className={CARD_CONTENT_CLASS}>
@@ -518,13 +517,10 @@ export function BillingPolicyForm({
 								control={form.control}
 								name="consumptionRule"
 								label={t('policy.consumptionRule')}
-								options={CONSUMPTION_OPTIONS}
+								options={consumptionOptions(t)}
 							/>
 							<p className="text-xs text-muted-foreground">
-								Which sessions count as chargeable on a Per-session fee
-								plan's invoice: attended sessions plus unexcused absences,
-								every scheduled session, or only sessions actually
-								attended.
+								{t('policy.consumptionRuleHint')}
 							</p>
 						</div>
 						<SwitchField

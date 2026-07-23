@@ -111,8 +111,9 @@ function InvoiceHeader({
 						</StatusBadge>
 					</div>
 					<div className="mt-1 text-sm text-muted-foreground">
-						{invoice.studentName} · Issued {formatDate(invoice.issueDate)} ·
-						Due {formatDate(invoice.dueDate)}
+						{invoice.studentName} · {t('invoiceActions.issuedInline')}{' '}
+						{formatDate(invoice.issueDate)} · {t('invoiceActions.dueInline')}{' '}
+						{formatDate(invoice.dueDate)}
 					</div>
 				</div>
 
@@ -336,8 +337,8 @@ function PaymentHistoryCard({ invoice }: { invoice: InvoiceDetail }) {
 			{payments.length === 0 ? (
 				<p className="text-sm text-muted-foreground">
 					{invoice.amountDue > 0
-						? 'Outstanding balance — record a payment to update.'
-						: 'No payments recorded.'}
+						? t('invoiceActions.outstandingHint')
+						: t('invoices.detail.noPayments')}
 				</p>
 			) : (
 				<div className="flex flex-col gap-3">
@@ -410,7 +411,7 @@ export function InvoiceDetailPage({ invoiceId }: InvoiceDetailPageProps) {
 			await updateInvoice.mutateAsync({ id: invoice.id, status: 'UNPAID' });
 			toast.success(t('invoiceExtra.issued'));
 		} catch (err) {
-			toast.error(isApiError(err) ? err.message : 'Failed to issue invoice');
+			toast.error(isApiError(err) ? err.message : t('invoiceActions.issueFailed'));
 		}
 	}
 
@@ -420,11 +421,15 @@ export function InvoiceDetailPage({ invoiceId }: InvoiceDetailPageProps) {
 			const result = await applyWalletCredit.mutateAsync(invoice.id);
 			toast.success(
 				result.applied > 0
-					? `Applied ${formatPrice(result.applied)} UZS in wallet credit`
-					: 'No wallet credit available to apply',
+					? t('invoiceActions.walletApplied', {
+							amount: formatPrice(result.applied),
+						})
+					: t('invoiceActions.noWalletCredit'),
 			);
 		} catch (err) {
-			toast.error(isApiError(err) ? err.message : 'Failed to apply wallet credit');
+			toast.error(
+				isApiError(err) ? err.message : t('invoiceActions.applyWalletFailed'),
+			);
 		}
 	}
 
@@ -435,7 +440,7 @@ export function InvoiceDetailPage({ invoiceId }: InvoiceDetailPageProps) {
 			toast.success(t('invoiceExtra.voided'));
 			setVoidOpen(false);
 		} catch (err) {
-			toast.error(isApiError(err) ? err.message : 'Failed to void invoice');
+			toast.error(isApiError(err) ? err.message : t('invoiceActions.voidFailed'));
 		}
 	}
 
@@ -453,7 +458,7 @@ export function InvoiceDetailPage({ invoiceId }: InvoiceDetailPageProps) {
 				<Skeleton className="h-40 rounded-xl" />
 			) : isError || !invoice ? (
 				<div className="flex min-h-40 items-center justify-center rounded-xl border text-sm text-muted-foreground">
-					Invoice not found.
+					{t('invoices.notFound')}
 				</div>
 			) : (
 				<>

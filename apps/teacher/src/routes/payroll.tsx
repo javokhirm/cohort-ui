@@ -85,10 +85,12 @@ export function PayrollRoute() {
 						rateType={detail.rateType}
 					/>
 					<p className="px-1 text-[12px] text-muted-foreground">
-						Computed from {detail.breakdown.calculation.sessionsTaught}{' '}
-						completed sessions ({detail.breakdown.calculation.hoursTaught}h).
-						Exact total {formatMoney(detail.breakdown.calculation.grossExact)}
-						, rounded to {formatMoney(detail.breakdown.calculation.gross)}.
+						{t('calcNote', {
+							sessions: detail.breakdown.calculation.sessionsTaught,
+							hours: detail.breakdown.calculation.hoursTaught,
+							exact: formatMoney(detail.breakdown.calculation.grossExact),
+							rounded: formatMoney(detail.breakdown.calculation.gross),
+						})}
 					</p>
 				</div>
 			)}

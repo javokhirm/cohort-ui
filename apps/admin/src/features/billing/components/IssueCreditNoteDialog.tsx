@@ -53,8 +53,7 @@ export function IssueCreditNoteDialog({
 				<DialogHeader>
 					<DialogTitle>{t('creditNotes.issue')}</DialogTitle>
 					<DialogDescription>
-						Reverses part of this invoice&apos;s charges. This can&apos;t be
-						undone.
+						{t('creditNoteForm.dialogDescription')}
 					</DialogDescription>
 				</DialogHeader>
 
@@ -100,7 +99,7 @@ function IssueCreditNoteForm({
 			toast.success(t('creditNotes.done'));
 			onClose();
 		} catch (err) {
-			toast.error(isApiError(err) ? err.message : 'Failed to issue credit note');
+			toast.error(isApiError(err) ? err.message : t('creditNotes.failed'));
 		}
 	}
 
@@ -116,7 +115,7 @@ function IssueCreditNoteForm({
 						name="amount"
 						render={({ field }) => (
 							<FormItem>
-								<FormLabel>Amount *</FormLabel>
+								<FormLabel>{t('creditNotes.amount')}</FormLabel>
 								<FormControl>
 									<Input
 										{...field}
@@ -134,7 +133,9 @@ function IssueCreditNoteForm({
 									/>
 								</FormControl>
 								<FormDescription>
-									Up to {formatPrice(maxAmount)} UZS creditable.
+									{t('creditNoteForm.maxCreditable', {
+										max: formatPrice(maxAmount),
+									})}
 								</FormDescription>
 								<FormMessage />
 							</FormItem>

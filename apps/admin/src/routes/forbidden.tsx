@@ -14,7 +14,7 @@ export function ForbiddenPage() {
 				description={t('forbiddenDescription')}
 				action={
 					<Button asChild variant="outline">
-						<Link to="/login">Back to sign in</Link>
+						<Link to="/login">{t('backToSignIn')}</Link>
 					</Button>
 				}
 			/>

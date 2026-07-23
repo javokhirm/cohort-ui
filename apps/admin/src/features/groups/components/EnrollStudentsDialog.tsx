@@ -109,9 +109,7 @@ function EnrollForm({
 				studentIds: selected,
 				enrolledAt,
 			});
-			toast.success(
-				`${selected.length} student${selected.length === 1 ? '' : 's'} enrolled`,
-			);
+			toast.success(t('roster.enrolledToast', { count: selected.length }));
 			onClose();
 		} catch (err) {
 			const badDate = describeEnrollmentDateError(t, err);
@@ -147,7 +145,7 @@ function EnrollForm({
 						</div>
 					) : students.length === 0 ? (
 						<div className="p-6 text-center text-sm text-muted-foreground">
-							No matching students.
+							{t('roster.noMatchingStudents')}
 						</div>
 					) : (
 						<div className="divide-y divide-border">
@@ -184,8 +182,7 @@ function EnrollForm({
 						disabled={enrollStudents.isPending}
 					/>
 					<p className="text-xs text-muted-foreground">
-						The day the student actually started. This sets their billing
-						anniversary, so back-date it if you are adding them late.
+						{t('roster.startDateHint')}
 					</p>
 				</div>
 			</div>

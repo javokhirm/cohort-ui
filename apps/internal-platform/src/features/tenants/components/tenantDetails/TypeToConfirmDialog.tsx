@@ -13,6 +13,8 @@ import {
 } from '@repo/ui';
 import { useT } from '@repo/i18n';
 
+import { useAppT } from '@/locales';
+
 interface TypeToConfirmDialogProps {
 	open: boolean;
 	onOpenChange: (open: boolean) => void;
@@ -37,6 +39,7 @@ export function TypeToConfirmDialog({
 	variant = 'default',
 }: TypeToConfirmDialogProps) {
 	const tc = useT('common');
+	const t = useAppT('tenants');
 	const [value, setValue] = useState('');
 
 	function handleOpenChange(next: boolean) {
@@ -53,7 +56,7 @@ export function TypeToConfirmDialog({
 				</DialogHeader>
 				<div className="flex flex-col gap-2">
 					<Label htmlFor="type-confirm-input">
-						Type <strong>{tenantName}</strong> to confirm
+						{t('confirmType', { name: tenantName })}
 					</Label>
 					<Input
 						id="type-confirm-input"
@@ -71,7 +74,7 @@ export function TypeToConfirmDialog({
 						disabled={value !== tenantName || loading}
 						onClick={onConfirm}
 					>
-						{loading ? 'Processing…' : confirmLabel}
+						{loading ? t('processing') : confirmLabel}
 					</Button>
 				</DialogFooter>
 			</DialogContent>

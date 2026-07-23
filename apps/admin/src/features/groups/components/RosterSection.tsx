@@ -26,7 +26,7 @@ import {
 } from '@repo/ui';
 import { isApiError } from '@repo/api-client';
 import { formatDate } from '@repo/utils';
-import { useT } from '@repo/i18n';
+import { useStatusLabel, useT } from '@repo/i18n';
 import { useAppT } from '@/locales';
 
 import { Can } from '@/components/Can';
@@ -49,6 +49,7 @@ interface RosterSectionProps {
 export function RosterSection({ groupId, capacity }: RosterSectionProps) {
 	const t = useAppT('groups');
 	const tc = useT('common');
+	const statusLabel = useStatusLabel();
 	const { data: enrollments = [], isLoading } = useGroupEnrollments(groupId);
 	const [enrollOpen, setEnrollOpen] = useState(false);
 	const [dropTarget, setDropTarget] = useState<Enrollment | null>(null);
@@ -72,10 +73,15 @@ export function RosterSection({ groupId, capacity }: RosterSectionProps) {
 		<div className="flex flex-col gap-3">
 			<div className="flex items-center justify-between">
 				<h2 className="text-sm font-semibold">
-					Roster{' '}
+					{t('roster.title')}{' '}
 					<span className="text-muted-foreground">
-						· {activeCount}
-						{capacity != null ? `/${capacity}` : ''} enrolled
+						·{' '}
+						{t('roster.enrolledSummary', {
+							filled:
+								capacity != null
+									? `${activeCount}/${capacity}`
+									: activeCount,
+						})}
 					</span>
 				</h2>
 				<div className="flex items-center gap-2">
@@ -138,7 +144,7 @@ export function RosterSection({ groupId, capacity }: RosterSectionProps) {
 				</Card>
 			) : visibleEnrollments.length === 0 ? (
 				<Card className="px-4 py-6 text-center text-sm text-muted-foreground">
-					No enrollments with this status.
+					{t('roster.emptyFiltered')}
 				</Card>
 			) : (
 				<Card className="gap-0 divide-y divide-border py-0">
@@ -154,12 +160,16 @@ export function RosterSection({ groupId, capacity }: RosterSectionProps) {
 										{e.studentName}
 									</span>
 									<span className="font-mono text-xs text-muted-foreground">
-										{e.studentCode} · enrolled{' '}
-										{formatDate(e.enrolledAt)}
+										{e.studentCode} ·{' '}
+										{t('roster.enrolledOn', {
+											date: formatDate(e.enrolledAt),
+										})}
 									</span>
 								</div>
 								<div className="flex items-center gap-3">
-									<StatusBadge kind="enrollment" status={e.status} />
+									<StatusBadge kind="enrollment" status={e.status}>
+										{statusLabel('enrollment', e.status)}
+									</StatusBadge>
 									<Can permission="enrollment.update">
 										<div className="flex items-center gap-1">
 											{transitions.includes('ACTIVE') && (

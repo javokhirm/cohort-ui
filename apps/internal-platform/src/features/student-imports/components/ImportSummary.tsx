@@ -2,7 +2,7 @@ import { Card, ProgressBar, StatusBadge } from '@repo/ui';
 
 import type { StudentImportSessionView } from '@/api/student-imports/types';
 
-import { IMPORT_STATUS_LABEL, IMPORT_STATUS_TONE } from '../constants';
+import { importStatusLabel, IMPORT_STATUS_TONE } from '../constants';
 import { useAppT } from '@/locales';
 
 function Stat({
@@ -53,7 +53,7 @@ export function ImportSummary({ session }: { session: StudentImportSessionView }
 		<div className="flex flex-col gap-4">
 			<div className="flex flex-wrap items-center gap-3">
 				<StatusBadge tone={IMPORT_STATUS_TONE[status]}>
-					{IMPORT_STATUS_LABEL[status]}
+					{importStatusLabel(t, status)}
 				</StatusBadge>
 				<span className="font-mono text-sm text-muted-foreground">
 					{session.fileName}
@@ -69,16 +69,13 @@ export function ImportSummary({ session }: { session: StudentImportSessionView }
 			{isApplying && (
 				<Card className="gap-3 p-4">
 					<div className="flex items-center justify-between text-sm">
-						<span className="font-medium">Importing students…</span>
+						<span className="font-medium">{t('importingStudents')}</span>
 						<span className="tabular-nums text-muted-foreground">
 							{counters.processedRows} / {counters.validRows}
 						</span>
 					</div>
 					<ProgressBar value={percent} tone="amber" />
-					<p className="text-xs text-muted-foreground">
-						This runs in the background — you can leave this page and come
-						back.
-					</p>
+					<p className="text-xs text-muted-foreground">{t('importingHint')}</p>
 				</Card>
 			)}
 

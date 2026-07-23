@@ -44,10 +44,12 @@ export function Header() {
 					E
 				</div>
 				<div className="flex items-center gap-2">
-					<span className="text-sm font-bold text-(--console-fg)">Cohort</span>
+					<span className="text-sm font-bold text-(--console-fg)">
+						{tApp('brand')}
+					</span>
 					<span className="flex items-center gap-1.5 rounded-md border border-tone-amber-fg/25 bg-tone-amber-bg px-2 py-0.5 text-[10px] font-bold tracking-wide text-tone-amber-fg">
 						<ShieldCheck className="size-3" />
-						INTERNAL · PLATFORM CONSOLE
+						{tApp('brandBadge')}
 					</span>
 					<span className="flex items-center gap-1 rounded-md border border-tone-green-fg/25 bg-tone-green-bg px-2 py-0.5 text-[10px] font-bold tracking-wide text-tone-green-fg">
 						<span className="size-1.5 rounded-full bg-tone-green-fg" />

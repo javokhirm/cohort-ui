@@ -34,6 +34,7 @@ const CELL_W_PX = 52;
  * frozen header and student column need the grid to own its own scroll.
  */
 export function AttendanceGrid({ grid, onEditCell }: AttendanceGridProps) {
+	const t = useAppT('attendance');
 	const tm = useAppT('marks');
 	const [openCell, setOpenCell] = useState<string | null>(null);
 
@@ -75,9 +76,11 @@ export function AttendanceGrid({ grid, onEditCell }: AttendanceGridProps) {
 				letter: descriptor?.label[0] ?? '',
 				tone: descriptor?.tone ?? 'slate',
 				accent: today,
-				label: `${row.studentName ?? 'Student'}, ${formatFullDate(col.date)} — ${
-					descriptor?.label ?? 'not marked'
-				}`,
+				label: t('cellLabel', {
+					name: row.studentName ?? t('studentFallback'),
+					date: formatFullDate(col.date),
+					status: descriptor?.label ?? t('notMarked'),
+				}),
 				onClick: editable
 					? () => setOpenCell((cur) => (cur === cellKey ? null : cellKey))
 					: undefined,
@@ -105,9 +108,10 @@ export function AttendanceGrid({ grid, onEditCell }: AttendanceGridProps) {
 					sublabel: formatWeekday(col.date),
 					accent: isTodayIso(col.date),
 					muted: col.status === 'CANCELLED',
-					title: `${formatFullDate(col.date)}${
-						col.status === 'CANCELLED' ? ' — cancelled' : ''
-					}`,
+					title:
+						col.status === 'CANCELLED'
+							? t('dateCancelled', { date: formatFullDate(col.date) })
+							: formatFullDate(col.date),
 				}))}
 				rows={rows}
 				rightCols={[{ label: tm('column.rate'), width: '64px' }]}

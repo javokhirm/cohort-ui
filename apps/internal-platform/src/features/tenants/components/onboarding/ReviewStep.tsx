@@ -24,23 +24,33 @@ export function ReviewStep({
 	const plan = plans.find((p) => p.id === data.planId);
 
 	const rows: { label: string; value: string }[] = [
-		{ label: 'Center name', value: data.centerName },
-		{ label: 'City', value: data.city },
-		{ label: 'Owner', value: `${data.ownerFirstName} ${data.ownerLastName}` },
-		{ label: 'Owner phone', value: data.ownerPhone },
-		...(data.ownerEmail ? [{ label: 'Owner email', value: data.ownerEmail }] : []),
-		{ label: 'Plan', value: plan ? `${plan.name} (14-day trial)` : '—' },
-		{ label: 'Initial branch', value: data.branchName },
-		{ label: 'Branch code', value: data.branchCode },
+		{ label: t('onboarding.businessName'), value: data.centerName },
+		{ label: t('onboarding.city'), value: data.city },
+		{
+			label: t('onboarding.owner'),
+			value: `${data.ownerFirstName} ${data.ownerLastName}`,
+		},
+		{ label: t('onboarding.ownerPhone'), value: data.ownerPhone },
+		...(data.ownerEmail
+			? [{ label: t('onboarding.ownerEmail'), value: data.ownerEmail }]
+			: []),
+		{
+			label: t('onboarding.plan'),
+			value: plan ? `${plan.name} ${t('onboarding.trialSuffix')}` : '—',
+		},
+		{ label: t('onboarding.initialBranch'), value: data.branchName },
+		{ label: t('onboarding.branchCode'), value: data.branchCode },
 	];
 
 	return (
 		<Card>
 			<CardContent className="flex flex-col gap-6 pt-6">
 				<div>
-					<p className="text-base font-semibold">Review & create</p>
+					<p className="text-base font-semibold">
+						{t('onboarding.reviewTitle')}
+					</p>
 					<p className="text-sm text-muted-foreground">
-						Confirm the details before provisioning the tenant.
+						{t('onboarding.reviewSubtitle')}
 					</p>
 				</div>
 
@@ -62,8 +72,7 @@ export function ReviewStep({
 				<div className="flex items-start gap-3 rounded-lg border border-blue-200 bg-blue-50 px-4 py-3 dark:border-blue-900/50 dark:bg-blue-950/30">
 					<Info className="mt-0.5 size-4 shrink-0 text-blue-600 dark:text-blue-400" />
 					<p className="text-sm text-blue-700 dark:text-blue-300">
-						A welcome SMS & default role templates will be provisioned
-						automatically.
+						{t('onboarding.provisionNote')}
 					</p>
 				</div>
 
@@ -76,7 +85,9 @@ export function ReviewStep({
 						onClick={onSubmit}
 						disabled={submitting}
 					>
-						{submitting ? 'Creating…' : 'Create tenant'}
+						{submitting
+							? t('onboarding.creating')
+							: t('onboarding.createTenant')}
 					</Button>
 				</div>
 			</CardContent>

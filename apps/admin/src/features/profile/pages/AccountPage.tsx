@@ -37,17 +37,15 @@ export function AccountPage() {
 
 			{isError && (
 				<div className="rounded-lg border border-destructive/30 bg-destructive/5 px-4 py-3 text-sm text-destructive">
-					Failed to load your profile. Please refresh.
+					{t('loadError')}
 				</div>
 			)}
 
 			{profile && (
 				<Card>
 					<CardHeader>
-						<CardTitle>Profile</CardTitle>
-						<CardDescription>
-							Ask an administrator to change your name or contact details.
-						</CardDescription>
+						<CardTitle>{t('profileCardTitle')}</CardTitle>
+						<CardDescription>{t('identityHint')}</CardDescription>
 					</CardHeader>
 					<CardContent>
 						<div className="grid grid-cols-1 gap-4 sm:grid-cols-2">

@@ -102,7 +102,7 @@ function RecordPaymentForm({
 			toast.success(t('payments.record.done'));
 			onClose();
 		} catch (err) {
-			toast.error(isApiError(err) ? err.message : 'Failed to record payment');
+			toast.error(isApiError(err) ? err.message : t('payments.record.failed'));
 		}
 	}
 
@@ -144,7 +144,7 @@ function RecordPaymentForm({
 						name="method"
 						render={({ field }) => (
 							<FormItem>
-								<FormLabel>Method *</FormLabel>
+								<FormLabel>{t('payments.record.method')}</FormLabel>
 								<div className="grid grid-cols-3 gap-2">
 									{RECORDABLE_PAYMENT_METHOD_OPTIONS.map((opt) => (
 										<Button

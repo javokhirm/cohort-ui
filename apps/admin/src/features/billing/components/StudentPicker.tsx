@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react';
 import { Search } from 'lucide-react';
 
 import { Button, cn, Input, Popover, PopoverContent, PopoverTrigger } from '@repo/ui';
+import { useT } from '@repo/i18n';
 import { useAppT } from '@/locales';
 
 import { useStudent, useStudents } from '@/features/people/api/students.queries';
@@ -15,6 +16,7 @@ interface StudentPickerProps {
 /** Searchable single-select student picker — no `Combobox` primitive exists yet in `@repo/ui`. */
 export function StudentPicker({ value, onChange, disabled }: StudentPickerProps) {
 	const t = useAppT('billing');
+	const tc = useT('common');
 	const [open, setOpen] = useState(false);
 	const [input, setInput] = useState('');
 	const [search, setSearch] = useState('');
@@ -53,7 +55,7 @@ export function StudentPicker({ value, onChange, disabled }: StudentPickerProps)
 				>
 					{selected
 						? `${selected.user.firstName} ${selected.user.lastName}`
-						: 'Select student…'}
+						: t('pickerExtra.selectStudent')}
 				</Button>
 			</PopoverTrigger>
 			<PopoverContent
@@ -73,11 +75,11 @@ export function StudentPicker({ value, onChange, disabled }: StudentPickerProps)
 				<div className="max-h-64 overflow-y-auto p-1">
 					{isLoading ? (
 						<div className="px-3 py-4 text-sm text-muted-foreground">
-							Loading…
+							{tc('state.loading')}
 						</div>
 					) : students.length === 0 ? (
 						<div className="px-3 py-4 text-center text-sm text-muted-foreground">
-							No matching students.
+							{t('picker.noStudents')}
 						</div>
 					) : (
 						students.map((s) => (

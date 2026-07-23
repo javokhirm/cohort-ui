@@ -54,9 +54,10 @@ type FeePlanFormProps = CreateProps | EditProps;
 
 /** Branch options with a leading "shared across all branches" choice. */
 function useBranchOptions() {
+	const t = useAppT('billing');
 	const { data: branches = [] } = useBranches();
 	return [
-		{ value: SHARED_BRANCH_VALUE, label: 'Shared — all branches' },
+		{ value: SHARED_BRANCH_VALUE, label: t('feePlanForm.sharedOption') },
 		...branches.map((b) => ({ value: String(b.id), label: b.name })),
 	];
 }
@@ -122,8 +123,7 @@ function CreateFeePlanForm({
 							options={branchOptions}
 						/>
 						<p className="text-xs text-muted-foreground">
-							Plans are standalone. Attach this one to a course after you
-							save it — every group of that course will bill on it.
+							{t('feePlanForm.standaloneHint')}
 						</p>
 						<div className="grid grid-cols-2 gap-3">
 							<FormInput
@@ -314,7 +314,7 @@ export function FeePlanForm(props: FeePlanFormProps) {
 		<FormSheet
 			open={open}
 			onOpenChange={onOpenChange}
-			title={mode === 'create' ? 'New fee plan' : 'Edit fee plan'}
+			title={mode === 'create' ? t('feePlans.addSheet') : t('feePlans.edit')}
 			description={t('feePlans.requiredHint')}
 			footer={
 				<>

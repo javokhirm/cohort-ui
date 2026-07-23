@@ -3,6 +3,7 @@ import { formatPrice } from '@repo/utils';
 
 import type { RateType } from '../api/keys';
 import type { PayrollBreakdownLine } from '../api/payroll.queries';
+import { useAppT } from '@/locales';
 
 interface StudentBreakdownTableProps {
 	lines: PayrollBreakdownLine[];
@@ -26,12 +27,13 @@ export function StudentBreakdownTable({
 	sessionsTaught,
 	hoursTaught,
 }: StudentBreakdownTableProps) {
+	const t = useAppT('payroll');
 	const isPercent = rateType === 'PERCENT';
 
 	const columns: ColumnDef<PayrollBreakdownLine>[] = [
 		{
 			id: 'student',
-			header: 'Student',
+			header: t('breakdown.column.student'),
 			cell: ({ row }) => (
 				<div className="min-w-0">
 					<div className="truncate text-sm font-medium">
@@ -45,7 +47,9 @@ export function StudentBreakdownTable({
 		},
 		{
 			accessorKey: 'monthlyTuition',
-			header: () => <div className="text-right">Monthly tuition</div>,
+			header: () => (
+				<div className="text-right">{t('breakdown.column.monthlyTuition')}</div>
+			),
 			cell: ({ getValue }) => (
 				<div className="text-right text-sm tabular-nums text-muted-foreground">
 					{formatPrice(getValue<number>())}
@@ -55,7 +59,9 @@ export function StudentBreakdownTable({
 		},
 		{
 			id: 'sessions',
-			header: () => <div className="text-right">Sessions</div>,
+			header: () => (
+				<div className="text-right">{t('breakdown.column.sessions')}</div>
+			),
 			cell: ({ row }) => (
 				<div className="text-right text-sm tabular-nums text-muted-foreground">
 					{row.original.sessionsTaught}/{row.original.sessionsTotalPlanned}
@@ -65,7 +71,9 @@ export function StudentBreakdownTable({
 		},
 		{
 			accessorKey: 'prorationFactor',
-			header: () => <div className="text-right">Proration</div>,
+			header: () => (
+				<div className="text-right">{t('breakdown.column.proration')}</div>
+			),
 			cell: ({ getValue }) => (
 				<div className="text-right text-sm tabular-nums text-muted-foreground">
 					{prorationLabel(getValue<number>())}
@@ -75,7 +83,7 @@ export function StudentBreakdownTable({
 		},
 		{
 			accessorKey: 'hours',
-			header: () => <div className="text-right">Hours</div>,
+			header: () => <div className="text-right">{t('breakdown.column.hours')}</div>,
 			cell: ({ getValue }) => (
 				<div className="text-right text-sm tabular-nums text-muted-foreground">
 					{getValue<number>()}
@@ -85,7 +93,9 @@ export function StudentBreakdownTable({
 		},
 		{
 			accessorKey: 'revenueBase',
-			header: () => <div className="text-right">Revenue line</div>,
+			header: () => (
+				<div className="text-right">{t('breakdown.column.revenueLine')}</div>
+			),
 			cell: ({ getValue }) => (
 				<div className="text-right text-sm font-medium tabular-nums">
 					{formatPrice(getValue<number>())}
@@ -98,7 +108,7 @@ export function StudentBreakdownTable({
 	if (isPercent) {
 		columns.push({
 			accessorKey: 'share',
-			header: () => <div className="text-right">Share</div>,
+			header: () => <div className="text-right">{t('breakdown.column.share')}</div>,
 			cell: ({ getValue }) => (
 				<div className="text-right text-sm font-semibold tabular-nums">
 					{formatPrice(getValue<number>())}
@@ -111,9 +121,13 @@ export function StudentBreakdownTable({
 	return (
 		<Card className="gap-0 overflow-hidden py-0">
 			<div className="flex items-center justify-between border-b border-border px-5 py-3.5">
-				<h2 className="text-sm font-bold">Student breakdown</h2>
+				<h2 className="text-sm font-bold">{t('breakdown.title')}</h2>
 				<span className="text-xs text-muted-foreground">
-					{lines.length} students · {sessionsTaught} sessions · {hoursTaught}h
+					{t('breakdown.summary', {
+						students: lines.length,
+						sessions: sessionsTaught,
+						hours: hoursTaught,
+					})}
 				</span>
 			</div>
 			<DataTable
@@ -122,29 +136,15 @@ export function StudentBreakdownTable({
 				getRowId={(row) => String(row.enrollmentId)}
 				emptyState={
 					<div className="py-12 text-center text-sm text-muted-foreground">
-						No student lines for this period.
+						{t('breakdown.empty')}
 					</div>
 				}
 				className="rounded-none border-0"
 			/>
 			<div className="border-t border-border bg-muted/40 px-5 py-3 text-xs text-muted-foreground">
-				{isPercent ? (
-					<>
-						Denominator is <b>every class the group holds this month</b>{' '}
-						across all teachers — taught, still scheduled or cancelled. So
-						tuition is earned per class actually delivered: shared students
-						are split and never double-paid, a student who joined or left
-						mid-month funds only the classes they were enrolled for, an open
-						month accrues rather than paying the full fee up front, and a
-						cancelled class is earned by nobody.
-					</>
-				) : (
-					<>
-						Per-student revenue lines apply to revenue-share teachers only.
-						This teacher is paid on the basis shown above; students are listed
-						for audit.
-					</>
-				)}
+				{isPercent
+					? t('breakdown.footnotePercent')
+					: t('breakdown.footnoteOther')}
 			</div>
 		</Card>
 	);

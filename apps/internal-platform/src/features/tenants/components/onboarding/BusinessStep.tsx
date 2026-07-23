@@ -17,15 +17,19 @@ export function BusinessStep({
 		<Card>
 			<CardContent className="flex flex-col gap-6 pt-6">
 				<div>
-					<p className="text-base font-semibold">Business information</p>
+					<p className="text-base font-semibold">
+						{t('onboarding.businessTitle')}
+					</p>
 					<p className="text-sm text-muted-foreground">
-						Tell us about the education center.
+						{t('onboarding.businessSubtitle')}
 					</p>
 				</div>
 
 				<div className="flex flex-col gap-4">
 					<div className="flex flex-col gap-1.5">
-						<Label htmlFor="center-name">Center name</Label>
+						<Label htmlFor="center-name">
+							{t('onboarding.businessName')}
+						</Label>
 						<Input
 							id="center-name"
 							value={data.centerName}
@@ -34,7 +38,7 @@ export function BusinessStep({
 						/>
 					</div>
 					<div className="flex flex-col gap-1.5">
-						<Label htmlFor="city">City</Label>
+						<Label htmlFor="city">{t('onboarding.city')}</Label>
 						<Input
 							id="city"
 							value={data.city}

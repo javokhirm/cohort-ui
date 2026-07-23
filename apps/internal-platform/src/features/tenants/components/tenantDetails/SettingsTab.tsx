@@ -38,18 +38,20 @@ export function SettingsTab({
 		<div className="flex max-w-lg flex-col gap-6">
 			<Card className="gap-0 py-0">
 				<CardHeader className="border-b border-border px-5 py-4">
-					<CardTitle className="text-sm font-semibold">General</CardTitle>
+					<CardTitle className="text-sm font-semibold">
+						{t('settings.general')}
+					</CardTitle>
 				</CardHeader>
 				<CardContent className="flex flex-col gap-4 px-5 py-5">
 					<div className="flex flex-col gap-1.5">
-						<Label>Display name</Label>
+						<Label>{t('settings.displayName')}</Label>
 						<Input value={tenant.name} disabled />
 						<p className="text-xs text-muted-foreground">
-							Tenant name cannot be changed from the platform console.
+							{t('settings.displayNameHint')}
 						</p>
 					</div>
 					<div className="flex flex-col gap-1.5">
-						<Label htmlFor="settings-phone">Phone</Label>
+						<Label htmlFor="settings-phone">{t('settings.phone')}</Label>
 						<PhoneInput
 							id="settings-phone"
 							value={phone}
@@ -57,7 +59,7 @@ export function SettingsTab({
 						/>
 					</div>
 					<div className="flex flex-col gap-1.5">
-						<Label htmlFor="settings-city">City</Label>
+						<Label htmlFor="settings-city">{t('onboarding.city')}</Label>
 						<Input
 							id="settings-city"
 							value={city}
@@ -66,7 +68,7 @@ export function SettingsTab({
 						/>
 					</div>
 					<div className="flex flex-col gap-1.5">
-						<Label>Timezone</Label>
+						<Label>{t('onboarding.timezone')}</Label>
 						<Select value={timezone} onValueChange={setTimezone}>
 							<SelectTrigger>
 								<SelectValue />
@@ -83,15 +85,15 @@ export function SettingsTab({
 						</Select>
 					</div>
 					<div className="flex flex-col gap-1.5">
-						<Label>Language</Label>
+						<Label>{t('onboarding.language')}</Label>
 						<Select value={locale} onValueChange={setLocale}>
 							<SelectTrigger>
 								<SelectValue />
 							</SelectTrigger>
 							<SelectContent>
-								<SelectItem value="uz">Uzbek (Latin)</SelectItem>
-								<SelectItem value="ru">Russian</SelectItem>
-								<SelectItem value="en">English</SelectItem>
+								<SelectItem value="uz">{t('settings.langUz')}</SelectItem>
+								<SelectItem value="ru">{t('settings.langRu')}</SelectItem>
+								<SelectItem value="en">{t('settings.langEn')}</SelectItem>
 							</SelectContent>
 						</Select>
 					</div>
@@ -107,7 +109,7 @@ export function SettingsTab({
 								})
 							}
 						>
-							{saving ? 'Saving…' : 'Save changes'}
+							{saving ? t('settings.saving') : t('settings.save')}
 						</Button>
 					</div>
 				</CardContent>

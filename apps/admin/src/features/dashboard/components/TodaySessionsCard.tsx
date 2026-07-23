@@ -3,6 +3,7 @@ import { CalendarDays } from 'lucide-react';
 
 import { EmptyState, Separator, StatusBadge } from '@repo/ui';
 import { toIsoDate } from '@repo/utils';
+import { useStatusLabel } from '@repo/i18n';
 
 import { useSessionCalendar } from '@/features/groups/api/sessions.queries';
 
@@ -17,6 +18,7 @@ import { useAppT } from '@/locales';
  */
 export function TodaySessionsCard() {
 	const t = useAppT('dashboard');
+	const statusLabel = useStatusLabel();
 	const today = toIsoDate(new Date());
 	const { data, isLoading, isError, refetch } = useSessionCalendar({
 		from: today,
@@ -65,7 +67,9 @@ export function TodaySessionsCard() {
 											.join(' · ') || '—'}
 									</p>
 								</div>
-								<StatusBadge kind="session" status={session.status} />
+								<StatusBadge kind="session" status={session.status}>
+									{statusLabel('session', session.status)}
+								</StatusBadge>
 							</div>
 						</li>
 					))}

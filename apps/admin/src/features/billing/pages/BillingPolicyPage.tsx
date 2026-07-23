@@ -37,11 +37,7 @@ export function BillingPolicyPage() {
 							{t('misc.managedByCohort')}
 						</CardTitle>
 						<p className="text-sm font-normal text-muted-foreground">
-							This policy drives every invoice your center issues, so it is
-							configured by the Cohort team rather than changed here.
-							Contact support to request a change — it takes effect from
-							your next billing run and never alters invoices that have
-							already been issued.
+							{t('policyPage.managedDescription')}
 						</p>
 					</div>
 				</CardHeader>
@@ -50,19 +46,19 @@ export function BillingPolicyPage() {
 			{isLoading && (
 				<div className="flex items-center justify-center py-16 text-muted-foreground">
 					<Spinner className="mr-2 size-5" />
-					Loading billing policy…
+					{t('policyPage.loading')}
 				</div>
 			)}
 
 			{isError && isForbidden && (
 				<div className="rounded-lg border border-border bg-muted/40 px-4 py-3 text-sm text-muted-foreground">
-					You don&apos;t have permission to view the billing policy.
+					{t('policyPage.forbidden')}
 				</div>
 			)}
 
 			{isError && !isForbidden && (
 				<div className="rounded-lg border border-destructive/30 bg-destructive/5 px-4 py-3 text-sm text-destructive">
-					Failed to load the billing policy. Please refresh.
+					{t('policy.loadError')}
 				</div>
 			)}
 

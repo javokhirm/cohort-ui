@@ -11,32 +11,11 @@ import type { LetterGrade, MarkConfig } from '../api/marks.queries';
 /** Per-letter percentage — mirrors the backend `LETTER_PCT` constant. */
 const LETTER_PCT: Record<LetterGrade, number> = { A: 95, B: 85, C: 75, D: 65, F: 50 };
 
-/** A short label for a scale, e.g. "Points · max 10" / "Percentage · 0–100" / "Letter · A–F". */
-export function scaleLabel(config: MarkConfig): string {
-	switch (config.type) {
-		case 'POINTS':
-			return `Points · max ${config.maxPoints ?? '—'}`;
-		case 'PERCENTAGE':
-			return `Percentage · 0–${config.maxPoints ?? 100}`;
-		case 'LETTER':
-			return 'Letter grade · A–F';
-	}
-}
-
 /**
- * The compact form for a header or list row, e.g. "Points /10", "Percentage /100",
- * "Letter A–F" — where `scaleLabel` is the fuller sentence used inside the sheet.
+ * Scale-label copy (e.g. "Points · max 10") is localized, so it lives in the
+ * marks catalog and is built at the call site from `config.type` — not here,
+ * which stays free of user-facing strings.
  */
-export function scaleShortLabel(config: MarkConfig): string {
-	switch (config.type) {
-		case 'POINTS':
-			return `Points /${config.maxPoints ?? '—'}`;
-		case 'PERCENTAGE':
-			return `Percentage /${config.maxPoints ?? 100}`;
-		case 'LETTER':
-			return 'Letter A–F';
-	}
-}
 
 /** Whether a config accepts letters (vs a bounded numeric score). */
 export function isLetterScale(config: MarkConfig): boolean {
@@ -53,16 +32,6 @@ export function scoreTone(pct: number | null): StatusTone {
 	if (pct >= WEAK_SCORE_PCT) return 'amber';
 	return 'red';
 }
-
-/**
- * The same bands as a legend, so the key under the marks grid can never drift
- * from the tones `scoreTone` actually assigns.
- */
-export const SCORE_BANDS: { tone: StatusTone; label: string }[] = [
-	{ tone: 'green', label: '90% and up' },
-	{ tone: 'amber', label: `${WEAK_SCORE_PCT}–89%` },
-	{ tone: 'red', label: `Below ${WEAK_SCORE_PCT}%` },
-];
 
 /**
  * The 0–100 normalized percentage a value would produce, for optimistic display

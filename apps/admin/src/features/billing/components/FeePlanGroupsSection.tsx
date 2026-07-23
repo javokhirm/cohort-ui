@@ -31,16 +31,13 @@ export function FeePlanGroupsSection({ feePlanId }: { feePlanId: number }) {
 			{isLoading ? (
 				<div className="flex items-center gap-2 py-2 text-sm text-muted-foreground">
 					<Spinner className="size-4" />
-					Loading groups…
+					{t('feePlanForm.loadingGroups')}
 				</div>
 			) : isError ? (
-				<p className="text-sm text-destructive">
-					Failed to load groups. Please refresh.
-				</p>
+				<p className="text-sm text-destructive">{t('feePlanForm.loadError')}</p>
 			) : groups.length === 0 ? (
 				<p className="text-xs text-muted-foreground">
-					No groups bill on this plan yet. A group inherits it from its course —
-					attach the plan when you create or edit a course.
+					{t('feePlanForm.noGroupsHint')}
 				</p>
 			) : (
 				<>
@@ -65,8 +62,7 @@ export function FeePlanGroupsSection({ feePlanId }: { feePlanId: number }) {
 						))}
 					</ul>
 					<p className="text-xs text-muted-foreground">
-						Changing the amount or cycle re-prices every future invoice for
-						these groups. Invoices already issued keep their original plan.
+						{t('feePlanForm.repriceHint')}
 					</p>
 				</>
 			)}

@@ -32,15 +32,22 @@ import { useAppT } from '@/locales';
 
 const ALL_STAFF = 'all';
 
-const STATUS_FILTERS: { value: PayrollRowStatus | undefined; label: string }[] = [
-	{ value: undefined, label: 'All' },
-	{ value: 'LIVE', label: 'Live' },
-	{ value: 'FINALIZED', label: 'Finalized' },
-	{ value: 'PAID', label: 'Paid' },
-];
+type PayrollT = ReturnType<typeof useAppT<'payroll'>>;
+
+function buildStatusFilters(
+	t: PayrollT,
+): { value: PayrollRowStatus | undefined; label: string }[] {
+	return [
+		{ value: undefined, label: t('filterAll') },
+		{ value: 'LIVE', label: t('live') },
+		{ value: 'FINALIZED', label: t('finalized') },
+		{ value: 'PAID', label: t('paid') },
+	];
+}
 
 export function PayrollPage() {
 	const t = useAppT('payroll');
+	const statusFilters = buildStatusFilters(t);
 	const navigate = useNavigate({ from: '/payroll' });
 	const search = useSearch({ from: '/_authed/payroll' });
 	const month = search.month ?? currentMonth();
@@ -90,7 +97,7 @@ export function PayrollPage() {
 		<div className="mx-auto flex max-w-7xl flex-col gap-6">
 			<PageHeader
 				title={t('title')}
-				description={`${formatMonthLabel(month)} · computed per teacher from sessions taught & students`}
+				description={`${formatMonthLabel(month)} · ${t('headerSubtitle')}`}
 				actions={
 					<div className="flex flex-wrap items-center gap-2">
 						<PeriodSelector month={month} onMonthChange={handleMonthChange} />
@@ -148,7 +155,7 @@ export function PayrollPage() {
 			<div className="flex flex-col gap-4">
 				<div className="flex flex-wrap items-end gap-4">
 					<SearchFilterBar
-						filters={STATUS_FILTERS.map((f) => ({
+						filters={statusFilters.map((f) => ({
 							id: f.value ?? 'ALL',
 							label: f.label,
 							active: status === f.value,
@@ -156,7 +163,9 @@ export function PayrollPage() {
 						}))}
 					/>
 					<div className="flex flex-col gap-1.5">
-						<Label className="text-xs text-muted-foreground">Staff</Label>
+						<Label className="text-xs text-muted-foreground">
+							{t('staffLabel')}
+						</Label>
 						<Select
 							value={staffId ? String(staffId) : ALL_STAFF}
 							onValueChange={handleStaffChange}
@@ -165,7 +174,7 @@ export function PayrollPage() {
 								<SelectValue placeholder={t('allStaff')} />
 							</SelectTrigger>
 							<SelectContent>
-								<SelectItem value={ALL_STAFF}>All staff</SelectItem>
+								<SelectItem value={ALL_STAFF}>{t('allStaff')}</SelectItem>
 								{staffOptions.map((s) => (
 									<SelectItem key={s.id} value={String(s.id)}>
 										{s.user.firstName} {s.user.lastName}
@@ -178,14 +187,13 @@ export function PayrollPage() {
 
 				{data != null && data.excludedCount > 0 && (
 					<p className="text-sm text-muted-foreground">
-						{data.excludedCount} staff excluded — no active payroll config
-						this month.
+						{t('excluded', { count: data.excludedCount })}
 					</p>
 				)}
 
 				{isError && (
 					<div className="rounded-lg border border-destructive/30 bg-destructive/5 px-4 py-3 text-sm text-destructive">
-						Failed to load payroll. Please refresh.
+						{t('loadError')}
 					</div>
 				)}
 

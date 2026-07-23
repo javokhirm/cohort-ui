@@ -34,16 +34,20 @@ export function OwnerStep({
 		<Card>
 			<CardContent className="flex flex-col gap-6 pt-6">
 				<div>
-					<p className="text-base font-semibold">Owner account</p>
+					<p className="text-base font-semibold">
+						{t('onboarding.ownerTitle')}
+					</p>
 					<p className="text-sm text-muted-foreground">
-						The first account — receives the OWNER role with full access.
+						{t('onboarding.ownerSubtitle')}
 					</p>
 				</div>
 
 				<div className="flex flex-col gap-4">
 					<div className="grid grid-cols-2 gap-3">
 						<div className="flex flex-col gap-1.5">
-							<Label htmlFor="owner-first-name">First name</Label>
+							<Label htmlFor="owner-first-name">
+								{t('onboarding.firstName')}
+							</Label>
 							<Input
 								id="owner-first-name"
 								value={data.ownerFirstName}
@@ -54,7 +58,9 @@ export function OwnerStep({
 							/>
 						</div>
 						<div className="flex flex-col gap-1.5">
-							<Label htmlFor="owner-last-name">Last name</Label>
+							<Label htmlFor="owner-last-name">
+								{t('onboarding.lastName')}
+							</Label>
 							<Input
 								id="owner-last-name"
 								value={data.ownerLastName}
@@ -66,7 +72,7 @@ export function OwnerStep({
 						</div>
 					</div>
 					<div className="flex flex-col gap-1.5">
-						<Label htmlFor="owner-phone">Phone number</Label>
+						<Label htmlFor="owner-phone">{t('onboarding.phoneNumber')}</Label>
 						<PhoneInput
 							id="owner-phone"
 							value={data.ownerPhone}
@@ -75,8 +81,10 @@ export function OwnerStep({
 					</div>
 					<div className="flex flex-col gap-1.5">
 						<Label htmlFor="owner-email">
-							Email{' '}
-							<span className="text-muted-foreground">(optional)</span>
+							{t('onboarding.email')}{' '}
+							<span className="text-muted-foreground">
+								{t('onboarding.optional')}
+							</span>
 						</Label>
 						<Input
 							id="owner-email"
@@ -87,7 +95,9 @@ export function OwnerStep({
 						/>
 					</div>
 					<div className="flex flex-col gap-1.5">
-						<Label htmlFor="owner-password">Temporary password</Label>
+						<Label htmlFor="owner-password">
+							{t('onboarding.tempPassword')}
+						</Label>
 						<PasswordInput
 							id="owner-password"
 							value={data.ownerPassword}
@@ -95,7 +105,7 @@ export function OwnerStep({
 							placeholder={t('onboarding.newPasswordPlaceholder')}
 						/>
 						<p className="text-xs text-muted-foreground">
-							The owner should change this on first login.
+							{t('onboarding.ownerPasswordHint')}
 						</p>
 					</div>
 				</div>

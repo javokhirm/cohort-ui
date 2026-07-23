@@ -27,7 +27,11 @@ import { SettingsTab } from '@/features/tenants/components/tenantDetails/Setting
 import { SubscriptionTab } from '@/features/tenants/components/tenantDetails/SubscriptionTab';
 import { TypeToConfirmDialog } from '@/features/tenants/components/tenantDetails/TypeToConfirmDialog';
 import { avatarClass, getInitials } from '@/features/tenants/utils';
-import { TAB_TRIGGER_CLASS } from '@/features/tenants/constants';
+import {
+	TAB_TRIGGER_CLASS,
+	TENANT_STATUS_TONE,
+	tenantStatusLabel,
+} from '@/features/tenants/constants';
 import {
 	useCancelTenant,
 	useSuspendTenant,
@@ -65,9 +69,9 @@ export function TenantDetailPage() {
 	if (!isValidId || isError) {
 		return (
 			<div className="flex flex-col items-center gap-4 py-24 text-center">
-				<p className="text-muted-foreground">Tenant not found.</p>
+				<p className="text-muted-foreground">{t('notFound')}</p>
 				<Link to="/tenants">
-					<Button variant="outline">← All tenants</Button>
+					<Button variant="outline">← {t('backToList')}</Button>
 				</Link>
 			</div>
 		);
@@ -89,7 +93,7 @@ export function TenantDetailPage() {
 				to="/tenants"
 				className="inline-flex w-fit items-center gap-1 text-sm text-muted-foreground transition-colors hover:text-foreground"
 			>
-				← All tenants
+				← {t('backToList')}
 			</Link>
 
 			<div className="flex flex-wrap items-start justify-between gap-4">
@@ -106,7 +110,9 @@ export function TenantDetailPage() {
 							<h1 className="text-xl font-bold leading-tight">
 								{tenant.name}
 							</h1>
-							<StatusBadge kind="tenant" status={tenant.status} />
+							<StatusBadge tone={TENANT_STATUS_TONE[tenant.status]}>
+								{tenantStatusLabel(t, tenant.status)}
+							</StatusBadge>
 						</div>
 					</div>
 				</div>

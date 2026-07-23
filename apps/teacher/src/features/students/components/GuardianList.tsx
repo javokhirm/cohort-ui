@@ -67,11 +67,11 @@ export function GuardianList({ studentId }: GuardianListProps) {
 								{fullName(
 									guardian.firstName,
 									guardian.lastName,
-									'Unnamed contact',
+									t('unnamedContact'),
 								)}
 							</span>
 							{guardian.isPrimary && (
-								<StatusBadge tone="red">Primary</StatusBadge>
+								<StatusBadge tone="red">{t('primary')}</StatusBadge>
 							)}
 						</div>
 						<div className="truncate text-[12px] text-muted-foreground">

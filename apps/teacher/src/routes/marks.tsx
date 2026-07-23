@@ -158,11 +158,11 @@ export function MarksRoute() {
 	const header = (
 		<PageHeader
 			className="shrink-0"
-			title={detail?.courseName ?? 'Enter marks'}
+			title={detail?.courseName ?? t('enterTitle')}
 			description={
 				detail
 					? `${detail.groupName} · ${formatFullDate(detail.sessionDate)}`
-					: `Session #${sessionId}`
+					: t('sessionNumber', { id: sessionId })
 			}
 			actions={viewToggle}
 		/>

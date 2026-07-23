@@ -23,6 +23,7 @@ interface GroupCardProps {
  * perfect absence.
  */
 export function GroupCard({ group, branchName, onOpen }: GroupCardProps) {
+	const t = useAppT('groups');
 	const tAttendance = useAppT('attendance');
 	const rule = group.scheduleRule;
 	const filledLabel = capacityLabel(group.activeEnrollmentsCount, group.capacity);
@@ -120,7 +121,7 @@ export function GroupCard({ group, branchName, onOpen }: GroupCardProps) {
 							attendanceToneClass(group.attendanceRate),
 						)}
 					>
-						{group.attendanceRate}% attendance
+						{t('attendancePercent', { rate: group.attendanceRate })}
 					</span>
 				)}
 			</div>

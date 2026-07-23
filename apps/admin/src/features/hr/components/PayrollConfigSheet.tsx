@@ -65,8 +65,7 @@ function PayrollConfigFields({
 			/>
 			{lockType && (
 				<p className="text-xs text-muted-foreground">
-					A window keeps the pay model it opened with — switch between fixed and
-					percentage pay by changing the pay model instead.
+					{t('payroll.sheet.lockTypeHint')}
 				</p>
 			)}
 			{payrollType === 'PERCENT' ? (
@@ -105,7 +104,7 @@ function PayrollConfigFields({
 				label={t('payroll.field.effectiveFrom')}
 			/>
 			<p className="text-xs text-muted-foreground">
-				Payroll from this date uses this pay model.
+				{t('payroll.field.effectiveFromHint')}
 			</p>
 		</FieldGroup>
 	);

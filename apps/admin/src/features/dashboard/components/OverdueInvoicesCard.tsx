@@ -67,7 +67,7 @@ export function OverdueInvoicesCard() {
 											{invoice.studentName}
 										</p>
 										<p className="truncate text-xs text-muted-foreground">
-											{invoice.invoiceNumber} · Due{' '}
+											{invoice.invoiceNumber} · {t('due')}{' '}
 											{formatDate(invoice.dueDate)}
 										</p>
 									</div>
@@ -76,7 +76,7 @@ export function OverdueInvoicesCard() {
 											{formatPriceCompact(invoice.amountDue)}
 										</p>
 										<p className="text-xs text-muted-foreground">
-											{days} {days === 1 ? 'day' : 'days'}
+											{t('overdueDays', { count: days })}
 										</p>
 									</div>
 								</div>

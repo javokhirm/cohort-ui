@@ -27,7 +27,7 @@ export function DangerZoneTab({
 							{t('danger.unsuspend')}
 						</p>
 						<p className="mt-1 text-xs text-muted-foreground">
-							Restores access for all staff, teachers, students and parents.
+							{t('danger.unsuspendHint')}
 						</p>
 					</div>
 					<Button
@@ -47,9 +47,7 @@ export function DangerZoneTab({
 							{t('danger.suspend')}
 						</p>
 						<p className="mt-1 text-xs text-muted-foreground">
-							Immediately locks out all staff, teachers, students and
-							parents. Data is retained. This is reversible — you can
-							reactivate at any time.
+							{t('danger.suspendHint')}
 						</p>
 					</div>
 					<Button
@@ -70,9 +68,7 @@ export function DangerZoneTab({
 						{t('danger.cancelSubscription')}
 					</p>
 					<p className="mt-1 text-xs text-muted-foreground">
-						{t('danger.terminates')}
-						after 30 days. This is <strong>permanent</strong> and cannot be
-						undone from the console.
+						{t('danger.cancelSubscriptionHint')}
 					</p>
 				</div>
 				<Button

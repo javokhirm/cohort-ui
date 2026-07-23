@@ -19,15 +19,17 @@ export function BranchStep({
 		<Card>
 			<CardContent className="flex flex-col gap-6 pt-6">
 				<div>
-					<p className="text-base font-semibold">Initial branch</p>
+					<p className="text-base font-semibold">
+						{t('onboarding.initialBranch')}
+					</p>
 					<p className="text-sm text-muted-foreground">
-						Every center has at least one branch. You can add more later.
+						{t('onboarding.branchSubtitle')}
 					</p>
 				</div>
 
 				<div className="flex flex-col gap-4">
 					<div className="flex flex-col gap-1.5">
-						<Label htmlFor="branch-name">Branch name</Label>
+						<Label htmlFor="branch-name">{t('onboarding.branchName')}</Label>
 						<Input
 							id="branch-name"
 							value={data.branchName}
@@ -36,7 +38,7 @@ export function BranchStep({
 						/>
 					</div>
 					<div className="flex flex-col gap-1.5">
-						<Label htmlFor="branch-code">Branch code</Label>
+						<Label htmlFor="branch-code">{t('onboarding.branchCode')}</Label>
 						<Input
 							id="branch-code"
 							value={data.branchCode}
@@ -50,7 +52,7 @@ export function BranchStep({
 							placeholder={t('onboarding.branchCodePlaceholder')}
 						/>
 						<p className="text-xs text-muted-foreground">
-							Short unique identifier used in reports.
+							{t('onboarding.branchCodeHint')}
 						</p>
 					</div>
 				</div>

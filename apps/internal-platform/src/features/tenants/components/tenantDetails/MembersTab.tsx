@@ -20,11 +20,22 @@ const MEMBER_STATUS_TONE: Record<string, StatusTone> = {
 	INACTIVE: 'slate',
 };
 
-const MEMBER_STATUS_LABEL: Record<string, string> = {
-	ACTIVE: 'Active',
-	INVITED: 'Invited',
-	INACTIVE: 'Inactive',
-};
+/** Localized member-status label — keeps the enum→key mapping type-safe. */
+function memberStatusLabel(
+	t: ReturnType<typeof useAppT<'tenants'>>,
+	status: string,
+): string {
+	switch (status) {
+		case 'ACTIVE':
+			return t('memberStatus.active');
+		case 'INVITED':
+			return t('memberStatus.invited');
+		case 'INACTIVE':
+			return t('memberStatus.inactive');
+		default:
+			return status;
+	}
+}
 
 /**
  * Built per render rather than held at module scope: the headers are
@@ -80,7 +91,7 @@ function buildColumns(
 				const status = getValue<string>();
 				return (
 					<StatusBadge tone={MEMBER_STATUS_TONE[status] ?? 'slate'}>
-						{MEMBER_STATUS_LABEL[status] ?? status}
+						{memberStatusLabel(t, status)}
 					</StatusBadge>
 				);
 			},
@@ -110,7 +121,7 @@ export function MembersTab({ members }: { members: TenantMemberView[] }) {
 				getRowId={(row) => String(row.userId)}
 				emptyState={
 					<div className="py-16 text-center text-sm text-muted-foreground">
-						No members found.
+						{t('membersEmpty')}
 					</div>
 				}
 				className="rounded-none border-0"

@@ -48,7 +48,7 @@ function buildColumns(t: ReturnType<typeof useAppT<'audit'>>): ColumnDef<AuditLo
 					{row.original.tenant ? (
 						row.original.tenant.name
 					) : (
-						<span className="italic">Platform</span>
+						<span className="italic">{t('platform')}</span>
 					)}
 				</span>
 			),
@@ -113,10 +113,10 @@ export function AuditLogPage() {
 	return (
 		<div className="flex flex-col gap-6">
 			<div>
-				<h1 className="text-xl font-semibold tracking-tight">Audit Log</h1>
+				<h1 className="text-xl font-semibold tracking-tight">{t('title')}</h1>
 				<p className="text-sm text-muted-foreground">
-					Platform-wide action trail — newest first
-					{total > 0 ? ` · ${total} entries` : ''}
+					{t('subtitle')}
+					{total > 0 ? ` · ${t('entriesSuffix', { count: total })}` : ''}
 				</p>
 			</div>
 
@@ -135,7 +135,7 @@ export function AuditLogPage() {
 
 			{isError && (
 				<div className="rounded-lg border border-destructive/30 bg-destructive/5 px-4 py-3 text-sm text-destructive">
-					Failed to load audit logs. Please refresh.
+					{t('loadError')}
 				</div>
 			)}
 
@@ -153,7 +153,7 @@ export function AuditLogPage() {
 					}
 					emptyState={
 						<div className="py-16 text-center text-sm text-muted-foreground">
-							No audit log entries match your filters.
+							{t('empty')}
 						</div>
 					}
 					className="rounded-none border-0"

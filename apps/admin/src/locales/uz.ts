@@ -670,6 +670,8 @@ export const uz = {
 				updateModelFailed: 'Ish haqi modelini yangilab boʻlmadi',
 				updatedWindow: 'Ish haqi oynasi yangilandi',
 				updateWindowFailed: 'Ish haqi oynasini yangilab boʻlmadi',
+				lockTypeHint:
+					'Oyna oʻzi ochilgan toʻlov modelini saqlab qoladi — belgilangan va foizli toʻlov oʻrtasida toʻlov modelini oʻzgartirish orqali almashing.',
 			},
 			type: {
 				FIXED: 'Belgilangan maosh',
@@ -683,6 +685,8 @@ export const uz = {
 				percentPlaceholder: 'masalan, 50',
 				percentHint:
 					'Oʻqituvchi oʻz guruhlaridagi oʻquvchilar oʻqish toʻlovining shu ulushini oladi — yakunlangan darslarga mutanosib ravishda.',
+				effectiveFromHint:
+					'Shu sanadan boshlab ish haqi shu toʻlov modelidan foydalanadi.',
 			},
 			validation: {
 				modelRequired: 'Ish haqi modelini tanlang',
@@ -698,6 +702,7 @@ export const uz = {
 		create: 'Guruh yaratish',
 		edit: 'Guruhni tahrirlash',
 		back: 'Guruhlarga qaytish',
+		backToGroup: '{{name}}ga qaytish',
 		created: 'Guruh yaratildi',
 		updated: 'Guruh yangilandi',
 		searchPlaceholder: 'Nomi yoki kodi boʻyicha qidirish…',
@@ -707,6 +712,8 @@ export const uz = {
 		noRoom: 'Xona yoʻq',
 		unassigned: 'Biriktirilmagan',
 		noSchedule: 'Jadval belgilanmagan',
+		loadError: 'Guruhlarni yuklab boʻlmadi. Sahifani yangilang.',
+		emptyFiltered: 'Bu filtrlarga mos guruh topilmadi.',
 		status: {
 			PLANNED: 'Rejalashtirilgan',
 			ACTIVE: 'Faol',
@@ -778,8 +785,12 @@ export const uz = {
 				groupStatus: 'Guruh holati',
 				dateRange: 'Sana oraligʻi',
 				weeklySchedule: 'Haftalik jadval',
+				days: 'Kunlar *',
 			},
+			previewTitle: 'Darslar koʻrinishi',
 			previewEmpty: 'Darslarni koʻrish uchun kunlar va sana oraligʻini tanlang',
+			previewCount_one: 'Bu qoida {{count}} ta dars yaratadi',
+			previewCount_other: 'Bu qoida {{count}} ta dars yaratadi',
 			saveChanges: 'Oʻzgarishlarni saqlash',
 			reschedule: {
 				title: 'Darslar qayta rejalashtirilsinmi?',
@@ -838,12 +849,21 @@ export const uz = {
 			},
 		},
 		roster: {
+			title: 'Roʻyxat',
+			enrolledSummary: '{{filled}} qabul qilingan',
+			enrolledOn: 'qabul qilingan {{date}}',
 			enroll: 'Oʻquvchilarni qabul qilish',
 			enrollSearchHint:
 				'Faol oʻquvchilarni qidiring va ularni ushbu guruhga qoʻshing.',
 			enrollDescription:
 				'Bu guruh roʻyxatini shakllantirish uchun faol oʻquvchilarni qabul qiling.',
 			emptyTitle: 'Hali oʻquvchi qabul qilinmagan',
+			emptyFiltered: 'Bu holatdagi qabullar yoʻq.',
+			noMatchingStudents: 'Mos oʻquvchi topilmadi.',
+			startDateHint:
+				'Oʻquvchi haqiqatda boshlagan kun. Bu ularning billing yilligini belgilaydi, shuning uchun ularni kech qoʻshsangiz, sanani orqaga suring.',
+			enrolledToast_one: '{{count}} ta oʻquvchi qabul qilindi',
+			enrolledToast_other: '{{count}} ta oʻquvchi qabul qilindi',
 			drop: 'Oʻquvchini chiqarish',
 			dropPlaceholder: 'masalan, koʻchirildi, qatnashishni toʻxtatdi…',
 			dropped: 'Oʻquvchi guruhdan chiqarildi',
@@ -885,6 +905,9 @@ export const uz = {
 				confirm: 'Darsni bekor qilish',
 				reasonPlaceholder: 'masalan, oʻqituvchi band, bayram kuni…',
 				done: 'Dars bekor qilindi',
+				warning:
+					'Qabul qilingan oʻquvchilarga xabar beriladi. Buni ortga qaytarib boʻlmaydi.',
+				reasonRequired: 'Sabab *',
 			},
 			reschedule: {
 				action: 'Darsni koʻchirish',
@@ -899,6 +922,7 @@ export const uz = {
 			end: 'Tugashi',
 			branch: 'Filial',
 			cancelReason: 'Sabab',
+			cancellationReasonLabel: 'Bekor qilish sababi',
 			clashingGroup: 'Toʻqnashayotgan guruh',
 		},
 		actions: {
@@ -912,6 +936,7 @@ export const uz = {
 		schedule: {
 			title: 'Dars jadvali',
 			description: 'Barcha guruhlar boʻyicha darslar kalendari',
+			loadError: 'Jadvalni yuklab boʻlmadi. Sahifani yangilang.',
 		},
 		enrollmentDateError:
 			'Bu boshlanish sanasi oʻquvchiga hech qachon hisob-faktura chiqarilmaydigan billing davrlarini oʻtkazib yuboradi. {{from}} va {{to}} orasidagi sanani tanlang.',
@@ -1216,6 +1241,9 @@ export const uz = {
 			groupsUsing: 'Ushbu rejadan foydalanayotgan guruhlar',
 			collected: 'Yigʻilgan',
 			outstanding: 'Qoldiq',
+			notInUse: 'Foydalanilmayapti',
+			groupCount_one: '{{count}} ta guruh',
+			groupCount_other: '{{count}} ta guruh',
 		},
 		misc: {
 			billTo: 'Kimga',
@@ -1260,6 +1288,178 @@ export const uz = {
 			dunning: 'Eslatmalar',
 			advanced: 'Qoʻshimcha',
 		},
+		invoiceForm: {
+			editTitle: 'Hisob-fakturani tahrirlash',
+			editDescription:
+				'Muddati va izohlarni faqat qoralama holatida oʻzgartirish mumkin.',
+			saveChanges: 'Oʻzgarishlarni saqlash',
+			noDiscount: 'Chegirmasiz',
+			item: 'Qator {{index}}',
+			createFailed: 'Hisob-fakturani yaratib boʻlmadi',
+			discountApplyFailed:
+				'Hisob-faktura {{number}} yaratildi, lekin chegirma qoʻllanmadi: {{error}}',
+			unknownError: 'nomaʼlum xatolik',
+			zeroTotalWarning:
+				'Bu chegirma jami summani 0 UZS ga tushiradi — hech narsa hisoblanmaydi.',
+		},
+		invoiceActions: {
+			outstandingHint: 'Qoldiq balans bor — yangilash uchun toʻlovni qayd eting.',
+			issueFailed: 'Hisob-fakturani chiqarib boʻlmadi',
+			walletApplied: '{{amount}} UZS hamyon mablagʻi qoʻllandi',
+			noWalletCredit: 'Qoʻllash uchun hamyon mablagʻi yoʻq',
+			applyWalletFailed: 'Hamyon mablagʻini qoʻllab boʻlmadi',
+			voidFailed: 'Hisob-fakturani bekor qilib boʻlmadi',
+			issuedInline: 'Chiqarilgan',
+			dueInline: 'Toʻlov muddati',
+		},
+		refundForm: {
+			destinationWallet: 'Hamyon',
+			destinationCashOut: 'Naqd yechish',
+			cannotUndo: 'Buni ortga qaytarib boʻlmaydi.',
+			destination: 'Yoʻnalish *',
+			walletOnlyHint:
+				'Bu toʻlov hisob-fakturaga bogʻlanmagan, shuning uchun faqat naqd sifatida qaytariladi.',
+		},
+		creditNoteForm: {
+			dialogDescription:
+				'Bu hisob-faktura toʻlovlarining bir qismini bekor qiladi. Buni ortga qaytarib boʻlmaydi.',
+			maxCreditable: 'Maksimal {{max}} UZS qaytarish mumkin.',
+		},
+		applyDiscount: {
+			allApplied: 'Har bir faol chegirma bu hisob-fakturaga allaqachon qoʻllangan.',
+			noneAvailable:
+				'Faol chegirmalar yoʻq. Avval «Chegirmalar» boʻlimida yarating.',
+			zeroTotalWarning:
+				'Bu chegirma jami summani 0 UZS ga tushiradi — boshqa qarz qolmaydi.',
+		},
+		discountCard: {
+			percentageOff: 'Foizli chegirma',
+			fixedAmountOff: 'Belgilangan summa chegirmasi',
+			validFromLabel: '{{date}} dan',
+			validUntilLabel: '{{date}} gacha',
+			editAria: '{{name}} chegirmasini tahrirlash',
+			off: 'chegirma',
+			usageCapped: '{{used}} / {{max}} ishlatilgan',
+			usageUncapped_one: '{{count}} marta ishlatilgan',
+			usageUncapped_other: '{{count}} marta ishlatilgan',
+		},
+		enrollmentDiscount: {
+			hint: 'Bu qabulning oylik hisob-fakturasiga har oy, muddati tugaguncha avtomatik qoʻllanadi. Asosdagi promo-kodning foydalanish chekloviga doimiy biriktirmalar taʼsir qilmaydi.',
+			removeConfirm: '«{{name}}» doimiy chegirmasi olib tashlansinmi?',
+			removeAria: '{{name}}ni olib tashlash',
+			validUntilShort: '{{date}} gacha',
+			noEndDate: 'muddatsiz',
+			allAssigned: 'Har bir faol chegirma bu qabulga allaqachon biriktirilgan.',
+			noneToAssign:
+				'Biriktirish uchun faol chegirma yoʻq — avval «Chegirmalar» boʻlimida yarating.',
+			validUntilHint:
+				'Shu sanagacha yaratilgan har bir oylik hisob-fakturaga qoʻllanadi. Muddatsiz qoldirish uchun boʻsh qoldiring.',
+		},
+		feePlanForm: {
+			sharedOption: 'Umumiy — barcha filiallar',
+			standaloneHint:
+				'Rejalar mustaqil. Saqlaganingizdan soʻng uni kursga biriktiring — oʻsha kursning har bir guruhi shu reja boʻyicha hisob chiqaradi.',
+			repriceHint:
+				'Summa yoki davrni oʻzgartirsangiz, bu guruhlarning kelgusi barcha hisob-fakturalari qayta narxlanadi. Allaqachon chiqarilgan hisob-fakturalar oʻz rejasida qoladi.',
+			noGroupsHint:
+				'Bu rejada hali guruh yoʻq. Guruh uni kursidan meros qilib oladi — kursni yaratganingizda yoki tahrirlaganingizda rejani biriktiring.',
+			loadError: 'Guruhlarni yuklab boʻlmadi. Sahifani yangilang.',
+			loadingGroups: 'Guruhlar yuklanmoqda…',
+		},
+		generateExtra: {
+			failed: 'Hisob-fakturalarni yaratib boʻlmadi',
+			titleAnniversary: 'Muddati kelgan hisob-fakturalarni yaratish',
+			descAnniversary:
+				'Oʻz davri boshlangan, lekin hali hisob chiqarilmagan har bir oʻquvchiga hisob-faktura chiqaradi. Har bir oʻquvchi oʻz davri — qabul yilligida boshlangan davr — uchun hisoblanadi, shuning uchun oy tanlanmaydi.',
+			descPostpaid:
+				'Tanlangan oyni toʻliq oʻtgach hisoblaydi — bu bitta ishga tushirish ham vaqtga asoslangan oylik qismini, ham dars sarfiga asoslangan qismini qamrab oladi.',
+			descPrepaid: 'Tanlangan oyni boshlanishidan oldin, oldindan hisoblaydi.',
+			consumedMonth: 'Sarflangan oy',
+			billingMonth: 'Hisob-kitob oyi',
+			hintAnniversary:
+				'Tungi ishga tushirish buni allaqachon bajaradi. Undan uzilishdan keyin yetib olish uchun foydalaning — joriy davri uchun allaqachon hisob chiqarilgan oʻquvchilar tegilmaydi.',
+			hintPostpaid:
+				'{{period}} da sarflangan qabullar uchun hisob-fakturalar yaratadi. Bu davr uchun mavjud hisob-fakturalar tegilmaydi.',
+			hintPrepaid:
+				'{{period}} uchun oldindan hisob-fakturalar yaratadi. Bu davr uchun mavjud hisob-fakturalar tegilmaydi.',
+			resultTitle: '{{period}} uchun hisob-fakturalar yaratildi',
+			invoicesCreated_one: '{{count}} ta hisob-faktura yaratildi',
+			invoicesCreated_other: '{{count}} ta hisob-faktura yaratildi',
+			proratedSuffix_one: ' ({{count}} ta qismli)',
+			proratedSuffix_other: ' ({{count}} ta qismli)',
+			errorsTitle_one: '{{count}} ta qabulda yaratib boʻlmadi',
+			errorsTitle_other: '{{count}} ta qabulda yaratib boʻlmadi',
+			errorsDescription:
+				'Qolgan ishga tushirish yakunlandi — bular oʻtkazib yuborildi, hisoblanmadi. Qayta ishga tushirib koʻring; sabab uchun server jurnallarini tekshiring.',
+		},
+		policyPage: {
+			managedDescription:
+				'Bu siyosat markazingiz chiqaradigan har bir hisob-fakturani boshqaradi, shuning uchun u shu yerda emas, Cohort jamoasi tomonidan sozlanadi. Oʻzgartirish uchun qoʻllab-quvvatlashga murojaat qiling — u keyingi hisob-kitob ishga tushishidan boshlab kuchga kiradi va allaqachon chiqarilgan hisob-fakturalarni oʻzgartirmaydi.',
+			forbidden: 'Billing siyosatini koʻrish uchun ruxsatingiz yoʻq.',
+			loading: 'Billing siyosati yuklanmoqda…',
+		},
+		pickerExtra: {
+			selectGroup: 'Guruhni tanlang…',
+			selectStudent: 'Oʻquvchini tanlang…',
+		},
+		paymentDetail: {
+			dateTime: 'Sana va vaqt',
+			notYetSettled: 'Hali hisoblanmagan',
+			notLinkedToInvoice: 'Hisob-fakturaga bogʻlanmagan.',
+		},
+		policyDetail: {
+			billingMode: 'Hisob-kitob rejimi',
+			billingCycle: 'Hisob-kitob davri',
+			invoiceDue: 'Toʻlov muddati',
+			billingDay: 'Hisob-kitob kuni',
+			defaultDueDay: 'Standart toʻlov kuni',
+			defaultProration: 'Standart qismli hisoblash',
+			immediateDueOffset: 'Darhol toʻlov muddati siljishi',
+			gracePeriod: 'Imtiyozli muddat',
+			chargeOnEnrollment: 'Qabulda hisoblash',
+			lateFees: 'Kechikish jarimalari',
+			type: 'Turi',
+			amount: 'Summa',
+			recurrence: 'Takrorlanishi',
+			maxPerInvoice: 'Hisob-fakturaga maksimal',
+			autoSuspend: 'Qabulni avtomatik toʻxtatish',
+			autoCancel: 'Qabulni avtomatik bekor qilish',
+			paymentReminders: 'Toʻlov eslatmalari',
+			consumptionRule: 'Sarf qoidasi',
+			autoApplyCredit: 'Hamyon mablagʻini avtomatik qoʻllash',
+			modePrepaid: 'Oldindan — oldindan hisoblanadi',
+			modePostpaid: 'Keyin — keyin hisoblanadi',
+			anchorCalendar: 'Kalendar oyi',
+			anchorEnrollment: 'Qabul yilligi',
+			prorationSession: 'Dars asosida',
+			prorationDaily: 'Kunlik',
+			prorationNone: 'Yoʻq',
+			consumptionAttendedPlusUnexcused: 'Qatnashgan + sababsiz',
+			consumptionAllScheduled: 'Barcha rejalashtirilgan',
+			consumptionAttendedOnly: 'Faqat qatnashgan',
+			lateFeeFixed: 'Belgilangan summa',
+			lateFeePercent: 'Hisob-faktura foizi',
+			recurrenceOneTime: 'Bir marta',
+			recurrenceDaily: 'Kunlik',
+			recurrenceWeekly: 'Haftalik',
+			on: 'Yoqilgan',
+			off: 'Oʻchirilgan',
+			disabled: 'Oʻchirilgan',
+			daysPastDue: '{{days}} kun kechikkan',
+			dueOnCycleStart: 'Har bir oʻquvchining davri boshlanish sanasida',
+			dueDaysIntoCycle: 'Har bir oʻquvchining davriga {{days}} kun',
+			dayOfMonth: 'Oyning {{day}}-kuni',
+			prorationNotApplied: '{{method}} — bu davrda qoʻllanilmaydi',
+			sameDay: 'Oʻsha kuni',
+			daysValue: '{{days}} kun',
+			graceNone: 'Yoʻq — toʻlov muddatida muddati oʻtadi',
+			graceValue:
+				'Hisob-faktura muddati oʻtgan deb belgilanishidan {{days}} kun oldin',
+			chargeOnFirstCycle: 'Yoqilgan — birinchi toʻliq davr darhol hisoblanadi',
+			chargeOnProrated: 'Yoqilgan — qismli hisob-faktura darhol chiqariladi',
+			chargeOff: 'Oʻchirilgan — keyingi ishga tushishda hisoblanadi',
+			uncapped: 'Cheklovsiz',
+		},
 	},
 	payroll: {
 		title: 'Ish haqi',
@@ -1275,6 +1475,18 @@ export const uz = {
 		export: 'Eksport',
 		allStaff: 'Barcha xodimlar',
 		howCalculated: 'Bu qanday hisoblanadi',
+		paid: 'Toʻlangan',
+		filterAll: 'Barchasi',
+		staffLabel: 'Xodim',
+		loadError: 'Ish haqini yuklab boʻlmadi. Sahifani yangilang.',
+		headerSubtitle:
+			'har bir oʻqituvchi uchun oʻtilgan darslar va oʻquvchilardan hisoblanadi',
+		excluded_one:
+			'{{count}} xodim chiqarildi — bu oyda faol ish haqi sozlamasi yoʻq.',
+		excluded_other:
+			'{{count}} xodim chiqarildi — bu oyda faol ish haqi sozlamasi yoʻq.',
+		emptyTitle: 'Bu filtrga mos oʻqituvchi yoʻq',
+		emptyDescription: 'Bu oynada yakunlangan dars yoki faol ish haqi sozlamasi yoʻq.',
 		stat: {
 			totalComputed: 'Jami hisoblangan',
 			advances: 'Oy oʻrtasidagi avanslar',
@@ -1285,6 +1497,10 @@ export const uz = {
 			type: 'Turi',
 			amount: 'Summa',
 			status: 'Holati',
+			sessions: 'Darslar',
+			students: 'Oʻquvchilar',
+			computed: 'Hisoblangan',
+			advances: 'Avanslar',
 		},
 		advance: {
 			amountPlaceholder: 'Summa',
@@ -1293,6 +1509,21 @@ export const uz = {
 			removed: 'Avans oʻchirildi',
 			removeTitle: 'Bu avans oʻchirilsinmi?',
 			removeConfirm: 'Oʻchirish',
+			title: 'Oy oʻrtasidagi avanslar',
+			subtitle:
+				'Ish haqidan oldin olingan maosh — eslab qolinadi va sofdan chegiriladi.',
+			empty: 'Bu davrda avans yoʻq.',
+			defaultLabel: 'Avans',
+			removeAria: 'Avansni oʻchirish',
+			exceedWarning:
+				'Avanslar hisoblangan toʻlovdan oshib ketdi — sof 0 ga tenglashtirildi, oʻtkazma yoʻq.',
+			removeDescription:
+				'{{date}} da qayd etilgan {{amount}} oʻchiriladi va endi sofdan chegirilmaydi.',
+			errorFinalized: 'Bu davr yakunlangan — avanslar qulflangan.',
+			errorLinked: 'Bu avans yakunlangan ish haqiga bogʻlangan.',
+			errorFutureMonth: 'Kelajakdagi oy uchun avans qayd etib boʻlmaydi.',
+			recordFailed: 'Avansni qayd etib boʻlmadi',
+			removeFailed: 'Avansni oʻchirib boʻlmadi',
 		},
 		markPaid: {
 			done: 'Ish haqi toʻlangan deb belgilandi',
@@ -1305,6 +1536,66 @@ export const uz = {
 			confirm: 'Yakunlashni bekor qilish',
 			done: 'Holat bekor qilindi — koʻrsatkichlar yana joriy',
 		},
+		breakdown: {
+			title: 'Oʻquvchilar taqsimoti',
+			summary: '{{students}} oʻquvchi · {{sessions}} dars · {{hours}} soat',
+			empty: 'Bu davr uchun oʻquvchi qatorlari yoʻq.',
+			column: {
+				student: 'Oʻquvchi',
+				monthlyTuition: 'Oylik oʻqish toʻlovi',
+				sessions: 'Darslar',
+				proration: 'Qismli hisoblash',
+				hours: 'Soatlar',
+				revenueLine: 'Daromad qatori',
+				share: 'Ulush',
+			},
+			footnotePercent:
+				'Maxraj — bu oyda guruh oʻtkazadigan har bir dars (barcha oʻqituvchilar boʻyicha: oʻtilgan, hali rejalashtirilgan yoki bekor qilingan). Shunday qilib, toʻlov haqiqatda oʻtilgan har bir dars uchun ishlab olinadi: umumiy oʻquvchilar boʻlinadi va hech qachon ikki marta toʻlanmaydi; oy oʻrtasida qoʻshilgan yoki chiqib ketgan oʻquvchi faqat oʻzi yozilgan darslarni moliyalashtiradi; ochiq oy toʻliq toʻlovni oldindan olmasdan yigʻiladi; bekor qilingan dars esa hech kimga tegishli emas.',
+			footnoteOther:
+				'Har bir oʻquvchi daromad qatorlari faqat daromad ulushidagi oʻqituvchilarga tegishli. Bu oʻqituvchi yuqorida koʻrsatilgan asosda toʻlanadi; oʻquvchilar tekshirish uchun keltirilgan.',
+		},
+		calc: {
+			rateDescPercent: 'Oʻquvchi toʻlovlarining {{percent}}%',
+			rateDescHourly: 'Soatlik stavka',
+			rateDescFixed: 'Belgilangan oylik maosh',
+			summary: '{{sessions}} dars · {{students}} oʻquvchi',
+			revenueBase: 'Daromad asosi (qismli)',
+			fullPrecision: 'Toʻliq aniqlik',
+			rounding: 'bankir yaxlitlashi',
+			snapshotFinalized:
+				'{{date}} da yakunlandi — muzlatilgan, qayta hisoblanmaydi.',
+			snapshotFinalizedBy:
+				'{{date}} da {{name}} tomonidan yakunlandi — muzlatilgan, qayta hisoblanmaydi.',
+			formulaPercent: '{{percent}}% × {{base}} UZS daromad asosi',
+			formulaHourly: '{{hours}} soat × {{rate}} UZS/soat',
+			formulaFixedProrated: '{{base}} UZS oylik × oyning {{pct}}%',
+			formulaFixed: '{{base}} UZS oylik maosh',
+		},
+		finalize: {
+			title: '{{month}} yakunlansinmi?',
+			description_one:
+				'{{count}} oʻqituvchining joriy koʻrsatkichlari snapshotga muzlatiladi — ular darslarni kuzatishni toʻxtatadi va toʻlanadigan yozuvga aylanadi.',
+			description_other:
+				'{{count}} oʻqituvchining joriy koʻrsatkichlari snapshotga muzlatiladi — ular darslarni kuzatishni toʻxtatadi va toʻlanadigan yozuvga aylanadi.',
+			currentMonthWarning:
+				'Siz joriy oyni yakunlayapsiz. Yakunlashdan keyin oʻtilgan darslar bu oyda toʻlanmaydi.',
+			done: '{{finalized}} ta yakunlandi, {{skipped}} ta oʻtkazib yuborildi',
+			failed: 'Davrni yakunlab boʻlmadi',
+		},
+		detail: {
+			liveHint:
+				'Joriy — koʻrsatkichlar davr yakunlangunga qadar oʻtilgan darslardan yangilanadi.',
+			paidOn: '{{date}} da toʻlangan.',
+			markPaidTitle: '{{month}} toʻlangan deb belgilansinmi?',
+			markPaidDescription:
+				'{{name}} uchun {{amount}} sof toʻlangan deb qayd etiladi. Buni ortga qaytarib boʻlmaydi.',
+			noFigure: 'Bu oʻqituvchi uchun {{month}} da ish haqi koʻrsatkichi yoʻq.',
+			errorAlreadyFinalized: 'Bu davr allaqachon yakunlangan.',
+			errorExpenseLocked:
+				'Bogʻliq maosh xarajati qulflangan — bu yozuvni oʻzgartirib boʻlmaydi.',
+			markPaidFailed: 'Ish haqini toʻlangan deb belgilab boʻlmadi',
+			unfinalizeFailed: 'Yakunlashni bekor qilib boʻlmadi',
+		},
 	},
 
 	dashboard: {
@@ -1314,9 +1605,19 @@ export const uz = {
 		thisMonth: 'Shu oy',
 		thisWeek: 'Shu hafta',
 		retry: 'Qayta urinish',
+		panelError: 'Bu panelni yuklab boʻlmadi.',
+		due: 'Muddati',
+		overdueDays_one: '{{count}} kun',
+		overdueDays_other: '{{count}} kun',
 		newGroup: 'Yangi guruh',
 		addStudent: 'Oʻquvchi qoʻshish',
 		createInvoice: 'Hisob-faktura yaratish',
+		greeting: {
+			morning: 'Xayrli tong',
+			afternoon: 'Xayrli kun',
+			evening: 'Xayrli kech',
+			withName: '{{greeting}}, {{name}}',
+		},
 		stat: {
 			activeStudents: 'Faol oʻquvchilar',
 			revenueThisMonth: 'Shu oydagi daromad',
@@ -1360,6 +1661,13 @@ export const uz = {
 		confirmPassword: 'Yangi parolni tasdiqlang',
 		confirmPasswordPlaceholder: 'Yangi parolni qayta kiriting',
 		changed: 'Parol oʻzgartirildi. Keyingi kirishda undan foydalaning.',
+		loadError: 'Profilingizni yuklab boʻlmadi. Sahifani yangilang.',
+		profileCardTitle: 'Profil',
+		identityHint:
+			'Ismingiz yoki aloqa maʼlumotlaringizni oʻzgartirish uchun administratorga murojaat qiling.',
+		changeDescription:
+			'Oʻz hisobingiz uchun yangi parol belgilang. Siz tizimda qolasiz — yangi parol keyingi kirishda kerak boʻladi.',
+		changeFailed: 'Parolni oʻzgartirib boʻlmadi. Qayta urinib koʻring.',
 	},
 
 	shell: {
@@ -1368,5 +1676,6 @@ export const uz = {
 		prevMonth: 'Oldingi oy',
 		nextMonth: 'Keyingi oy',
 		brandSurface: 'BOSHQARUV',
+		backToSignIn: 'Kirishga qaytish',
 	},
 } as const;

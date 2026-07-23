@@ -132,7 +132,7 @@ function GenerateInvoicesForm({ onClose }: { onClose: () => void }) {
 			});
 			setResult(data);
 		} catch (err) {
-			toast.error(isApiError(err) ? err.message : 'Failed to generate invoices');
+			toast.error(isApiError(err) ? err.message : t('generateExtra.failed'));
 		}
 	}
 
@@ -151,15 +151,15 @@ function GenerateInvoicesForm({ onClose }: { onClose: () => void }) {
 			<DialogHeader>
 				<DialogTitle>
 					{isAnniversary
-						? 'Generate due invoices'
-						: 'Generate monthly invoices'}
+						? t('generateExtra.titleAnniversary')
+						: t('misc.generateMonthly')}
 				</DialogTitle>
 				<DialogDescription>
 					{isAnniversary
-						? 'Bills every student whose own cycle has started but has not been invoiced yet. Each student is billed for their own period — the one that began on their enrollment anniversary — so there is no month to choose.'
+						? t('generateExtra.descAnniversary')
 						: isPostpaid
-							? 'Bills the selected month in arrears, after it has fully elapsed — this single run covers both the time-based monthly leg and the consumption-based per-session leg.'
-							: 'Bills the selected month in advance, before it starts.'}
+							? t('generateExtra.descPostpaid')
+							: t('generateExtra.descPrepaid')}
 				</DialogDescription>
 			</DialogHeader>
 
@@ -167,7 +167,9 @@ function GenerateInvoicesForm({ onClose }: { onClose: () => void }) {
 				{!isAnniversary && (
 					<div className="flex flex-col gap-1.5">
 						<Label htmlFor="generate-period">
-							{isPostpaid ? 'Consumed month' : 'Billing month'}
+							{isPostpaid
+								? t('generateExtra.consumedMonth')
+								: t('generateExtra.billingMonth')}
 						</Label>
 						<Input
 							id="generate-period"
@@ -200,10 +202,14 @@ function GenerateInvoicesForm({ onClose }: { onClose: () => void }) {
 
 			<p className="text-xs text-muted-foreground">
 				{isAnniversary
-					? 'The nightly run already does this. Use it to catch up after downtime — students already invoiced for their current cycle are left untouched.'
+					? t('generateExtra.hintAnniversary')
 					: isPostpaid
-						? `Generates invoices for enrollments consumed in ${formatPeriod(year, month)}. Existing invoices for the period are left untouched.`
-						: `Generates invoices for ${formatPeriod(year, month)}, in advance. Existing invoices for the period are left untouched.`}
+						? t('generateExtra.hintPostpaid', {
+								period: formatPeriod(year, month),
+							})
+						: t('generateExtra.hintPrepaid', {
+								period: formatPeriod(year, month),
+							})}
 			</p>
 
 			<DialogFooter>
@@ -247,11 +253,15 @@ function GenerationResult({
 		<div className="flex flex-col gap-5">
 			<DialogHeader>
 				<DialogTitle>
-					Invoices generated for {formatResultPeriod(result.period)}
+					{t('generateExtra.resultTitle', {
+						period: formatResultPeriod(result.period),
+					})}
 				</DialogTitle>
 				<DialogDescription>
-					{result.generated} invoice{result.generated === 1 ? '' : 's'} created
-					{result.prorated > 0 ? ` (${result.prorated} prorated)` : ''}.
+					{t('generateExtra.invoicesCreated', { count: result.generated })}
+					{result.prorated > 0
+						? t('generateExtra.proratedSuffix', { count: result.prorated })
+						: ''}
 				</DialogDescription>
 			</DialogHeader>
 
@@ -279,12 +289,10 @@ function GenerationResult({
 			{result.errors > 0 && (
 				<Alert variant="destructive">
 					<AlertTitle>
-						{result.errors} enrollment{result.errors === 1 ? '' : 's'} failed
-						to generate
+						{t('generateExtra.errorsTitle', { count: result.errors })}
 					</AlertTitle>
 					<AlertDescription>
-						The rest of the run completed — these were skipped, not billed.
-						Re-run to retry them; check the server logs for the cause.
+						{t('generateExtra.errorsDescription')}
 					</AlertDescription>
 				</Alert>
 			)}

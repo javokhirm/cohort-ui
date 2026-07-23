@@ -54,6 +54,8 @@ export function GroupHeaderCard({
 	onOpenMarks,
 }: GroupHeaderCardProps) {
 	const t = useAppT('groups');
+	const tAttendance = useAppT('attendance');
+	const tMarks = useAppT('marks');
 	const rule = group.scheduleRule;
 
 	return (
@@ -87,11 +89,11 @@ export function GroupHeaderCard({
 			<div className="mt-3.5 flex gap-2 border-t border-border pt-3.5">
 				<Button variant="outline" size="sm" onClick={onOpenAttendance}>
 					<ClipboardCheck className="size-3.5" />
-					{t('title')}
+					{tAttendance('title')}
 				</Button>
 				<Button variant="outline" size="sm" onClick={onOpenMarks}>
 					<PenLine className="size-3.5" />
-					{t('title')}
+					{tMarks('title')}
 				</Button>
 			</div>
 		</div>

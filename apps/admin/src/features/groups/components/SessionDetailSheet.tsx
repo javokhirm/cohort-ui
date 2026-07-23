@@ -172,7 +172,9 @@ function SessionBody({
 
 			{cancelled && session.cancellationReason && (
 				<div className="rounded-lg bg-muted px-3 py-2 text-sm">
-					<span className="font-medium">Cancellation reason: </span>
+					<span className="font-medium">
+						{t('sessions.cancellationReasonLabel')}:{' '}
+					</span>
 					{session.cancellationReason}
 				</div>
 			)}
@@ -450,10 +452,10 @@ function SessionActions({
 				{t('sessions.cancel.action')}
 			</h3>
 			<p className="text-sm text-muted-foreground">
-				Enrolled students will be notified. This can't be undone.
+				{t('sessions.cancel.warning')}
 			</p>
 			<div>
-				<Label className="mb-1.5">Reason *</Label>
+				<Label className="mb-1.5">{t('sessions.cancel.reasonRequired')}</Label>
 				<Textarea
 					value={reason}
 					onChange={(e) => setReason(e.target.value)}

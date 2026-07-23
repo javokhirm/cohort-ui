@@ -648,6 +648,8 @@ export const en: TranslationsOf<typeof uz> = {
 				updateModelFailed: 'Failed to update the pay model',
 				updatedWindow: 'Pay window updated',
 				updateWindowFailed: 'Failed to update the pay window',
+				lockTypeHint:
+					'A window keeps the pay model it opened with — switch between fixed and percentage pay by changing the pay model instead.',
 			},
 			type: {
 				FIXED: 'Fixed salary',
@@ -661,6 +663,7 @@ export const en: TranslationsOf<typeof uz> = {
 				percentPlaceholder: 'e.g. 50',
 				percentHint:
 					'The teacher earns this share of the tuition of students in their groups, prorated by completed sessions.',
+				effectiveFromHint: 'Payroll from this date uses this pay model.',
 			},
 			validation: {
 				modelRequired: 'Pick a pay model',
@@ -676,6 +679,7 @@ export const en: TranslationsOf<typeof uz> = {
 		create: 'Create group',
 		edit: 'Edit group',
 		back: 'Back to groups',
+		backToGroup: 'Back to {{name}}',
 		created: 'Group created',
 		updated: 'Group updated',
 		searchPlaceholder: 'Search by name or code…',
@@ -685,6 +689,8 @@ export const en: TranslationsOf<typeof uz> = {
 		noRoom: 'No room',
 		unassigned: 'Unassigned',
 		noSchedule: 'No schedule set',
+		loadError: 'Failed to load groups. Please refresh.',
+		emptyFiltered: 'No groups match these filters.',
 		status: {
 			PLANNED: 'Planned',
 			ACTIVE: 'Active',
@@ -756,8 +762,12 @@ export const en: TranslationsOf<typeof uz> = {
 				groupStatus: 'Group status',
 				dateRange: 'Date range',
 				weeklySchedule: 'Weekly schedule',
+				days: 'Days *',
 			},
+			previewTitle: 'Session preview',
 			previewEmpty: 'Pick days and a date range to preview sessions',
+			previewCount_one: 'This rule generates {{count}} session',
+			previewCount_other: 'This rule generates {{count}} sessions',
 			saveChanges: 'Save changes',
 			reschedule: {
 				title: 'Reschedule sessions?',
@@ -814,10 +824,19 @@ export const en: TranslationsOf<typeof uz> = {
 			},
 		},
 		roster: {
+			title: 'Roster',
+			enrolledSummary: '{{filled}} enrolled',
+			enrolledOn: 'enrolled {{date}}',
 			enroll: 'Enroll students',
 			enrollSearchHint: 'Search active students and add them to this group.',
 			enrollDescription: "Enroll active students to build this group's roster.",
 			emptyTitle: 'No students enrolled',
+			emptyFiltered: 'No enrollments with this status.',
+			noMatchingStudents: 'No matching students.',
+			startDateHint:
+				'The day the student actually started. This sets their billing anniversary, so back-date it if you are adding them late.',
+			enrolledToast_one: '{{count}} student enrolled',
+			enrolledToast_other: '{{count}} students enrolled',
 			drop: 'Drop student',
 			dropPlaceholder: 'e.g. Transferred, stopped attending…',
 			dropped: 'Student dropped from group',
@@ -859,6 +878,8 @@ export const en: TranslationsOf<typeof uz> = {
 				confirm: 'Cancel session',
 				reasonPlaceholder: 'e.g. Teacher unavailable, public holiday…',
 				done: 'Session cancelled',
+				warning: "Enrolled students will be notified. This can't be undone.",
+				reasonRequired: 'Reason *',
 			},
 			reschedule: {
 				action: 'Reschedule session',
@@ -873,6 +894,7 @@ export const en: TranslationsOf<typeof uz> = {
 			end: 'End',
 			branch: 'Branch',
 			cancelReason: 'Reason',
+			cancellationReasonLabel: 'Cancellation reason',
 			clashingGroup: 'Clashing group',
 		},
 		actions: {
@@ -886,6 +908,7 @@ export const en: TranslationsOf<typeof uz> = {
 		schedule: {
 			title: 'Schedule',
 			description: 'Session calendar across all groups',
+			loadError: 'Failed to load the schedule. Please refresh.',
 		},
 		enrollmentDateError:
 			'That start date would skip billing cycles the student would never be invoiced for. Pick a date between {{from}} and {{to}}.',
@@ -1187,6 +1210,9 @@ export const en: TranslationsOf<typeof uz> = {
 			groupsUsing: 'Groups using this plan',
 			collected: 'Collected',
 			outstanding: 'Outstanding',
+			notInUse: 'Not in use',
+			groupCount_one: '{{count}} group',
+			groupCount_other: '{{count}} groups',
 		},
 		misc: {
 			billTo: 'Bill to',
@@ -1230,6 +1256,177 @@ export const en: TranslationsOf<typeof uz> = {
 			dunning: 'Dunning',
 			advanced: 'Advanced',
 		},
+		invoiceForm: {
+			editTitle: 'Edit invoice',
+			editDescription:
+				'Due date and notes can be changed while the invoice is a draft.',
+			saveChanges: 'Save changes',
+			noDiscount: 'No discount',
+			item: 'Item {{index}}',
+			createFailed: 'Failed to create invoice',
+			discountApplyFailed:
+				'Invoice {{number}} was created, but the discount could not be applied: {{error}}',
+			unknownError: 'unknown error',
+			zeroTotalWarning:
+				'This discount brings the total to 0 UZS — nothing will be charged.',
+		},
+		invoiceActions: {
+			outstandingHint: 'Outstanding balance — record a payment to update.',
+			issueFailed: 'Failed to issue invoice',
+			walletApplied: 'Applied {{amount}} UZS in wallet credit',
+			noWalletCredit: 'No wallet credit available to apply',
+			applyWalletFailed: 'Failed to apply wallet credit',
+			voidFailed: 'Failed to void invoice',
+			issuedInline: 'Issued',
+			dueInline: 'Due',
+		},
+		refundForm: {
+			destinationWallet: 'Wallet',
+			destinationCashOut: 'Cash out',
+			cannotUndo: "This can't be undone.",
+			destination: 'Destination *',
+			walletOnlyHint:
+				"This payment isn't linked to an invoice, so it can only be refunded as cash.",
+		},
+		creditNoteForm: {
+			dialogDescription:
+				"Reverses part of this invoice's charges. This can't be undone.",
+			maxCreditable: 'Up to {{max}} UZS creditable.',
+		},
+		applyDiscount: {
+			allApplied: 'Every active discount is already applied to this invoice.',
+			noneAvailable:
+				'No active discounts are available. Create one under Discounts first.',
+			zeroTotalWarning:
+				'This discount brings the total to 0 UZS — nothing more will be owed.',
+		},
+		discountCard: {
+			percentageOff: 'Percentage off',
+			fixedAmountOff: 'Fixed amount off',
+			validFromLabel: 'From {{date}}',
+			validUntilLabel: 'Until {{date}}',
+			editAria: 'Edit {{name}}',
+			off: 'off',
+			usageCapped: '{{used}} / {{max}} used',
+			usageUncapped_one: '{{count}} redeemed',
+			usageUncapped_other: '{{count}} redeemed',
+		},
+		enrollmentDiscount: {
+			hint: "Applies automatically to this enrollment's monthly invoice — every month, until it expires. Usage caps on the underlying promo are not consumed by standing assignments.",
+			removeConfirm: 'Remove the "{{name}}" standing discount?',
+			removeAria: 'Remove {{name}}',
+			validUntilShort: 'until {{date}}',
+			noEndDate: 'no end date',
+			allAssigned: 'Every active discount is already assigned to this enrollment.',
+			noneToAssign:
+				'No active discounts to assign — create one under Discounts first.',
+			validUntilHint:
+				'Applied to every monthly invoice generated before this date. Leave blank for no end date.',
+		},
+		feePlanForm: {
+			sharedOption: 'Shared — all branches',
+			standaloneHint:
+				'Plans are standalone. Attach this one to a course after you save it — every group of that course will bill on it.',
+			repriceHint:
+				'Changing the amount or cycle re-prices every future invoice for these groups. Invoices already issued keep their original plan.',
+			noGroupsHint:
+				'No groups bill on this plan yet. A group inherits it from its course — attach the plan when you create or edit a course.',
+			loadError: 'Failed to load groups. Please refresh.',
+			loadingGroups: 'Loading groups…',
+		},
+		generateExtra: {
+			failed: 'Failed to generate invoices',
+			titleAnniversary: 'Generate due invoices',
+			descAnniversary:
+				'Bills every student whose own cycle has started but has not been invoiced yet. Each student is billed for their own period — the one that began on their enrollment anniversary — so there is no month to choose.',
+			descPostpaid:
+				'Bills the selected month in arrears, after it has fully elapsed — this single run covers both the time-based monthly leg and the consumption-based per-session leg.',
+			descPrepaid: 'Bills the selected month in advance, before it starts.',
+			consumedMonth: 'Consumed month',
+			billingMonth: 'Billing month',
+			hintAnniversary:
+				'The nightly run already does this. Use it to catch up after downtime — students already invoiced for their current cycle are left untouched.',
+			hintPostpaid:
+				'Generates invoices for enrollments consumed in {{period}}. Existing invoices for the period are left untouched.',
+			hintPrepaid:
+				'Generates invoices for {{period}}, in advance. Existing invoices for the period are left untouched.',
+			resultTitle: 'Invoices generated for {{period}}',
+			invoicesCreated_one: '{{count}} invoice created',
+			invoicesCreated_other: '{{count}} invoices created',
+			proratedSuffix_one: ' ({{count}} prorated)',
+			proratedSuffix_other: ' ({{count}} prorated)',
+			errorsTitle_one: '{{count}} enrollment failed to generate',
+			errorsTitle_other: '{{count}} enrollments failed to generate',
+			errorsDescription:
+				'The rest of the run completed — these were skipped, not billed. Re-run to retry them; check the server logs for the cause.',
+		},
+		policyPage: {
+			managedDescription:
+				'This policy drives every invoice your center issues, so it is configured by the Cohort team rather than changed here. Contact support to request a change — it takes effect from your next billing run and never alters invoices that have already been issued.',
+			forbidden: "You don't have permission to view the billing policy.",
+			loading: 'Loading billing policy…',
+		},
+		pickerExtra: {
+			selectGroup: 'Select group…',
+			selectStudent: 'Select student…',
+		},
+		paymentDetail: {
+			dateTime: 'Date & time',
+			notYetSettled: 'Not yet settled',
+			notLinkedToInvoice: 'Not linked to an invoice.',
+		},
+		policyDetail: {
+			billingMode: 'Billing mode',
+			billingCycle: 'Billing cycle',
+			invoiceDue: 'Invoice due',
+			billingDay: 'Billing day',
+			defaultDueDay: 'Default due day',
+			defaultProration: 'Default proration',
+			immediateDueOffset: 'Immediate invoice due offset',
+			gracePeriod: 'Grace period',
+			chargeOnEnrollment: 'Charge on enrollment',
+			lateFees: 'Late fees',
+			type: 'Type',
+			amount: 'Amount',
+			recurrence: 'Recurrence',
+			maxPerInvoice: 'Maximum per invoice',
+			autoSuspend: 'Auto-suspend enrollment',
+			autoCancel: 'Auto-cancel enrollment',
+			paymentReminders: 'Payment reminders',
+			consumptionRule: 'Consumption rule',
+			autoApplyCredit: 'Auto-apply wallet credit',
+			modePrepaid: 'Prepaid — billed in advance',
+			modePostpaid: 'Postpaid — billed in arrears',
+			anchorCalendar: 'Calendar month',
+			anchorEnrollment: 'Enrollment anniversary',
+			prorationSession: 'Session-based',
+			prorationDaily: 'Daily',
+			prorationNone: 'None',
+			consumptionAttendedPlusUnexcused: 'Attended + unexcused',
+			consumptionAllScheduled: 'All scheduled',
+			consumptionAttendedOnly: 'Attended only',
+			lateFeeFixed: 'Fixed amount',
+			lateFeePercent: 'Percentage of the invoice',
+			recurrenceOneTime: 'One-time',
+			recurrenceDaily: 'Daily',
+			recurrenceWeekly: 'Weekly',
+			on: 'On',
+			off: 'Off',
+			disabled: 'Disabled',
+			daysPastDue: '{{days}} days past due',
+			dueOnCycleStart: "On each student's cycle start date",
+			dueDaysIntoCycle: "{{days}} days into each student's cycle",
+			dayOfMonth: 'Day {{day}} of the month',
+			prorationNotApplied: '{{method}} — not applied on this cycle',
+			sameDay: 'Same day',
+			daysValue: '{{days}} days',
+			graceNone: 'None — overdue on the due date',
+			graceValue: '{{days}} days before an invoice is marked overdue',
+			chargeOnFirstCycle: 'On — first full cycle invoiced immediately',
+			chargeOnProrated: 'On — prorated invoice issued immediately',
+			chargeOff: 'Off — billed on the next run',
+			uncapped: 'Uncapped',
+		},
 	},
 	payroll: {
 		title: 'Payroll',
@@ -1245,6 +1442,16 @@ export const en: TranslationsOf<typeof uz> = {
 		export: 'Export',
 		allStaff: 'All staff',
 		howCalculated: 'How this is calculated',
+		paid: 'Paid',
+		filterAll: 'All',
+		staffLabel: 'Staff',
+		loadError: 'Failed to load payroll. Please refresh.',
+		headerSubtitle: 'computed per teacher from sessions taught & students',
+		excluded_one: '{{count}} staff excluded — no active payroll config this month.',
+		excluded_other: '{{count}} staff excluded — no active payroll config this month.',
+		emptyTitle: 'No teachers match this filter',
+		emptyDescription:
+			'No completed sessions or active payroll config in this window.',
 		stat: {
 			totalComputed: 'Total computed',
 			advances: 'Mid-month advances',
@@ -1255,6 +1462,10 @@ export const en: TranslationsOf<typeof uz> = {
 			type: 'Type',
 			amount: 'Amount',
 			status: 'Status',
+			sessions: 'Sessions',
+			students: 'Students',
+			computed: 'Computed',
+			advances: 'Advances',
 		},
 		advance: {
 			amountPlaceholder: 'Amount',
@@ -1263,6 +1474,20 @@ export const en: TranslationsOf<typeof uz> = {
 			removed: 'Advance removed',
 			removeTitle: 'Remove this advance?',
 			removeConfirm: 'Remove',
+			title: 'Mid-month advances',
+			subtitle: 'Salary drawn before the run — remembered and deducted from net.',
+			empty: 'No advances this period.',
+			defaultLabel: 'Advance',
+			removeAria: 'Remove advance',
+			exceedWarning:
+				'Advances exceed computed pay — net clamped to 0, no carry-over.',
+			removeDescription:
+				'{{amount}} recorded {{date}} is deleted and no longer deducted from net.',
+			errorFinalized: 'This period is finalized — advances are locked.',
+			errorLinked: 'This advance is locked into a finalized payroll.',
+			errorFutureMonth: 'Advances cannot be recorded for a future month.',
+			recordFailed: 'Failed to record the advance',
+			removeFailed: 'Failed to remove the advance',
 		},
 		markPaid: {
 			done: 'Payroll marked as paid',
@@ -1275,6 +1500,65 @@ export const en: TranslationsOf<typeof uz> = {
 			confirm: 'Unfinalize',
 			done: 'Snapshot discarded — figures are live again',
 		},
+		breakdown: {
+			title: 'Student breakdown',
+			summary: '{{students}} students · {{sessions}} sessions · {{hours}}h',
+			empty: 'No student lines for this period.',
+			column: {
+				student: 'Student',
+				monthlyTuition: 'Monthly tuition',
+				sessions: 'Sessions',
+				proration: 'Proration',
+				hours: 'Hours',
+				revenueLine: 'Revenue line',
+				share: 'Share',
+			},
+			footnotePercent:
+				'Denominator is every class the group holds this month across all teachers — taught, still scheduled or cancelled. So tuition is earned per class actually delivered: shared students are split and never double-paid, a student who joined or left mid-month funds only the classes they were enrolled for, an open month accrues rather than paying the full fee up front, and a cancelled class is earned by nobody.',
+			footnoteOther:
+				'Per-student revenue lines apply to revenue-share teachers only. This teacher is paid on the basis shown above; students are listed for audit.',
+		},
+		calc: {
+			rateDescPercent: '{{percent}}% of student fees',
+			rateDescHourly: 'Hourly rate',
+			rateDescFixed: 'Fixed monthly salary',
+			summary: '{{sessions}} sessions · {{students}} students',
+			revenueBase: 'Revenue base (prorated)',
+			fullPrecision: 'Full precision',
+			rounding: "banker's rounding",
+			snapshotFinalized: 'Snapshot finalized {{date}} — frozen, never recomputed.',
+			snapshotFinalizedBy:
+				'Snapshot finalized {{date}} by {{name}} — frozen, never recomputed.',
+			formulaPercent: '{{percent}}% × {{base}} UZS revenue base',
+			formulaHourly: '{{hours}}h × {{rate}} UZS/h',
+			formulaFixedProrated: '{{base}} UZS monthly × {{pct}}% of month',
+			formulaFixed: '{{base}} UZS monthly salary',
+		},
+		finalize: {
+			title: 'Finalize {{month}}?',
+			description_one:
+				'Live figures for {{count}} teacher are frozen into snapshots — they stop tracking sessions and become payable records.',
+			description_other:
+				'Live figures for {{count}} teachers are frozen into snapshots — they stop tracking sessions and become payable records.',
+			currentMonthWarning:
+				'You are finalizing the current month. Sessions completed after finalizing will not be paid this month.',
+			done: '{{finalized}} finalized, {{skipped}} skipped',
+			failed: 'Failed to finalize the period',
+		},
+		detail: {
+			liveHint:
+				'Live — figures update from completed sessions until the period is finalized.',
+			paidOn: 'Paid on {{date}}.',
+			markPaidTitle: 'Mark {{month}} as paid?',
+			markPaidDescription:
+				'{{amount}} net for {{name}} is recorded as paid out. This cannot be undone.',
+			noFigure: 'No payroll figure for this teacher in {{month}}.',
+			errorAlreadyFinalized: 'This period is already finalized.',
+			errorExpenseLocked:
+				'The linked salary expense is locked — this record cannot change.',
+			markPaidFailed: 'Failed to mark payroll as paid',
+			unfinalizeFailed: 'Failed to unfinalize',
+		},
 	},
 
 	dashboard: {
@@ -1284,9 +1568,19 @@ export const en: TranslationsOf<typeof uz> = {
 		thisMonth: 'This month',
 		thisWeek: 'This week',
 		retry: 'Retry',
+		panelError: 'Couldn’t load this panel.',
+		due: 'Due',
+		overdueDays_one: '{{count}} day',
+		overdueDays_other: '{{count}} days',
 		newGroup: 'New group',
 		addStudent: 'Add student',
 		createInvoice: 'Create invoice',
+		greeting: {
+			morning: 'Good morning',
+			afternoon: 'Good afternoon',
+			evening: 'Good evening',
+			withName: '{{greeting}}, {{name}}',
+		},
 		stat: {
 			activeStudents: 'Active students',
 			revenueThisMonth: 'Revenue this month',
@@ -1329,6 +1623,12 @@ export const en: TranslationsOf<typeof uz> = {
 		confirmPassword: 'Confirm new password',
 		confirmPasswordPlaceholder: 'Re-enter the new password',
 		changed: 'Password changed. Use it the next time you sign in.',
+		loadError: 'Failed to load your profile. Please refresh.',
+		profileCardTitle: 'Profile',
+		identityHint: 'Ask an administrator to change your name or contact details.',
+		changeDescription:
+			'Set a new password for your own account. You stay signed in — the new password is needed the next time you sign in.',
+		changeFailed: 'Failed to change password. Please try again.',
 	},
 
 	shell: {
@@ -1337,5 +1637,6 @@ export const en: TranslationsOf<typeof uz> = {
 		prevMonth: 'Previous month',
 		nextMonth: 'Next month',
 		brandSurface: 'MANAGE',
+		backToSignIn: 'Back to sign in',
 	},
 };

@@ -106,7 +106,7 @@ function CreateInvoiceForm({
 	const { data: discountData } = useDiscountList({ isActive: true, limit: 100 });
 	const discounts = discountData?.rows ?? [];
 	const discountOptions = [
-		{ value: NO_DISCOUNT_VALUE, label: 'No discount' },
+		{ value: NO_DISCOUNT_VALUE, label: t('invoiceForm.noDiscount') },
 		...discounts.map((d) => ({
 			value: String(d.id),
 			label: `${d.name} (${d.type === 'PERCENTAGE' ? `${d.value}%` : `${formatPrice(d.value)} UZS`})`,
@@ -145,7 +145,7 @@ function CreateInvoiceForm({
 				notes: blankToNull(values.notes),
 			});
 		} catch (err) {
-			toast.error(isApiError(err) ? err.message : 'Failed to create invoice');
+			toast.error(isApiError(err) ? err.message : t('invoiceForm.createFailed'));
 			return;
 		}
 
@@ -157,9 +157,12 @@ function CreateInvoiceForm({
 				});
 			} catch (err) {
 				toast.error(
-					`Invoice ${invoice.invoiceNumber} was created, but the discount could not be applied: ${
-						isApiError(err) ? err.message : 'unknown error'
-					}`,
+					t('invoiceForm.discountApplyFailed', {
+						number: invoice.invoiceNumber,
+						error: isApiError(err)
+							? err.message
+							: t('invoiceForm.unknownError'),
+					}),
 				);
 				onSuccess();
 				return;
@@ -187,7 +190,7 @@ function CreateInvoiceForm({
 							name="studentId"
 							render={({ field }) => (
 								<FormItem>
-									<FormLabel>Student *</FormLabel>
+									<FormLabel>{t('invoices.form.student')}</FormLabel>
 									<StudentPicker
 										value={field.value}
 										onChange={field.onChange}
@@ -229,7 +232,7 @@ function CreateInvoiceForm({
 								>
 									<div className="flex items-center justify-between">
 										<span className="text-xs font-medium text-muted-foreground">
-											Item {index + 1}
+											{t('invoiceForm.item', { index: index + 1 })}
 										</span>
 										<div className="flex items-center">
 											<Button
@@ -371,10 +374,7 @@ function CreateInvoiceForm({
 						{subtotal > 0 && total === 0 && (
 							<div className="mt-1 flex items-start gap-1.5 text-xs text-tone-amber-fg">
 								<AlertTriangle className="mt-0.5 size-3.5 shrink-0" />
-								<span>
-									This discount brings the total to 0 UZS — nothing will
-									be charged.
-								</span>
+								<span>{t('invoiceForm.zeroTotalWarning')}</span>
 							</div>
 						)}
 					</div>
@@ -478,6 +478,7 @@ function EditInvoiceForm({
 }
 
 export function InvoiceForm(props: InvoiceFormProps) {
+	const t = useAppT('billing');
 	const tc = useT('common');
 	const { open, onOpenChange, mode } = props;
 	const [isPending, setIsPending] = useState(false);
@@ -492,11 +493,13 @@ export function InvoiceForm(props: InvoiceFormProps) {
 		<FormSheet
 			open={open}
 			onOpenChange={onOpenChange}
-			title={mode === 'create' ? 'Create invoice' : 'Edit invoice'}
+			title={
+				mode === 'create' ? t('invoices.form.title') : t('invoiceForm.editTitle')
+			}
 			description={
 				mode === 'create'
-					? 'Fields marked * are required'
-					: 'Due date and notes can be changed while the invoice is a draft.'
+					? t('invoices.form.requiredHint')
+					: t('invoiceForm.editDescription')
 			}
 			maxWidth="lg"
 			footer={
@@ -506,7 +509,9 @@ export function InvoiceForm(props: InvoiceFormProps) {
 					</Button>
 					<Button type="submit" form={formId} disabled={isPending}>
 						{isPending && <Spinner className="mr-2 size-4" />}
-						{mode === 'create' ? 'Create invoice' : 'Save changes'}
+						{mode === 'create'
+							? t('invoices.form.submit')
+							: t('invoiceForm.saveChanges')}
 					</Button>
 				</>
 			}

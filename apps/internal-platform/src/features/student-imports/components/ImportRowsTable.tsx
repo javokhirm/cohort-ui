@@ -2,7 +2,7 @@ import { Card, DataTable, Pagination, StatusBadge, type ColumnDef } from '@repo/
 
 import type { StudentImportRowView } from '@/api/student-imports/types';
 
-import { ROW_OUTCOME_LABEL, ROW_OUTCOME_TONE } from '../constants';
+import { rowOutcomeLabel, ROW_OUTCOME_TONE } from '../constants';
 import { IMPORT_ROWS_PAGE_SIZE, useStudentImportRows } from '../hooks';
 import type { StudentImportRowFilters } from '@/api/student-imports/types';
 import { useAppT } from '@/locales';
@@ -66,14 +66,14 @@ function buildColumns(
 				if (outcome) {
 					return (
 						<StatusBadge tone={ROW_OUTCOME_TONE[outcome.outcome]}>
-							{ROW_OUTCOME_LABEL[outcome.outcome]}
+							{rowOutcomeLabel(t, outcome.outcome)}
 						</StatusBadge>
 					);
 				}
 				return errors.length > 0 ? (
-					<StatusBadge tone="red">Invalid</StatusBadge>
+					<StatusBadge tone="red">{t('invalid')}</StatusBadge>
 				) : (
-					<StatusBadge tone="green">Valid</StatusBadge>
+					<StatusBadge tone="green">{t('valid')}</StatusBadge>
 				);
 			},
 		},
@@ -154,7 +154,7 @@ export function ImportRowsTable({
 				getRowId={(row) => String(row.rowNumber)}
 				emptyState={
 					<div className="py-16 text-center text-sm text-muted-foreground">
-						No rows match this filter.
+						{t('rowsEmpty')}
 					</div>
 				}
 				className="rounded-none border-0"

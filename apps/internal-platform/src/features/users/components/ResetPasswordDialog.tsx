@@ -57,10 +57,9 @@ export function ResetPasswordDialog({
 		<Dialog open={open} onOpenChange={handleOpenChange}>
 			<DialogContent className="max-w-sm">
 				<DialogHeader>
-					<DialogTitle>Reset password</DialogTitle>
+					<DialogTitle>{t('resetPassword')}</DialogTitle>
 					<DialogDescription>
-						Set a new password for <strong>{fullName}</strong>. They will need
-						to use this password on their next login.
+						{t('resetDescription', { name: fullName })}
 					</DialogDescription>
 				</DialogHeader>
 				<Form {...form}>
@@ -79,7 +78,7 @@ export function ResetPasswordDialog({
 							<p className="text-sm text-destructive">
 								{isApiError(mutation.error)
 									? mutation.error.message
-									: 'Failed to reset password. Please try again.'}
+									: t('resetError')}
 							</p>
 						)}
 						<DialogFooter>

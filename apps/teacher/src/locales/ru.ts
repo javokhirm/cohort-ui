@@ -25,6 +25,9 @@ export const ru: TranslationsOf<typeof uz> = {
 		goToThisMonth: 'Перейти к этому месяцу',
 		listView: 'Списком',
 		tableView: 'Таблицей',
+		unsavedChanges: 'Несохранённые изменения',
+		savedState: 'Сохранено',
+		myBranches: 'Мои филиалы',
 	},
 
 	schedule: {
@@ -49,6 +52,12 @@ export const ru: TranslationsOf<typeof uz> = {
 		sessionErrorTitle: 'Не удалось загрузить занятие',
 		sessionsErrorDescription:
 			'Не удалось получить занятия этой группы. Повторите через минуту.',
+		greetingMorning: 'Доброе утро',
+		greetingAfternoon: 'Добрый день',
+		greetingEvening: 'Добрый вечер',
+		emptyWhenToday: 'сегодня',
+		emptyWhenOnDate: '{{date}}',
+		noRoom: 'Аудитория не указана',
 	},
 
 	groups: {
@@ -71,6 +80,25 @@ export const ru: TranslationsOf<typeof uz> = {
 			room: 'Аудитория',
 			filled: 'Заполнено',
 		},
+		groupFallback: 'Группа',
+		groupNumber: 'Группа №{{id}}',
+		tabRoster: 'Состав',
+		tabSchedule: 'Расписание',
+		tabGrading: 'Оценивание',
+		unnamedStudent: 'Без имени',
+		unknownBranch: 'Неизвестный филиал',
+		attendancePercent: '{{rate}}% посещаемости',
+		attendanceRateShort: '{{rate}}% пос.',
+		emptyBranch: 'В этом филиале групп нет',
+		emptyBranchDescription:
+			'Вы преподаёте и в других филиалах — выберите «Все филиалы» в верхней панели, чтобы увидеть эти группы.',
+		emptyTitle: 'Групп пока нет',
+		emptyDescription: 'Группы, которые вам назначены, появятся здесь.',
+		groupCount_one: '{{count}} группа',
+		groupCount_few: '{{count}} группы',
+		groupCount_many: '{{count}} групп',
+		groupCount_other: '{{count}} групп',
+		hiddenSuffix: ' · {{count}} скрыто фильтром филиала',
 	},
 
 	attendance: {
@@ -85,6 +113,18 @@ export const ru: TranslationsOf<typeof uz> = {
 		cancelledTitle: 'Это занятие отменено',
 		cancelledDescription: 'Для отменённого занятия посещаемость не отмечается.',
 		noStudentsDescription: 'В этой группе пока нет активных учеников для отметки.',
+		takeTitle: 'Отметить посещаемость',
+		sessionNumber: 'Занятие №{{id}}',
+		presentAbsent: '{{present}} присут. · {{absent}} отсут.',
+		notMarked: 'не отмечено',
+		studentFallback: 'Ученик',
+		cellLabel: '{{name}}, {{date}} — {{status}}',
+		dateCancelled: '{{date}} — отменено',
+		onlyTodayEditable: 'Редактируется только сегодняшний столбец',
+		markAllHintNoSession: 'На сегодня занятий нет',
+		markAllHintCancelled: 'Сегодняшнее занятие отменено',
+		markAllHintNoStudents: 'Учеников нет',
+		markAllHintReady: 'Отметит всех учеников присутствующими на сегодняшнем занятии',
 	},
 
 	marks: {
@@ -115,6 +155,32 @@ export const ru: TranslationsOf<typeof uz> = {
 			marks: 'Оценки',
 		},
 		topBand: '90% и выше',
+		midBand: '{{low}}–89%',
+		lowBand: 'ниже {{low}}%',
+		enterTitle: 'Выставить оценки',
+		sessionNumber: 'Занятие №{{id}}',
+		notMarked: 'не оценено',
+		score: 'оценка',
+		cellLabel: '{{name}}, {{date}} — {{status}}',
+		dateCancelled: '{{date}} — отменено',
+		markedProgress: '{{marked}} из {{total}} оценено',
+		markFor: 'Оценка для {{name}}',
+		scalePoints: 'Баллы · максимум {{max}}',
+		scalePercentage: 'Проценты · 0–{{max}}',
+		scaleLetter: 'Буквенная оценка · A–F',
+		scaleShortPoints: 'Баллы /{{max}}',
+		scaleShortPercentage: 'Проценты /{{max}}',
+		scaleShortLetter: 'Буквы A–F',
+		scaleUsedFor: '{{scale}} · для ежедневных оценок',
+		scaleNotSet: 'Ещё не задано · нажмите, чтобы выбрать',
+		gradingScaleDescription: 'Как выставляются ежедневные оценки для этой группы.',
+		scaleType: 'Тип шкалы',
+		letterHint: 'Буквенные оценки A–F вводятся прямо в листе оценок.',
+		maxPercent: 'Максимум (%)',
+		maxPointsLabel: 'Максимум баллов',
+		allowHalf: 'Разрешить половинные баллы',
+		preview: 'Предпросмотр',
+		previewPoints: 'Ежедневные баллы · максимум {{max}}',
 	},
 
 	payroll: {
@@ -125,6 +191,31 @@ export const ru: TranslationsOf<typeof uz> = {
 		emptyTitle: 'Пока нечего показать',
 		emptyDescription:
 			'Зарплата появится здесь, когда офис настроит вашу модель оплаты и у вас будут проведённые занятия.',
+		advancesTitle: 'Авансы',
+		advancesHint:
+			'Зарплата, взятая до расчёта — вычитается из вашей суммы к выплате.',
+		advanceFallback: 'Аванс',
+		studentsTitle: 'Ученики',
+		noCompletedSessions:
+			'В этом месяце нет проведённых занятий с зачисленными учениками.',
+		breakdownSubtitle_one: '{{count}} ученик · проведено вами из общего числа',
+		breakdownSubtitle_few: '{{count}} ученика · проведено вами из общего числа',
+		breakdownSubtitle_many: '{{count}} учеников · проведено вами из общего числа',
+		breakdownSubtitle_other: '{{count}} ученика · проведено вами из общего числа',
+		sessionsCount: '{{taught}}/{{planned}} занятий',
+		tuitionSuffix: ' · {{amount}} оплата обучения',
+		revenueShareNote:
+			'Оплата обучения каждого ученика делится на все занятия группы за месяц, и вы зарабатываете за те, что провели. Ещё не проведённые занятия не оплачиваются, отменённое занятие не оплачивается вовсе, а ученик, присоединившийся в середине месяца, считается только со дня зачисления.',
+		referenceNote:
+			'Приведено для справки. Вам платят на указанной выше основе, а не за каждого ученика.',
+		netPayable: 'К выплате',
+		computed: 'Начислено',
+		liveNote:
+			'В реальном времени — цифры обновляются по проведённым занятиям до закрытия периода.',
+		advancesExceedNote:
+			'Авансы превышают начисленную оплату — сумма к выплате за этот месяц удержана на нуле.',
+		calcNote:
+			'Рассчитано по {{sessions}} проведённым занятиям ({{hours}} ч). Точная сумма {{exact}}, округлено до {{rounded}}.',
 	},
 
 	students: {
@@ -144,6 +235,16 @@ export const ru: TranslationsOf<typeof uz> = {
 			phone: 'Телефон',
 			email: 'Эл. почта',
 		},
+		sectionContact: 'Контакты',
+		sectionGuardians: 'Представители',
+		unnamedContact: 'Без имени',
+		unnamedStudent: 'Без имени',
+		primary: 'Основной',
+		gender: {
+			M: 'Мужской',
+			F: 'Женский',
+			O: 'Другой',
+		},
 	},
 
 	profile: {
@@ -153,5 +254,11 @@ export const ru: TranslationsOf<typeof uz> = {
 			'Не удалось получить данные вашего аккаунта. Повторите через минуту.',
 		staffId: 'Табельный номер',
 		branches: 'Филиалы',
+		phone: 'Телефон',
+		email: 'Эл. почта',
+		allBranches: 'Все филиалы',
+		appearance: 'Оформление',
+		darkMode: 'Тёмная тема',
+		lightMode: 'Светлая тема',
 	},
 };

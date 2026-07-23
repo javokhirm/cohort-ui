@@ -1,5 +1,6 @@
 import type { StatusTone } from '@repo/ui';
 import { EmptyState, ProgressBar } from '@repo/ui';
+import { useStatusLabel } from '@repo/i18n';
 import { Users } from 'lucide-react';
 
 import { useLeadFunnel } from '../api/dashboard.queries';
@@ -9,17 +10,18 @@ import { PanelCard } from './PanelCard';
 import { PanelError } from './PanelError';
 import { useAppT } from '@/locales';
 
-const STAGE_META: Record<LeadFunnelStatus, { label: string; tone: StatusTone }> = {
-	NEW: { label: 'New', tone: 'slate' },
-	CONTACTED: { label: 'Contacted', tone: 'blue' },
-	TRIAL_BOOKED: { label: 'Trial booked', tone: 'amber' },
-	ENROLLED: { label: 'Enrolled', tone: 'green' },
-	LOST: { label: 'Lost', tone: 'red' },
+const STAGE_TONE: Record<LeadFunnelStatus, StatusTone> = {
+	NEW: 'slate',
+	CONTACTED: 'blue',
+	TRIAL_BOOKED: 'amber',
+	ENROLLED: 'green',
+	LOST: 'red',
 };
 
 /** Lead funnel — stage-entry counts for the current week, as relative bars. */
 export function LeadFunnelCard() {
 	const t = useAppT('dashboard');
+	const statusLabel = useStatusLabel();
 	const { data, isLoading, isError, refetch } = useLeadFunnel();
 
 	if (isLoading) return <PanelSkeleton rows={5} />;
@@ -40,12 +42,11 @@ export function LeadFunnelCard() {
 			) : (
 				<div className="flex flex-col gap-4">
 					{data.stages.map((stage) => {
-						const meta = STAGE_META[stage.status];
 						return (
 							<div key={stage.status} className="flex flex-col gap-1.5">
 								<div className="flex items-center justify-between">
 									<span className="text-sm text-muted-foreground">
-										{meta.label}
+										{statusLabel('lead', stage.status)}
 									</span>
 									<span className="text-sm font-semibold tabular-nums">
 										{stage.count}
@@ -53,7 +54,7 @@ export function LeadFunnelCard() {
 								</div>
 								<ProgressBar
 									value={(stage.count / max) * 100}
-									tone={meta.tone}
+									tone={STAGE_TONE[stage.status]}
 								/>
 							</div>
 						);

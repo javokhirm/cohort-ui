@@ -4,7 +4,6 @@ import { ChevronRight, SlidersHorizontal } from 'lucide-react';
 import { EmptyState, Skeleton } from '@repo/ui';
 
 import { useGradingConfig } from '../api/grading-config.queries';
-import { scaleShortLabel } from '../lib/scale';
 import { GradingScaleSheet } from './GradingScaleSheet';
 import { useAppT } from '@/locales';
 
@@ -25,6 +24,14 @@ export function GroupGradingTab({ groupId }: GroupGradingTabProps) {
 	const [scaleOpen, setScaleOpen] = useState(false);
 	const { data, isPending, isError } = useGradingConfig(groupId);
 	const current = data?.current ?? null;
+
+	const scaleText = !current
+		? ''
+		: current.type === 'LETTER'
+			? t('scaleShortLetter')
+			: current.type === 'PERCENTAGE'
+				? t('scaleShortPercentage', { max: current.maxPoints ?? 100 })
+				: t('scaleShortPoints', { max: current.maxPoints ?? '—' });
 
 	if (isPending) {
 		return <Skeleton className="h-20 w-full rounded-xl" />;
@@ -58,8 +65,8 @@ export function GroupGradingTab({ groupId }: GroupGradingTabProps) {
 					</span>
 					<span className="block truncate text-[11.5px] text-muted-foreground">
 						{current
-							? `${scaleShortLabel(current)} · used for daily marks`
-							: 'Not set yet · tap to choose one'}
+							? t('scaleUsedFor', { scale: scaleText })
+							: t('scaleNotSet')}
 					</span>
 				</span>
 				<ChevronRight className="size-4 shrink-0 text-muted-foreground/50" />

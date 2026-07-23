@@ -104,7 +104,13 @@ export function EnrollmentDiscountSheet({
 	}
 
 	function handleRevoke(assignment: EnrollmentDiscountResponse) {
-		if (!confirm(`Remove the "${assignment.discountName}" standing discount?`))
+		if (
+			!confirm(
+				t('enrollmentDiscount.removeConfirm', {
+					name: assignment.discountName,
+				}),
+			)
+		)
 			return;
 		revoke.mutate(
 			{ enrollmentId, assignmentId: assignment.id },
@@ -140,9 +146,7 @@ export function EnrollmentDiscountSheet({
 		>
 			<div className="flex flex-col gap-4">
 				<div className="rounded-xl bg-card p-4 text-xs leading-relaxed text-muted-foreground">
-					Applies automatically to this enrollment&rsquo;s monthly invoice —
-					every month, until it expires. Usage caps on the underlying promo are
-					not consumed by standing assignments.
+					{t('enrollmentDiscount.hint')}
 				</div>
 
 				{assignments.length > 0 && (
@@ -164,10 +168,18 @@ export function EnrollmentDiscountSheet({
 											{formatDiscountValue(
 												a.discountType,
 												a.discountValue,
-											)}
+											)}{' '}
+											·{' '}
 											{a.validUntil
-												? ` · until ${formatDate(a.validUntil)}`
-												: ' · no end date'}
+												? t(
+														'enrollmentDiscount.validUntilShort',
+														{
+															date: formatDate(
+																a.validUntil,
+															),
+														},
+													)
+												: t('enrollmentDiscount.noEndDate')}
 										</p>
 									</div>
 									<Button
@@ -177,7 +189,9 @@ export function EnrollmentDiscountSheet({
 										className="text-muted-foreground hover:text-destructive"
 										onClick={() => handleRevoke(a)}
 										disabled={revoke.isPending}
-										aria-label={`Remove ${a.discountName}`}
+										aria-label={t('enrollmentDiscount.removeAria', {
+											name: a.discountName,
+										})}
 									>
 										<Trash2 className="size-4" />
 									</Button>
@@ -202,8 +216,8 @@ export function EnrollmentDiscountSheet({
 							) : options.length === 0 ? (
 								<p className="text-sm text-muted-foreground">
 									{assignments.length > 0
-										? 'Every active discount is already assigned to this enrollment.'
-										: 'No active discounts to assign — create one under Discounts first.'}
+										? t('enrollmentDiscount.allAssigned')
+										: t('enrollmentDiscount.noneToAssign')}
 								</p>
 							) : (
 								<FormField
@@ -254,8 +268,7 @@ export function EnrollmentDiscountSheet({
 									label={t('discountExtra.validUntil')}
 								/>
 								<p className="text-xs text-muted-foreground">
-									{t('misc.appliedBeforeThis')}
-									date. Leave blank for no end date.
+									{t('enrollmentDiscount.validUntilHint')}
 								</p>
 							</FormSection>
 						)}

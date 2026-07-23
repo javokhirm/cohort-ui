@@ -1,5 +1,6 @@
 import { formatDate } from '@repo/utils';
 import type { SubscriptionStatus } from '@/api/subscriptions/types';
+import { useAppT } from '@/locales';
 
 export function BillingDateCell({
 	status,
@@ -10,14 +11,17 @@ export function BillingDateCell({
 	currentPeriodEnd: string;
 	cancelledAt: string | null;
 }) {
+	const t = useAppT('subscriptions');
 	if (status === 'TRIALING') {
-		return <span className="text-sm font-medium text-tone-blue-fg">In trial</span>;
+		return (
+			<span className="text-sm font-medium text-tone-blue-fg">{t('inTrial')}</span>
+		);
 	}
 
 	if (status === 'PAST_DUE') {
 		return (
 			<span className="text-sm font-medium text-tone-red-fg">
-				Overdue · {formatDate(currentPeriodEnd)}
+				{t('overdue')} · {formatDate(currentPeriodEnd)}
 			</span>
 		);
 	}

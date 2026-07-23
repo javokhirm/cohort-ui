@@ -133,7 +133,7 @@ export function InvoiceTable({ invoices, isLoading, onRowClick }: InvoiceTablePr
 			onRowClick={onRowClick}
 			emptyState={
 				<div className="py-16 text-center text-sm text-muted-foreground">
-					No invoices match this filter.
+					{t('invoices.emptyFiltered')}
 				</div>
 			}
 			className="rounded-none border-0"

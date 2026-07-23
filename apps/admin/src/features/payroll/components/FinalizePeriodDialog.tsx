@@ -51,14 +51,15 @@ export function FinalizePeriodDialog({
 			{
 				onSuccess: (result) => {
 					toast.success(
-						`${result.finalized} finalized, ${result.skipped} skipped`,
+						t('finalize.done', {
+							finalized: result.finalized,
+							skipped: result.skipped,
+						}),
 					);
 					onOpenChange(false);
 				},
 				onError: (err) => {
-					toast.error(
-						isApiError(err) ? err.message : 'Failed to finalize the period',
-					);
+					toast.error(isApiError(err) ? err.message : t('finalize.failed'));
 				},
 			},
 		);
@@ -68,30 +69,33 @@ export function FinalizePeriodDialog({
 		<Dialog open={open} onOpenChange={onOpenChange}>
 			<DialogContent className="max-w-md">
 				<DialogHeader>
-					<DialogTitle>Finalize {formatMonthLabel(month)}?</DialogTitle>
+					<DialogTitle>
+						{t('finalize.title', { month: formatMonthLabel(month) })}
+					</DialogTitle>
 					<DialogDescription>
-						Live figures for {summary.staffCount}{' '}
-						{summary.staffCount === 1 ? 'teacher' : 'teachers'} are frozen
-						into snapshots — they stop tracking sessions and become payable
-						records.
+						{t('finalize.description', { count: summary.staffCount })}
 					</DialogDescription>
 				</DialogHeader>
 
 				<div className="flex flex-col gap-2 rounded-lg bg-muted/40 px-4 py-3 text-sm">
 					<div className="flex items-center justify-between">
-						<span className="text-muted-foreground">Total computed</span>
+						<span className="text-muted-foreground">
+							{t('stat.totalComputed')}
+						</span>
 						<span className="font-semibold tabular-nums">
 							{formatMoney(summary.totalComputed)}
 						</span>
 					</div>
 					<div className="flex items-center justify-between">
-						<span className="text-muted-foreground">Mid-month advances</span>
+						<span className="text-muted-foreground">
+							{t('stat.advances')}
+						</span>
 						<span className="font-semibold tabular-nums text-tone-red-fg">
 							−{formatMoney(summary.totalAdvances)}
 						</span>
 					</div>
 					<div className="flex items-center justify-between">
-						<span className="font-semibold">Net payable</span>
+						<span className="font-semibold">{t('stat.netPayable')}</span>
 						<span className="font-bold tabular-nums text-tone-green-fg">
 							{formatMoney(summary.totalNetPayable)}
 						</span>
@@ -101,10 +105,7 @@ export function FinalizePeriodDialog({
 				{isCurrentMonth && (
 					<div className="flex items-start gap-2.5 rounded-lg border border-destructive/30 bg-destructive/5 px-4 py-3 text-sm text-destructive">
 						<TriangleAlert className="mt-0.5 size-4 shrink-0" />
-						<span>
-							You are finalizing the <b>current</b> month. Sessions
-							completed after finalizing will not be paid this month.
-						</span>
+						<span>{t('finalize.currentMonthWarning')}</span>
 					</div>
 				)}
 

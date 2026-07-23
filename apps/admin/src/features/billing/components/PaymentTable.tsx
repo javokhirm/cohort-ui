@@ -89,7 +89,7 @@ export function PaymentTable({ payments, isLoading, onRowClick }: PaymentTablePr
 				onRowClick={onRowClick}
 				emptyState={
 					<div className="py-16 text-center text-sm text-muted-foreground">
-						No payments match this filter.
+						{t('payments.emptyFiltered')}
 					</div>
 				}
 				className="rounded-none border-0"

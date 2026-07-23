@@ -17,7 +17,6 @@ import {
 	isLetterScale,
 	normalizedPctFor,
 	parseScoreInput,
-	scaleLabel,
 	scoreTone,
 } from '../lib/scale';
 import { MarkInput } from './MarkInput';
@@ -58,8 +57,15 @@ export function MarksList({
 	onSave,
 }: MarksListProps) {
 	const t = useAppT('marks');
+	const tShell = useAppT('shell');
 	const isLetter = isLetterScale(config);
 	const progress = roster.length > 0 ? (markedCount / roster.length) * 100 : 0;
+
+	const scaleText = isLetter
+		? t('scaleLetter')
+		: config.type === 'PERCENTAGE'
+			? t('scalePercentage', { max: config.maxPoints ?? 100 })
+			: t('scalePoints', { max: config.maxPoints ?? '—' });
 
 	/** The band a draft value lands in, for the row's edge tone. */
 	const draftPct = (value: string): number | null => {
@@ -75,10 +81,13 @@ export function MarksList({
 				<div className="flex flex-wrap items-center justify-between gap-2">
 					<span className="inline-flex items-center gap-1.5 text-xs font-semibold text-foreground">
 						<SlidersHorizontal className="size-3.5 text-muted-foreground" />
-						{scaleLabel(config)}
+						{scaleText}
 					</span>
 					<span className="text-xs font-semibold tabular-nums text-muted-foreground">
-						{markedCount} of {roster.length} marked
+						{t('markedProgress', {
+							marked: markedCount,
+							total: roster.length,
+						})}
 					</span>
 				</div>
 				<ProgressBar
@@ -96,7 +105,7 @@ export function MarksList({
 						<MarkInput
 							config={config}
 							value={value}
-							label={`Mark for ${s.studentName}`}
+							label={t('markFor', { name: s.studentName })}
 							onChange={(next) => onChange(s.studentId, next)}
 						/>
 					);
@@ -135,8 +144,11 @@ export function MarksList({
 
 			<StickyActionBar
 				className="-mx-4 shrink-0 rounded-t-2xl md:-mx-6"
-				status={`${markedCount} of ${roster.length} marked`}
-				hint={isDirty ? 'Unsaved changes' : 'Saved'}
+				status={t('markedProgress', {
+					marked: markedCount,
+					total: roster.length,
+				})}
+				hint={isDirty ? tShell('unsavedChanges') : tShell('savedState')}
 				action={
 					<Button onClick={onSave} disabled={!isDirty || isSaving}>
 						<Check className="size-4" />

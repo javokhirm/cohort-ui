@@ -12,6 +12,7 @@ import { LETTER_GRADES } from '../api/marks.queries';
 import type { MarksGrid as GridData } from '../api/marks-grid.queries';
 import { isTodayIso } from '../lib/month';
 import { normalizedPctFor, parseScoreInput, scoreTone } from '../lib/scale';
+import { useAppT } from '@/locales';
 
 interface MarkCellValue {
 	rawScore?: number | null;
@@ -38,6 +39,7 @@ const CELL_W_PX = 56;
  * frozen header and student column need the grid to own its own scroll.
  */
 export function MarksGrid({ grid, onEditCell }: MarksGridProps) {
+	const t = useAppT('marks');
 	const [openCell, setOpenCell] = useState<string | null>(null);
 	const [editing, setEditing] = useState<Record<string, string>>({});
 	const isLetter = grid.config.type === 'LETTER';
@@ -65,7 +67,8 @@ export function MarksGrid({ grid, onEditCell }: MarksGridProps) {
 			const cell = row.cells[col.sessionId];
 			const today = isTodayIso(col.date);
 			const editable = today && col.status !== 'CANCELLED';
-			const who = `${row.studentName ?? 'Student'}, ${formatFullDate(col.date)}`;
+			const name = row.studentName ?? t('column.student');
+			const date = formatFullDate(col.date);
 
 			if (isLetter) {
 				const dropOpts: SheetDropOption[] | undefined = editable
@@ -84,7 +87,11 @@ export function MarksGrid({ grid, onEditCell }: MarksGridProps) {
 					letter: cell?.letter ?? '',
 					tone: cell ? scoreTone(cell.normalizedPct) : 'slate',
 					accent: today,
-					label: `${who} — ${cell?.letter ?? 'not marked'}`,
+					label: t('cellLabel', {
+						name,
+						date,
+						status: cell?.letter ?? t('notMarked'),
+					}),
 					onClick: editable
 						? () => setOpenCell((cur) => (cur === cellKey ? null : cellKey))
 						: undefined,
@@ -104,7 +111,7 @@ export function MarksGrid({ grid, onEditCell }: MarksGridProps) {
 					max,
 					step,
 					inputMode: 'decimal' as const,
-					label: `${who} — score`,
+					label: t('cellLabel', { name, date, status: t('score') }),
 					onChange: (e) =>
 						setEditing((prev) => ({ ...prev, [cellKey]: e.target.value })),
 					onCommit: (value: string) => {
@@ -125,7 +132,11 @@ export function MarksGrid({ grid, onEditCell }: MarksGridProps) {
 				letter: cell?.rawScore != null ? String(cell.rawScore) : '',
 				tone: cell ? scoreTone(cell.normalizedPct) : 'slate',
 				accent: false,
-				label: `${who} — ${cell?.rawScore ?? 'not marked'}`,
+				label: t('cellLabel', {
+					name,
+					date,
+					status: cell?.rawScore ?? t('notMarked'),
+				}),
 			};
 		}),
 	}));
@@ -148,14 +159,15 @@ export function MarksGrid({ grid, onEditCell }: MarksGridProps) {
 					sublabel: formatWeekday(col.date),
 					accent: isTodayIso(col.date),
 					muted: col.status === 'CANCELLED',
-					title: `${formatFullDate(col.date)}${
-						col.status === 'CANCELLED' ? ' — cancelled' : ''
-					}`,
+					title:
+						col.status === 'CANCELLED'
+							? t('dateCancelled', { date: formatFullDate(col.date) })
+							: formatFullDate(col.date),
 				}))}
 				rows={rows}
 				rightCols={[
-					{ label: 'Avg', width: '62px' },
-					{ label: 'Rank', width: '54px', divider: true },
+					{ label: t('column.avg'), width: '62px' },
+					{ label: t('column.rank'), width: '54px', divider: true },
 				]}
 			/>
 		</>

@@ -1,4 +1,5 @@
 import { Button, Card, DataTable, StatusBadge, type ColumnDef } from '@repo/ui';
+import { useT } from '@repo/i18n';
 
 import type { TenantBranchView } from '@/api/tenants/types';
 import { useAppT } from '@/locales';
@@ -9,6 +10,7 @@ import { useAppT } from '@/locales';
  */
 function buildColumns(
 	t: ReturnType<typeof useAppT<'tenants'>>,
+	tc: ReturnType<typeof useT<'common'>>,
 ): ColumnDef<TenantBranchView>[] {
 	return [
 		{
@@ -58,7 +60,7 @@ function buildColumns(
 			header: t('column.status'),
 			cell: ({ row }) => (
 				<StatusBadge tone={row.original.isActive ? 'green' : 'slate'}>
-					{row.original.isActive ? 'Active' : 'Inactive'}
+					{row.original.isActive ? tc('state.active') : tc('state.inactive')}
 				</StatusBadge>
 			),
 		},
@@ -67,21 +69,22 @@ function buildColumns(
 
 export function BranchesTab({ branches }: { branches: TenantBranchView[] }) {
 	const t = useAppT('tenants');
+	const tc = useT('common');
 	return (
 		<div className="flex flex-col gap-4">
 			<div className="flex justify-end">
 				<Button size="sm" disabled>
-					+ Add branch
+					+ {t('addBranch')}
 				</Button>
 			</div>
 			<Card className="gap-0 overflow-hidden py-0">
 				<DataTable
-					columns={buildColumns(t)}
+					columns={buildColumns(t, tc)}
 					data={branches}
 					getRowId={(row) => String(row.id)}
 					emptyState={
 						<div className="py-16 text-center text-sm text-muted-foreground">
-							No branches found.
+							{t('branchesEmpty')}
 						</div>
 					}
 					className="rounded-none border-0"

@@ -483,7 +483,9 @@ export function GroupFormPage(props: GroupFormPageProps) {
 				className="flex w-fit items-center gap-1.5 text-sm text-muted-foreground hover:text-foreground"
 			>
 				<ArrowLeft className="size-3.5" />
-				{props.mode === 'create' ? t('back') : `Back to ${props.group.name}`}
+				{props.mode === 'create'
+					? t('back')
+					: t('backToGroup', { name: props.group.name })}
 			</Link>
 
 			<PageHeader title={props.mode === 'create' ? t('create') : t('edit')} />

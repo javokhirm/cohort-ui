@@ -280,7 +280,7 @@ export function InvoiceListPage() {
 
 				{isError && (
 					<div className="rounded-lg border border-destructive/30 bg-destructive/5 px-4 py-3 text-sm text-destructive">
-						Failed to load invoices. Please refresh.
+						{t('invoices.loadError')}
 					</div>
 				)}
 

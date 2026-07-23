@@ -52,6 +52,7 @@ export function AttendanceList({
 	onSave,
 }: AttendanceListProps) {
 	const t = useAppT('attendance');
+	const tShell = useAppT('shell');
 	const tally = ATTENDANCE_STATUSES.map((status) => ({
 		status,
 		...resolveStatus('attendance', status),
@@ -128,8 +129,8 @@ export function AttendanceList({
 
 			<StickyActionBar
 				className="-mx-4 shrink-0 rounded-t-2xl md:-mx-6"
-				status={`${present} present · ${absent} absent`}
-				hint={isDirty ? 'Unsaved changes' : 'Saved'}
+				status={t('presentAbsent', { present, absent })}
+				hint={isDirty ? tShell('unsavedChanges') : tShell('savedState')}
 				action={
 					<Button onClick={onSave} disabled={!isDirty || isSaving}>
 						<Check className="size-4" />

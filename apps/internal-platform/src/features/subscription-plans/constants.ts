@@ -1,28 +1,46 @@
+import type { useAppT } from '@/locales';
+
 export type FeatureKey =
 	'billing' | 'payroll' | 'assessments' | 'telegram_bot' | 'api_access';
 
-export const FEATURE_LABELS: Record<FeatureKey, { label: string; description: string }> =
-	{
-		billing: {
-			label: 'Billing module',
-			description: 'Invoices, payments & revenue tracking',
-		},
-		payroll: {
-			label: 'Payroll module',
-			description: 'Staff salary & payslip management',
-		},
-		assessments: {
-			label: 'Assessments',
-			description: 'Tests, grades & progress tracking',
-		},
-		telegram_bot: {
-			label: 'Telegram bot',
-			description: 'Parent notifications via Telegram',
-		},
-		api_access: {
-			label: 'API access',
-			description: 'REST API key for integrations',
-		},
-	};
+export const ALL_FEATURES: FeatureKey[] = [
+	'billing',
+	'payroll',
+	'assessments',
+	'telegram_bot',
+	'api_access',
+];
 
-export const ALL_FEATURES = Object.keys(FEATURE_LABELS) as FeatureKey[];
+type PlansT = ReturnType<typeof useAppT<'plans'>>;
+
+/** Localized feature name — keeps the key mapping type-safe. */
+export function featureLabel(t: PlansT, key: FeatureKey): string {
+	switch (key) {
+		case 'billing':
+			return t('feature.billing');
+		case 'payroll':
+			return t('feature.payroll');
+		case 'assessments':
+			return t('feature.assessments');
+		case 'telegram_bot':
+			return t('feature.telegram_bot');
+		case 'api_access':
+			return t('feature.api_access');
+	}
+}
+
+/** Localized feature description. */
+export function featureDescription(t: PlansT, key: FeatureKey): string {
+	switch (key) {
+		case 'billing':
+			return t('feature.billingDesc');
+		case 'payroll':
+			return t('feature.payrollDesc');
+		case 'assessments':
+			return t('feature.assessmentsDesc');
+		case 'telegram_bot':
+			return t('feature.telegram_botDesc');
+		case 'api_access':
+			return t('feature.api_accessDesc');
+	}
+}

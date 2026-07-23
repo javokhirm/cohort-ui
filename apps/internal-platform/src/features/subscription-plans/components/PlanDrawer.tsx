@@ -19,7 +19,7 @@ import {
 	SheetTitle,
 } from '@repo/ui';
 
-import { ALL_FEATURES, FEATURE_LABELS } from '../constants';
+import { ALL_FEATURES, featureLabel, featureDescription } from '../constants';
 import {
 	EMPTY_FORM,
 	planSchema,
@@ -60,7 +60,7 @@ export function PlanDrawer({
 				className="w-[480px] sm:max-w-[480px] overflow-y-auto"
 			>
 				<SheetHeader className="pb-2">
-					<SheetTitle>{isEdit ? 'Edit plan' : 'Create plan'}</SheetTitle>
+					<SheetTitle>{isEdit ? t('editPlan') : t('create')}</SheetTitle>
 				</SheetHeader>
 
 				<Form {...form}>
@@ -73,9 +73,12 @@ export function PlanDrawer({
 							name="name"
 							render={({ field }) => (
 								<FormItem>
-									<FormLabel>Plan name</FormLabel>
+									<FormLabel>{t('planName')}</FormLabel>
 									<FormControl>
-										<Input placeholder="e.g. Growth" {...field} />
+										<Input
+											placeholder={t('planNamePlaceholder')}
+											{...field}
+										/>
 									</FormControl>
 									<FormMessage />
 								</FormItem>
@@ -88,7 +91,7 @@ export function PlanDrawer({
 								name="priceMonthly"
 								render={({ field }) => (
 									<FormItem>
-										<FormLabel>Monthly price (UZS)</FormLabel>
+										<FormLabel>{t('monthlyPrice')}</FormLabel>
 										<FormControl>
 											<Input
 												type="number"
@@ -109,7 +112,7 @@ export function PlanDrawer({
 								name="priceAnnual"
 								render={({ field }) => (
 									<FormItem>
-										<FormLabel>Annual price (UZS)</FormLabel>
+										<FormLabel>{t('annualPrice')}</FormLabel>
 										<FormControl>
 											<Input
 												type="number"
@@ -133,7 +136,7 @@ export function PlanDrawer({
 								name="maxStudents"
 								render={({ field }) => (
 									<FormItem>
-										<FormLabel>Student limit</FormLabel>
+										<FormLabel>{t('studentLimit')}</FormLabel>
 										<FormControl>
 											<Input
 												type="number"
@@ -146,7 +149,7 @@ export function PlanDrawer({
 											/>
 										</FormControl>
 										<p className="text-xs text-muted-foreground">
-											0 = unlimited
+											{t('unlimitedHint')}
 										</p>
 										<FormMessage />
 									</FormItem>
@@ -157,7 +160,7 @@ export function PlanDrawer({
 								name="maxBranches"
 								render={({ field }) => (
 									<FormItem>
-										<FormLabel>Branch limit</FormLabel>
+										<FormLabel>{t('branchLimit')}</FormLabel>
 										<FormControl>
 											<Input
 												type="number"
@@ -170,7 +173,7 @@ export function PlanDrawer({
 											/>
 										</FormControl>
 										<p className="text-xs text-muted-foreground">
-											0 = unlimited
+											{t('unlimitedHint')}
 										</p>
 										<FormMessage />
 									</FormItem>
@@ -198,10 +201,10 @@ export function PlanDrawer({
 											</FormControl>
 											<div>
 												<FormLabel className="text-sm font-medium leading-none">
-													{FEATURE_LABELS[feature].label}
+													{featureLabel(t, feature)}
 												</FormLabel>
 												<p className="mt-0.5 text-xs text-muted-foreground">
-													{FEATURE_LABELS[feature].description}
+													{featureDescription(t, feature)}
 												</p>
 											</div>
 										</FormItem>
@@ -222,11 +225,11 @@ export function PlanDrawer({
 							<Button type="submit" className="flex-1" disabled={saving}>
 								{saving
 									? isEdit
-										? 'Saving…'
-										: 'Creating…'
+										? t('saving')
+										: t('creating')
 									: isEdit
-										? 'Save changes'
-										: 'Create plan'}
+										? t('saveChanges')
+										: t('create')}
 							</Button>
 						</SheetFooter>
 					</form>

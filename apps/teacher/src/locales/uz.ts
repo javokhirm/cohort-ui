@@ -37,6 +37,9 @@ export const uz = {
 		goToThisMonth: 'Shu oyga oʻtish',
 		listView: 'Roʻyxat koʻrinishi',
 		tableView: 'Jadval koʻrinishi',
+		unsavedChanges: 'Saqlanmagan oʻzgarishlar',
+		savedState: 'Saqlangan',
+		myBranches: 'Mening filiallarim',
 	},
 
 	schedule: {
@@ -62,6 +65,12 @@ export const uz = {
 		sessionErrorTitle: 'Bu darsni yuklab boʻlmadi',
 		sessionsErrorDescription:
 			'Bu guruh darslarini yuklashda xatolik yuz berdi. Bir ozdan keyin qayta urinib koʻring.',
+		greetingMorning: 'Xayrli tong',
+		greetingAfternoon: 'Xayrli kun',
+		greetingEvening: 'Xayrli kech',
+		emptyWhenToday: 'bugun',
+		emptyWhenOnDate: '{{date}} kuni',
+		noRoom: 'Xona belgilanmagan',
 	},
 
 	groups: {
@@ -85,6 +94,24 @@ export const uz = {
 			room: 'Xona',
 			filled: 'Toʻldirilgan',
 		},
+		groupFallback: 'Guruh',
+		groupNumber: 'Guruh #{{id}}',
+		tabRoster: 'Roʻyxat',
+		tabSchedule: 'Jadval',
+		tabGrading: 'Baholash',
+		unnamedStudent: 'Nomsiz oʻquvchi',
+		unknownBranch: 'Nomaʼlum filial',
+		attendancePercent: '{{rate}}% davomat',
+		attendanceRateShort: '{{rate}}% dav.',
+		emptyBranch: 'Bu filialda guruhlar yoʻq',
+		emptyBranchDescription:
+			'Siz boshqa joyda dars berasiz — bu guruhlarni koʻrish uchun yuqoridagi paneldan «Barcha filiallar»ni tanlang.',
+		emptyTitle: 'Hali guruhlar yoʻq',
+		emptyDescription:
+			'Siz dars berish uchun biriktirilgan guruhlar shu yerda koʻrinadi.',
+		groupCount_one: '{{count}} guruh',
+		groupCount_other: '{{count}} guruh',
+		hiddenSuffix: ' · {{count}} tasi filial filtri bilan yashirilgan',
 	},
 
 	attendance: {
@@ -99,6 +126,18 @@ export const uz = {
 		cancelledTitle: 'Bu dars bekor qilingan',
 		cancelledDescription: 'Bekor qilingan dars uchun davomat olib boʻlmaydi.',
 		noStudentsDescription: 'Bu guruhda hali belgilanadigan faol oʻquvchilar yoʻq.',
+		takeTitle: 'Davomat olish',
+		sessionNumber: 'Dars #{{id}}',
+		presentAbsent: '{{present}} bor · {{absent}} yoʻq',
+		notMarked: 'belgilanmagan',
+		studentFallback: 'Oʻquvchi',
+		cellLabel: '{{name}}, {{date}} — {{status}}',
+		dateCancelled: '{{date}} — bekor qilingan',
+		onlyTodayEditable: 'Faqat bugungi ustun tahrirlanadi',
+		markAllHintNoSession: 'Bugun dars rejalashtirilmagan',
+		markAllHintCancelled: 'Bugungi dars bekor qilingan',
+		markAllHintNoStudents: 'Oʻquvchilar qabul qilinmagan',
+		markAllHintReady: 'Bugungi dars uchun barcha oʻquvchilarni bor deb belgilaydi',
 	},
 
 	marks: {
@@ -129,6 +168,32 @@ export const uz = {
 			marks: 'Baholar',
 		},
 		topBand: '90% va undan yuqori',
+		midBand: '{{low}}–89%',
+		lowBand: '{{low}}% dan past',
+		enterTitle: 'Baho qoʻyish',
+		sessionNumber: 'Dars #{{id}}',
+		notMarked: 'baholanmagan',
+		score: 'baho',
+		cellLabel: '{{name}}, {{date}} — {{status}}',
+		dateCancelled: '{{date}} — bekor qilingan',
+		markedProgress: '{{marked}} / {{total}} baholandi',
+		markFor: '{{name}} uchun baho',
+		scalePoints: 'Ball · maksimum {{max}}',
+		scalePercentage: 'Foiz · 0–{{max}}',
+		scaleLetter: 'Harf bahosi · A–F',
+		scaleShortPoints: 'Ball /{{max}}',
+		scaleShortPercentage: 'Foiz /{{max}}',
+		scaleShortLetter: 'Harf A–F',
+		scaleUsedFor: '{{scale}} · kundalik baholar uchun',
+		scaleNotSet: 'Hali oʻrnatilmagan · tanlash uchun bosing',
+		gradingScaleDescription: 'Bu guruhda kundalik baholar qanday qoʻyiladi.',
+		scaleType: 'Shkala turi',
+		letterHint: 'A–F harf baholari baho varagʻiga toʻgʻridan-toʻgʻri kiritiladi.',
+		maxPercent: 'Maksimum (%)',
+		maxPointsLabel: 'Maksimum ball',
+		allowHalf: 'Yarim ballli baholarga ruxsat berish',
+		preview: 'Koʻrib chiqish',
+		previewPoints: 'Kunlik ball · maksimum {{max}}',
 	},
 
 	payroll: {
@@ -139,6 +204,28 @@ export const uz = {
 		emptyTitle: 'Hali koʻrsatiladigan maosh yoʻq',
 		emptyDescription:
 			'Ofis maosh modelingizni sozlagach va yakunlangan darslaringiz boʻlgach, maoshingiz shu yerda koʻrinadi.',
+		advancesTitle: 'Avanslar',
+		advancesHint: 'Hisob-kitobgacha olingan maosh — sof summangizdan chegiriladi.',
+		advanceFallback: 'Avans',
+		studentsTitle: 'Oʻquvchilar',
+		noCompletedSessions:
+			'Bu oyda qabul qilingan oʻquvchilar bilan yakunlangan darslar yoʻq.',
+		breakdownSubtitle_one: '{{count}} oʻquvchi · siz oʻtgan darslar / umumiy soni',
+		breakdownSubtitle_other: '{{count}} oʻquvchi · siz oʻtgan darslar / umumiy soni',
+		sessionsCount: '{{taught}}/{{planned}} dars',
+		tuitionSuffix: ' · {{amount}} oʻquv toʻlovi',
+		revenueShareNote:
+			'Har bir oʻquvchining oʻquv toʻlovi guruhning shu oydagi barcha darslariga boʻlinadi va siz oʻtgan darslar uchun haq olasiz. Hali oldinda turgan darslar toʻlanmaydi, bekor qilingan dars umuman toʻlanmaydi, oy oʻrtasida qoʻshilgan oʻquvchi esa faqat qoʻshilgan kunidan hisoblanadi.',
+		referenceNote:
+			'Maʼlumot uchun keltirilgan. Siz yuqorida koʻrsatilgan asosda haq olasiz, har bir oʻquvchi uchun emas.',
+		netPayable: 'Sof toʻlov',
+		computed: 'Hisoblangan',
+		liveNote:
+			'Jonli — koʻrsatkichlar yakunlangan darslardan davr yopilgunga qadar yangilanadi.',
+		advancesExceedNote:
+			'Avanslar hisoblangan maoshdan oshib ketdi — bu oy uchun sof summa nolda ushlab turiladi.',
+		calcNote:
+			'Yakunlangan {{sessions}} darsdan hisoblangan ({{hours}} soat). Aniq jami {{exact}}, {{rounded}} gacha yaxlitlangan.',
 	},
 
 	students: {
@@ -158,6 +245,16 @@ export const uz = {
 			phone: 'Telefon',
 			email: 'Elektron pochta',
 		},
+		sectionContact: 'Aloqa',
+		sectionGuardians: 'Vasiylar',
+		unnamedContact: 'Nomsiz kontakt',
+		unnamedStudent: 'Nomsiz oʻquvchi',
+		primary: 'Asosiy',
+		gender: {
+			M: 'Erkak',
+			F: 'Ayol',
+			O: 'Boshqa',
+		},
 	},
 
 	profile: {
@@ -167,5 +264,11 @@ export const uz = {
 			'Hisobingiz maʼlumotlarini yuklashda xatolik yuz berdi. Bir ozdan keyin qayta urinib koʻring.',
 		staffId: 'Xodim IDsi',
 		branches: 'Filiallar',
+		phone: 'Telefon',
+		email: 'Elektron pochta',
+		allBranches: 'Barcha filiallar',
+		appearance: 'Koʻrinish',
+		darkMode: 'Tungi rejim',
+		lightMode: 'Kunduzgi rejim',
 	},
 } as const;

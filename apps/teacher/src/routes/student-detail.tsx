@@ -4,16 +4,10 @@ import { useNavigate, useParams, useRouter } from '@tanstack/react-router';
 import { Button, DetailRows, EmptyState, PageHeader, Skeleton } from '@repo/ui';
 import { formatDate } from '@repo/utils';
 
-import { useStudent, type StudentGender } from '@/features/students/api/students.queries';
+import { useStudent } from '@/features/students/api/students.queries';
 import { GuardianList } from '@/features/students/components/GuardianList';
 import { StudentHeaderCard } from '@/features/students/components/StudentHeaderCard';
 import { useAppT } from '@/locales';
-
-const GENDER_LABELS: Record<StudentGender, string> = {
-	M: 'Male',
-	F: 'Female',
-	O: 'Other',
-};
 
 /** Small caps section label, matching the design's group headings. */
 function SectionLabel({ children }: { children: string }) {
@@ -100,37 +94,37 @@ export function StudentDetailRoute() {
 				<StudentHeaderCard student={student} />
 			</div>
 
-			<SectionLabel>Contact</SectionLabel>
+			<SectionLabel>{t('sectionContact')}</SectionLabel>
 			<div className="rounded-xl border border-border bg-card px-3.5 shadow-xs">
 				<DetailRows
 					rows={[
 						{
-							label: 'Phone',
+							label: t('field.phone'),
 							value: student.phone ?? '—',
 							icon: <Phone />,
 						},
 						{
-							label: 'Email',
+							label: t('field.email'),
 							value: student.email ?? '—',
 							icon: <Mail />,
 						},
 						{
-							label: 'Date of birth',
+							label: t('field.dateOfBirth'),
 							value: student.dateOfBirth
 								? formatDate(student.dateOfBirth)
 								: '—',
 							icon: <CalendarDays />,
 						},
 						{
-							label: 'Gender',
-							value: student.gender ? GENDER_LABELS[student.gender] : '—',
+							label: t('field.gender'),
+							value: student.gender ? t(`gender.${student.gender}`) : '—',
 							icon: <User />,
 						},
 					]}
 				/>
 			</div>
 
-			<SectionLabel>Guardians</SectionLabel>
+			<SectionLabel>{t('sectionGuardians')}</SectionLabel>
 			<GuardianList studentId={studentId} />
 		</div>
 	);

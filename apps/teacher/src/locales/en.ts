@@ -25,6 +25,9 @@ export const en: TranslationsOf<typeof uz> = {
 		goToThisMonth: 'Go to this month',
 		listView: 'List view',
 		tableView: 'Table view',
+		unsavedChanges: 'Unsaved changes',
+		savedState: 'Saved',
+		myBranches: 'My branches',
 	},
 
 	schedule: {
@@ -50,6 +53,12 @@ export const en: TranslationsOf<typeof uz> = {
 		sessionErrorTitle: "Couldn't load this session",
 		sessionsErrorDescription:
 			"Something went wrong fetching this group's sessions. Try again in a moment.",
+		greetingMorning: 'Good morning',
+		greetingAfternoon: 'Good afternoon',
+		greetingEvening: 'Good evening',
+		emptyWhenToday: 'today',
+		emptyWhenOnDate: 'on {{date}}',
+		noRoom: 'No room set',
 	},
 
 	groups: {
@@ -72,6 +81,23 @@ export const en: TranslationsOf<typeof uz> = {
 			room: 'Room',
 			filled: 'Filled',
 		},
+		groupFallback: 'Group',
+		groupNumber: 'Group #{{id}}',
+		tabRoster: 'Roster',
+		tabSchedule: 'Schedule',
+		tabGrading: 'Grading',
+		unnamedStudent: 'Unnamed student',
+		unknownBranch: 'Unknown branch',
+		attendancePercent: '{{rate}}% attendance',
+		attendanceRateShort: '{{rate}}% att.',
+		emptyBranch: 'No groups at this branch',
+		emptyBranchDescription:
+			'You teach elsewhere — switch to "All branches" in the topbar to see those groups.',
+		emptyTitle: 'No groups yet',
+		emptyDescription: 'Groups you are assigned to teach will appear here.',
+		groupCount_one: '{{count}} group',
+		groupCount_other: '{{count}} groups',
+		hiddenSuffix: ' · {{count}} hidden by the branch filter',
 	},
 
 	attendance: {
@@ -86,6 +112,18 @@ export const en: TranslationsOf<typeof uz> = {
 		cancelledTitle: 'This session is cancelled',
 		cancelledDescription: "Attendance can't be taken for a cancelled session.",
 		noStudentsDescription: 'This group has no active students to mark yet.',
+		takeTitle: 'Take attendance',
+		sessionNumber: 'Session #{{id}}',
+		presentAbsent: '{{present}} present · {{absent}} absent',
+		notMarked: 'not marked',
+		studentFallback: 'Student',
+		cellLabel: '{{name}}, {{date}} — {{status}}',
+		dateCancelled: '{{date}} — cancelled',
+		onlyTodayEditable: "Only today's column is editable",
+		markAllHintNoSession: 'No session scheduled today',
+		markAllHintCancelled: "Today's session is cancelled",
+		markAllHintNoStudents: 'No students enrolled',
+		markAllHintReady: "Sets every student to Present for today's session",
 	},
 
 	marks: {
@@ -116,6 +154,32 @@ export const en: TranslationsOf<typeof uz> = {
 			marks: 'Marks',
 		},
 		topBand: '90% and up',
+		midBand: '{{low}}–89%',
+		lowBand: 'Below {{low}}%',
+		enterTitle: 'Enter marks',
+		sessionNumber: 'Session #{{id}}',
+		notMarked: 'not marked',
+		score: 'score',
+		cellLabel: '{{name}}, {{date}} — {{status}}',
+		dateCancelled: '{{date}} — cancelled',
+		markedProgress: '{{marked}} of {{total}} marked',
+		markFor: 'Mark for {{name}}',
+		scalePoints: 'Points · max {{max}}',
+		scalePercentage: 'Percentage · 0–{{max}}',
+		scaleLetter: 'Letter grade · A–F',
+		scaleShortPoints: 'Points /{{max}}',
+		scaleShortPercentage: 'Percentage /{{max}}',
+		scaleShortLetter: 'Letter A–F',
+		scaleUsedFor: '{{scale}} · used for daily marks',
+		scaleNotSet: 'Not set yet · tap to choose one',
+		gradingScaleDescription: 'How daily marks are entered for this group.',
+		scaleType: 'Scale type',
+		letterHint: 'Letter grades A–F are entered directly on the marks sheet.',
+		maxPercent: 'Maximum (%)',
+		maxPointsLabel: 'Maximum points',
+		allowHalf: 'Allow half-point scores',
+		preview: 'Preview',
+		previewPoints: 'Daily points · max {{max}}',
 	},
 
 	payroll: {
@@ -126,6 +190,28 @@ export const en: TranslationsOf<typeof uz> = {
 		emptyTitle: 'No pay to show yet',
 		emptyDescription:
 			'Your pay appears here once the office sets up your pay model and you have completed sessions.',
+		advancesTitle: 'Advances',
+		advancesHint: 'Salary drawn before the run — deducted from your net.',
+		advanceFallback: 'Advance',
+		studentsTitle: 'Students',
+		noCompletedSessions: 'No completed sessions with enrolled students this month.',
+		breakdownSubtitle_one: '{{count}} student · sessions you taught of their total',
+		breakdownSubtitle_other:
+			'{{count}} students · sessions you taught of their total',
+		sessionsCount: '{{taught}}/{{planned}} sessions',
+		tuitionSuffix: ' · {{amount}} tuition',
+		revenueShareNote:
+			"Each student's tuition is split across all of the group's classes for the month, and you earn the ones you taught. Classes still ahead of you are not paid yet, a cancelled class is not paid at all, and a student who joined mid-month counts only from the day they joined.",
+		referenceNote:
+			'Listed for reference. You are paid on the basis shown above, not per student.',
+		netPayable: 'Net payable',
+		computed: 'Computed',
+		liveNote:
+			'Live — figures update from completed sessions until the period is finalized.',
+		advancesExceedNote:
+			'Advances exceed the computed pay — net is held at zero for this month.',
+		calcNote:
+			'Computed from {{sessions}} completed sessions ({{hours}}h). Exact total {{exact}}, rounded to {{rounded}}.',
 	},
 
 	students: {
@@ -145,6 +231,16 @@ export const en: TranslationsOf<typeof uz> = {
 			phone: 'Phone',
 			email: 'Email',
 		},
+		sectionContact: 'Contact',
+		sectionGuardians: 'Guardians',
+		unnamedContact: 'Unnamed contact',
+		unnamedStudent: 'Unnamed student',
+		primary: 'Primary',
+		gender: {
+			M: 'Male',
+			F: 'Female',
+			O: 'Other',
+		},
 	},
 
 	profile: {
@@ -154,5 +250,11 @@ export const en: TranslationsOf<typeof uz> = {
 			'Something went wrong fetching your account. Try again in a moment.',
 		staffId: 'Staff ID',
 		branches: 'Branches',
+		phone: 'Phone',
+		email: 'Email',
+		allBranches: 'All branches',
+		appearance: 'Appearance',
+		darkMode: 'Dark mode',
+		lightMode: 'Light mode',
 	},
 };

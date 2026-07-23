@@ -664,6 +664,8 @@ export const ru: TranslationsOf<typeof uz> = {
 				updateModelFailed: 'Не удалось обновить модель оплаты',
 				updatedWindow: 'Период оплаты обновлён',
 				updateWindowFailed: 'Не удалось обновить период оплаты',
+				lockTypeHint:
+					'Окно сохраняет модель оплаты, с которой оно открылось — переключайтесь между фиксированной и процентной оплатой, меняя модель оплаты.',
 			},
 			type: {
 				FIXED: 'Фиксированный оклад',
@@ -677,6 +679,8 @@ export const ru: TranslationsOf<typeof uz> = {
 				percentPlaceholder: 'например, 50',
 				percentHint:
 					'Преподаватель получает эту долю от оплаты обучения учеников своих групп — пропорционально проведённым занятиям.',
+				effectiveFromHint:
+					'С этой даты зарплата рассчитывается по этой модели оплаты.',
 			},
 			validation: {
 				modelRequired: 'Выберите модель оплаты',
@@ -693,6 +697,7 @@ export const ru: TranslationsOf<typeof uz> = {
 		create: 'Создать группу',
 		edit: 'Редактировать группу',
 		back: 'Назад к группам',
+		backToGroup: 'Назад к {{name}}',
 		created: 'Группа создана',
 		updated: 'Группа обновлена',
 		searchPlaceholder: 'Поиск по названию или коду…',
@@ -702,6 +707,8 @@ export const ru: TranslationsOf<typeof uz> = {
 		noRoom: 'Без аудитории',
 		unassigned: 'Не назначен',
 		noSchedule: 'Расписание не задано',
+		loadError: 'Не удалось загрузить группы. Обновите страницу.',
+		emptyFiltered: 'Нет групп по этим фильтрам.',
 		status: {
 			PLANNED: 'Запланирована',
 			ACTIVE: 'Активна',
@@ -773,8 +780,12 @@ export const ru: TranslationsOf<typeof uz> = {
 				groupStatus: 'Статус группы',
 				dateRange: 'Период',
 				weeklySchedule: 'Недельное расписание',
+				days: 'Дни *',
 			},
+			previewTitle: 'Предпросмотр занятий',
 			previewEmpty: 'Выберите дни и период, чтобы увидеть занятия',
+			previewCount_one: 'Это правило создаёт {{count}} занятие',
+			previewCount_other: 'Это правило создаёт {{count}} занятий',
 			saveChanges: 'Сохранить изменения',
 			reschedule: {
 				title: 'Перестроить расписание?',
@@ -833,11 +844,20 @@ export const ru: TranslationsOf<typeof uz> = {
 			},
 		},
 		roster: {
+			title: 'Список',
+			enrolledSummary: '{{filled}} зачислено',
+			enrolledOn: 'зачислен {{date}}',
 			enroll: 'Зачислить учеников',
 			enrollSearchHint: 'Найдите активных учеников и добавьте их в эту группу.',
 			enrollDescription:
 				'Зачислите активных учеников, чтобы сформировать состав группы.',
 			emptyTitle: 'Учеников пока нет',
+			emptyFiltered: 'Нет зачислений с этим статусом.',
+			noMatchingStudents: 'Подходящих учеников нет.',
+			startDateHint:
+				'День, когда ученик фактически начал. Это задаёт его годовщину биллинга, поэтому укажите прошлую дату, если добавляете его с опозданием.',
+			enrolledToast_one: 'Зачислен {{count}} ученик',
+			enrolledToast_other: 'Зачислено {{count}} учеников',
 			drop: 'Отчислить ученика',
 			dropPlaceholder: 'например, переведён, перестал ходить…',
 			dropped: 'Ученик отчислен из группы',
@@ -879,6 +899,8 @@ export const ru: TranslationsOf<typeof uz> = {
 				confirm: 'Отменить занятие',
 				reasonPlaceholder: 'например, преподаватель занят, праздник…',
 				done: 'Занятие отменено',
+				warning: 'Зачисленные ученики будут уведомлены. Это нельзя отменить.',
+				reasonRequired: 'Причина *',
 			},
 			reschedule: {
 				action: 'Перенести занятие',
@@ -893,6 +915,7 @@ export const ru: TranslationsOf<typeof uz> = {
 			end: 'Окончание',
 			branch: 'Филиал',
 			cancelReason: 'Причина',
+			cancellationReasonLabel: 'Причина отмены',
 			clashingGroup: 'Конфликтующая группа',
 		},
 		actions: {
@@ -906,6 +929,7 @@ export const ru: TranslationsOf<typeof uz> = {
 		schedule: {
 			title: 'Расписание',
 			description: 'Календарь занятий по всем группам',
+			loadError: 'Не удалось загрузить расписание. Обновите страницу.',
 		},
 		enrollmentDateError:
 			'Такая дата начала пропустит расчётные периоды, за которые ученику никогда не выставят счёт. Выберите дату между {{from}} и {{to}}.',
@@ -1207,6 +1231,9 @@ export const ru: TranslationsOf<typeof uz> = {
 			groupsUsing: 'Группы, использующие этот план',
 			collected: 'Собрано',
 			outstanding: 'Задолженность',
+			notInUse: 'Не используется',
+			groupCount_one: '{{count}} группа',
+			groupCount_other: '{{count}} групп',
 		},
 		misc: {
 			billTo: 'Кому',
@@ -1251,6 +1278,178 @@ export const ru: TranslationsOf<typeof uz> = {
 			dunning: 'Напоминания',
 			advanced: 'Дополнительно',
 		},
+		invoiceForm: {
+			editTitle: 'Редактировать счёт',
+			editDescription:
+				'Срок оплаты и заметки можно изменить, пока счёт в статусе черновика.',
+			saveChanges: 'Сохранить изменения',
+			noDiscount: 'Без скидки',
+			item: 'Позиция {{index}}',
+			createFailed: 'Не удалось создать счёт',
+			discountApplyFailed:
+				'Счёт {{number}} создан, но скидку не удалось применить: {{error}}',
+			unknownError: 'неизвестная ошибка',
+			zeroTotalWarning:
+				'Эта скидка снижает итог до 0 UZS — ничего не будет начислено.',
+		},
+		invoiceActions: {
+			outstandingHint:
+				'Есть непогашенный остаток — запишите платёж, чтобы обновить.',
+			issueFailed: 'Не удалось выставить счёт',
+			walletApplied: 'Применён кошелёк на {{amount}} UZS',
+			noWalletCredit: 'Нет средств кошелька для применения',
+			applyWalletFailed: 'Не удалось применить средства кошелька',
+			voidFailed: 'Не удалось аннулировать счёт',
+			issuedInline: 'Выставлен',
+			dueInline: 'Срок оплаты',
+		},
+		refundForm: {
+			destinationWallet: 'Кошелёк',
+			destinationCashOut: 'Наличными',
+			cannotUndo: 'Это нельзя отменить.',
+			destination: 'Направление *',
+			walletOnlyHint:
+				'Этот платёж не привязан к счёту, поэтому может быть возвращён только наличными.',
+		},
+		creditNoteForm: {
+			dialogDescription:
+				'Отменяет часть начислений по этому счёту. Это нельзя отменить.',
+			maxCreditable: 'Доступно к возврату до {{max}} UZS.',
+		},
+		applyDiscount: {
+			allApplied: 'Каждая активная скидка уже применена к этому счёту.',
+			noneAvailable:
+				'Нет доступных активных скидок. Сначала создайте одну в разделе «Скидки».',
+			zeroTotalWarning:
+				'Эта скидка снижает итог до 0 UZS — больше ничего не будет должно.',
+		},
+		discountCard: {
+			percentageOff: 'Скидка в процентах',
+			fixedAmountOff: 'Скидка фиксированной суммой',
+			validFromLabel: 'с {{date}}',
+			validUntilLabel: 'до {{date}}',
+			editAria: 'Редактировать скидку {{name}}',
+			off: 'скидка',
+			usageCapped: 'использовано {{used}} / {{max}}',
+			usageUncapped_one: 'использовано {{count}} раз',
+			usageUncapped_other: 'использовано {{count}} раз',
+		},
+		enrollmentDiscount: {
+			hint: 'Применяется автоматически к месячному счёту этого зачисления — каждый месяц, пока не истечёт. Лимиты использования базового промокода постоянными назначениями не расходуются.',
+			removeConfirm: 'Убрать постоянную скидку «{{name}}»?',
+			removeAria: 'Убрать {{name}}',
+			validUntilShort: 'до {{date}}',
+			noEndDate: 'без срока',
+			allAssigned: 'Каждая активная скидка уже назначена этому зачислению.',
+			noneToAssign:
+				'Нет активных скидок для назначения — сначала создайте одну в разделе «Скидки».',
+			validUntilHint:
+				'Применяется к каждому месячному счёту, созданному до этой даты. Оставьте пустым, чтобы без срока.',
+		},
+		feePlanForm: {
+			sharedOption: 'Общий — все филиалы',
+			standaloneHint:
+				'Планы самостоятельны. После сохранения привяжите его к курсу — каждая группа этого курса будет выставлять счета по нему.',
+			repriceHint:
+				'Изменение суммы или цикла пересчитывает все будущие счета для этих групп. Уже выставленные счета сохраняют свой исходный план.',
+			noGroupsHint:
+				'Пока нет групп на этом плане. Группа наследует его от своего курса — привяжите план при создании или редактировании курса.',
+			loadError: 'Не удалось загрузить группы. Обновите страницу.',
+			loadingGroups: 'Загрузка групп…',
+		},
+		generateExtra: {
+			failed: 'Не удалось сгенерировать счета',
+			titleAnniversary: 'Сгенерировать счета к оплате',
+			descAnniversary:
+				'Выставляет счёт каждому ученику, чей собственный цикл начался, но ещё не был выставлен. Каждый ученик выставляется за свой период — тот, что начался в годовщину зачисления — поэтому месяц выбирать не нужно.',
+			descPostpaid:
+				'Выставляет выбранный месяц по факту, после того как он полностью прошёл — этот единый запуск покрывает и повременную месячную часть, и часть по проведённым занятиям.',
+			descPrepaid: 'Выставляет выбранный месяц заранее, до его начала.',
+			consumedMonth: 'Отработанный месяц',
+			billingMonth: 'Месяц выставления',
+			hintAnniversary:
+				'Ночной запуск уже делает это. Используйте, чтобы наверстать после простоя — ученики, которым уже выставлен счёт за текущий цикл, не затрагиваются.',
+			hintPostpaid:
+				'Генерирует счета для зачислений, отработанных в {{period}}. Существующие счета за период не затрагиваются.',
+			hintPrepaid:
+				'Генерирует счета за {{period}}, заранее. Существующие счета за период не затрагиваются.',
+			resultTitle: 'Счета сгенерированы за {{period}}',
+			invoicesCreated_one: 'создан {{count}} счёт',
+			invoicesCreated_other: 'создано {{count}} счетов',
+			proratedSuffix_one: ' ({{count}} пропорциональный)',
+			proratedSuffix_other: ' ({{count}} пропорциональных)',
+			errorsTitle_one: '{{count}} зачисление не удалось сгенерировать',
+			errorsTitle_other: '{{count}} зачислений не удалось сгенерировать',
+			errorsDescription:
+				'Остальная часть запуска завершена — они были пропущены, а не выставлены. Запустите снова, чтобы повторить; причину смотрите в логах сервера.',
+		},
+		policyPage: {
+			managedDescription:
+				'Эта политика управляет каждым счётом вашего центра, поэтому её настраивает команда Cohort, а не меняют здесь. Чтобы запросить изменение, обратитесь в поддержку — оно вступит в силу со следующего запуска биллинга и никогда не изменит уже выставленные счета.',
+			forbidden: 'У вас нет прав на просмотр политики биллинга.',
+			loading: 'Загрузка политики биллинга…',
+		},
+		pickerExtra: {
+			selectGroup: 'Выберите группу…',
+			selectStudent: 'Выберите ученика…',
+		},
+		paymentDetail: {
+			dateTime: 'Дата и время',
+			notYetSettled: 'Ещё не проведён',
+			notLinkedToInvoice: 'Не привязан к счёту.',
+		},
+		policyDetail: {
+			billingMode: 'Режим биллинга',
+			billingCycle: 'Цикл биллинга',
+			invoiceDue: 'Срок оплаты счёта',
+			billingDay: 'День биллинга',
+			defaultDueDay: 'День оплаты по умолчанию',
+			defaultProration: 'Пропорция по умолчанию',
+			immediateDueOffset: 'Смещение срока немедленного счёта',
+			gracePeriod: 'Льготный период',
+			chargeOnEnrollment: 'Начисление при зачислении',
+			lateFees: 'Пени за просрочку',
+			type: 'Тип',
+			amount: 'Сумма',
+			recurrence: 'Периодичность',
+			maxPerInvoice: 'Максимум на счёт',
+			autoSuspend: 'Автоприостановка зачисления',
+			autoCancel: 'Автоотмена зачисления',
+			paymentReminders: 'Напоминания об оплате',
+			consumptionRule: 'Правило учёта',
+			autoApplyCredit: 'Автоприменение средств кошелька',
+			modePrepaid: 'Предоплата — счёт заранее',
+			modePostpaid: 'Постоплата — счёт по факту',
+			anchorCalendar: 'Календарный месяц',
+			anchorEnrollment: 'Годовщина зачисления',
+			prorationSession: 'По занятиям',
+			prorationDaily: 'Ежедневно',
+			prorationNone: 'Нет',
+			consumptionAttendedPlusUnexcused: 'Посещённые + без уважит. причины',
+			consumptionAllScheduled: 'Все запланированные',
+			consumptionAttendedOnly: 'Только посещённые',
+			lateFeeFixed: 'Фиксированная сумма',
+			lateFeePercent: 'Процент от счёта',
+			recurrenceOneTime: 'Разово',
+			recurrenceDaily: 'Ежедневно',
+			recurrenceWeekly: 'Еженедельно',
+			on: 'Включено',
+			off: 'Выключено',
+			disabled: 'Отключено',
+			daysPastDue: 'просрочка {{days}} дн.',
+			dueOnCycleStart: 'В дату начала цикла каждого ученика',
+			dueDaysIntoCycle: '{{days}} дн. в цикл каждого ученика',
+			dayOfMonth: '{{day}}-е число месяца',
+			prorationNotApplied: '{{method}} — не применяется в этом цикле',
+			sameDay: 'В тот же день',
+			daysValue: '{{days}} дн.',
+			graceNone: 'Нет — просрочка в день оплаты',
+			graceValue: '{{days}} дн. до отметки счёта как просроченного',
+			chargeOnFirstCycle: 'Включено — первый полный цикл выставляется сразу',
+			chargeOnProrated: 'Включено — пропорциональный счёт выставляется сразу',
+			chargeOff: 'Выключено — выставляется при следующем запуске',
+			uncapped: 'Без ограничения',
+		},
 	},
 	payroll: {
 		title: 'Зарплата',
@@ -1266,6 +1465,19 @@ export const ru: TranslationsOf<typeof uz> = {
 		export: 'Экспорт',
 		allStaff: 'Все сотрудники',
 		howCalculated: 'Как это рассчитано',
+		paid: 'Оплачено',
+		filterAll: 'Все',
+		staffLabel: 'Сотрудник',
+		loadError: 'Не удалось загрузить зарплату. Обновите страницу.',
+		headerSubtitle:
+			'рассчитывается по каждому преподавателю на основе проведённых занятий и учеников',
+		excluded_one:
+			'{{count}} сотрудник исключён — в этом месяце нет активной настройки зарплаты.',
+		excluded_other:
+			'{{count}} сотрудников исключено — в этом месяце нет активной настройки зарплаты.',
+		emptyTitle: 'Нет преподавателей по этому фильтру',
+		emptyDescription:
+			'В этом окне нет завершённых занятий или активной настройки зарплаты.',
 		stat: {
 			totalComputed: 'Всего начислено',
 			advances: 'Авансы в середине месяца',
@@ -1276,6 +1488,10 @@ export const ru: TranslationsOf<typeof uz> = {
 			type: 'Тип',
 			amount: 'Сумма',
 			status: 'Статус',
+			sessions: 'Занятия',
+			students: 'Ученики',
+			computed: 'Начислено',
+			advances: 'Авансы',
 		},
 		advance: {
 			amountPlaceholder: 'Сумма',
@@ -1284,6 +1500,21 @@ export const ru: TranslationsOf<typeof uz> = {
 			removed: 'Аванс удалён',
 			removeTitle: 'Удалить этот аванс?',
 			removeConfirm: 'Удалить',
+			title: 'Авансы в середине месяца',
+			subtitle:
+				'Зарплата, взятая до расчёта — запоминается и вычитается из суммы к выплате.',
+			empty: 'В этом периоде нет авансов.',
+			defaultLabel: 'Аванс',
+			removeAria: 'Удалить аванс',
+			exceedWarning:
+				'Авансы превышают начисленную выплату — сумма к выплате обнулена, переноса нет.',
+			removeDescription:
+				'{{amount}}, записанный {{date}}, будет удалён и больше не вычитается из суммы к выплате.',
+			errorFinalized: 'Этот период утверждён — авансы заблокированы.',
+			errorLinked: 'Этот аванс привязан к утверждённой зарплате.',
+			errorFutureMonth: 'Авансы нельзя записать за будущий месяц.',
+			recordFailed: 'Не удалось записать аванс',
+			removeFailed: 'Не удалось удалить аванс',
 		},
 		markPaid: {
 			done: 'Зарплата отмечена как выплаченная',
@@ -1296,6 +1527,66 @@ export const ru: TranslationsOf<typeof uz> = {
 			confirm: 'Отменить утверждение',
 			done: 'Снимок отброшен — показатели снова текущие',
 		},
+		breakdown: {
+			title: 'Разбивка по ученикам',
+			summary: '{{students}} учеников · {{sessions}} занятий · {{hours}} ч',
+			empty: 'Нет строк по ученикам за этот период.',
+			column: {
+				student: 'Ученик',
+				monthlyTuition: 'Месячная оплата',
+				sessions: 'Занятия',
+				proration: 'Пропорция',
+				hours: 'Часы',
+				revenueLine: 'Строка дохода',
+				share: 'Доля',
+			},
+			footnotePercent:
+				'Знаменатель — каждое занятие, которое группа проводит в этом месяце (по всем преподавателям: проведённые, ещё запланированные или отменённые). Так оплата зарабатывается за каждое фактически проведённое занятие: общие ученики делятся и никогда не оплачиваются дважды; ученик, присоединившийся или ушедший в середине месяца, финансирует только те занятия, на которые был записан; открытый месяц накапливается, а не оплачивается полностью вперёд; отменённое занятие не зарабатывает никто.',
+			footnoteOther:
+				'Строки дохода по ученикам применяются только к преподавателям на доле от дохода. Этот преподаватель оплачивается на показанной выше основе; ученики приведены для сверки.',
+		},
+		calc: {
+			rateDescPercent: '{{percent}}% от оплаты учеников',
+			rateDescHourly: 'Почасовая ставка',
+			rateDescFixed: 'Фиксированный месячный оклад',
+			summary: '{{sessions}} занятий · {{students}} учеников',
+			revenueBase: 'База дохода (пропорционально)',
+			fullPrecision: 'Полная точность',
+			rounding: 'банковское округление',
+			snapshotFinalized:
+				'Снимок утверждён {{date}} — заморожен, не пересчитывается.',
+			snapshotFinalizedBy:
+				'Снимок утверждён {{date}} пользователем {{name}} — заморожен, не пересчитывается.',
+			formulaPercent: '{{percent}}% × {{base}} UZS база дохода',
+			formulaHourly: '{{hours}} ч × {{rate}} UZS/ч',
+			formulaFixedProrated: '{{base}} UZS в месяц × {{pct}}% месяца',
+			formulaFixed: '{{base}} UZS месячный оклад',
+		},
+		finalize: {
+			title: 'Утвердить {{month}}?',
+			description_one:
+				'Текущие показатели {{count}} преподавателя замораживаются в снимки — они перестают отслеживать занятия и становятся записями к выплате.',
+			description_other:
+				'Текущие показатели {{count}} преподавателей замораживаются в снимки — они перестают отслеживать занятия и становятся записями к выплате.',
+			currentMonthWarning:
+				'Вы утверждаете текущий месяц. Занятия, проведённые после утверждения, не будут оплачены в этом месяце.',
+			done: '{{finalized}} утверждено, {{skipped}} пропущено',
+			failed: 'Не удалось утвердить период',
+		},
+		detail: {
+			liveHint:
+				'Текущая — показатели обновляются по проведённым занятиям до утверждения периода.',
+			paidOn: 'Оплачено {{date}}.',
+			markPaidTitle: 'Отметить {{month}} как выплаченный?',
+			markPaidDescription:
+				'{{amount}} к выплате для {{name}} будет записано как выплаченное. Это нельзя отменить.',
+			noFigure: 'Нет показателя зарплаты для этого преподавателя за {{month}}.',
+			errorAlreadyFinalized: 'Этот период уже утверждён.',
+			errorExpenseLocked:
+				'Связанный расход на зарплату заблокирован — эту запись нельзя изменить.',
+			markPaidFailed: 'Не удалось отметить зарплату как выплаченную',
+			unfinalizeFailed: 'Не удалось отменить утверждение',
+		},
 	},
 
 	dashboard: {
@@ -1305,9 +1596,19 @@ export const ru: TranslationsOf<typeof uz> = {
 		thisMonth: 'Этот месяц',
 		thisWeek: 'Эта неделя',
 		retry: 'Повторить',
+		panelError: 'Не удалось загрузить эту панель.',
+		due: 'Срок',
+		overdueDays_one: '{{count}} дн.',
+		overdueDays_other: '{{count}} дн.',
 		newGroup: 'Новая группа',
 		addStudent: 'Добавить ученика',
 		createInvoice: 'Создать счёт',
+		greeting: {
+			morning: 'Доброе утро',
+			afternoon: 'Добрый день',
+			evening: 'Добрый вечер',
+			withName: '{{greeting}}, {{name}}',
+		},
 		stat: {
 			activeStudents: 'Активные ученики',
 			revenueThisMonth: 'Выручка за месяц',
@@ -1351,6 +1652,13 @@ export const ru: TranslationsOf<typeof uz> = {
 		confirmPassword: 'Подтвердите новый пароль',
 		confirmPasswordPlaceholder: 'Введите новый пароль ещё раз',
 		changed: 'Пароль изменён. Используйте его при следующем входе.',
+		loadError: 'Не удалось загрузить ваш профиль. Обновите страницу.',
+		profileCardTitle: 'Профиль',
+		identityHint:
+			'Чтобы изменить имя или контактные данные, обратитесь к администратору.',
+		changeDescription:
+			'Задайте новый пароль для своей учётной записи. Вы останетесь в системе — новый пароль понадобится при следующем входе.',
+		changeFailed: 'Не удалось изменить пароль. Попробуйте снова.',
 	},
 
 	shell: {
@@ -1359,5 +1667,6 @@ export const ru: TranslationsOf<typeof uz> = {
 		prevMonth: 'Предыдущий месяц',
 		nextMonth: 'Следующий месяц',
 		brandSurface: 'УПРАВЛЕНИЕ',
+		backToSignIn: 'Вернуться ко входу',
 	},
 };

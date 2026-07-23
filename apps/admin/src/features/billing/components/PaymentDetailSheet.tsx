@@ -12,6 +12,7 @@ import {
 	StatusBadge,
 } from '@repo/ui';
 import { formatDateTime, formatPrice } from '@repo/utils';
+import { useStatusLabel } from '@repo/i18n';
 import { useAppT } from '@/locales';
 
 import { useBranches } from '@/api/branches';
@@ -46,6 +47,7 @@ export function PaymentDetailSheet({
 	onOpenChange,
 }: PaymentDetailSheetProps) {
 	const t = useAppT('billing');
+	const statusLabel = useStatusLabel();
 	const { data: payment, isLoading } = usePayment(open ? paymentId : null);
 	const { data: branches = [] } = useBranches();
 	const [refundOpen, setRefundOpen] = useState(false);
@@ -82,7 +84,9 @@ export function PaymentDetailSheet({
 											<StatusBadge
 												kind="payment"
 												status={payment.status}
-											/>
+											>
+												{statusLabel('payment', payment.status)}
+											</StatusBadge>
 										</div>
 										<div className="mt-0.5 flex items-center gap-1.5 text-sm text-muted-foreground">
 											<span className="font-mono">
@@ -130,7 +134,7 @@ export function PaymentDetailSheet({
 									</div>
 									<div>
 										<div className="text-xs text-muted-foreground">
-											Date & time
+											{t('paymentDetail.dateTime')}
 										</div>
 										<div className="text-sm font-semibold">
 											{payment.paidAt
@@ -138,7 +142,7 @@ export function PaymentDetailSheet({
 														', ',
 														' · ',
 													)
-												: 'Not yet settled'}
+												: t('paymentDetail.notYetSettled')}
 										</div>
 									</div>
 									{payment.providerTxnId && (
@@ -200,7 +204,7 @@ export function PaymentDetailSheet({
 									</>
 								) : (
 									<p className="text-sm text-muted-foreground">
-										Not linked to an invoice.
+										{t('paymentDetail.notLinkedToInvoice')}
 									</p>
 								)}
 							</div>

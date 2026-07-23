@@ -5,6 +5,7 @@ import { ArrowLeft, Undo2, Wallet } from 'lucide-react';
 import { Button, Card, ConfirmDialog, Skeleton, StatusBadge, toast } from '@repo/ui';
 import { isApiError } from '@repo/api-client';
 import { formatDate, formatMoney } from '@repo/utils';
+import { useStatusLabel } from '@repo/i18n';
 
 import { usePermissions } from '@/features/auth/hooks';
 
@@ -24,13 +25,15 @@ function initials(name: string): string {
 	return `${first?.[0] ?? ''}${last?.[0] ?? ''}`.toUpperCase() || '?';
 }
 
-function actionErrorMessage(err: unknown, fallback: string): string {
+type PayrollT = ReturnType<typeof useAppT<'payroll'>>;
+
+function actionErrorMessage(t: PayrollT, err: unknown, fallback: string): string {
 	if (!isApiError(err)) return fallback;
 	switch (err.code) {
 		case 'PAYROLL_PERIOD_FINALIZED':
-			return 'This period is already finalized.';
+			return t('detail.errorAlreadyFinalized');
 		case 'EXPENSE_LOCKED':
-			return 'The linked salary expense is locked — this record cannot change.';
+			return t('detail.errorExpenseLocked');
 		default:
 			return err.message || fallback;
 	}
@@ -39,6 +42,7 @@ function actionErrorMessage(err: unknown, fallback: string): string {
 function HeaderCard({ period }: { period: PayrollStaffPeriodResponse }) {
 	const t = useAppT('payroll');
 	const { can } = usePermissions();
+	const statusLabel = useStatusLabel();
 	const [payOpen, setPayOpen] = useState(false);
 	const [unfinalizeOpen, setUnfinalizeOpen] = useState(false);
 
@@ -53,7 +57,7 @@ function HeaderCard({ period }: { period: PayrollStaffPeriodResponse }) {
 				setPayOpen(false);
 			},
 			onError: (err) => {
-				toast.error(actionErrorMessage(err, 'Failed to mark payroll as paid'));
+				toast.error(actionErrorMessage(t, err, t('detail.markPaidFailed')));
 			},
 		});
 	}
@@ -65,7 +69,7 @@ function HeaderCard({ period }: { period: PayrollStaffPeriodResponse }) {
 				setUnfinalizeOpen(false);
 			},
 			onError: (err) => {
-				toast.error(actionErrorMessage(err, 'Failed to unfinalize'));
+				toast.error(actionErrorMessage(t, err, t('detail.unfinalizeFailed')));
 			},
 		});
 	}
@@ -91,7 +95,9 @@ function HeaderCard({ period }: { period: PayrollStaffPeriodResponse }) {
 							{period.status === 'LIVE' ? (
 								<LiveBadge />
 							) : (
-								<StatusBadge kind="payroll" status={period.status} />
+								<StatusBadge kind="payroll" status={period.status}>
+									{statusLabel('payroll', period.status)}
+								</StatusBadge>
 							)}
 							<RateTypeBadge
 								rateType={period.rateType}
@@ -106,19 +112,25 @@ function HeaderCard({ period }: { period: PayrollStaffPeriodResponse }) {
 
 				<div className="flex gap-6">
 					<div className="text-right">
-						<div className="text-xs text-muted-foreground">Computed</div>
+						<div className="text-xs text-muted-foreground">
+							{t('column.computed')}
+						</div>
 						<div className="text-base font-bold tabular-nums">
 							{formatMoney(period.grossAmount)}
 						</div>
 					</div>
 					<div className="text-right">
-						<div className="text-xs text-muted-foreground">Advances</div>
+						<div className="text-xs text-muted-foreground">
+							{t('column.advances')}
+						</div>
 						<div className="text-base font-bold tabular-nums text-tone-red-fg">
 							−{formatMoney(period.advancesTotal)}
 						</div>
 					</div>
 					<div className="text-right">
-						<div className="text-xs text-muted-foreground">Net payable</div>
+						<div className="text-xs text-muted-foreground">
+							{t('stat.netPayable')}
+						</div>
 						<div className="text-base font-bold tabular-nums text-tone-green-fg">
 							{formatMoney(period.netAmount)}
 						</div>
@@ -152,13 +164,12 @@ function HeaderCard({ period }: { period: PayrollStaffPeriodResponse }) {
 							aria-hidden
 							className="size-1.5 animate-pulse rounded-full bg-current"
 						/>
-						Live — figures update from completed sessions until the period is
-						finalized.
+						{t('detail.liveHint')}
 					</div>
 				)}
 				{period.status === 'PAID' && period.paidAt && (
 					<div className="text-sm text-muted-foreground">
-						Paid on {formatDate(period.paidAt)}.
+						{t('detail.paidOn', { date: formatDate(period.paidAt) })}
 					</div>
 				)}
 			</div>
@@ -166,8 +177,13 @@ function HeaderCard({ period }: { period: PayrollStaffPeriodResponse }) {
 			<ConfirmDialog
 				open={payOpen}
 				onOpenChange={setPayOpen}
-				title={`Mark ${formatMonthLabel(period.month)} as paid?`}
-				description={`${formatMoney(period.netAmount)} net for ${period.staffName} is recorded as paid out. This cannot be undone.`}
+				title={t('detail.markPaidTitle', {
+					month: formatMonthLabel(period.month),
+				})}
+				description={t('detail.markPaidDescription', {
+					amount: formatMoney(period.netAmount),
+					name: period.staffName,
+				})}
 				confirmLabel={t('markPaid.confirm')}
 				loading={markPaid.isPending}
 				onConfirm={handleMarkPaid}
@@ -215,7 +231,7 @@ export function PayrollDetailPage({ staffId, month }: PayrollDetailPageProps) {
 				</>
 			) : isError || !period ? (
 				<div className="flex min-h-40 items-center justify-center rounded-xl border text-sm text-muted-foreground">
-					No payroll figure for this teacher in {formatMonthLabel(month)}.
+					{t('detail.noFigure', { month: formatMonthLabel(month) })}
 				</div>
 			) : (
 				<>

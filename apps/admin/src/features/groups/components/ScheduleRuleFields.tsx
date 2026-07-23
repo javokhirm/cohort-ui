@@ -27,7 +27,7 @@ export function ScheduleRuleFields() {
 	return (
 		<div className="flex flex-col gap-3">
 			<div className="flex flex-col gap-1.5">
-				<span className="text-sm font-medium">Days *</span>
+				<span className="text-sm font-medium">{t('form.field.days')}</span>
 				<div className="flex flex-wrap gap-1.5">
 					{SCHEDULE_DAYS.map((day) => {
 						const active = days.includes(day);
