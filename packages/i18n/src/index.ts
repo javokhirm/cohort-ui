@@ -1,6 +1,6 @@
 export { getLocale, initI18n, setLocale, subscribeToLocale } from './config';
 
-export { translate, useLocale, useT } from './hooks';
+export { translate, useDateFnsLocale, useLocale, useT } from './hooks';
 
 export type { Translator } from './hooks';
 

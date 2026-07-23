@@ -54,6 +54,9 @@ export const uz = {
 			active: 'Faol',
 			inactive: 'Nofaol',
 		},
+		field: {
+			selectDate: 'Sanani tanlang',
+		},
 		table: {
 			empty: 'Bu yerda hali maʼlumot yoʻq',
 			emptyFiltered: 'Tanlangan filtrlarga mos natija topilmadi',

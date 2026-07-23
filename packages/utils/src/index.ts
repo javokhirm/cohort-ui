@@ -1,5 +1,7 @@
 export type { ID, Locale, Nullable, PartialBy, RequiredBy, SortDirection } from './types';
 
+export type { DateFnsLocale } from './date';
+
 export { isDefined, isNonNull, isNumber, isString } from './guards';
 
 export {
@@ -33,6 +35,7 @@ export {
 	formatMonthShort,
 	formatFullDate,
 	formatWeekRange,
+	dateFnsLocaleFor,
 } from './date';
 
 export { parseApiCode } from './codes';

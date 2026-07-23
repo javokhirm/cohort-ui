@@ -30,6 +30,18 @@ const DATE_FNS_LOCALES: Record<Locale, DateFnsLocale> = {
 	en: enUS,
 };
 
+export type { DateFnsLocale };
+
+/**
+ * The date-fns locale object for a UI locale code — for libraries that localize
+ * through date-fns directly and need the object, not just our code (e.g.
+ * react-day-picker's `locale` prop). Pure: unlike {@link setDateLocale} it reads
+ * no module state, so callers stay reactive to their own locale source.
+ */
+export function dateFnsLocaleFor(locale: Locale): DateFnsLocale {
+	return DATE_FNS_LOCALES[locale];
+}
+
 /** Monday-first weeks, matching the center's calendar (ISO week). */
 const WEEK_OPTS = { weekStartsOn: 1 } as const;
 

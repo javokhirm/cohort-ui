@@ -1,7 +1,7 @@
 import * as React from 'react';
 import i18next from 'i18next';
 import { useTranslation } from 'react-i18next';
-import type { Locale } from '@repo/utils';
+import { dateFnsLocaleFor, type DateFnsLocale, type Locale } from '@repo/utils';
 
 import { getLocale, setLocale, subscribeToLocale } from './config';
 import { SUPPORTED_LOCALES } from './messages';
@@ -40,6 +40,18 @@ interface UseLocaleResult {
 export function useLocale(): UseLocaleResult {
 	const current = React.useSyncExternalStore(subscribeToLocale, getLocale, getLocale);
 	return { locale: current, setLocale, locales: SUPPORTED_LOCALES };
+}
+
+/**
+ * The active locale as a date-fns `Locale` object, for libraries that localize
+ * through date-fns directly — chiefly react-day-picker's `locale` prop. Push it
+ * into `@repo/ui`'s `DatePickerLocaleProvider` once per app; that package can't
+ * read the locale itself (it must not depend on i18n). Re-renders on language
+ * change, like {@link useLocale}.
+ */
+export function useDateFnsLocale(): DateFnsLocale {
+	const { locale } = useLocale();
+	return dateFnsLocaleFor(locale);
 }
 
 /**

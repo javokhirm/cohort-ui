@@ -1,4 +1,5 @@
 import { type Control, type FieldPath, type FieldValues } from 'react-hook-form';
+import type { DateFnsLocale } from '@repo/utils';
 
 import { FormControl, FormField, FormItem, FormLabel, FormMessage } from '../form';
 import { DatePicker } from './date-picker';
@@ -17,6 +18,8 @@ interface FormDatePickerProps<
 	minDate?: string;
 	/** Latest selectable date, as an ISO calendar date ("YYYY-MM-DD"). */
 	maxDate?: string;
+	/** Overrides the app-provided calendar locale; rarely needed. */
+	locale?: DateFnsLocale;
 }
 
 export function FormDatePicker<
@@ -31,6 +34,7 @@ export function FormDatePicker<
 	className,
 	minDate,
 	maxDate,
+	locale,
 }: FormDatePickerProps<TFieldValues, TName>) {
 	return (
 		<FormField
@@ -48,6 +52,7 @@ export function FormDatePicker<
 							className={className}
 							minDate={minDate}
 							maxDate={maxDate}
+							locale={locale}
 						/>
 					</FormControl>
 					<FormMessage />
