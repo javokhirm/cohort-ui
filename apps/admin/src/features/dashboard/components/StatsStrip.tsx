@@ -28,7 +28,7 @@ export function StatsStrip({ data }: { data: DashboardStats }) {
 					value: signed(activeStudents.newThisMonth),
 					trend: activeStudents.newThisMonth > 0 ? 'positive' : 'neutral',
 				}}
-				hint="this month"
+				hint={t('stat.hintThisMonth')}
 			/>
 
 			<StatCard
@@ -40,7 +40,7 @@ export function StatsStrip({ data }: { data: DashboardStats }) {
 						? { value: <TrendChip value={attendanceToday.changePoints} /> }
 						: undefined
 				}
-				hint="vs last week"
+				hint={t('stat.hintVsLastWeek')}
 			/>
 
 			<StatCard
@@ -56,7 +56,7 @@ export function StatsStrip({ data }: { data: DashboardStats }) {
 							}
 						: undefined
 				}
-				hint="UZS"
+				hint={t('stat.hintCurrency')}
 			/>
 
 			<StatCard
@@ -64,10 +64,10 @@ export function StatsStrip({ data }: { data: DashboardStats }) {
 				value={formatPriceCompact(outstanding.amount)}
 				icon={<Wallet />}
 				delta={{
-					value: `${outstanding.overdueCount} overdue`,
+					value: t('stat.overdue', { count: outstanding.overdueCount }),
 					trend: outstanding.overdueCount > 0 ? 'negative' : 'neutral',
 				}}
-				hint="UZS"
+				hint={t('stat.hintCurrency')}
 			/>
 
 			<StatCard
@@ -78,7 +78,7 @@ export function StatsStrip({ data }: { data: DashboardStats }) {
 					value: signed(newLeads.change),
 					trend: newLeads.change > 0 ? 'positive' : 'neutral',
 				}}
-				hint="this week"
+				hint={t('stat.hintThisWeek')}
 			/>
 		</div>
 	);

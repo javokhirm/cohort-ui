@@ -3,13 +3,7 @@ import { z } from 'zod';
 import type { Translator } from '@repo/i18n';
 
 import type { useAppT } from '@/locales';
-
-/**
- * Branch is nullable on courses (`null` = shared across all branches), so the
- * form models the branch picker as a string and this sentinel stands in for
- * "shared". Converted to `number | null` at submit time.
- */
-export const SHARED_BRANCH_VALUE = 'shared';
+import { branchToPayload } from '@/lib/branch';
 
 type CourseT = ReturnType<typeof useAppT<'courses'>>;
 
@@ -43,16 +37,6 @@ export function editCourseSchema(t: Translator<'validation'>, tc: CourseT) {
 
 export type CreateCourseFormValues = z.infer<ReturnType<typeof createCourseSchema>>;
 export type EditCourseFormValues = z.infer<ReturnType<typeof editCourseSchema>>;
-
-/** Form branch string → payload `branchId` (`null` when shared). */
-export function branchToPayload(branch: string): number | null {
-	return branch === SHARED_BRANCH_VALUE ? null : Number(branch);
-}
-
-/** Payload `branchId` → form branch string. */
-export function branchToForm(branchId: number | null): string {
-	return branchId == null ? SHARED_BRANCH_VALUE : String(branchId);
-}
 
 /**
  * Only a shared plan (`branchId: null`) or one in the course's own branch may

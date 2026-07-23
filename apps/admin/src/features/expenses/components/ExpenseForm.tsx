@@ -23,8 +23,8 @@ import { useStatusLabel, useT } from '@repo/i18n';
 
 import { FormSection } from '@/components/FormSection';
 import { FormSheet } from '@/components/FormSheet';
+import { BranchSelectField } from '@/components/BranchSelectField';
 import { useAppT } from '@/locales';
-import { useBranches } from '@/api/branches';
 import { useActiveBranchIds } from '@/store/branchStore';
 
 import {
@@ -79,9 +79,6 @@ function CreateExpenseForm({
 		},
 	});
 
-	const { data: branches = [] } = useBranches();
-	const branchOptions = branches.map((b) => ({ value: String(b.id), label: b.name }));
-
 	const createExpense = useCreateExpense();
 
 	useEffect(() => {
@@ -120,11 +117,10 @@ function CreateExpenseForm({
 									label: statusLabel('expense', o.value),
 								}))}
 							/>
-							<FormSelect
+							<BranchSelectField
 								control={form.control}
 								name="branchId"
 								label={t('field.branch')}
-								options={branchOptions}
 								valueAsNumber
 							/>
 						</div>
@@ -216,9 +212,6 @@ function EditExpenseForm({
 		// eslint-disable-next-line react-hooks/exhaustive-deps
 	}, [expense]);
 
-	const { data: branches = [] } = useBranches();
-	const branchOptions = branches.map((b) => ({ value: String(b.id), label: b.name }));
-
 	const updateExpense = useUpdateExpense();
 
 	useEffect(() => {
@@ -258,11 +251,10 @@ function EditExpenseForm({
 									label: statusLabel('expense', o.value),
 								}))}
 							/>
-							<FormSelect
+							<BranchSelectField
 								control={form.control}
 								name="branchId"
 								label={t('field.branch')}
-								options={branchOptions}
 								valueAsNumber
 							/>
 						</div>

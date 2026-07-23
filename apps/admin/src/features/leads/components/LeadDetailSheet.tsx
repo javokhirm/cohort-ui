@@ -420,7 +420,9 @@ function TimelineItem({ activity, isLast }: { activity: LeadActivity; isLast: bo
 			<div className="pb-3">
 				<div className="flex flex-wrap items-center gap-x-1 text-sm">
 					{activity.status ? (
-						<div className="font-semibold">{activity.label}</div>
+						<div className="font-semibold">
+							{t(`activity.event.${activity.status}`)}
+						</div>
 					) : (
 						<span className="font-semibold">{activity.notes}</span>
 					)}

@@ -254,6 +254,14 @@ export const uz = {
 			logged: 'Faoliyat qayd etildi',
 			failed: 'Faoliyatni qayd etib boʻlmadi.',
 			placeholder: 'Nima boʻldi?',
+			// System timeline events, keyed by the lead's status as of the entry.
+			event: {
+				NEW: 'Lid qoʻshildi',
+				CONTACTED: 'Lid bilan bogʻlanildi',
+				TRIAL_BOOKED: 'Sinov darsi belgilandi',
+				ENROLLED: 'Oʻquvchiga aylantirildi',
+				LOST: 'Yoʻqotilgan deb belgilandi',
+			},
 		},
 		detail: {
 			title: 'Lid tafsilotlari',
@@ -1622,6 +1630,12 @@ export const uz = {
 			attendanceToday: 'Bugungi davomat',
 			newLeads: 'Yangi lidlar',
 			outstanding: 'Qoldiq',
+			hintThisMonth: 'shu oy',
+			hintThisWeek: 'shu hafta',
+			hintVsLastWeek: 'oʻtgan haftaga nisbatan',
+			hintCurrency: 'UZS',
+			overdue_one: '{{count}} muddati oʻtgan',
+			overdue_other: '{{count}} muddati oʻtgan',
 		},
 		card: {
 			todaySessions: 'Bugungi darslar',

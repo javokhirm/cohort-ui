@@ -234,6 +234,14 @@ export const en: TranslationsOf<typeof uz> = {
 			logged: 'Activity logged',
 			failed: 'Failed to log activity.',
 			placeholder: 'What happened?',
+			// System timeline events, keyed by the lead's status as of the entry.
+			event: {
+				NEW: 'Lead added',
+				CONTACTED: 'Lead contacted',
+				TRIAL_BOOKED: 'Trial lesson booked',
+				ENROLLED: 'Converted to student',
+				LOST: 'Marked as lost',
+			},
 		},
 		detail: {
 			title: 'Lead details',
@@ -1589,6 +1597,12 @@ export const en: TranslationsOf<typeof uz> = {
 			attendanceToday: 'Attendance today',
 			newLeads: 'New leads',
 			outstanding: 'Outstanding',
+			hintThisMonth: 'this month',
+			hintThisWeek: 'this week',
+			hintVsLastWeek: 'vs last week',
+			hintCurrency: 'UZS',
+			overdue_one: '{{count}} overdue',
+			overdue_other: '{{count}} overdue',
 		},
 		card: {
 			todaySessions: 'Today’s sessions',

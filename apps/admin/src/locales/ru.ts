@@ -247,6 +247,14 @@ export const ru: TranslationsOf<typeof uz> = {
 			logged: 'Активность записана',
 			failed: 'Не удалось записать активность.',
 			placeholder: 'Что произошло?',
+			// System timeline events, keyed by the lead's status as of the entry.
+			event: {
+				NEW: 'Лид добавлен',
+				CONTACTED: 'Связались с лидом',
+				TRIAL_BOOKED: 'Записан на пробное занятие',
+				ENROLLED: 'Переведён в ученика',
+				LOST: 'Отмечен как потерянный',
+			},
 		},
 		detail: {
 			title: 'Детали лида',
@@ -1619,6 +1627,14 @@ export const ru: TranslationsOf<typeof uz> = {
 			attendanceToday: 'Посещаемость сегодня',
 			newLeads: 'Новые лиды',
 			outstanding: 'Задолженность',
+			hintThisMonth: 'за месяц',
+			hintThisWeek: 'за неделю',
+			hintVsLastWeek: 'к прошлой неделе',
+			hintCurrency: 'UZS',
+			overdue_one: '{{count}} просрочено',
+			overdue_few: '{{count}} просрочено',
+			overdue_many: '{{count}} просрочено',
+			overdue_other: '{{count}} просрочено',
 		},
 		card: {
 			todaySessions: 'Занятия сегодня',

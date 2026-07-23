@@ -21,8 +21,8 @@ import { type Translator, useT } from '@repo/i18n';
 
 import { useAppT } from '@/locales';
 
-import { useBranches } from '@/api/branches';
 import { FormSection } from '@/components/FormSection';
+import { BranchSelectField } from '@/components/BranchSelectField';
 import { useBranchStore } from '@/store/branchStore';
 import { useCourseList } from '@/features/courses/api/courses.queries';
 import { useStaffList } from '@/features/hr/api/staff.queries';
@@ -52,7 +52,6 @@ import { SessionPreviewCard } from '../components/SessionPreviewCard';
 /** Pickers for the group form. Rooms narrow to the chosen branch. */
 function useGroupFormOptions(branchId: string) {
 	const t = useAppT('groups');
-	const { data: branches = [] } = useBranches();
 	const { data: courseData } = useCourseList({ limit: 100, isActive: true });
 	const { data: teacherData } = useStaffList({ role: 'TEACHER', limit: 100 });
 	const branchNum = branchId && branchId !== '' ? Number(branchId) : undefined;
@@ -62,10 +61,6 @@ function useGroupFormOptions(branchId: string) {
 		isActive: true,
 	});
 
-	const branchOptions: SelectOption[] = branches.map((b) => ({
-		value: String(b.id),
-		label: b.name,
-	}));
 	const courseOptions: SelectOption[] = (courseData?.rows ?? []).map((c) => ({
 		value: String(c.id),
 		label: c.name,
@@ -85,7 +80,7 @@ function useGroupFormOptions(branchId: string) {
 		})),
 	];
 
-	return { branchOptions, courseOptions, teacherOptions, roomOptions };
+	return { courseOptions, teacherOptions, roomOptions };
 }
 
 // ─── Shared field layout (used by create + edit via FormProvider) ─────────────
@@ -113,8 +108,7 @@ function GroupFields({
 	const startDate = form.watch('startDate');
 	const endDate = form.watch('endDate');
 	const startTime = form.watch('startTime');
-	const { branchOptions, courseOptions, teacherOptions, roomOptions } =
-		useGroupFormOptions(branchId);
+	const { courseOptions, teacherOptions, roomOptions } = useGroupFormOptions(branchId);
 
 	return (
 		<div className="grid grid-cols-1 gap-4 lg:grid-cols-[1fr_420px] lg:items-start">
@@ -162,12 +156,11 @@ function GroupFields({
 							/>
 						</div>
 						<div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
-							<FormSelect
+							<BranchSelectField
 								control={form.control}
 								name="branchId"
 								label={t('form.field.branch')}
 								placeholder={t('form.field.branchPlaceholder')}
-								options={branchOptions}
 								disabled={mode === 'edit'}
 							/>
 							<FormSelect

@@ -28,7 +28,6 @@ import { useAppT } from '@/locales';
 
 import { FormSection } from '@/components/FormSection';
 import { FormSheet } from '@/components/FormSheet';
-import { useBranches } from '@/api/branches';
 import { useActiveBranchIds } from '@/store/branchStore';
 
 import { blankToNull } from '../schemas/discount-form.schema';
@@ -48,6 +47,7 @@ import {
 import { useDiscountList } from '../api/discounts.queries';
 import { INVOICE_LINE_ITEM_TYPE_OPTIONS } from '../lib/invoice-options';
 import { StudentPicker } from './StudentPicker';
+import { BranchSelectField } from '@/components/BranchSelectField';
 
 interface CreateProps {
 	mode: 'create';
@@ -88,7 +88,7 @@ function CreateInvoiceForm({
 					description: '',
 					quantity: 1,
 					unitAmount: undefined as unknown as number,
-					type: 'TUITION',
+					type: 'OTHER',
 				},
 			],
 			discountId: NO_DISCOUNT_VALUE,
@@ -99,9 +99,6 @@ function CreateInvoiceForm({
 		control: form.control,
 		name: 'lineItems',
 	});
-
-	const { data: branches = [] } = useBranches();
-	const branchOptions = branches.map((b) => ({ value: String(b.id), label: b.name }));
 
 	const { data: discountData } = useDiscountList({ isActive: true, limit: 100 });
 	const discounts = discountData?.rows ?? [];
@@ -200,11 +197,10 @@ function CreateInvoiceForm({
 							)}
 						/>
 						<div className="grid grid-cols-2 gap-3">
-							<FormSelect
+							<BranchSelectField
 								control={form.control}
 								name="branchId"
 								label={t('feePlans.field.branch')}
-								options={branchOptions}
 								valueAsNumber
 							/>
 							<FormDatePicker

@@ -15,8 +15,8 @@ import { useStatusLabel, useT } from '@repo/i18n';
 
 import { FormSection } from '@/components/FormSection';
 import { FormSheet } from '@/components/FormSheet';
+import { BranchSelectField } from '@/components/BranchSelectField';
 import { useAppT } from '@/locales';
-import { useBranches } from '@/api/branches';
 import { useBranchStore } from '@/store/branchStore';
 
 import {
@@ -70,7 +70,6 @@ function CreateRoomForm({
 		},
 	});
 
-	const { data: branches = [] } = useBranches();
 	const createRoom = useCreateRoom();
 
 	useEffect(() => {
@@ -103,15 +102,11 @@ function CreateRoomForm({
 							label={t('field.name')}
 							placeholder={t('field.namePlaceholder')}
 						/>
-						<FormSelect
+						<BranchSelectField
 							control={form.control}
 							name="branchId"
 							label={t('field.branch')}
 							valueAsNumber
-							options={branches.map((b) => ({
-								value: String(b.id),
-								label: b.name,
-							}))}
 						/>
 						<div className="grid grid-cols-2 gap-3">
 							<FormInput
@@ -181,7 +176,6 @@ function EditRoomForm({
 		// eslint-disable-next-line react-hooks/exhaustive-deps
 	}, [room]);
 
-	const { data: branches = [] } = useBranches();
 	const updateRoom = useUpdateRoom();
 
 	useEffect(() => {
@@ -216,15 +210,11 @@ function EditRoomForm({
 							label={t('field.name')}
 							placeholder={t('field.namePlaceholder')}
 						/>
-						<FormSelect
+						<BranchSelectField
 							control={form.control}
 							name="branchId"
 							label={t('field.branch')}
 							valueAsNumber
-							options={branches.map((b) => ({
-								value: String(b.id),
-								label: b.name,
-							}))}
 						/>
 						<div className="grid grid-cols-2 gap-3">
 							<FormInput

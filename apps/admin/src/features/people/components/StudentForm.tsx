@@ -18,6 +18,7 @@ import { useStatusLabel, useT } from '@repo/i18n';
 
 import { FormSection } from '@/components/FormSection';
 import { FormSheet } from '@/components/FormSheet';
+import { BranchSelectField } from '@/components/BranchSelectField';
 import { useAppT } from '@/locales';
 
 import {
@@ -27,7 +28,6 @@ import {
 	type CreateStudentFormValues,
 	type EditStudentFormValues,
 } from '../schemas/student-form.schema';
-import { useBranches } from '@/api/branches';
 import { useBranchStore } from '@/store/branchStore';
 import { useGroups, type Student } from '../api/students.queries';
 import {
@@ -113,7 +113,6 @@ function CreateStudentForm({
 		form.resetField('guardianRelation');
 	}
 
-	const { data: branches = [] } = useBranches();
 	const selectedBranchId = form.watch('branchId');
 	const { data: groupsPage } = useGroups(
 		selectedBranchId ? { branchIds: [selectedBranchId] } : undefined,
@@ -223,15 +222,11 @@ function CreateStudentForm({
 								name="phone"
 								label={t('form.field.phone')}
 							/>
-							<FormSelect
+							<BranchSelectField
 								control={form.control}
 								name="branchId"
 								label={t('form.field.branch')}
 								valueAsNumber
-								options={branches.map((b) => ({
-									value: String(b.id),
-									label: b.name,
-								}))}
 							/>
 						</div>
 						<FormInput
@@ -361,7 +356,6 @@ function EditStudentForm({
 		});
 	}, [student, form]);
 
-	const { data: branches = [] } = useBranches();
 	const updateStudent = useUpdateStudent();
 
 	useEffect(() => {
@@ -446,15 +440,11 @@ function EditStudentForm({
 							/>
 						</div>
 						<div className="grid grid-cols-2 gap-3">
-							<FormSelect
+							<BranchSelectField
 								control={form.control}
 								name="branchId"
 								label={t('form.field.branch')}
 								valueAsNumber
-								options={branches.map((b) => ({
-									value: String(b.id),
-									label: b.name,
-								}))}
 							/>
 						</div>
 						<FormInput

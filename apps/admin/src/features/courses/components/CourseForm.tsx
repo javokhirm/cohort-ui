@@ -17,17 +17,15 @@ import { useT } from '@repo/i18n';
 
 import { FormSection } from '@/components/FormSection';
 import { FormSheet } from '@/components/FormSheet';
+import { BranchSelectField } from '@/components/BranchSelectField';
 import { useAppT } from '@/locales';
-import { useBranches } from '@/api/branches';
+import { SHARED_BRANCH_VALUE, branchToForm, branchToPayload } from '@/lib/branch';
 import { useFeePlanList } from '@/features/billing/api/fee-plans.queries';
 
 import {
-	branchToForm,
-	branchToPayload,
 	createCourseSchema,
 	editCourseSchema,
 	isPlanBranchCompatible,
-	SHARED_BRANCH_VALUE,
 	type CreateCourseFormValues,
 	type EditCourseFormValues,
 } from '../schemas/course-form.schema';
@@ -49,16 +47,6 @@ interface EditProps {
 }
 
 type CourseFormProps = CreateProps | EditProps;
-
-/** Branch options with a leading "shared across all branches" choice. */
-function useBranchOptions() {
-	const t = useAppT('courses');
-	const { data: branches = [] } = useBranches();
-	return [
-		{ value: SHARED_BRANCH_VALUE, label: t('sharedOption') },
-		...branches.map((b) => ({ value: String(b.id), label: b.name })),
-	];
-}
 
 /**
  * Active plans this course may bill on, narrowed to the branch-compatible ones
@@ -133,7 +121,6 @@ function CreateCourseForm({
 		},
 	});
 
-	const branchOptions = useBranchOptions();
 	const createCourse = useCreateCourse();
 
 	const branch = form.watch('branch');
@@ -192,11 +179,11 @@ function CreateCourseForm({
 							label={t('field.name')}
 							placeholder={t('field.namePlaceholder')}
 						/>
-						<FormSelect
+						<BranchSelectField
 							control={form.control}
 							name="branch"
 							label={t('field.branch')}
-							options={branchOptions}
+							sharedLabel={t('sharedOption')}
 						/>
 						<FeePlanField control={form.control} options={feePlanOptions} />
 						<div className="grid grid-cols-2 gap-3">
@@ -271,7 +258,6 @@ function EditCourseForm({
 		// eslint-disable-next-line react-hooks/exhaustive-deps
 	}, [course]);
 
-	const branchOptions = useBranchOptions();
 	const updateCourse = useUpdateCourse();
 
 	const branch = form.watch('branch');
@@ -333,11 +319,11 @@ function EditCourseForm({
 							label={t('field.name')}
 							placeholder={t('field.namePlaceholder')}
 						/>
-						<FormSelect
+						<BranchSelectField
 							control={form.control}
 							name="branch"
 							label={t('field.branch')}
-							options={branchOptions}
+							sharedLabel={t('sharedOption')}
 						/>
 						<FeePlanField control={form.control} options={feePlanOptions} />
 						<p className="text-xs text-muted-foreground">

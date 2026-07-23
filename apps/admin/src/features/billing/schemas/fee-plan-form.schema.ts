@@ -2,13 +2,6 @@ import { z } from 'zod';
 
 import { FEE_PLAN_BILLING_CYCLES } from '../api/fee-plans.queries';
 
-/**
- * Branch is nullable on fee plans (`null` = applies across all branches), so
- * the form models the branch picker as a string and this sentinel stands in
- * for "shared" — same pattern as the course branch picker.
- */
-export const SHARED_BRANCH_VALUE = 'shared';
-
 const billingCycle = z.enum(FEE_PLAN_BILLING_CYCLES);
 
 /**
@@ -36,13 +29,3 @@ export const editFeePlanSchema = feePlanBase.extend({
 
 export type CreateFeePlanFormValues = z.infer<typeof createFeePlanSchema>;
 export type EditFeePlanFormValues = z.infer<typeof editFeePlanSchema>;
-
-/** Form branch string → payload `branchId` (`null` when shared). */
-export function branchToPayload(branch: string): number | null {
-	return branch === SHARED_BRANCH_VALUE ? null : Number(branch);
-}
-
-/** Payload `branchId` → form branch string. */
-export function branchToForm(branchId: number | null): string {
-	return branchId == null ? SHARED_BRANCH_VALUE : String(branchId);
-}

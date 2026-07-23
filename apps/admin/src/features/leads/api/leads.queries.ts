@@ -79,7 +79,6 @@ export interface LeadActivity {
 	id: number;
 	type: LeadActivityType;
 	status: LeadStatus;
-	label: string;
 	notes: string | null;
 	scheduledAt: string | null;
 	actorStaffId: number | null;
