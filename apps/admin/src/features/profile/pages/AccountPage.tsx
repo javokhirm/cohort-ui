@@ -11,6 +11,7 @@ import {
 
 import { useMyProfile } from '../api/profile.queries';
 import { ChangePasswordForm } from '../components/ChangePasswordForm';
+import { useAppT } from '@/locales';
 
 /** A labelled, non-editable identity value. Name/phone/email are not editable here. */
 function ReadOnlyField({ label, value }: { label: string; value: string }) {
@@ -23,40 +24,42 @@ function ReadOnlyField({ label, value }: { label: string; value: string }) {
 }
 
 export function AccountPage() {
+	const t = useAppT('profile');
 	const { data: profile, isLoading, isError } = useMyProfile();
 
 	const fullName = profile ? `${profile.firstName} ${profile.lastName}`.trim() : '';
 
 	return (
 		<div className="mx-auto flex max-w-3xl flex-col gap-6">
-			<PageHeader
-				title="My account"
-				description="Your profile and sign-in password"
-			/>
+			<PageHeader title={t('title')} description={t('description')} />
 
 			{isLoading && <Skeleton className="h-44 w-full rounded-xl" />}
 
 			{isError && (
 				<div className="rounded-lg border border-destructive/30 bg-destructive/5 px-4 py-3 text-sm text-destructive">
-					Failed to load your profile. Please refresh.
+					{t('loadError')}
 				</div>
 			)}
 
 			{profile && (
 				<Card>
 					<CardHeader>
-						<CardTitle>Profile</CardTitle>
-						<CardDescription>
-							Ask an administrator to change your name or contact details.
-						</CardDescription>
+						<CardTitle>{t('profileCardTitle')}</CardTitle>
+						<CardDescription>{t('identityHint')}</CardDescription>
 					</CardHeader>
 					<CardContent>
 						<div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
-							<ReadOnlyField label="Full name" value={fullName || '—'} />
-							<ReadOnlyField label="Phone" value={profile.phone} />
-							<ReadOnlyField label="Email" value={profile.email ?? '—'} />
 							<ReadOnlyField
-								label="Role"
+								label={t('fullName')}
+								value={fullName || '—'}
+							/>
+							<ReadOnlyField label={t('phone')} value={profile.phone} />
+							<ReadOnlyField
+								label={t('email')}
+								value={profile.email ?? '—'}
+							/>
+							<ReadOnlyField
+								label={t('role')}
 								value={profile.roles.join(', ') || '—'}
 							/>
 						</div>

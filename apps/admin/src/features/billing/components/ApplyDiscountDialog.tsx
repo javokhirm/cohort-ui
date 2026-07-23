@@ -19,6 +19,8 @@ import {
 } from '@repo/ui';
 import { isApiError } from '@repo/api-client';
 import { formatPrice } from '@repo/utils';
+import { useT } from '@repo/i18n';
+import { useAppT } from '@/locales';
 
 import { useApplyDiscount } from '../api/invoices.mutations';
 import type { InvoiceDetail } from '../api/invoices.queries';
@@ -40,11 +42,12 @@ export function ApplyDiscountDialog({
 	open,
 	onOpenChange,
 }: ApplyDiscountDialogProps) {
+	const t = useAppT('billing');
 	return (
 		<Dialog open={open} onOpenChange={onOpenChange}>
 			<DialogContent className="max-w-md">
 				<DialogHeader>
-					<DialogTitle>Apply discount</DialogTitle>
+					<DialogTitle>{t('discounts.apply.title')}</DialogTitle>
 					<DialogDescription>
 						{invoice.invoiceNumber} · {invoice.studentName}
 					</DialogDescription>
@@ -80,6 +83,8 @@ function ApplyDiscountForm({
 	invoice: InvoiceDetail;
 	onClose: () => void;
 }) {
+	const t = useAppT('billing');
+	const tc = useT('common');
 	const { data: discountData, isLoading } = useDiscountList({
 		isActive: true,
 		limit: 100,
@@ -122,10 +127,10 @@ function ApplyDiscountForm({
 				invoiceId: invoice.id,
 				discountId: Number(values.discountId),
 			});
-			toast.success('Discount applied');
+			toast.success(t('discounts.apply.done'));
 			onClose();
 		} catch (err) {
-			toast.error(isApiError(err) ? err.message : 'Failed to apply discount');
+			toast.error(isApiError(err) ? err.message : t('discounts.apply.failed'));
 		}
 	}
 
@@ -133,7 +138,7 @@ function ApplyDiscountForm({
 		return (
 			<div className="flex items-center justify-center py-8 text-sm text-muted-foreground">
 				<Spinner className="mr-2 size-4" />
-				Loading discounts…
+				{tc('state.loading')}
 			</div>
 		);
 	}
@@ -143,12 +148,12 @@ function ApplyDiscountForm({
 			<div className="flex flex-col gap-4">
 				<p className="text-sm text-muted-foreground">
 					{invoice.discounts.length > 0
-						? 'Every active discount is already applied to this invoice.'
-						: 'No active discounts are available. Create one under Discounts first.'}
+						? t('applyDiscount.allApplied')
+						: t('applyDiscount.noneAvailable')}
 				</p>
 				<DialogFooter>
 					<Button type="button" variant="outline" onClick={onClose}>
-						Close
+						{t('misc.close')}
 					</Button>
 				</DialogFooter>
 			</div>
@@ -165,15 +170,17 @@ function ApplyDiscountForm({
 					<FormSelect
 						control={form.control}
 						name="discountId"
-						label="Discount *"
-						placeholder="Select a discount"
+						label={t('discounts.apply.discount')}
+						placeholder={t('discounts.apply.discountPlaceholder')}
 						options={options}
 					/>
 				</FieldGroup>
 
 				<div className="flex flex-col gap-1.5">
 					<div className="flex justify-between text-sm">
-						<span className="text-muted-foreground">Current total</span>
+						<span className="text-muted-foreground">
+							{t('invoiceExtra.currentTotal')}
+						</span>
 						<span className="font-medium tabular-nums">
 							{formatPrice(invoice.total)} UZS
 						</span>
@@ -188,16 +195,13 @@ function ApplyDiscountForm({
 					)}
 					<Separator className="my-1" />
 					<div className="flex justify-between text-base font-bold">
-						<span>New total</span>
+						<span>{t('invoiceExtra.newTotal')}</span>
 						<span className="tabular-nums">{formatPrice(newTotal)} UZS</span>
 					</div>
 					{selected && invoice.total > 0 && newTotal === 0 && (
 						<div className="mt-1 flex items-start gap-1.5 text-xs text-tone-amber-fg">
 							<AlertTriangle className="mt-0.5 size-3.5 shrink-0" />
-							<span>
-								This discount brings the total to 0 UZS — nothing more
-								will be owed.
-							</span>
+							<span>{t('applyDiscount.zeroTotalWarning')}</span>
 						</div>
 					)}
 				</div>
@@ -209,11 +213,11 @@ function ApplyDiscountForm({
 						onClick={onClose}
 						disabled={applyDiscount.isPending}
 					>
-						Cancel
+						{tc('action.cancel')}
 					</Button>
 					<Button type="submit" disabled={applyDiscount.isPending}>
 						{applyDiscount.isPending && <Spinner className="mr-2 size-4" />}
-						Apply discount
+						{t('discounts.apply.confirm')}
 					</Button>
 				</DialogFooter>
 			</form>

@@ -17,12 +17,16 @@ import {
 	FormMessage,
 	FormPasswordInput,
 	Input,
+	LocaleSwitcher,
 	OtpInput,
 	Spinner,
 } from '@repo/ui';
+import { useT } from '@repo/i18n';
 
 import { credentialsSchema, otpSchema, type CredentialsInput } from '../schemas';
 import { useRequestOtp, useVerifyOtp } from '../hooks';
+import { useLocalePreference } from '@/hooks/useLocalePreference';
+import { useAppT } from '@/locales';
 
 function errorMessage(error: unknown, fallback: string): string {
 	return isApiError(error) ? error.message : fallback;
@@ -30,6 +34,8 @@ function errorMessage(error: unknown, fallback: string): string {
 
 /** Cohort "E" mark + wordmark + INTERNAL badge — shared by the rail and the mobile header. */
 function BrandLockup({ compact = false }: { compact?: boolean }) {
+	const t = useAppT('shell');
+
 	return (
 		<div className="flex items-center gap-2.5">
 			<span
@@ -40,10 +46,10 @@ function BrandLockup({ compact = false }: { compact?: boolean }) {
 				E
 			</span>
 			<span className="text-[15px] font-bold tracking-tight text-foreground">
-				Cohort
+				{t('brand')}
 			</span>
 			<span className="rounded-[5px] border border-tone-amber-fg/25 bg-tone-amber-bg px-1.5 py-0.5 text-[10px] font-bold uppercase tracking-widest text-tone-amber-fg">
-				Internal
+				{t('brandSurface')}
 			</span>
 		</div>
 	);
@@ -54,6 +60,7 @@ function BrandLockup({ compact = false }: { compact?: boolean }) {
  * Follows the app theme; the indigo wash reads on both palettes.
  */
 function ConsoleRail() {
+	const t = useT('auth');
 	return (
 		<aside className="relative hidden overflow-hidden border-r border-border bg-background lg:flex lg:w-[46%] lg:max-w-140 lg:flex-col lg:justify-between lg:px-11 lg:py-10">
 			<div
@@ -65,26 +72,23 @@ function ConsoleRail() {
 			</div>
 			<div className="relative">
 				<p className="text-[11px] font-bold uppercase tracking-[0.14em] text-muted-foreground">
-					Platform Console
+					{t('operator.railKicker')}
 				</p>
 				<h2 className="mt-3.5 text-[30px] font-extrabold leading-[1.15] tracking-tight text-foreground">
-					The control room for
-					<br />
-					the Cohort network.
+					{t('operator.railHeadline')}
 				</h2>
 				<p className="mt-3.5 max-w-95 text-sm leading-relaxed text-muted-foreground">
-					Onboard education centers, manage subscriptions and feature flags, and
-					monitor platform health across every tenant.
+					{t('operator.railBody')}
 				</p>
 			</div>
 			<div className="relative flex items-center gap-4.5 text-xs text-muted-foreground">
 				<span className="flex items-center gap-1.5">
 					<Lock className="size-3.5" />
-					2FA enforced
+					{t('operator.twoFactorEnforced')}
 				</span>
 				<span className="flex items-center gap-1.5">
 					<ShieldCheck className="size-3.5" />
-					Audited access
+					{t('operator.auditedAccess')}
 				</span>
 			</div>
 		</aside>
@@ -103,6 +107,10 @@ interface LoginFormProps {
  * Router-agnostic: navigation happens via `onAuthenticated`.
  */
 export function LoginForm({ onAuthenticated }: LoginFormProps) {
+	const t = useT('auth');
+	const tCommon = useT('common');
+	const { locale, changeLocale } = useLocalePreference();
+
 	const [step, setStep] = useState<'credentials' | 'otp'>('credentials');
 	const [email, setEmail] = useState('');
 	const [password, setPassword] = useState('');
@@ -135,7 +143,9 @@ export function LoginForm({ onAuthenticated }: LoginFormProps) {
 		event.preventDefault();
 		const parsed = otpSchema.safeParse({ code });
 		if (!parsed.success) {
-			setOtpFormatError(parsed.error.issues[0]?.message ?? 'Invalid code.');
+			setOtpFormatError(
+				parsed.error.issues[0]?.message ?? t('operator.invalidCode'),
+			);
 			return;
 		}
 		setOtpFormatError(null);
@@ -168,7 +178,7 @@ export function LoginForm({ onAuthenticated }: LoginFormProps) {
 	const otpError =
 		otpFormatError ??
 		(verifyOtp.isError
-			? errorMessage(verifyOtp.error, 'Invalid or expired code.')
+			? errorMessage(verifyOtp.error, t('operator.invalidOrExpired'))
 			: null);
 
 	return (
@@ -176,7 +186,10 @@ export function LoginForm({ onAuthenticated }: LoginFormProps) {
 			<ConsoleRail />
 
 			{/* Right panel — slightly elevated surface to separate from the dark rail */}
-			<main className="flex flex-1 items-center justify-center bg-card px-6 py-10">
+			<main className="relative flex flex-1 items-center justify-center bg-card px-6 py-10">
+				<div className="absolute right-5 top-5">
+					<LocaleSwitcher locale={locale} onLocaleChange={changeLocale} />
+				</div>
 				<div className="w-full max-w-95">
 					<div className="mb-8 lg:hidden">
 						<BrandLockup compact />
@@ -186,13 +199,13 @@ export function LoginForm({ onAuthenticated }: LoginFormProps) {
 						<div className="animate-in fade-in-0 zoom-in-[0.98] duration-300">
 							<span className="inline-flex items-center gap-1.5 rounded-md bg-primary/10 px-2.5 py-1 text-[11px] font-bold uppercase tracking-[0.08em] text-primary">
 								<ShieldCheck className="size-3.5" />
-								Operator sign-in
+								{t('operator.badge')}
 							</span>
 							<h1 className="mt-4.5 text-[23px] font-extrabold tracking-tight text-foreground">
-								Sign in to the console
+								{t('operator.title')}
 							</h1>
 							<p className="mt-1.5 text-[13.5px] text-muted-foreground">
-								Restricted to Cohort platform staff.
+								{t('operator.subtitle')}
 							</p>
 
 							<Form {...credForm}>
@@ -207,7 +220,9 @@ export function LoginForm({ onAuthenticated }: LoginFormProps) {
 											name="email"
 											render={({ field }) => (
 												<FormItem>
-													<FormLabel>Work email</FormLabel>
+													<FormLabel>
+														{t('workEmail')}
+													</FormLabel>
 													<FormControl>
 														<Input
 															type="email"
@@ -222,7 +237,7 @@ export function LoginForm({ onAuthenticated }: LoginFormProps) {
 										/>
 										<FormPasswordInput
 											control={credForm.control}
-											label="Password"
+											label={t('password')}
 											name="password"
 											autoComplete="current-password"
 											placeholder="••••••••••"
@@ -232,7 +247,7 @@ export function LoginForm({ onAuthenticated }: LoginFormProps) {
 												<AlertDescription>
 													{errorMessage(
 														requestOtp.error,
-														'Could not sign in.',
+														t('couldNotSignIn'),
 													)}
 												</AlertDescription>
 											</Alert>
@@ -245,7 +260,7 @@ export function LoginForm({ onAuthenticated }: LoginFormProps) {
 											{requestOtp.isPending && (
 												<Spinner className="size-4 text-primary-foreground" />
 											)}
-											Continue
+											{t('continue')}
 										</Button>
 									</FieldGroup>
 								</form>
@@ -261,20 +276,16 @@ export function LoginForm({ onAuthenticated }: LoginFormProps) {
 								onClick={backToCredentials}
 							>
 								<ArrowLeft className="size-4" />
-								Back
+								{tCommon('action.back')}
 							</Button>
 							<span className="flex size-11.5 items-center justify-center rounded-[12px] bg-primary/10 text-primary">
 								<Lock className="size-5" />
 							</span>
 							<h1 className="mt-3.5 text-[22px] font-extrabold tracking-tight text-foreground">
-								Two-factor authentication
+								{t('operator.twoFactorTitle')}
 							</h1>
 							<p className="mt-1.5 text-[13.5px] text-muted-foreground">
-								Enter the 6-digit code we sent to{' '}
-								<span className="font-medium text-foreground">
-									{email}
-								</span>
-								.
+								{t('operator.otpSentTo', { email })}
 							</p>
 
 							<form onSubmit={onSubmitOtp} className="mt-5.5">
@@ -284,7 +295,7 @@ export function LoginForm({ onAuthenticated }: LoginFormProps) {
 										onChange={setCode}
 										autoFocus
 										error={!!otpError}
-										aria-label="One-time code"
+										aria-label={t('operator.oneTimeCode')}
 									/>
 									{otpError && (
 										<Alert variant="destructive">
@@ -301,10 +312,10 @@ export function LoginForm({ onAuthenticated }: LoginFormProps) {
 										{verifyOtp.isPending && (
 											<Spinner className="size-4 text-primary-foreground" />
 										)}
-										Verify &amp; continue
+										{t('operator.verifyAndContinue')}
 									</Button>
 									<p className="text-center text-[12.5px] text-muted-foreground">
-										Didn&apos;t get a code?{' '}
+										{t('operator.noCode')}{' '}
 										<Button
 											type="button"
 											variant="link"
@@ -313,7 +324,7 @@ export function LoginForm({ onAuthenticated }: LoginFormProps) {
 											onClick={resendCode}
 											disabled={requestOtp.isPending}
 										>
-											Resend code
+											{t('otp.resend')}
 										</Button>
 									</p>
 								</FieldGroup>

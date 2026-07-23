@@ -1,19 +1,23 @@
 import type { ExpenseCategory } from '../api/expenses.queries';
 
-export const EXPENSE_CATEGORY_OPTIONS: { value: ExpenseCategory; label: string }[] = [
-	{ value: 'RENT', label: 'Rent' },
-	{ value: 'UTILITIES', label: 'Utilities' },
-	{ value: 'MARKETING', label: 'Marketing' },
-	{ value: 'SALARY', label: 'Salary' },
-	{ value: 'OTHER', label: 'Other' },
+/**
+ * Expense category options — **values only, never display text**.
+ *
+ * The category labels live in `@repo/i18n`'s `enums.domain.expense.*`, the same
+ * catalog that colors the `StatusBadge`, and are read at render through
+ * `useStatusLabel('expense', category)`. Keeping labels out of this module is
+ * what lets a language switch re-translate the chips (conventions.md §7).
+ */
+export const EXPENSE_CATEGORY_OPTIONS: { value: ExpenseCategory }[] = [
+	{ value: 'RENT' },
+	{ value: 'UTILITIES' },
+	{ value: 'MARKETING' },
+	{ value: 'SALARY' },
+	{ value: 'OTHER' },
 ];
 
 /** Category filter chips for the expense list toolbar (maps to `?category=`). */
-export const EXPENSE_CATEGORY_FILTERS: {
-	value: ExpenseCategory | undefined;
-	label: string;
-}[] = [{ value: undefined, label: 'All' }, ...EXPENSE_CATEGORY_OPTIONS];
-
-export function expenseCategoryLabel(category: ExpenseCategory): string {
-	return EXPENSE_CATEGORY_OPTIONS.find((o) => o.value === category)?.label ?? category;
-}
+export const EXPENSE_CATEGORY_FILTERS: { value: ExpenseCategory | undefined }[] = [
+	{ value: undefined },
+	...EXPENSE_CATEGORY_OPTIONS,
+];

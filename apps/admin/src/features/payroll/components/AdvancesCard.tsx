@@ -25,23 +25,27 @@ import {
 	advanceFormSchema,
 	type AdvanceFormValues,
 } from '../schemas/advance-form.schema';
+import { useAppT } from '@/locales';
+
+type PayrollT = ReturnType<typeof useAppT<'payroll'>>;
 
 /** Backend error codes worth translating for the operator. */
-function advanceErrorMessage(err: unknown, fallback: string): string {
+function advanceErrorMessage(t: PayrollT, err: unknown, fallback: string): string {
 	if (!isApiError(err)) return fallback;
 	switch (err.code) {
 		case 'PAYROLL_PERIOD_FINALIZED':
-			return 'This period is finalized — advances are locked.';
+			return t('advance.errorFinalized');
 		case 'ADVANCE_LINKED':
-			return 'This advance is locked into a finalized payroll.';
+			return t('advance.errorLinked');
 		case 'PAYROLL_MONTH_IN_FUTURE':
-			return 'Advances cannot be recorded for a future month.';
+			return t('advance.errorFutureMonth');
 		default:
 			return err.message || fallback;
 	}
 }
 
 function AddAdvanceForm({ period }: { period: PayrollStaffPeriodResponse }) {
+	const t = useAppT('payroll');
 	const createAdvance = useCreateAdvance();
 	const form = useForm<AdvanceFormValues>({
 		resolver: zodResolver(advanceFormSchema),
@@ -57,10 +61,10 @@ function AddAdvanceForm({ period }: { period: PayrollStaffPeriodResponse }) {
 				label: values.label?.trim() || undefined,
 				advanceDate: values.advanceDate,
 			});
-			toast.success('Advance recorded');
+			toast.success(t('advance.recorded'));
 			form.reset({ label: '', amount: undefined, advanceDate: todayIsoDate() });
 		} catch (err) {
-			toast.error(advanceErrorMessage(err, 'Failed to record the advance'));
+			toast.error(advanceErrorMessage(t, err, t('advance.recordFailed')));
 		}
 	}
 
@@ -73,14 +77,14 @@ function AddAdvanceForm({ period }: { period: PayrollStaffPeriodResponse }) {
 				<FormInput
 					control={form.control}
 					name="label"
-					placeholder="Reason (e.g. cash advance)"
+					placeholder={t('advance.reasonPlaceholder')}
 				/>
 				<div className="flex items-start gap-2">
 					<div className="flex-1">
 						<FormMoneyInput
 							control={form.control}
 							name="amount"
-							placeholder="Amount"
+							placeholder={t('advance.amountPlaceholder')}
 						/>
 					</div>
 					<FormDatePicker
@@ -90,7 +94,7 @@ function AddAdvanceForm({ period }: { period: PayrollStaffPeriodResponse }) {
 					/>
 					<Button type="submit" disabled={createAdvance.isPending}>
 						<Plus className="mr-1 size-4" />
-						Record
+						{t('record')}
 					</Button>
 				</div>
 			</form>
@@ -104,6 +108,7 @@ function AddAdvanceForm({ period }: { period: PayrollStaffPeriodResponse }) {
  * only while the row is LIVE; a finalized snapshot locks its advances.
  */
 export function AdvancesCard({ period }: { period: PayrollStaffPeriodResponse }) {
+	const t = useAppT('payroll');
 	const { can } = usePermissions();
 	const removeAdvance = useRemoveAdvance();
 	const [advanceToRemove, setAdvanceToRemove] = useState<PayrollAdvance | null>(null);
@@ -115,11 +120,11 @@ export function AdvancesCard({ period }: { period: PayrollStaffPeriodResponse })
 		if (!advanceToRemove) return;
 		removeAdvance.mutate(advanceToRemove.id, {
 			onSuccess: () => {
-				toast.success('Advance removed');
+				toast.success(t('advance.removed'));
 				setAdvanceToRemove(null);
 			},
 			onError: (err) => {
-				toast.error(advanceErrorMessage(err, 'Failed to remove the advance'));
+				toast.error(advanceErrorMessage(t, err, t('advance.removeFailed')));
 			},
 		});
 	}
@@ -127,15 +132,15 @@ export function AdvancesCard({ period }: { period: PayrollStaffPeriodResponse })
 	return (
 		<Card className="gap-0 overflow-hidden py-0">
 			<div className="border-b border-border px-5 py-3.5">
-				<h2 className="text-sm font-bold">Mid-month advances</h2>
+				<h2 className="text-sm font-bold">{t('advance.title')}</h2>
 				<p className="mt-0.5 text-xs text-muted-foreground">
-					Salary drawn before the run — remembered and deducted from net.
+					{t('advance.subtitle')}
 				</p>
 			</div>
 
 			{period.advances.length === 0 ? (
 				<p className="border-b border-border px-5 py-4 text-sm text-muted-foreground">
-					No advances this period.
+					{t('advance.empty')}
 				</p>
 			) : (
 				period.advances.map((advance) => (
@@ -145,7 +150,7 @@ export function AdvancesCard({ period }: { period: PayrollStaffPeriodResponse })
 					>
 						<div className="min-w-0">
 							<div className="truncate text-sm font-medium text-tone-red-fg">
-								{advance.label ?? 'Advance'}
+								{advance.label ?? t('advance.defaultLabel')}
 							</div>
 							<div className="mt-0.5 text-xs text-muted-foreground">
 								{formatDate(advance.advanceDate)}
@@ -160,7 +165,7 @@ export function AdvancesCard({ period }: { period: PayrollStaffPeriodResponse })
 									variant="ghost"
 									size="icon"
 									className="size-7 text-muted-foreground hover:text-destructive"
-									aria-label={`Remove advance ${advance.label ?? ''}`.trim()}
+									aria-label={t('advance.removeAria')}
 									onClick={() => setAdvanceToRemove(advance)}
 								>
 									<X className="size-3.5" />
@@ -179,26 +184,26 @@ export function AdvancesCard({ period }: { period: PayrollStaffPeriodResponse })
 
 			{period.advancesExceedGross && (
 				<div className="border-b border-border bg-destructive/5 px-5 py-3 text-xs text-destructive">
-					Advances exceed computed pay — net clamped to 0, no carry-over.
+					{t('advance.exceedWarning')}
 				</div>
 			)}
 
 			<div className="bg-muted/40 px-5 py-3.5">
 				<div className="mb-1.5 flex items-center justify-between text-sm">
-					<span className="text-muted-foreground">Computed</span>
+					<span className="text-muted-foreground">{t('column.computed')}</span>
 					<span className="tabular-nums">
 						{formatMoney(period.grossAmount)}
 					</span>
 				</div>
 				<div className="mb-2 flex items-center justify-between text-sm">
-					<span className="text-muted-foreground">Advances</span>
+					<span className="text-muted-foreground">{t('column.advances')}</span>
 					<span className="tabular-nums text-tone-red-fg">
 						−{formatMoney(period.advancesTotal)}
 					</span>
 				</div>
 				<div className="mb-2 h-px bg-border" />
 				<div className="flex items-center justify-between">
-					<span className="text-sm font-bold">Net payable</span>
+					<span className="text-sm font-bold">{t('stat.netPayable')}</span>
 					<span className="text-base font-bold tabular-nums text-tone-green-fg">
 						{formatMoney(period.netAmount)}
 					</span>
@@ -210,15 +215,16 @@ export function AdvancesCard({ period }: { period: PayrollStaffPeriodResponse })
 				onOpenChange={(open) => {
 					if (!open) setAdvanceToRemove(null);
 				}}
-				title="Remove this advance?"
+				title={t('advance.removeTitle')}
 				description={
 					advanceToRemove
-						? `${formatMoney(advanceToRemove.amount)} recorded ${formatDate(
-								advanceToRemove.advanceDate,
-							)} is deleted and no longer deducted from net.`
+						? t('advance.removeDescription', {
+								amount: formatMoney(advanceToRemove.amount),
+								date: formatDate(advanceToRemove.advanceDate),
+							})
 						: undefined
 				}
-				confirmLabel="Remove"
+				confirmLabel={t('advance.removeConfirm')}
 				variant="destructive"
 				loading={removeAdvance.isPending}
 				onConfirm={handleRemoveConfirm}

@@ -6,6 +6,7 @@ import { IMPORT_COLUMNS } from '@/api/student-imports/types';
 import type { StudentImportSessionView } from '@/api/student-imports/types';
 
 import { useUploadStudentImport } from '../hooks';
+import { useAppT } from '@/locales';
 
 interface UploadImportCardProps {
 	tenantId: number;
@@ -17,6 +18,7 @@ interface UploadImportCardProps {
  * the upload produces a report, and the operator decides what to do with it.
  */
 export function UploadImportCard({ tenantId, onUploaded }: UploadImportCardProps) {
+	const t = useAppT('imports');
 	const [file, setFile] = useState<File | null>(null);
 	const inputRef = useRef<HTMLInputElement>(null);
 
@@ -31,16 +33,14 @@ export function UploadImportCard({ tenantId, onUploaded }: UploadImportCardProps
 	return (
 		<Card className="gap-4 p-5">
 			<div className="flex flex-col gap-1">
-				<h3 className="text-sm font-semibold">Import students from CSV</h3>
-				<p className="text-sm text-muted-foreground">
-					One row per student per group. The file is checked against this center
-					before anything is imported — you will see exactly what will happen
-					before you confirm it.
-				</p>
+				<h3 className="text-sm font-semibold">{t('uploadTitle')}</h3>
+				<p className="text-sm text-muted-foreground">{t('uploadSubtitle')}</p>
 			</div>
 
 			<div className="rounded-lg border border-border bg-muted/40 p-3">
-				<p className="mb-2 text-xs font-medium text-muted-foreground">Columns</p>
+				<p className="mb-2 text-xs font-medium text-muted-foreground">
+					{t('columns')}
+				</p>
 				<code className="block break-all font-mono text-xs text-muted-foreground">
 					{IMPORT_COLUMNS.join(',')}
 				</code>
@@ -48,9 +48,7 @@ export function UploadImportCard({ tenantId, onUploaded }: UploadImportCardProps
 					<strong className="font-medium text-foreground">
 						nextBillingDate
 					</strong>{' '}
-					is the day this student&apos;s previous center would next have charged
-					them. It becomes their billing anniversary here — their first invoice
-					is raised on that date, not today.
+					{t('nextBillingHint')}
 				</p>
 			</div>
 
@@ -66,10 +64,10 @@ export function UploadImportCard({ tenantId, onUploaded }: UploadImportCardProps
 					disabled={!file || mutation.isPending}
 					onClick={() => file && mutation.mutate(file)}
 				>
-					{mutation.isPending ? 'Checking…' : 'Upload and check'}
+					{mutation.isPending ? t('checking') : t('uploadAndCheck')}
 				</Button>
 				<Button variant="outline" onClick={downloadImportTemplate}>
-					Download template
+					{t('downloadTemplate')}
 				</Button>
 			</div>
 
@@ -77,7 +75,7 @@ export function UploadImportCard({ tenantId, onUploaded }: UploadImportCardProps
 				<p className="text-sm text-destructive">
 					{mutation.error instanceof Error
 						? mutation.error.message
-						: 'The file could not be read. Please check it and try again.'}
+						: t('uploadError')}
 				</p>
 			)}
 		</Card>

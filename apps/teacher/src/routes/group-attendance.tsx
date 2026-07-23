@@ -35,12 +35,7 @@ import {
 	isTodayIso,
 } from '@/features/attendance/lib/month';
 import { useSessions } from '@/features/schedule/api/sessions.queries';
-
-/** The grid's colour key, read straight off the shared attendance status map. */
-const LEGEND: LegendItem[] = ATTENDANCE_STATUSES.map((status) => {
-	const { tone, label } = resolveStatus('attendance', status);
-	return { tone, label };
-});
+import { useAppT } from '@/locales';
 
 /**
  * A group's monthly attendance table (`GET /teach/groups/:id/attendance`,
@@ -61,6 +56,10 @@ const LEGEND: LegendItem[] = ATTENDANCE_STATUSES.map((status) => {
  * still open the table on mobile without immediately bouncing back.
  */
 export function GroupAttendanceRoute() {
+	const t = useAppT('attendance');
+	const tShell = useAppT('shell');
+	const tGroups = useAppT('groups');
+	const tSchedule = useAppT('schedule');
 	const navigate = useNavigate();
 	const { groupId: groupIdParam } = useParams({
 		from: '/_authed/groups/$groupId/attendance',
@@ -75,6 +74,13 @@ export function GroupAttendanceRoute() {
 	const gridQuery = useAttendanceGrid(groupId, month);
 	const upsertCell = useUpsertAttendanceCell(groupId, month);
 	const markAllPresent = useMarkAllPresent(groupId, month);
+
+	// The grid's colour key, read off the shared attendance status map. Built at
+	// render (not module scope) so the labels re-resolve when the locale changes.
+	const legend: LegendItem[] = ATTENDANCE_STATUSES.map((status) => {
+		const { tone, label } = resolveStatus('attendance', status);
+		return { tone, label };
+	});
 
 	// Resolve today's session for this group to enable the "List" toggle.
 	const today = todayIsoDate();
@@ -113,11 +119,10 @@ export function GroupAttendanceRoute() {
 	// Why the button is off (or what it will do) — better than a caption that
 	// says the same thing whether or not it can be pressed.
 	let markAllHint: string;
-	if (!todayColumn) markAllHint = 'No session scheduled today';
-	else if (todayColumn.status === 'CANCELLED')
-		markAllHint = "Today's session is cancelled";
-	else if (rows.length === 0) markAllHint = 'No students enrolled';
-	else markAllHint = "Sets every student to Present for today's session";
+	if (!todayColumn) markAllHint = t('markAllHintNoSession');
+	else if (todayColumn.status === 'CANCELLED') markAllHint = t('markAllHintCancelled');
+	else if (rows.length === 0) markAllHint = t('markAllHintNoStudents');
+	else markAllHint = t('markAllHintReady');
 
 	const onMarkAllPresent = () => {
 		if (!grid || !todayColumn) return;
@@ -128,7 +133,7 @@ export function GroupAttendanceRoute() {
 			.map((row) => row.studentId);
 		markAllPresent.mutate(
 			{ sessionId, studentIds, alreadyMarkedIds },
-			{ onSuccess: () => toast.success('Marked everyone present') },
+			{ onSuccess: () => toast.success(t('markedAllPresent')) },
 		);
 	};
 
@@ -143,11 +148,11 @@ export function GroupAttendanceRoute() {
 		body = stateCard(
 			<EmptyState
 				icon={<CalendarX />}
-				title="Couldn't load attendance"
-				description="Something went wrong. Try again in a moment."
+				title={t('errorTitle')}
+				description={tShell('genericErrorDescription')}
 				action={
 					<Button variant="outline" onClick={() => void gridQuery.refetch()}>
-						Try again
+						{tShell('tryAgain')}
 					</Button>
 				}
 			/>,
@@ -158,15 +163,15 @@ export function GroupAttendanceRoute() {
 		body = stateCard(
 			<EmptyState
 				icon={<CalendarX />}
-				title="No sessions this month"
-				description="This group has no scheduled sessions in the selected month."
+				title={tSchedule('noSessionsThisMonth')}
+				description={tSchedule('noSessionsThisMonthDescription')}
 				action={
 					month !== currentMonth() && (
 						<Button
 							variant="outline"
 							onClick={() => goToMonth(currentMonth())}
 						>
-							Go to this month
+							{tShell('goToThisMonth')}
 						</Button>
 					)
 				}
@@ -176,8 +181,8 @@ export function GroupAttendanceRoute() {
 		body = stateCard(
 			<EmptyState
 				icon={<Users />}
-				title="No students enrolled"
-				description="This group has no active students to mark yet."
+				title={tGroups('rosterEmptyTitle')}
+				description={t('noStudentsDescription')}
 			/>,
 		);
 	} else {
@@ -195,8 +200,8 @@ export function GroupAttendanceRoute() {
 		<div className="flex h-full w-full flex-col pb-3">
 			<PageHeader
 				className="shrink-0"
-				title={grid?.group.courseName ?? 'Attendance'}
-				description={grid?.group.name ?? `Group #${groupId}`}
+				title={grid?.group.courseName ?? t('title')}
+				description={grid?.group.name ?? tGroups('groupNumber', { id: groupId })}
 				actions={
 					<Tabs
 						value="table"
@@ -211,13 +216,13 @@ export function GroupAttendanceRoute() {
 						}}
 					>
 						<TabsList>
-							<TabsTrigger value="table" aria-label="Table view">
+							<TabsTrigger value="table" aria-label={tShell('tableView')}>
 								<LayoutGrid />
 							</TabsTrigger>
 							<TabsTrigger
 								value="list"
 								disabled={!todaySession}
-								aria-label="List view"
+								aria-label={tShell('listView')}
 							>
 								<List />
 							</TabsTrigger>
@@ -245,7 +250,7 @@ export function GroupAttendanceRoute() {
 								onClick={onMarkAllPresent}
 							>
 								<CheckCheck className="size-4" />
-								Mark all present
+								{t('markAllPresent')}
 							</Button>
 						</span>
 					</TooltipTrigger>
@@ -254,9 +259,9 @@ export function GroupAttendanceRoute() {
 			</div>
 
 			<div className="mt-2 flex shrink-0 flex-wrap items-center justify-between gap-x-4 gap-y-1.5">
-				<ToneLegend items={LEGEND} />
+				<ToneLegend items={legend} />
 				<p className="text-[11px] text-muted-foreground">
-					Only today&apos;s column is editable
+					{t('onlyTodayEditable')}
 				</p>
 			</div>
 

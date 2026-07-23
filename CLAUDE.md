@@ -40,6 +40,10 @@ one that diverges.
   entrypoint.
 - **Server state lives in TanStack Query. Client state lives in Zustand.** Do not put
   server data in Zustand or React state, and do not build a Redux-style global store.
+- **All user-facing text is localized.** Never hardcode a string in a component — use `useT()`
+  from `@repo/i18n` and add the key to **all three catalogs** (`uz` is the source of truth, then
+  `ru`, `en`). Interpolate (`t('greeting', { name })`), never concatenate. Details in
+  [docs/conventions.md](docs/conventions.md) §7.
 - **Anything touching money, invoices, or payments is critical.** Format money via the
   shared helpers (never raw `toFixed`), show invoice/payment status explicitly, and never
   assume a mutation succeeded without server confirmation.

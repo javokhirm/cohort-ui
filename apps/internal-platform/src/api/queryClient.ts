@@ -1,5 +1,6 @@
 import { isApiError } from '@repo/api-client';
 import { toast } from '@repo/ui';
+import { translate } from '@repo/i18n';
 import { MutationCache, QueryCache, QueryClient } from '@tanstack/react-query';
 
 /**
@@ -12,15 +13,15 @@ import { MutationCache, QueryCache, QueryClient } from '@tanstack/react-query';
  */
 function notifyError(error: unknown): void {
 	if (!isApiError(error)) {
-		toast.error('Something went wrong. Please try again.');
+		toast.error(translate('common', 'error.unknown'));
 		return;
 	}
 	if (error.status === 401) return;
 	if (error.status === 403) {
-		toast.error('You do not have permission to do that.');
+		toast.error(translate('common', 'error.forbidden'));
 		return;
 	}
-	toast.error(error.message || 'Request failed.');
+	toast.error(error.message || translate('common', 'error.requestFailed'));
 }
 
 export const queryClient = new QueryClient({

@@ -23,6 +23,8 @@ import {
 } from '@repo/ui';
 import { isApiError } from '@repo/api-client';
 import { formatPrice, toIsoDate } from '@repo/utils';
+import { useT } from '@repo/i18n';
+import { useAppT } from '@/locales';
 
 import { FormSection } from '@/components/FormSection';
 import { FormSheet } from '@/components/FormSheet';
@@ -69,6 +71,8 @@ function CreateInvoiceForm({
 	onSuccess: () => void;
 	onPendingChange: (pending: boolean) => void;
 }) {
+	const t = useAppT('billing');
+	const tc = useT('common');
 	const activeBranchIds = useActiveBranchIds();
 	const form = useForm<CreateInvoiceFormValues>({
 		resolver: zodResolver(createInvoiceSchema),
@@ -102,7 +106,7 @@ function CreateInvoiceForm({
 	const { data: discountData } = useDiscountList({ isActive: true, limit: 100 });
 	const discounts = discountData?.rows ?? [];
 	const discountOptions = [
-		{ value: NO_DISCOUNT_VALUE, label: 'No discount' },
+		{ value: NO_DISCOUNT_VALUE, label: t('invoiceForm.noDiscount') },
 		...discounts.map((d) => ({
 			value: String(d.id),
 			label: `${d.name} (${d.type === 'PERCENTAGE' ? `${d.value}%` : `${formatPrice(d.value)} UZS`})`,
@@ -141,7 +145,7 @@ function CreateInvoiceForm({
 				notes: blankToNull(values.notes),
 			});
 		} catch (err) {
-			toast.error(isApiError(err) ? err.message : 'Failed to create invoice');
+			toast.error(isApiError(err) ? err.message : t('invoiceForm.createFailed'));
 			return;
 		}
 
@@ -153,16 +157,19 @@ function CreateInvoiceForm({
 				});
 			} catch (err) {
 				toast.error(
-					`Invoice ${invoice.invoiceNumber} was created, but the discount could not be applied: ${
-						isApiError(err) ? err.message : 'unknown error'
-					}`,
+					t('invoiceForm.discountApplyFailed', {
+						number: invoice.invoiceNumber,
+						error: isApiError(err)
+							? err.message
+							: t('invoiceForm.unknownError'),
+					}),
 				);
 				onSuccess();
 				return;
 			}
 		}
 
-		toast.success('Invoice created');
+		toast.success(t('invoices.created'));
 		onSuccess();
 	}
 
@@ -175,7 +182,7 @@ function CreateInvoiceForm({
 			>
 				<FormSection>
 					<span className="text-sm font-semibold text-muted-foreground">
-						Bill to
+						{t('misc.billTo')}
 					</span>
 					<FieldGroup>
 						<FormField
@@ -183,7 +190,7 @@ function CreateInvoiceForm({
 							name="studentId"
 							render={({ field }) => (
 								<FormItem>
-									<FormLabel>Student *</FormLabel>
+									<FormLabel>{t('invoices.form.student')}</FormLabel>
 									<StudentPicker
 										value={field.value}
 										onChange={field.onChange}
@@ -196,14 +203,14 @@ function CreateInvoiceForm({
 							<FormSelect
 								control={form.control}
 								name="branchId"
-								label="Branch *"
+								label={t('feePlans.field.branch')}
 								options={branchOptions}
 								valueAsNumber
 							/>
 							<FormDatePicker
 								control={form.control}
 								name="dueDate"
-								label="Due date *"
+								label={t('invoices.form.dueDate')}
 								minDate={toIsoDate(new Date())}
 							/>
 						</div>
@@ -213,7 +220,7 @@ function CreateInvoiceForm({
 				<FormSection>
 					<div className="flex items-center justify-between">
 						<span className="text-sm font-semibold text-muted-foreground">
-							Line items
+							{t('invoices.detail.lineItems')}
 						</span>
 					</div>
 					<div className="flex flex-col gap-3">
@@ -225,7 +232,7 @@ function CreateInvoiceForm({
 								>
 									<div className="flex items-center justify-between">
 										<span className="text-xs font-medium text-muted-foreground">
-											Item {index + 1}
+											{t('invoiceForm.item', { index: index + 1 })}
 										</span>
 										<div className="flex items-center">
 											<Button
@@ -233,7 +240,9 @@ function CreateInvoiceForm({
 												variant="ghost"
 												size="icon"
 												className="size-7 text-muted-foreground hover:text-foreground"
-												aria-label="Duplicate item"
+												aria-label={t(
+													'invoiceExtra.duplicateItem',
+												)}
 												onClick={() =>
 													insert(index + 1, {
 														...form.getValues(
@@ -249,7 +258,7 @@ function CreateInvoiceForm({
 												variant="ghost"
 												size="icon"
 												className="size-7 text-muted-foreground hover:text-destructive"
-												aria-label="Remove item"
+												aria-label={t('invoiceExtra.removeItem')}
 												disabled={fields.length === 1}
 												onClick={() => remove(index)}
 											>
@@ -260,20 +269,27 @@ function CreateInvoiceForm({
 									<FormInput
 										control={form.control}
 										name={`lineItems.${index}.description`}
-										label="Description"
-										placeholder="e.g. Monthly tuition — March"
+										label={t('invoices.form.lineDescription')}
+										placeholder={t(
+											'invoiceExtra.descriptionPlaceholder',
+										)}
 									/>
 									<div className="grid grid-cols-[1.3fr_0.6fr_1.3fr] gap-2">
 										<FormSelect
 											control={form.control}
 											name={`lineItems.${index}.type`}
-											label="Type"
-											options={INVOICE_LINE_ITEM_TYPE_OPTIONS}
+											label={t('invoices.form.lineType')}
+											options={INVOICE_LINE_ITEM_TYPE_OPTIONS.map(
+												(o) => ({
+													value: o.value,
+													label: t(`lineItemType.${o.value}`),
+												}),
+											)}
 										/>
 										<FormInput
 											control={form.control}
 											name={`lineItems.${index}.quantity`}
-											label="Qty"
+											label={t('invoices.form.lineQty')}
 											type="number"
 											min={1}
 											onChange={(e) =>
@@ -289,7 +305,7 @@ function CreateInvoiceForm({
 										<FormMoneyInput
 											control={form.control}
 											name={`lineItems.${index}.unitAmount`}
-											label="Unit price"
+											label={t('invoices.form.lineUnit')}
 											suffix="UZS"
 											placeholder="0"
 										/>
@@ -313,7 +329,7 @@ function CreateInvoiceForm({
 						}
 					>
 						<Plus className="mr-1 size-3.5" />
-						Add item
+						{t('misc.addItem')}
 					</Button>
 					{form.formState.errors.lineItems?.root?.message && (
 						<p className="text-sm font-medium text-destructive">
@@ -326,12 +342,14 @@ function CreateInvoiceForm({
 					<FormSelect
 						control={form.control}
 						name="discountId"
-						label="Discount"
+						label={t('invoices.detail.discount')}
 						options={discountOptions}
 					/>
 					<div className="flex flex-col gap-1.5">
 						<div className="flex justify-between text-sm">
-							<span className="text-muted-foreground">Subtotal</span>
+							<span className="text-muted-foreground">
+								{t('invoices.detail.subtotal')}
+							</span>
 							<span className="font-medium tabular-nums">
 								{formatPrice(subtotal)} UZS
 							</span>
@@ -350,16 +368,13 @@ function CreateInvoiceForm({
 						)}
 						<Separator className="my-1" />
 						<div className="flex justify-between text-base font-bold">
-							<span>Total</span>
+							<span>{t('invoices.detail.total')}</span>
 							<span className="tabular-nums">{formatPrice(total)} UZS</span>
 						</div>
 						{subtotal > 0 && total === 0 && (
 							<div className="mt-1 flex items-start gap-1.5 text-xs text-tone-amber-fg">
 								<AlertTriangle className="mt-0.5 size-3.5 shrink-0" />
-								<span>
-									This discount brings the total to 0 UZS — nothing will
-									be charged.
-								</span>
+								<span>{t('invoiceForm.zeroTotalWarning')}</span>
 							</div>
 						)}
 					</div>
@@ -371,9 +386,12 @@ function CreateInvoiceForm({
 						name="notes"
 						render={({ field }) => (
 							<FormItem>
-								<FormLabel>Notes</FormLabel>
+								<FormLabel>{tc('action.more')}</FormLabel>
 								<FormControl>
-									<Textarea placeholder="Optional notes" {...field} />
+									<Textarea
+										placeholder={t('discountExtra.notesPlaceholder')}
+										{...field}
+									/>
 								</FormControl>
 								<FormMessage />
 							</FormItem>
@@ -394,6 +412,8 @@ function EditInvoiceForm({
 	onSuccess: () => void;
 	onPendingChange: (pending: boolean) => void;
 }) {
+	const t = useAppT('billing');
+	const tc = useT('common');
 	const form = useForm<EditInvoiceFormValues>({
 		resolver: zodResolver(editInvoiceSchema),
 		defaultValues: {
@@ -414,7 +434,7 @@ function EditInvoiceForm({
 			dueDate: values.dueDate,
 			notes: blankToNull(values.notes),
 		});
-		toast.success('Invoice updated');
+		toast.success(t('invoiceExtra.updated'));
 		onSuccess();
 	}
 
@@ -430,17 +450,19 @@ function EditInvoiceForm({
 						<FormDatePicker
 							control={form.control}
 							name="dueDate"
-							label="Due date *"
+							label={t('invoices.form.dueDate')}
 						/>
 						<FormField
 							control={form.control}
 							name="notes"
 							render={({ field }) => (
 								<FormItem>
-									<FormLabel>Notes</FormLabel>
+									<FormLabel>{tc('action.more')}</FormLabel>
 									<FormControl>
 										<Textarea
-											placeholder="Optional notes"
+											placeholder={t(
+												'discountExtra.notesPlaceholder',
+											)}
 											{...field}
 										/>
 									</FormControl>
@@ -456,6 +478,8 @@ function EditInvoiceForm({
 }
 
 export function InvoiceForm(props: InvoiceFormProps) {
+	const t = useAppT('billing');
+	const tc = useT('common');
 	const { open, onOpenChange, mode } = props;
 	const [isPending, setIsPending] = useState(false);
 
@@ -469,21 +493,25 @@ export function InvoiceForm(props: InvoiceFormProps) {
 		<FormSheet
 			open={open}
 			onOpenChange={onOpenChange}
-			title={mode === 'create' ? 'Create invoice' : 'Edit invoice'}
+			title={
+				mode === 'create' ? t('invoices.form.title') : t('invoiceForm.editTitle')
+			}
 			description={
 				mode === 'create'
-					? 'Fields marked * are required'
-					: 'Due date and notes can be changed while the invoice is a draft.'
+					? t('invoices.form.requiredHint')
+					: t('invoiceForm.editDescription')
 			}
 			maxWidth="lg"
 			footer={
 				<>
 					<Button type="button" variant="outline" onClick={handleClose}>
-						Cancel
+						{tc('action.cancel')}
 					</Button>
 					<Button type="submit" form={formId} disabled={isPending}>
 						{isPending && <Spinner className="mr-2 size-4" />}
-						{mode === 'create' ? 'Create invoice' : 'Save changes'}
+						{mode === 'create'
+							? t('invoices.form.submit')
+							: t('invoiceForm.saveChanges')}
 					</Button>
 				</>
 			}

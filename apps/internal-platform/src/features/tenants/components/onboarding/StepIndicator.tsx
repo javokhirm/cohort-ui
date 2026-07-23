@@ -2,13 +2,15 @@ import { Check } from 'lucide-react';
 
 import { cn } from '@repo/ui';
 
-import { STEP_LABELS } from './types';
+import { stepLabels } from './types';
 import type { OnboardStep } from './types';
+import { useAppT } from '@/locales';
 
 export function StepIndicator({ current }: { current: OnboardStep }) {
+	const t = useAppT('tenants');
 	return (
 		<div className="flex w-full items-start">
-			{STEP_LABELS.flatMap((label, i) => {
+			{stepLabels(t).flatMap((label, i) => {
 				const n = (i + 1) as OnboardStep;
 				const done = n < current;
 				const active = n === current;

@@ -16,8 +16,11 @@ import { CenteredNotice } from '@/features/users/components/CenteredNotice';
 import { DetailSkeleton } from '@/features/users/components/DetailSkeleton';
 import { ResetPasswordDialog } from '@/features/users/components/ResetPasswordDialog';
 import { DeactivateDialog } from '@/features/users/components/DeactivateDialog';
+import { useAppT } from '@/locales';
 
 export function UserDetailPage() {
+	const t = useAppT('users');
+	const tt = useAppT('tenants');
 	const { userId } = useParams({ strict: false }) as { userId?: string };
 	const id = Number(userId);
 	const validId = userId != null && Number.isInteger(id) && id > 0;
@@ -28,7 +31,7 @@ export function UserDetailPage() {
 	const { data: user, isLoading, isError, error } = useUserDetail(id, validId);
 
 	if (!validId || (isError && isApiError(error) && error.status === 404)) {
-		return <CenteredNotice message="User not found." />;
+		return <CenteredNotice message={t('notFound')} />;
 	}
 
 	if (isLoading) {
@@ -37,9 +40,9 @@ export function UserDetailPage() {
 
 	if (isError || !user) {
 		return (
-			<CenteredNotice message="Failed to load this user. Please try again.">
+			<CenteredNotice message={t('loadDetailError')}>
 				<Link to="/users">
-					<Button variant="outline">← User directory</Button>
+					<Button variant="outline">← {t('backToList')}</Button>
 				</Link>
 			</CenteredNotice>
 		);
@@ -53,7 +56,7 @@ export function UserDetailPage() {
 				to="/users"
 				className="inline-flex w-fit items-center gap-1 text-sm text-muted-foreground transition-colors hover:text-foreground"
 			>
-				← User directory
+				← {t('backToList')}
 			</Link>
 
 			<div className="flex flex-wrap items-center justify-between gap-4">
@@ -71,7 +74,7 @@ export function UserDetailPage() {
 								{fullName}
 							</h1>
 							<StatusBadge tone={user.isActive ? 'green' : 'red'}>
-								{user.isActive ? 'Active' : 'Inactive'}
+								{user.isActive ? t('active') : t('inactive')}
 							</StatusBadge>
 						</div>
 						<div className="flex flex-wrap items-center gap-3 text-sm text-muted-foreground">
@@ -88,7 +91,7 @@ export function UserDetailPage() {
 						onClick={() => setResetOpen(true)}
 					>
 						<KeyRound className="size-4" />
-						Reset password
+						{t('resetPassword')}
 					</Button>
 					<Button
 						variant="destructive"
@@ -97,19 +100,19 @@ export function UserDetailPage() {
 						onClick={() => setDeactivateOpen(true)}
 					>
 						<Ban className="size-4" />
-						Deactivate
+						{tt('danger.deactivate')}
 					</Button>
 				</div>
 			</div>
 
 			<div className="flex flex-col gap-3">
 				<p className="text-xs font-semibold uppercase tracking-widest text-muted-foreground">
-					Tenant Memberships ({user.memberships.length})
+					{t('memberships', { count: user.memberships.length })}
 				</p>
 
 				{user.memberships.length === 0 ? (
 					<div className="rounded-lg border border-dashed border-border px-4 py-8 text-center text-sm text-muted-foreground">
-						This user has no tenant memberships.
+						{t('noMemberships')}
 					</div>
 				) : (
 					<div className="flex flex-col gap-2">
@@ -152,7 +155,9 @@ export function UserDetailPage() {
 									<StatusBadge
 										tone={m.status === 'active' ? 'green' : 'amber'}
 									>
-										{m.status === 'active' ? 'Active' : 'Suspended'}
+										{m.status === 'active'
+											? t('membershipActive')
+											: t('membershipSuspended')}
 									</StatusBadge>
 									<ChevronRight className="size-4 text-muted-foreground" />
 								</div>

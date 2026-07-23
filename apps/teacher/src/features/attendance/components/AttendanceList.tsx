@@ -19,6 +19,7 @@ import {
 	type SessionDetail,
 } from '../api/attendance.queries';
 import { StatusToggle } from './StatusToggle';
+import { useAppT } from '@/locales';
 
 interface AttendanceListProps {
 	detail: SessionDetail;
@@ -50,6 +51,8 @@ export function AttendanceList({
 	onMarkAllPresent,
 	onSave,
 }: AttendanceListProps) {
+	const t = useAppT('attendance');
+	const tShell = useAppT('shell');
 	const tally = ATTENDANCE_STATUSES.map((status) => ({
 		status,
 		...resolveStatus('attendance', status),
@@ -84,7 +87,7 @@ export function AttendanceList({
 					disabled={present === detail.roster.length}
 				>
 					<CheckCheck className="size-4" />
-					All present
+					{t('allPresent')}
 				</Button>
 			</div>
 
@@ -126,12 +129,12 @@ export function AttendanceList({
 
 			<StickyActionBar
 				className="-mx-4 shrink-0 rounded-t-2xl md:-mx-6"
-				status={`${present} present · ${absent} absent`}
-				hint={isDirty ? 'Unsaved changes' : 'Saved'}
+				status={t('presentAbsent', { present, absent })}
+				hint={isDirty ? tShell('unsavedChanges') : tShell('savedState')}
 				action={
 					<Button onClick={onSave} disabled={!isDirty || isSaving}>
 						<Check className="size-4" />
-						Save attendance
+						{t('save')}
 					</Button>
 				}
 			/>

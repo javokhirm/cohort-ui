@@ -1,11 +1,13 @@
 import * as React from 'react';
 import { CalendarIcon } from 'lucide-react';
 import type { Matcher } from 'react-day-picker';
+import { formatDate, type DateFnsLocale } from '@repo/utils';
 
 import { cn } from '../../lib/utils';
 import { Button } from '../button';
 import { Calendar } from '../calendar';
 import { Popover, PopoverContent, PopoverTrigger } from '../popover';
+import { useDatePickerLocale, useDatePickerPlaceholder } from './date-picker-locale';
 
 export interface DatePickerProps {
 	/** Selected date as an ISO calendar date ("YYYY-MM-DD"), or undefined when empty. */
@@ -19,6 +21,11 @@ export interface DatePickerProps {
 	minDate?: string;
 	/** Latest selectable date, as an ISO calendar date. */
 	maxDate?: string;
+	/**
+	 * Overrides the calendar's date-fns locale. Defaults to the app-provided
+	 * `DatePickerLocaleProvider` value; pass only to force a specific locale.
+	 */
+	locale?: DateFnsLocale;
 }
 
 /**
@@ -39,26 +46,25 @@ function toIsoDate(date: Date): string {
 	return `${year}-${month}-${day}`;
 }
 
-function formatDisplayDate(date: Date): string {
-	return date.toLocaleDateString('en-GB', {
-		day: '2-digit',
-		month: 'short',
-		year: 'numeric',
-	});
-}
-
 function DatePicker({
 	value,
 	onChange,
-	placeholder = 'Select date',
+	placeholder,
 	disabled,
 	className,
 	id,
 	minDate,
 	maxDate,
+	locale,
 }: DatePickerProps) {
 	const [open, setOpen] = React.useState(false);
 	const selected = parseIsoDate(value);
+	const contextLocale = useDatePickerLocale();
+	const contextPlaceholder = useDatePickerPlaceholder();
+	// Explicit props win; otherwise the app-provided defaults, or undefined —
+	// react-day-picker then falls back to English and the trigger shows no hint.
+	const resolvedLocale = locale ?? contextLocale;
+	const resolvedPlaceholder = placeholder ?? contextPlaceholder;
 
 	const disabledMatchers: Matcher[] = [];
 	const minDateValue = parseIsoDate(minDate);
@@ -83,7 +89,7 @@ function DatePicker({
 					)}
 				>
 					<span className="truncate">
-						{selected ? formatDisplayDate(selected) : placeholder}
+						{selected && value ? formatDate(value) : resolvedPlaceholder}
 					</span>
 					<CalendarIcon className="size-4 shrink-0 text-muted-foreground" />
 				</Button>
@@ -92,6 +98,7 @@ function DatePicker({
 				<Calendar
 					mode="single"
 					selected={selected}
+					locale={resolvedLocale}
 					captionLayout="dropdown"
 					startMonth={new Date(currentYear - 100, 0)}
 					endMonth={new Date(currentYear + 10, 11)}

@@ -1,9 +1,11 @@
 import { useState } from 'react';
 
 import { Button, PageHeader, Pagination, SearchFilterBar } from '@repo/ui';
+import { useStatusLabel, useT } from '@repo/i18n';
 import { Download, Plus } from 'lucide-react';
 
 import { Can } from '@/components/Can';
+import { useAppT } from '@/locales';
 import { useStudents } from '../api/students.queries';
 import type { StudentListFilters } from '../api/keys';
 import { StudentTable } from '../components/StudentTable';
@@ -11,17 +13,21 @@ import { StudentForm } from '../components/StudentForm';
 
 type StatusFilter = 'ALL' | 'ACTIVE' | 'INACTIVE' | 'GRADUATED' | 'SUSPENDED';
 
-const STATUS_TABS: { value: StatusFilter; label: string }[] = [
-	{ value: 'ALL', label: 'All' },
-	{ value: 'ACTIVE', label: 'Active' },
-	{ value: 'INACTIVE', label: 'Inactive' },
-	{ value: 'GRADUATED', label: 'Graduated' },
-	{ value: 'SUSPENDED', label: 'Suspended' },
+/** Values only — labels resolve at render so a language switch re-translates. */
+const STATUS_TABS: { value: StatusFilter }[] = [
+	{ value: 'ALL' },
+	{ value: 'ACTIVE' },
+	{ value: 'INACTIVE' },
+	{ value: 'GRADUATED' },
+	{ value: 'SUSPENDED' },
 ];
 
 const PAGE_SIZE = 20;
 
 export function StudentListPage() {
+	const t = useAppT('people');
+	const tc = useT('common');
+	const statusLabel = useStatusLabel();
 	const [statusFilter, setStatusFilter] = useState<StatusFilter>('ACTIVE');
 	const [search, setSearch] = useState('');
 	const [page, setPage] = useState(1);
@@ -51,13 +57,13 @@ export function StudentListPage() {
 	return (
 		<div className="mx-auto flex max-w-7xl flex-col gap-6">
 			<PageHeader
-				title="Students"
-				description="Manage student records, enrollments and balances"
+				title={t('title')}
+				description={t('description')}
 				actions={
 					<Can permission="student.create">
 						<Button onClick={() => setAddOpen(true)}>
 							<Plus className="mr-1.5 size-4" />
-							Add student
+							{t('add')}
 						</Button>
 					</Can>
 				}
@@ -67,17 +73,20 @@ export function StudentListPage() {
 				<SearchFilterBar
 					searchValue={search}
 					onSearchChange={handleSearchChange}
-					searchPlaceholder="Search name or code..."
+					searchPlaceholder={t('searchPlaceholder')}
 					filters={STATUS_TABS.map((tab) => ({
 						id: tab.value,
-						label: tab.label,
+						label:
+							tab.value === 'ALL'
+								? tc('state.all')
+								: statusLabel('student', tab.value),
 						active: statusFilter === tab.value,
 						onClick: () => handleStatusChange(tab.value),
 					}))}
 					actions={
 						<Button variant="outline" size="sm" disabled>
 							<Download className="mr-1.5 size-4" />
-							Export
+							{t('export')}
 						</Button>
 					}
 				/>

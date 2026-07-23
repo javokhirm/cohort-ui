@@ -4,6 +4,7 @@ import { BranchSwitcher } from '@repo/ui';
 
 import { useTeachBranches } from '@/api/branches';
 import { useBranchStore } from '@/store/branchStore';
+import { useAppT } from '@/locales';
 
 /**
  * The teacher's branch switcher, in the topbar. TEACH wiring for `@repo/ui`'s
@@ -18,6 +19,7 @@ import { useBranchStore } from '@/store/branchStore';
  * Renders nothing for a single-branch teacher, which is most of them.
  */
 export function BranchSelector() {
+	const tShell = useAppT('shell');
 	const { data: branches } = useTeachBranches();
 	const activeBranchId = useBranchStore((s) => s.activeBranchId);
 	const setActiveBranchId = useBranchStore((s) => s.setActiveBranchId);
@@ -35,7 +37,7 @@ export function BranchSelector() {
 			branches={branches}
 			value={activeBranchId}
 			onChange={setActiveBranchId}
-			menuLabel="My branches"
+			menuLabel={tShell('myBranches')}
 		/>
 	);
 }

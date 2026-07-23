@@ -17,8 +17,10 @@ import {
 	type DrawerMode,
 	type PlanFormValues,
 } from '@/features/subscription-plans/schemas';
+import { useAppT } from '@/locales';
 
 export function SubscriptionPlansPage() {
+	const t = useAppT('plans');
 	const [drawerOpen, setDrawerOpen] = useState(false);
 	const [drawerMode, setDrawerMode] = useState<DrawerMode>({ kind: 'create' });
 
@@ -57,31 +59,24 @@ export function SubscriptionPlansPage() {
 		<div className="flex flex-col gap-6">
 			<div className="flex items-start justify-between">
 				<div>
-					<h1 className="text-xl font-semibold tracking-tight">
-						Subscription Plans
-					</h1>
-					<p className="text-sm text-muted-foreground">
-						Tiers, pricing and feature flags applied across every tenant.
-					</p>
+					<h1 className="text-xl font-semibold tracking-tight">{t('title')}</h1>
+					<p className="text-sm text-muted-foreground">{t('subtitle')}</p>
 				</div>
 				<Button onClick={openCreate} className="gap-1.5" disabled={isLoading}>
 					<Plus className="size-4" />
-					Create plan
+					{t('create')}
 				</Button>
 			</div>
 
 			<div className="flex items-center gap-2.5 rounded-lg border border-amber-200 bg-amber-50 px-4 py-3 text-sm text-amber-800 dark:border-amber-900/50 dark:bg-amber-950/30 dark:text-amber-300">
 				<span className="shrink-0 text-base">⚠</span>
-				<p>
-					Editing a tier's pricing or flags affects{' '}
-					<strong>all tenants currently on that plan</strong>.
-				</p>
+				<p>{t('warning')}</p>
 			</div>
 
 			{isError && (
 				<div className="rounded-lg border border-destructive/30 bg-destructive/5 px-4 py-3 text-sm text-destructive">
-					Failed to load plans
-					{error instanceof Error ? `: ${error.message}` : '.'} Please refresh.
+					{t('loadError')}
+					{error instanceof Error ? `: ${error.message}` : '.'} {t('refresh')}
 				</div>
 			)}
 
@@ -93,7 +88,7 @@ export function SubscriptionPlansPage() {
 				</div>
 			) : activePlans.length === 0 ? (
 				<p className="py-16 text-center text-sm text-muted-foreground">
-					No active plans. Create one above.
+					{t('empty')}
 				</p>
 			) : (
 				<div className="grid grid-cols-1 gap-6 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">

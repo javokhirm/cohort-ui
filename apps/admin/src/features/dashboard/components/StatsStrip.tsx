@@ -5,6 +5,7 @@ import { formatNumber, formatPriceCompact } from '@repo/utils';
 
 import type { DashboardStats } from '../api/types';
 import { TrendChip } from './TrendChip';
+import { useAppT } from '@/locales';
 
 /** Signed count (e.g. `+12`), for the count-based deltas. */
 function signed(n: number): string {
@@ -13,13 +14,14 @@ function signed(n: number): string {
 
 /** The five KPI tiles. Each shows a value plus its comparison baseline. */
 export function StatsStrip({ data }: { data: DashboardStats }) {
+	const t = useAppT('dashboard');
 	const { activeStudents, attendanceToday, revenueThisMonth, outstanding, newLeads } =
 		data;
 
 	return (
 		<div className="grid grid-cols-2 gap-4 md:grid-cols-3 xl:grid-cols-5">
 			<StatCard
-				label="Active students"
+				label={t('stat.activeStudents')}
 				value={formatNumber(activeStudents.total)}
 				icon={<Users />}
 				delta={{
@@ -30,7 +32,7 @@ export function StatsStrip({ data }: { data: DashboardStats }) {
 			/>
 
 			<StatCard
-				label="Attendance today"
+				label={t('stat.attendanceToday')}
 				value={attendanceToday.rate != null ? `${attendanceToday.rate}%` : '—'}
 				icon={<CalendarCheck />}
 				delta={
@@ -42,7 +44,7 @@ export function StatsStrip({ data }: { data: DashboardStats }) {
 			/>
 
 			<StatCard
-				label="Revenue this month"
+				label={t('stat.revenueThisMonth')}
 				value={formatPriceCompact(revenueThisMonth.amount)}
 				icon={<CircleDollarSign />}
 				delta={
@@ -58,7 +60,7 @@ export function StatsStrip({ data }: { data: DashboardStats }) {
 			/>
 
 			<StatCard
-				label="Outstanding"
+				label={t('stat.outstanding')}
 				value={formatPriceCompact(outstanding.amount)}
 				icon={<Wallet />}
 				delta={{
@@ -69,7 +71,7 @@ export function StatsStrip({ data }: { data: DashboardStats }) {
 			/>
 
 			<StatCard
-				label="New leads"
+				label={t('stat.newLeads')}
 				value={formatNumber(newLeads.thisWeek)}
 				icon={<Filter />}
 				delta={{

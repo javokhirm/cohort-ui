@@ -18,6 +18,7 @@ import {
 
 import { useChangeMyPassword } from '../api/profile.mutations';
 import { changePasswordSchema, type ChangePasswordFormValues } from '../schemas';
+import { useAppT } from '@/locales';
 
 /**
  * Self-service password change. Posts only `newPassword` — `confirmPassword` is a
@@ -25,6 +26,7 @@ import { changePasswordSchema, type ChangePasswordFormValues } from '../schemas'
  * authenticated as the account owner.
  */
 export function ChangePasswordForm() {
+	const t = useAppT('profile');
 	const form = useForm<ChangePasswordFormValues>({
 		resolver: zodResolver(changePasswordSchema),
 		defaultValues: { newPassword: '', confirmPassword: '' },
@@ -33,7 +35,7 @@ export function ChangePasswordForm() {
 	const changePassword = useChangeMyPassword({
 		onSuccess: () => {
 			form.reset();
-			toast.success('Password changed. Use it the next time you sign in.');
+			toast.success(t('changed'));
 		},
 	});
 
@@ -44,11 +46,8 @@ export function ChangePasswordForm() {
 	return (
 		<Card>
 			<CardHeader>
-				<CardTitle>Change password</CardTitle>
-				<CardDescription>
-					Set a new password for your own account. You stay signed in — the new
-					password is needed the next time you sign in.
-				</CardDescription>
+				<CardTitle>{t('changePassword')}</CardTitle>
+				<CardDescription>{t('changeDescription')}</CardDescription>
 			</CardHeader>
 			<CardContent>
 				<Form {...form}>
@@ -60,16 +59,16 @@ export function ChangePasswordForm() {
 							<FormPasswordInput
 								control={form.control}
 								name="newPassword"
-								label="New password"
+								label={t('newPassword')}
 								autoComplete="new-password"
-								placeholder="Min. 8 characters"
+								placeholder={t('newPasswordPlaceholder')}
 							/>
 							<FormPasswordInput
 								control={form.control}
 								name="confirmPassword"
-								label="Confirm new password"
+								label={t('confirmPassword')}
 								autoComplete="new-password"
-								placeholder="Re-enter the new password"
+								placeholder={t('confirmPasswordPlaceholder')}
 							/>
 						</FieldGroup>
 
@@ -77,7 +76,7 @@ export function ChangePasswordForm() {
 							<p className="text-sm text-destructive">
 								{isApiError(changePassword.error)
 									? changePassword.error.message
-									: 'Failed to change password. Please try again.'}
+									: t('changeFailed')}
 							</p>
 						)}
 
@@ -86,7 +85,7 @@ export function ChangePasswordForm() {
 								{changePassword.isPending && (
 									<Spinner className="mr-2 size-4" />
 								)}
-								Change password
+								{t('changePassword')}
 							</Button>
 						</div>
 					</form>

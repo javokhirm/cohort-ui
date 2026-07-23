@@ -24,12 +24,21 @@ import { tenantsKeys } from '@/api/tenants/keys';
 import { changeTenantPlan } from '@/api/tenants/tenants.mutations';
 import type { BillingInterval } from '@/api/tenants/types';
 import { formatPrice } from '@repo/utils';
+import { useAppT } from '@/locales';
+import { useT } from '@repo/i18n';
 
-function planLimitLabel(plan: PlanView): string {
+function planLimitLabel(
+	t: ReturnType<typeof useAppT<'tenants'>>,
+	plan: PlanView,
+): string {
 	const students =
-		plan.maxStudents != null ? `${plan.maxStudents} students` : 'Unlimited students';
+		plan.maxStudents != null
+			? t('limits.students', { count: plan.maxStudents })
+			: t('limits.studentsUnlimited');
 	const branches =
-		plan.maxBranches != null ? `${plan.maxBranches} branches` : 'Unlimited branches';
+		plan.maxBranches != null
+			? t('limits.branches', { count: plan.maxBranches })
+			: t('limits.branchesUnlimited');
 	return `${students} · ${branches}`;
 }
 
@@ -56,6 +65,9 @@ export function ChangePlanDialog({
 	currentTierId,
 	currentBillingInterval,
 }: ChangePlanDialogProps) {
+	const t = useAppT('tenants');
+	const ts = useAppT('subscriptions');
+	const tc = useT('common');
 	const [step, setStep] = useState<'select' | 'confirm'>('select');
 	const [billingInterval, setBillingInterval] = useState<BillingInterval>(
 		currentBillingInterval ?? 'MONTHLY',
@@ -112,9 +124,9 @@ export function ChangePlanDialog({
 				{step === 'select' ? (
 					<>
 						<DialogHeader>
-							<DialogTitle>Change subscription plan</DialogTitle>
+							<DialogTitle>{ts('changePlanTitle')}</DialogTitle>
 							<DialogDescription>
-								Choose a plan and billing interval for this tenant.
+								{ts('changePlanDescription')}
 							</DialogDescription>
 						</DialogHeader>
 
@@ -132,7 +144,9 @@ export function ChangePlanDialog({
 												: 'text-muted-foreground hover:text-foreground',
 										)}
 									>
-										{interval === 'MONTHLY' ? 'Monthly' : 'Annual'}
+										{interval === 'MONTHLY'
+											? ts('monthly')
+											: ts('annual')}
 									</button>
 								))}
 							</div>
@@ -152,7 +166,7 @@ export function ChangePlanDialog({
 								))
 							) : plans.length === 0 ? (
 								<p className="py-6 text-center text-sm text-muted-foreground">
-									No active plans available.
+									{ts('noActivePlans')}
 								</p>
 							) : (
 								plans.map((plan) => {
@@ -185,24 +199,26 @@ export function ChangePlanDialog({
 													</span>
 													{isCurrent && (
 														<span className="rounded-full bg-muted px-2 py-0.5 text-[11px] text-muted-foreground">
-															Current
+															{ts('current')}
 														</span>
 													)}
 													{savings != null && (
 														<span className="rounded-full bg-tone-green-bg px-2 py-0.5 text-[11px] font-medium text-tone-green-fg">
-															Save {savings}%
+															{ts('savePercent', {
+																percent: savings,
+															})}
 														</span>
 													)}
 												</div>
 												<p className="text-xs text-muted-foreground">
-													{planLimitLabel(plan)}
+													{planLimitLabel(t, plan)}
 												</p>
 											</div>
 											<div className="flex items-center gap-3">
 												<div className="text-right">
 													<p className="text-sm font-semibold tabular-nums">
 														{price === 0
-															? 'Custom'
+															? ts('custom')
 															: `${formatPrice(price)} UZS`}
 													</p>
 													{price > 0 && (
@@ -235,7 +251,7 @@ export function ChangePlanDialog({
 								variant="outline"
 								onClick={() => handleOpenChange(false)}
 							>
-								Cancel
+								{tc('action.cancel')}
 							</Button>
 							<Button
 								disabled={
@@ -243,16 +259,16 @@ export function ChangePlanDialog({
 								}
 								onClick={() => setStep('confirm')}
 							>
-								Continue
+								{t('onboarding.continue')}
 							</Button>
 						</DialogFooter>
 					</>
 				) : (
 					<>
 						<DialogHeader>
-							<DialogTitle>Confirm plan change</DialogTitle>
+							<DialogTitle>{ts('confirmTitle')}</DialogTitle>
 							<DialogDescription>
-								Review the details before applying this change.
+								{ts('confirmDescription')}
 							</DialogDescription>
 						</DialogHeader>
 
@@ -260,29 +276,29 @@ export function ChangePlanDialog({
 							<div className="grid grid-cols-[1fr_auto_1fr] items-center gap-3 rounded-lg border border-border bg-muted/30 px-5 py-4">
 								<div className="text-center">
 									<p className="mb-1 text-[11px] font-medium uppercase tracking-wider text-muted-foreground">
-										From
+										{ts('from')}
 									</p>
 									<p className="text-sm font-semibold">
-										{currentPlan?.name ?? 'No plan'}
+										{currentPlan?.name ?? ts('noPlan')}
 									</p>
 									<p className="mt-0.5 text-xs text-muted-foreground">
 										{currentBillingInterval === 'ANNUAL'
-											? 'Annual billing'
-											: 'Monthly billing'}
+											? ts('annualBilling')
+											: ts('monthlyBilling')}
 									</p>
 								</div>
 								<div className="text-lg text-muted-foreground">→</div>
 								<div className="text-center">
 									<p className="mb-1 text-[11px] font-medium uppercase tracking-wider text-muted-foreground">
-										To
+										{ts('to')}
 									</p>
 									<p className="text-sm font-semibold text-primary">
 										{selectedPlan?.name}
 									</p>
 									<p className="mt-0.5 text-xs text-muted-foreground">
 										{billingInterval === 'ANNUAL'
-											? 'Annual billing'
-											: 'Monthly billing'}
+											? ts('annualBilling')
+											: ts('monthlyBilling')}
 									</p>
 								</div>
 							</div>
@@ -290,19 +306,18 @@ export function ChangePlanDialog({
 							{selectedPlan && (
 								<div className="flex items-center justify-between rounded-lg border border-primary/20 bg-primary/5 px-4 py-3">
 									<span className="text-sm text-muted-foreground">
-										New charge
+										{ts('newCharge')}
 									</span>
 									<span className="text-base font-bold tabular-nums">
 										{priceFor(selectedPlan) === 0
-											? 'Custom pricing'
+											? ts('customPricing')
 											: `${formatPrice(priceFor(selectedPlan))} UZS${priceSuffix}`}
 									</span>
 								</div>
 							)}
 
 							<p className="text-xs text-muted-foreground">
-								This change takes effect immediately. Billing adjustments
-								will be prorated for the current period.
+								{ts('prorationNote')}
 							</p>
 						</div>
 
@@ -310,7 +325,7 @@ export function ChangePlanDialog({
 							<p className="text-sm text-destructive">
 								{mutation.error instanceof Error
 									? mutation.error.message
-									: 'Failed to apply the plan change. Please try again.'}
+									: ts('applyError')}
 							</p>
 						)}
 
@@ -320,13 +335,15 @@ export function ChangePlanDialog({
 								onClick={() => setStep('select')}
 								disabled={mutation.isPending}
 							>
-								Back
+								{t('back')}
 							</Button>
 							<Button
 								disabled={mutation.isPending}
 								onClick={() => mutation.mutate()}
 							>
-								{mutation.isPending ? 'Applying…' : 'Confirm change'}
+								{mutation.isPending
+									? ts('applying')
+									: ts('confirmChange')}
 							</Button>
 						</DialogFooter>
 					</>

@@ -1,4 +1,5 @@
 import { Input, Label, Switch, Tabs, TabsList, TabsTrigger } from '@repo/ui';
+import { useAppT } from '@/locales';
 
 import type { GradingType } from '../api/grading-config.queries';
 import { GRADING_TYPE_OPTIONS, gradingPreview } from '../lib/group-options';
@@ -34,15 +35,16 @@ export function GradingScaleControl({
 	maxError,
 	idPrefix,
 }: GradingScaleControlProps) {
+	const t = useAppT('groups');
 	return (
 		<div className="flex flex-col gap-4">
 			<div className="flex flex-col gap-1.5">
-				<span className="text-sm font-medium">Scale type</span>
+				<span className="text-sm font-medium">{t('grading.scaleType')}</span>
 				<Tabs value={type} onValueChange={(v) => onTypeChange(v as GradingType)}>
 					<TabsList className="w-full">
 						{GRADING_TYPE_OPTIONS.map((o) => (
 							<TabsTrigger key={o.value} value={o.value} className="flex-1">
-								{o.label}
+								{t(`grading.type.${o.value}`)}
 							</TabsTrigger>
 						))}
 					</TabsList>
@@ -50,13 +52,13 @@ export function GradingScaleControl({
 			</div>
 
 			{type === 'LETTER' ? (
-				<p className="text-sm text-muted-foreground">
-					Letter grades A–F are entered directly on the marks sheet.
-				</p>
+				<p className="text-sm text-muted-foreground">{t('grading.letterHint')}</p>
 			) : (
 				<div className="flex flex-col gap-1.5">
 					<Label htmlFor={`${idPrefix}-grading-max`}>
-						{type === 'PERCENTAGE' ? 'Maximum (%)' : 'Maximum points'}
+						{type === 'PERCENTAGE'
+							? t('grading.maxPercent')
+							: t('grading.maxPoints')}
 					</Label>
 					<Input
 						id={`${idPrefix}-grading-max`}
@@ -76,7 +78,7 @@ export function GradingScaleControl({
 			{type === 'POINTS' && (
 				<div className="flex items-center justify-between">
 					<Label htmlFor={`${idPrefix}-grading-half`}>
-						Allow half-point scores
+						{t('grading.allowHalf')}
 					</Label>
 					<Switch
 						id={`${idPrefix}-grading-half`}
@@ -87,8 +89,10 @@ export function GradingScaleControl({
 			)}
 
 			<div className="rounded-lg border border-border bg-muted/40 px-3 py-2 text-sm text-muted-foreground">
-				Preview ·{' '}
-				<span className="text-foreground">{gradingPreview(type, maxPoints)}</span>
+				{t('grading.preview')} ·{' '}
+				<span className="text-foreground">
+					{gradingPreview(t, type, maxPoints)}
+				</span>
 			</div>
 		</div>
 	);

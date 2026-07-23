@@ -17,6 +17,9 @@ import {
 	type SelectOption,
 } from '@repo/ui';
 import { isApiError } from '@repo/api-client';
+import { type Translator, useT } from '@repo/i18n';
+
+import { useAppT } from '@/locales';
 
 import { useBranches } from '@/api/branches';
 import { FormSection } from '@/components/FormSection';
@@ -27,7 +30,7 @@ import { useRoomList } from '@/features/rooms/api/rooms.queries';
 
 import type { GroupDetail } from '../api/groups.queries';
 import { useCreateGroup, useUpdateGroup } from '../api/groups.mutations';
-import { GROUP_STATUS_OPTIONS } from '../lib/group-options';
+import { GROUP_STATUS_OPTIONS, type GroupsT } from '../lib/group-options';
 import { describeScheduleConflict } from '../lib/schedule-conflict';
 import {
 	createGroupSchema,
@@ -48,6 +51,7 @@ import { SessionPreviewCard } from '../components/SessionPreviewCard';
 
 /** Pickers for the group form. Rooms narrow to the chosen branch. */
 function useGroupFormOptions(branchId: string) {
+	const t = useAppT('groups');
 	const { data: branches = [] } = useBranches();
 	const { data: courseData } = useCourseList({ limit: 100, isActive: true });
 	const { data: teacherData } = useStaffList({ role: 'TEACHER', limit: 100 });
@@ -67,14 +71,14 @@ function useGroupFormOptions(branchId: string) {
 		label: c.name,
 	}));
 	const teacherOptions: SelectOption[] = [
-		{ value: NONE_VALUE, label: 'Unassigned' },
+		{ value: NONE_VALUE, label: t('unassigned') },
 		...(teacherData?.rows ?? []).map((t) => ({
 			value: String(t.id),
 			label: `${t.user.firstName} ${t.user.lastName}`.trim(),
 		})),
 	];
 	const roomOptions: SelectOption[] = [
-		{ value: NONE_VALUE, label: 'No room' },
+		{ value: NONE_VALUE, label: t('noRoom') },
 		...(roomData?.rows ?? []).map((r) => ({
 			value: String(r.id),
 			label: r.name,
@@ -102,6 +106,7 @@ function GroupFields({
 	 * shared `CreateGroupFormValues` shape. */
 	extraSection?: React.ReactNode;
 }) {
+	const t = useAppT('groups');
 	const form = useFormContext<CreateGroupFormValues>();
 	const branchId = form.watch('branchId');
 	const days = form.watch('days');
@@ -115,36 +120,36 @@ function GroupFields({
 		<div className="grid grid-cols-1 gap-4 lg:grid-cols-[1fr_420px] lg:items-start">
 			<div className="flex flex-col gap-4">
 				<FormSection
-					title="Details"
+					title={t('form.section.details')}
 					className="border border-border bg-card shadow-xs"
 				>
 					<FieldGroup>
 						<FormInput
 							control={form.control}
 							name="name"
-							label="Group name *"
-							placeholder="e.g. IELTS Morning A"
+							label={t('form.field.name')}
+							placeholder={t('form.field.namePlaceholder')}
 						/>
 						<div className="grid grid-cols-1 gap-3 sm:grid-cols-[minmax(0,1fr)_minmax(0,1fr)_minmax(0,0.5fr)]">
 							<FormSelect
 								control={form.control}
 								name="teacherId"
-								label="Teacher"
+								label={t('form.field.teacher')}
 								options={teacherOptions}
 							/>
 							<FormSelect
 								control={form.control}
 								name="roomId"
-								label="Room"
+								label={t('form.field.room')}
 								options={roomOptions}
 							/>
 							<FormInput
 								control={form.control}
 								name="capacity"
-								label="Capacity"
+								label={t('form.field.capacity')}
 								type="number"
 								min={1}
-								placeholder="e.g. 15"
+								placeholder={t('form.field.capacityPlaceholder')}
 								onChange={(e) =>
 									form.setValue(
 										'capacity',
@@ -160,16 +165,16 @@ function GroupFields({
 							<FormSelect
 								control={form.control}
 								name="branchId"
-								label="Branch *"
-								placeholder="Select branch"
+								label={t('form.field.branch')}
+								placeholder={t('form.field.branchPlaceholder')}
 								options={branchOptions}
 								disabled={mode === 'edit'}
 							/>
 							<FormSelect
 								control={form.control}
 								name="courseId"
-								label="Course *"
-								placeholder="Select course"
+								label={t('form.field.course')}
+								placeholder={t('form.field.coursePlaceholder')}
 								options={courseOptions}
 								disabled={mode === 'edit'}
 							/>
@@ -179,19 +184,19 @@ function GroupFields({
 							<FormDatePicker
 								control={form.control}
 								name="startDate"
-								label="Start date"
+								label={t('form.field.startDate')}
 							/>
 							<FormDatePicker
 								control={form.control}
 								name="endDate"
-								label="End date"
+								label={t('form.field.endDate')}
 							/>
 						</div>
 					</FieldGroup>
 				</FormSection>
 
 				<FormSection
-					title="Recurring schedule rule"
+					title={t('form.section.scheduleRule')}
 					className="border border-border bg-card shadow-xs"
 				>
 					<ScheduleRuleFields />
@@ -199,7 +204,7 @@ function GroupFields({
 
 				{mode === 'create' ? (
 					<FormSection
-						title="Grading scale"
+						title={t('form.section.gradingScale')}
 						className="border border-border bg-card shadow-xs"
 					>
 						<GradingScaleFields />
@@ -226,14 +231,14 @@ function GroupFields({
  * gets a specific "scheduling conflict" message naming the occupied slot so the
  * user can fix the room/time; every other error falls back to the server message.
  */
-function notifyGroupMutationError(err: unknown) {
+function notifyGroupMutationError(t: GroupsT, tc: Translator<'common'>, err: unknown) {
 	const conflict = describeScheduleConflict(err);
 	if (conflict) {
-		toast.error('Scheduling conflict', { description: conflict });
+		toast.error(t('sessions.conflict'), { description: conflict });
 	} else if (isApiError(err)) {
 		toast.error(err.message);
 	} else {
-		toast.error('Something went wrong');
+		toast.error(tc('error.unknown'));
 	}
 }
 
@@ -246,6 +251,8 @@ function CreateGroupForm({
 	onSuccess: (groupId: number) => void;
 	onPendingChange: (pending: boolean) => void;
 }) {
+	const t = useAppT('groups');
+	const tc = useT('common');
 	// When exactly one branch is selected globally, pre-fill it (still editable).
 	const activeBranchIds = useBranchStore((s) => s.activeBranchIds);
 	const defaultBranchId =
@@ -282,10 +289,10 @@ function CreateGroupForm({
 		try {
 			created = await createGroup.mutateAsync(createValuesToPayload(values));
 		} catch (err) {
-			notifyGroupMutationError(err);
+			notifyGroupMutationError(t, tc, err);
 			return;
 		}
-		toast.success('Group created');
+		toast.success(t('created'));
 		onSuccess(created.id);
 	}
 
@@ -312,6 +319,8 @@ function EditGroupForm({
 	onSuccess: (groupId: number) => void;
 	onPendingChange: (pending: boolean) => void;
 }) {
+	const t = useAppT('groups');
+	const tc = useT('common');
 	const form = useForm<EditGroupFormValues>({
 		resolver: zodResolver(editGroupSchema),
 		defaultValues: groupToFormValues(group),
@@ -337,11 +346,11 @@ function EditGroupForm({
 			await updateGroup.mutateAsync(editValuesToPayload(group.id, values));
 		} catch (err) {
 			// Regenerating the schedule can also collide with another group's room.
-			notifyGroupMutationError(err);
+			notifyGroupMutationError(t, tc, err);
 			setPendingReschedule(null);
 			return;
 		}
-		toast.success('Group updated');
+		toast.success(t('updated'));
 		onSuccess(group.id);
 	}
 
@@ -366,15 +375,18 @@ function EditGroupForm({
 					gradingSection={<GradingScaleSection groupId={group.id} />}
 					extraSection={
 						<FormSection
-							title="Status"
+							title={t('form.section.status')}
 							className="border border-border bg-card shadow-xs"
 						>
 							<FieldGroup>
 								<FormSelect
 									control={form.control}
 									name="status"
-									label="Group status"
-									options={GROUP_STATUS_OPTIONS}
+									label={t('form.field.groupStatus')}
+									options={GROUP_STATUS_OPTIONS.map((o) => ({
+										value: o.value,
+										label: t(`status.${o.value}`),
+									}))}
 								/>
 							</FieldGroup>
 						</FormSection>
@@ -387,10 +399,10 @@ function EditGroupForm({
 				onOpenChange={(open) => {
 					if (!open) setPendingReschedule(null);
 				}}
-				title="Reschedule sessions?"
-				description="These changes reschedule the group. All sessions are regenerated from the current schedule and existing future sessions are lost. Past sessions are kept."
-				confirmLabel="Save & reschedule"
-				cancelLabel="Keep editing"
+				title={t('form.reschedule.title')}
+				description={t('form.reschedule.description')}
+				confirmLabel={t('form.reschedule.confirm')}
+				cancelLabel={t('form.reschedule.cancel')}
 				variant="destructive"
 				loading={updateGroup.isPending}
 				onConfirm={() => {
@@ -445,6 +457,8 @@ interface EditPageProps {
 export type GroupFormPageProps = CreatePageProps | EditPageProps;
 
 export function GroupFormPage(props: GroupFormPageProps) {
+	const tc = useT('common');
+	const t = useAppT('groups');
 	const navigate = useNavigate();
 	const [isPending, setIsPending] = useState(false);
 	const formId = props.mode === 'create' ? 'create-group-form' : 'edit-group-form';
@@ -470,11 +484,11 @@ export function GroupFormPage(props: GroupFormPageProps) {
 			>
 				<ArrowLeft className="size-3.5" />
 				{props.mode === 'create'
-					? 'Back to groups'
-					: `Back to ${props.group.name}`}
+					? t('back')
+					: t('backToGroup', { name: props.group.name })}
 			</Link>
 
-			<PageHeader title={props.mode === 'create' ? 'Create group' : 'Edit group'} />
+			<PageHeader title={props.mode === 'create' ? t('create') : t('edit')} />
 
 			{props.mode === 'create' ? (
 				<CreateGroupForm onSuccess={goToGroup} onPendingChange={setIsPending} />
@@ -496,11 +510,11 @@ export function GroupFormPage(props: GroupFormPageProps) {
 							: () => goToGroup(props.group.id)
 					}
 				>
-					Cancel
+					{tc('action.cancel')}
 				</Button>
 				<Button type="submit" form={formId} disabled={isPending}>
 					{isPending && <Spinner className="mr-2 size-4" />}
-					{props.mode === 'create' ? 'Create group' : 'Save changes'}
+					{props.mode === 'create' ? t('create') : t('form.saveChanges')}
 				</Button>
 			</div>
 		</div>

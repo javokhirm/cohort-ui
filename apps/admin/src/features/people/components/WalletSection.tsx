@@ -14,6 +14,7 @@ import {
 import { formatDateTime, formatPrice } from '@repo/utils';
 
 import { Can } from '@/components/Can';
+import { useAppT } from '@/locales';
 import { useStudentWallet } from '../api/wallet.queries';
 import { WALLET_TRANSACTION_TYPE_META } from '../lib/wallet-options';
 import { WalletDepositDialog } from './WalletDepositDialog';
@@ -24,6 +25,7 @@ interface WalletSectionProps {
 }
 
 export function WalletSection({ studentId }: WalletSectionProps) {
+	const t = useAppT('people');
 	const { data: wallet, isLoading } = useStudentWallet(studentId);
 	const [depositOpen, setDepositOpen] = useState(false);
 	const [adjustOpen, setAdjustOpen] = useState(false);
@@ -41,7 +43,7 @@ export function WalletSection({ studentId }: WalletSectionProps) {
 		<div className="flex flex-col gap-4">
 			<div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
 				<StatCard
-					label="Wallet balance"
+					label={t('wallet.balance')}
 					value={`${formatPrice(wallet.balance)} ${wallet.currency}`}
 					icon={<WalletIcon />}
 					className="sm:max-w-xs"
@@ -50,13 +52,13 @@ export function WalletSection({ studentId }: WalletSectionProps) {
 					<Can permission="wallet.deposit">
 						<Button variant="outline" onClick={() => setDepositOpen(true)}>
 							<ArrowDownToLine className="mr-1.5 size-4" />
-							Deposit
+							{t('wallet.deposit')}
 						</Button>
 					</Can>
 					<Can permission="wallet.adjust">
 						<Button variant="outline" onClick={() => setAdjustOpen(true)}>
 							<SlidersHorizontal className="mr-1.5 size-4" />
-							Adjust balance
+							{t('wallet.adjust')}
 						</Button>
 					</Can>
 				</div>
@@ -64,22 +66,22 @@ export function WalletSection({ studentId }: WalletSectionProps) {
 
 			<Card className="gap-0 overflow-hidden py-0">
 				<div className="border-b border-border px-5 py-3">
-					<h2 className="text-sm font-semibold">Recent transactions</h2>
+					<h2 className="text-sm font-semibold">{t('wallet.recent')}</h2>
 				</div>
 				{wallet.transactions.length === 0 ? (
 					<EmptyState
 						icon={<WalletIcon />}
-						title="No transactions yet"
-						description="Deposits, adjustments, and invoice activity will show up here."
+						title={t('wallet.emptyTitle')}
+						description={t('wallet.emptyDescription')}
 					/>
 				) : (
 					<div className="max-h-96 divide-y divide-border overflow-y-auto">
-						{wallet.transactions.map((t) => {
-							const meta = WALLET_TRANSACTION_TYPE_META[t.type];
+						{wallet.transactions.map((tx) => {
+							const meta = WALLET_TRANSACTION_TYPE_META[tx.type];
 							const Icon = meta.icon;
 							return (
 								<div
-									key={t.id}
+									key={tx.id}
 									className="flex items-center justify-between gap-3 px-5 py-3"
 								>
 									<div className="flex items-center gap-3">
@@ -93,24 +95,24 @@ export function WalletSection({ studentId }: WalletSectionProps) {
 										</span>
 										<div>
 											<StatusBadge tone={meta.tone}>
-												{meta.label}
+												{t(`wallet.txType.${tx.type}`)}
 											</StatusBadge>
 											<div className="mt-1 text-xs text-muted-foreground">
-												{formatDateTime(t.createdAt)}
-												{t.notes ? ` · ${t.notes}` : ''}
+												{formatDateTime(tx.createdAt)}
+												{tx.notes ? ` · ${tx.notes}` : ''}
 											</div>
 										</div>
 									</div>
 									<div
 										className={cn(
 											'shrink-0 text-sm font-bold tabular-nums',
-											t.amount >= 0
+											tx.amount >= 0
 												? 'text-tone-green-fg'
 												: 'text-tone-red-fg',
 										)}
 									>
-										{t.amount > 0 ? '+' : ''}
-										{formatPrice(t.amount)} UZS
+										{tx.amount > 0 ? '+' : ''}
+										{formatPrice(tx.amount)} UZS
 									</div>
 								</div>
 							);

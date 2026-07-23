@@ -13,7 +13,7 @@ import {
 } from '@repo/ui';
 
 import { useIsMobile } from '@/hooks/use-is-mobile';
-import { ToneLegend } from '@/components/ToneLegend';
+import { type LegendItem, ToneLegend } from '@/components/ToneLegend';
 import { useMarksGrid } from '@/features/marks/api/marks-grid.queries';
 import { useUpsertMarkCell } from '@/features/marks/api/marks-grid.mutations';
 import { MarksGrid } from '@/features/marks/components/MarksGrid';
@@ -24,7 +24,8 @@ import {
 	formatMonthLabel,
 	isTodayIso,
 } from '@/features/marks/lib/month';
-import { SCORE_BANDS } from '@/features/marks/lib/scale';
+import { WEAK_SCORE_PCT } from '@/features/marks/lib/scale';
+import { useAppT } from '@/locales';
 
 /**
  * A group's monthly marks table (`GET /teach/groups/:id/marks`, §1.1): rows are
@@ -42,6 +43,11 @@ import { SCORE_BANDS } from '@/features/marks/lib/scale';
  * 10 or out of 100.
  */
 export function GroupMarksRoute() {
+	const t = useAppT('marks');
+	const tShell = useAppT('shell');
+	const tGroups = useAppT('groups');
+	const tAttendance = useAppT('attendance');
+	const tSchedule = useAppT('schedule');
 	const navigate = useNavigate();
 	const { groupId: groupIdParam } = useParams({
 		from: '/_authed/groups/$groupId/marks',
@@ -55,6 +61,14 @@ export function GroupMarksRoute() {
 
 	const gridQuery = useMarksGrid(groupId, month);
 	const upsertCell = useUpsertMarkCell(groupId, month);
+
+	// The grid's colour key. The tone→band mapping mirrors `scoreTone`; labels are
+	// built at render so they re-resolve when the locale changes.
+	const scoreBands: LegendItem[] = [
+		{ tone: 'green', label: t('topBand') },
+		{ tone: 'amber', label: t('midBand', { low: WEAK_SCORE_PCT }) },
+		{ tone: 'red', label: t('lowBand', { low: WEAK_SCORE_PCT }) },
+	];
 
 	const grid = gridQuery.data;
 	const rows = grid?.rows ?? [];
@@ -94,11 +108,11 @@ export function GroupMarksRoute() {
 		body = stateCard(
 			<EmptyState
 				icon={<Star />}
-				title="Couldn't load marks"
-				description="Something went wrong. Try again in a moment."
+				title={t('errorTitle')}
+				description={tShell('genericErrorDescription')}
 				action={
 					<Button variant="outline" onClick={() => void gridQuery.refetch()}>
-						Try again
+						{tShell('tryAgain')}
 					</Button>
 				}
 			/>,
@@ -109,15 +123,15 @@ export function GroupMarksRoute() {
 		body = stateCard(
 			<EmptyState
 				icon={<Star />}
-				title="No sessions this month"
-				description="This group has no scheduled sessions in the selected month."
+				title={tSchedule('noSessionsThisMonth')}
+				description={tSchedule('noSessionsThisMonthDescription')}
 				action={
 					month !== currentMonth() && (
 						<Button
 							variant="outline"
 							onClick={() => goToMonth(currentMonth())}
 						>
-							Go to this month
+							{tShell('goToThisMonth')}
 						</Button>
 					)
 				}
@@ -127,8 +141,8 @@ export function GroupMarksRoute() {
 		body = stateCard(
 			<EmptyState
 				icon={<Users />}
-				title="No students enrolled"
-				description="This group has no active students to mark yet."
+				title={tGroups('rosterEmptyTitle')}
+				description={tAttendance('noStudentsDescription')}
 			/>,
 		);
 	} else {
@@ -146,8 +160,8 @@ export function GroupMarksRoute() {
 		<div className="flex h-full w-full flex-col pb-3">
 			<PageHeader
 				className="shrink-0"
-				title={grid?.group.courseName ?? 'Marks'}
-				description={grid?.group.name ?? `Group #${groupId}`}
+				title={grid?.group.courseName ?? t('title')}
+				description={grid?.group.name ?? tGroups('groupNumber', { id: groupId })}
 				actions={
 					<Tabs
 						value="table"
@@ -162,13 +176,13 @@ export function GroupMarksRoute() {
 						}}
 					>
 						<TabsList>
-							<TabsTrigger value="table" aria-label="Table view">
+							<TabsTrigger value="table" aria-label={tShell('tableView')}>
 								<LayoutGrid />
 							</TabsTrigger>
 							<TabsTrigger
 								value="list"
 								disabled={!todaySessionId}
-								aria-label="List view"
+								aria-label={tShell('listView')}
 							>
 								<List />
 							</TabsTrigger>
@@ -188,9 +202,9 @@ export function GroupMarksRoute() {
 			</div>
 
 			<div className="mt-2 flex shrink-0 flex-wrap items-center justify-between gap-x-4 gap-y-1.5">
-				<ToneLegend items={SCORE_BANDS} />
+				<ToneLegend items={scoreBands} />
 				<p className="text-[11px] text-muted-foreground">
-					Only today&apos;s column is editable
+					{tAttendance('onlyTodayEditable')}
 				</p>
 			</div>
 

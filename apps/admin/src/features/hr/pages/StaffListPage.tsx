@@ -3,8 +3,10 @@ import { useNavigate, useSearch } from '@tanstack/react-router';
 import { Plus } from 'lucide-react';
 
 import { Button, Card, PageHeader, Pagination, SearchFilterBar } from '@repo/ui';
+import { useT } from '@repo/i18n';
 
 import { Can } from '@/components/Can';
+import { useAppT } from '@/locales';
 import { useStaffList } from '../api/staff.queries';
 import type { StaffListFilters } from '../api/keys';
 import { ROLE_FILTERS } from '../lib/roles';
@@ -14,6 +16,8 @@ import { StaffForm } from '../components/StaffForm';
 const PAGE_SIZE = 20;
 
 export function StaffListPage() {
+	const t = useAppT('hr');
+	const tc = useT('common');
 	const navigate = useNavigate({ from: '/staff' });
 	const { page = 1, search: searchParam, role } = useSearch({ from: '/_authed/staff' });
 
@@ -57,13 +61,13 @@ export function StaffListPage() {
 	return (
 		<div className="mx-auto flex max-w-7xl flex-col gap-6">
 			<PageHeader
-				title="Staff & HR"
-				description="Teachers, managers and administrators"
+				title={t('title')}
+				description={t('description')}
 				actions={
 					<Can permission="staff.create">
 						<Button onClick={() => setAddOpen(true)}>
 							<Plus className="mr-1.5 size-4" />
-							Add staff member
+							{t('add')}
 						</Button>
 					</Can>
 				}
@@ -73,10 +77,10 @@ export function StaffListPage() {
 				<SearchFilterBar
 					searchValue={inputValue}
 					onSearchChange={setInputValue}
-					searchPlaceholder="Search staff…"
+					searchPlaceholder={t('searchPlaceholder')}
 					filters={ROLE_FILTERS.map((f) => ({
 						id: f.value ?? 'ALL',
-						label: f.label,
+						label: f.value ? t(`roleFilter.${f.value}`) : tc('state.all'),
 						active: role === f.value,
 						onClick: () => handleRoleChange(f.value),
 					}))}
@@ -84,7 +88,7 @@ export function StaffListPage() {
 
 				{isError && (
 					<div className="rounded-lg border border-destructive/30 bg-destructive/5 px-4 py-3 text-sm text-destructive">
-						Failed to load staff. Please refresh.
+						{t('loadError')}
 					</div>
 				)}
 

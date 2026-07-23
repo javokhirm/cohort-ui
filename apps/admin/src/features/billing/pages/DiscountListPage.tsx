@@ -3,6 +3,8 @@ import { useNavigate, useSearch } from '@tanstack/react-router';
 import { Plus, Tag } from 'lucide-react';
 
 import { Button, EmptyState, PageHeader, SearchFilterBar, Spinner } from '@repo/ui';
+import { useT } from '@repo/i18n';
+import { useAppT } from '@/locales';
 
 import { Can } from '@/components/Can';
 import { usePermissions } from '@/features/auth/hooks';
@@ -17,6 +19,8 @@ import { DiscountForm } from '../components/DiscountForm';
 const PAGE_SIZE = 12;
 
 export function DiscountListPage() {
+	const t = useAppT('billing');
+	const tc = useT('common');
 	const navigate = useNavigate({ from: '/discounts' });
 	const { can } = usePermissions();
 	const { status, search: searchParam } = useSearch({ from: '/_authed/discounts' });
@@ -69,13 +73,13 @@ export function DiscountListPage() {
 	return (
 		<div className="mx-auto flex max-w-7xl flex-col gap-6">
 			<PageHeader
-				title="Discounts"
-				description="Scholarships, promo codes, and sibling discounts"
+				title={t('discounts.title')}
+				description={t('discounts.description')}
 				actions={
 					<Can permission="discount.manage">
 						<Button onClick={() => setAddOpen(true)}>
 							<Plus className="mr-1.5 size-4" />
-							New discount
+							{t('discounts.add')}
 						</Button>
 					</Can>
 				}
@@ -88,7 +92,7 @@ export function DiscountListPage() {
 					searchPlaceholder="Search discounts…"
 					filters={DISCOUNT_STATUS_FILTERS.map((f) => ({
 						id: f.value ?? 'ALL',
-						label: f.label,
+						label: tc(`state.${f.labelKey}`),
 						active: status === f.value,
 						onClick: () => handleStatusChange(f.value),
 					}))}
@@ -96,7 +100,7 @@ export function DiscountListPage() {
 
 				{isError && (
 					<div className="rounded-lg border border-destructive/30 bg-destructive/5 px-4 py-3 text-sm text-destructive">
-						Failed to load discounts. Please refresh.
+						{t('discounts.loadError')}
 					</div>
 				)}
 
@@ -125,8 +129,8 @@ export function DiscountListPage() {
 					!isError && (
 						<EmptyState
 							icon={<Tag />}
-							title="No discounts match this filter"
-							description="Try adjusting the search or status filter, or add a new discount."
+							title={t('discountExtra.emptyTitle')}
+							description={t('discountExtra.emptyDescription')}
 						/>
 					)
 				)}

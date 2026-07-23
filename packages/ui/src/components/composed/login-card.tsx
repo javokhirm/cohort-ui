@@ -27,6 +27,27 @@ export interface LoginCardBrand {
 	};
 }
 
+/**
+ * Translatable copy for the card. Injected as strings — this package stays free
+ * of `@repo/i18n` (they are peers in the dependency graph), so each app passes
+ * its own `useT('auth')` values and the defaults keep Storybook/tests English.
+ */
+export interface LoginCardLabels {
+	phone: string;
+	password: string;
+	signIn: string;
+	signingIn: string;
+	poweredBy: string;
+}
+
+const DEFAULT_LABELS: LoginCardLabels = {
+	phone: 'Phone number',
+	password: 'Password',
+	signIn: 'Sign in',
+	signingIn: 'Signing in…',
+	poweredBy: 'Powered by',
+};
+
 interface LoginCardProps {
 	brand: LoginCardBrand;
 	/**
@@ -39,7 +60,10 @@ interface LoginCardProps {
 	isPending?: boolean;
 	/** Server-side failure to surface above the submit button. */
 	error?: string | null;
-	submitLabel?: string;
+	/** Translated copy; anything omitted falls back to the English default. */
+	labels?: Partial<LoginCardLabels>;
+	/** Fixed to the top-right corner — used for the pre-login locale switcher. */
+	topRight?: React.ReactNode;
 }
 
 /**
@@ -57,15 +81,18 @@ export function LoginCard({
 	onSubmit,
 	isPending = false,
 	error = null,
-	submitLabel = 'Sign in',
+	labels,
+	topRight,
 }: LoginCardProps) {
+	const l = { ...DEFAULT_LABELS, ...labels };
 	const form = useForm<LoginCredentials>({
 		resolver,
 		defaultValues: { phone: '', password: '' },
 	});
 
 	return (
-		<div className="flex min-h-svh flex-col items-center justify-center bg-[radial-gradient(130%_55%_at_50%_-8%,var(--sidebar-accent)_0%,var(--background)_62%)] px-5 py-9">
+		<div className="relative flex min-h-svh flex-col items-center justify-center bg-[radial-gradient(130%_55%_at_50%_-8%,var(--sidebar-accent)_0%,var(--background)_62%)] px-5 py-9">
+			{topRight && <div className="absolute right-5 top-5">{topRight}</div>}
 			<div className="w-full max-w-[362px]">
 				<div className="mb-5.5 flex flex-col items-center text-center">
 					<div className="flex size-13.5 items-center justify-center rounded-[15px] bg-linear-to-br from-primary to-primary/70 text-[23px] font-bold text-primary-foreground shadow-[0_8px_20px_-6px_color-mix(in_srgb,var(--color-primary)_55%,transparent)]">
@@ -92,13 +119,13 @@ export function LoginCard({
 								<FormPhoneInput
 									control={form.control}
 									name="phone"
-									label="Phone number"
+									label={l.phone}
 									autoComplete="username"
 								/>
 								<FormPasswordInput
 									control={form.control}
 									name="password"
-									label="Password"
+									label={l.password}
 									autoComplete="current-password"
 									placeholder="••••••••••"
 								/>
@@ -117,7 +144,7 @@ export function LoginCard({
 									{isPending && (
 										<Spinner className="size-4 text-primary-foreground" />
 									)}
-									{isPending ? 'Signing in…' : submitLabel}
+									{isPending ? l.signingIn : l.signIn}
 								</Button>
 							</FieldGroup>
 						</form>
@@ -125,7 +152,7 @@ export function LoginCard({
 				</div>
 
 				<p className="mt-4.5 text-center text-[11.5px] text-muted-foreground">
-					Powered by{' '}
+					{l.poweredBy}{' '}
 					<span className="font-semibold text-foreground">Cohort</span>
 				</p>
 			</div>

@@ -18,21 +18,26 @@ import {
 } from '@repo/ui';
 import { isApiError } from '@repo/api-client';
 import { formatPrice } from '@repo/utils';
+import { useStatusLabel, useT } from '@repo/i18n';
 
 import { Can } from '@/components/Can';
+import { useAppT } from '@/locales';
 import { usePermissions } from '@/features/auth/hooks';
 
 import { useExpenseList, useExpenseSummary } from '../api/expenses.queries';
 import type { ExpenseResponse } from '../api/expenses.queries';
 import type { ExpenseListFilters } from '../api/keys';
 import { useDeleteExpense } from '../api/expenses.mutations';
-import { EXPENSE_CATEGORY_FILTERS, expenseCategoryLabel } from '../lib/expense-options';
+import { EXPENSE_CATEGORY_FILTERS } from '../lib/expense-options';
 import { ExpenseTable } from '../components/ExpenseTable';
 import { ExpenseForm } from '../components/ExpenseForm';
 
 const PAGE_SIZE = 20;
 
 export function ExpenseListPage() {
+	const t = useAppT('expenses');
+	const tc = useT('common');
+	const statusLabel = useStatusLabel();
 	const navigate = useNavigate({ from: '/expenses' });
 	const { can } = usePermissions();
 	const { page = 1, category, from, to } = useSearch({ from: '/_authed/expenses' });
@@ -89,11 +94,11 @@ export function ExpenseListPage() {
 		if (!deleteExpense) return;
 		deleteMutation.mutate(deleteExpense.id, {
 			onSuccess: () => {
-				toast.success('Expense deleted');
+				toast.success(t('deleted'));
 				setDeleteExpense(null);
 			},
 			onError: (err) => {
-				toast.error(isApiError(err) ? err.message : 'Failed to delete expense');
+				toast.error(isApiError(err) ? err.message : t('deleteFailed'));
 			},
 		});
 	}
@@ -101,13 +106,13 @@ export function ExpenseListPage() {
 	return (
 		<div className="mx-auto flex max-w-7xl flex-col gap-6">
 			<PageHeader
-				title="Expenses"
-				description="Operating costs for branch-level P&L tracking"
+				title={t('title')}
+				description={t('description')}
 				actions={
 					<Can permission="expense.create">
 						<Button onClick={() => setAddOpen(true)}>
 							<Plus className="mr-1.5 size-4" />
-							Add expense
+							{t('add')}
 						</Button>
 					</Can>
 				}
@@ -116,7 +121,9 @@ export function ExpenseListPage() {
 			<Card className="gap-0 py-0">
 				<div className="flex flex-wrap items-center justify-between gap-6 px-5 py-4">
 					<div>
-						<p className="text-sm text-muted-foreground">Total this period</p>
+						<p className="text-sm text-muted-foreground">
+							{t('totalThisPeriod')}
+						</p>
 						<p className="text-2xl font-bold tabular-nums">
 							{formatPrice(summary?.total ?? 0)}{' '}
 							{summary?.currency ?? 'UZS'}
@@ -136,7 +143,7 @@ export function ExpenseListPage() {
 									/>
 									<div className="flex flex-col">
 										<span className="text-xs text-muted-foreground">
-											{expenseCategoryLabel(cat)}
+											{statusLabel('expense', cat)}
 										</span>
 										<span className="text-sm font-semibold tabular-nums">
 											{formatPrice(amount)} UZS
@@ -153,7 +160,9 @@ export function ExpenseListPage() {
 				<SearchFilterBar
 					filters={EXPENSE_CATEGORY_FILTERS.map((f) => ({
 						id: f.value ?? 'ALL',
-						label: f.label,
+						label: f.value
+							? statusLabel('expense', f.value)
+							: tc('state.all'),
 						active: category === f.value,
 						onClick: () => handleCategoryChange(f.value),
 					}))}
@@ -163,7 +172,7 @@ export function ExpenseListPage() {
 								htmlFor="expense-from"
 								className="text-xs text-muted-foreground"
 							>
-								From
+								{t('filterFrom')}
 							</Label>
 							<DatePicker
 								id="expense-from"
@@ -177,7 +186,7 @@ export function ExpenseListPage() {
 								htmlFor="expense-to"
 								className="text-xs text-muted-foreground"
 							>
-								To
+								{t('filterTo')}
 							</Label>
 							<DatePicker
 								id="expense-to"
@@ -191,7 +200,7 @@ export function ExpenseListPage() {
 
 				{isError && (
 					<div className="rounded-lg border border-destructive/30 bg-destructive/5 px-4 py-3 text-sm text-destructive">
-						Failed to load expenses. Please refresh.
+						{t('loadError')}
 					</div>
 				)}
 
@@ -229,9 +238,9 @@ export function ExpenseListPage() {
 				onOpenChange={(open) => {
 					if (!open) setDeleteExpense(null);
 				}}
-				title="Delete this expense?"
-				description="This removes it from P&L totals. This action cannot be undone."
-				confirmLabel="Delete expense"
+				title={t('confirmDelete.title')}
+				description={t('confirmDelete.description')}
+				confirmLabel={t('confirmDelete.confirm')}
 				variant="destructive"
 				loading={deleteMutation.isPending}
 				onConfirm={handleDeleteConfirm}

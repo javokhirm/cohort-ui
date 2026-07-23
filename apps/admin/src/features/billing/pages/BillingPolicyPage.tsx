@@ -2,6 +2,7 @@ import { Lock } from 'lucide-react';
 
 import { Card, CardHeader, CardTitle, PageHeader, Spinner } from '@repo/ui';
 import { isApiError } from '@repo/api-client';
+import { useAppT } from '@/locales';
 
 import { useBillingPolicy } from '../api/billing-policy.queries';
 import { BillingPolicySummary } from '../components/BillingPolicySummary';
@@ -14,6 +15,7 @@ import { BillingPolicySummary } from '../components/BillingPolicySummary';
  * invoice generation branches on the billing mode and cycle anchor.
  */
 export function BillingPolicyPage() {
+	const t = useAppT('billing');
 	const { data: policy, isLoading, isError, error } = useBillingPolicy();
 
 	const isForbidden = isApiError(error) && error.status === 403;
@@ -21,8 +23,8 @@ export function BillingPolicyPage() {
 	return (
 		<div className="mx-auto flex max-w-3xl flex-col gap-6">
 			<PageHeader
-				title="Billing Policy"
-				description="How this center's invoices are generated, when they fall due, and how overdue accounts are handled"
+				title={t('policySections.pageTitle')}
+				description={t('policySections.pageDescription')}
 			/>
 
 			<Card>
@@ -32,14 +34,10 @@ export function BillingPolicyPage() {
 					</span>
 					<div className="flex flex-col gap-1">
 						<CardTitle className="text-sm font-semibold">
-							Managed by Cohort
+							{t('misc.managedByCohort')}
 						</CardTitle>
 						<p className="text-sm font-normal text-muted-foreground">
-							This policy drives every invoice your center issues, so it is
-							configured by the Cohort team rather than changed here.
-							Contact support to request a change — it takes effect from
-							your next billing run and never alters invoices that have
-							already been issued.
+							{t('policyPage.managedDescription')}
 						</p>
 					</div>
 				</CardHeader>
@@ -48,19 +46,19 @@ export function BillingPolicyPage() {
 			{isLoading && (
 				<div className="flex items-center justify-center py-16 text-muted-foreground">
 					<Spinner className="mr-2 size-5" />
-					Loading billing policy…
+					{t('policyPage.loading')}
 				</div>
 			)}
 
 			{isError && isForbidden && (
 				<div className="rounded-lg border border-border bg-muted/40 px-4 py-3 text-sm text-muted-foreground">
-					You don&apos;t have permission to view the billing policy.
+					{t('policyPage.forbidden')}
 				</div>
 			)}
 
 			{isError && !isForbidden && (
 				<div className="rounded-lg border border-destructive/30 bg-destructive/5 px-4 py-3 text-sm text-destructive">
-					Failed to load the billing policy. Please refresh.
+					{t('policy.loadError')}
 				</div>
 			)}
 

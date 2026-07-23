@@ -1,16 +1,10 @@
-import { Check, Globe, PanelLeft, Search } from 'lucide-react';
+import { PanelLeft, Search } from 'lucide-react';
 
-import {
-	DropdownMenu,
-	DropdownMenuContent,
-	DropdownMenuItem,
-	DropdownMenuSeparator,
-	DropdownMenuTrigger,
-	NotificationBell,
-	ThemeToggle,
-} from '@repo/ui';
+import { NotificationBell, ThemeToggle } from '@repo/ui';
+import { useT } from '@repo/i18n';
 
 import { BranchSelector } from './BranchSelector';
+import { LanguageMenu } from './LanguageMenu';
 
 interface HeaderProps {
 	sidebarCollapsed: boolean;
@@ -18,13 +12,18 @@ interface HeaderProps {
 }
 
 export function Header({ sidebarCollapsed, onSidebarToggle }: HeaderProps) {
+	const t = useT('nav');
 	return (
 		<header className="z-40 flex h-14 shrink-0 items-center gap-2 border-b border-border bg-card px-3">
 			{/* Sidebar toggle */}
 			<button
 				type="button"
 				onClick={onSidebarToggle}
-				aria-label={sidebarCollapsed ? 'Expand sidebar' : 'Collapse sidebar'}
+				aria-label={
+					sidebarCollapsed
+						? t('shell.expandSidebar')
+						: t('shell.collapseSidebar')
+				}
 				className="flex size-8 items-center justify-center rounded-lg text-muted-foreground hover:bg-muted"
 			>
 				<PanelLeft className="size-4" />
@@ -38,7 +37,7 @@ export function Header({ sidebarCollapsed, onSidebarToggle }: HeaderProps) {
 				<Search className="absolute left-2.5 size-3.5 text-muted-foreground" />
 				<input
 					type="search"
-					placeholder="Search students, invoices, groups..."
+					placeholder={t('shell.searchPlaceholder')}
 					className="h-full w-full rounded-lg border border-border bg-muted/50 pl-8 pr-10 text-sm placeholder:text-muted-foreground focus:outline-none focus:ring-1 focus:ring-ring"
 				/>
 				<kbd className="pointer-events-none absolute right-2 flex h-5 items-center rounded border border-border bg-background px-1 text-[10px] font-medium text-muted-foreground">
@@ -49,28 +48,7 @@ export function Header({ sidebarCollapsed, onSidebarToggle }: HeaderProps) {
 			<div className="flex-1" />
 
 			{/* Language picker */}
-			<DropdownMenu>
-				<DropdownMenuTrigger asChild>
-					<button
-						type="button"
-						className="flex items-center gap-1.5 rounded-lg px-2.5 py-1.5 hover:bg-muted"
-					>
-						<Globe className="size-4 text-muted-foreground" />
-						<span className="text-xs font-semibold text-foreground">EN</span>
-					</button>
-				</DropdownMenuTrigger>
-				<DropdownMenuContent align="end" className="w-44">
-					<DropdownMenuItem className="justify-between">
-						English <Check className="size-3.5 text-primary" />
-					</DropdownMenuItem>
-					<DropdownMenuItem>Русский</DropdownMenuItem>
-					<DropdownMenuItem>O'zbekcha</DropdownMenuItem>
-					<DropdownMenuSeparator />
-					<p className="px-2 py-1 text-[10px] text-muted-foreground">
-						UI copy stays English in preview
-					</p>
-				</DropdownMenuContent>
-			</DropdownMenu>
+			<LanguageMenu />
 
 			{/* Notifications */}
 			<NotificationBell unreadCount={0} />

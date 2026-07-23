@@ -12,9 +12,12 @@ import {
 	useTheme,
 } from '@repo/ui';
 
+import { useStatusLabel } from '@repo/i18n';
+
 import { useTeachBranches } from '@/api/branches';
 import { useAuth } from '@/features/auth/hooks';
 import { useProfile } from '@/features/profile/api/profile.queries';
+import { useAppT } from '@/locales';
 
 /**
  * The signed-in teacher's profile (`GET /teach/me`, api-reference §4.9).
@@ -28,6 +31,9 @@ import { useProfile } from '@/features/profile/api/profile.queries';
  * Mobile-first: a single centered column that a teacher reads on a phone.
  */
 export function ProfileRoute() {
+	const t = useAppT('profile');
+	const tShell = useAppT('shell');
+	const statusLabel = useStatusLabel();
 	const { logout } = useAuth();
 	const { isDark, toggleTheme } = useTheme();
 	const { data: profile, isPending, isError } = useProfile();
@@ -49,8 +55,8 @@ export function ProfileRoute() {
 				<div className="rounded-2xl border border-border bg-card">
 					<EmptyState
 						icon={<UserRound />}
-						title="Couldn't load your profile"
-						description="Something went wrong fetching your account. Try again in a moment."
+						title={t('errorTitle')}
+						description={t('errorDescription')}
 					/>
 				</div>
 				<Button
@@ -59,7 +65,7 @@ export function ProfileRoute() {
 					onClick={logout}
 				>
 					<LogOut className="size-4" />
-					Log out
+					{tShell('logOut')}
 				</Button>
 			</div>
 		);
@@ -71,7 +77,7 @@ export function ProfileRoute() {
 
 	const branchesValue =
 		profile.branchScope === null ? (
-			'All branches'
+			t('allBranches')
 		) : branchesQuery.isPending ? (
 			<Skeleton className="h-4 w-32" />
 		) : branchesQuery.data && branchesQuery.data.length > 0 ? (
@@ -95,7 +101,9 @@ export function ProfileRoute() {
 						{fullName}
 					</p>
 					<div className="mt-1">
-						<StatusBadge kind="role" status="teacher" />
+						<StatusBadge kind="role" status="teacher">
+							{statusLabel('role', 'teacher')}
+						</StatusBadge>
 					</div>
 				</div>
 			</div>
@@ -105,20 +113,24 @@ export function ProfileRoute() {
 				<DetailRows
 					rows={[
 						{
-							label: 'Staff ID',
+							label: t('staffId'),
 							value: String(profile.id),
 							icon: <IdCard />,
 						},
-						{ label: 'Phone', value: profile.phone, icon: <Phone /> },
-						{ label: 'Email', value: profile.email ?? '—', icon: <Mail /> },
-						{ label: 'Branches', value: branchesValue, icon: <MapPin /> },
+						{ label: t('phone'), value: profile.phone, icon: <Phone /> },
+						{
+							label: t('email'),
+							value: profile.email ?? '—',
+							icon: <Mail />,
+						},
+						{ label: t('branches'), value: branchesValue, icon: <MapPin /> },
 					]}
 				/>
 			</div>
 
 			{/* Settings */}
 			<p className="mt-6 mb-2 px-1 text-[10.5px] font-semibold uppercase tracking-widest text-muted-foreground">
-				Settings
+				{tShell('settings')}
 			</p>
 			<div className="overflow-hidden rounded-2xl border border-border bg-card shadow-xs">
 				<Button
@@ -131,9 +143,11 @@ export function ProfileRoute() {
 					) : (
 						<Sun className="size-4.5 text-muted-foreground" />
 					)}
-					<span className="flex-1 text-left text-foreground">Appearance</span>
+					<span className="flex-1 text-left text-foreground">
+						{t('appearance')}
+					</span>
 					<span className="text-[13px] font-normal text-muted-foreground">
-						{isDark ? 'Dark' : 'Light'} mode
+						{isDark ? t('darkMode') : t('lightMode')}
 					</span>
 				</Button>
 			</div>
@@ -144,7 +158,7 @@ export function ProfileRoute() {
 				onClick={logout}
 			>
 				<LogOut className="size-4" />
-				Log out
+				{tShell('logOut')}
 			</Button>
 		</div>
 	);

@@ -3,6 +3,8 @@ import { useNavigate, useSearch } from '@tanstack/react-router';
 import { Plus } from 'lucide-react';
 
 import { Button, Card, PageHeader, Pagination, SearchFilterBar } from '@repo/ui';
+import { useT } from '@repo/i18n';
+import { useAppT } from '@/locales';
 
 import { Can } from '@/components/Can';
 import { usePermissions } from '@/features/auth/hooks';
@@ -16,6 +18,8 @@ import { FeePlanForm } from '../components/FeePlanForm';
 const PAGE_SIZE = 20;
 
 export function FeePlanListPage() {
+	const t = useAppT('billing');
+	const tc = useT('common');
 	const navigate = useNavigate({ from: '/fee-plans' });
 	const { can } = usePermissions();
 	const { page = 1, status } = useSearch({ from: '/_authed/fee-plans' });
@@ -49,13 +53,13 @@ export function FeePlanListPage() {
 	return (
 		<div className="mx-auto flex max-w-7xl flex-col gap-6">
 			<PageHeader
-				title="Fee Plans"
-				description="Reusable billing templates applied at enrollment"
+				title={t('feePlans.title')}
+				description={t('feePlans.description')}
 				actions={
 					<Can permission="fee-plan.manage">
 						<Button onClick={() => setAddOpen(true)}>
 							<Plus className="mr-1.5 size-4" />
-							New fee plan
+							{t('misc.newFeePlan')}
 						</Button>
 					</Can>
 				}
@@ -65,7 +69,7 @@ export function FeePlanListPage() {
 				<SearchFilterBar
 					filters={FEE_PLAN_STATUS_FILTERS.map((f) => ({
 						id: f.value ?? 'ALL',
-						label: f.label,
+						label: tc(`state.${f.labelKey}`),
 						active: status === f.value,
 						onClick: () => handleStatusChange(f.value),
 					}))}
@@ -73,7 +77,7 @@ export function FeePlanListPage() {
 
 				{isError && (
 					<div className="rounded-lg border border-destructive/30 bg-destructive/5 px-4 py-3 text-sm text-destructive">
-						Failed to load fee plans. Please refresh.
+						{t('feePlans.loadError')}
 					</div>
 				)}
 

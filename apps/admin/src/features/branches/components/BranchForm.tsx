@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import { useForm, type Control, type FieldPath, type FieldValues } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 
@@ -15,9 +15,11 @@ import {
 	Switch,
 	toast,
 } from '@repo/ui';
+import { useT } from '@repo/i18n';
 
 import { FormSection } from '@/components/FormSection';
 import { FormSheet } from '@/components/FormSheet';
+import { useAppT } from '@/locales';
 import type { Branch } from '@/api/branches';
 
 import {
@@ -99,39 +101,40 @@ function IdentityAndContact({
 	/** The short-code field — an editable input on create, a read-only display on edit. */
 	codeField: React.ReactNode;
 }) {
+	const t = useAppT('branches');
 	// eslint-disable-next-line @typescript-eslint/no-explicit-any -- one form body serves both modes; fields are shared
 	const c = control as Control<any>;
 	return (
 		<>
-			<FormSection title="Identity">
+			<FormSection title={t('section.identity')}>
 				<FieldGroup>
 					<FormInput
 						control={c}
 						name="name"
-						label="Branch name *"
-						placeholder="e.g. Sergeli"
+						label={t('field.name')}
+						placeholder={t('field.namePlaceholder')}
 					/>
 					<div className="grid grid-cols-2 gap-3">
 						{codeField}
 						<FormInput
 							control={c}
 							name="timezone"
-							label="Timezone"
+							label={t('field.timezone')}
 							placeholder={DEFAULT_TIMEZONE}
 						/>
 					</div>
 				</FieldGroup>
 			</FormSection>
 
-			<FormSection title="Location & contact">
+			<FormSection title={t('section.location')}>
 				<FieldGroup>
 					<FormInput
 						control={c}
 						name="address"
-						label="Address *"
-						placeholder="Street, district, city"
+						label={t('field.address')}
+						placeholder={t('field.addressPlaceholder')}
 					/>
-					<FormPhoneInput control={c} name="phone" label="Phone *" />
+					<FormPhoneInput control={c} name="phone" label={t('field.phone')} />
 				</FieldGroup>
 			</FormSection>
 		</>
@@ -145,8 +148,13 @@ function CreateBranchForm({
 	onSuccess: () => void;
 	onPendingChange: (pending: boolean) => void;
 }) {
+	const t = useAppT('branches');
+	const tc = useT('common');
+	const tv = useT('validation');
+	const schema = useMemo(() => createBranchSchema(tv, t), [tv, t]);
+
 	const form = useForm<CreateBranchFormValues>({
-		resolver: zodResolver(createBranchSchema),
+		resolver: zodResolver(schema),
 		defaultValues: {
 			name: '',
 			code: '',
@@ -172,7 +180,7 @@ function CreateBranchForm({
 			timezone: values.timezone,
 			isMain: values.isMain,
 		});
-		toast.success('Branch created');
+		toast.success(t('created'));
 		onSuccess();
 	}
 
@@ -189,23 +197,22 @@ function CreateBranchForm({
 						<FormInput
 							control={form.control}
 							name="code"
-							label="Short code *"
-							placeholder="e.g. SER"
+							label={t('field.code')}
+							placeholder={t('field.codePlaceholder')}
 						/>
 					}
 				/>
 
-				<FormSection title="Status">
+				<FormSection title={t('section.status')}>
 					{/* New branches are always created active (the backend has no create-time
 					    `isActive`), so the Active toggle is shown for parity but locked on. */}
 					<div className="flex flex-row items-center justify-between gap-4">
 						<div className="flex flex-col gap-0.5">
 							<span className="text-sm font-semibold text-foreground">
-								Active
+								{tc('state.active')}
 							</span>
 							<span className="text-xs text-muted-foreground">
-								New branches start active. You can deactivate later from
-								Edit.
+								{t('hint.activeOnCreate')}
 							</span>
 						</div>
 						<Switch checked disabled />
@@ -213,8 +220,8 @@ function CreateBranchForm({
 					<SwitchField
 						control={form.control}
 						name="isMain"
-						label="Main branch"
-						description="The tenant's primary campus, shown first and used as the default. Turning this on moves the MAIN label off the current main branch."
+						label={t('field.isMain')}
+						description={t('hint.isMain')}
 					/>
 				</FormSection>
 			</form>
@@ -240,8 +247,13 @@ function EditBranchForm({
 		isActive: b.isActive,
 	});
 
+	const t = useAppT('branches');
+	const tc = useT('common');
+	const tv = useT('validation');
+	const schema = useMemo(() => editBranchSchema(tv), [tv]);
+
 	const form = useForm<EditBranchFormValues>({
-		resolver: zodResolver(editBranchSchema),
+		resolver: zodResolver(schema),
 		defaultValues: toDefaults(branch),
 	});
 
@@ -268,7 +280,7 @@ function EditBranchForm({
 			isMain: branch.isMain ? undefined : values.isMain,
 			isActive: values.isActive,
 		});
-		toast.success('Branch updated');
+		toast.success(t('updated'));
 		onSuccess();
 	}
 
@@ -284,7 +296,7 @@ function EditBranchForm({
 					codeField={
 						<div className="flex flex-col gap-2">
 							<span className="text-sm font-medium leading-none">
-								Short code
+								{t('field.codeReadonly')}
 							</span>
 							<div className="flex h-9 items-center rounded-md border border-input bg-muted px-3 text-sm text-muted-foreground">
 								{branch.code}
@@ -293,21 +305,21 @@ function EditBranchForm({
 					}
 				/>
 
-				<FormSection title="Status">
+				<FormSection title={t('section.status')}>
 					<SwitchField
 						control={form.control}
 						name="isActive"
-						label="Active"
-						description="Inactive branches are hidden from new enrollments and staff assignment."
+						label={tc('state.active')}
+						description={t('hint.activeOnEdit')}
 					/>
 					<SwitchField
 						control={form.control}
 						name="isMain"
-						label="Main branch"
+						label={t('field.isMain')}
 						description={
 							branch.isMain
-								? 'This is the main branch. Set another branch as main to move the label.'
-								: 'Turning this on moves the MAIN label off the current main branch.'
+								? t('hint.isMainCurrent')
+								: t('hint.isMainTransfer')
 						}
 						disabled={branch.isMain}
 					/>
@@ -319,6 +331,8 @@ function EditBranchForm({
 
 export function BranchForm(props: BranchFormProps) {
 	const { open, onOpenChange, mode } = props;
+	const t = useAppT('branches');
+	const tc = useT('common');
 	const [isPending, setIsPending] = useState(false);
 
 	const formId = mode === 'create' ? 'create-branch-form' : 'edit-branch-form';
@@ -331,16 +345,16 @@ export function BranchForm(props: BranchFormProps) {
 		<FormSheet
 			open={open}
 			onOpenChange={onOpenChange}
-			title={mode === 'create' ? 'Add branch' : 'Edit branch'}
-			description="Fields marked * are required"
+			title={mode === 'create' ? t('add') : t('edit')}
+			description={t('requiredHint')}
 			footer={
 				<>
 					<Button type="button" variant="outline" onClick={handleClose}>
-						Cancel
+						{tc('action.cancel')}
 					</Button>
 					<Button type="submit" form={formId} disabled={isPending}>
 						{isPending && <Spinner className="mr-2 size-4" />}
-						{mode === 'create' ? 'Create branch' : 'Save changes'}
+						{mode === 'create' ? t('submitCreate') : t('submitUpdate')}
 					</Button>
 				</>
 			}

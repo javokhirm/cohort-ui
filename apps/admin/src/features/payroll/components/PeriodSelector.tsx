@@ -3,6 +3,8 @@ import { ChevronLeft, ChevronRight } from 'lucide-react';
 import { Button } from '@repo/ui';
 
 import { addMonths, currentMonth, formatMonthLabel } from '../lib/month';
+import { useAppT } from '@/locales';
+import { useT } from '@repo/i18n';
 
 interface PeriodSelectorProps {
 	/** The selected `YYYY-MM`. */
@@ -17,6 +19,8 @@ interface PeriodSelectorProps {
  * completed sessions to compute from.
  */
 export function PeriodSelector({ month, onMonthChange }: PeriodSelectorProps) {
+	const t = useAppT('payroll');
+	const tc = useT('common');
 	const thisMonth = currentMonth();
 	const nextDisabled = month >= thisMonth;
 
@@ -27,7 +31,7 @@ export function PeriodSelector({ month, onMonthChange }: PeriodSelectorProps) {
 					variant="ghost"
 					size="icon"
 					className="size-7 text-muted-foreground hover:bg-card"
-					aria-label="Previous month"
+					aria-label={tc('action.previous')}
 					onClick={() => onMonthChange(addMonths(month, -1))}
 				>
 					<ChevronLeft className="size-4" />
@@ -39,7 +43,7 @@ export function PeriodSelector({ month, onMonthChange }: PeriodSelectorProps) {
 					variant="ghost"
 					size="icon"
 					className="size-7 text-muted-foreground hover:bg-card"
-					aria-label="Next month"
+					aria-label={tc('action.next')}
 					disabled={nextDisabled}
 					onClick={() => onMonthChange(addMonths(month, 1))}
 				>
@@ -52,7 +56,7 @@ export function PeriodSelector({ month, onMonthChange }: PeriodSelectorProps) {
 					size="sm"
 					onClick={() => onMonthChange(thisMonth)}
 				>
-					This month
+					{t('thisMonth')}
 				</Button>
 			)}
 		</div>

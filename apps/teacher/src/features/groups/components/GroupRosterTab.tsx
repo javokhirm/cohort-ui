@@ -2,10 +2,12 @@ import type { KeyboardEvent } from 'react';
 import { ChevronRight, Users } from 'lucide-react';
 
 import { Avatar, AvatarFallback, cn, EmptyState, Skeleton, StatusBadge } from '@repo/ui';
+import { useStatusLabel } from '@repo/i18n';
 
 import { useGroupStudents, type TeachGroupStudent } from '../api/groups.queries';
 import { attendanceToneClass } from '../lib/capacity';
 import { fullName, initials } from '../lib/student-name';
+import { useAppT } from '@/locales';
 
 interface GroupRosterTabProps {
 	groupId: number;
@@ -18,7 +20,10 @@ interface RosterRowProps {
 }
 
 function RosterRow({ student, onOpen }: RosterRowProps) {
-	const name = fullName(student.firstName, student.lastName);
+	const t = useAppT('groups');
+	const tAttendance = useAppT('attendance');
+	const statusLabel = useStatusLabel();
+	const name = fullName(student.firstName, student.lastName, t('unnamedStudent'));
 
 	const onKeyDown = (event: KeyboardEvent<HTMLDivElement>) => {
 		if (event.key !== 'Enter' && event.key !== ' ') return;
@@ -50,10 +55,14 @@ function RosterRow({ student, onOpen }: RosterRowProps) {
 			</div>
 
 			<div className="shrink-0 text-right">
-				<StatusBadge kind="enrollment" status={student.enrollmentStatus} />
+				<StatusBadge kind="enrollment" status={student.enrollmentStatus}>
+					{statusLabel('enrollment', student.enrollmentStatus)}
+				</StatusBadge>
 				<div className="mt-0.75 text-[11px] font-semibold">
 					{student.attendanceRate === null ? (
-						<span className="text-muted-foreground">No attendance yet</span>
+						<span className="text-muted-foreground">
+							{tAttendance('emptyTitle')}
+						</span>
 					) : (
 						<span
 							className={cn(
@@ -61,7 +70,7 @@ function RosterRow({ student, onOpen }: RosterRowProps) {
 								attendanceToneClass(student.attendanceRate),
 							)}
 						>
-							{student.attendanceRate}% att.
+							{t('attendanceRateShort', { rate: student.attendanceRate })}
 						</span>
 					)}
 				</div>
@@ -81,6 +90,7 @@ function RosterRow({ student, onOpen }: RosterRowProps) {
  * perfect absence.
  */
 export function GroupRosterTab({ groupId, onOpenStudent }: GroupRosterTabProps) {
+	const t = useAppT('groups');
 	const { data: students, isPending, isError } = useGroupStudents(groupId);
 
 	if (isPending) {
@@ -98,8 +108,8 @@ export function GroupRosterTab({ groupId, onOpenStudent }: GroupRosterTabProps) 
 			<div className="rounded-xl border border-border bg-card">
 				<EmptyState
 					icon={<Users />}
-					title="Couldn't load the roster"
-					description="Something went wrong fetching this group's students. Try again in a moment."
+					title={t('rosterErrorTitle')}
+					description={t('rosterErrorDescription')}
 				/>
 			</div>
 		);
@@ -110,8 +120,8 @@ export function GroupRosterTab({ groupId, onOpenStudent }: GroupRosterTabProps) 
 			<div className="rounded-xl border border-border bg-card">
 				<EmptyState
 					icon={<Users />}
-					title="No students enrolled"
-					description="Students enrolled in this group will appear here."
+					title={t('rosterEmptyTitle')}
+					description={t('rosterEmptyDescription')}
 				/>
 			</div>
 		);

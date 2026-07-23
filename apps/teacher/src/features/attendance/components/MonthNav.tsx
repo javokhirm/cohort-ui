@@ -1,6 +1,7 @@
 import { ChevronLeft, ChevronRight } from 'lucide-react';
 
 import { Button } from '@repo/ui';
+import { useAppT } from '@/locales';
 
 interface MonthNavProps {
 	label: string;
@@ -16,6 +17,7 @@ interface MonthNavProps {
  * schedule feature's `WeekNav`; promote to `@repo/ui` if a second app needs it.
  */
 export function MonthNav({ label, onPrev, onNext, showToday, onToday }: MonthNavProps) {
+	const tShell = useAppT('shell');
 	return (
 		<div className="flex items-center gap-2">
 			<div className="flex items-center gap-0.5 rounded-lg border border-border bg-muted p-1">
@@ -23,7 +25,7 @@ export function MonthNav({ label, onPrev, onNext, showToday, onToday }: MonthNav
 					variant="ghost"
 					size="icon"
 					className="size-7 text-muted-foreground hover:bg-card"
-					aria-label="Previous month"
+					aria-label={tShell('prevMonth')}
 					onClick={onPrev}
 				>
 					<ChevronLeft className="size-4" />
@@ -35,7 +37,7 @@ export function MonthNav({ label, onPrev, onNext, showToday, onToday }: MonthNav
 					variant="ghost"
 					size="icon"
 					className="size-7 text-muted-foreground hover:bg-card"
-					aria-label="Next month"
+					aria-label={tShell('nextMonth')}
 					onClick={onNext}
 				>
 					<ChevronRight className="size-4" />
@@ -43,7 +45,7 @@ export function MonthNav({ label, onPrev, onNext, showToday, onToday }: MonthNav
 			</div>
 			{showToday && (
 				<Button variant="outline" size="sm" onClick={onToday}>
-					This month
+					{tShell('thisMonth')}
 				</Button>
 			)}
 		</div>

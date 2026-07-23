@@ -1,5 +1,7 @@
 import { create } from 'zustand';
 
+import { setLocale } from '@repo/i18n';
+
 import type { AuthResult, AuthUserSummary } from '@/lib/auth/types';
 import { clearStoredRefreshToken, setStoredRefreshToken } from '@/lib/auth/tokenStorage';
 
@@ -28,6 +30,9 @@ export const useSessionStore = create<SessionState>((set) => ({
 	status: 'unknown',
 	setSession: (result) => {
 		setStoredRefreshToken(result.refreshToken);
+		// user → tenant → localStorage → 'uz': the server already applied the
+		// tenant fallback, so a non-null value here is the teacher's own choice.
+		setLocale(result.user.preferredLanguage);
 		set({
 			accessToken: result.accessToken,
 			user: result.user,

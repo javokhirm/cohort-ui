@@ -7,6 +7,7 @@ import { useTeachBranches } from '@/api/branches';
 import { GroupCard } from '@/features/groups/components/GroupCard';
 import { useGroups } from '@/features/groups/api/groups.queries';
 import { useBranchFilter } from '@/store/branchStore';
+import { useAppT } from '@/locales';
 
 /**
  * The groups this teacher teaches (`GET /teach/groups`, api-reference §4.2),
@@ -19,6 +20,7 @@ import { useBranchFilter } from '@/store/branchStore';
  * attendance and marks grids are reached from.
  */
 export function GroupsRoute() {
+	const t = useAppT('groups');
 	const navigate = useNavigate();
 	const { data: branches } = useTeachBranches();
 	const { data, isPending, isError } = useGroups();
@@ -51,8 +53,8 @@ export function GroupsRoute() {
 				<div className="rounded-xl border border-border bg-card">
 					<EmptyState
 						icon={<LayoutGrid />}
-						title="Couldn't load your groups"
-						description="Something went wrong fetching the groups you teach. Try again in a moment."
+						title={t('errorTitle')}
+						description={t('errorDescription')}
 					/>
 				</div>
 			</div>
@@ -65,15 +67,11 @@ export function GroupsRoute() {
 				<div className="rounded-xl border border-border bg-card">
 					<EmptyState
 						icon={<LayoutGrid />}
-						title={
-							hiddenByBranch > 0
-								? 'No groups at this branch'
-								: 'No groups yet'
-						}
+						title={hiddenByBranch > 0 ? t('emptyBranch') : t('emptyTitle')}
 						description={
 							hiddenByBranch > 0
-								? 'You teach elsewhere — switch to "All branches" in the topbar to see those groups.'
-								: 'Groups you are assigned to teach will appear here.'
+								? t('emptyBranchDescription')
+								: t('emptyDescription')
 						}
 					/>
 				</div>
@@ -84,8 +82,8 @@ export function GroupsRoute() {
 	return (
 		<div className="mx-auto w-full max-w-230 pb-6">
 			<p className="text-[13px] text-muted-foreground">
-				{groups.length === 1 ? '1 group' : `${groups.length} groups`}
-				{hiddenByBranch > 0 && ` · ${hiddenByBranch} hidden by the branch filter`}
+				{t('groupCount', { count: groups.length })}
+				{hiddenByBranch > 0 && t('hiddenSuffix', { count: hiddenByBranch })}
 			</p>
 
 			<div className="mt-4 grid gap-2.75 md:grid-cols-2">
@@ -95,7 +93,7 @@ export function GroupsRoute() {
 						group={group}
 						branchName={
 							showBranch
-								? (branchName(group.branchId) ?? 'Unknown branch')
+								? (branchName(group.branchId) ?? t('unknownBranch'))
 								: undefined
 						}
 						onOpen={() =>

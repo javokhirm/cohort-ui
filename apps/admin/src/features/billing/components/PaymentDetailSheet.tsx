@@ -12,11 +12,12 @@ import {
 	StatusBadge,
 } from '@repo/ui';
 import { formatDateTime, formatPrice } from '@repo/utils';
+import { useStatusLabel } from '@repo/i18n';
+import { useAppT } from '@/locales';
 
 import { useBranches } from '@/api/branches';
 import { Can } from '@/components/Can';
 import { usePayment, type PaymentDetail } from '../api/payments.queries';
-import { paymentMethodLabel } from '../lib/payment-options';
 import { RefundPaymentDialog } from './RefundPaymentDialog';
 
 function isRefundable(payment: PaymentDetail): boolean {
@@ -45,6 +46,8 @@ export function PaymentDetailSheet({
 	open,
 	onOpenChange,
 }: PaymentDetailSheetProps) {
+	const t = useAppT('billing');
+	const statusLabel = useStatusLabel();
 	const { data: payment, isLoading } = usePayment(open ? paymentId : null);
 	const { data: branches = [] } = useBranches();
 	const [refundOpen, setRefundOpen] = useState(false);
@@ -57,7 +60,7 @@ export function PaymentDetailSheet({
 		<Sheet open={open} onOpenChange={onOpenChange}>
 			<SheetContent className="flex w-full flex-col gap-0 p-0 sm:max-w-md">
 				<SheetHeader className="border-b px-6 py-4">
-					<SheetTitle>Payment details</SheetTitle>
+					<SheetTitle>{t('payments.detailTitle')}</SheetTitle>
 				</SheetHeader>
 
 				<div className="flex-1 overflow-y-auto p-6">
@@ -81,7 +84,9 @@ export function PaymentDetailSheet({
 											<StatusBadge
 												kind="payment"
 												status={payment.status}
-											/>
+											>
+												{statusLabel('payment', payment.status)}
+											</StatusBadge>
 										</div>
 										<div className="mt-0.5 flex items-center gap-1.5 text-sm text-muted-foreground">
 											<span className="font-mono">
@@ -94,7 +99,7 @@ export function PaymentDetailSheet({
 								</div>
 								<div className="mt-3 border-t pt-3">
 									<div className="text-xs text-muted-foreground">
-										Amount
+										{t('invoices.detail.amount')}
 									</div>
 									<div className="text-xl font-bold tabular-nums">
 										{formatPrice(payment.amount)} {payment.currency}
@@ -108,7 +113,7 @@ export function PaymentDetailSheet({
 											onClick={() => setRefundOpen(true)}
 										>
 											<RotateCcw className="mr-1.5 size-4" />
-											Refund
+											{t('payments.refund.action')}
 										</Button>
 									</Can>
 								)}
@@ -116,20 +121,20 @@ export function PaymentDetailSheet({
 
 							<div className="rounded-xl border bg-card p-4">
 								<div className="mb-3 text-[10.5px] font-semibold tracking-widest text-muted-foreground uppercase">
-									Transaction
+									{t('misc.transaction')}
 								</div>
 								<div className="flex flex-col gap-3">
 									<div>
 										<div className="text-xs text-muted-foreground">
-											Method
+											{t('payments.column.method')}
 										</div>
 										<div className="text-sm font-semibold">
-											{paymentMethodLabel(payment.method)}
+											{t(`paymentMethod.${payment.method}`)}
 										</div>
 									</div>
 									<div>
 										<div className="text-xs text-muted-foreground">
-											Date & time
+											{t('paymentDetail.dateTime')}
 										</div>
 										<div className="text-sm font-semibold">
 											{payment.paidAt
@@ -137,13 +142,13 @@ export function PaymentDetailSheet({
 														', ',
 														' · ',
 													)
-												: 'Not yet settled'}
+												: t('paymentDetail.notYetSettled')}
 										</div>
 									</div>
 									{payment.providerTxnId && (
 										<div>
 											<div className="text-xs text-muted-foreground">
-												Provider transaction ID
+												{t('misc.providerTransactionId')}
 											</div>
 											<div className="font-mono text-sm font-semibold">
 												{payment.providerTxnId}
@@ -153,7 +158,7 @@ export function PaymentDetailSheet({
 									{payment.notes && (
 										<div>
 											<div className="text-xs text-muted-foreground">
-												Notes
+												{t('discountExtra.notesPlaceholder')}
 											</div>
 											<div className="text-sm font-semibold">
 												{payment.notes}
@@ -165,7 +170,7 @@ export function PaymentDetailSheet({
 
 							<div className="rounded-xl border bg-card p-4">
 								<div className="mb-3 text-[10.5px] font-semibold tracking-widest text-muted-foreground uppercase">
-									Linked invoice
+									{t('misc.linkedInvoice')}
 								</div>
 								{payment.invoiceId != null ? (
 									<>
@@ -179,7 +184,7 @@ export function PaymentDetailSheet({
 														`#${payment.invoiceId}`}
 												</div>
 												<div className="text-xs text-muted-foreground">
-													Invoice reference
+													{t('misc.invoiceReference')}
 												</div>
 											</div>
 										</div>
@@ -193,13 +198,13 @@ export function PaymentDetailSheet({
 												params={{ id: String(payment.invoiceId) }}
 											>
 												<FileText className="mr-1.5 size-4" />
-												View invoice
+												{t('misc.viewInvoice')}
 											</Link>
 										</Button>
 									</>
 								) : (
 									<p className="text-sm text-muted-foreground">
-										Not linked to an invoice.
+										{t('paymentDetail.notLinkedToInvoice')}
 									</p>
 								)}
 							</div>

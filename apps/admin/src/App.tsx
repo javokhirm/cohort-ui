@@ -1,7 +1,8 @@
 import { useEffect, useState } from 'react';
 import { RouterProvider } from '@tanstack/react-router';
 
-import { Spinner } from '@repo/ui';
+import { DatePickerLocaleProvider, Spinner } from '@repo/ui';
+import { useDateFnsLocale, useT } from '@repo/i18n';
 import { runRefresh } from '@/api/apiClient';
 import { loadPermissions } from '@/api/me';
 import { useSessionStore } from '@/store/sessionStore';
@@ -21,6 +22,11 @@ const bootPromise = runRefresh().then((ok) => (ok ? loadPermissions() : undefine
 export function App() {
 	const status = useSessionStore((s) => s.status);
 	const [booted, setBooted] = useState(status !== 'unknown');
+	// Push the active locale and a localized empty-state placeholder into
+	// @repo/ui's date pickers once for the whole app; re-renders on language
+	// change (see useDateFnsLocale / useT).
+	const dateFnsLocale = useDateFnsLocale();
+	const t = useT('common');
 
 	useEffect(() => {
 		void bootPromise.finally(() => setBooted(true));
@@ -34,5 +40,12 @@ export function App() {
 		);
 	}
 
-	return <RouterProvider router={router} />;
+	return (
+		<DatePickerLocaleProvider
+			locale={dateFnsLocale}
+			selectDatePlaceholder={t('field.selectDate')}
+		>
+			<RouterProvider router={router} />
+		</DatePickerLocaleProvider>
+	);
 }

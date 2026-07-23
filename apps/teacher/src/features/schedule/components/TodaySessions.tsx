@@ -4,6 +4,7 @@ import { EmptyState, SessionCard, Skeleton } from '@repo/ui';
 import { formatTime } from '@repo/utils';
 
 import type { TeachSession } from '../api/sessions.queries';
+import { useAppT } from '@/locales';
 
 interface TodaySessionsProps {
 	isPending: boolean;
@@ -33,6 +34,7 @@ export function TodaySessions({
 	onTakeAttendance,
 	onEnterMarks,
 }: TodaySessionsProps) {
+	const t = useAppT('schedule');
 	if (isPending) {
 		return (
 			<div className="space-y-3">
@@ -48,8 +50,8 @@ export function TodaySessions({
 			<div className="rounded-2xl border border-border bg-card">
 				<EmptyState
 					icon={<CalendarDays />}
-					title="Couldn't load your schedule"
-					description="Something went wrong fetching your sessions. Try again in a moment."
+					title={t('errorTitle')}
+					description={t('errorDescription')}
 				/>
 			</div>
 		);
@@ -62,13 +64,13 @@ export function TodaySessions({
 					icon={<CalendarDays />}
 					title={
 						hiddenByBranch > 0
-							? 'No classes at this branch'
-							: `No classes ${emptyWhen}`
+							? t('emptyBranch')
+							: t('emptyDay', { when: emptyWhen })
 					}
 					description={
 						hiddenByBranch > 0
-							? 'You do teach elsewhere — switch to "All branches" in the topbar to see those.'
-							: 'Enjoy the break. Your next teaching day is dotted on the strip above.'
+							? t('emptyBranchDescription')
+							: t('emptyDayDescription')
 					}
 				/>
 			</div>
@@ -96,7 +98,7 @@ export function TodaySessions({
 								? undefined
 								: [
 										{
-											label: 'Attendance',
+											label: t('attendanceAction'),
 											icon: <ClipboardCheck className="size-4" />,
 											variant: 'outline',
 											onClick: (e) => {
@@ -105,7 +107,7 @@ export function TodaySessions({
 											},
 										},
 										{
-											label: 'Marks',
+											label: t('marksAction'),
 											icon: <Star className="size-4" />,
 											variant: 'default',
 											onClick: (e) => {

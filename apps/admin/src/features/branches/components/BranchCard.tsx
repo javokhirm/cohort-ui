@@ -1,8 +1,10 @@
 import { MapPin, Pencil, Phone } from 'lucide-react';
 
 import { Card, StatusBadge } from '@repo/ui';
+import { useT } from '@repo/i18n';
 
 import { Can } from '@/components/Can';
+import { useAppT } from '@/locales';
 import type { Branch } from '@/api/branches';
 
 interface BranchCardProps {
@@ -21,6 +23,9 @@ function shortCode(code: string): string {
 }
 
 export function BranchCard({ branch, onEdit }: BranchCardProps) {
+	const t = useAppT('branches');
+	const tc = useT('common');
+
 	return (
 		<Card className="gap-0 p-5">
 			<div className="flex items-start gap-3">
@@ -35,7 +40,7 @@ export function BranchCard({ branch, onEdit }: BranchCardProps) {
 						</h3>
 						{branch.isMain && (
 							<span className="rounded-md bg-tone-amber-bg px-1.5 py-px text-[9.5px] font-bold uppercase tracking-wide text-tone-amber-fg">
-								Main
+								{t('main')}
 							</span>
 						)}
 					</div>
@@ -48,15 +53,15 @@ export function BranchCard({ branch, onEdit }: BranchCardProps) {
 
 				<div className="flex shrink-0 items-center gap-2">
 					{branch.isActive ? (
-						<StatusBadge tone="green">Active</StatusBadge>
+						<StatusBadge tone="green">{tc('state.active')}</StatusBadge>
 					) : (
-						<StatusBadge tone="slate">Inactive</StatusBadge>
+						<StatusBadge tone="slate">{tc('state.inactive')}</StatusBadge>
 					)}
 					<Can permission="branch.update">
 						<button
 							type="button"
 							onClick={() => onEdit(branch)}
-							aria-label={`Edit ${branch.name}`}
+							aria-label={t('editAria', { name: branch.name })}
 							className="flex size-7 items-center justify-center rounded-md text-muted-foreground transition-colors hover:bg-muted hover:text-foreground"
 						>
 							<Pencil className="size-4" />

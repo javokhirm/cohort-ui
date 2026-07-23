@@ -58,14 +58,14 @@ unchanged, which is the whole point of doing the package split now.
 
 We keep the package count minimal and grow it only when a second consumer appears.
 
-| Package      | Responsibility                                                                                                                                           | May depend on         |
-| ------------ | -------------------------------------------------------------------------------------------------------------------------------------------------------- | --------------------- |
-| `utils`      | Framework-agnostic pure helpers (money, dates, formatting, code parsing, guards) **and** shared cross-cutting types. The leaf.                           | —                     |
-| `config`     | Build tooling: ESLint flat config, Tailwind preset + design tokens, base `tsconfig` — via subpath exports (`@cohort/config/eslint`, `/tailwind`, `/ts`). | — (leaf)              |
-| `api-client` | Generated OpenAPI types, the typed HTTP client (envelope unwrap, error normalization, injected auth hook), query-key factories, pagination helpers.      | `utils`               |
-| `auth`       | Session store, token storage + silent refresh, permission catalog, `<Can>`, route guards, `useAuth`/`usePermissions`.                                    | `api-client`, `utils` |
-| `i18n`       | uz/ru/en message catalogs, locale provider, money/date/number formatters (UZS, Asia/Tashkent).                                                           | `utils`               |
-| `ui`         | shadcn/ui primitives + composed, app-agnostic components. No data fetching, no business logic.                                                           | `config`, `utils`     |
+| Package      | Responsibility                                                                                                                                                                 | May depend on         |
+| ------------ | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ | --------------------- |
+| `utils`      | Framework-agnostic pure helpers (money, dates, formatting, code parsing, guards) **and** shared cross-cutting types. The leaf.                                                 | —                     |
+| `config`     | Build tooling: ESLint flat config, Tailwind preset + design tokens, base `tsconfig` — via subpath exports (`@cohort/config/eslint`, `/tailwind`, `/ts`).                       | — (leaf)              |
+| `api-client` | Generated OpenAPI types, the typed HTTP client (envelope unwrap, error normalization, injected auth hook), query-key factories, pagination helpers.                            | `utils`               |
+| `auth`       | Session store, token storage + silent refresh, permission catalog, `<Can>`, route guards, `useAuth`/`usePermissions`.                                                          | `api-client`, `utils` |
+| `i18n`       | uz/ru/en shared message catalogs, `initI18n`/`I18nProvider`, `useT`/`useLocale`/`setLocale` (i18next + react-i18next). Region formatters (UZS, Asia/Tashkent) stay in `utils`. | `utils`               |
+| `ui`         | shadcn/ui primitives + composed, app-agnostic components. No data fetching, no business logic.                                                                                 | `config`, `utils`     |
 
 > **Why so few?** A one-app repo doesn't need nine packages. We folded standalone `types`
 > into `utils` (no cross-package type earns its own package yet) and the three `config-*`

@@ -9,7 +9,9 @@ import {
 	type RowSelectionState,
 } from '@repo/ui';
 import { formatDate } from '@repo/utils';
+import { useStatusLabel } from '@repo/i18n';
 
+import { useAppT } from '@/locales';
 import { useBranches } from '@/api/branches';
 import type { Student, StudentUser } from '../api/students.queries';
 
@@ -29,6 +31,8 @@ interface StudentTableProps {
 }
 
 export function StudentTable({ students, isLoading }: StudentTableProps) {
+	const t = useAppT('people');
+	const statusLabel = useStatusLabel();
 	const navigate = useNavigate();
 	const { data: branches = [] } = useBranches();
 	const [rowSelection, setRowSelection] = useState<RowSelectionState>({});
@@ -46,14 +50,16 @@ export function StudentTable({ students, isLoading }: StudentTableProps) {
 								: false
 					}
 					onCheckedChange={(v) => table.toggleAllPageRowsSelected(!!v)}
-					aria-label="Select all"
+					aria-label={t('column.selectAll')}
 				/>
 			),
 			cell: ({ row }) => (
 				<Checkbox
 					checked={row.getIsSelected()}
 					onCheckedChange={(v) => row.toggleSelected(!!v)}
-					aria-label={`Select ${row.original.user.firstName} ${row.original.user.lastName}`}
+					aria-label={t('column.selectRow', {
+						name: `${row.original.user.firstName} ${row.original.user.lastName}`,
+					})}
 					onClick={(e) => e.stopPropagation()}
 				/>
 			),
@@ -62,7 +68,7 @@ export function StudentTable({ students, isLoading }: StudentTableProps) {
 		},
 		{
 			accessorKey: 'studentCode',
-			header: 'Code',
+			header: t('column.code'),
 			cell: ({ getValue }) => (
 				<span className="font-mono text-xs text-muted-foreground">
 					{getValue<string>()}
@@ -72,7 +78,7 @@ export function StudentTable({ students, isLoading }: StudentTableProps) {
 		},
 		{
 			id: 'student',
-			header: 'Student',
+			header: t('column.student'),
 			cell: ({ row }) => (
 				<div className="flex items-center gap-2.5">
 					<StudentAvatar user={row.original.user} />
@@ -84,7 +90,7 @@ export function StudentTable({ students, isLoading }: StudentTableProps) {
 		},
 		{
 			id: 'branch',
-			header: 'Branch',
+			header: t('column.branch'),
 			cell: ({ row }) => {
 				const branchName =
 					branches.find((b) => b.id === row.original.branchId)?.name ?? '—';
@@ -95,7 +101,7 @@ export function StudentTable({ students, isLoading }: StudentTableProps) {
 		},
 		{
 			id: 'dateOfBirth',
-			header: 'Date of Birth',
+			header: t('column.dateOfBirth'),
 			cell: ({ row }) => {
 				const { dateOfBirth } = row.original;
 				return (
@@ -108,9 +114,11 @@ export function StudentTable({ students, isLoading }: StudentTableProps) {
 		},
 		{
 			accessorKey: 'status',
-			header: 'Status',
+			header: t('column.status'),
 			cell: ({ getValue }) => (
-				<StatusBadge kind="student" status={getValue<string>()} />
+				<StatusBadge kind="student" status={getValue<string>()}>
+					{statusLabel('student', getValue<string>())}
+				</StatusBadge>
 			),
 			size: 102,
 		},

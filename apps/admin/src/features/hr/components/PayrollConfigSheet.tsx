@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import { useForm, type UseFormReturn } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 
@@ -13,10 +13,12 @@ import {
 	Spinner,
 	toast,
 } from '@repo/ui';
+import { useT } from '@repo/i18n';
 import { isApiError } from '@repo/api-client';
 import { todayIsoDate } from '@repo/utils';
 
 import { FormSheet } from '@/components/FormSheet';
+import { useAppT } from '@/locales';
 import {
 	useCreatePayrollConfig,
 	useUpdatePayrollConfig,
@@ -28,10 +30,8 @@ import {
 	type PayrollConfigFormValues,
 } from '../schemas/payroll-config-form.schema';
 
-const PAYROLL_TYPE_OPTIONS = [
-	{ value: 'FIXED', label: 'Fixed salary' },
-	{ value: 'PERCENT', label: '% of student fees' },
-];
+/** Values only — labels resolve at render (conventions.md §7). */
+const PAYROLL_TYPE_OPTIONS = [{ value: 'FIXED' }, { value: 'PERCENT' }] as const;
 
 const CREATE_FORM_ID = 'create-payroll-config-form';
 const EDIT_FORM_ID = 'edit-payroll-config-form';
@@ -48,6 +48,7 @@ function PayrollConfigFields({
 	form: UseFormReturn<PayrollConfigFormValues>;
 	lockType?: boolean;
 }) {
+	const t = useAppT('hr');
 	const payrollType = form.watch('payrollType');
 
 	return (
@@ -55,14 +56,16 @@ function PayrollConfigFields({
 			<FormSelect
 				control={form.control}
 				name="payrollType"
-				label="Pay model *"
-				options={PAYROLL_TYPE_OPTIONS}
+				label={t('payroll.field.model')}
+				options={PAYROLL_TYPE_OPTIONS.map((o) => ({
+					value: o.value,
+					label: t(`payroll.type.${o.value}`),
+				}))}
 				disabled={lockType}
 			/>
 			{lockType && (
 				<p className="text-xs text-muted-foreground">
-					A window keeps the pay model it opened with — switch between fixed and
-					percentage pay by changing the pay model instead.
+					{t('payroll.sheet.lockTypeHint')}
 				</p>
 			)}
 			{payrollType === 'PERCENT' ? (
@@ -70,9 +73,9 @@ function PayrollConfigFields({
 					<FormInput
 						control={form.control}
 						name="payrollPercent"
-						label="Share of student fees (%) *"
+						label={t('payroll.field.percent')}
 						type="number"
-						placeholder="e.g. 50"
+						placeholder={t('payroll.field.percentPlaceholder')}
 						onChange={(e) =>
 							form.setValue(
 								'payrollPercent',
@@ -84,25 +87,24 @@ function PayrollConfigFields({
 						}
 					/>
 					<p className="text-xs text-muted-foreground">
-						The teacher earns this share of the tuition of students in their
-						groups, prorated by completed sessions.
+						{t('payroll.field.percentHint')}
 					</p>
 				</>
 			) : (
 				<FormMoneyInput
 					control={form.control}
 					name="baseSalary"
-					label="Monthly salary *"
+					label={t('payroll.field.salary')}
 					placeholder="0"
 				/>
 			)}
 			<FormDatePicker
 				control={form.control}
 				name="effectiveFrom"
-				label="Effective from *"
+				label={t('payroll.field.effectiveFrom')}
 			/>
 			<p className="text-xs text-muted-foreground">
-				Payroll from this date uses this pay model.
+				{t('payroll.field.effectiveFromHint')}
 			</p>
 		</FieldGroup>
 	);
@@ -117,6 +119,10 @@ function CreatePayrollConfigForm({
 	onSuccess: () => void;
 	onPendingChange: (pending: boolean) => void;
 }) {
+	const t = useAppT('hr');
+	const tv = useT('validation');
+	const schema = useMemo(() => payrollConfigFormSchema(tv, t), [tv, t]);
+
 	const createConfig = useCreatePayrollConfig(staffId);
 	const blankValues: PayrollConfigFormValues = {
 		payrollType: 'FIXED',
@@ -125,7 +131,7 @@ function CreatePayrollConfigForm({
 		effectiveFrom: todayIsoDate(),
 	};
 	const form = useForm<PayrollConfigFormValues>({
-		resolver: zodResolver(payrollConfigFormSchema),
+		resolver: zodResolver(schema),
 		defaultValues: blankValues,
 	});
 
@@ -143,11 +149,13 @@ function CreatePayrollConfigForm({
 					values.payrollType === 'PERCENT' ? values.payrollPercent : undefined,
 				effectiveFrom: values.effectiveFrom,
 			});
-			toast.success('Pay model updated');
+			toast.success(t('payroll.sheet.updatedModel'));
 			onSuccess();
 			form.reset(blankValues);
 		} catch (err) {
-			toast.error(isApiError(err) ? err.message : 'Failed to update the pay model');
+			toast.error(
+				isApiError(err) ? err.message : t('payroll.sheet.updateModelFailed'),
+			);
 		}
 	}
 
@@ -180,9 +188,13 @@ function EditPayrollConfigForm({
 		effectiveFrom: c.effectiveFrom,
 	});
 
+	const t = useAppT('hr');
+	const tv = useT('validation');
+	const schema = useMemo(() => payrollConfigFormSchema(tv, t), [tv, t]);
+
 	const updateConfig = useUpdatePayrollConfig();
 	const form = useForm<PayrollConfigFormValues>({
-		resolver: zodResolver(payrollConfigFormSchema),
+		resolver: zodResolver(schema),
 		defaultValues: toDefaults(config),
 	});
 
@@ -207,11 +219,11 @@ function EditPayrollConfigForm({
 					values.payrollType === 'PERCENT' ? values.payrollPercent : undefined,
 				effectiveFrom: values.effectiveFrom,
 			});
-			toast.success('Pay window updated');
+			toast.success(t('payroll.sheet.updatedWindow'));
 			onSuccess();
 		} catch (err) {
 			toast.error(
-				isApiError(err) ? err.message : 'Failed to update the pay window',
+				isApiError(err) ? err.message : t('payroll.sheet.updateWindowFailed'),
 			);
 		}
 	}
@@ -256,6 +268,8 @@ export type PayrollConfigSheetProps = CreateProps | EditProps;
  */
 export function PayrollConfigSheet(props: PayrollConfigSheetProps) {
 	const { open, onOpenChange } = props;
+	const t = useAppT('hr');
+	const tc = useT('common');
 	const [isPending, setIsPending] = useState(false);
 	const isCreate = props.mode === 'create';
 
@@ -267,16 +281,18 @@ export function PayrollConfigSheet(props: PayrollConfigSheetProps) {
 		<FormSheet
 			open={open}
 			onOpenChange={onOpenChange}
-			title={isCreate ? 'Change pay model' : 'Edit pay window'}
+			title={
+				isCreate ? t('payroll.sheet.createTitle') : t('payroll.sheet.editTitle')
+			}
 			description={
 				isCreate
-					? 'Opens a new pay window; earlier periods keep the model they were computed with.'
-					: 'Corrects this window in place. Only windows no finalized payroll has priced can be edited.'
+					? t('payroll.sheet.createDescription')
+					: t('payroll.sheet.editDescription')
 			}
 			footer={
 				<>
 					<Button type="button" variant="outline" onClick={handleClose}>
-						Cancel
+						{tc('action.cancel')}
 					</Button>
 					<Button
 						type="submit"
@@ -284,7 +300,7 @@ export function PayrollConfigSheet(props: PayrollConfigSheetProps) {
 						disabled={isPending}
 					>
 						{isPending && <Spinner className="mr-2 size-4" />}
-						{isCreate ? 'Save' : 'Save changes'}
+						{isCreate ? tc('action.save') : tc('action.save')}
 					</Button>
 				</>
 			}

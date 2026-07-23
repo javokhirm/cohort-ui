@@ -24,6 +24,8 @@ import {
 } from '@repo/ui';
 import { isApiError } from '@repo/api-client';
 import { formatDate } from '@repo/utils';
+import { useStatusLabel, useT } from '@repo/i18n';
+import { useAppT } from '@/locales';
 
 import { Can } from '@/components/Can';
 import { useBranches } from '@/api/branches';
@@ -53,13 +55,14 @@ export function SessionDetailSheet({
 	onOpenChange,
 	groupId,
 }: SessionDetailSheetProps) {
+	const t = useAppT('groups');
 	const { data: session, isLoading } = useSession(open ? sessionId : null);
 
 	return (
 		<Sheet open={open} onOpenChange={onOpenChange}>
 			<SheetContent className="flex w-full flex-col gap-0 p-0 sm:max-w-md">
 				<SheetHeader className="flex-row items-center justify-between border-b px-6 py-4">
-					<SheetTitle>Session details</SheetTitle>
+					<SheetTitle>{t('sessions.detailTitle')}</SheetTitle>
 				</SheetHeader>
 
 				<div className="flex-1 overflow-y-auto p-6">
@@ -116,6 +119,8 @@ function SessionBody({
 	groupId?: number;
 	onDone: () => void;
 }) {
+	const t = useAppT('groups');
+	const statusLabel = useStatusLabel();
 	const [mode, setMode] = useState<Mode>('view');
 	const [conflict, setConflict] = useState<string | null>(null);
 	const cancelled = session.status === 'CANCELLED';
@@ -131,7 +136,7 @@ function SessionBody({
 					<AlertTriangle className="mt-0.5 size-4 shrink-0 text-destructive" />
 					<div>
 						<p className="font-semibold text-destructive">
-							Scheduling conflict
+							{t('sessions.conflict')}
 						</p>
 						<p className="text-destructive/90">{conflict}</p>
 					</div>
@@ -153,7 +158,9 @@ function SessionBody({
 						kind="session"
 						status={session.status}
 						className="shrink-0"
-					/>
+					>
+						{statusLabel('session', session.status)}
+					</StatusBadge>
 				</div>
 				<div className="mt-3 flex items-center gap-2 border-t pt-3">
 					<CalendarClock className="size-4 text-primary" />
@@ -165,7 +172,9 @@ function SessionBody({
 
 			{cancelled && session.cancellationReason && (
 				<div className="rounded-lg bg-muted px-3 py-2 text-sm">
-					<span className="font-medium">Cancellation reason: </span>
+					<span className="font-medium">
+						{t('sessions.cancellationReasonLabel')}:{' '}
+					</span>
 					{session.cancellationReason}
 				</div>
 			)}
@@ -173,22 +182,29 @@ function SessionBody({
 			{/* Details */}
 			<div className="rounded-xl border bg-card p-4">
 				<div className="mb-3 text-[10.5px] font-semibold uppercase tracking-widest text-muted-foreground">
-					Details
+					{t('form.section.details')}
 				</div>
 				<div className="grid grid-cols-2 gap-x-4 gap-y-3">
 					<DetailField
-						label="Time"
+						label={t('sessions.column.time')}
 						value={`${hhmm(session.startTime)} – ${hhmm(session.endTime)}`}
 					/>
 					<DetailField
-						label="Duration"
-						value={formatSessionDuration(session.startTime, session.endTime)}
+						label={t('detail.stat.duration')}
+						value={formatSessionDuration(
+							t,
+							session.startTime,
+							session.endTime,
+						)}
 					/>
-					<DetailField label="Room" value={session.roomName ?? 'Not set'} />
-					<DetailField label="Branch" value={branchName} />
+					<DetailField
+						label={t('sessions.column.room')}
+						value={session.roomName ?? t('notSet')}
+					/>
+					<DetailField label={t('sessions.branch')} value={branchName} />
 					<div className="col-span-2">
 						<div className="mb-1.5 text-[10.5px] font-semibold uppercase tracking-widest text-muted-foreground">
-							Teacher
+							{t('sessions.column.teacher')}
 						</div>
 						<div className="flex items-center gap-2">
 							<Avatar className="size-7">
@@ -197,12 +213,15 @@ function SessionBody({
 								</AvatarFallback>
 							</Avatar>
 							<span className="text-sm font-semibold">
-								{session.teacherName ?? 'Unassigned'}
+								{session.teacherName ?? t('unassigned')}
 							</span>
 						</div>
 					</div>
 					<div className="col-span-2">
-						<DetailField label="Topic" value={session.topic ?? 'Not set'} />
+						<DetailField
+							label={t('sessions.column.topic')}
+							value={session.topic ?? t('notSet')}
+						/>
 					</div>
 				</div>
 			</div>
@@ -241,6 +260,8 @@ function SessionActions({
 	groupId?: number;
 	onDone: () => void;
 }) {
+	const t = useAppT('groups');
+	const tc = useT('common');
 	const updateSession = useUpdateSession();
 
 	const { data: teacherData } = useStaffList({ role: 'TEACHER', limit: 100 });
@@ -279,7 +300,7 @@ function SessionActions({
 			} else if (isApiError(err)) {
 				toast.error(err.message);
 			} else {
-				toast.error('Something went wrong');
+				toast.error(tc('error.unknown'));
 			}
 		}
 	}
@@ -292,11 +313,11 @@ function SessionActions({
 				<div className="grid grid-cols-2 gap-2">
 					<Button variant="outline" onClick={() => setMode('reschedule')}>
 						<CalendarClock className="mr-2 size-4" />
-						Reschedule
+						{t('actions.reschedule')}
 					</Button>
 					<Button variant="outline" onClick={() => setMode('substitute')}>
 						<UserCog className="mr-2 size-4" />
-						Substitute
+						{t('actions.substitute')}
 					</Button>
 				</div>
 				<Button
@@ -305,7 +326,7 @@ function SessionActions({
 					onClick={() => setMode('cancel')}
 				>
 					<X className="mr-2 size-4" />
-					Cancel session
+					{t('sessions.cancel.action')}
 				</Button>
 			</div>
 		);
@@ -314,9 +335,11 @@ function SessionActions({
 	if (mode === 'reschedule') {
 		return (
 			<div className="flex flex-col gap-3 border-t pt-4">
-				<h3 className="text-sm font-semibold">Reschedule session</h3>
+				<h3 className="text-sm font-semibold">
+					{t('sessions.reschedule.action')}
+				</h3>
 				<div>
-					<Label className="mb-1.5">Date</Label>
+					<Label className="mb-1.5">{t('sessions.column.date')}</Label>
 					<DatePicker
 						value={date}
 						onChange={(value) => setDate(value ?? '')}
@@ -325,7 +348,7 @@ function SessionActions({
 				</div>
 				<div className="grid grid-cols-2 gap-3">
 					<div>
-						<Label className="mb-1.5">Start</Label>
+						<Label className="mb-1.5">{t('sessions.column.start')}</Label>
 						<input
 							type="time"
 							value={startTime}
@@ -334,7 +357,7 @@ function SessionActions({
 						/>
 					</div>
 					<div>
-						<Label className="mb-1.5">End</Label>
+						<Label className="mb-1.5">{t('sessions.end')}</Label>
 						<input
 							type="time"
 							value={endTime}
@@ -344,13 +367,13 @@ function SessionActions({
 					</div>
 				</div>
 				<div>
-					<Label className="mb-1.5">Room</Label>
+					<Label className="mb-1.5">{t('sessions.column.room')}</Label>
 					<Select value={roomId} onValueChange={setRoomId}>
 						<SelectTrigger className="w-full">
 							<SelectValue />
 						</SelectTrigger>
 						<SelectContent>
-							<SelectItem value={NONE}>No room</SelectItem>
+							<SelectItem value={NONE}>{t('noRoom')}</SelectItem>
 							{rooms.map((r) => (
 								<SelectItem key={r.id} value={String(r.id)}>
 									{r.name}
@@ -362,7 +385,7 @@ function SessionActions({
 				<ActionButtons
 					onCancel={() => setMode('view')}
 					pending={pending}
-					confirmLabel="Save changes"
+					confirmLabel={t('form.saveChanges')}
 					onConfirm={() =>
 						void run(
 							{
@@ -372,7 +395,7 @@ function SessionActions({
 								endTime,
 								roomId: roomId === NONE ? null : Number(roomId),
 							},
-							'Session rescheduled',
+							t('sessions.reschedule.done'),
 						)
 					}
 				/>
@@ -383,15 +406,19 @@ function SessionActions({
 	if (mode === 'substitute') {
 		return (
 			<div className="flex flex-col gap-3 border-t pt-4">
-				<h3 className="text-sm font-semibold">Assign substitute teacher</h3>
+				<h3 className="text-sm font-semibold">
+					{t('sessions.substitute.action')}
+				</h3>
 				<div>
-					<Label className="mb-1.5">Teacher</Label>
+					<Label className="mb-1.5">{t('sessions.column.teacher')}</Label>
 					<Select value={teacherId} onValueChange={setTeacherId}>
 						<SelectTrigger className="w-full">
-							<SelectValue placeholder="Select teacher" />
+							<SelectValue
+								placeholder={t('form.field.teacherPlaceholder')}
+							/>
 						</SelectTrigger>
 						<SelectContent>
-							<SelectItem value={NONE}>Unassigned</SelectItem>
+							<SelectItem value={NONE}>{t('unassigned')}</SelectItem>
 							{teachers.map((t) => (
 								<SelectItem key={t.id} value={String(t.id)}>
 									{t.user.firstName} {t.user.lastName}
@@ -403,14 +430,14 @@ function SessionActions({
 				<ActionButtons
 					onCancel={() => setMode('view')}
 					pending={pending}
-					confirmLabel="Assign"
+					confirmLabel={t('sessions.substitute.confirm')}
 					onConfirm={() =>
 						void run(
 							{
 								id: session.id,
 								teacherId: teacherId === NONE ? null : Number(teacherId),
 							},
-							'Substitute assigned',
+							t('sessions.substitute.done'),
 						)
 					}
 				/>
@@ -421,23 +448,25 @@ function SessionActions({
 	// cancel
 	return (
 		<div className="flex flex-col gap-3 border-t pt-4">
-			<h3 className="text-sm font-semibold text-destructive">Cancel session</h3>
+			<h3 className="text-sm font-semibold text-destructive">
+				{t('sessions.cancel.action')}
+			</h3>
 			<p className="text-sm text-muted-foreground">
-				Enrolled students will be notified. This can't be undone.
+				{t('sessions.cancel.warning')}
 			</p>
 			<div>
-				<Label className="mb-1.5">Reason *</Label>
+				<Label className="mb-1.5">{t('sessions.cancel.reasonRequired')}</Label>
 				<Textarea
 					value={reason}
 					onChange={(e) => setReason(e.target.value)}
-					placeholder="e.g. Teacher unavailable, public holiday…"
+					placeholder={t('sessions.cancel.reasonPlaceholder')}
 					rows={3}
 				/>
 			</div>
 			<ActionButtons
 				onCancel={() => setMode('view')}
 				pending={pending}
-				confirmLabel="Cancel session"
+				confirmLabel={t('sessions.cancel.confirm')}
 				destructive
 				disabled={reason.trim().length === 0}
 				onConfirm={() =>
@@ -447,7 +476,7 @@ function SessionActions({
 							status: 'CANCELLED',
 							cancellationReason: reason.trim(),
 						},
-						'Session cancelled',
+						t('sessions.cancel.done'),
 					).then(() => onDone())
 				}
 			/>
@@ -470,6 +499,7 @@ function ActionButtons({
 	destructive?: boolean;
 	disabled?: boolean;
 }) {
+	const tc = useT('common');
 	return (
 		<div className="flex gap-2">
 			<Button
@@ -479,7 +509,7 @@ function ActionButtons({
 				onClick={onCancel}
 				disabled={pending}
 			>
-				Back
+				{tc('action.back')}
 			</Button>
 			<Button
 				type="button"

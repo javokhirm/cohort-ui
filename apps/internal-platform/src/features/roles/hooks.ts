@@ -5,6 +5,7 @@ import { listPermissions, listRoles } from '@/api/roles/roles.queries';
 import { updateRolePermissions } from '@/api/roles/roles.mutations';
 import type { RoleView } from '@/api/roles/types';
 import { toast } from '@repo/ui';
+import { useAppT } from '@/locales';
 
 export function useRoles() {
 	return useQuery({
@@ -22,6 +23,7 @@ export function usePermissions() {
 
 export function useUpdateRolePermissions() {
 	const queryClient = useQueryClient();
+	const t = useAppT('roles');
 	return useMutation({
 		mutationFn: ({
 			roleName,
@@ -44,7 +46,7 @@ export function useUpdateRolePermissions() {
 		},
 		onError: (_err, _vars, ctx) => {
 			if (ctx?.prev) queryClient.setQueryData(rolesKeys.list(), ctx.prev);
-			toast.error('Failed to update permissions. Please try again.');
+			toast.error(t('updateError'));
 		},
 		onSettled: () => {
 			void queryClient.invalidateQueries({ queryKey: rolesKeys.list() });

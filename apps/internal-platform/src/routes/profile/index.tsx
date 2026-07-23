@@ -11,8 +11,12 @@ import {
 } from '@repo/ui';
 import { useAuth, useOperator } from '@/features/auth/hooks';
 import { MOCK_SECURITY } from './_mock';
+import { useAppT } from '@/locales';
 
 export function ProfilePage() {
+	const t = useAppT('users');
+	const tp = useAppT('profile');
+	const ts = useAppT('shell');
 	const { user } = useAuth();
 	const { data: profile } = useOperator();
 
@@ -29,12 +33,8 @@ export function ProfilePage() {
 		<div className="flex max-w-2xl flex-col gap-6">
 			{/* Page header */}
 			<div>
-				<h1 className="text-xl font-semibold tracking-tight">
-					Profile &amp; Security
-				</h1>
-				<p className="text-sm text-muted-foreground">
-					Your platform operator account.
-				</p>
+				<h1 className="text-xl font-semibold tracking-tight">{tp('title')}</h1>
+				<p className="text-sm text-muted-foreground">{tp('subtitle')}</p>
 			</div>
 
 			{/* Identity card */}
@@ -59,13 +59,13 @@ export function ProfilePage() {
 						</p>
 					</div>
 
-					<StatusBadge tone="indigo">PLATFORM OPERATOR</StatusBadge>
+					<StatusBadge tone="indigo">{ts('operatorBadge')}</StatusBadge>
 				</CardContent>
 			</Card>
 
 			{/* Security section */}
 			<div className="flex flex-col gap-3">
-				<h2 className="text-sm font-semibold">Security</h2>
+				<h2 className="text-sm font-semibold">{tp('security')}</h2>
 
 				<Card className="gap-0 py-0">
 					{/* 2FA row */}
@@ -74,18 +74,16 @@ export function ProfilePage() {
 							<Lock className="size-4.5 text-tone-green-fg" />
 						</div>
 						<div className="flex-1">
-							<p className="text-sm font-medium">
-								Two-factor authentication
-							</p>
+							<p className="text-sm font-medium">{tp('twoFactor')}</p>
 							<p className="text-xs text-muted-foreground">
 								{sec.twoFactor.method}
-								{sec.twoFactor.enforced && ' · enforced'}
+								{sec.twoFactor.enforced && ` · ${tp('enforced')}`}
 							</p>
 						</div>
 						{sec.twoFactor.enabled ? (
-							<StatusBadge tone="green">Enabled</StatusBadge>
+							<StatusBadge tone="green">{tp('enabled')}</StatusBadge>
 						) : (
-							<StatusBadge tone="red">Disabled</StatusBadge>
+							<StatusBadge tone="red">{tp('disabled')}</StatusBadge>
 						)}
 					</div>
 
@@ -97,10 +95,9 @@ export function ProfilePage() {
 							<Monitor className="size-4.5 text-muted-foreground" />
 						</div>
 						<div className="flex-1">
-							<p className="text-sm font-medium">Active sessions</p>
+							<p className="text-sm font-medium">{tp('activeSessions')}</p>
 							<p className="text-xs text-muted-foreground">
-								{sec.sessions.count} device
-								{sec.sessions.count !== 1 && 's'} ·{' '}
+								{tp('devices', { count: sec.sessions.count })} ·{' '}
 								{sec.sessions.location}
 							</p>
 						</div>
@@ -110,7 +107,7 @@ export function ProfilePage() {
 							size="sm"
 							className="text-tone-red-fg hover:text-tone-red-fg"
 						>
-							Revoke all
+							{t('revokeAll')}
 						</Button>
 					</div>
 				</Card>

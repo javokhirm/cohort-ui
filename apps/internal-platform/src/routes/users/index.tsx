@@ -16,77 +16,85 @@ import {
 import { useUserList } from '@/features/users/hooks';
 import { avatarClass, getInitials } from '@/features/users/utils';
 import { PAGE_SIZE } from '@/features/users/constants';
+import { useAppT } from '@/locales';
 
 type UserRow = NonNullable<ReturnType<typeof useUserList>['data']>['rows'][number];
 
-const columns: ColumnDef<UserRow>[] = [
-	{
-		id: 'user',
-		header: 'User',
-		cell: ({ row }) => {
-			const user = row.original;
-			return (
-				<div className="flex items-center gap-3">
-					<Avatar className="size-8 shrink-0">
-						<AvatarFallback
-							className={cn('text-xs font-bold', avatarClass(user.id))}
-						>
-							{getInitials(user.firstName, user.lastName)}
-						</AvatarFallback>
-					</Avatar>
-					<div className="flex flex-col">
-						<span className="text-sm font-medium">
-							{user.firstName} {user.lastName}
-						</span>
-						{user.email && (
-							<span className="text-xs text-muted-foreground">
-								{user.email}
+/**
+ * Built per render rather than held at module scope: the headers are
+ * user-facing, so they must re-resolve when the language changes.
+ */
+function buildColumns(t: ReturnType<typeof useAppT<'users'>>): ColumnDef<UserRow>[] {
+	return [
+		{
+			id: 'user',
+			header: t('column.user'),
+			cell: ({ row }) => {
+				const user = row.original;
+				return (
+					<div className="flex items-center gap-3">
+						<Avatar className="size-8 shrink-0">
+							<AvatarFallback
+								className={cn('text-xs font-bold', avatarClass(user.id))}
+							>
+								{getInitials(user.firstName, user.lastName)}
+							</AvatarFallback>
+						</Avatar>
+						<div className="flex flex-col">
+							<span className="text-sm font-medium">
+								{user.firstName} {user.lastName}
 							</span>
-						)}
+							{user.email && (
+								<span className="text-xs text-muted-foreground">
+									{user.email}
+								</span>
+							)}
+						</div>
 					</div>
-				</div>
-			);
+				);
+			},
 		},
-	},
-	{
-		accessorKey: 'phone',
-		header: 'Phone',
-		cell: ({ getValue }) => (
-			<span className="text-sm tabular-nums text-muted-foreground">
-				{getValue<string>()}
-			</span>
-		),
-	},
-	{
-		id: 'tenants',
-		header: 'Tenants',
-		cell: ({ row }) => (
-			<div className="flex flex-wrap gap-1.5">
-				{row.original.tenants.slice(0, 3).map((t) => (
-					<Badge key={t.tenantId} variant="secondary" className="text-xs">
-						{t.name}
-					</Badge>
-				))}
-				{row.original.tenants.length > 3 && (
-					<Badge variant="outline" className="text-xs">
-						+{row.original.tenants.length - 3}
-					</Badge>
-				)}
-			</div>
-		),
-	},
-	{
-		accessorKey: 'membershipCount',
-		header: () => <div className="text-right">Count</div>,
-		cell: ({ getValue }) => (
-			<div className="text-right text-sm font-medium tabular-nums">
-				{getValue<number>()}
-			</div>
-		),
-	},
-];
+		{
+			accessorKey: 'phone',
+			header: t('column.phone'),
+			cell: ({ getValue }) => (
+				<span className="text-sm tabular-nums text-muted-foreground">
+					{getValue<string>()}
+				</span>
+			),
+		},
+		{
+			id: 'tenants',
+			header: t('column.tenant'),
+			cell: ({ row }) => (
+				<div className="flex flex-wrap gap-1.5">
+					{row.original.tenants.slice(0, 3).map((t) => (
+						<Badge key={t.tenantId} variant="secondary" className="text-xs">
+							{t.name}
+						</Badge>
+					))}
+					{row.original.tenants.length > 3 && (
+						<Badge variant="outline" className="text-xs">
+							+{row.original.tenants.length - 3}
+						</Badge>
+					)}
+				</div>
+			),
+		},
+		{
+			accessorKey: 'membershipCount',
+			header: () => <div className="text-right">{t('column.count')}</div>,
+			cell: ({ getValue }) => (
+				<div className="text-right text-sm font-medium tabular-nums">
+					{getValue<number>()}
+				</div>
+			),
+		},
+	];
+}
 
 export function UserDirectoryPage() {
+	const t = useAppT('users');
 	const navigate = useNavigate({ from: '/users' });
 	const { page = 1, search: searchParam } = useSearch({ from: '/_authed/users' });
 
@@ -118,11 +126,8 @@ export function UserDirectoryPage() {
 	return (
 		<div className="flex flex-col gap-6">
 			<div>
-				<h1 className="text-xl font-semibold tracking-tight">User Directory</h1>
-				<p className="text-sm text-muted-foreground">
-					Every person across all tenants. A user can belong to multiple
-					centers.
-				</p>
+				<h1 className="text-xl font-semibold tracking-tight">{t('title')}</h1>
+				<p className="text-sm text-muted-foreground">{t('listSubtitle')}</p>
 			</div>
 
 			<div className="flex items-center gap-3">
@@ -132,26 +137,26 @@ export function UserDirectoryPage() {
 						type="text"
 						value={inputValue}
 						onChange={(e) => setInputValue(e.target.value)}
-						placeholder="Search name, phone or email..."
+						placeholder={t('searchPlaceholder')}
 						className="flex h-9 w-full rounded-md border border-input bg-transparent px-3 py-1 pl-9 text-sm shadow-sm transition-colors placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring"
 					/>
 				</div>
 				{!isLoading && (
 					<span className="text-sm text-muted-foreground">
-						{total} {total === 1 ? 'user' : 'users'}
+						{t('count', { count: total })}
 					</span>
 				)}
 			</div>
 
 			{isError && (
 				<div className="rounded-lg border border-destructive/30 bg-destructive/5 px-4 py-3 text-sm text-destructive">
-					Failed to load users. Please refresh.
+					{t('loadError')}
 				</div>
 			)}
 
 			<Card className="gap-0 overflow-hidden py-0">
 				<DataTable
-					columns={columns}
+					columns={buildColumns(t)}
 					data={list?.rows ?? []}
 					isLoading={isLoading}
 					getRowId={(row) => String(row.id)}
@@ -163,7 +168,7 @@ export function UserDirectoryPage() {
 					}
 					emptyState={
 						<div className="py-16 text-center text-sm text-muted-foreground">
-							No users match your search.
+							{t('empty')}
 						</div>
 					}
 					className="rounded-none border-0"

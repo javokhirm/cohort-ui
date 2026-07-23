@@ -13,6 +13,7 @@ const AUTH: AuthResult = {
 		lastName: 'Owner',
 		roles: ['OWNER'],
 		branchScope: null,
+		preferredLanguage: null,
 	},
 };
 

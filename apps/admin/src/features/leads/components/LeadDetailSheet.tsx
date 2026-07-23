@@ -24,8 +24,10 @@ import {
 	TONE_CLASSES,
 } from '@repo/ui';
 import { formatDate, formatRelative } from '@repo/utils';
+import { useStatusLabel } from '@repo/i18n';
 
 import { Can } from '@/components/Can';
+import { useAppT } from '@/locales';
 import { useBranches } from '@/api/branches';
 
 import { useConvertLead, useMoveLeadStatus } from '../api/leads.mutations';
@@ -45,6 +47,8 @@ interface LeadDetailSheetProps {
 }
 
 export function LeadDetailSheet({ leadId, open, onOpenChange }: LeadDetailSheetProps) {
+	const t = useAppT('leads');
+	const statusLabel = useStatusLabel();
 	const navigate = useNavigate();
 	const { data: lead, isLoading } = useLead(open ? leadId : null);
 	const { data: branches = [] } = useBranches();
@@ -73,13 +77,11 @@ export function LeadDetailSheet({ leadId, open, onOpenChange }: LeadDetailSheetP
 			{ id: lead.id, status: 'LOST' },
 			{
 				onSuccess: () => {
-					toast.success('Lead marked as lost');
+					toast.success(t('toast.markedLost'));
 					setMarkLostOpen(false);
 				},
 				onError: (err) =>
-					toast.error(
-						isApiError(err) ? err.message : 'Failed to update the lead.',
-					),
+					toast.error(isApiError(err) ? err.message : t('toast.updateFailed')),
 			},
 		);
 	}
@@ -90,7 +92,7 @@ export function LeadDetailSheet({ leadId, open, onOpenChange }: LeadDetailSheetP
 			{ id: lead.id },
 			{
 				onSuccess: (student) => {
-					toast.success('Lead converted to a student');
+					toast.success(t('toast.converted'));
 					setConvertOpen(false);
 					onOpenChange(false);
 					void navigate({
@@ -99,9 +101,7 @@ export function LeadDetailSheet({ leadId, open, onOpenChange }: LeadDetailSheetP
 					});
 				},
 				onError: (err) =>
-					toast.error(
-						isApiError(err) ? err.message : 'Failed to convert the lead.',
-					),
+					toast.error(isApiError(err) ? err.message : t('toast.convertFailed')),
 			},
 		);
 	}
@@ -111,11 +111,9 @@ export function LeadDetailSheet({ leadId, open, onOpenChange }: LeadDetailSheetP
 		moveStatus.mutate(
 			{ id: lead.id, status: next },
 			{
-				onSuccess: () => toast.success('Stage updated'),
+				onSuccess: () => toast.success(t('toast.stageUpdated')),
 				onError: (err) =>
-					toast.error(
-						isApiError(err) ? err.message : 'Failed to move the lead.',
-					),
+					toast.error(isApiError(err) ? err.message : t('toast.moveFailed')),
 			},
 		);
 	}
@@ -140,7 +138,7 @@ export function LeadDetailSheet({ leadId, open, onOpenChange }: LeadDetailSheetP
 		<Sheet open={open} onOpenChange={handleOpenChange}>
 			<SheetContent className="flex w-full flex-col gap-0 p-0 sm:max-w-md">
 				<SheetHeader className="border-b px-6 py-4">
-					<SheetTitle>Lead details</SheetTitle>
+					<SheetTitle>{t('detail.title')}</SheetTitle>
 				</SheetHeader>
 
 				<div className="flex-1 overflow-y-auto p-6">
@@ -177,7 +175,9 @@ export function LeadDetailSheet({ leadId, open, onOpenChange }: LeadDetailSheetP
 											kind="lead"
 											status={lead.status}
 											className="shrink-0"
-										/>
+										>
+											{statusLabel('lead', lead.status)}
+										</StatusBadge>
 									) : (
 										<Can
 											permission="lead.update"
@@ -186,7 +186,9 @@ export function LeadDetailSheet({ leadId, open, onOpenChange }: LeadDetailSheetP
 													kind="lead"
 													status={lead.status}
 													className="shrink-0"
-												/>
+												>
+													{statusLabel('lead', lead.status)}
+												</StatusBadge>
 											}
 										>
 											<DropdownMenu>
@@ -202,10 +204,7 @@ export function LeadDetailSheet({ leadId, open, onOpenChange }: LeadDetailSheetP
 														],
 													)}
 												>
-													{
-														resolveStatus('lead', lead.status)
-															.label
-													}
+													{statusLabel('lead', lead.status)}
 													<ChevronDown className="size-3" />
 												</DropdownMenuTrigger>
 												<DropdownMenuContent
@@ -236,7 +235,10 @@ export function LeadDetailSheet({ leadId, open, onOpenChange }: LeadDetailSheetP
 																	)}
 																/>
 																<span className="flex-1">
-																	{d.label}
+																	{statusLabel(
+																		'lead',
+																		s,
+																	)}
 																</span>
 																{current && (
 																	<Check className="size-4 text-muted-foreground" />
@@ -250,36 +252,41 @@ export function LeadDetailSheet({ leadId, open, onOpenChange }: LeadDetailSheetP
 									)}
 								</div>
 								<div className="mt-3 flex items-center gap-2 border-t pt-3">
-									<StatusBadge
-										kind="lead_source"
-										status={lead.source}
-									/>
+									<StatusBadge kind="lead_source" status={lead.source}>
+										{statusLabel('lead_source', lead.source)}
+									</StatusBadge>
 								</div>
 							</div>
 
 							{/* Details */}
 							<div className="rounded-xl border bg-card p-4">
 								<div className="mb-3 text-[10.5px] font-semibold tracking-widest text-muted-foreground uppercase">
-									Details
+									{t('detail.sectionDetails')}
 								</div>
 								<div className="grid grid-cols-2 gap-x-4 gap-y-3">
 									<DetailField
-										label="Course interest"
+										label={t('detail.field.courseInterest')}
 										value={lead.courseInterest?.name ?? '—'}
 									/>
-									<DetailField label="Branch" value={branchName} />
 									<DetailField
-										label="Assigned to"
-										value={lead.assignedTo?.name ?? 'Unassigned'}
+										label={t('detail.field.branch')}
+										value={branchName}
 									/>
 									<DetailField
-										label="Captured"
+										label={t('detail.field.assignedTo')}
+										value={
+											lead.assignedTo?.name ??
+											t('detail.unassigned')
+										}
+									/>
+									<DetailField
+										label={t('detail.field.captured')}
 										value={formatDate(lead.createdAt)}
 									/>
 									{lead.email && (
 										<div className="col-span-2">
 											<DetailField
-												label="Email"
+												label={t('detail.field.email')}
 												value={lead.email}
 											/>
 										</div>
@@ -291,7 +298,7 @@ export function LeadDetailSheet({ leadId, open, onOpenChange }: LeadDetailSheetP
 							<div className="rounded-xl border bg-card p-4">
 								<div className="mb-3 flex items-center justify-between">
 									<span className="text-[10.5px] font-semibold tracking-widest text-muted-foreground uppercase">
-										Activity
+										{t('detail.sectionActivity')}
 									</span>
 									{!activityOpen && (
 										<Can permission="lead.activity.create">
@@ -300,7 +307,7 @@ export function LeadDetailSheet({ leadId, open, onOpenChange }: LeadDetailSheetP
 												className="h-auto p-0 text-primary"
 												onClick={() => setActivityOpen(true)}
 											>
-												Log activity
+												{t('detail.logActivity')}
 											</Button>
 										</Can>
 									)}
@@ -316,7 +323,7 @@ export function LeadDetailSheet({ leadId, open, onOpenChange }: LeadDetailSheetP
 
 								{lead.activities.length === 0 ? (
 									<p className="text-sm text-muted-foreground">
-										No activity yet.
+										{t('detail.noActivity')}
 									</p>
 								) : (
 									<ol className="flex flex-col">
@@ -341,7 +348,7 @@ export function LeadDetailSheet({ leadId, open, onOpenChange }: LeadDetailSheetP
 								variant="outline"
 								onClick={() => setActivityOpen(true)}
 							>
-								Log activity
+								{t('detail.logActivity')}
 							</Button>
 						</Can>
 						{!isTerminal && (
@@ -351,7 +358,7 @@ export function LeadDetailSheet({ leadId, open, onOpenChange }: LeadDetailSheetP
 									onClick={() => setConvertOpen(true)}
 								>
 									<Check className="mr-1.5 size-4" />
-									Convert to student
+									{t('detail.convert')}
 								</Button>
 							</Can>
 						)}
@@ -362,9 +369,9 @@ export function LeadDetailSheet({ leadId, open, onOpenChange }: LeadDetailSheetP
 			<ConfirmDialog
 				open={markLostOpen}
 				onOpenChange={setMarkLostOpen}
-				title="Mark this lead as lost?"
-				description="It moves to the Lost column and can no longer be converted."
-				confirmLabel="Mark as lost"
+				title={t('detail.markLost.title')}
+				description={t('detail.markLost.description')}
+				confirmLabel={t('detail.markLost.confirm')}
 				variant="destructive"
 				loading={moveStatus.isPending}
 				onConfirm={handleMarkLost}
@@ -372,9 +379,9 @@ export function LeadDetailSheet({ leadId, open, onOpenChange }: LeadDetailSheetP
 			<ConfirmDialog
 				open={convertOpen}
 				onOpenChange={setConvertOpen}
-				title="Convert to student?"
-				description="Creates an enrolled student from this lead. You can enroll them in a group afterward."
-				confirmLabel="Convert"
+				title={t('detail.convertDialog.title')}
+				description={t('detail.convertDialog.description')}
+				confirmLabel={t('detail.convertDialog.confirm')}
 				loading={convertLead.isPending}
 				onConfirm={handleConvert}
 			/>
@@ -394,6 +401,7 @@ function DetailField({ label, value }: { label: string; value: React.ReactNode }
 }
 
 function TimelineItem({ activity, isLast }: { activity: LeadActivity; isLast: boolean }) {
+	const t = useAppT('leads');
 	const descriptor = activity.status
 		? resolveStatus('lead', activity.status).tone
 		: ACTIVITY_TONE[activity.type];
@@ -419,7 +427,7 @@ function TimelineItem({ activity, isLast }: { activity: LeadActivity; isLast: bo
 				</div>
 				<div className="flex flex-wrap items-center gap-x-1.5 mt-0.5">
 					<span className="text-xs text-muted-foreground">
-						{activity.actorName ?? 'System'}
+						{activity.actorName ?? t('detail.system')}
 					</span>
 					<span className="text-muted-foreground">·</span>
 					<span className="text-xs text-muted-foreground">

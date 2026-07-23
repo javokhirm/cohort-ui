@@ -2,6 +2,7 @@ import { formatShortDate } from '@repo/utils';
 import type { ScheduleDay } from '../api/groups.queries';
 import { hhmm } from '../lib/group-options';
 import { generateSessionDates } from '../lib/session-preview';
+import { useAppT } from '@/locales';
 
 interface SessionPreviewCardProps {
 	days: ScheduleDay[];
@@ -17,24 +18,17 @@ export function SessionPreviewCard({
 	endDate,
 	startTime,
 }: SessionPreviewCardProps) {
+	const t = useAppT('groups');
 	const dates = generateSessionDates(days, startDate, endDate);
 
 	return (
 		<div className="flex h-fit flex-col rounded-xl border border-border bg-card shadow-xs">
 			<div className="p-4">
-				<span className="text-sm font-semibold">Session preview</span>
+				<span className="text-sm font-semibold">{t('form.previewTitle')}</span>
 				<p className="text-xs text-muted-foreground">
-					{dates.length > 0 ? (
-						<>
-							This rule generates{' '}
-							<span className="font-semibold text-primary">
-								{dates.length}
-							</span>{' '}
-							sessions
-						</>
-					) : (
-						'Pick days and a date range to preview sessions'
-					)}
+					{dates.length > 0
+						? t('form.previewCount', { count: dates.length })
+						: t('form.previewEmpty')}
 				</p>
 			</div>
 

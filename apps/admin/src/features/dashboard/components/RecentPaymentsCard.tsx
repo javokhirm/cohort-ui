@@ -8,6 +8,7 @@ import { usePaymentList } from '@/features/billing/api/payments.queries';
 import { PanelSkeleton } from './DashboardSkeletons';
 import { PanelCard } from './PanelCard';
 import { PanelError } from './PanelError';
+import { useAppT } from '@/locales';
 
 /** Title-case a payment method code (`BANK_TRANSFER` → `Bank transfer`). */
 function methodLabel(method: string): string {
@@ -17,21 +18,23 @@ function methodLabel(method: string): string {
 
 /** Recent payments — reuses the payment list endpoint (SUCCEEDED, newest first). */
 export function RecentPaymentsCard() {
+	const t = useAppT('dashboard');
 	const { data, isLoading, isError, refetch } = usePaymentList({
 		status: 'SUCCEEDED',
 		limit: 5,
 	});
 
 	if (isLoading) return <PanelSkeleton />;
-	if (isError || !data) return <PanelError title="Recent payments" onRetry={refetch} />;
+	if (isError || !data)
+		return <PanelError title={t('card.recentPayments')} onRetry={refetch} />;
 
 	return (
-		<PanelCard title="Recent payments" flush>
+		<PanelCard title={t('card.recentPayments')} flush>
 			{data.rows.length === 0 ? (
 				<EmptyState
 					icon={<Wallet />}
-					title="No payments yet"
-					description="Recorded payments will show up here."
+					title={t('card.noPaymentsTitle')}
+					description={t('card.noPaymentsDescription')}
 				/>
 			) : (
 				<ul>

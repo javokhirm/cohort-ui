@@ -1,10 +1,14 @@
 import * as React from 'react';
 import { Globe } from 'lucide-react';
+import type { Locale } from '@repo/utils';
 import { cn } from '@repo/ui/lib/utils';
 
-export type Locale = 'uz' | 'ru' | 'en';
+/** Re-exported so `@repo/ui` consumers keep importing `Locale` from the barrel. */
+export type { Locale };
 
 const LOCALE_LABELS: Record<Locale, string> = { uz: 'UZ', ru: 'RU', en: 'EN' };
+
+const LOCALE_ORDER: Locale[] = ['uz', 'ru', 'en'];
 
 interface LocaleSwitcherProps extends Omit<
 	React.ComponentProps<'button'>,
@@ -16,7 +20,9 @@ interface LocaleSwitcherProps extends Omit<
 
 /**
  * Globe icon + current locale label; cycles through uz → ru → en on click.
- * Appears in the auth screen and app topbar of TEACH and PORTAL.
+ * Purely presentational — the caller owns the locale and persists the choice
+ * (localStorage + `PATCH /me/preferences`). Used on the auth screens and the
+ * teacher shell; the desktop consoles use a dropdown in their Header instead.
  */
 function LocaleSwitcher({
 	className,
@@ -25,9 +31,8 @@ function LocaleSwitcher({
 	...props
 }: LocaleSwitcherProps) {
 	function cycle() {
-		const locales: Locale[] = ['uz', 'ru', 'en'];
-		const idx = locales.indexOf(locale ?? 'uz');
-		onLocaleChange?.(locales[(idx + 1) % locales.length]!);
+		const idx = LOCALE_ORDER.indexOf(locale ?? 'uz');
+		onLocaleChange?.(LOCALE_ORDER[(idx + 1) % LOCALE_ORDER.length]!);
 	}
 
 	return (

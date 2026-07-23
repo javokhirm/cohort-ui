@@ -16,6 +16,8 @@ import {
 	SelectTrigger,
 	SelectValue,
 } from '@repo/ui';
+import { useStatusLabel, useT } from '@repo/i18n';
+import { useAppT } from '@/locales';
 
 import { usePaymentList } from '../api/payments.queries';
 import type { PaymentListFilters } from '../api/keys';
@@ -28,6 +30,9 @@ const PAGE_SIZE = 20;
 const ALL = 'all';
 
 export function PaymentListPage() {
+	const t = useAppT('billing');
+	const tc = useT('common');
+	const statusLabel = useStatusLabel();
 	const navigate = useNavigate({ from: '/payments' });
 	const [selectedPaymentId, setSelectedPaymentId] = useState<number | null>(null);
 	const {
@@ -108,15 +113,17 @@ export function PaymentListPage() {
 	return (
 		<div className="mx-auto flex max-w-7xl flex-col gap-6">
 			<PageHeader
-				title="Payments"
-				description="Every recorded and online payment"
+				title={t('payments.title')}
+				description={t('payments.description')}
 			/>
 
 			<div className="flex flex-col gap-4">
 				<SearchFilterBar
 					filters={PAYMENT_STATUS_FILTERS.map((f) => ({
 						id: f.value ?? 'ALL',
-						label: f.label,
+						label: f.value
+							? statusLabel('payment', f.value)
+							: tc('state.all'),
 						active: status === f.value,
 						onClick: () => handleStatusChange(f.value),
 					}))}
@@ -124,23 +131,29 @@ export function PaymentListPage() {
 
 				<div className="flex flex-wrap items-end gap-4">
 					<div className="flex flex-col gap-1.5">
-						<Label className="text-xs text-muted-foreground">Method</Label>
+						<Label className="text-xs text-muted-foreground">
+							{t('payments.column.method')}
+						</Label>
 						<Select value={method ?? ALL} onValueChange={handleMethodChange}>
 							<SelectTrigger className="h-9 w-44" size="sm">
-								<SelectValue placeholder="All methods" />
+								<SelectValue placeholder={t('payments.allMethods')} />
 							</SelectTrigger>
 							<SelectContent>
-								<SelectItem value={ALL}>All methods</SelectItem>
+								<SelectItem value={ALL}>
+									{t('payments.allMethods')}
+								</SelectItem>
 								{PAYMENT_METHOD_OPTIONS.map((o) => (
 									<SelectItem key={o.value} value={o.value}>
-										{o.label}
+										{t(`paymentMethod.${o.value}`)}
 									</SelectItem>
 								))}
 							</SelectContent>
 						</Select>
 					</div>
 					<div className="flex flex-col gap-1.5">
-						<Label className="text-xs text-muted-foreground">Student</Label>
+						<Label className="text-xs text-muted-foreground">
+							{t('payments.column.student')}
+						</Label>
 						<div className="w-56">
 							<StudentPicker
 								value={studentId}
@@ -153,7 +166,7 @@ export function PaymentListPage() {
 							htmlFor="payment-from"
 							className="text-xs text-muted-foreground"
 						>
-							Paid from
+							{t('misc.paidFrom')}
 						</Label>
 						<DatePicker
 							id="payment-from"
@@ -167,7 +180,7 @@ export function PaymentListPage() {
 							htmlFor="payment-to"
 							className="text-xs text-muted-foreground"
 						>
-							Paid to
+							{t('misc.paidTo')}
 						</Label>
 						<DatePicker
 							id="payment-to"
@@ -183,14 +196,14 @@ export function PaymentListPage() {
 							onClick={handleClearExtraFilters}
 						>
 							<X className="mr-1.5 size-3.5" />
-							Clear filters
+							{t('misc.clearFilters')}
 						</Button>
 					)}
 				</div>
 
 				{isError && (
 					<div className="rounded-lg border border-destructive/30 bg-destructive/5 px-4 py-3 text-sm text-destructive">
-						Failed to load payments. Please refresh.
+						{t('payments.loadError')}
 					</div>
 				)}
 

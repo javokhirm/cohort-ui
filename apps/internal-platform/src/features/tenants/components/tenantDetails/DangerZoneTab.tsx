@@ -3,6 +3,7 @@ import { Ban, PauseCircle, PlayCircle } from 'lucide-react';
 import { Button } from '@repo/ui';
 
 import type { TenantStatus } from '@/api/tenants/types';
+import { useAppT } from '@/locales';
 
 export function DangerZoneTab({
 	status,
@@ -15,6 +16,7 @@ export function DangerZoneTab({
 	onUnsuspend: () => void;
 	onCancel: () => void;
 }) {
+	const t = useAppT('tenants');
 	return (
 		<div className="flex max-w-lg flex-col gap-4">
 			{status === 'SUSPENDED' ? (
@@ -22,10 +24,10 @@ export function DangerZoneTab({
 					<div className="flex-1">
 						<p className="flex items-center gap-1.5 text-sm font-semibold text-green-600 dark:text-green-400">
 							<PlayCircle className="size-4" />
-							Unsuspend tenant
+							{t('danger.unsuspend')}
 						</p>
 						<p className="mt-1 text-xs text-muted-foreground">
-							Restores access for all staff, teachers, students and parents.
+							{t('danger.unsuspendHint')}
 						</p>
 					</div>
 					<Button
@@ -34,7 +36,7 @@ export function DangerZoneTab({
 						className="shrink-0 border-green-500 text-green-600 hover:bg-green-500/10 dark:text-green-400"
 						onClick={onUnsuspend}
 					>
-						Unsuspend
+						{t('danger.unsuspend')}
 					</Button>
 				</div>
 			) : (
@@ -42,12 +44,10 @@ export function DangerZoneTab({
 					<div className="flex-1">
 						<p className="flex items-center gap-1.5 text-sm font-semibold text-amber-600 dark:text-amber-400">
 							<PauseCircle className="size-4" />
-							Suspend tenant
+							{t('danger.suspend')}
 						</p>
 						<p className="mt-1 text-xs text-muted-foreground">
-							Immediately locks out all staff, teachers, students and
-							parents. Data is retained. This is reversible — you can
-							reactivate at any time.
+							{t('danger.suspendHint')}
 						</p>
 					</div>
 					<Button
@@ -56,7 +56,7 @@ export function DangerZoneTab({
 						className="shrink-0 border-amber-500 text-amber-600 hover:bg-amber-500/10 dark:text-amber-400"
 						onClick={onSuspend}
 					>
-						Suspend
+						{t('danger.suspend')}
 					</Button>
 				</div>
 			)}
@@ -65,12 +65,10 @@ export function DangerZoneTab({
 				<div className="flex-1">
 					<p className="flex items-center gap-1.5 text-sm font-semibold text-destructive">
 						<Ban className="size-4" />
-						Cancel subscription
+						{t('danger.cancelSubscription')}
 					</p>
 					<p className="mt-1 text-xs text-muted-foreground">
-						Terminates the subscription and schedules tenant data for deletion
-						after 30 days. This is <strong>permanent</strong> and cannot be
-						undone from the console.
+						{t('danger.cancelSubscriptionHint')}
 					</p>
 				</div>
 				<Button
@@ -79,7 +77,7 @@ export function DangerZoneTab({
 					className="shrink-0"
 					onClick={onCancel}
 				>
-					Cancel subscription
+					{t('danger.cancelSubscription')}
 				</Button>
 			</div>
 		</div>

@@ -83,10 +83,13 @@ A small wrapper (built on `openapi-fetch`, which consumes the generated `schema.
 1. prefixes the surface base URL,
 2. attaches the `Authorization` header from an **injected token getter** (so `api-client`
    never imports `auth` — keeps the dependency one-way),
-3. **unwraps the envelope** — returns `data` on success (and `null` for a 204),
-4. **normalizes errors** — throws a typed `ApiError` carrying `code`, `message`, `details`,
+3. attaches the active locale as the `x-lang` header from an **injected locale getter** (same
+   pattern — `api-client` never imports `i18n`), so backend `error.message` comes back
+   translated,
+4. **unwraps the envelope** — returns `data` on success (and `null` for a 204),
+5. **normalizes errors** — throws a typed `ApiError` carrying `code`, `message`, `details`,
    `status`,
-5. runs the **401 → refresh → retry** hook (the refresh implementation is injected by
+6. runs the **401 → refresh → retry** hook (the refresh implementation is injected by
    `auth`; single-flight so concurrent 401s share one refresh).
 
 ```ts
@@ -95,6 +98,7 @@ export interface ApiClientOptions {
 	baseUrl: string; // e.g. `${env.apiOrigin}/api/v1/manage`
 	getAccessToken: () => string | null; // injected by auth
 	onUnauthorized: () => Promise<boolean>; // injected by auth: refresh; true = retry
+	getLocale?: () => string; // injected by the app's i18n layer → `x-lang`
 }
 
 export class ApiError extends Error {

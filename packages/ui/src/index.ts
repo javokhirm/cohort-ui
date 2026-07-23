@@ -43,6 +43,7 @@ export * from './components/composed/actions-menu';
 export * from './components/composed/branch-switcher';
 export * from './components/composed/confirm-dialog';
 export * from './components/composed/date-picker';
+export * from './components/composed/date-picker-locale';
 export * from './components/composed/form-date-picker';
 export * from './components/composed/form-input';
 export * from './components/composed/form-money-input';

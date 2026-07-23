@@ -10,6 +10,8 @@ import {
 	type StatusTone,
 } from '@repo/ui';
 import { formatDate } from '@repo/utils';
+import { useT } from '@repo/i18n';
+import { useAppT } from '@/locales';
 
 import { Can } from '@/components/Can';
 
@@ -22,15 +24,22 @@ interface DiscountCardProps {
 	onEdit?: (discount: DiscountResponse) => void;
 }
 
-const TYPE_META: Record<DiscountType, { tone: StatusTone; description: string }> = {
-	PERCENTAGE: { tone: 'violet', description: 'Percentage off' },
-	FIXED_AMOUNT: { tone: 'green', description: 'Fixed amount off' },
+const TYPE_META: Record<
+	DiscountType,
+	{
+		tone: StatusTone;
+		descriptionKey: 'discountCard.percentageOff' | 'discountCard.fixedAmountOff';
+	}
+> = {
+	PERCENTAGE: { tone: 'violet', descriptionKey: 'discountCard.percentageOff' },
+	FIXED_AMOUNT: { tone: 'green', descriptionKey: 'discountCard.fixedAmountOff' },
 };
 
 function Validity({
 	validFrom,
 	validUntil,
 }: Pick<DiscountResponse, 'validFrom' | 'validUntil'>) {
+	const t = useAppT('billing');
 	if (validFrom && validUntil) {
 		return (
 			<span className="flex items-center gap-1.5">
@@ -40,13 +49,25 @@ function Validity({
 			</span>
 		);
 	}
-	if (validFrom) return <span>From {formatDate(validFrom)}</span>;
-	if (validUntil) return <span>Until {formatDate(validUntil)}</span>;
-	return <span>No expiry</span>;
+	if (validFrom)
+		return (
+			<span>
+				{t('discountCard.validFromLabel', { date: formatDate(validFrom) })}
+			</span>
+		);
+	if (validUntil)
+		return (
+			<span>
+				{t('discountCard.validUntilLabel', { date: formatDate(validUntil) })}
+			</span>
+		);
+	return <span>{t('discountExtra.noExpiry')}</span>;
 }
 
 export function DiscountCard({ discount, onEdit }: DiscountCardProps) {
-	const { tone, description } = TYPE_META[discount.type];
+	const t = useAppT('billing');
+	const tc = useT('common');
+	const { tone, descriptionKey } = TYPE_META[discount.type];
 	const capped = discount.maxUses != null;
 	const usagePct = capped ? (discount.currentUses / discount.maxUses!) * 100 : 0;
 
@@ -57,20 +78,24 @@ export function DiscountCard({ discount, onEdit }: DiscountCardProps) {
 					<h3 className="truncate font-semibold text-foreground">
 						{discount.name}
 					</h3>
-					<p className="mt-0.5 text-xs text-muted-foreground">{description}</p>
+					<p className="mt-0.5 text-xs text-muted-foreground">
+						{t(descriptionKey)}
+					</p>
 				</div>
 				<div className="flex shrink-0 items-center gap-2">
 					{discount.isActive ? (
-						<StatusBadge tone="green">Active</StatusBadge>
+						<StatusBadge tone="green">{tc('state.active')}</StatusBadge>
 					) : (
-						<StatusBadge tone="slate">Inactive</StatusBadge>
+						<StatusBadge tone="slate">{tc('state.inactive')}</StatusBadge>
 					)}
 					{onEdit && (
 						<Can permission="discount.manage">
 							<button
 								type="button"
 								onClick={() => onEdit(discount)}
-								aria-label={`Edit ${discount.name}`}
+								aria-label={t('discountCard.editAria', {
+									name: discount.name,
+								})}
 								className="flex size-7 items-center justify-center rounded-md text-muted-foreground transition-colors hover:bg-muted hover:text-foreground"
 							>
 								<Pencil className="size-4" />
@@ -89,12 +114,16 @@ export function DiscountCard({ discount, onEdit }: DiscountCardProps) {
 				<span className="text-2xl font-extrabold tabular-nums">
 					{formatDiscountValue(discount.type, discount.value)}
 				</span>
-				<span className="text-xs font-medium opacity-70">off</span>
+				<span className="text-xs font-medium opacity-70">
+					{t('discountCard.off')}
+				</span>
 			</div>
 
 			<div className="mt-4 flex flex-col gap-2 text-sm">
 				<div className="flex items-center justify-between gap-2">
-					<span className="text-muted-foreground">Promo code</span>
+					<span className="text-muted-foreground">
+						{t('discountExtra.promoCode')}
+					</span>
 					{discount.code ? (
 						<Badge
 							variant="outline"
@@ -107,11 +136,18 @@ export function DiscountCard({ discount, onEdit }: DiscountCardProps) {
 					)}
 				</div>
 				<div className="flex items-center justify-between gap-2">
-					<span className="text-muted-foreground">Usage</span>
+					<span className="text-muted-foreground">
+						{t('discountExtra.usage')}
+					</span>
 					<span className="font-semibold tabular-nums text-foreground">
 						{capped
-							? `${discount.currentUses} / ${discount.maxUses} used`
-							: `${discount.currentUses} redeemed`}
+							? t('discountCard.usageCapped', {
+									used: discount.currentUses,
+									max: discount.maxUses,
+								})
+							: t('discountCard.usageUncapped', {
+									count: discount.currentUses,
+								})}
 					</span>
 				</div>
 				{capped && <ProgressBar value={usagePct} tone={tone} />}

@@ -1,9 +1,11 @@
 import { useNavigate } from '@tanstack/react-router';
 
 import { Badge, DataTable, StatusBadge, type ColumnDef } from '@repo/ui';
+import { useStatusLabel } from '@repo/i18n';
+
+import { useAppT } from '@/locales';
 
 import type { StaffResponse, StaffUser } from '../api/staff.queries';
-import { roleLabel } from '../lib/roles';
 
 function StaffAvatar({ user }: { user: StaffUser }) {
 	const initials =
@@ -21,12 +23,14 @@ interface StaffTableProps {
 }
 
 export function StaffTable({ staff, isLoading }: StaffTableProps) {
+	const t = useAppT('hr');
+	const statusLabel = useStatusLabel();
 	const navigate = useNavigate();
 
 	const columns: ColumnDef<StaffResponse>[] = [
 		{
 			accessorKey: 'staffCode',
-			header: 'Employee',
+			header: t('column.employee'),
 			cell: ({ getValue }) => (
 				<span className="font-mono text-xs text-muted-foreground">
 					{getValue<string>()}
@@ -36,7 +40,7 @@ export function StaffTable({ staff, isLoading }: StaffTableProps) {
 		},
 		{
 			id: 'name',
-			header: 'Name',
+			header: t('column.name'),
 			cell: ({ row }) => {
 				const { user, position, department } = row.original;
 				const subtitle = position ?? department;
@@ -59,7 +63,7 @@ export function StaffTable({ staff, isLoading }: StaffTableProps) {
 		},
 		{
 			id: 'role',
-			header: 'Role',
+			header: t('column.role'),
 			cell: ({ row }) => {
 				const roles = row.original.roles;
 				if (roles.length === 0)
@@ -68,7 +72,7 @@ export function StaffTable({ staff, isLoading }: StaffTableProps) {
 					<div className="flex flex-wrap gap-1">
 						{roles.map((role) => (
 							<Badge key={role} variant="secondary" className="text-xs">
-								{roleLabel(role)}
+								{statusLabel('role', role)}
 							</Badge>
 						))}
 					</div>
@@ -78,7 +82,7 @@ export function StaffTable({ staff, isLoading }: StaffTableProps) {
 		},
 		{
 			id: 'branch',
-			header: 'Branch',
+			header: t('column.branch'),
 			cell: ({ row }) => (
 				<span className="text-sm text-muted-foreground">
 					{row.original.branch?.name ?? '—'}
@@ -87,15 +91,17 @@ export function StaffTable({ staff, isLoading }: StaffTableProps) {
 		},
 		{
 			accessorKey: 'status',
-			header: 'Status',
+			header: t('column.status'),
 			cell: ({ getValue }) => (
-				<StatusBadge kind="staff" status={getValue<string>()} />
+				<StatusBadge kind="staff" status={getValue<string>()}>
+					{statusLabel('staff', getValue<string>())}
+				</StatusBadge>
 			),
 			size: 112,
 		},
 		{
 			id: 'load',
-			header: 'Teaching load',
+			header: t('column.load'),
 			cell: ({ row }) => {
 				const { groupsCount, weeklyHours } = row.original;
 				if (groupsCount === 0) {
@@ -103,8 +109,7 @@ export function StaffTable({ staff, isLoading }: StaffTableProps) {
 				}
 				return (
 					<span className="text-sm text-muted-foreground">
-						{groupsCount} {groupsCount === 1 ? 'group' : 'groups'} ·{' '}
-						{weeklyHours}h/wk
+						{t('loadValue', { count: groupsCount, hours: weeklyHours })}
 					</span>
 				);
 			},
@@ -125,7 +130,7 @@ export function StaffTable({ staff, isLoading }: StaffTableProps) {
 			}
 			emptyState={
 				<div className="py-16 text-center text-sm text-muted-foreground">
-					No staff match this filter.
+					{t('emptyFiltered')}
 				</div>
 			}
 			className="rounded-none border-0"

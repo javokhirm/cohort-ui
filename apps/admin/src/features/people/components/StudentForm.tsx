@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { Plus, X } from 'lucide-react';
@@ -14,9 +14,11 @@ import {
 	FormSelect,
 	Spinner,
 } from '@repo/ui';
+import { useStatusLabel, useT } from '@repo/i18n';
 
 import { FormSection } from '@/components/FormSection';
 import { FormSheet } from '@/components/FormSheet';
+import { useAppT } from '@/locales';
 
 import {
 	createStudentSchema,
@@ -50,23 +52,25 @@ interface EditProps {
 
 type StudentFormProps = CreateProps | EditProps;
 
-const GENDER_OPTIONS = [
-	{ value: 'M', label: 'Male' },
-	{ value: 'F', label: 'Female' },
-];
+/**
+ * Option tables hold **values only** — labels resolve at render against the
+ * `people` namespace (or `enums.domain.student.*` for statuses), so a language
+ * switch re-translates every dropdown (conventions.md §7).
+ */
+const GENDER_OPTIONS = [{ value: 'M' }, { value: 'F' }] as const;
 
 const GUARDIAN_RELATION_OPTIONS = [
-	{ value: 'father', label: 'Father' },
-	{ value: 'mother', label: 'Mother' },
-	{ value: 'guardian', label: 'Guardian' },
-];
+	{ value: 'father' },
+	{ value: 'mother' },
+	{ value: 'guardian' },
+] as const;
 
 const STUDENT_STATUS_OPTIONS = [
-	{ value: 'ACTIVE', label: 'Active' },
-	{ value: 'INACTIVE', label: 'Inactive' },
-	{ value: 'GRADUATED', label: 'Graduated' },
-	{ value: 'SUSPENDED', label: 'Suspended' },
-];
+	{ value: 'ACTIVE' },
+	{ value: 'INACTIVE' },
+	{ value: 'GRADUATED' },
+	{ value: 'SUSPENDED' },
+] as const;
 
 function CreateStudentForm({
 	onSuccess,
@@ -75,13 +79,17 @@ function CreateStudentForm({
 	onSuccess: () => void;
 	onPendingChange: (pending: boolean) => void;
 }) {
+	const t = useAppT('people');
+	const tv = useT('validation');
+	const schema = useMemo(() => createStudentSchema(tv, t), [tv, t]);
+
 	// When exactly one branch is selected globally, pre-fill it (still editable).
 	const activeBranchIds = useBranchStore((s) => s.activeBranchIds);
 	const defaultBranchId =
 		activeBranchIds?.length === 1 ? activeBranchIds[0] : undefined;
 
 	const form = useForm<CreateStudentFormValues>({
-		resolver: zodResolver(createStudentSchema),
+		resolver: zodResolver(schema),
 		defaultValues: {
 			firstName: '',
 			lastName: '',
@@ -159,7 +167,7 @@ function CreateStudentForm({
 			await enrollStudent.mutateAsync({ groupId: values.groupId, studentId });
 		}
 
-		toast.success('Student added successfully');
+		toast.success(t('created'));
 		onSuccess();
 	}
 
@@ -171,51 +179,54 @@ function CreateStudentForm({
 				className="flex flex-col gap-4"
 			>
 				{/* PERSONAL */}
-				<FormSection title="Personal">
+				<FormSection title={t('form.section.personal')}>
 					<FieldGroup>
 						<div className="grid grid-cols-2 gap-3">
 							<FormInput
 								control={form.control}
 								name="firstName"
-								label="First name *"
-								placeholder="e.g. Diyorbek"
+								label={t('form.field.firstName')}
+								placeholder={t('form.field.firstNamePlaceholder')}
 							/>
 							<FormInput
 								control={form.control}
 								name="lastName"
-								label="Last name *"
-								placeholder="e.g. Rustamov"
+								label={t('form.field.lastName')}
+								placeholder={t('form.field.lastNamePlaceholder')}
 							/>
 						</div>
 						<div className="grid grid-cols-2 gap-3">
 							<FormDatePicker
 								control={form.control}
 								name="dateOfBirth"
-								label="Date of birth"
+								label={t('form.field.dateOfBirth')}
 							/>
 							<FormSelect
 								control={form.control}
 								name="gender"
-								label="Gender"
-								options={GENDER_OPTIONS}
+								label={t('form.field.gender')}
+								options={GENDER_OPTIONS.map((o) => ({
+									value: o.value,
+									label: t(`gender.${o.value}`),
+								}))}
 							/>
 						</div>
 					</FieldGroup>
 				</FormSection>
 
 				{/* CONTACT */}
-				<FormSection title="Contact">
+				<FormSection title={t('form.section.contact')}>
 					<FieldGroup>
 						<div className="grid grid-cols-2 gap-3">
 							<FormPhoneInput
 								control={form.control}
 								name="phone"
-								label="Phone *"
+								label={t('form.field.phone')}
 							/>
 							<FormSelect
 								control={form.control}
 								name="branchId"
-								label="Branch *"
+								label={t('form.field.branch')}
 								valueAsNumber
 								options={branches.map((b) => ({
 									value: String(b.id),
@@ -226,8 +237,8 @@ function CreateStudentForm({
 						<FormInput
 							control={form.control}
 							name="address"
-							label="Address"
-							placeholder="Street, district, city"
+							label={t('form.field.address')}
+							placeholder={t('form.field.addressPlaceholder')}
 						/>
 					</FieldGroup>
 				</FormSection>
@@ -235,7 +246,7 @@ function CreateStudentForm({
 				{/* GUARDIAN — optional, hidden until the user opts in */}
 				{hasGuardian ? (
 					<FormSection
-						title="Guardian"
+						title={t('form.section.guardian')}
 						actions={
 							<Button
 								type="button"
@@ -244,7 +255,7 @@ function CreateStudentForm({
 								onClick={handleRemoveGuardian}
 							>
 								<X className="mr-1 size-3.5" />
-								Remove
+								{t('form.removeGuardian')}
 							</Button>
 						}
 					>
@@ -253,20 +264,23 @@ function CreateStudentForm({
 								<FormInput
 									control={form.control}
 									name="guardianName"
-									label="Guardian name *"
-									placeholder="e.g. Rustam Olimov"
+									label={t('form.field.guardianName')}
+									placeholder={t('form.field.guardianNamePlaceholder')}
 								/>
 								<FormSelect
 									control={form.control}
 									name="guardianRelation"
-									label="Relation"
-									options={GUARDIAN_RELATION_OPTIONS}
+									label={t('form.field.relation')}
+									options={GUARDIAN_RELATION_OPTIONS.map((o) => ({
+										value: o.value,
+										label: t(`relation.${o.value}`),
+									}))}
 								/>
 							</div>
 							<FormPhoneInput
 								control={form.control}
 								name="guardianPhone"
-								label="Guardian phone *"
+								label={t('form.field.guardianPhone')}
 							/>
 						</FieldGroup>
 					</FormSection>
@@ -278,18 +292,18 @@ function CreateStudentForm({
 						className="w-full border-dashed"
 					>
 						<Plus className="mr-1.5 size-4" />
-						Add guardian
+						{t('form.addGuardian')}
 					</Button>
 				)}
 
 				{/* INITIAL ENROLLMENT — the student bills on the group's course plan. */}
 				{groups.length > 0 && (
-					<FormSection title="Initial enrollment">
+					<FormSection title={t('form.section.enrollment')}>
 						<FieldGroup>
 							<FormSelect
 								control={form.control}
 								name="groupId"
-								label="Group"
+								label={t('form.field.group')}
 								valueAsNumber
 								options={groups.map((g) => ({
 									value: String(g.id),
@@ -313,8 +327,13 @@ function EditStudentForm({
 	onSuccess: () => void;
 	onPendingChange: (pending: boolean) => void;
 }) {
+	const t = useAppT('people');
+	const tv = useT('validation');
+	const statusLabel = useStatusLabel();
+	const schema = useMemo(() => editStudentSchema(tv), [tv]);
+
 	const form = useForm<EditStudentFormValues>({
-		resolver: zodResolver(editStudentSchema),
+		resolver: zodResolver(schema),
 		defaultValues: {
 			firstName: student.user.firstName,
 			lastName: student.user.lastName,
@@ -362,7 +381,7 @@ function EditStudentForm({
 			address: values.address || undefined,
 			status: values.status,
 		});
-		toast.success('Student updated');
+		toast.success(t('updated'));
 		onSuccess();
 	}
 
@@ -374,60 +393,63 @@ function EditStudentForm({
 				className="flex flex-col gap-4"
 			>
 				{/* PERSONAL */}
-				<FormSection title="Personal">
+				<FormSection title={t('form.section.personal')}>
 					<FieldGroup>
 						<div className="grid grid-cols-2 gap-3">
 							<FormInput
 								control={form.control}
 								name="firstName"
-								label="First name *"
-								placeholder="e.g. Diyorbek"
+								label={t('form.field.firstName')}
+								placeholder={t('form.field.firstNamePlaceholder')}
 							/>
 							<FormInput
 								control={form.control}
 								name="lastName"
-								label="Last name *"
-								placeholder="e.g. Rustamov"
+								label={t('form.field.lastName')}
+								placeholder={t('form.field.lastNamePlaceholder')}
 							/>
 						</div>
 						<div className="grid grid-cols-2 gap-3">
 							<FormDatePicker
 								control={form.control}
 								name="dateOfBirth"
-								label="Date of birth"
+								label={t('form.field.dateOfBirth')}
 							/>
 							<FormSelect
 								control={form.control}
 								name="gender"
-								label="Gender"
-								options={GENDER_OPTIONS}
+								label={t('form.field.gender')}
+								options={GENDER_OPTIONS.map((o) => ({
+									value: o.value,
+									label: t(`gender.${o.value}`),
+								}))}
 							/>
 						</div>
 					</FieldGroup>
 				</FormSection>
 
 				{/* CONTACT */}
-				<FormSection title="Contact">
+				<FormSection title={t('form.section.contact')}>
 					<FieldGroup>
 						<div className="grid grid-cols-2 gap-3">
 							<FormPhoneInput
 								control={form.control}
 								name="phone"
-								label="Phone *"
+								label={t('form.field.phone')}
 							/>
 							<FormInput
 								control={form.control}
 								name="email"
-								label="Email"
+								label={t('form.field.email')}
 								type="email"
-								placeholder="name@example.uz"
+								placeholder={t('form.field.emailPlaceholder')}
 							/>
 						</div>
 						<div className="grid grid-cols-2 gap-3">
 							<FormSelect
 								control={form.control}
 								name="branchId"
-								label="Branch *"
+								label={t('form.field.branch')}
 								valueAsNumber
 								options={branches.map((b) => ({
 									value: String(b.id),
@@ -438,19 +460,22 @@ function EditStudentForm({
 						<FormInput
 							control={form.control}
 							name="address"
-							label="Address"
-							placeholder="Street, district, city"
+							label={t('form.field.address')}
+							placeholder={t('form.field.addressPlaceholder')}
 						/>
 					</FieldGroup>
 				</FormSection>
 
 				{/* STATUS */}
-				<FormSection title="Status">
+				<FormSection title={t('form.section.status')}>
 					<FormSelect
 						control={form.control}
 						name="status"
-						label="Student status"
-						options={STUDENT_STATUS_OPTIONS}
+						label={t('form.field.studentStatus')}
+						options={STUDENT_STATUS_OPTIONS.map((o) => ({
+							value: o.value,
+							label: statusLabel('student', o.value),
+						}))}
 					/>
 				</FormSection>
 			</form>
@@ -462,6 +487,8 @@ function EditStudentForm({
 
 export function StudentForm(props: StudentFormProps) {
 	const { open, onOpenChange, mode } = props;
+	const t = useAppT('people');
+	const tc = useT('common');
 	const [isPending, setIsPending] = useState(false);
 
 	const formId = mode === 'create' ? 'create-student-form' : 'edit-student-form';
@@ -474,16 +501,16 @@ export function StudentForm(props: StudentFormProps) {
 		<FormSheet
 			open={open}
 			onOpenChange={onOpenChange}
-			title={mode === 'create' ? 'Add student' : 'Edit student'}
-			description="Fields marked * are required"
+			title={mode === 'create' ? t('form.addTitle') : t('form.editTitle')}
+			description={t('form.requiredHint')}
 			footer={
 				<>
 					<Button type="button" variant="outline" onClick={handleSuccess}>
-						Cancel
+						{tc('action.cancel')}
 					</Button>
 					<Button type="submit" form={formId} disabled={isPending}>
 						{isPending && <Spinner className="mr-2 size-4" />}
-						Save student
+						{t('form.save')}
 					</Button>
 				</>
 			}

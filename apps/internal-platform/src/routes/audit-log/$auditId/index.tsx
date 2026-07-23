@@ -9,8 +9,10 @@ import { CenteredNotice } from '@/features/audit-log/components/CenteredNotice';
 import { DetailSkeleton } from '@/features/audit-log/components/DetailSkeleton';
 import { FieldRow } from '@/features/audit-log/components/FieldRow';
 import { JsonBlock } from '@/features/audit-log/components/JsonBlock';
+import { useAppT } from '@/locales';
 
 export function AuditLogDetailPage() {
+	const t = useAppT('audit');
 	const { auditId } = useParams({ strict: false }) as { auditId?: string };
 	const id = Number(auditId);
 	const validId = auditId != null && Number.isInteger(id) && id > 0;
@@ -18,13 +20,13 @@ export function AuditLogDetailPage() {
 	const { data: entry, isLoading, isError, error } = useAuditLogEntry(id, validId);
 
 	if (!validId || (isError && isApiError(error) && error.status === 404)) {
-		return <CenteredNotice message="Audit log entry not found." />;
+		return <CenteredNotice message={t('notFound')} />;
 	}
 
 	if (isLoading) return <DetailSkeleton />;
 
 	if (isError || !entry) {
-		return <CenteredNotice message="Failed to load this entry. Please try again." />;
+		return <CenteredNotice message={t('loadDetailError')} />;
 	}
 
 	return (
@@ -34,12 +36,12 @@ export function AuditLogDetailPage() {
 				to={'/audit-log' as any}
 				className="inline-flex w-fit items-center gap-1 text-sm text-muted-foreground transition-colors hover:text-foreground"
 			>
-				← Audit Log
+				← {t('backToList')}
 			</Link>
 
 			<div>
 				<h1 className="text-xl font-semibold tracking-tight">
-					Audit Entry #{entry.id}
+					{t('entryTitle', { id: entry.id })}
 				</h1>
 				<p className="text-sm text-muted-foreground">
 					{formatTimestamp(entry.timestamp)}
@@ -49,13 +51,13 @@ export function AuditLogDetailPage() {
 			<Card className="py-0">
 				<CardContent className="px-6 py-0">
 					<dl>
-						<FieldRow label="Action">
+						<FieldRow label={t('column.action')}>
 							<code className="rounded bg-muted px-1.5 py-0.5 font-mono text-xs">
 								{entry.action}
 							</code>
 						</FieldRow>
 
-						<FieldRow label="Actor">
+						<FieldRow label={t('column.actor')}>
 							<span className="font-medium">{entry.actor.name ?? '—'}</span>
 							{entry.actor.role && (
 								<span className="ml-2 text-xs text-muted-foreground">
@@ -69,7 +71,7 @@ export function AuditLogDetailPage() {
 							)}
 						</FieldRow>
 
-						<FieldRow label="Tenant">
+						<FieldRow label={t('column.tenant')}>
 							{entry.tenant ? (
 								<Link
 									to="/tenants/$tenantId"
@@ -81,35 +83,39 @@ export function AuditLogDetailPage() {
 								</Link>
 							) : (
 								<span className="italic text-muted-foreground">
-									Platform (no tenant)
+									{t('platformNoTenant')}
 								</span>
 							)}
 						</FieldRow>
 
-						<FieldRow label="Entity">
+						<FieldRow label={t('column.entity')}>
 							{entry.entityType
 								? `${entry.entityType}${entry.entityId != null ? ` #${entry.entityId}` : ''}`
 								: '—'}
 						</FieldRow>
 
-						<FieldRow label="IP Address">{entry.ipAddress ?? '—'}</FieldRow>
+						<FieldRow label={t('column.ipAddress')}>
+							{entry.ipAddress ?? '—'}
+						</FieldRow>
 					</dl>
 				</CardContent>
 			</Card>
 
 			<div className="flex flex-col gap-3">
 				<h2 className="text-xs font-semibold uppercase tracking-widest text-muted-foreground">
-					Before / After
+					{t('beforeAfter')}
 				</h2>
 				<div className="grid gap-4 md:grid-cols-2">
 					<div className="flex flex-col gap-2">
 						<p className="text-xs font-medium text-muted-foreground">
-							Before
+							{t('before')}
 						</p>
 						<JsonBlock value={entry.details.before} />
 					</div>
 					<div className="flex flex-col gap-2">
-						<p className="text-xs font-medium text-muted-foreground">After</p>
+						<p className="text-xs font-medium text-muted-foreground">
+							{t('after')}
+						</p>
 						<JsonBlock value={entry.details.after} />
 					</div>
 				</div>

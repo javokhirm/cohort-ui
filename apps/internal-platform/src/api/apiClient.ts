@@ -1,4 +1,5 @@
 import { createApiClient } from '@repo/api-client';
+import { getLocale } from '@repo/i18n';
 
 import { env } from '../lib/env';
 import { getAccessToken, useSessionStore } from '../store/sessionStore';
@@ -10,11 +11,13 @@ const apiBase = `${env.VITE_API_ORIGIN}/api/v1`;
 /**
  * Unauthenticated surface: super admin login, OTP verification, and token refresh.
  * No bearer token and no refresh-on-401 — these *are* the auth endpoints.
+ * Still sends `x-lang` so pre-login errors come back localised.
  */
 export const publicApi = createApiClient({
 	baseUrl: `${apiBase}/public`,
 	getAccessToken: () => null,
 	onUnauthorized: async () => false,
+	getLocale,
 });
 
 /**
@@ -49,4 +52,5 @@ export const superAdminApi = createApiClient({
 	baseUrl: `${apiBase}/super-admin`,
 	getAccessToken,
 	onUnauthorized: runRefresh,
+	getLocale,
 });

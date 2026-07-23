@@ -1,5 +1,6 @@
 import type { PlanView } from '@/api/plans/types';
 import { formatNumber } from '@repo/utils';
+import type { useAppT } from '@/locales';
 
 export type OnboardStep = 1 | 2 | 3 | 4 | 5;
 
@@ -16,7 +17,16 @@ export type OnboardFormData = {
 	branchCode: string;
 };
 
-export const STEP_LABELS = ['Business', 'Owner', 'Plan', 'Branch', 'Review'];
+/** Step labels are user-facing, so they resolve from the translator at render. */
+export function stepLabels(t: ReturnType<typeof useAppT<'tenants'>>): string[] {
+	return [
+		t('onboarding.businessTitle'),
+		t('onboarding.owner'),
+		t('onboarding.plan'),
+		t('onboarding.initialBranch'),
+		t('onboarding.reviewTitle'),
+	];
+}
 
 export const EMPTY_FORM: OnboardFormData = {
 	centerName: '',
@@ -31,14 +41,17 @@ export const EMPTY_FORM: OnboardFormData = {
 	branchCode: '',
 };
 
-export function planLimits(plan: PlanView): string {
+export function planLimits(
+	t: ReturnType<typeof useAppT<'tenants'>>,
+	plan: PlanView,
+): string {
 	const branches =
 		plan.maxBranches === null
-			? 'Unlimited branches'
-			: `${plan.maxBranches} branch${plan.maxBranches === 1 ? '' : 'es'}`;
+			? t('limits.branchesUnlimited')
+			: t('limits.branches', { count: plan.maxBranches });
 	const students =
 		plan.maxStudents === null
-			? 'Unlimited students'
-			: `${formatNumber(plan.maxStudents)} students`;
+			? t('limits.studentsUnlimited')
+			: t('limits.students', { count: formatNumber(plan.maxStudents) });
 	return `${branches} · ${students}`;
 }

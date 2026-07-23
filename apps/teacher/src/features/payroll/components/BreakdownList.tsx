@@ -1,6 +1,7 @@
 import { formatMoney } from '@repo/utils';
 
 import type { MyPayrollLine, MyPayrollRateType } from '../api/payroll.queries';
+import { useAppT } from '@/locales';
 
 interface BreakdownListProps {
 	lines: MyPayrollLine[];
@@ -14,14 +15,15 @@ interface BreakdownListProps {
  * no per-student amount (they are not paid that way).
  */
 export function BreakdownList({ lines, rateType }: BreakdownListProps) {
+	const t = useAppT('payroll');
 	const isRevenueShare = rateType === 'PERCENT';
 
 	if (lines.length === 0) {
 		return (
 			<div className="rounded-xl border border-border bg-card p-4">
-				<h2 className="text-sm font-semibold">Students</h2>
+				<h2 className="text-sm font-semibold">{t('studentsTitle')}</h2>
 				<p className="mt-2 text-[13px] text-muted-foreground">
-					No completed sessions with enrolled students this month.
+					{t('noCompletedSessions')}
 				</p>
 			</div>
 		);
@@ -30,10 +32,9 @@ export function BreakdownList({ lines, rateType }: BreakdownListProps) {
 	return (
 		<div className="rounded-xl border border-border bg-card">
 			<div className="border-b border-border p-4">
-				<h2 className="text-sm font-semibold">Students</h2>
+				<h2 className="text-sm font-semibold">{t('studentsTitle')}</h2>
 				<p className="mt-0.5 text-[12px] text-muted-foreground">
-					{lines.length === 1 ? '1 student' : `${lines.length} students`} ·
-					sessions you taught of their total
+					{t('breakdownSubtitle', { count: lines.length })}
 				</p>
 			</div>
 
@@ -51,9 +52,14 @@ export function BreakdownList({ lines, rateType }: BreakdownListProps) {
 								{line.groupName}
 							</p>
 							<p className="mt-1 text-[12px] tabular-nums text-muted-foreground">
-								{line.sessionsTaught}/{line.sessionsTotalPlanned} sessions
+								{t('sessionsCount', {
+									taught: line.sessionsTaught,
+									planned: line.sessionsTotalPlanned,
+								})}
 								{line.monthlyTuition !== null &&
-									` · ${formatMoney(line.monthlyTuition)} tuition`}
+									t('tuitionSuffix', {
+										amount: formatMoney(line.monthlyTuition),
+									})}
 							</p>
 						</div>
 
@@ -67,9 +73,7 @@ export function BreakdownList({ lines, rateType }: BreakdownListProps) {
 			</ul>
 
 			<p className="border-t border-border p-4 text-[12px] text-muted-foreground">
-				{isRevenueShare
-					? "Each student's tuition is split across all of the group's classes for the month, and you earn the ones you taught. Classes still ahead of you are not paid yet, a cancelled class is not paid at all, and a student who joined mid-month counts only from the day they joined."
-					: 'Listed for reference. You are paid on the basis shown above, not per student.'}
+				{isRevenueShare ? t('revenueShareNote') : t('referenceNote')}
 			</p>
 		</div>
 	);

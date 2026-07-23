@@ -12,7 +12,9 @@ import {
 	type ColumnDef,
 } from '@repo/ui';
 import { formatDate, formatPrice } from '@repo/utils';
+import { useStatusLabel, useT } from '@repo/i18n';
 
+import { useAppT } from '@/locales';
 import { useBranches } from '@/api/branches';
 
 import type { ExpenseResponse } from '../api/expenses.queries';
@@ -50,6 +52,9 @@ function RowActions({
 	expense: ExpenseResponse;
 	onDelete: (expense: ExpenseResponse) => void;
 }) {
+	const t = useAppT('expenses');
+	const tc = useT('common');
+
 	return (
 		<DropdownMenu>
 			<DropdownMenuTrigger asChild>
@@ -58,14 +63,14 @@ function RowActions({
 					size="sm"
 					className="size-8 p-0"
 					onClick={(e) => e.stopPropagation()}
-					aria-label="Expense actions"
+					aria-label={t('rowActionsAria')}
 				>
 					<MoreHorizontal className="size-4" />
 				</Button>
 			</DropdownMenuTrigger>
 			<DropdownMenuContent align="end" onClick={(e) => e.stopPropagation()}>
 				<DropdownMenuItem variant="destructive" onClick={() => onDelete(expense)}>
-					Delete
+					{tc('action.delete')}
 				</DropdownMenuItem>
 			</DropdownMenuContent>
 		</DropdownMenu>
@@ -78,13 +83,15 @@ export function ExpenseTable({
 	onEdit,
 	onDelete,
 }: ExpenseTableProps) {
+	const t = useAppT('expenses');
+	const statusLabel = useStatusLabel();
 	const { data: branches = [] } = useBranches();
 	const branchName = (id: number) => branches.find((b) => b.id === id)?.name ?? '—';
 
 	const columns: ColumnDef<ExpenseResponse>[] = [
 		{
 			accessorKey: 'expenseDate',
-			header: 'Date',
+			header: t('column.date'),
 			cell: ({ getValue }) => (
 				<span className="text-sm text-muted-foreground">
 					{formatDate(getValue<string>())}
@@ -94,21 +101,23 @@ export function ExpenseTable({
 		},
 		{
 			accessorKey: 'category',
-			header: 'Category',
+			header: t('column.category'),
 			cell: ({ getValue }) => (
-				<StatusBadge kind="expense" status={getValue<string>()} />
+				<StatusBadge kind="expense" status={getValue<string>()}>
+					{statusLabel('expense', getValue<string>())}
+				</StatusBadge>
 			),
 			size: 120,
 		},
 		{
 			id: 'vendor',
-			header: 'Vendor / Description',
+			header: t('column.vendor'),
 			cell: ({ row }) => (
 				<span className="flex items-center gap-2 text-sm font-medium">
 					{vendorDescriptionLabel(row.original)}
 					{isSourceOwned(row.original) && (
 						<Badge variant="secondary" className="text-xs">
-							Payroll
+							{t('payrollBadge')}
 						</Badge>
 					)}
 				</span>
@@ -116,7 +125,7 @@ export function ExpenseTable({
 		},
 		{
 			accessorKey: 'amount',
-			header: () => <div className="text-right">Amount</div>,
+			header: () => <div className="text-right">{t('column.amount')}</div>,
 			cell: ({ row }) => (
 				<div className="text-right text-sm font-semibold tabular-nums">
 					{formatPrice(row.original.amount)} {row.original.currency}
@@ -126,7 +135,7 @@ export function ExpenseTable({
 		},
 		{
 			id: 'branch',
-			header: 'Branch',
+			header: t('column.branch'),
 			cell: ({ row }) => (
 				<span className="text-sm text-muted-foreground">
 					{branchName(row.original.branchId)}
@@ -139,7 +148,7 @@ export function ExpenseTable({
 	if (onDelete) {
 		columns.push({
 			id: 'actions',
-			header: () => <span className="sr-only">Actions</span>,
+			header: () => <span className="sr-only">{t('column.actions')}</span>,
 			// Auto rows (payroll-sourced) are managed from payroll — no actions.
 			cell: ({ row }) =>
 				isSourceOwned(row.original) ? (
@@ -167,7 +176,7 @@ export function ExpenseTable({
 			}
 			emptyState={
 				<div className="py-16 text-center text-sm text-muted-foreground">
-					No expenses match this filter.
+					{t('emptyFiltered')}
 				</div>
 			}
 			className="rounded-none border-0"

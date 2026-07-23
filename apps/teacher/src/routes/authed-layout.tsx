@@ -2,6 +2,7 @@ import { useEffect } from 'react';
 import { Outlet, useNavigate, useRouterState } from '@tanstack/react-router';
 
 import { AppSidebar, AppTopbar, BottomTabBar, ThemeToggle } from '@repo/ui';
+import { useT } from '@repo/i18n';
 
 import { useSessionStore } from '@/store/sessionStore';
 import { BranchSelector } from '@/layouts/BranchSelector';
@@ -28,6 +29,7 @@ export function AuthedLayout() {
 	const user = useSessionStore((s) => s.user);
 	const navigate = useNavigate();
 	const pathname = useRouterState({ select: (s) => s.location.pathname });
+	const t = useT('nav');
 
 	useEffect(() => {
 		if (status !== 'authenticated') {
@@ -46,7 +48,7 @@ export function AuthedLayout() {
 
 	const navItems = NAV_ITEMS.map(({ id, label, href, Icon }) => ({
 		id,
-		label,
+		label: t(`item.${label}`),
 		icon: <Icon />,
 		active: href === active.href,
 		onClick: () => void navigate({ to: href }),
@@ -66,7 +68,7 @@ export function AuthedLayout() {
 
 			<div className="flex min-w-0 flex-1 flex-col overflow-hidden">
 				<AppTopbar
-					title={active.title}
+					title={active.title ? t(`item.${active.title}`) : ''}
 					subtitle={active.subtitle}
 					branch={<BranchSelector />}
 					actions={

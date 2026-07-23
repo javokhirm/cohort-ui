@@ -3,8 +3,10 @@ import { useNavigate, useSearch } from '@tanstack/react-router';
 import { DoorOpen, Plus } from 'lucide-react';
 
 import { Button, EmptyState, PageHeader, SearchFilterBar, Spinner } from '@repo/ui';
+import { useT } from '@repo/i18n';
 
 import { Can } from '@/components/Can';
+import { useAppT } from '@/locales';
 import { useBranches } from '@/api/branches';
 import { usePermissions } from '@/features/auth/hooks';
 import { useInfiniteScrollSentinel } from '@/hooks/useInfiniteScrollSentinel';
@@ -18,6 +20,8 @@ import { RoomForm } from '../components/RoomForm';
 const PAGE_SIZE = 20;
 
 export function RoomListPage() {
+	const t = useAppT('rooms');
+	const tc = useT('common');
 	const navigate = useNavigate({ from: '/rooms' });
 	const { can } = usePermissions();
 	const { status } = useSearch({ from: '/_authed/rooms' });
@@ -53,13 +57,13 @@ export function RoomListPage() {
 	return (
 		<div className="mx-auto flex max-w-7xl flex-col gap-6">
 			<PageHeader
-				title="Rooms"
-				description="Physical and online rooms by branch"
+				title={t('title')}
+				description={t('description')}
 				actions={
 					<Can permission="room.create">
 						<Button onClick={() => setAddOpen(true)}>
 							<Plus className="mr-1.5 size-4" />
-							New room
+							{t('add')}
 						</Button>
 					</Can>
 				}
@@ -69,7 +73,7 @@ export function RoomListPage() {
 				<SearchFilterBar
 					filters={ROOM_STATUS_FILTERS.map((f) => ({
 						id: f.value ?? 'ALL',
-						label: f.label,
+						label: tc(`state.${f.labelKey}`),
 						active: status === f.value,
 						onClick: () => handleStatusChange(f.value),
 					}))}
@@ -77,7 +81,7 @@ export function RoomListPage() {
 
 				{isError && (
 					<div className="rounded-lg border border-destructive/30 bg-destructive/5 px-4 py-3 text-sm text-destructive">
-						Failed to load rooms. Please refresh.
+						{t('loadError')}
 					</div>
 				)}
 
@@ -107,8 +111,8 @@ export function RoomListPage() {
 					!isError && (
 						<EmptyState
 							icon={<DoorOpen />}
-							title="No rooms match this filter"
-							description="Try adjusting the status filter, or add a new room."
+							title={t('emptyTitle')}
+							description={t('emptyDescription')}
 						/>
 					)
 				)}

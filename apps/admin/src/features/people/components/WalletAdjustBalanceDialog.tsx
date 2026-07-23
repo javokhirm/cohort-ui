@@ -1,3 +1,4 @@
+import { useMemo } from 'react';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 
@@ -24,6 +25,9 @@ import {
 } from '@repo/ui';
 import { isApiError } from '@repo/api-client';
 import { formatPrice } from '@repo/utils';
+import { useT } from '@repo/i18n';
+
+import { useAppT } from '@/locales';
 
 import { useAdjustWalletBalance } from '../api/wallet.mutations';
 import {
@@ -44,14 +48,15 @@ export function WalletAdjustBalanceDialog({
 	open,
 	onOpenChange,
 }: WalletAdjustBalanceDialogProps) {
+	const t = useAppT('people');
+
 	return (
 		<Dialog open={open} onOpenChange={onOpenChange}>
 			<DialogContent className="max-w-md">
 				<DialogHeader>
-					<DialogTitle>Adjust balance</DialogTitle>
+					<DialogTitle>{t('wallet.adjustDialog.title')}</DialogTitle>
 					<DialogDescription>
-						A manual correction to the wallet balance. Use a negative amount
-						to deduct.
+						{t('wallet.adjustDialog.description')}
 					</DialogDescription>
 				</DialogHeader>
 
@@ -78,8 +83,16 @@ function AdjustBalanceForm({
 	currentBalance: number;
 	onClose: () => void;
 }) {
+	const t = useAppT('people');
+	const tc = useT('common');
+	const tv = useT('validation');
+	const schema = useMemo(
+		() => adjustBalanceSchema(currentBalance, tv, t),
+		[currentBalance, tv, t],
+	);
+
 	const form = useForm<AdjustBalanceFormValues>({
-		resolver: zodResolver(adjustBalanceSchema(currentBalance)),
+		resolver: zodResolver(schema),
 		defaultValues: { amount: undefined, reason: '' },
 	});
 
@@ -92,10 +105,10 @@ function AdjustBalanceForm({
 				amount: values.amount,
 				reason: values.reason,
 			});
-			toast.success('Balance adjusted');
+			toast.success(t('wallet.adjustDialog.success'));
 			onClose();
 		} catch (err) {
-			toast.error(isApiError(err) ? err.message : 'Failed to adjust balance');
+			toast.error(isApiError(err) ? err.message : t('wallet.adjustDialog.failed'));
 		}
 	}
 
@@ -106,7 +119,9 @@ function AdjustBalanceForm({
 				className="flex flex-col gap-4"
 			>
 				<div className="flex items-center justify-between rounded-lg border border-border bg-muted/40 px-3 py-2.5">
-					<span className="text-sm text-muted-foreground">Current balance</span>
+					<span className="text-sm text-muted-foreground">
+						{t('wallet.adjustDialog.currentBalance')}
+					</span>
 					<span className="text-sm font-bold tabular-nums">
 						{formatPrice(currentBalance)} UZS
 					</span>
@@ -118,7 +133,7 @@ function AdjustBalanceForm({
 						name="amount"
 						render={({ field }) => (
 							<FormItem>
-								<FormLabel>Amount *</FormLabel>
+								<FormLabel>{t('wallet.adjustDialog.amount')}</FormLabel>
 								<FormControl>
 									<Input
 										{...field}
@@ -135,7 +150,7 @@ function AdjustBalanceForm({
 									/>
 								</FormControl>
 								<FormDescription>
-									Positive to add, negative to deduct.
+									{t('wallet.adjustDialog.amountHint')}
 								</FormDescription>
 								<FormMessage />
 							</FormItem>
@@ -145,8 +160,8 @@ function AdjustBalanceForm({
 					<FormInput
 						control={form.control}
 						name="reason"
-						label="Reason *"
-						placeholder="Why is this adjustment being made?"
+						label={t('wallet.adjustDialog.reason')}
+						placeholder={t('wallet.adjustDialog.reasonPlaceholder')}
 					/>
 				</FieldGroup>
 
@@ -157,11 +172,11 @@ function AdjustBalanceForm({
 						onClick={onClose}
 						disabled={adjustBalance.isPending}
 					>
-						Cancel
+						{tc('action.cancel')}
 					</Button>
 					<Button type="submit" disabled={adjustBalance.isPending}>
 						{adjustBalance.isPending && <Spinner className="mr-2 size-4" />}
-						Confirm adjustment
+						{t('wallet.adjustDialog.confirm')}
 					</Button>
 				</DialogFooter>
 			</form>

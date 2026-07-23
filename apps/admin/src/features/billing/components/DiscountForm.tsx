@@ -12,6 +12,8 @@ import {
 	Spinner,
 	toast,
 } from '@repo/ui';
+import { useT } from '@repo/i18n';
+import { useAppT } from '@/locales';
 
 import { FormSection } from '@/components/FormSection';
 import { FormSheet } from '@/components/FormSheet';
@@ -49,6 +51,7 @@ function CreateDiscountForm({
 	onSuccess: () => void;
 	onPendingChange: (pending: boolean) => void;
 }) {
+	const t = useAppT('billing');
 	const form = useForm<CreateDiscountFormValues>({
 		resolver: zodResolver(createDiscountSchema),
 		defaultValues: {
@@ -75,7 +78,7 @@ function CreateDiscountForm({
 			validFrom: blankToNull(values.validFrom),
 			validUntil: blankToNull(values.validUntil),
 		});
-		toast.success('Discount added');
+		toast.success(t('discountExtra.added'));
 		onSuccess();
 	}
 
@@ -91,23 +94,26 @@ function CreateDiscountForm({
 						<FormInput
 							control={form.control}
 							name="name"
-							label="Discount name *"
-							placeholder="e.g. Sibling discount"
+							label={t('discounts.field.name')}
+							placeholder={t('discounts.field.namePlaceholder')}
 						/>
 						<div className="grid grid-cols-2 gap-3">
 							<FormSelect
 								control={form.control}
 								name="type"
-								label="Type"
-								options={DISCOUNT_TYPE_OPTIONS}
+								label={t('invoices.form.lineType')}
+								options={DISCOUNT_TYPE_OPTIONS.map((o) => ({
+									value: o.value,
+									label: t(`discountType.${o.value}`),
+								}))}
 							/>
 							<FormInput
 								control={form.control}
 								name="value"
-								label="Value *"
+								label={t('discounts.field.value')}
 								type="number"
 								min={0}
-								placeholder="10"
+								placeholder={t('discountExtra.valuePlaceholder')}
 								onChange={(e) =>
 									form.setValue(
 										'value',
@@ -122,19 +128,19 @@ function CreateDiscountForm({
 						<FormInput
 							control={form.control}
 							name="code"
-							label="Promo code"
-							placeholder="SIBLING10 (optional)"
+							label={t('discountExtra.promoCode')}
+							placeholder={t('discountExtra.promoCodePlaceholder')}
 						/>
 						<div className="grid grid-cols-2 gap-3">
 							<FormDatePicker
 								control={form.control}
 								name="validFrom"
-								label="Valid from"
+								label={t('discountExtra.validFrom')}
 							/>
 							<FormDatePicker
 								control={form.control}
 								name="validUntil"
-								label="Valid until"
+								label={t('discountExtra.validUntil')}
 							/>
 						</div>
 					</FieldGroup>
@@ -153,6 +159,8 @@ function EditDiscountForm({
 	onSuccess: () => void;
 	onPendingChange: (pending: boolean) => void;
 }) {
+	const t = useAppT('billing');
+	const tc = useT('common');
 	const toDefaults = (d: DiscountResponse): EditDiscountFormValues => ({
 		name: d.name,
 		type: d.type,
@@ -190,7 +198,7 @@ function EditDiscountForm({
 			validUntil: blankToNull(values.validUntil),
 			isActive: values.status === 'active',
 		});
-		toast.success('Discount updated');
+		toast.success(t('discounts.updated'));
 		onSuccess();
 	}
 
@@ -206,20 +214,23 @@ function EditDiscountForm({
 						<FormInput
 							control={form.control}
 							name="name"
-							label="Discount name *"
-							placeholder="e.g. Sibling discount"
+							label={t('discounts.field.name')}
+							placeholder={t('discounts.field.namePlaceholder')}
 						/>
 						<div className="grid grid-cols-2 gap-3">
 							<FormSelect
 								control={form.control}
 								name="type"
-								label="Type"
-								options={DISCOUNT_TYPE_OPTIONS}
+								label={t('invoices.form.lineType')}
+								options={DISCOUNT_TYPE_OPTIONS.map((o) => ({
+									value: o.value,
+									label: t(`discountType.${o.value}`),
+								}))}
 							/>
 							<FormInput
 								control={form.control}
 								name="value"
-								label="Value *"
+								label={t('discounts.field.value')}
 								type="number"
 								min={0}
 								onChange={(e) =>
@@ -236,26 +247,29 @@ function EditDiscountForm({
 						<FormInput
 							control={form.control}
 							name="code"
-							label="Promo code"
-							placeholder="SIBLING10 (optional)"
+							label={t('discountExtra.promoCode')}
+							placeholder={t('discountExtra.promoCodePlaceholder')}
 						/>
 						<div className="grid grid-cols-2 gap-3">
 							<FormDatePicker
 								control={form.control}
 								name="validFrom"
-								label="Valid from"
+								label={t('discountExtra.validFrom')}
 							/>
 							<FormDatePicker
 								control={form.control}
 								name="validUntil"
-								label="Valid until"
+								label={t('discountExtra.validUntil')}
 							/>
 						</div>
 						<FormSelect
 							control={form.control}
 							name="status"
-							label="Status"
-							options={DISCOUNT_STATUS_OPTIONS}
+							label={t('feePlans.field.status')}
+							options={DISCOUNT_STATUS_OPTIONS.map((o) => ({
+								value: o.value,
+								label: tc(`state.${o.labelKey}`),
+							}))}
 						/>
 					</FieldGroup>
 				</FormSection>
@@ -265,6 +279,8 @@ function EditDiscountForm({
 }
 
 export function DiscountForm(props: DiscountFormProps) {
+	const t = useAppT('billing');
+	const tc = useT('common');
 	const { open, onOpenChange, mode } = props;
 	const [isPending, setIsPending] = useState(false);
 
@@ -278,16 +294,16 @@ export function DiscountForm(props: DiscountFormProps) {
 		<FormSheet
 			open={open}
 			onOpenChange={onOpenChange}
-			title={mode === 'create' ? 'New discount' : 'Edit discount'}
-			description="Fields marked * are required"
+			title={mode === 'create' ? t('discounts.add') : t('discounts.edit')}
+			description={t('feePlans.requiredHint')}
 			footer={
 				<>
 					<Button type="button" variant="outline" onClick={handleClose}>
-						Cancel
+						{tc('action.cancel')}
 					</Button>
 					<Button type="submit" form={formId} disabled={isPending}>
 						{isPending && <Spinner className="mr-2 size-4" />}
-						Save discount
+						{t('misc.saveDiscount')}
 					</Button>
 				</>
 			}

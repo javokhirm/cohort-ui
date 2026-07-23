@@ -17,6 +17,8 @@ import {
 
 import { resetPasswordSchema, type ResetPasswordFormValues } from '../schemas';
 import { useResetPassword } from '../hooks';
+import { useAppT } from '@/locales';
+import { useT } from '@repo/i18n';
 
 export function ResetPasswordDialog({
 	userId,
@@ -29,6 +31,8 @@ export function ResetPasswordDialog({
 	open: boolean;
 	onOpenChange: (open: boolean) => void;
 }) {
+	const t = useAppT('users');
+	const tc = useT('common');
 	const form = useForm<ResetPasswordFormValues>({
 		resolver: zodResolver(resetPasswordSchema),
 		defaultValues: { newPassword: '' },
@@ -53,10 +57,9 @@ export function ResetPasswordDialog({
 		<Dialog open={open} onOpenChange={handleOpenChange}>
 			<DialogContent className="max-w-sm">
 				<DialogHeader>
-					<DialogTitle>Reset password</DialogTitle>
+					<DialogTitle>{t('resetPassword')}</DialogTitle>
 					<DialogDescription>
-						Set a new password for <strong>{fullName}</strong>. They will need
-						to use this password on their next login.
+						{t('resetDescription', { name: fullName })}
 					</DialogDescription>
 				</DialogHeader>
 				<Form {...form}>
@@ -67,15 +70,15 @@ export function ResetPasswordDialog({
 						<FormPasswordInput
 							control={form.control}
 							name="newPassword"
-							label="New password"
-							placeholder="Min. 8 characters"
+							label={t('newPassword')}
+							placeholder={t('newPasswordPlaceholder')}
 							autoComplete="new-password"
 						/>
 						{mutation.isError && (
 							<p className="text-sm text-destructive">
 								{isApiError(mutation.error)
 									? mutation.error.message
-									: 'Failed to reset password. Please try again.'}
+									: t('resetError')}
 							</p>
 						)}
 						<DialogFooter>
@@ -85,13 +88,13 @@ export function ResetPasswordDialog({
 								onClick={() => handleOpenChange(false)}
 								disabled={mutation.isPending}
 							>
-								Cancel
+								{tc('action.cancel')}
 							</Button>
 							<Button type="submit" disabled={mutation.isPending}>
 								{mutation.isPending && (
 									<Spinner className="mr-2 size-4" />
 								)}
-								Reset password
+								{t('resetPassword')}
 							</Button>
 						</DialogFooter>
 					</form>

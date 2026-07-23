@@ -42,6 +42,13 @@ export interface ApiClientOptions {
 	getAccessToken: () => string | null;
 	/** Injected by auth. Return true when a new token is ready and the caller should retry. */
 	onUnauthorized: () => Promise<boolean>;
+	/**
+	 * Injected by the app's i18n layer — return the active locale code
+	 * (`'uz' | 'ru' | 'en'`). Sent as the `x-lang` header so the backend
+	 * localises `error.message` and other request-scoped text. Injected exactly
+	 * like `getAccessToken` so this package never imports `@repo/i18n`.
+	 */
+	getLocale?: () => string;
 }
 
 export function createApiClient(opts: ApiClientOptions): ApiClient {
@@ -56,6 +63,8 @@ export function createApiClient(opts: ApiClientOptions): ApiClient {
 	http.interceptors.request.use((config) => {
 		const token = opts.getAccessToken();
 		if (token) config.headers.Authorization = `Bearer ${token}`;
+		const locale = opts.getLocale?.();
+		if (locale) config.headers['x-lang'] = locale;
 		return config;
 	});
 

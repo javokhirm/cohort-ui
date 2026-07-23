@@ -20,13 +20,14 @@ import { WeekNav } from '@/features/schedule/components/WeekNav';
 import { WeekStrip } from '@/features/schedule/components/WeekStrip';
 import { useBranchFilter } from '@/store/branchStore';
 import { useSessionStore } from '@/store/sessionStore';
+import { useAppT } from '@/locales';
 
-/** Time-of-day greeting for the center's current hour. */
-function greeting(): string {
+/** Catalog key for the time-of-day greeting at the center's current hour. */
+function greetingKey(): 'greetingMorning' | 'greetingAfternoon' | 'greetingEvening' {
 	const hour = currentHour();
-	if (hour < 12) return 'Good morning';
-	if (hour < 18) return 'Good afternoon';
-	return 'Good evening';
+	if (hour < 12) return 'greetingMorning';
+	if (hour < 18) return 'greetingAfternoon';
+	return 'greetingEvening';
 }
 
 /**
@@ -42,6 +43,7 @@ function greeting(): string {
  * failure this screen must not have.
  */
 export function TodayRoute() {
+	const t = useAppT('schedule');
 	const user = useSessionStore((s) => s.user);
 	const filterByBranch = useBranchFilter();
 	const navigate = useNavigate();
@@ -76,7 +78,7 @@ export function TodayRoute() {
 	return (
 		<div className="mx-auto w-full max-w-3xl">
 			<TodayGreeting
-				greeting={greeting()}
+				greeting={t(greetingKey())}
 				firstName={user?.firstName}
 				longDate={formatFullDate(today)}
 			/>
@@ -102,7 +104,11 @@ export function TodayRoute() {
 				isError={isError}
 				sessions={daySessions}
 				hiddenByBranch={hiddenByBranch}
-				emptyWhen={isToday ? 'today' : `on ${formatShortDate(selectedDate)}`}
+				emptyWhen={
+					isToday
+						? t('emptyWhenToday')
+						: t('emptyWhenOnDate', { date: formatShortDate(selectedDate) })
+				}
 				onTakeAttendance={(sessionId) =>
 					void navigate({
 						to: '/sessions/$sessionId/attendance',

@@ -4,6 +4,7 @@ import { Button } from '@repo/ui';
 
 import type { MyPayrollPeriod } from '../api/payroll.queries';
 import { formatMonthLabel } from '../lib/format';
+import { useAppT } from '@/locales';
 
 interface MonthPickerProps {
 	/** Newest first — the order the API returns them in. */
@@ -18,6 +19,7 @@ interface MonthPickerProps {
  * with no snapshot and no live figure.
  */
 export function MonthPicker({ periods, month, onChange }: MonthPickerProps) {
+	const tShell = useAppT('shell');
 	const index = periods.findIndex((period) => period.month === month);
 	// `periods` is newest-first, so "newer" is the lower index.
 	const newer = index > 0 ? periods[index - 1] : undefined;
@@ -29,7 +31,7 @@ export function MonthPicker({ periods, month, onChange }: MonthPickerProps) {
 			<Button
 				variant="outline"
 				size="icon"
-				aria-label="Previous month"
+				aria-label={tShell('prevMonth')}
 				disabled={!older}
 				onClick={() => older && onChange(older.month)}
 			>
@@ -41,7 +43,7 @@ export function MonthPicker({ periods, month, onChange }: MonthPickerProps) {
 			<Button
 				variant="outline"
 				size="icon"
-				aria-label="Next month"
+				aria-label={tShell('nextMonth')}
 				disabled={!newer}
 				onClick={() => newer && onChange(newer.month)}
 			>

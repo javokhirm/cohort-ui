@@ -13,6 +13,8 @@ import {
 } from '@repo/ui';
 
 import { useDeactivateUser } from '../hooks';
+import { useAppT } from '@/locales';
+import { useT } from '@repo/i18n';
 
 export function DeactivateDialog({
 	userId,
@@ -25,6 +27,9 @@ export function DeactivateDialog({
 	open: boolean;
 	onOpenChange: (open: boolean) => void;
 }) {
+	const tt = useAppT('tenants');
+	const t = useAppT('users');
+	const tc = useT('common');
 	const mutation = useDeactivateUser(userId, {
 		onSuccess: () => onOpenChange(false),
 	});
@@ -38,10 +43,9 @@ export function DeactivateDialog({
 		<Dialog open={open} onOpenChange={handleOpenChange}>
 			<DialogContent className="max-w-sm">
 				<DialogHeader>
-					<DialogTitle>Deactivate user</DialogTitle>
+					<DialogTitle>{t('deactivateTitle')}</DialogTitle>
 					<DialogDescription>
-						This will revoke <strong>{fullName}</strong>'s access across all
-						tenants. They will not be able to log in until reactivated.
+						{t('deactivateDescription', { name: fullName })}
 					</DialogDescription>
 				</DialogHeader>
 				<Separator />
@@ -49,7 +53,7 @@ export function DeactivateDialog({
 					<p className="text-sm text-destructive">
 						{isApiError(mutation.error)
 							? mutation.error.message
-							: 'Failed to deactivate user. Please try again.'}
+							: t('deactivateError')}
 					</p>
 				)}
 				<DialogFooter>
@@ -58,7 +62,7 @@ export function DeactivateDialog({
 						onClick={() => handleOpenChange(false)}
 						disabled={mutation.isPending}
 					>
-						Cancel
+						{tc('action.cancel')}
 					</Button>
 					<Button
 						variant="destructive"
@@ -66,7 +70,7 @@ export function DeactivateDialog({
 						onClick={() => mutation.mutate()}
 					>
 						{mutation.isPending && <Spinner className="mr-2 size-4" />}
-						Deactivate
+						{tt('danger.deactivate')}
 					</Button>
 				</DialogFooter>
 			</DialogContent>

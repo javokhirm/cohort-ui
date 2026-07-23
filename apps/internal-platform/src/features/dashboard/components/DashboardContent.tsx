@@ -38,15 +38,20 @@ import type { DashboardKpis } from '@/api/dashboard/types';
 import {
 	AXIS_TICK,
 	CHART,
-	SERVICES,
+	buildServices,
 	TENANT_STATUS_COLORS,
 	TENANT_STATUS_FALLBACK,
 	TOOLTIP_STYLE,
 } from '../constants';
 import { getInitials } from '../utils';
 import { TrendChip } from './TrendChip';
+import { useAppT } from '@/locales';
+import { TENANT_STATUS_TONE, tenantStatusLabel } from '@/features/tenants/constants';
+import type { TenantStatus } from '@/api/tenants/types';
 
 export function DashboardContent({ data }: { data: DashboardKpis }) {
+	const t = useAppT('dashboard');
+	const tt = useAppT('tenants');
 	const trendData = data.mrr.trend.slice(-6).map((p) => ({
 		month: p.periodMonth.slice(5),
 		revenue: p.mrr,
@@ -56,7 +61,7 @@ export function DashboardContent({ data }: { data: DashboardKpis }) {
 	const tenantStatusData = (Object.entries(data.tenants.byStatus) as [string, number][])
 		.filter(([, count]) => count > 0)
 		.map(([status, count]) => ({
-			name: status.charAt(0) + status.slice(1).toLowerCase(),
+			name: tenantStatusLabel(tt, status as TenantStatus),
 			count,
 			fill: TENANT_STATUS_COLORS[status] ?? TENANT_STATUS_FALLBACK,
 		}));
@@ -66,20 +71,24 @@ export function DashboardContent({ data }: { data: DashboardKpis }) {
 			{/* ── Section A: KPI strip ─────────────────────────────────── */}
 			<div className="grid grid-cols-2 gap-4 md:grid-cols-3 xl:grid-cols-6">
 				<StatCard
-					label="Total Tenants"
+					label={t('stat.totalTenants')}
 					value={data.tenants.total}
 					icon={<Building2 />}
-					delta={{ value: `+${data.tenants.newThisMonth} this month` }}
-					hint="all time"
+					delta={{
+						value: t('delta.thisMonth', {
+							count: data.tenants.newThisMonth,
+						}),
+					}}
+					hint={t('hint.allTime')}
 				/>
 				<StatCard
-					label="Active Tenants"
+					label={t('stat.activeTenants')}
 					value={data.tenants.active}
 					icon={<Building2 />}
-					hint={`of ${data.tenants.total} total`}
+					hint={t('hint.ofTotal', { total: data.tenants.total })}
 				/>
 				<StatCard
-					label="MRR"
+					label={t('stat.mrr')}
 					value={formatPriceCompact(data.mrr.current)}
 					icon={<Wallet />}
 					delta={{
@@ -88,27 +97,27 @@ export function DashboardContent({ data }: { data: DashboardKpis }) {
 								<TrendChip value={data.mrr.growth} />
 							) : undefined,
 					}}
-					hint="vs last month"
+					hint={t('hint.vsLastMonth')}
 				/>
 				<StatCard
-					label="Total Students"
+					label={t('stat.totalStudents')}
 					value={formatNumber(data.students.active)}
 					icon={<Users />}
 				/>
 				<StatCard
-					label="New This Month"
+					label={t('stat.newThisMonth')}
 					value={data.tenants.newThisMonth}
 					icon={<ArrowUpRight />}
-					hint="tenant sign-ups"
+					hint={t('hint.tenantSignups')}
 				/>
 				<StatCard
-					label="Churn Rate"
+					label={t('stat.churnRate')}
 					value={formatPercent(data.mrr.churnRate)}
 					icon={<Activity />}
 					delta={{
 						value: <TrendChip value={data.mrr.churnRate} upIsGood={false} />,
 					}}
-					hint="this period"
+					hint={t('hint.thisPeriod')}
 				/>
 			</div>
 
@@ -118,10 +127,10 @@ export function DashboardContent({ data }: { data: DashboardKpis }) {
 				<Card className="gap-0 py-0">
 					<CardHeader className="border-b border-border px-5 py-4">
 						<CardTitle className="text-sm font-semibold">
-							Revenue Trend
+							{t('card.revenueTrend')}
 						</CardTitle>
 						<p className="text-xs text-muted-foreground">
-							Last 6 months (UZS)
+							{t('chart.last6Months')}
 						</p>
 					</CardHeader>
 					<CardContent className="px-2 py-4">
@@ -162,9 +171,11 @@ export function DashboardContent({ data }: { data: DashboardKpis }) {
 				<Card className="gap-0 py-0">
 					<CardHeader className="border-b border-border px-5 py-4">
 						<CardTitle className="text-sm font-semibold">
-							New Signups
+							{t('card.newSignups')}
 						</CardTitle>
-						<p className="text-xs text-muted-foreground">Tenants per month</p>
+						<p className="text-xs text-muted-foreground">
+							{t('chart.tenantsPerMonth')}
+						</p>
 					</CardHeader>
 					<CardContent className="px-2 py-4">
 						<ResponsiveContainer width="100%" height={180}>
@@ -201,10 +212,10 @@ export function DashboardContent({ data }: { data: DashboardKpis }) {
 				<Card className="gap-0 py-0">
 					<CardHeader className="border-b border-border px-5 py-4">
 						<CardTitle className="text-sm font-semibold">
-							Tenant Status
+							{t('card.tenantStatus')}
 						</CardTitle>
 						<p className="text-xs text-muted-foreground">
-							Lifecycle breakdown
+							{t('card.lifecycleBreakdown')}
 						</p>
 					</CardHeader>
 					<CardContent className="flex items-center justify-center px-2 py-4">
@@ -246,16 +257,16 @@ export function DashboardContent({ data }: { data: DashboardKpis }) {
 				<Card className="gap-0 py-0">
 					<CardHeader className="border-b border-border px-5 py-4">
 						<CardTitle className="text-sm font-semibold">
-							Needs Attention
+							{t('card.needsAttention')}
 						</CardTitle>
 						<p className="text-xs text-muted-foreground">
-							Suspended or at-risk tenants
+							{t('chart.atRisk')}
 						</p>
 					</CardHeader>
 					<CardContent className="px-0 py-0">
 						{data.atRisk.tenants.length === 0 ? (
 							<p className="px-5 py-6 text-sm text-tone-green-fg">
-								All tenants healthy ✓
+								{t('allHealthy')}
 							</p>
 						) : (
 							<ul>
@@ -272,15 +283,16 @@ export function DashboardContent({ data }: { data: DashboardKpis }) {
 												{tenant.name}
 											</span>
 											<StatusBadge
-												kind="tenant"
-												status={tenant.status}
-											/>
+												tone={TENANT_STATUS_TONE[tenant.status]}
+											>
+												{tenantStatusLabel(tt, tenant.status)}
+											</StatusBadge>
 											<Button
 												variant="outline"
 												size="sm"
 												className="shrink-0 text-xs"
 											>
-												View
+												{t('view')}
 											</Button>
 										</div>
 									</li>
@@ -294,26 +306,26 @@ export function DashboardContent({ data }: { data: DashboardKpis }) {
 				<Card className="gap-0 py-0">
 					<CardHeader className="border-b border-border px-5 py-4">
 						<CardTitle className="text-sm font-semibold">
-							Monthly Highlights
+							{t('card.monthlyHighlights')}
 						</CardTitle>
 						<p className="text-xs text-muted-foreground">
-							Current period at a glance
+							{t('card.currentPeriod')}
 						</p>
 					</CardHeader>
 					<CardContent className="px-0 py-0">
 						{[
 							{
-								label: 'New tenants',
+								label: t('stat.newTenants'),
 								value: `+${data.tenants.newThisMonth}`,
 								tone: 'text-tone-green-fg',
 							},
 							{
-								label: 'New subscriptions',
+								label: t('stat.newSubscriptions'),
 								value: `+${data.mrr.signups}`,
 								tone: 'text-tone-blue-fg',
 							},
 							{
-								label: 'Churned',
+								label: t('stat.churned'),
 								value:
 									data.mrr.churned > 0 ? `-${data.mrr.churned}` : '0',
 								tone:
@@ -322,7 +334,7 @@ export function DashboardContent({ data }: { data: DashboardKpis }) {
 										: 'text-muted-foreground',
 							},
 							{
-								label: 'MRR growth',
+								label: t('stat.mrrGrowth'),
 								value:
 									data.mrr.growth != null
 										? `${data.mrr.growth > 0 ? '+' : ''}${formatPercent(data.mrr.growth)}`
@@ -333,7 +345,7 @@ export function DashboardContent({ data }: { data: DashboardKpis }) {
 										: 'text-tone-red-fg',
 							},
 							{
-								label: 'Revenue collected',
+								label: t('stat.revenueCollected'),
 								value:
 									data.revenue.processedThisMonth > 0
 										? formatPriceCompact(
@@ -365,15 +377,13 @@ export function DashboardContent({ data }: { data: DashboardKpis }) {
 			<Card className="gap-0 py-0">
 				<CardHeader className="border-b border-border px-5 py-4">
 					<CardTitle className="text-sm font-semibold">
-						System Services
+						{t('card.systemServices')}
 					</CardTitle>
-					<p className="text-xs text-muted-foreground">
-						Live status — all times UTC+5
-					</p>
+					<p className="text-xs text-muted-foreground">{t('systemSubtitle')}</p>
 				</CardHeader>
 				<CardContent className="px-5 py-4">
 					<div className="grid grid-cols-2 gap-3 md:grid-cols-3">
-						{SERVICES.map(({ name, icon: Icon }) => (
+						{buildServices(t).map(({ name, icon: Icon }) => (
 							<div
 								key={name}
 								className="flex items-center justify-between rounded-lg border border-border bg-muted/30 px-4 py-3"
@@ -382,7 +392,7 @@ export function DashboardContent({ data }: { data: DashboardKpis }) {
 									<Icon className="size-4 text-muted-foreground" />
 									<span className="text-sm font-medium">{name}</span>
 								</div>
-								<StatusBadge tone="green">Operational</StatusBadge>
+								<StatusBadge tone="green">{t('operational')}</StatusBadge>
 							</div>
 						))}
 					</div>

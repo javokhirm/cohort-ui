@@ -185,6 +185,36 @@
         ]
       }
     },
+    "/api/v1/super-admin/me/preferences": {
+      "patch": {
+        "operationId": "MeController_updatePreferences",
+        "parameters": [],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/UpdateMyPreferencesDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Update the authenticated operator's language preference",
+        "tags": [
+          "Super Admin / Profile"
+        ]
+      }
+    },
     "/api/v1/super-admin/tenants/summary": {
       "get": {
         "operationId": "TenantsController_summary",
@@ -1758,6 +1788,36 @@
           }
         ],
         "summary": "Change the authenticated staff member's own password",
+        "tags": [
+          "Manage / Profile"
+        ]
+      }
+    },
+    "/api/v1/manage/me/preferences": {
+      "patch": {
+        "operationId": "MeController_updatePreferences",
+        "parameters": [],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/UpdateMyPreferencesDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Update the authenticated staff member's language preference",
         "tags": [
           "Manage / Profile"
         ]
@@ -6902,6 +6962,36 @@
         ]
       }
     },
+    "/api/v1/teach/me/preferences": {
+      "patch": {
+        "operationId": "MyProfileController_updatePreferences",
+        "parameters": [],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/UpdateMyPreferencesDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Update the authenticated teacher's language preference",
+        "tags": [
+          "Teach / My Profile"
+        ]
+      }
+    },
     "/api/v1/teach/sessions/{id}/attendances": {
       "get": {
         "operationId": "AttendanceController_list",
@@ -7673,6 +7763,22 @@
         "required": [
           "email",
           "code"
+        ]
+      },
+      "UpdateMyPreferencesDto": {
+        "type": "object",
+        "properties": {
+          "preferredLanguage": {
+            "type": "string",
+            "enum": [
+              "uz",
+              "ru",
+              "en"
+            ]
+          }
+        },
+        "required": [
+          "preferredLanguage"
         ]
       },
       "OnboardBranchDto": {
@@ -8889,10 +8995,9 @@
             "type": "string",
             "enum": [
               "SCHEDULED",
-              "COMPLETED",
               "CANCELLED"
             ],
-            "description": "CANCELLED requires cancellationReason"
+            "description": "CANCELLED requires cancellationReason; SCHEDULED reactivates a cancelled session. COMPLETED is not settable — the system sets it once the session’s end time passes."
           },
           "cancellationReason": {
             "type": "string",

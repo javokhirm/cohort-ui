@@ -1,5 +1,7 @@
 import { cn, DataTable, StatusBadge, type ColumnDef } from '@repo/ui';
 import { formatDate, formatPrice } from '@repo/utils';
+import { useStatusLabel } from '@repo/i18n';
+import { useAppT } from '@/locales';
 
 import type { InvoiceResponse } from '../api/invoices.queries';
 
@@ -14,10 +16,12 @@ function isVoid(invoice: InvoiceResponse) {
 }
 
 export function InvoiceTable({ invoices, isLoading, onRowClick }: InvoiceTableProps) {
+	const statusLabel = useStatusLabel();
+	const t = useAppT('billing');
 	const columns: ColumnDef<InvoiceResponse>[] = [
 		{
 			accessorKey: 'invoiceNumber',
-			header: 'Invoice #',
+			header: t('invoices.column.invoice'),
 			cell: ({ row, getValue }) => (
 				<span
 					className={cn(
@@ -32,7 +36,7 @@ export function InvoiceTable({ invoices, isLoading, onRowClick }: InvoiceTablePr
 		},
 		{
 			id: 'student',
-			header: 'Student',
+			header: t('invoices.column.student'),
 			cell: ({ row }) => (
 				<span
 					className={cn(
@@ -46,7 +50,7 @@ export function InvoiceTable({ invoices, isLoading, onRowClick }: InvoiceTablePr
 		},
 		{
 			id: 'total',
-			header: () => <div className="text-right">Total</div>,
+			header: () => <div className="text-right">{t('invoices.detail.total')}</div>,
 			cell: ({ row }) => (
 				<div
 					className={cn(
@@ -61,7 +65,7 @@ export function InvoiceTable({ invoices, isLoading, onRowClick }: InvoiceTablePr
 		},
 		{
 			id: 'paid',
-			header: () => <div className="text-right">Paid</div>,
+			header: () => <div className="text-right">{t('invoices.detail.paid')}</div>,
 			cell: ({ row }) => (
 				<div
 					className={cn(
@@ -78,7 +82,9 @@ export function InvoiceTable({ invoices, isLoading, onRowClick }: InvoiceTablePr
 		},
 		{
 			id: 'balance',
-			header: () => <div className="text-right">Balance</div>,
+			header: () => (
+				<div className="text-right">{t('invoices.detail.balance')}</div>
+			),
 			cell: ({ row }) => (
 				<div
 					className={cn(
@@ -97,15 +103,17 @@ export function InvoiceTable({ invoices, isLoading, onRowClick }: InvoiceTablePr
 		},
 		{
 			accessorKey: 'status',
-			header: 'Status',
+			header: t('invoices.column.status'),
 			cell: ({ getValue }) => (
-				<StatusBadge kind="invoice" status={getValue<string>()} />
+				<StatusBadge kind="invoice" status={getValue<string>()}>
+					{statusLabel('invoice', getValue<string>())}
+				</StatusBadge>
 			),
 			size: 110,
 		},
 		{
 			accessorKey: 'dueDate',
-			header: 'Due',
+			header: t('invoices.column.due'),
 			cell: ({ getValue }) => (
 				<span className="text-sm text-muted-foreground">
 					{formatDate(getValue<string>())}
@@ -125,7 +133,7 @@ export function InvoiceTable({ invoices, isLoading, onRowClick }: InvoiceTablePr
 			onRowClick={onRowClick}
 			emptyState={
 				<div className="py-16 text-center text-sm text-muted-foreground">
-					No invoices match this filter.
+					{t('invoices.emptyFiltered')}
 				</div>
 			}
 			className="rounded-none border-0"

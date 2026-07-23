@@ -2,6 +2,7 @@ import { useState } from 'react';
 
 import { Button, Skeleton, StatusBadge } from '@repo/ui';
 import { formatDate } from '@repo/utils';
+import { useAppT } from '@/locales';
 
 import { useEnrollmentDiscounts } from '../api/enrollment-discounts.queries';
 import { EnrollmentDiscountSheet } from './EnrollmentDiscountSheet';
@@ -22,6 +23,7 @@ export function StandingDiscountCell({
 	enrollmentId,
 	groupName,
 }: StandingDiscountCellProps) {
+	const t = useAppT('billing');
 	const [open, setOpen] = useState(false);
 	const { data: assignments = [], isLoading } = useEnrollmentDiscounts(enrollmentId);
 
@@ -49,7 +51,7 @@ export function StandingDiscountCell({
 						className="h-auto p-0"
 						onClick={() => setOpen(true)}
 					>
-						Manage
+						{t('misc.manage')}
 					</Button>
 				</>
 			) : (

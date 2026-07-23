@@ -7,6 +7,7 @@ import {
 	type DetailRow,
 } from '@repo/ui';
 import { formatPrice } from '@repo/utils';
+import { useAppT } from '@/locales';
 
 import type {
 	BillingCycleAnchor,
@@ -17,45 +18,6 @@ import type {
 	LateFeeType,
 	PolicyProrationMethod,
 } from '../api/billing-policy.queries';
-
-const BILLING_MODE_LABEL: Record<BillingMode, string> = {
-	PREPAID: 'Prepaid — billed in advance',
-	POSTPAID: 'Postpaid — billed in arrears',
-};
-
-const BILLING_CYCLE_ANCHOR_LABEL: Record<BillingCycleAnchor, string> = {
-	CALENDAR: 'Calendar month',
-	ENROLLMENT: 'Enrollment anniversary',
-};
-
-const PRORATION_LABEL: Record<PolicyProrationMethod, string> = {
-	SESSION: 'Session-based',
-	DAILY: 'Daily',
-	NONE: 'None',
-};
-
-const CONSUMPTION_LABEL: Record<ConsumptionRule, string> = {
-	ATTENDED_PLUS_UNEXCUSED: 'Attended + unexcused',
-	ALL_SCHEDULED: 'All scheduled',
-	ATTENDED_ONLY: 'Attended only',
-};
-
-const LATE_FEE_TYPE_LABEL: Record<LateFeeType, string> = {
-	FIXED: 'Fixed amount',
-	PERCENT: 'Percentage of the invoice',
-};
-
-const LATE_FEE_RECURRENCE_LABEL: Record<LateFeeRecurrence, string> = {
-	ONE_TIME: 'One-time',
-	DAILY: 'Daily',
-	WEEKLY: 'Weekly',
-};
-
-const onOff = (value: boolean) => (value ? 'On' : 'Off');
-
-/** `null` on a dunning field means the step is switched off entirely. */
-const daysOrDisabled = (days: number | null) =>
-	days == null ? 'Disabled' : `${days} days past due`;
 
 function Section({ title, rows }: { title: string; rows: DetailRow[] }) {
 	return (
@@ -76,13 +38,54 @@ function Section({ title, rows }: { title: string; rows: DetailRow[] }) {
  * (see `BillingPolicyPage`).
  */
 export function BillingPolicySummary({ policy }: { policy: BillingPolicyResponse }) {
+	const t = useAppT('billing');
 	const isAnniversary = policy.billingCycleAnchor === 'ENROLLMENT';
 
+	const billingModeLabel: Record<BillingMode, string> = {
+		PREPAID: t('policyDetail.modePrepaid'),
+		POSTPAID: t('policyDetail.modePostpaid'),
+	};
+	const anchorLabel: Record<BillingCycleAnchor, string> = {
+		CALENDAR: t('policyDetail.anchorCalendar'),
+		ENROLLMENT: t('policyDetail.anchorEnrollment'),
+	};
+	const prorationLabel: Record<PolicyProrationMethod, string> = {
+		SESSION: t('policyDetail.prorationSession'),
+		DAILY: t('policyDetail.prorationDaily'),
+		NONE: t('policyDetail.prorationNone'),
+	};
+	const consumptionLabel: Record<ConsumptionRule, string> = {
+		ATTENDED_PLUS_UNEXCUSED: t('policyDetail.consumptionAttendedPlusUnexcused'),
+		ALL_SCHEDULED: t('policyDetail.consumptionAllScheduled'),
+		ATTENDED_ONLY: t('policyDetail.consumptionAttendedOnly'),
+	};
+	const lateFeeTypeLabel: Record<LateFeeType, string> = {
+		FIXED: t('policyDetail.lateFeeFixed'),
+		PERCENT: t('policyDetail.lateFeePercent'),
+	};
+	const lateFeeRecurrenceLabel: Record<LateFeeRecurrence, string> = {
+		ONE_TIME: t('policyDetail.recurrenceOneTime'),
+		DAILY: t('policyDetail.recurrenceDaily'),
+		WEEKLY: t('policyDetail.recurrenceWeekly'),
+	};
+
+	const onOff = (value: boolean) =>
+		value ? t('policyDetail.on') : t('policyDetail.off');
+
+	/** `null` on a dunning field means the step is switched off entirely. */
+	const daysOrDisabled = (days: number | null) =>
+		days == null
+			? t('policyDetail.disabled')
+			: t('policyDetail.daysPastDue', { days });
+
 	const basics: DetailRow[] = [
-		{ label: 'Billing mode', value: BILLING_MODE_LABEL[policy.billingMode] },
 		{
-			label: 'Billing cycle',
-			value: BILLING_CYCLE_ANCHOR_LABEL[policy.billingCycleAnchor],
+			label: t('policyDetail.billingMode'),
+			value: billingModeLabel[policy.billingMode],
+		},
+		{
+			label: t('policyDetail.billingCycle'),
+			value: anchorLabel[policy.billingCycleAnchor],
 		},
 		// Under enrollment-anniversary billing there is no shared billing/due day —
 		// every student rolls on their own join date — so showing those two fields
@@ -90,108 +93,121 @@ export function BillingPolicySummary({ policy }: { policy: BillingPolicyResponse
 		...(isAnniversary
 			? [
 					{
-						label: 'Invoice due',
+						label: t('policyDetail.invoiceDue'),
 						value:
 							policy.dueOffsetDays === 0
-								? "On each student's cycle start date"
-								: `${policy.dueOffsetDays} days into each student's cycle`,
+								? t('policyDetail.dueOnCycleStart')
+								: t('policyDetail.dueDaysIntoCycle', {
+										days: policy.dueOffsetDays,
+									}),
 					},
 				]
 			: [
 					{
-						label: 'Billing day',
-						value: `Day ${policy.billingDay} of the month`,
+						label: t('policyDetail.billingDay'),
+						value: t('policyDetail.dayOfMonth', { day: policy.billingDay }),
 					},
 					{
-						label: 'Default due day',
-						value: `Day ${policy.dueDay} of the month`,
+						label: t('policyDetail.defaultDueDay'),
+						value: t('policyDetail.dayOfMonth', { day: policy.dueDay }),
 					},
 				]),
 		{
-			label: 'Default proration',
+			label: t('policyDetail.defaultProration'),
 			value: isAnniversary
-				? `${PRORATION_LABEL[policy.prorationMethod]} — not applied on this cycle`
-				: PRORATION_LABEL[policy.prorationMethod],
+				? t('policyDetail.prorationNotApplied', {
+						method: prorationLabel[policy.prorationMethod],
+					})
+				: prorationLabel[policy.prorationMethod],
 		},
 		{
-			label: 'Immediate invoice due offset',
+			label: t('policyDetail.immediateDueOffset'),
 			value:
 				policy.immediateDueDays === 0
-					? 'Same day'
-					: `${policy.immediateDueDays} days`,
+					? t('policyDetail.sameDay')
+					: t('policyDetail.daysValue', { days: policy.immediateDueDays }),
 		},
 		{
-			label: 'Grace period',
+			label: t('policyDetail.gracePeriod'),
 			value:
 				policy.graceDays === 0
-					? 'None — overdue on the due date'
-					: `${policy.graceDays} days before an invoice is marked overdue`,
+					? t('policyDetail.graceNone')
+					: t('policyDetail.graceValue', { days: policy.graceDays }),
 		},
 	];
 
 	const enrollment: DetailRow[] = [
 		{
-			label: 'Charge on enrollment',
+			label: t('policyDetail.chargeOnEnrollment'),
 			value: policy.chargeOnEnrollment
 				? isAnniversary
-					? 'On — first full cycle invoiced immediately'
-					: 'On — prorated invoice issued immediately'
-				: 'Off — billed on the next run',
+					? t('policyDetail.chargeOnFirstCycle')
+					: t('policyDetail.chargeOnProrated')
+				: t('policyDetail.chargeOff'),
 		},
 	];
 
 	const lateFees: DetailRow[] = policy.lateFeeEnabled
 		? [
-				{ label: 'Late fees', value: 'On' },
-				{ label: 'Type', value: LATE_FEE_TYPE_LABEL[policy.lateFeeType] },
+				{ label: t('policyDetail.lateFees'), value: t('policyDetail.on') },
 				{
-					label: 'Amount',
+					label: t('policyDetail.type'),
+					value: lateFeeTypeLabel[policy.lateFeeType],
+				},
+				{
+					label: t('policyDetail.amount'),
 					value:
 						policy.lateFeeType === 'PERCENT'
 							? `${policy.lateFeeAmount}%`
 							: formatPrice(policy.lateFeeAmount),
 				},
 				{
-					label: 'Recurrence',
-					value: LATE_FEE_RECURRENCE_LABEL[policy.lateFeeRecurrence],
+					label: t('policyDetail.recurrence'),
+					value: lateFeeRecurrenceLabel[policy.lateFeeRecurrence],
 				},
 				{
-					label: 'Maximum per invoice',
+					label: t('policyDetail.maxPerInvoice'),
 					value:
 						policy.lateFeeMaxTotal == null
-							? 'Uncapped'
+							? t('policyDetail.uncapped')
 							: formatPrice(policy.lateFeeMaxTotal),
 				},
 			]
-		: [{ label: 'Late fees', value: 'Off' }];
+		: [{ label: t('policyDetail.lateFees'), value: t('policyDetail.off') }];
 
 	const dunning: DetailRow[] = [
 		{
-			label: 'Auto-suspend enrollment',
+			label: t('policyDetail.autoSuspend'),
 			value: daysOrDisabled(policy.autoSuspendAfterDays),
 		},
 		{
-			label: 'Auto-cancel enrollment',
+			label: t('policyDetail.autoCancel'),
 			value: daysOrDisabled(policy.autoCancelAfterDays),
 		},
-		{ label: 'Payment reminders', value: onOff(policy.remindersEnabled) },
+		{
+			label: t('policyDetail.paymentReminders'),
+			value: onOff(policy.remindersEnabled),
+		},
 	];
 
 	const advanced: DetailRow[] = [
 		{
-			label: 'Consumption rule',
-			value: CONSUMPTION_LABEL[policy.consumptionRule],
+			label: t('policyDetail.consumptionRule'),
+			value: consumptionLabel[policy.consumptionRule],
 		},
-		{ label: 'Auto-apply wallet credit', value: onOff(policy.autoApplyCredit) },
+		{
+			label: t('policyDetail.autoApplyCredit'),
+			value: onOff(policy.autoApplyCredit),
+		},
 	];
 
 	return (
 		<div className="flex flex-col gap-6">
-			<Section title="Billing basics" rows={basics} />
-			<Section title="Enrollment" rows={enrollment} />
-			<Section title="Late fees" rows={lateFees} />
-			<Section title="Dunning" rows={dunning} />
-			<Section title="Advanced" rows={advanced} />
+			<Section title={t('policySections.basics')} rows={basics} />
+			<Section title={t('policySections.enrollment')} rows={enrollment} />
+			<Section title={t('policySections.lateFees')} rows={lateFees} />
+			<Section title={t('policySections.dunning')} rows={dunning} />
+			<Section title={t('policySections.advanced')} rows={advanced} />
 		</div>
 	);
 }

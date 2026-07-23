@@ -1,5 +1,8 @@
 import { cn, StatusBadge } from '@repo/ui';
 import { formatRelative } from '@repo/utils';
+import { useStatusLabel } from '@repo/i18n';
+
+import { useAppT } from '@/locales';
 
 import type { LeadCard as LeadCardType } from '../api/leads.queries';
 import { getInitials, leadFullName } from '../lib/lead-options';
@@ -22,6 +25,9 @@ export function LeadCard({
 	onDragStart,
 	onDragEnd,
 }: LeadCardProps) {
+	const t = useAppT('leads');
+	const statusLabel = useStatusLabel();
+
 	return (
 		<div
 			role="button"
@@ -61,11 +67,13 @@ export function LeadCard({
 			</div>
 
 			<div className="mb-2 truncate text-xs text-muted-foreground">
-				{lead.courseInterest?.name ?? 'No course interest'}
+				{lead.courseInterest?.name ?? t('card.noCourseInterest')}
 			</div>
 
 			<div className="flex items-center justify-between gap-2">
-				<StatusBadge kind="lead_source" status={lead.source} />
+				<StatusBadge kind="lead_source" status={lead.source}>
+					{statusLabel('lead_source', lead.source)}
+				</StatusBadge>
 				<span className="shrink-0 text-[11px] text-muted-foreground">
 					{formatRelative(lead.createdAt)}
 				</span>

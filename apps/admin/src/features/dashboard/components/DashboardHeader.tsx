@@ -2,48 +2,44 @@ import { useNavigate } from '@tanstack/react-router';
 import { FilePlus2, Plus, UsersRound } from 'lucide-react';
 
 import { Button } from '@repo/ui';
-import { TASHKENT_TZ } from '@repo/utils';
+import { currentHour, formatFullDate, todayIsoDate } from '@repo/utils';
 
 import { useSessionStore } from '@/store/sessionStore';
-
-/** Time-of-day greeting for the given hour (0–23) in the tenant timezone. */
-function greeting(hour: number): string {
-	if (hour < 12) return 'Good morning';
-	if (hour < 18) return 'Good afternoon';
-	return 'Good evening';
-}
+import { useAppT } from '@/locales';
 
 /**
  * Dashboard greeting + quick actions. The name comes from the logged-in staff
- * profile; the date/greeting are computed in the tenant timezone (`Intl`, no
- * extra date dependency in the app).
+ * profile; the date/greeting are computed in the tenant timezone via the shared
+ * `@repo/utils` helpers, so the date localizes with the active language.
  */
 export function DashboardHeader() {
+	const t = useAppT('dashboard');
 	const navigate = useNavigate();
 	const user = useSessionStore((s) => s.user);
 
-	const now = new Date();
-	const hour = Number(
-		new Intl.DateTimeFormat('en-US', {
-			timeZone: TASHKENT_TZ,
-			hour: 'numeric',
-			hour12: false,
-		}).format(now),
-	);
-	const dateLabel = new Intl.DateTimeFormat('en-US', {
-		timeZone: TASHKENT_TZ,
-		weekday: 'long',
-		day: 'numeric',
-		month: 'long',
-		year: 'numeric',
-	}).format(now);
+	const hour = currentHour();
+	const dateLabel = formatFullDate(todayIsoDate(), { year: true });
+
+	// User-facing text must not be hardcoded (conventions §7); the key is
+	// picked here and resolved with `t` so a language switch re-translates.
+	const greetingKey =
+		hour < 12
+			? 'greeting.morning'
+			: hour < 18
+				? 'greeting.afternoon'
+				: 'greeting.evening';
+	const greetingText = t(greetingKey);
 
 	return (
 		<div className="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
 			<div>
 				<h1 className="text-2xl font-bold tracking-tight">
-					{greeting(hour)}
-					{user ? `, ${user.firstName}` : ''}
+					{user
+						? t('greeting.withName', {
+								greeting: greetingText,
+								name: user.firstName,
+							})
+						: greetingText}
 				</h1>
 				<p className="text-sm text-muted-foreground">{dateLabel}</p>
 			</div>
@@ -55,7 +51,7 @@ export function DashboardHeader() {
 					onClick={() => void navigate({ to: '/students' })}
 				>
 					<UsersRound className="size-4" />
-					Add student
+					{t('addStudent')}
 				</Button>
 				<Button
 					variant="outline"
@@ -63,11 +59,11 @@ export function DashboardHeader() {
 					onClick={() => void navigate({ to: '/groups/new' })}
 				>
 					<Plus className="size-4" />
-					New group
+					{t('newGroup')}
 				</Button>
 				<Button size="sm" onClick={() => void navigate({ to: '/invoices' })}>
 					<FilePlus2 className="size-4" />
-					Create invoice
+					{t('createInvoice')}
 				</Button>
 			</div>
 		</div>

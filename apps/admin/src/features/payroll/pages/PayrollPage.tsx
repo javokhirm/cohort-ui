@@ -28,17 +28,26 @@ import { PayrollPeriodTable } from '../components/PayrollPeriodTable';
 import { PeriodSelector } from '../components/PeriodSelector';
 import { buildPayrollCsv, downloadCsv } from '../lib/export-csv';
 import { currentMonth, formatMonthLabel } from '../lib/month';
+import { useAppT } from '@/locales';
 
 const ALL_STAFF = 'all';
 
-const STATUS_FILTERS: { value: PayrollRowStatus | undefined; label: string }[] = [
-	{ value: undefined, label: 'All' },
-	{ value: 'LIVE', label: 'Live' },
-	{ value: 'FINALIZED', label: 'Finalized' },
-	{ value: 'PAID', label: 'Paid' },
-];
+type PayrollT = ReturnType<typeof useAppT<'payroll'>>;
+
+function buildStatusFilters(
+	t: PayrollT,
+): { value: PayrollRowStatus | undefined; label: string }[] {
+	return [
+		{ value: undefined, label: t('filterAll') },
+		{ value: 'LIVE', label: t('live') },
+		{ value: 'FINALIZED', label: t('finalized') },
+		{ value: 'PAID', label: t('paid') },
+	];
+}
 
 export function PayrollPage() {
+	const t = useAppT('payroll');
+	const statusFilters = buildStatusFilters(t);
 	const navigate = useNavigate({ from: '/payroll' });
 	const search = useSearch({ from: '/_authed/payroll' });
 	const month = search.month ?? currentMonth();
@@ -87,8 +96,8 @@ export function PayrollPage() {
 	return (
 		<div className="mx-auto flex max-w-7xl flex-col gap-6">
 			<PageHeader
-				title="Payroll"
-				description={`${formatMonthLabel(month)} · computed per teacher from sessions taught & students`}
+				title={t('title')}
+				description={`${formatMonthLabel(month)} · ${t('headerSubtitle')}`}
 				actions={
 					<div className="flex flex-wrap items-center gap-2">
 						<PeriodSelector month={month} onMonthChange={handleMonthChange} />
@@ -98,12 +107,12 @@ export function PayrollPage() {
 							disabled={rows.length === 0}
 						>
 							<Download className="mr-1.5 size-4" />
-							Export
+							{t('export')}
 						</Button>
 						{periodFinalized ? (
 							<div className="flex h-9 items-center gap-1.5 rounded-lg border border-border bg-muted px-3 text-sm font-semibold text-muted-foreground">
 								<Check className="size-4" />
-								Finalized
+								{t('finalized')}
 							</div>
 						) : (
 							can('payroll.finalize') && (
@@ -112,7 +121,7 @@ export function PayrollPage() {
 									disabled={!summary || rows.length === 0}
 								>
 									<Lock className="mr-1.5 size-4" />
-									Finalize period
+									{t('finalizePeriod')}
 								</Button>
 							)
 						)}
@@ -122,11 +131,11 @@ export function PayrollPage() {
 
 			<div className="grid grid-cols-1 gap-4 sm:grid-cols-3">
 				<StatCard
-					label="Total computed"
+					label={t('stat.totalComputed')}
 					value={statValue(summary?.totalComputed)}
 				/>
 				<StatCard
-					label="Mid-month advances"
+					label={t('stat.advances')}
 					value={
 						<span className="text-tone-red-fg">
 							{statValue(summary?.totalAdvances)}
@@ -134,7 +143,7 @@ export function PayrollPage() {
 					}
 				/>
 				<StatCard
-					label="Net payable"
+					label={t('stat.netPayable')}
 					value={
 						<span className="text-tone-green-fg">
 							{statValue(summary?.totalNetPayable)}
@@ -146,7 +155,7 @@ export function PayrollPage() {
 			<div className="flex flex-col gap-4">
 				<div className="flex flex-wrap items-end gap-4">
 					<SearchFilterBar
-						filters={STATUS_FILTERS.map((f) => ({
+						filters={statusFilters.map((f) => ({
 							id: f.value ?? 'ALL',
 							label: f.label,
 							active: status === f.value,
@@ -154,16 +163,18 @@ export function PayrollPage() {
 						}))}
 					/>
 					<div className="flex flex-col gap-1.5">
-						<Label className="text-xs text-muted-foreground">Staff</Label>
+						<Label className="text-xs text-muted-foreground">
+							{t('staffLabel')}
+						</Label>
 						<Select
 							value={staffId ? String(staffId) : ALL_STAFF}
 							onValueChange={handleStaffChange}
 						>
 							<SelectTrigger className="h-9 w-52" size="sm">
-								<SelectValue placeholder="All staff" />
+								<SelectValue placeholder={t('allStaff')} />
 							</SelectTrigger>
 							<SelectContent>
-								<SelectItem value={ALL_STAFF}>All staff</SelectItem>
+								<SelectItem value={ALL_STAFF}>{t('allStaff')}</SelectItem>
 								{staffOptions.map((s) => (
 									<SelectItem key={s.id} value={String(s.id)}>
 										{s.user.firstName} {s.user.lastName}
@@ -176,14 +187,13 @@ export function PayrollPage() {
 
 				{data != null && data.excludedCount > 0 && (
 					<p className="text-sm text-muted-foreground">
-						{data.excludedCount} staff excluded — no active payroll config
-						this month.
+						{t('excluded', { count: data.excludedCount })}
 					</p>
 				)}
 
 				{isError && (
 					<div className="rounded-lg border border-destructive/30 bg-destructive/5 px-4 py-3 text-sm text-destructive">
-						Failed to load payroll. Please refresh.
+						{t('loadError')}
 					</div>
 				)}
 

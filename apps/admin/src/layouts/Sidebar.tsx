@@ -33,12 +33,38 @@ import {
 	TooltipContent,
 	TooltipTrigger,
 } from '@repo/ui';
+import { useT } from '@repo/i18n';
 import { useAuth, usePermissions } from '@/features/auth/hooks';
 import type { PermissionRequirement } from '@/lib/auth/permissions';
+import { useAppT } from '@/locales';
+
+/** Leaf keys under the `nav` namespace's `group.*` / `item.*` — resolved at
+ * render, not module load, so language switches re-translate the sidebar. Typed
+ * as unions (not `string`) so a typo or a removed catalog key fails check-types. */
+type NavGroupKey =
+	'overview' | 'crm' | 'people' | 'academics' | 'finance' | 'administration';
+type NavItemKey =
+	| 'dashboard'
+	| 'leads'
+	| 'students'
+	| 'staff'
+	| 'courses'
+	| 'rooms'
+	| 'groups'
+	| 'schedule'
+	| 'invoices'
+	| 'payments'
+	| 'feePlans'
+	| 'billingPolicy'
+	| 'discounts'
+	| 'expenses'
+	| 'payroll'
+	| 'branches';
 
 type NavItemDef = {
 	id: string;
-	label: string;
+	/** i18n key under `nav:item.*`. */
+	label: NavItemKey;
 	Icon: LucideIcon;
 	href: string;
 	badge?: string;
@@ -47,17 +73,18 @@ type NavItemDef = {
 };
 
 type NavGroupDef = {
-	label: string;
+	/** i18n key under `nav:group.*`. */
+	label: NavGroupKey;
 	items: NavItemDef[];
 };
 
 const NAV_GROUPS: NavGroupDef[] = [
 	{
-		label: 'Overview',
+		label: 'overview',
 		items: [
 			{
 				id: 'dashboard',
-				label: 'Dashboard',
+				label: 'dashboard',
 				Icon: LayoutDashboard,
 				href: '/',
 				permission: 'dashboard.read',
@@ -65,11 +92,11 @@ const NAV_GROUPS: NavGroupDef[] = [
 		],
 	},
 	{
-		label: 'CRM',
+		label: 'crm',
 		items: [
 			{
 				id: 'leads',
-				label: 'Leads / Pipeline',
+				label: 'leads',
 				Icon: Filter,
 				href: '/leads',
 				permission: 'lead.read',
@@ -77,18 +104,18 @@ const NAV_GROUPS: NavGroupDef[] = [
 		],
 	},
 	{
-		label: 'People',
+		label: 'people',
 		items: [
 			{
 				id: 'students',
-				label: 'Students',
+				label: 'students',
 				Icon: GraduationCap,
 				href: '/students',
 				permission: 'student.read',
 			},
 			{
 				id: 'staff',
-				label: 'Staff & HR',
+				label: 'staff',
 				Icon: Briefcase,
 				href: '/staff',
 				permission: 'staff.read',
@@ -96,53 +123,53 @@ const NAV_GROUPS: NavGroupDef[] = [
 		],
 	},
 	{
-		label: 'Academics',
+		label: 'academics',
 		items: [
 			{
 				id: 'courses',
-				label: 'Courses',
+				label: 'courses',
 				Icon: BookOpen,
 				href: '/courses',
 				permission: 'course.read',
 			},
 			{
 				id: 'rooms',
-				label: 'Rooms',
+				label: 'rooms',
 				Icon: DoorOpen,
 				href: '/rooms',
 				permission: 'room.read',
 			},
 			{
 				id: 'groups',
-				label: 'Groups',
+				label: 'groups',
 				Icon: CalendarDays,
 				href: '/groups',
 				permission: 'group.read',
 			},
 			{
 				id: 'schedule',
-				label: 'Schedule',
+				label: 'schedule',
 				Icon: CalendarClock,
 				href: '/schedule',
 				permission: 'session.read',
 			},
 			// {
 			// 	id: 'attendance',
-			// 	label: 'Attendance',
+			// 	label: 'attendance',
 			// 	Icon: CheckSquare,
 			// 	href: '/attendance',
 			// 	permission: 'attendance.read',
 			// },
 			// {
 			// 	id: 'assessments',
-			// 	label: 'Assessments',
+			// 	label: 'assessments',
 			// 	Icon: ClipboardList,
 			// 	href: '/assessments',
 			// 	permission: 'assessment.read',
 			// },
 			// {
 			// 	id: 'report-cards',
-			// 	label: 'Report Cards',
+			// 	label: 'reportCards',
 			// 	Icon: ScrollText,
 			// 	href: '/report-cards',
 			// 	permission: ['report-card.generate', 'report-card.publish'],
@@ -150,46 +177,46 @@ const NAV_GROUPS: NavGroupDef[] = [
 		],
 	},
 	{
-		label: 'Finance',
+		label: 'finance',
 		items: [
 			{
 				id: 'invoices',
-				label: 'Invoices',
+				label: 'invoices',
 				Icon: FileText,
 				href: '/invoices',
 				permission: 'invoice.read',
 			},
 			{
 				id: 'payments',
-				label: 'Payments',
+				label: 'payments',
 				Icon: CreditCard,
 				href: '/payments',
 				permission: 'payment.read',
 			},
 			{
 				id: 'fee-plans',
-				label: 'Fee Plans',
+				label: 'feePlans',
 				Icon: Layers,
 				href: '/fee-plans',
 				permission: 'fee-plan.manage',
 			},
 			{
 				id: 'billing-policy',
-				label: 'Billing Policy',
+				label: 'billingPolicy',
 				Icon: SlidersHorizontal,
 				href: '/billing-policy',
 				permission: 'billing-policy.view',
 			},
 			{
 				id: 'discounts',
-				label: 'Discounts',
+				label: 'discounts',
 				Icon: Tag,
 				href: '/discounts',
 				permission: 'discount.manage',
 			},
 			{
 				id: 'expenses',
-				label: 'Expenses',
+				label: 'expenses',
 				Icon: Receipt,
 				href: '/expenses',
 				permission: [
@@ -201,7 +228,7 @@ const NAV_GROUPS: NavGroupDef[] = [
 			},
 			{
 				id: 'payroll',
-				label: 'Payroll',
+				label: 'payroll',
 				Icon: Wallet,
 				href: '/payroll',
 				badge: 'OWNER',
@@ -210,11 +237,11 @@ const NAV_GROUPS: NavGroupDef[] = [
 		],
 	},
 	// {
-	// 	label: 'Engagement',
+	// 	label: 'engagement',
 	// 	items: [
 	// 		{
 	// 			id: 'communication',
-	// 			label: 'Communication',
+	// 			label: 'communication',
 	// 			Icon: MessageSquare,
 	// 			href: '/communication',
 	// 			permission: [
@@ -225,7 +252,7 @@ const NAV_GROUPS: NavGroupDef[] = [
 	// 		},
 	// 		{
 	// 			id: 'materials',
-	// 			label: 'Learning Materials',
+	// 			label: 'materials',
 	// 			Icon: FolderOpen,
 	// 			href: '/materials',
 	// 			permission: 'material.read',
@@ -233,25 +260,25 @@ const NAV_GROUPS: NavGroupDef[] = [
 	// 	],
 	// },
 	{
-		label: 'Administration',
+		label: 'administration',
 		items: [
 			{
 				id: 'branches',
-				label: 'Branches',
+				label: 'branches',
 				Icon: Building2,
 				href: '/branches',
 				permission: 'branch.read',
 			},
 			// {
 			// 	id: 'roles',
-			// 	label: 'Roles & Permissions',
+			// 	label: 'roles',
 			// 	Icon: Shield,
 			// 	href: '/roles',
 			// 	permission: 'role.read',
 			// },
 			// {
 			// 	id: 'audit-log',
-			// 	label: 'Audit Log',
+			// 	label: 'auditLog',
 			// 	Icon: History,
 			// 	href: '/audit-log',
 			// 	permission: 'audit.read',
@@ -274,7 +301,9 @@ function NavButton({
 	collapsed: boolean;
 }) {
 	const navigate = useNavigate();
+	const t = useT('nav');
 	const { Icon } = item;
+	const label = t(`item.${item.label}`);
 
 	const button = (
 		<button
@@ -312,7 +341,7 @@ function NavButton({
 					collapsed ? 'opacity-0' : 'opacity-100',
 				)}
 			>
-				<span className="flex-1 truncate text-left">{item.label}</span>
+				<span className="flex-1 truncate text-left">{label}</span>
 				{item.badge && (
 					<span className="rounded-md bg-tone-amber-bg px-1.5 py-px text-[9.5px] font-bold uppercase tracking-wide text-tone-amber-fg">
 						{item.badge}
@@ -327,7 +356,7 @@ function NavButton({
 			<Tooltip>
 				<TooltipTrigger asChild>{button}</TooltipTrigger>
 				<TooltipContent side="right" sideOffset={8}>
-					<span>{item.label}</span>
+					<span>{label}</span>
 					{item.badge && (
 						<span className="ml-1 text-[9px] font-bold text-tone-amber-fg">
 							{item.badge}
@@ -346,6 +375,9 @@ export function Sidebar({ collapsed }: SidebarProps) {
 	const { can, permissionsLoaded } = usePermissions();
 	const pathname = useRouterState({ select: (s) => s.location.pathname });
 	const navigate = useNavigate();
+	const t = useT('nav');
+	const tAuth = useT('auth');
+	const tApp = useAppT('shell');
 
 	// Cosmetic nav filtering — show only what the resolved permissions allow, and
 	// drop a group once all its items are hidden. The backend enforces access.
@@ -394,7 +426,7 @@ export function Sidebar({ collapsed }: SidebarProps) {
 						{tenantName}
 					</div>
 					<div className="font-mono text-[10px] text-muted-foreground">
-						MANAGE
+						{tApp('brandSurface')}
 					</div>
 				</div>
 			</div>
@@ -415,7 +447,7 @@ export function Sidebar({ collapsed }: SidebarProps) {
 							)}
 						>
 							<span className="text-[10px] font-semibold uppercase tracking-widest text-muted-foreground">
-								{group.label}
+								{t(`group.${group.label}`)}
 							</span>
 						</div>
 						{group.items.map((item) => (
@@ -486,7 +518,7 @@ export function Sidebar({ collapsed }: SidebarProps) {
 									onClick={() => void navigate({ to: '/account' })}
 								>
 									<User className="mr-2 size-4" />
-									Profile
+									{t('item.profile')}
 								</DropdownMenuItem>
 								<DropdownMenuSeparator />
 								<DropdownMenuItem
@@ -494,7 +526,7 @@ export function Sidebar({ collapsed }: SidebarProps) {
 									onClick={logout}
 								>
 									<LogOut className="mr-2 size-4" />
-									Sign out
+									{tAuth('signOut')}
 								</DropdownMenuItem>
 							</DropdownMenuContent>
 						</DropdownMenu>

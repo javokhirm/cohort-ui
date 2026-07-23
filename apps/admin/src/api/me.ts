@@ -1,3 +1,5 @@
+import type { Locale } from '@repo/utils';
+
 import { manageApi } from '@/api/apiClient';
 import { useSessionStore } from '@/store/sessionStore';
 
@@ -25,6 +27,16 @@ export interface ManageProfile {
 /** Fetch the current staff member's profile + resolved permission codes. */
 export function fetchManageProfile(): Promise<ManageProfile> {
 	return manageApi.get<ManageProfile>('/me');
+}
+
+/**
+ * Persist the caller's UI language to `PATCH /manage/me/preferences`. Returns
+ * nothing — the endpoint responds 200 with an empty body. The local switch
+ * (localStorage + i18next) is applied optimistically by `useLocalePreference`;
+ * this call is what makes the choice follow the user across devices and apps.
+ */
+export function updateMyPreferences(preferredLanguage: Locale): Promise<null> {
+	return manageApi.patch<null>('/me/preferences', { preferredLanguage });
 }
 
 /**

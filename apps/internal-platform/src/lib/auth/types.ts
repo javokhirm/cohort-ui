@@ -8,6 +8,7 @@
  * with generated types from `@repo/api-client` once the spec is regenerated
  * (`pnpm gen:api` against a running backend).
  */
+import type { Locale } from '@repo/utils';
 
 /** The `user` summary returned alongside the JWT pair. */
 export interface AuthUserSummary {
@@ -17,6 +18,8 @@ export interface AuthUserSummary {
 	roles: string[];
 	/** `null` = all branches. Operators are platform-wide, so typically `null`. */
 	branchScope: number[] | null;
+	/** Stored UI language, or `null` if never chosen. Applied on sign-in. */
+	preferredLanguage: Locale | null;
 }
 
 /** `data` of a successful login / verify-otp / refresh response. */

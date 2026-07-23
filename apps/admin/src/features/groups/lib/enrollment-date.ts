@@ -1,6 +1,8 @@
 import { isApiError } from '@repo/api-client';
 import { formatDate } from '@repo/utils';
 
+import type { GroupsT } from './group-options';
+
 /**
  * Backend error code raised when an enrollment's `enrolledAt` falls outside the
  * tenant's current billing period (`EnrollmentStartWindowService`). The 422 body
@@ -32,7 +34,7 @@ function pretty(iso: string | undefined): string | null {
  * explanation naming the window the date must fall in; otherwise return `null`
  * so the caller can fall back to generic error handling. Pure — safe to unit-test.
  */
-export function describeEnrollmentDateError(err: unknown): string | null {
+export function describeEnrollmentDateError(t: GroupsT, err: unknown): string | null {
 	if (!isApiError(err) || err.code !== ENROLLMENT_DATE_CODE) return null;
 
 	const { earliest, latest } = (err.details ?? {}) as EnrollmentDateDetail;
@@ -42,5 +44,5 @@ export function describeEnrollmentDateError(err: unknown): string | null {
 	// fallback when the details are missing or malformed.
 	if (!from || !to) return err.message;
 
-	return `That start date would skip billing cycles the student would never be invoiced for. Pick a date between ${from} and ${to}.`;
+	return t('enrollmentDateError', { from, to });
 }

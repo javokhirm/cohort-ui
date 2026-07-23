@@ -4,59 +4,76 @@ import { formatDateTime } from '@repo/utils';
 
 import type { StudentImportSessionView } from '@/api/student-imports/types';
 
-import { IMPORT_STATUS_LABEL, IMPORT_STATUS_TONE } from '../constants';
+import { importStatusLabel, IMPORT_STATUS_TONE } from '../constants';
 import { useStudentImports } from '../hooks';
 import { UploadImportCard } from './UploadImportCard';
+import { useAppT } from '@/locales';
 
-const columns: ColumnDef<StudentImportSessionView>[] = [
-	{
-		id: 'file',
-		header: 'File',
-		cell: ({ row }) => (
-			<span className="font-mono text-sm">{row.original.fileName}</span>
-		),
-	},
-	{
-		id: 'status',
-		header: 'Status',
-		cell: ({ row }) => (
-			<StatusBadge tone={IMPORT_STATUS_TONE[row.original.status]}>
-				{IMPORT_STATUS_LABEL[row.original.status]}
-			</StatusBadge>
-		),
-	},
-	{
-		id: 'result',
-		header: 'Result',
-		cell: ({ row }) => {
-			const { status, counters } = row.original;
-			if (status === 'COMPLETED') {
+/**
+ * Built per render rather than held at module scope: the headers are
+ * user-facing, so they must re-resolve when the language changes.
+ */
+function buildColumns(
+	t: ReturnType<typeof useAppT<'imports'>>,
+): ColumnDef<StudentImportSessionView>[] {
+	return [
+		{
+			id: 'file',
+			header: t('column.file'),
+			cell: ({ row }) => (
+				<span className="font-mono text-sm">{row.original.fileName}</span>
+			),
+		},
+		{
+			id: 'status',
+			header: t('column.status'),
+			cell: ({ row }) => (
+				<StatusBadge tone={IMPORT_STATUS_TONE[row.original.status]}>
+					{importStatusLabel(t, row.original.status)}
+				</StatusBadge>
+			),
+		},
+		{
+			id: 'result',
+			header: t('column.result'),
+			cell: ({ row }) => {
+				const { status, counters } = row.original;
+				if (status === 'COMPLETED') {
+					return (
+						<span className="text-sm text-muted-foreground">
+							{t('resultImported', { count: counters.createdCount })}
+							{counters.skippedCount > 0 &&
+								t('resultAlreadyEnrolledSuffix', {
+									count: counters.skippedCount,
+								})}
+							{counters.failedCount > 0 &&
+								t('resultFailedSuffix', {
+									count: counters.failedCount,
+								})}
+						</span>
+					);
+				}
 				return (
 					<span className="text-sm text-muted-foreground">
-						{counters.createdCount} imported
-						{counters.skippedCount > 0 &&
-							`, ${counters.skippedCount} already enrolled`}
-						{counters.failedCount > 0 && `, ${counters.failedCount} failed`}
+						{t('resultValid', {
+							valid: counters.validRows,
+							total: counters.totalRows,
+						})}
 					</span>
 				);
-			}
-			return (
-				<span className="text-sm text-muted-foreground">
-					{counters.validRows} of {counters.totalRows} rows valid
-				</span>
-			);
+			},
 		},
-	},
-	{
-		id: 'createdAt',
-		header: 'Uploaded',
-		cell: ({ row }) => (
-			<span className="text-sm text-muted-foreground">
-				{formatDateTime(row.original.createdAt)}
-			</span>
-		),
-	},
-];
+		{
+			id: 'createdAt',
+			header: t('column.uploaded'),
+			cell: ({ row }) => (
+				<span className="text-sm text-muted-foreground">
+					{formatDateTime(row.original.createdAt)}
+				</span>
+			),
+		},
+	];
+}
 
 /**
  * The center's import history, plus the upload that starts a new one.
@@ -65,6 +82,7 @@ const columns: ColumnDef<StudentImportSessionView>[] = [
  * archive — the permanent record of what was imported lives in the audit log.
  */
 export function ImportsTab({ tenantId }: { tenantId: number }) {
+	const t = useAppT('imports');
 	const navigate = useNavigate();
 	const { data: sessions, isLoading, isError } = useStudentImports(tenantId, true);
 
@@ -82,25 +100,24 @@ export function ImportsTab({ tenantId }: { tenantId: number }) {
 			/>
 
 			<div className="flex flex-col gap-3">
-				<h3 className="text-sm font-semibold">Recent imports</h3>
+				<h3 className="text-sm font-semibold">{t('recentImports')}</h3>
 
 				{isError ? (
 					<div className="rounded-lg border border-destructive/30 bg-destructive/5 px-4 py-3 text-sm text-destructive">
-						Failed to load this center&apos;s imports. Please refresh.
+						{t('importsLoadError')}
 					</div>
 				) : isLoading ? (
 					<Skeleton className="h-40 w-full" />
 				) : (
 					<Card className="gap-0 overflow-hidden py-0">
 						<DataTable
-							columns={columns}
+							columns={buildColumns(t)}
 							data={sessions ?? []}
 							getRowId={(row) => row.sessionId}
 							onRowClick={(row) => openSession(row.sessionId)}
 							emptyState={
 								<div className="py-16 text-center text-sm text-muted-foreground">
-									No imports yet. Upload a CSV to migrate this
-									center&apos;s students.
+									{t('importsEmpty')}
 								</div>
 							}
 							className="rounded-none border-0"

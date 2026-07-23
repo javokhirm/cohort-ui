@@ -13,6 +13,7 @@ import { AXIS_TICK, CHART, TOOLTIP_STYLE } from './chartTheme';
 import { ChartSkeleton } from './DashboardSkeletons';
 import { PanelCard } from './PanelCard';
 import { PanelError } from './PanelError';
+import { useAppT } from '@/locales';
 
 /** `YYYY-MM-DD` → day-of-month label (`24`). */
 function dayLabel(date: string): string {
@@ -21,11 +22,12 @@ function dayLabel(date: string): string {
 
 /** Attendance trend — daily rate, last 14 days. */
 export function AttendanceTrendCard() {
+	const t = useAppT('dashboard');
 	const { data, isLoading, isError, refetch } = useAttendanceTrend(14);
 
 	if (isLoading) return <ChartSkeleton />;
 	if (isError || !data)
-		return <PanelError title="Attendance trend" onRetry={refetch} />;
+		return <PanelError title={t('card.attendanceTrend')} onRetry={refetch} />;
 
 	const chartData = data.points.map((p) => ({
 		day: dayLabel(p.date),
@@ -34,8 +36,8 @@ export function AttendanceTrendCard() {
 
 	return (
 		<PanelCard
-			title="Attendance trend"
-			subtitle="Daily rate, last 14 days"
+			title={t('card.attendanceTrend')}
+			subtitle={t('card.attendanceTrendSubtitle')}
 			headerRight={
 				data.rate != null ? (
 					<span className="text-sm font-semibold tabular-nums text-tone-green-fg">

@@ -23,6 +23,8 @@ import {
 } from '@repo/ui';
 import { isApiError } from '@repo/api-client';
 import { formatPrice, toIsoDate } from '@repo/utils';
+import { useT } from '@repo/i18n';
+import { useAppT } from '@/locales';
 
 import { useRecordPayment } from '../api/invoices.mutations';
 import type { InvoiceDetail } from '../api/invoices.queries';
@@ -43,11 +45,12 @@ export function RecordPaymentDialog({
 	open,
 	onOpenChange,
 }: RecordPaymentDialogProps) {
+	const t = useAppT('billing');
 	return (
 		<Dialog open={open} onOpenChange={onOpenChange}>
 			<DialogContent className="max-w-md">
 				<DialogHeader>
-					<DialogTitle>Record payment</DialogTitle>
+					<DialogTitle>{t('invoices.detail.recordPayment')}</DialogTitle>
 					<DialogDescription>
 						{invoice.invoiceNumber} · {invoice.studentName}
 					</DialogDescription>
@@ -73,6 +76,8 @@ function RecordPaymentForm({
 	invoice: InvoiceDetail;
 	onClose: () => void;
 }) {
+	const t = useAppT('billing');
+	const tc = useT('common');
 	const form = useForm<RecordPaymentFormValues>({
 		resolver: zodResolver(recordPaymentSchema),
 		defaultValues: {
@@ -94,10 +99,10 @@ function RecordPaymentForm({
 				paidAt: new Date(`${values.paidAt}T00:00:00`).toISOString(),
 				notes: values.notes === '' ? null : values.notes,
 			});
-			toast.success('Payment recorded');
+			toast.success(t('payments.record.done'));
 			onClose();
 		} catch (err) {
-			toast.error(isApiError(err) ? err.message : 'Failed to record payment');
+			toast.error(isApiError(err) ? err.message : t('payments.record.failed'));
 		}
 	}
 
@@ -109,7 +114,7 @@ function RecordPaymentForm({
 			>
 				<div className="flex items-center justify-between rounded-lg border border-border bg-muted/40 px-3 py-2.5">
 					<span className="text-sm text-muted-foreground">
-						Outstanding balance
+						{t('misc.outstandingBalance')}
 					</span>
 					<span className="text-sm font-bold tabular-nums text-tone-red-fg">
 						{formatPrice(invoice.amountDue)} UZS
@@ -120,7 +125,7 @@ function RecordPaymentForm({
 					<FormInput
 						control={form.control}
 						name="amount"
-						label="Amount *"
+						label={t('payments.record.amount')}
 						type="number"
 						min={1}
 						onChange={(e) =>
@@ -139,7 +144,7 @@ function RecordPaymentForm({
 						name="method"
 						render={({ field }) => (
 							<FormItem>
-								<FormLabel>Method *</FormLabel>
+								<FormLabel>{t('payments.record.method')}</FormLabel>
 								<div className="grid grid-cols-3 gap-2">
 									{RECORDABLE_PAYMENT_METHOD_OPTIONS.map((opt) => (
 										<Button
@@ -153,7 +158,7 @@ function RecordPaymentForm({
 											)}
 											onClick={() => field.onChange(opt.value)}
 										>
-											{opt.label}
+											{t(`paymentMethod.${opt.value}`)}
 										</Button>
 									))}
 								</div>
@@ -166,13 +171,13 @@ function RecordPaymentForm({
 						<FormDatePicker
 							control={form.control}
 							name="paidAt"
-							label="Date"
+							label={t('payments.column.date')}
 						/>
 						<FormInput
 							control={form.control}
 							name="notes"
-							label="Notes"
-							placeholder="Optional"
+							label={t('discountExtra.notesPlaceholder')}
+							placeholder={t('payments.record.referencePlaceholder')}
 						/>
 					</div>
 				</FieldGroup>
@@ -184,11 +189,11 @@ function RecordPaymentForm({
 						onClick={onClose}
 						disabled={recordPayment.isPending}
 					>
-						Cancel
+						{tc('action.cancel')}
 					</Button>
 					<Button type="submit" disabled={recordPayment.isPending}>
 						{recordPayment.isPending && <Spinner className="mr-2 size-4" />}
-						Confirm payment
+						{t('payments.record.confirm')}
 					</Button>
 				</DialogFooter>
 			</form>

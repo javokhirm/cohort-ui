@@ -5,6 +5,7 @@ import { formatTime } from '@repo/utils';
 
 import type { TeachGroupDetail } from '../api/groups.queries';
 import { capacityLabel, capacityToneClass } from '../lib/capacity';
+import { useAppT } from '@/locales';
 
 interface GroupHeaderCardProps {
 	group: TeachGroupDetail;
@@ -52,6 +53,9 @@ export function GroupHeaderCard({
 	onOpenAttendance,
 	onOpenMarks,
 }: GroupHeaderCardProps) {
+	const t = useAppT('groups');
+	const tAttendance = useAppT('attendance');
+	const tMarks = useAppT('marks');
 	const rule = group.scheduleRule;
 
 	return (
@@ -69,11 +73,11 @@ export function GroupHeaderCard({
 
 			{/* Two-up on a phone: four columns at 375px clips "Filled" and a branch name. */}
 			<div className="grid grid-cols-2 gap-3 sm:grid-cols-4">
-				<Fact label="Course" value={group.courseName} />
-				<Fact label="Room" value={group.roomName ?? '—'} />
-				<Fact label="Branch" value={branchName ?? '—'} />
+				<Fact label={t('field.course')} value={group.courseName} />
+				<Fact label={t('field.room')} value={group.roomName ?? '—'} />
+				<Fact label={t('field.branch')} value={branchName ?? '—'} />
 				<Fact
-					label="Filled"
+					label={t('field.filled')}
 					value={capacityLabel(group.activeEnrollmentsCount, group.capacity)}
 					valueClassName={cn(
 						'tabular-nums',
@@ -85,11 +89,11 @@ export function GroupHeaderCard({
 			<div className="mt-3.5 flex gap-2 border-t border-border pt-3.5">
 				<Button variant="outline" size="sm" onClick={onOpenAttendance}>
 					<ClipboardCheck className="size-3.5" />
-					Attendance
+					{tAttendance('title')}
 				</Button>
 				<Button variant="outline" size="sm" onClick={onOpenMarks}>
 					<PenLine className="size-3.5" />
-					Marks
+					{tMarks('title')}
 				</Button>
 			</div>
 		</div>

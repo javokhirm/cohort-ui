@@ -14,87 +14,108 @@ import {
 } from '@repo/ui';
 
 import { formatDate, formatPrice, formatPriceCompact } from '@repo/utils';
+import { useStatusLabel } from '@repo/i18n';
 import {
 	useSubscriptionAnalytics,
 	useSubscriptionList,
 } from '@/features/subscriptions/hooks';
-import { PAGE_SIZE, STATUS_TABS } from '@/features/subscriptions/constants';
+import { PAGE_SIZE, buildStatusTabs } from '@/features/subscriptions/constants';
 import { avatarClass, getInitials } from '@/features/subscriptions/utils';
 import { BillingDateCell } from '@/features/subscriptions/components/BillingDateCell';
 import type { SubscriptionStatus } from '@/api/subscriptions/types';
+import { useAppT } from '@/locales';
 
 type SubscriptionRow = NonNullable<
 	ReturnType<typeof useSubscriptionList>['data']
 >['rows'][number];
 
-const columns: ColumnDef<SubscriptionRow>[] = [
-	{
-		id: 'tenant',
-		header: 'Tenant',
-		cell: ({ row }) => {
-			const sub = row.original;
-			return (
-				<div className="flex items-center gap-3">
-					<Avatar className="size-8 shrink-0">
-						<AvatarFallback
-							className={cn('text-xs font-bold', avatarClass(sub.tenantId))}
-						>
-							{getInitials(sub.tenantName ?? '?')}
-						</AvatarFallback>
-					</Avatar>
-					<span className="truncate text-sm font-medium">
-						{sub.tenantName ?? `Tenant #${sub.tenantId}`}
-					</span>
-				</div>
-			);
+/**
+ * Built per render rather than held at module scope: the headers are
+ * user-facing, so they must re-resolve when the language changes.
+ */
+function buildColumns(
+	t: ReturnType<typeof useAppT<'subscriptions'>>,
+	statusLabel: ReturnType<typeof useStatusLabel>,
+): ColumnDef<SubscriptionRow>[] {
+	return [
+		{
+			id: 'tenant',
+			header: t('column.tenant'),
+			cell: ({ row }) => {
+				const sub = row.original;
+				return (
+					<div className="flex items-center gap-3">
+						<Avatar className="size-8 shrink-0">
+							<AvatarFallback
+								className={cn(
+									'text-xs font-bold',
+									avatarClass(sub.tenantId),
+								)}
+							>
+								{getInitials(sub.tenantName ?? '?')}
+							</AvatarFallback>
+						</Avatar>
+						<span className="truncate text-sm font-medium">
+							{sub.tenantName ?? t('tenantRef', { id: sub.tenantId })}
+						</span>
+					</div>
+				);
+			},
 		},
-	},
-	{
-		id: 'plan',
-		header: 'Plan',
-		cell: ({ row }) => (
-			<span className="text-sm text-muted-foreground">
-				{row.original.tierName ?? `Tier #${row.original.subscriptionTierId}`}
-			</span>
-		),
-	},
-	{
-		accessorKey: 'status',
-		header: 'Status',
-		cell: ({ row }) => <StatusBadge kind="tenant" status={row.original.status} />,
-	},
-	{
-		accessorKey: 'monthlyValue',
-		header: () => 'MRR',
-		cell: ({ getValue }) => (
-			<div className="tabular-nums text-sm font-medium">
-				{formatPrice(getValue<number>())}
-			</div>
-		),
-	},
-	{
-		accessorKey: 'currentPeriodStart',
-		header: () => 'Period start',
-		cell: ({ getValue }) => (
-			<div className="text-sm text-muted-foreground">
-				{formatDate(getValue<string>())}
-			</div>
-		),
-	},
-	{
-		id: 'nextBill',
-		header: () => 'Next bill',
-		cell: ({ row }) => (
-			<BillingDateCell
-				status={row.original.status}
-				currentPeriodEnd={row.original.currentPeriodEnd}
-				cancelledAt={row.original.cancelledAt}
-			/>
-		),
-	},
-];
+		{
+			id: 'plan',
+			header: t('column.plan'),
+			cell: ({ row }) => (
+				<span className="text-sm text-muted-foreground">
+					{row.original.tierName ??
+						t('tierRef', { id: row.original.subscriptionTierId })}
+				</span>
+			),
+		},
+		{
+			accessorKey: 'status',
+			header: t('column.status'),
+			cell: ({ row }) => (
+				<StatusBadge kind="tenant" status={row.original.status}>
+					{statusLabel('tenant', row.original.status)}
+				</StatusBadge>
+			),
+		},
+		{
+			accessorKey: 'monthlyValue',
+			header: () => t('mrr'),
+			cell: ({ getValue }) => (
+				<div className="tabular-nums text-sm font-medium">
+					{formatPrice(getValue<number>())}
+				</div>
+			),
+		},
+		{
+			accessorKey: 'currentPeriodStart',
+			header: () => t('periodStart'),
+			cell: ({ getValue }) => (
+				<div className="text-sm text-muted-foreground">
+					{formatDate(getValue<string>())}
+				</div>
+			),
+		},
+		{
+			id: 'nextBill',
+			header: () => t('nextBill'),
+			cell: ({ row }) => (
+				<BillingDateCell
+					status={row.original.status}
+					currentPeriodEnd={row.original.currentPeriodEnd}
+					cancelledAt={row.original.cancelledAt}
+				/>
+			),
+		},
+	];
+}
 
 export function SubscriptionsPage() {
+	const t = useAppT('subscriptions');
+	const statusLabel = useStatusLabel();
 	const navigate = useNavigate({ from: '/subscriptions' });
 	const { page = 1, status } = useSearch({ from: '/_authed/subscriptions' });
 
@@ -128,17 +149,17 @@ export function SubscriptionsPage() {
 	return (
 		<div className="flex flex-col gap-6">
 			<div>
-				<h1 className="text-xl font-semibold tracking-tight">Subscriptions</h1>
-				<p className="text-sm text-muted-foreground">
-					Per-tenant billing lifecycle across the platform.
-				</p>
+				<h1 className="text-xl font-semibold tracking-tight">{t('title')}</h1>
+				<p className="text-sm text-muted-foreground">{t('subtitle')}</p>
 			</div>
 
 			{/* ── KPI strip ────────────────────────────────────────────────── */}
 			<div className="grid grid-cols-2 gap-3 sm:grid-cols-4">
 				<Card className="py-0">
 					<CardContent className="px-5 py-4">
-						<p className="text-xs text-muted-foreground">Active</p>
+						<p className="text-xs text-muted-foreground">
+							{t('statusLabel.active')}
+						</p>
 						{analyticsQuery.isLoading ? (
 							<Skeleton className="mt-1 h-8 w-12" />
 						) : (
@@ -150,7 +171,9 @@ export function SubscriptionsPage() {
 				</Card>
 				<Card className="py-0">
 					<CardContent className="px-5 py-4">
-						<p className="text-xs text-muted-foreground">Trialing</p>
+						<p className="text-xs text-muted-foreground">
+							{t('statusLabel.trialing')}
+						</p>
 						{analyticsQuery.isLoading ? (
 							<Skeleton className="mt-1 h-8 w-12" />
 						) : (
@@ -162,7 +185,9 @@ export function SubscriptionsPage() {
 				</Card>
 				<Card className="py-0">
 					<CardContent className="px-5 py-4">
-						<p className="text-xs text-muted-foreground">Past due</p>
+						<p className="text-xs text-muted-foreground">
+							{t('statusLabel.pastDue')}
+						</p>
 						{analyticsQuery.isLoading ? (
 							<Skeleton className="mt-1 h-8 w-12" />
 						) : (
@@ -174,7 +199,7 @@ export function SubscriptionsPage() {
 				</Card>
 				<Card className="py-0">
 					<CardContent className="px-5 py-4">
-						<p className="text-xs text-muted-foreground">Total MRR</p>
+						<p className="text-xs text-muted-foreground">{t('totalMrr')}</p>
 						{analyticsQuery.isLoading ? (
 							<Skeleton className="mt-1 h-7 w-24" />
 						) : (
@@ -190,7 +215,7 @@ export function SubscriptionsPage() {
 
 			{/* ── Status filter tabs ───────────────────────────────────────── */}
 			<div className="flex items-center gap-0.5 overflow-x-auto">
-				{STATUS_TABS.map((tab) => {
+				{buildStatusTabs(t).map((tab) => {
 					const isActive = (status ?? 'all') === tab.value;
 					const count = tabCounts[tab.value];
 					return (
@@ -225,19 +250,19 @@ export function SubscriptionsPage() {
 
 			{listQuery.isError && (
 				<div className="rounded-lg border border-destructive/30 bg-destructive/5 px-4 py-3 text-sm text-destructive">
-					Failed to load subscriptions. Please refresh.
+					{t('loadError')}
 				</div>
 			)}
 
 			<Card className="gap-0 overflow-hidden py-0">
 				<DataTable
-					columns={columns}
+					columns={buildColumns(t, statusLabel)}
 					data={list?.rows ?? []}
 					isLoading={listQuery.isLoading}
 					getRowId={(row) => String(row.id)}
 					emptyState={
 						<div className="py-16 text-center text-sm text-muted-foreground">
-							No subscriptions match your filters.
+							{t('empty')}
 						</div>
 					}
 					className="rounded-none border-0"

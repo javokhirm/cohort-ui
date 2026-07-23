@@ -131,16 +131,55 @@ const form = useForm<StudentForm>({ resolver: zodResolver(schema) });
 ## 7. i18n, money, dates, numbers
 
 - **All user-facing text is translated.** No hardcoded strings in components — use `useT()`
-  from `packages/i18n`. Add keys to **all three locales** (`uz` default, `ru`, `en`); where a
-  string corresponds to a backend message/error code, key it by that code.
-- **Money:** `numeric(14,2)`, default **UZS**. Always format via `formatMoney(amount,
-currency)` from `i18n`/`utils`. Never `toFixed`, never string-concat a currency symbol.
-  Treat amounts as numbers from the API (the backend transforms `numeric` → JS number).
+  from `@repo/i18n`. Add keys to **all three catalogs** (`uz` is the source of truth, then
+  `ru`, `en`); the typed `resources` declaration means a key missing from a catalog, or a typo
+  in `t()`, fails `check-types`.
+- **Money:** `numeric(14,2)`, default **UZS**. Always format via `formatMoney`/`formatPrice`
+  from `@repo/utils`. Never `toFixed`, never string-concat a currency symbol. Treat amounts as
+  numbers from the API (the backend transforms `numeric` → JS number).
 - **Dates/times:** default timezone **`Asia/Tashkent`**. Format via the shared
-  `formatDate`/`formatDateTime` helpers; parse API timestamps (ISO with offset) — don't
-  `new Date(str)` and render raw.
-- **Locale selection:** from the user's preference when available, else tenant default, else
-  `uz`. Persist the chosen locale in client state.
+  `formatDate`/`formatDateTime` helpers in `@repo/utils`; parse API timestamps (ISO with
+  offset) — don't `new Date(str)` and render raw. (Region formatting lives in `utils`, not
+  `i18n` — the market is fixed, only the message language switches.)
+- **Locale selection:** `user.preferredLanguage` → tenant default (already applied server-side)
+  → `localStorage` → `uz`. `initI18n({ storageKey })` resolves localStorage at boot; the
+  session store calls `setLocale(user.preferredLanguage)` on sign-in. Every request carries the
+  active locale as the `x-lang` header (injected into `@repo/api-client` via `getLocale`), so
+  backend `error.message` comes back translated — surface it directly, don't re-map it.
+
+**Where a string lives:**
+
+- **Two translators, one per side of the split.** `useT('nav')` reaches the shared shell catalog
+  in `@repo/i18n` (nav, auth, common actions, table empty/error, `common:state.*`, validation).
+  `useAppT('students')` reaches the app's own catalog under `apps/<app>/src/locales/` — feature
+  copy, one namespace per feature folder. Both are key-checked; promote a string to the package
+  only when a second app needs it.
+- **An app's catalogs are wired once**, in `apps/<app>/src/locales/index.ts`:
+  `registerAppLocales({ uz, ru, en })` merges them into the shared i18next instance and
+  `createAppT<typeof uz>()` produces the typed `useAppT`. `initAppLocales()` is called from
+  `main.tsx` **after** `initI18n(...)` — i18next has no resource store before that.
+- **`uz` is the source of truth**; `ru`/`en` annotate themselves `TranslationsOf<typeof uz>`, so a
+  key added to `uz` without a translation fails `check-types` in the translation file itself.
+- **No string concatenation** — use interpolation: `t('greeting', { name })`, not
+  `` `Hi ${name}` ``. Counts use i18next plurals (`_one`/`_other`, plus `_few`/`_many` for `ru`;
+  `TranslationsOf` lets a translation add the plural forms its own grammar needs).
+- **Module-level nav/config/column arrays hold keys, not display text** — resolve with `t()` at
+  render, never at module load, so a language switch re-translates. A `ColumnDef[]` with headers
+  therefore becomes a `buildColumns(t)` factory. Type the key fields as leaf unions (not
+  `string`) so `t()` stays key-checked.
+- **Zod schemas are factories**, not module constants: `createBranchSchema(t)` takes a
+  `Translator<'validation'>` and callers memoise on it (`useMemo(() => schema(tv), [tv])`). A
+  message captured at module load would never re-translate.
+- **`@repo/ui` never imports `@repo/i18n`** (they are peers). Presentational components take
+  copy as props (e.g. `LoginCard`'s `labels`); the app passes its `useT(...)` values in.
+  `@repo/ui`'s `STATUS_MAPS` owns the _tone_ of a status pill — the _words_ come from
+  `useStatusLabel()` and land on `StatusBadge` as `children`.
+- **Outside React** (query/mutation cache handlers and other module-scope code) use
+  `translate(ns, key)`. It reads the same instance but does not re-render, so it is only correct
+  for one-shot output like a toast.
+- **Tests** initialise i18next to English in the app's `test/setup.ts`
+  (`initI18n(...) ; initAppLocales() ; setLocale('en')`), so assertions read the English catalog.
+  Pure schema tests pass a stub translator that echoes its key.
 
 ---
 

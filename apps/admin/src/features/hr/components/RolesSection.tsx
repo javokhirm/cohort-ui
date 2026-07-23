@@ -12,12 +12,13 @@ import {
 } from '@repo/ui';
 import { isApiError } from '@repo/api-client';
 import { formatDate } from '@repo/utils';
+import { useStatusLabel, useT } from '@repo/i18n';
 
 import { Can } from '@/components/Can';
+import { useAppT } from '@/locales';
 
 import { useRevokeRole } from '../api/roles.mutations';
 import { useUserRoleAssignments, type RoleAssignment } from '../api/roles.queries';
-import { roleLabel } from '../lib/roles';
 import { GrantRoleDialog } from './GrantRoleDialog';
 
 interface RolesSectionProps {
@@ -36,6 +37,9 @@ interface RolesSectionProps {
  * OWNER row is shown, but without a remove button.
  */
 export function RolesSection({ userId, staffName }: RolesSectionProps) {
+	const t = useAppT('hr');
+	const tc = useT('common');
+	const statusLabel = useStatusLabel();
 	const { data: assignments = [], isLoading } = useUserRoleAssignments(userId);
 	const revokeRole = useRevokeRole();
 	const [grantOpen, setGrantOpen] = useState(false);
@@ -45,10 +49,10 @@ export function RolesSection({ userId, staffName }: RolesSectionProps) {
 		if (!revokeTarget) return;
 		try {
 			await revokeRole.mutateAsync({ userId, assignmentId: revokeTarget.id });
-			toast.success('Role revoked');
+			toast.success(t('roles.revoked'));
 			setRevokeTarget(null);
 		} catch (err) {
-			toast.error(isApiError(err) ? err.message : 'Something went wrong');
+			toast.error(isApiError(err) ? err.message : tc('error.unknown'));
 		}
 	}
 
@@ -56,15 +60,15 @@ export function RolesSection({ userId, staffName }: RolesSectionProps) {
 		<div className="flex flex-col gap-3">
 			<div className="flex items-center justify-between">
 				<h2 className="text-sm font-semibold">
-					Roles{' '}
+					{t('roles.heading')}{' '}
 					<span className="text-muted-foreground">
-						· {assignments.length} granted
+						{t('roles.grantedCount', { count: assignments.length })}
 					</span>
 				</h2>
 				<Can permission="role.assign">
 					<Button size="sm" onClick={() => setGrantOpen(true)}>
 						<Plus className="mr-1.5 size-4" />
-						Grant role
+						{t('roles.grant')}
 					</Button>
 				</Can>
 			</div>
@@ -81,13 +85,13 @@ export function RolesSection({ userId, staffName }: RolesSectionProps) {
 				<Card className="py-0">
 					<EmptyState
 						icon={<ShieldCheck />}
-						title="No roles granted"
-						description="Grant a role to give this person access to a Cohort app."
+						title={t('roles.emptyTitle')}
+						description={t('roles.emptyDescription')}
 						action={
 							<Can permission="role.assign">
 								<Button size="sm" onClick={() => setGrantOpen(true)}>
 									<Plus className="mr-1.5 size-4" />
-									Grant role
+									{t('roles.grant')}
 								</Button>
 							</Can>
 						}
@@ -102,17 +106,19 @@ export function RolesSection({ userId, staffName }: RolesSectionProps) {
 						>
 							<div className="flex flex-col">
 								<span className="text-sm font-medium">
-									{roleLabel(assignment.roleName)}
+									{statusLabel('role', assignment.roleName)}
 								</span>
 								<span className="text-xs text-muted-foreground">
-									{assignment.branchName ?? 'All branches'} · granted{' '}
-									{formatDate(assignment.createdAt)}
+									{assignment.branchName ?? t('roles.allBranches')}{' '}
+									{t('roles.grantedOn', {
+										date: formatDate(assignment.createdAt),
+									})}
 								</span>
 							</div>
 							<div className="flex items-center gap-3">
 								{!assignment.isActive && (
 									<Badge variant="outline" className="text-xs">
-										Inactive
+										{tc('state.inactive')}
 									</Badge>
 								)}
 								{/*
@@ -131,7 +137,7 @@ export function RolesSection({ userId, staffName }: RolesSectionProps) {
 												}
 											>
 												<Trash2 className="mr-1.5 size-3.5" />
-												Revoke
+												{t('roles.revoke')}
 											</Button>
 										)}
 								</Can>
@@ -151,17 +157,21 @@ export function RolesSection({ userId, staffName }: RolesSectionProps) {
 			<ConfirmDialog
 				open={revokeTarget != null}
 				onOpenChange={(o) => !o && setRevokeTarget(null)}
-				title="Revoke this role?"
+				title={t('roles.revokeConfirm.title')}
 				description={
 					revokeTarget
-						? `${staffName} loses ${roleLabel(revokeTarget.roleName)} access${
-								revokeTarget.branchName
-									? ` at ${revokeTarget.branchName}`
-									: ''
-							}. Their other roles are unaffected.`
+						? t('roles.revokeConfirm.description', {
+								name: staffName,
+								role: statusLabel('role', revokeTarget.roleName),
+								scope: revokeTarget.branchName
+									? t('roles.revokeConfirm.scopeAt', {
+											branch: revokeTarget.branchName,
+										})
+									: '',
+							})
 						: ''
 				}
-				confirmLabel="Revoke"
+				confirmLabel={t('roles.revokeConfirm.confirm')}
 				variant="destructive"
 				loading={revokeRole.isPending}
 				onConfirm={() => void onRevoke()}

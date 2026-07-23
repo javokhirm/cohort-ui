@@ -1,9 +1,9 @@
 import { useFormContext } from 'react-hook-form';
 
 import { cn, FormInput } from '@repo/ui';
+import { useAppT } from '@/locales';
 
 import { SCHEDULE_DAYS, type ScheduleDay } from '../api/groups.queries';
-import { DAY_LABELS } from '../lib/group-options';
 import type { CreateGroupFormValues } from '../schemas/group-form.schema';
 
 /**
@@ -12,6 +12,7 @@ import type { CreateGroupFormValues } from '../schemas/group-form.schema';
  * materializes individual sessions for the whole range.
  */
 export function ScheduleRuleFields() {
+	const t = useAppT('groups');
 	// Edit form values are a superset of create values, so the shared schedule
 	// fields resolve against the create shape in both modes.
 	const form = useFormContext<CreateGroupFormValues>();
@@ -26,7 +27,7 @@ export function ScheduleRuleFields() {
 	return (
 		<div className="flex flex-col gap-3">
 			<div className="flex flex-col gap-1.5">
-				<span className="text-sm font-medium">Days *</span>
+				<span className="text-sm font-medium">{t('form.field.days')}</span>
 				<div className="flex flex-wrap gap-1.5">
 					{SCHEDULE_DAYS.map((day) => {
 						const active = days.includes(day);
@@ -43,7 +44,7 @@ export function ScheduleRuleFields() {
 										: 'border-border bg-card text-muted-foreground hover:bg-muted',
 								)}
 							>
-								{DAY_LABELS[day]}
+								{t(`day.${day}`)}
 							</button>
 						);
 					})}
@@ -57,13 +58,13 @@ export function ScheduleRuleFields() {
 				<FormInput
 					control={form.control}
 					name="startTime"
-					label="Start time *"
+					label={t('form.field.startTime')}
 					type="time"
 				/>
 				<FormInput
 					control={form.control}
 					name="endTime"
-					label="End time *"
+					label={t('form.field.endTime')}
 					type="time"
 				/>
 			</div>

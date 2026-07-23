@@ -26,7 +26,9 @@ import {
 	toast,
 } from '@repo/ui';
 import { formatDate, formatMoney } from '@repo/utils';
+import { useStatusLabel } from '@repo/i18n';
 
+import { useAppT } from '@/locales';
 import { usePermissions } from '@/features/auth/hooks';
 import { usePayrollHistory } from '@/features/payroll/api/payroll.queries';
 
@@ -34,22 +36,13 @@ import { useStaffMember, type StaffResponse } from '../api/staff.queries';
 import { ChangeStaffPasswordDialog } from '../components/ChangeStaffPasswordDialog';
 import { PayrollConfigCard } from '../components/PayrollConfigCard';
 import { RolesSection } from '../components/RolesSection';
-import { primaryRole, roleLabel } from '../lib/roles';
-
-function employmentLabel(type: StaffResponse['employmentType']): string {
-	switch (type) {
-		case 'FULL_TIME':
-			return 'Full-time';
-		case 'PART_TIME':
-			return 'Part-time';
-		case 'CONTRACTOR':
-			return 'Contractor';
-	}
-}
+import { primaryRole } from '../lib/roles';
 
 // ─── Header ───────────────────────────────────────────────────────────────────
 
 function StaffHeader({ staff, onEdit }: { staff: StaffResponse; onEdit: () => void }) {
+	const t = useAppT('hr');
+	const statusLabel = useStatusLabel();
 	const [passwordOpen, setPasswordOpen] = useState(false);
 	const { can } = usePermissions();
 	const initials =
@@ -74,10 +67,12 @@ function StaffHeader({ staff, onEdit }: { staff: StaffResponse; onEdit: () => vo
 							</h1>
 							{role && (
 								<Badge variant="secondary" className="text-xs">
-									{roleLabel(role)}
+									{statusLabel('role', role)}
 								</Badge>
 							)}
-							<StatusBadge kind="staff" status={staff.status} />
+							<StatusBadge kind="staff" status={staff.status}>
+								{statusLabel('staff', staff.status)}
+							</StatusBadge>
 						</div>
 						{subtitle && (
 							<div className="mt-0.5 text-sm text-muted-foreground">
@@ -88,24 +83,25 @@ function StaffHeader({ staff, onEdit }: { staff: StaffResponse; onEdit: () => vo
 				</div>
 
 				<ActionsMenu
-					label="Staff actions"
+					label={t('detail.actionsLabel')}
 					items={[
 						{
-							label: 'Edit',
+							label: t('detail.action.edit'),
 							icon: Edit,
 							onClick: onEdit,
 							hidden: !can('staff.update'),
 						},
 						{
-							label: 'Change password',
+							label: t('detail.action.changePassword'),
 							icon: KeyRound,
 							onClick: () => setPasswordOpen(true),
 							hidden: !can('staff.update'),
 						},
 						{
-							label: 'Message',
+							label: t('detail.action.message'),
 							icon: MessageSquare,
-							onClick: () => toast.info('Messaging is not available yet'),
+							onClick: () =>
+								toast.info(t('detail.action.messagingUnavailable')),
 						},
 					]}
 				/>
@@ -124,6 +120,7 @@ function StaffHeader({ staff, onEdit }: { staff: StaffResponse; onEdit: () => vo
 // ─── Overview tab ─────────────────────────────────────────────────────────────
 
 function OverviewTab({ staff }: { staff: StaffResponse }) {
+	const t = useAppT('hr');
 	const subjects =
 		staff.specialization.length > 0 ? staff.specialization.join(', ') : '—';
 
@@ -131,21 +128,21 @@ function OverviewTab({ staff }: { staff: StaffResponse }) {
 		<div className="grid gap-4 lg:grid-cols-2">
 			<Card>
 				<CardContent>
-					<p className="mb-1 font-semibold">Contact</p>
+					<p className="mb-1 font-semibold">{t('detail.contactTitle')}</p>
 					<DetailRows
 						rows={[
 							{
-								label: 'Phone',
+								label: t('detail.row.phone'),
 								value: staff.user.phone,
 								icon: <Phone />,
 							},
 							{
-								label: 'Email',
+								label: t('detail.row.email'),
 								value: staff.user.email ?? '—',
 								icon: <Mail />,
 							},
 							{
-								label: 'Branch',
+								label: t('detail.row.branch'),
 								value: staff.branch?.name ?? '—',
 								icon: <Building2 />,
 							},
@@ -156,22 +153,24 @@ function OverviewTab({ staff }: { staff: StaffResponse }) {
 
 			<Card>
 				<CardContent>
-					<p className="mb-1 font-semibold">Employment</p>
+					<p className="mb-1 font-semibold">{t('detail.employmentTitle')}</p>
 					<DetailRows
 						rows={[
 							{
-								label: 'Contract',
-								value: employmentLabel(staff.employmentType),
+								label: t('detail.row.contract'),
+								value: t(`employment.${staff.employmentType}`),
 							},
 							{
-								label: 'Joined',
+								label: t('detail.row.joined'),
 								value: staff.hireDate ? formatDate(staff.hireDate) : '—',
 							},
 							{
-								label: 'Weekly load',
-								value: `${staff.weeklyHours}h / week`,
+								label: t('detail.row.weeklyLoad'),
+								value: t('detail.weeklyHours', {
+									count: staff.weeklyHours,
+								}),
 							},
-							{ label: 'Subjects', value: subjects },
+							{ label: t('detail.row.subjects'), value: subjects },
 						]}
 					/>
 				</CardContent>
@@ -183,6 +182,8 @@ function OverviewTab({ staff }: { staff: StaffResponse }) {
 // ─── Payroll tab ──────────────────────────────────────────────────────────────
 
 function PayrollTab({ staff }: { staff: StaffResponse }) {
+	const t = useAppT('hr');
+	const statusLabel = useStatusLabel();
 	const navigate = useNavigate();
 	const { data, isLoading } = usePayrollHistory({ staffId: staff.id, limit: 12 });
 	const payslips = data?.rows ?? [];
@@ -193,7 +194,7 @@ function PayrollTab({ staff }: { staff: StaffResponse }) {
 
 			<Card className="lg:col-span-2">
 				<CardContent>
-					<p className="mb-3 font-semibold">Recent payslips</p>
+					<p className="mb-3 font-semibold">{t('detail.recentPayslips')}</p>
 					{isLoading ? (
 						<div className="flex flex-col gap-2">
 							{[1, 2, 3].map((i) => (
@@ -202,7 +203,7 @@ function PayrollTab({ staff }: { staff: StaffResponse }) {
 						</div>
 					) : payslips.length === 0 ? (
 						<p className="py-6 text-center text-sm text-muted-foreground">
-							No payslips yet
+							{t('detail.noPayslips')}
 						</p>
 					) : (
 						<div className="flex flex-col">
@@ -228,10 +229,14 @@ function PayrollTab({ staff }: { staff: StaffResponse }) {
 												{formatDate(p.periodEnd)}
 											</p>
 											<p className="text-xs text-muted-foreground">
-												Net {formatMoney(p.netAmount)}
+												{t('detail.net', {
+													amount: formatMoney(p.netAmount),
+												})}
 											</p>
 										</div>
-										<StatusBadge kind="payroll" status={p.status} />
+										<StatusBadge kind="payroll" status={p.status}>
+											{statusLabel('payroll', p.status)}
+										</StatusBadge>
 									</button>
 								</div>
 							))}
@@ -246,9 +251,11 @@ function PayrollTab({ staff }: { staff: StaffResponse }) {
 // ─── Activity tab ─────────────────────────────────────────────────────────────
 
 function ActivityTab() {
+	const t = useAppT('hr');
+
 	return (
 		<div className="flex min-h-32 items-center justify-center rounded-xl border text-sm text-muted-foreground">
-			No recent activity
+			{t('detail.noActivity')}
 		</div>
 	);
 }
@@ -260,6 +267,7 @@ interface StaffDetailPageProps {
 }
 
 export function StaffDetailPage({ staffId }: StaffDetailPageProps) {
+	const t = useAppT('hr');
 	const navigate = useNavigate();
 	const { data: staff, isLoading, isError } = useStaffMember(staffId);
 
@@ -270,7 +278,7 @@ export function StaffDetailPage({ staffId }: StaffDetailPageProps) {
 				className="flex w-fit items-center gap-1.5 text-sm text-muted-foreground hover:text-foreground"
 			>
 				<ArrowLeft className="size-3.5" />
-				Back to staff
+				{t('detail.back')}
 			</Link>
 
 			{isLoading ? (
@@ -285,7 +293,7 @@ export function StaffDetailPage({ staffId }: StaffDetailPageProps) {
 				</div>
 			) : isError || !staff ? (
 				<div className="flex min-h-40 items-center justify-center rounded-xl border text-sm text-muted-foreground">
-					Staff member not found.
+					{t('detail.notFound')}
 				</div>
 			) : (
 				<>
@@ -301,10 +309,18 @@ export function StaffDetailPage({ staffId }: StaffDetailPageProps) {
 
 					<Tabs defaultValue="overview">
 						<TabsList>
-							<TabsTrigger value="overview">Overview</TabsTrigger>
-							<TabsTrigger value="roles">Roles</TabsTrigger>
-							<TabsTrigger value="payroll">Payroll</TabsTrigger>
-							<TabsTrigger value="activity">Activity</TabsTrigger>
+							<TabsTrigger value="overview">
+								{t('detail.tab.overview')}
+							</TabsTrigger>
+							<TabsTrigger value="roles">
+								{t('detail.tab.roles')}
+							</TabsTrigger>
+							<TabsTrigger value="payroll">
+								{t('detail.tab.payroll')}
+							</TabsTrigger>
+							<TabsTrigger value="activity">
+								{t('detail.tab.activity')}
+							</TabsTrigger>
 						</TabsList>
 
 						<div className="mt-4">

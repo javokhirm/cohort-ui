@@ -24,6 +24,7 @@ import {
 	type SaveGradingConfigInput,
 	useSetGradingConfig,
 } from '../api/grading-config.mutations';
+import { useAppT } from '@/locales';
 
 interface GradingScaleSheetProps {
 	groupId: number;
@@ -31,23 +32,7 @@ interface GradingScaleSheetProps {
 	onOpenChange: (open: boolean) => void;
 }
 
-const TYPE_TABS: { value: GradingType; label: string }[] = [
-	{ value: 'POINTS', label: 'Points' },
-	{ value: 'PERCENTAGE', label: 'Percentage' },
-	{ value: 'LETTER', label: 'Letter' },
-];
-
-/** The pending form's config, for the live preview line. */
-function previewLabel(type: GradingType, maxPoints: string): string {
-	switch (type) {
-		case 'POINTS':
-			return `Daily points · max ${maxPoints || '—'}`;
-		case 'PERCENTAGE':
-			return `Percentage · 0–${maxPoints || '100'}`;
-		case 'LETTER':
-			return 'Letter grade · A–F';
-	}
-}
+const TYPE_VALUES: GradingType[] = ['POINTS', 'PERCENTAGE', 'LETTER'];
 
 /** A sensible default max when switching into a numeric scale. */
 function defaultMax(type: GradingType): string {
@@ -67,6 +52,7 @@ export function GradingScaleSheet({
 	open,
 	onOpenChange,
 }: GradingScaleSheetProps) {
+	const t = useAppT('marks');
 	const configQuery = useGradingConfig(groupId, open);
 	const setConfig = useSetGradingConfig(groupId);
 	const current = configQuery.data?.current ?? null;
@@ -74,7 +60,7 @@ export function GradingScaleSheet({
 	const onSave = (input: SaveGradingConfigInput) =>
 		setConfig.mutate(input, {
 			onSuccess: () => {
-				toast.success('Grading scale updated');
+				toast.success(t('gradingScaleUpdated'));
 				onOpenChange(false);
 			},
 		});
@@ -83,10 +69,8 @@ export function GradingScaleSheet({
 		<Sheet open={open} onOpenChange={onOpenChange}>
 			<SheetContent side="bottom" className="mx-auto max-w-lg rounded-t-2xl">
 				<SheetHeader>
-					<SheetTitle>Grading scale</SheetTitle>
-					<SheetDescription>
-						How daily marks are entered for this group.
-					</SheetDescription>
+					<SheetTitle>{t('gradingScale')}</SheetTitle>
+					<SheetDescription>{t('gradingScaleDescription')}</SheetDescription>
 				</SheetHeader>
 
 				{configQuery.isPending ? (
@@ -122,6 +106,7 @@ interface GradingScaleFormProps {
  * the backend's default (Points, max 10) when the group has none yet.
  */
 function GradingScaleForm({ current, submitting, onSave }: GradingScaleFormProps) {
+	const t = useAppT('marks');
 	const seedType = current?.type ?? 'POINTS';
 	const [type, setType] = useState<GradingType>(seedType);
 	const [maxPoints, setMaxPoints] = useState(
@@ -138,6 +123,13 @@ function GradingScaleForm({ current, submitting, onSave }: GradingScaleFormProps
 	const numericMax = Number(maxPoints);
 	const numericInvalid = type !== 'LETTER' && !(numericMax > 0);
 
+	const previewText =
+		type === 'LETTER'
+			? t('scaleLetter')
+			: type === 'PERCENTAGE'
+				? t('scalePercentage', { max: maxPoints || '100' })
+				: t('previewPoints', { max: maxPoints || '—' });
+
 	const submit = () => {
 		const input: SaveGradingConfigInput = { type };
 		if (type !== 'LETTER') input.maxPoints = numericMax;
@@ -149,19 +141,15 @@ function GradingScaleForm({ current, submitting, onSave }: GradingScaleFormProps
 		<>
 			<div className="flex flex-col gap-5 px-4">
 				<div className="flex flex-col gap-2">
-					<Label className="text-muted-foreground">Scale type</Label>
+					<Label className="text-muted-foreground">{t('scaleType')}</Label>
 					<Tabs
 						value={type}
 						onValueChange={(v) => onSelectType(v as GradingType)}
 					>
 						<TabsList className="w-full">
-							{TYPE_TABS.map((t) => (
-								<TabsTrigger
-									key={t.value}
-									value={t.value}
-									className="flex-1"
-								>
-									{t.label}
+							{TYPE_VALUES.map((value) => (
+								<TabsTrigger key={value} value={value} className="flex-1">
+									{t(`type.${value}`)}
 								</TabsTrigger>
 							))}
 						</TabsList>
@@ -169,13 +157,13 @@ function GradingScaleForm({ current, submitting, onSave }: GradingScaleFormProps
 				</div>
 
 				{type === 'LETTER' ? (
-					<p className="text-sm text-muted-foreground">
-						Letter grades A–F are entered directly on the marks sheet.
-					</p>
+					<p className="text-sm text-muted-foreground">{t('letterHint')}</p>
 				) : (
 					<div className="flex flex-col gap-2">
 						<Label htmlFor="grading-max" className="text-muted-foreground">
-							{type === 'PERCENTAGE' ? 'Maximum (%)' : 'Maximum points'}
+							{type === 'PERCENTAGE'
+								? t('maxPercent')
+								: t('maxPointsLabel')}
 						</Label>
 						<Input
 							id="grading-max"
@@ -192,7 +180,7 @@ function GradingScaleForm({ current, submitting, onSave }: GradingScaleFormProps
 				{type === 'POINTS' && (
 					<div className="flex items-center justify-between">
 						<Label htmlFor="grading-half" className="text-foreground">
-							Allow half-point scores
+							{t('allowHalf')}
 						</Label>
 						<Switch
 							id="grading-half"
@@ -203,16 +191,14 @@ function GradingScaleForm({ current, submitting, onSave }: GradingScaleFormProps
 				)}
 
 				<div className="rounded-xl border border-border bg-muted/40 px-3 py-2 text-sm text-muted-foreground">
-					Preview ·{' '}
-					<span className="text-foreground">
-						{previewLabel(type, maxPoints)}
-					</span>
+					{t('preview')} ·{' '}
+					<span className="text-foreground">{previewText}</span>
 				</div>
 			</div>
 
 			<SheetFooter>
 				<Button onClick={submit} disabled={numericInvalid || submitting}>
-					Save grading scale
+					{t('saveGradingScale')}
 				</Button>
 			</SheetFooter>
 		</>

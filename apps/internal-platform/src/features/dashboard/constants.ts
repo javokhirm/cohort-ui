@@ -7,6 +7,8 @@ import {
 	Server,
 } from 'lucide-react';
 
+import type { useAppT } from '@/locales';
+
 export const TOOLTIP_STYLE: React.CSSProperties = {
 	backgroundColor: 'var(--popover)',
 	border: '1px solid var(--border)',
@@ -33,11 +35,14 @@ export const TENANT_STATUS_COLORS: Record<string, string> = {
 /** Fallback slice colour for a status the map doesn't know. */
 export const TENANT_STATUS_FALLBACK = 'var(--tone-slate-fg)';
 
-export const SERVICES = [
-	{ name: 'API', icon: Server },
-	{ name: 'Database', icon: Database },
-	{ name: 'Storage', icon: HardDrive },
-	{ name: 'Email', icon: Mail },
-	{ name: 'SMS', icon: MessageSquare },
-	{ name: 'Payments', icon: CreditCard },
-];
+/** System-service rows — names resolve from the translator at render. */
+export function buildServices(t: ReturnType<typeof useAppT<'dashboard'>>) {
+	return [
+		{ name: t('service.api'), icon: Server },
+		{ name: t('service.database'), icon: Database },
+		{ name: t('service.storage'), icon: HardDrive },
+		{ name: t('service.email'), icon: Mail },
+		{ name: t('service.sms'), icon: MessageSquare },
+		{ name: t('service.payments'), icon: CreditCard },
+	];
+}

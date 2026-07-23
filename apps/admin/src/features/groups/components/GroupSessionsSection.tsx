@@ -3,6 +3,9 @@ import { CalendarDays, MapPin, UserCog } from 'lucide-react';
 
 import { Card, EmptyState, Skeleton, StatusBadge } from '@repo/ui';
 import { formatDate } from '@repo/utils';
+import { useStatusLabel } from '@repo/i18n';
+
+import { useAppT } from '@/locales';
 
 import { useGroupSessions, type SessionCalendarItem } from '../api/groups.queries';
 import { hhmm } from '../lib/group-options';
@@ -13,6 +16,7 @@ interface GroupSessionsSectionProps {
 }
 
 export function GroupSessionsSection({ groupId }: GroupSessionsSectionProps) {
+	const t = useAppT('groups');
 	const { data: sessions = [], isLoading } = useGroupSessions(groupId);
 	const [openSessionId, setOpenSessionId] = useState<number | null>(null);
 
@@ -23,7 +27,7 @@ export function GroupSessionsSection({ groupId }: GroupSessionsSectionProps) {
 	return (
 		<div className="flex flex-col gap-3">
 			<h2 className="text-sm font-semibold">
-				Sessions{' '}
+				{t('sessions.title')}{' '}
 				<span className="text-muted-foreground">· {sessions.length}</span>
 			</h2>
 
@@ -39,8 +43,8 @@ export function GroupSessionsSection({ groupId }: GroupSessionsSectionProps) {
 				<Card className="py-0">
 					<EmptyState
 						icon={<CalendarDays />}
-						title="No sessions yet"
-						description="Set a start date, end date and weekly schedule on the group to generate sessions."
+						title={t('sessions.emptyTitle')}
+						description={t('sessions.emptyDescription')}
 					/>
 				</Card>
 			) : (
@@ -72,6 +76,8 @@ function SessionRow({
 	session: SessionCalendarItem;
 	onClick: () => void;
 }) {
+	const t = useAppT('groups');
+	const statusLabel = useStatusLabel();
 	return (
 		<button
 			type="button"
@@ -89,21 +95,23 @@ function SessionRow({
 				</div>
 				<div className="flex flex-col gap-0.5">
 					<span className="text-sm font-medium">
-						{session.topic ?? 'Session'}
+						{session.topic ?? t('sessions.column.session')}
 					</span>
 					<span className="flex flex-wrap items-center gap-x-2 gap-y-0.5 text-xs text-muted-foreground">
 						<span className="flex items-center gap-1">
 							<MapPin className="size-3" />
-							{session.roomName ?? 'No room'}
+							{session.roomName ?? t('noRoom')}
 						</span>
 						<span className="flex items-center gap-1">
 							<UserCog className="size-3" />
-							{session.teacherName ?? 'Unassigned'}
+							{session.teacherName ?? t('unassigned')}
 						</span>
 					</span>
 				</div>
 			</div>
-			<StatusBadge kind="session" status={session.status} />
+			<StatusBadge kind="session" status={session.status}>
+				{statusLabel('session', session.status)}
+			</StatusBadge>
 		</button>
 	);
 }

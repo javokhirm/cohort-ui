@@ -10,12 +10,14 @@ import { RecentPaymentsCard } from '@/features/dashboard/components/RecentPaymen
 import { RevenueTrendCard } from '@/features/dashboard/components/RevenueTrendCard';
 import { StatsStrip } from '@/features/dashboard/components/StatsStrip';
 import { TodaySessionsCard } from '@/features/dashboard/components/TodaySessionsCard';
+import { useAppT } from '@/locales';
 
 /** The KPI strip owns its own loading/error state; the rest self-fetch. */
 function StatsSection() {
+	const t = useAppT('dashboard');
 	const { data, isLoading, isError, refetch } = useDashboardStats();
 	if (isLoading) return <KpiStripSkeleton />;
-	if (isError || !data) return <PanelError title="Overview" onRetry={refetch} />;
+	if (isError || !data) return <PanelError title={t('title')} onRetry={refetch} />;
 	return <StatsStrip data={data} />;
 }
 

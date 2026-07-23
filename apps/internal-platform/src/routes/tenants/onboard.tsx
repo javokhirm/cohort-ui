@@ -18,8 +18,10 @@ import type {
 	OnboardFormData,
 	OnboardStep,
 } from '@/features/tenants/components/onboarding/types';
+import { useAppT } from '@/locales';
 
 export function OnboardTenantPage() {
+	const t = useAppT('tenants');
 	const navigate = useNavigate();
 	const queryClient = useQueryClient();
 	const [step, setStep] = useState<OnboardStep>(1);
@@ -74,16 +76,12 @@ export function OnboardTenantPage() {
 				to="/tenants"
 				className="inline-flex w-fit items-center gap-1 text-sm text-muted-foreground transition-colors hover:text-foreground"
 			>
-				← Cancel onboarding
+				← {t('cancelOnboarding')}
 			</Link>
 
 			<div>
-				<h1 className="text-2xl font-bold tracking-tight">
-					Onboard a new center
-				</h1>
-				<p className="text-sm text-muted-foreground">
-					Set up a new tenant on the Cohort platform.
-				</p>
+				<h1 className="text-2xl font-bold tracking-tight">{t('onboard')}</h1>
+				<p className="text-sm text-muted-foreground">{t('onboardSubtitle')}</p>
 			</div>
 
 			<StepIndicator current={step} />
@@ -119,7 +117,7 @@ export function OnboardTenantPage() {
 				<div className="rounded-lg border border-destructive/30 bg-destructive/5 px-4 py-3 text-sm text-destructive">
 					{mutation.error instanceof Error
 						? mutation.error.message
-						: 'Failed to create tenant. Please try again.'}
+						: t('createError')}
 				</div>
 			)}
 		</div>

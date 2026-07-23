@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 
@@ -19,9 +19,11 @@ import {
 	toast,
 } from '@repo/ui';
 import { toIsoDate } from '@repo/utils';
+import { useStatusLabel, useT } from '@repo/i18n';
 
 import { FormSection } from '@/components/FormSection';
 import { FormSheet } from '@/components/FormSheet';
+import { useAppT } from '@/locales';
 import { useBranches } from '@/api/branches';
 import { useActiveBranchIds } from '@/store/branchStore';
 
@@ -56,9 +58,14 @@ function CreateExpenseForm({
 	onSuccess: () => void;
 	onPendingChange: (pending: boolean) => void;
 }) {
+	const t = useAppT('expenses');
+	const tv = useT('validation');
+	const statusLabel = useStatusLabel();
+	const schema = useMemo(() => expenseFormSchema(tv), [tv]);
+
 	const activeBranchIds = useActiveBranchIds();
 	const form = useForm<ExpenseFormValues>({
-		resolver: zodResolver(expenseFormSchema),
+		resolver: zodResolver(schema),
 		defaultValues: {
 			category: 'RENT',
 			branchId:
@@ -90,7 +97,7 @@ function CreateExpenseForm({
 			vendor: blankToNull(values.vendor),
 			description: blankToNull(values.description),
 		});
-		toast.success('Expense recorded');
+		toast.success(t('created'));
 		onSuccess();
 	}
 
@@ -107,13 +114,16 @@ function CreateExpenseForm({
 							<FormSelect
 								control={form.control}
 								name="category"
-								label="Category *"
-								options={EXPENSE_CATEGORY_OPTIONS}
+								label={t('field.category')}
+								options={EXPENSE_CATEGORY_OPTIONS.map((o) => ({
+									value: o.value,
+									label: statusLabel('expense', o.value),
+								}))}
 							/>
 							<FormSelect
 								control={form.control}
 								name="branchId"
-								label="Branch *"
+								label={t('field.branch')}
 								options={branchOptions}
 								valueAsNumber
 							/>
@@ -121,10 +131,10 @@ function CreateExpenseForm({
 						<FormInput
 							control={form.control}
 							name="amount"
-							label="Amount (UZS) *"
+							label={t('field.amount')}
 							type="number"
 							min={0}
-							placeholder="e.g. 12 000 000"
+							placeholder={t('field.amountPlaceholder')}
 							onChange={(e) =>
 								form.setValue(
 									'amount',
@@ -139,13 +149,13 @@ function CreateExpenseForm({
 							<FormDatePicker
 								control={form.control}
 								name="expenseDate"
-								label="Date *"
+								label={t('field.date')}
 							/>
 							<FormInput
 								control={form.control}
 								name="vendor"
-								label="Vendor"
-								placeholder="Vendor name"
+								label={t('field.vendor')}
+								placeholder={t('field.vendorPlaceholder')}
 							/>
 						</div>
 						<FormField
@@ -153,10 +163,12 @@ function CreateExpenseForm({
 							name="description"
 							render={({ field }) => (
 								<FormItem>
-									<FormLabel>Description</FormLabel>
+									<FormLabel>{t('field.description')}</FormLabel>
 									<FormControl>
 										<Textarea
-											placeholder="Optional notes"
+											placeholder={t(
+												'field.descriptionPlaceholder',
+											)}
 											{...field}
 										/>
 									</FormControl>
@@ -189,8 +201,13 @@ function EditExpenseForm({
 		description: e.description ?? '',
 	});
 
+	const t = useAppT('expenses');
+	const tv = useT('validation');
+	const statusLabel = useStatusLabel();
+	const schema = useMemo(() => expenseFormSchema(tv), [tv]);
+
 	const form = useForm<ExpenseFormValues>({
-		resolver: zodResolver(expenseFormSchema),
+		resolver: zodResolver(schema),
 		defaultValues: toDefaults(expense),
 	});
 
@@ -218,7 +235,7 @@ function EditExpenseForm({
 			vendor: blankToNull(values.vendor),
 			description: blankToNull(values.description),
 		});
-		toast.success('Expense updated');
+		toast.success(t('updated'));
 		onSuccess();
 	}
 
@@ -235,13 +252,16 @@ function EditExpenseForm({
 							<FormSelect
 								control={form.control}
 								name="category"
-								label="Category *"
-								options={EXPENSE_CATEGORY_OPTIONS}
+								label={t('field.category')}
+								options={EXPENSE_CATEGORY_OPTIONS.map((o) => ({
+									value: o.value,
+									label: statusLabel('expense', o.value),
+								}))}
 							/>
 							<FormSelect
 								control={form.control}
 								name="branchId"
-								label="Branch *"
+								label={t('field.branch')}
 								options={branchOptions}
 								valueAsNumber
 							/>
@@ -249,7 +269,7 @@ function EditExpenseForm({
 						<FormInput
 							control={form.control}
 							name="amount"
-							label="Amount (UZS) *"
+							label={t('field.amount')}
 							type="number"
 							min={0}
 							onChange={(e) =>
@@ -266,13 +286,13 @@ function EditExpenseForm({
 							<FormDatePicker
 								control={form.control}
 								name="expenseDate"
-								label="Date *"
+								label={t('field.date')}
 							/>
 							<FormInput
 								control={form.control}
 								name="vendor"
-								label="Vendor"
-								placeholder="Vendor name"
+								label={t('field.vendor')}
+								placeholder={t('field.vendorPlaceholder')}
 							/>
 						</div>
 						<FormField
@@ -280,10 +300,12 @@ function EditExpenseForm({
 							name="description"
 							render={({ field }) => (
 								<FormItem>
-									<FormLabel>Description</FormLabel>
+									<FormLabel>{t('field.description')}</FormLabel>
 									<FormControl>
 										<Textarea
-											placeholder="Optional notes"
+											placeholder={t(
+												'field.descriptionPlaceholder',
+											)}
 											{...field}
 										/>
 									</FormControl>
@@ -300,6 +322,8 @@ function EditExpenseForm({
 
 export function ExpenseForm(props: ExpenseFormProps) {
 	const { open, onOpenChange, mode } = props;
+	const t = useAppT('expenses');
+	const tc = useT('common');
 	const [isPending, setIsPending] = useState(false);
 
 	const formId = mode === 'create' ? 'create-expense-form' : 'edit-expense-form';
@@ -312,16 +336,16 @@ export function ExpenseForm(props: ExpenseFormProps) {
 		<FormSheet
 			open={open}
 			onOpenChange={onOpenChange}
-			title={mode === 'create' ? 'Add expense' : 'Edit expense'}
-			description="Fields marked * are required"
+			title={mode === 'create' ? t('addSheet') : t('edit')}
+			description={t('requiredHint')}
 			footer={
 				<>
 					<Button type="button" variant="outline" onClick={handleClose}>
-						Cancel
+						{tc('action.cancel')}
 					</Button>
 					<Button type="submit" form={formId} disabled={isPending}>
 						{isPending && <Spinner className="mr-2 size-4" />}
-						{mode === 'create' ? 'Record expense' : 'Save changes'}
+						{mode === 'create' ? t('submitCreate') : t('submitUpdate')}
 					</Button>
 				</>
 			}

@@ -8,16 +8,22 @@ import { CommitImportDialog } from '@/features/student-imports/components/Commit
 import { ImportRowsTable } from '@/features/student-imports/components/ImportRowsTable';
 import { ImportSummary } from '@/features/student-imports/components/ImportSummary';
 import { useStudentImport } from '@/features/student-imports/hooks';
+import { useAppT } from '@/locales';
 
 type RowFilter = 'ALL' | 'INVALID' | ImportRowOutcome;
 
-const FILTERS: { value: RowFilter; label: string }[] = [
-	{ value: 'ALL', label: 'All rows' },
-	{ value: 'INVALID', label: 'Blocked' },
-	{ value: 'CREATED', label: 'Imported' },
-	{ value: 'SKIPPED_EXISTING', label: 'Already enrolled' },
-	{ value: 'FAILED', label: 'Failed' },
-];
+/** Row filter chips — labels resolve from the translator at render. */
+function buildFilters(
+	t: ReturnType<typeof useAppT<'imports'>>,
+): { value: RowFilter; label: string }[] {
+	return [
+		{ value: 'ALL', label: t('allRows') },
+		{ value: 'INVALID', label: t('stat.blocked') },
+		{ value: 'CREATED', label: t('stat.imported') },
+		{ value: 'SKIPPED_EXISTING', label: t('stat.alreadyEnrolled') },
+		{ value: 'FAILED', label: t('stat.failed') },
+	];
+}
 
 /**
  * One import session, from review to result.
@@ -28,6 +34,8 @@ const FILTERS: { value: RowFilter; label: string }[] = [
  * download.
  */
 export function ImportSessionPage() {
+	const t = useAppT('imports');
+	const tt = useAppT('tenants');
 	const { tenantId, sessionId } = useParams({ strict: false }) as {
 		tenantId?: string;
 		sessionId?: string;
@@ -49,14 +57,11 @@ export function ImportSessionPage() {
 		return (
 			<div className="flex flex-col items-center gap-4 py-24 text-center">
 				<div className="flex flex-col gap-1">
-					<p className="text-sm font-medium">This import could not be found.</p>
-					<p className="text-sm text-muted-foreground">
-						Import sessions expire after a week. Upload the file again to
-						start over.
-					</p>
+					<p className="text-sm font-medium">{t('notFoundTitle')}</p>
+					<p className="text-sm text-muted-foreground">{t('notFoundHint')}</p>
 				</div>
 				<Link to="/tenants">
-					<Button variant="outline">← All tenants</Button>
+					<Button variant="outline">← {tt('backToList')}</Button>
 				</Link>
 			</div>
 		);
@@ -87,8 +92,8 @@ export function ImportSessionPage() {
 	return (
 		<div className="flex flex-col gap-6">
 			<PageHeader
-				title="Student import"
-				description={`Center #${numericTenantId}`}
+				title={t('title')}
+				description={t('centerRef', { id: numericTenantId })}
 				actions={
 					<div className="flex gap-2">
 						{hasRejects && (
@@ -101,12 +106,12 @@ export function ImportSessionPage() {
 									)
 								}
 							>
-								Download rejected rows
+								{t('downloadRejected')}
 							</Button>
 						)}
 						{isReview && session.counters.validRows > 0 && (
 							<Button onClick={() => setCommitOpen(true)}>
-								Import students
+								{t('importStudents')}
 							</Button>
 						)}
 					</div>
@@ -117,25 +122,27 @@ export function ImportSessionPage() {
 
 			<div className="flex flex-col gap-3">
 				<div className="flex flex-wrap gap-2">
-					{FILTERS.filter(
-						// Outcome filters mean nothing until the import has actually run.
-						(option) =>
-							option.value === 'ALL' ||
-							option.value === 'INVALID' ||
-							isFinished,
-					).map((option) => (
-						<Button
-							key={option.value}
-							size="sm"
-							variant={filter === option.value ? 'default' : 'outline'}
-							onClick={() => {
-								setFilter(option.value);
-								setPage(1);
-							}}
-						>
-							{option.label}
-						</Button>
-					))}
+					{buildFilters(t)
+						.filter(
+							// Outcome filters mean nothing until the import has actually run.
+							(option) =>
+								option.value === 'ALL' ||
+								option.value === 'INVALID' ||
+								isFinished,
+						)
+						.map((option) => (
+							<Button
+								key={option.value}
+								size="sm"
+								variant={filter === option.value ? 'default' : 'outline'}
+								onClick={() => {
+									setFilter(option.value);
+									setPage(1);
+								}}
+							>
+								{option.label}
+							</Button>
+						))}
 				</div>
 
 				<ImportRowsTable

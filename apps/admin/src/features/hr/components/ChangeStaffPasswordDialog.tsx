@@ -1,3 +1,4 @@
+import { useMemo } from 'react';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 
@@ -15,6 +16,9 @@ import {
 	Spinner,
 	toast,
 } from '@repo/ui';
+import { useT } from '@repo/i18n';
+
+import { useAppT } from '@/locales';
 
 import { useChangeStaffPassword } from '../api/staff.mutations';
 import {
@@ -44,15 +48,15 @@ export function ChangeStaffPasswordDialog({
 	staffId,
 	staffName,
 }: ChangeStaffPasswordDialogProps) {
+	const t = useAppT('hr');
+
 	return (
 		<Dialog open={open} onOpenChange={onOpenChange}>
 			<DialogContent className="max-w-sm">
 				<DialogHeader>
-					<DialogTitle>Change password</DialogTitle>
+					<DialogTitle>{t('password.title')}</DialogTitle>
 					<DialogDescription>
-						Set a new login password for {staffName}. They sign in with it
-						from their next login — any session they already have stays
-						active.
+						{t('password.description', { name: staffName })}
 					</DialogDescription>
 				</DialogHeader>
 				{open && (
@@ -73,8 +77,13 @@ function ChangeStaffPasswordForm({
 	staffId: number;
 	onClose: () => void;
 }) {
+	const t = useAppT('hr');
+	const tc = useT('common');
+	const tv = useT('validation');
+	const schema = useMemo(() => changeStaffPasswordSchema(tv, t), [tv, t]);
+
 	const form = useForm<ChangeStaffPasswordFormValues>({
-		resolver: zodResolver(changeStaffPasswordSchema),
+		resolver: zodResolver(schema),
 		defaultValues: { newPassword: '', confirmPassword: '' },
 	});
 	const changePassword = useChangeStaffPassword(staffId);
@@ -82,18 +91,18 @@ function ChangeStaffPasswordForm({
 	async function onSubmit(values: ChangeStaffPasswordFormValues) {
 		try {
 			await changePassword.mutateAsync(values.newPassword);
-			toast.success('Password changed');
+			toast.success(t('password.changed'));
 			onClose();
 		} catch (err) {
 			// The global mutation-cache handler renders a generic message for a 403;
 			// name the actual rule so the operator knows this is not a missing
 			// permission but a deliberate escalation guard.
 			if (isApiError(err) && err.code === 'STAFF_PASSWORD_RESET_FORBIDDEN') {
-				toast.error("Only an owner can change another owner's password.");
+				toast.error(t('password.ownerOnly'));
 			} else if (isApiError(err)) {
 				toast.error(err.message);
 			} else {
-				toast.error('Something went wrong');
+				toast.error(tc('error.unknown'));
 			}
 		}
 	}
@@ -107,15 +116,15 @@ function ChangeStaffPasswordForm({
 				<FormPasswordInput
 					control={form.control}
 					name="newPassword"
-					label="New password"
-					placeholder="Min. 8 characters"
+					label={t('password.newPassword')}
+					placeholder={t('password.newPasswordPlaceholder')}
 					autoComplete="new-password"
 				/>
 				<FormPasswordInput
 					control={form.control}
 					name="confirmPassword"
-					label="Confirm new password"
-					placeholder="Re-enter the password"
+					label={t('password.confirmPassword')}
+					placeholder={t('password.confirmPasswordPlaceholder')}
 					autoComplete="new-password"
 				/>
 				<DialogFooter>
@@ -125,11 +134,11 @@ function ChangeStaffPasswordForm({
 						onClick={onClose}
 						disabled={changePassword.isPending}
 					>
-						Cancel
+						{tc('action.cancel')}
 					</Button>
 					<Button type="submit" disabled={changePassword.isPending}>
 						{changePassword.isPending && <Spinner className="mr-2 size-4" />}
-						Change password
+						{t('password.submit')}
 					</Button>
 				</DialogFooter>
 			</form>

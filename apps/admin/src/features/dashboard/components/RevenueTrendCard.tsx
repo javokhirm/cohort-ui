@@ -8,7 +8,7 @@ import {
 	YAxis,
 } from 'recharts';
 
-import { formatPriceAxis, formatPriceCompact } from '@repo/utils';
+import { formatMonthShort, formatPriceAxis, formatPriceCompact } from '@repo/utils';
 
 import { useRevenueTrend } from '../api/dashboard.queries';
 import { AXIS_TICK, CHART, TOOLTIP_STYLE } from './chartTheme';
@@ -16,29 +16,26 @@ import { ChartSkeleton } from './DashboardSkeletons';
 import { PanelCard } from './PanelCard';
 import { PanelError } from './PanelError';
 import { TrendChip } from './TrendChip';
-
-/** `YYYY-MM` → short month label (`Jul`). */
-function monthLabel(month: string): string {
-	const date = new Date(`${month}-01T00:00:00`);
-	return date.toLocaleString('en-US', { month: 'short' });
-}
+import { useAppT } from '@/locales';
 
 /** Revenue trend — settled payments per month, last 12 months. */
 export function RevenueTrendCard() {
+	const t = useAppT('dashboard');
 	const { data, isLoading, isError, refetch } = useRevenueTrend(12);
 
 	if (isLoading) return <ChartSkeleton />;
-	if (isError || !data) return <PanelError title="Revenue trend" onRetry={refetch} />;
+	if (isError || !data)
+		return <PanelError title={t('card.revenueTrend')} onRetry={refetch} />;
 
 	const chartData = data.points.map((p) => ({
-		month: monthLabel(p.month),
+		month: formatMonthShort(p.month),
 		revenue: p.revenue,
 	}));
 
 	return (
 		<PanelCard
-			title="Revenue trend"
-			subtitle="Monthly, last 12 months"
+			title={t('card.revenueTrend')}
+			subtitle={t('card.revenueTrendSubtitle')}
 			headerRight={
 				data.changePct != null ? (
 					<TrendChip value={data.changePct * 100} />

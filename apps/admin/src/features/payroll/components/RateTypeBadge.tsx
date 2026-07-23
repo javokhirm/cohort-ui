@@ -1,4 +1,5 @@
 import { StatusBadge } from '@repo/ui';
+import { useStatusLabel } from '@repo/i18n';
 
 import type { RateType } from '../api/keys';
 
@@ -10,6 +11,7 @@ interface RateTypeBadgeProps {
 
 /** Pay-model pill (Fixed / Hourly / Percent) from the `payroll_rate` map. */
 export function RateTypeBadge({ rateType, percent }: RateTypeBadgeProps) {
+	const statusLabel = useStatusLabel();
 	if (rateType === 'PERCENT' && percent != null) {
 		return (
 			<StatusBadge kind="payroll_rate" status={rateType}>
@@ -17,5 +19,9 @@ export function RateTypeBadge({ rateType, percent }: RateTypeBadgeProps) {
 			</StatusBadge>
 		);
 	}
-	return <StatusBadge kind="payroll_rate" status={rateType} />;
+	return (
+		<StatusBadge kind="payroll_rate" status={rateType}>
+			{statusLabel('payroll_rate', rateType)}
+		</StatusBadge>
+	);
 }

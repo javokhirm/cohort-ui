@@ -25,6 +25,7 @@ COPY apps/teacher/package.json           ./apps/teacher/
 COPY packages/api-client/package.json  ./packages/api-client/
 COPY packages/ui/package.json          ./packages/ui/
 COPY packages/utils/package.json       ./packages/utils/
+COPY packages/i18n/package.json        ./packages/i18n/
 COPY packages/eslint-config/package.json      ./packages/eslint-config/
 COPY packages/typescript-config/package.json  ./packages/typescript-config/
 RUN pnpm install --frozen-lockfile

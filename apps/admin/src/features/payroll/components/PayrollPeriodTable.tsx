@@ -1,9 +1,11 @@
 import { DataTable, StatusBadge, type ColumnDef } from '@repo/ui';
 import { formatMoney } from '@repo/utils';
+import { useStatusLabel } from '@repo/i18n';
 
 import type { PayrollPeriodRow } from '../api/payroll.queries';
 import { LiveBadge } from './LiveBadge';
 import { RateTypeBadge } from './RateTypeBadge';
+import { useAppT } from '@/locales';
 
 interface PayrollPeriodTableProps {
 	rows: PayrollPeriodRow[];
@@ -22,10 +24,12 @@ export function PayrollPeriodTable({
 	isLoading,
 	onRowClick,
 }: PayrollPeriodTableProps) {
+	const t = useAppT('payroll');
+	const statusLabel = useStatusLabel();
 	const columns: ColumnDef<PayrollPeriodRow>[] = [
 		{
 			id: 'teacher',
-			header: 'Teacher',
+			header: t('column.staff'),
 			cell: ({ row }) => {
 				const { staffName, staffCode, position } = row.original;
 				return (
@@ -47,7 +51,7 @@ export function PayrollPeriodTable({
 		},
 		{
 			id: 'type',
-			header: 'Type',
+			header: t('column.type'),
 			cell: ({ row }) => (
 				<RateTypeBadge
 					rateType={row.original.rateType}
@@ -58,7 +62,7 @@ export function PayrollPeriodTable({
 		},
 		{
 			accessorKey: 'sessionsTaught',
-			header: () => <div className="text-right">Sessions</div>,
+			header: () => <div className="text-right">{t('column.sessions')}</div>,
 			cell: ({ getValue }) => (
 				<div className="text-right text-sm tabular-nums text-muted-foreground">
 					{getValue<number>()}
@@ -68,7 +72,7 @@ export function PayrollPeriodTable({
 		},
 		{
 			accessorKey: 'studentsCount',
-			header: () => <div className="text-right">Students</div>,
+			header: () => <div className="text-right">{t('column.students')}</div>,
 			cell: ({ getValue }) => (
 				<div className="text-right text-sm tabular-nums text-muted-foreground">
 					{getValue<number>()}
@@ -78,7 +82,7 @@ export function PayrollPeriodTable({
 		},
 		{
 			accessorKey: 'grossAmount',
-			header: () => <div className="text-right">Computed</div>,
+			header: () => <div className="text-right">{t('column.computed')}</div>,
 			cell: ({ getValue }) => (
 				<div className="text-right text-sm tabular-nums">
 					{formatMoney(getValue<number>())}
@@ -88,7 +92,7 @@ export function PayrollPeriodTable({
 		},
 		{
 			accessorKey: 'advancesTotal',
-			header: () => <div className="text-right">Advances</div>,
+			header: () => <div className="text-right">{t('column.advances')}</div>,
 			cell: ({ getValue }) => {
 				const advances = getValue<number>();
 				return (
@@ -107,7 +111,7 @@ export function PayrollPeriodTable({
 		},
 		{
 			accessorKey: 'netAmount',
-			header: () => <div className="text-right">Net payable</div>,
+			header: () => <div className="text-right">{t('stat.netPayable')}</div>,
 			cell: ({ getValue }) => (
 				<div className="text-right text-sm font-bold tabular-nums">
 					{formatMoney(getValue<number>())}
@@ -117,13 +121,15 @@ export function PayrollPeriodTable({
 		},
 		{
 			accessorKey: 'status',
-			header: () => <div className="text-right">Status</div>,
+			header: () => <div className="text-right">{t('column.status')}</div>,
 			cell: ({ row }) => (
 				<div className="flex justify-end">
 					{row.original.status === 'LIVE' ? (
 						<LiveBadge />
 					) : (
-						<StatusBadge kind="payroll" status={row.original.status} />
+						<StatusBadge kind="payroll" status={row.original.status}>
+							{statusLabel('payroll', row.original.status)}
+						</StatusBadge>
 					)}
 				</div>
 			),
@@ -140,9 +146,9 @@ export function PayrollPeriodTable({
 			onRowClick={onRowClick}
 			emptyState={
 				<div className="py-16 text-center">
-					<p className="text-sm font-semibold">No teachers match this filter</p>
+					<p className="text-sm font-semibold">{t('emptyTitle')}</p>
 					<p className="mt-1 text-sm text-muted-foreground">
-						No completed sessions or active payroll config in this window.
+						{t('emptyDescription')}
 					</p>
 				</div>
 			}

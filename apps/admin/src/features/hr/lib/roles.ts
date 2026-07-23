@@ -11,14 +11,17 @@ export function primaryRole(roles: string[]): string | null {
 	return roles[0] ?? null;
 }
 
-/** "TEACHER" → "Teacher" */
-export function roleLabel(role: string): string {
-	return role.charAt(0).toUpperCase() + role.slice(1).toLowerCase();
-}
-
-export const ROLE_FILTERS: { value: StaffRoleFilter | undefined; label: string }[] = [
-	{ value: undefined, label: 'All' },
-	{ value: 'TEACHER', label: 'Teachers' },
-	{ value: 'MANAGER', label: 'Managers' },
-	{ value: 'ADMIN', label: 'Admins' },
+/**
+ * Role filter chips — **values only, never display text**. A label captured at
+ * module load would freeze in whatever language was active when the module first
+ * evaluated (conventions.md §7); screens resolve `hr:roleFilter.*` at render.
+ *
+ * A role *name* on a badge (`OWNER` → "Egasi") comes from `useStatusLabel('role',
+ * name)`, the same `enums.domain.role.*` catalog `@repo/ui` colors against.
+ */
+export const ROLE_FILTERS: { value: StaffRoleFilter | undefined }[] = [
+	{ value: undefined },
+	{ value: 'TEACHER' },
+	{ value: 'MANAGER' },
+	{ value: 'ADMIN' },
 ];

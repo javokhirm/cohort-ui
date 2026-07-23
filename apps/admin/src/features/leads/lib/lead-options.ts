@@ -7,29 +7,32 @@ import type {
 	LeadStatus,
 } from '../api/leads.queries';
 
+/**
+ * Lead option tables — **values and keys only, never display text**.
+ *
+ * A label captured at module load would freeze in whatever language was active
+ * when the module first evaluated (conventions.md §7). Sources and statuses are
+ * resolved at render through `useStatusLabel`, which reads the same
+ * `enums.domain.lead*` catalog that colors the badges; activity types and time
+ * windows resolve against the app's `leads` namespace.
+ */
+
 /** Lead-source options for the create form and the source filter. */
-export const LEAD_SOURCE_OPTIONS: { value: LeadSource; label: string }[] = [
-	{ value: 'INSTAGRAM', label: 'Instagram' },
-	{ value: 'TELEGRAM', label: 'Telegram' },
-	{ value: 'REFERRAL', label: 'Referral' },
-	{ value: 'WALK_IN', label: 'Walk-in' },
-	{ value: 'WEBSITE', label: 'Website' },
-	{ value: 'OTHER', label: 'Other' },
+export const LEAD_SOURCE_OPTIONS: { value: LeadSource }[] = [
+	{ value: 'INSTAGRAM' },
+	{ value: 'TELEGRAM' },
+	{ value: 'REFERRAL' },
+	{ value: 'WALK_IN' },
+	{ value: 'WEBSITE' },
+	{ value: 'OTHER' },
 ];
 
-export function leadSourceLabel(source: LeadSource): string {
-	return LEAD_SOURCE_OPTIONS.find((o) => o.value === source)?.label ?? source;
-}
-
 /** The four client-loggable activity types (the detail sheet's chip toggle). */
-export const ACTIVITY_TYPE_OPTIONS: {
-	value: LeadLoggableActivityType;
-	label: string;
-}[] = [
-	{ value: 'CALL', label: 'Call' },
-	{ value: 'MESSAGE', label: 'Message' },
-	{ value: 'TRIAL', label: 'Trial' },
-	{ value: 'NOTE', label: 'Note' },
+export const ACTIVITY_TYPE_OPTIONS: { value: LeadLoggableActivityType }[] = [
+	{ value: 'CALL' },
+	{ value: 'MESSAGE' },
+	{ value: 'TRIAL' },
+	{ value: 'NOTE' },
 ];
 
 /** Tone per activity type for the timeline dots. */
@@ -49,15 +52,11 @@ export const ACTIVITY_TONE: Record<LeadActivityType, StatusTone> = {
 export const TIME_WINDOW_VALUES = ['24h', '7d', '30d', '90d'] as const;
 export type TimeWindow = (typeof TIME_WINDOW_VALUES)[number];
 
-export const TIME_WINDOW_OPTIONS: {
-	value: TimeWindow;
-	label: string;
-	hours: number;
-}[] = [
-	{ value: '24h', label: 'Last 24 hours', hours: 24 },
-	{ value: '7d', label: 'Last 7 days', hours: 24 * 7 },
-	{ value: '30d', label: 'Last 30 days', hours: 24 * 30 },
-	{ value: '90d', label: 'Last 90 days', hours: 24 * 90 },
+export const TIME_WINDOW_OPTIONS: { value: TimeWindow; hours: number }[] = [
+	{ value: '24h', hours: 24 },
+	{ value: '7d', hours: 24 * 7 },
+	{ value: '30d', hours: 24 * 30 },
+	{ value: '90d', hours: 24 * 90 },
 ];
 
 /** Resolve a window token to an ISO `createdAfter` cutoff (evaluated now). */

@@ -2,6 +2,7 @@ import * as React from 'react';
 import { ChevronDownIcon, ChevronLeftIcon, ChevronRightIcon } from 'lucide-react';
 import {
 	DayPicker,
+	defaultDateLib,
 	getDefaultClassNames,
 	type ChevronProps,
 	type DayButton,
@@ -37,8 +38,11 @@ function Calendar({
 			)}
 			captionLayout={captionLayout}
 			formatters={{
-				formatMonthDropdown: (date) =>
-					date.toLocaleString('default', { month: 'short' }),
+				// Short month via the configured date library, so the dropdown follows
+				// the `locale` passed to DayPicker instead of the runtime default.
+				// `LLL` is the standalone short month (e.g. `Iyun` / `июнь` / `Jun`).
+				formatMonthDropdown: (date, dateLib) =>
+					(dateLib ?? defaultDateLib).format(date, 'LLL'),
 				...formatters,
 			}}
 			classNames={{
