@@ -8,6 +8,8 @@ import {
 	YAxis,
 } from 'recharts';
 
+import { formatMonthShort } from '@repo/utils';
+
 import { useEnrollmentTrend } from '../api/dashboard.queries';
 import { AXIS_TICK, CHART, TOOLTIP_STYLE } from './chartTheme';
 import { ChartSkeleton } from './DashboardSkeletons';
@@ -15,12 +17,6 @@ import { PanelCard } from './PanelCard';
 import { PanelError } from './PanelError';
 import { TrendChip } from './TrendChip';
 import { useAppT } from '@/locales';
-
-/** `YYYY-MM` → short month label (`Jul`). */
-function monthLabel(month: string): string {
-	const date = new Date(`${month}-01T00:00:00`);
-	return date.toLocaleString('en-US', { month: 'short' });
-}
 
 /** Enrollment trend — new enrollments per month, last 12 months. */
 export function EnrollmentTrendCard() {
@@ -32,7 +28,7 @@ export function EnrollmentTrendCard() {
 		return <PanelError title={t('card.enrollmentTrend')} onRetry={refetch} />;
 
 	const chartData = data.points.map((p) => ({
-		month: monthLabel(p.month),
+		month: formatMonthShort(p.month),
 		enrollments: p.enrollments,
 	}));
 

@@ -2,36 +2,23 @@ import { useNavigate } from '@tanstack/react-router';
 import { FilePlus2, Plus, UsersRound } from 'lucide-react';
 
 import { Button } from '@repo/ui';
-import { TASHKENT_TZ } from '@repo/utils';
+import { currentHour, formatFullDate, todayIsoDate } from '@repo/utils';
 
 import { useSessionStore } from '@/store/sessionStore';
 import { useAppT } from '@/locales';
 
 /**
  * Dashboard greeting + quick actions. The name comes from the logged-in staff
- * profile; the date/greeting are computed in the tenant timezone (`Intl`, no
- * extra date dependency in the app).
+ * profile; the date/greeting are computed in the tenant timezone via the shared
+ * `@repo/utils` helpers, so the date localizes with the active language.
  */
 export function DashboardHeader() {
 	const t = useAppT('dashboard');
 	const navigate = useNavigate();
 	const user = useSessionStore((s) => s.user);
 
-	const now = new Date();
-	const hour = Number(
-		new Intl.DateTimeFormat('en-US', {
-			timeZone: TASHKENT_TZ,
-			hour: 'numeric',
-			hour12: false,
-		}).format(now),
-	);
-	const dateLabel = new Intl.DateTimeFormat('en-US', {
-		timeZone: TASHKENT_TZ,
-		weekday: 'long',
-		day: 'numeric',
-		month: 'long',
-		year: 'numeric',
-	}).format(now);
+	const hour = currentHour();
+	const dateLabel = formatFullDate(todayIsoDate(), { year: true });
 
 	// User-facing text must not be hardcoded (conventions §7); the key is
 	// picked here and resolved with `t` so a language switch re-translates.

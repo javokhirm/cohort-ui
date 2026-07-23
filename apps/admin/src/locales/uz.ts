@@ -714,6 +714,8 @@ export const uz = {
 		noSchedule: 'Jadval belgilanmagan',
 		loadError: 'Guruhlarni yuklab boʻlmadi. Sahifani yangilang.',
 		emptyFiltered: 'Bu filtrlarga mos guruh topilmadi.',
+		seats_one: '{{count}} oʻrin',
+		seats_other: '{{count}} oʻrin',
 		status: {
 			PLANNED: 'Rejalashtirilgan',
 			ACTIVE: 'Faol',

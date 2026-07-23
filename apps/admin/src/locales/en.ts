@@ -689,6 +689,8 @@ export const en: TranslationsOf<typeof uz> = {
 		noRoom: 'No room',
 		unassigned: 'Unassigned',
 		noSchedule: 'No schedule set',
+		seats_one: '{{count}} seat',
+		seats_other: '{{count}} seats',
 		loadError: 'Failed to load groups. Please refresh.',
 		emptyFiltered: 'No groups match these filters.',
 		status: {

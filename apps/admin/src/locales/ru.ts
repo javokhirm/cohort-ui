@@ -707,6 +707,10 @@ export const ru: TranslationsOf<typeof uz> = {
 		noRoom: 'Без аудитории',
 		unassigned: 'Не назначен',
 		noSchedule: 'Расписание не задано',
+		seats_one: '{{count}} место',
+		seats_few: '{{count}} места',
+		seats_many: '{{count}} мест',
+		seats_other: '{{count}} мест',
 		loadError: 'Не удалось загрузить группы. Обновите страницу.',
 		emptyFiltered: 'Нет групп по этим фильтрам.',
 		status: {

@@ -13,6 +13,7 @@ export {
 
 export {
 	TASHKENT_TZ,
+	setDateLocale,
 	formatDate,
 	formatDateTime,
 	formatDateTimeLong,
@@ -29,6 +30,7 @@ export {
 	weekDates,
 	formatWeekday,
 	formatDayOfMonth,
+	formatMonthShort,
 	formatFullDate,
 	formatWeekRange,
 } from './date';
