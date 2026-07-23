@@ -15,6 +15,7 @@ import {
 import { useTeachBranches } from '@/api/branches';
 import { useAuth } from '@/features/auth/hooks';
 import { useProfile } from '@/features/profile/api/profile.queries';
+import { useAppT } from '@/locales';
 
 /**
  * The signed-in teacher's profile (`GET /teach/me`, api-reference §4.9).
@@ -28,6 +29,8 @@ import { useProfile } from '@/features/profile/api/profile.queries';
  * Mobile-first: a single centered column that a teacher reads on a phone.
  */
 export function ProfileRoute() {
+	const t = useAppT('profile');
+	const tShell = useAppT('shell');
 	const { logout } = useAuth();
 	const { isDark, toggleTheme } = useTheme();
 	const { data: profile, isPending, isError } = useProfile();
@@ -49,8 +52,8 @@ export function ProfileRoute() {
 				<div className="rounded-2xl border border-border bg-card">
 					<EmptyState
 						icon={<UserRound />}
-						title="Couldn't load your profile"
-						description="Something went wrong fetching your account. Try again in a moment."
+						title={t('errorTitle')}
+						description={t('errorDescription')}
 					/>
 				</div>
 				<Button
@@ -59,7 +62,7 @@ export function ProfileRoute() {
 					onClick={logout}
 				>
 					<LogOut className="size-4" />
-					Log out
+					{tShell('logOut')}
 				</Button>
 			</div>
 		);
@@ -118,7 +121,7 @@ export function ProfileRoute() {
 
 			{/* Settings */}
 			<p className="mt-6 mb-2 px-1 text-[10.5px] font-semibold uppercase tracking-widest text-muted-foreground">
-				Settings
+				{tShell('settings')}
 			</p>
 			<div className="overflow-hidden rounded-2xl border border-border bg-card shadow-xs">
 				<Button
@@ -144,7 +147,7 @@ export function ProfileRoute() {
 				onClick={logout}
 			>
 				<LogOut className="size-4" />
-				Log out
+				{tShell('logOut')}
 			</Button>
 		</div>
 	);

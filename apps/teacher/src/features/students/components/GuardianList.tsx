@@ -4,6 +4,7 @@ import { EmptyState, Skeleton, StatusBadge } from '@repo/ui';
 
 import { useStudentGuardians } from '../api/students.queries';
 import { fullName, relationLabel } from '../lib/student-name';
+import { useAppT } from '@/locales';
 
 interface GuardianListProps {
 	studentId: number;
@@ -18,6 +19,7 @@ interface GuardianListProps {
  * the one alarming thing on an otherwise neutral screen.
  */
 export function GuardianList({ studentId }: GuardianListProps) {
+	const t = useAppT('students');
 	const { data: guardians, isPending, isError } = useStudentGuardians(studentId);
 
 	if (isPending) {
@@ -29,8 +31,8 @@ export function GuardianList({ studentId }: GuardianListProps) {
 			<div className="rounded-xl border border-border bg-card">
 				<EmptyState
 					icon={<ShieldAlert />}
-					title="Couldn't load guardians"
-					description="Something went wrong fetching this student's guardians. Try again in a moment."
+					title={t('guardiansErrorTitle')}
+					description={t('guardiansErrorDescription')}
 				/>
 			</div>
 		);
@@ -41,8 +43,8 @@ export function GuardianList({ studentId }: GuardianListProps) {
 			<div className="rounded-xl border border-border bg-card">
 				<EmptyState
 					icon={<ShieldAlert />}
-					title="No guardians on file"
-					description="Ask the front desk to add a guardian for this student."
+					title={t('guardiansEmptyTitle')}
+					description={t('guardiansEmptyDescription')}
 				/>
 			</div>
 		);

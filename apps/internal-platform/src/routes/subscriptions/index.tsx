@@ -22,79 +22,92 @@ import { PAGE_SIZE, STATUS_TABS } from '@/features/subscriptions/constants';
 import { avatarClass, getInitials } from '@/features/subscriptions/utils';
 import { BillingDateCell } from '@/features/subscriptions/components/BillingDateCell';
 import type { SubscriptionStatus } from '@/api/subscriptions/types';
+import { useAppT } from '@/locales';
 
 type SubscriptionRow = NonNullable<
 	ReturnType<typeof useSubscriptionList>['data']
 >['rows'][number];
 
-const columns: ColumnDef<SubscriptionRow>[] = [
-	{
-		id: 'tenant',
-		header: 'Tenant',
-		cell: ({ row }) => {
-			const sub = row.original;
-			return (
-				<div className="flex items-center gap-3">
-					<Avatar className="size-8 shrink-0">
-						<AvatarFallback
-							className={cn('text-xs font-bold', avatarClass(sub.tenantId))}
-						>
-							{getInitials(sub.tenantName ?? '?')}
-						</AvatarFallback>
-					</Avatar>
-					<span className="truncate text-sm font-medium">
-						{sub.tenantName ?? `Tenant #${sub.tenantId}`}
-					</span>
-				</div>
-			);
+/**
+ * Built per render rather than held at module scope: the headers are
+ * user-facing, so they must re-resolve when the language changes.
+ */
+function buildColumns(
+	t: ReturnType<typeof useAppT<'subscriptions'>>,
+): ColumnDef<SubscriptionRow>[] {
+	return [
+		{
+			id: 'tenant',
+			header: t('column.tenant'),
+			cell: ({ row }) => {
+				const sub = row.original;
+				return (
+					<div className="flex items-center gap-3">
+						<Avatar className="size-8 shrink-0">
+							<AvatarFallback
+								className={cn(
+									'text-xs font-bold',
+									avatarClass(sub.tenantId),
+								)}
+							>
+								{getInitials(sub.tenantName ?? '?')}
+							</AvatarFallback>
+						</Avatar>
+						<span className="truncate text-sm font-medium">
+							{sub.tenantName ?? `Tenant #${sub.tenantId}`}
+						</span>
+					</div>
+				);
+			},
 		},
-	},
-	{
-		id: 'plan',
-		header: 'Plan',
-		cell: ({ row }) => (
-			<span className="text-sm text-muted-foreground">
-				{row.original.tierName ?? `Tier #${row.original.subscriptionTierId}`}
-			</span>
-		),
-	},
-	{
-		accessorKey: 'status',
-		header: 'Status',
-		cell: ({ row }) => <StatusBadge kind="tenant" status={row.original.status} />,
-	},
-	{
-		accessorKey: 'monthlyValue',
-		header: () => 'MRR',
-		cell: ({ getValue }) => (
-			<div className="tabular-nums text-sm font-medium">
-				{formatPrice(getValue<number>())}
-			</div>
-		),
-	},
-	{
-		accessorKey: 'currentPeriodStart',
-		header: () => 'Period start',
-		cell: ({ getValue }) => (
-			<div className="text-sm text-muted-foreground">
-				{formatDate(getValue<string>())}
-			</div>
-		),
-	},
-	{
-		id: 'nextBill',
-		header: () => 'Next bill',
-		cell: ({ row }) => (
-			<BillingDateCell
-				status={row.original.status}
-				currentPeriodEnd={row.original.currentPeriodEnd}
-				cancelledAt={row.original.cancelledAt}
-			/>
-		),
-	},
-];
+		{
+			id: 'plan',
+			header: t('column.plan'),
+			cell: ({ row }) => (
+				<span className="text-sm text-muted-foreground">
+					{row.original.tierName ?? `Tier #${row.original.subscriptionTierId}`}
+				</span>
+			),
+		},
+		{
+			accessorKey: 'status',
+			header: t('column.status'),
+			cell: ({ row }) => <StatusBadge kind="tenant" status={row.original.status} />,
+		},
+		{
+			accessorKey: 'monthlyValue',
+			header: () => 'MRR',
+			cell: ({ getValue }) => (
+				<div className="tabular-nums text-sm font-medium">
+					{formatPrice(getValue<number>())}
+				</div>
+			),
+		},
+		{
+			accessorKey: 'currentPeriodStart',
+			header: () => 'Period start',
+			cell: ({ getValue }) => (
+				<div className="text-sm text-muted-foreground">
+					{formatDate(getValue<string>())}
+				</div>
+			),
+		},
+		{
+			id: 'nextBill',
+			header: () => 'Next bill',
+			cell: ({ row }) => (
+				<BillingDateCell
+					status={row.original.status}
+					currentPeriodEnd={row.original.currentPeriodEnd}
+					cancelledAt={row.original.cancelledAt}
+				/>
+			),
+		},
+	];
+}
 
 export function SubscriptionsPage() {
+	const t = useAppT('subscriptions');
 	const navigate = useNavigate({ from: '/subscriptions' });
 	const { page = 1, status } = useSearch({ from: '/_authed/subscriptions' });
 
@@ -231,7 +244,7 @@ export function SubscriptionsPage() {
 
 			<Card className="gap-0 overflow-hidden py-0">
 				<DataTable
-					columns={columns}
+					columns={buildColumns(t)}
 					data={list?.rows ?? []}
 					isLoading={listQuery.isLoading}
 					getRowId={(row) => String(row.id)}

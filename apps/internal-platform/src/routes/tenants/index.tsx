@@ -28,89 +28,102 @@ import {
 	type StatusTab,
 } from '@/features/tenants/constants';
 import { useTenantsPage, useTenantSummary } from '@/features/tenants/hooks';
+import { useAppT } from '@/locales';
 
 type TenantRow = NonNullable<ReturnType<typeof useTenantsPage>['data']>['rows'][number];
 
-const columns: ColumnDef<TenantRow>[] = [
-	{
-		id: 'center',
-		header: 'Center',
-		cell: ({ row }) => {
-			const tenant = row.original;
-			return (
-				<div className="flex items-center gap-3">
-					<Avatar className="size-8 shrink-0">
-						<AvatarFallback
-							className={cn('text-xs font-bold', avatarClass(tenant.id))}
-						>
-							{getInitials(tenant.name)}
-						</AvatarFallback>
-					</Avatar>
-					<div className="min-w-0">
-						<p className="truncate text-sm font-medium leading-tight">
-							{tenant.name}
-						</p>
+/**
+ * Built per render rather than held at module scope: the headers are
+ * user-facing, so they must re-resolve when the language changes.
+ */
+function buildColumns(t: ReturnType<typeof useAppT<'tenants'>>): ColumnDef<TenantRow>[] {
+	return [
+		{
+			id: 'center',
+			header: t('column.center'),
+			cell: ({ row }) => {
+				const tenant = row.original;
+				return (
+					<div className="flex items-center gap-3">
+						<Avatar className="size-8 shrink-0">
+							<AvatarFallback
+								className={cn(
+									'text-xs font-bold',
+									avatarClass(tenant.id),
+								)}
+							>
+								{getInitials(tenant.name)}
+							</AvatarFallback>
+						</Avatar>
+						<div className="min-w-0">
+							<p className="truncate text-sm font-medium leading-tight">
+								{tenant.name}
+							</p>
+						</div>
 					</div>
-				</div>
-			);
+				);
+			},
 		},
-	},
-	{
-		id: 'plan',
-		header: 'Plan',
-		cell: ({ row }) => (
-			<span className="text-sm text-muted-foreground">
-				{row.original.plan?.name ?? '—'}
-			</span>
-		),
-	},
-	{
-		id: 'status',
-		header: 'Status',
-		cell: ({ row }) => {
-			const tenant = row.original;
-			return (
-				<div className="flex flex-col gap-1">
-					<StatusBadge tone={TENANT_STATUS_TONE[tenant.status]}>
-						{TENANT_STATUS_LABEL[tenant.status]}
-					</StatusBadge>
-					{tenant.subscriptionStatus && (
-						<StatusBadge tone={SUB_STATUS_TONE[tenant.subscriptionStatus]}>
-							{SUB_STATUS_LABEL[tenant.subscriptionStatus]}
+		{
+			id: 'plan',
+			header: t('column.plan'),
+			cell: ({ row }) => (
+				<span className="text-sm text-muted-foreground">
+					{row.original.plan?.name ?? '—'}
+				</span>
+			),
+		},
+		{
+			id: 'status',
+			header: t('column.status'),
+			cell: ({ row }) => {
+				const tenant = row.original;
+				return (
+					<div className="flex flex-col gap-1">
+						<StatusBadge tone={TENANT_STATUS_TONE[tenant.status]}>
+							{TENANT_STATUS_LABEL[tenant.status]}
 						</StatusBadge>
-					)}
-				</div>
-			);
+						{tenant.subscriptionStatus && (
+							<StatusBadge
+								tone={SUB_STATUS_TONE[tenant.subscriptionStatus]}
+							>
+								{SUB_STATUS_LABEL[tenant.subscriptionStatus]}
+							</StatusBadge>
+						)}
+					</div>
+				);
+			},
 		},
-	},
-	{
-		id: 'branches',
-		header: () => <div className="text-right">Branches</div>,
-		cell: ({ row }) => (
-			<div className="text-right tabular-nums">{row.original.branches}</div>
-		),
-	},
-	{
-		id: 'students',
-		header: () => <div className="text-right">Students</div>,
-		cell: ({ row }) => (
-			<div className="text-right tabular-nums">
-				{formatNumber(row.original.students)}
-			</div>
-		),
-	},
-	{
-		id: 'mrr',
-		header: () => <div className="text-right">MRR</div>,
-		cell: ({ row }) => (
-			<div className="text-right tabular-nums text-sm">
-				{row.original.mrr === 0 ? '—' : formatPrice(row.original.mrr)}
-			</div>
-		),
-	},
-];
+		{
+			id: 'branches',
+			header: () => <div className="text-right">Branches</div>,
+			cell: ({ row }) => (
+				<div className="text-right tabular-nums">{row.original.branches}</div>
+			),
+		},
+		{
+			id: 'students',
+			header: () => <div className="text-right">Students</div>,
+			cell: ({ row }) => (
+				<div className="text-right tabular-nums">
+					{formatNumber(row.original.students)}
+				</div>
+			),
+		},
+		{
+			id: 'mrr',
+			header: () => <div className="text-right">MRR</div>,
+			cell: ({ row }) => (
+				<div className="text-right tabular-nums text-sm">
+					{row.original.mrr === 0 ? '—' : formatPrice(row.original.mrr)}
+				</div>
+			),
+		},
+	];
+}
 
 export function TenantsPage() {
+	const t = useAppT('tenants');
 	const navigate = useNavigate();
 	const [search, setSearch] = useState('');
 	const [debouncedSearch, setDebouncedSearch] = useState('');
@@ -156,7 +169,7 @@ export function TenantsPage() {
 				<div>
 					<h1 className="text-xl font-semibold tracking-tight">Tenants</h1>
 					<p className="text-sm text-muted-foreground">
-						Every education center on the Cohort platform
+						{t('description')}
 						{summary ? ` · ${summary.total} total` : ''}
 					</p>
 				</div>
@@ -237,7 +250,7 @@ export function TenantsPage() {
 						type="search"
 						value={search}
 						onChange={handleSearch}
-						placeholder="Search centers..."
+						placeholder={t('searchPlaceholder')}
 						className="h-9 w-64 rounded-md border border-input bg-background pl-8 pr-3 text-sm shadow-sm placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring"
 					/>
 				</div>
@@ -285,7 +298,7 @@ export function TenantsPage() {
 
 			<Card className="gap-0 overflow-hidden py-0">
 				<DataTable
-					columns={columns}
+					columns={buildColumns(t)}
 					data={tenantsPage?.rows ?? []}
 					isLoading={isLoading}
 					getRowId={(row) => String(row.id)}

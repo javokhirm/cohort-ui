@@ -16,8 +16,11 @@ import { CenteredNotice } from '@/features/users/components/CenteredNotice';
 import { DetailSkeleton } from '@/features/users/components/DetailSkeleton';
 import { ResetPasswordDialog } from '@/features/users/components/ResetPasswordDialog';
 import { DeactivateDialog } from '@/features/users/components/DeactivateDialog';
+import { useAppT } from '@/locales';
 
 export function UserDetailPage() {
+	const t = useAppT('users');
+	const tt = useAppT('tenants');
 	const { userId } = useParams({ strict: false }) as { userId?: string };
 	const id = Number(userId);
 	const validId = userId != null && Number.isInteger(id) && id > 0;
@@ -88,7 +91,7 @@ export function UserDetailPage() {
 						onClick={() => setResetOpen(true)}
 					>
 						<KeyRound className="size-4" />
-						Reset password
+						{t('resetPassword')}
 					</Button>
 					<Button
 						variant="destructive"
@@ -97,7 +100,7 @@ export function UserDetailPage() {
 						onClick={() => setDeactivateOpen(true)}
 					>
 						<Ban className="size-4" />
-						Deactivate
+						{tt('danger.deactivate')}
 					</Button>
 				</div>
 			</div>

@@ -5,6 +5,7 @@ import { branchDotClass, cn } from '@repo/ui';
 
 import type { TeachGroup } from '../api/groups.queries';
 import { attendanceToneClass, capacityLabel, capacityToneClass } from '../lib/capacity';
+import { useAppT } from '@/locales';
 
 interface GroupCardProps {
 	group: TeachGroup;
@@ -22,6 +23,7 @@ interface GroupCardProps {
  * perfect absence.
  */
 export function GroupCard({ group, branchName, onOpen }: GroupCardProps) {
+	const tAttendance = useAppT('attendance');
 	const rule = group.scheduleRule;
 	const filledLabel = capacityLabel(group.activeEnrollmentsCount, group.capacity);
 
@@ -109,7 +111,7 @@ export function GroupCard({ group, branchName, onOpen }: GroupCardProps) {
 
 				{group.attendanceRate === null ? (
 					<span className="shrink-0 text-[11.5px] text-muted-foreground">
-						No attendance yet
+						{tAttendance('emptyTitle')}
 					</span>
 				) : (
 					<span

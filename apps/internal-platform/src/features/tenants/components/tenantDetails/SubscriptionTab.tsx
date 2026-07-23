@@ -7,6 +7,7 @@ import { plansKeys } from '@/api/plans/keys';
 import { listPlans } from '@/api/plans/plans.queries';
 import type { TenantDetailView } from '@/api/tenants/types';
 import { formatDate, formatPrice } from '@repo/utils';
+import { useAppT } from '@/locales';
 
 const SUB_STATUS_TONE: Record<string, StatusTone> = {
 	TRIALING: 'blue',
@@ -31,6 +32,7 @@ export function SubscriptionTab({
 	subscriptionTierId: number | null;
 	onChangePlan: () => void;
 }) {
+	const ts = useAppT('subscriptions');
 	const { data: plansPage } = useQuery({
 		queryKey: plansKeys.list({ isActive: true }),
 		queryFn: () => listPlans({ isActive: true, limit: 100 }),
@@ -45,7 +47,7 @@ export function SubscriptionTab({
 				<Card className="gap-0 py-0">
 					<CardHeader className="px-5 pb-0">
 						<p className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">
-							Current Plan
+							{ts('currentPlan')}
 						</p>
 					</CardHeader>
 					<CardContent className="flex flex-col gap-4 px-5 pt-3 pb-5">
@@ -105,7 +107,7 @@ export function SubscriptionTab({
 							</p>
 						)}
 						<Button className="w-full" onClick={onChangePlan}>
-							Change plan
+							{ts('changePlan')}
 						</Button>
 					</CardContent>
 				</Card>
@@ -113,7 +115,7 @@ export function SubscriptionTab({
 				<Card className="gap-0 py-0">
 					<CardHeader className="border-b border-border px-5 py-4">
 						<CardTitle className="text-sm font-semibold">
-							Recent Invoices
+							{ts('recentInvoices')}
 						</CardTitle>
 					</CardHeader>
 					<CardContent className="py-10 text-center text-sm text-muted-foreground">

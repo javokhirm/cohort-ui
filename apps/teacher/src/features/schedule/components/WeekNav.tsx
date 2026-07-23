@@ -1,6 +1,7 @@
 import { ChevronLeft, ChevronRight } from 'lucide-react';
 
 import { Button } from '@repo/ui';
+import { useAppT } from '@/locales';
 
 interface WeekNavProps {
 	/** The visible week's range label, e.g. "14 – 20 Jul". */
@@ -24,6 +25,8 @@ export function WeekNav({
 	showJumpToday,
 	onJumpToday,
 }: WeekNavProps) {
+	const t = useAppT('schedule');
+	const tShell = useAppT('shell');
 	return (
 		<div className="mb-2.5 flex items-center justify-between">
 			<div className="flex items-center gap-0.5">
@@ -32,7 +35,7 @@ export function WeekNav({
 					size="icon"
 					className="size-8 text-muted-foreground"
 					onClick={onPrevWeek}
-					aria-label="Previous week"
+					aria-label={tShell('prevWeek')}
 				>
 					<ChevronLeft className="size-4" />
 				</Button>
@@ -44,7 +47,7 @@ export function WeekNav({
 					size="icon"
 					className="size-8 text-muted-foreground"
 					onClick={onNextWeek}
-					aria-label="Next week"
+					aria-label={tShell('nextWeek')}
 				>
 					<ChevronRight className="size-4" />
 				</Button>
@@ -57,7 +60,7 @@ export function WeekNav({
 					className="h-7 text-primary"
 					onClick={onJumpToday}
 				>
-					Today
+					{t('today')}
 				</Button>
 			)}
 		</div>

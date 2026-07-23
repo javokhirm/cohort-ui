@@ -21,12 +21,14 @@ import {
 import { useT } from '@repo/i18n';
 import { useAuth, useOperator } from '@/features/auth/hooks';
 import { LanguageMenu } from './LanguageMenu';
+import { useAppT } from '@/locales';
 
 export function Header() {
 	const { user, logout } = useAuth();
 	const { data: profile } = useOperator();
 	const t = useT('nav');
 	const tAuth = useT('auth');
+	const tApp = useAppT('shell');
 
 	const fullName = user ? `${user.firstName} ${user.lastName}`.trim() : '';
 	const initials = user
@@ -49,7 +51,7 @@ export function Header() {
 					</span>
 					<span className="flex items-center gap-1 rounded-md border border-tone-green-fg/25 bg-tone-green-bg px-2 py-0.5 text-[10px] font-bold tracking-wide text-tone-green-fg">
 						<span className="size-1.5 rounded-full bg-tone-green-fg" />
-						PROD
+						{tApp('env')}
 					</span>
 				</div>
 			</div>
@@ -102,7 +104,7 @@ export function Header() {
 									{fullName}
 								</div>
 								<div className="text-[10px] font-bold tracking-[0.04em] text-(--console-accent-fg)">
-									PLATFORM OPERATOR
+									{tApp('operatorBadge')}
 								</div>
 							</div>
 						)}
@@ -120,7 +122,7 @@ export function Header() {
 									</div>
 								)}
 								<span className="mt-1.5 inline-flex rounded-sm bg-tone-indigo-bg px-1.5 py-0.5 text-[10px] font-bold tracking-wide text-tone-indigo-fg">
-									PLATFORM OPERATOR
+									{tApp('operatorBadge')}
 								</span>
 							</DropdownMenuLabel>
 							<DropdownMenuSeparator />

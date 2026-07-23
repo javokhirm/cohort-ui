@@ -17,6 +17,7 @@ import {
 } from '@repo/ui';
 
 import type { TenantDetailView, UpdateTenantInput } from '@/api/tenants/types';
+import { useAppT } from '@/locales';
 
 export function SettingsTab({
 	tenant,
@@ -27,6 +28,7 @@ export function SettingsTab({
 	onSave: (data: UpdateTenantInput) => void;
 	saving: boolean;
 }) {
+	const t = useAppT('tenants');
 	const [timezone, setTimezone] = useState(tenant.timezone);
 	const [locale, setLocale] = useState(tenant.locale);
 	const [phone, setPhone] = useState(tenant.phone ?? '');
@@ -60,7 +62,7 @@ export function SettingsTab({
 							id="settings-city"
 							value={city}
 							onChange={(e) => setCity(e.target.value)}
-							placeholder="Tashkent"
+							placeholder={t('onboarding.cityPlaceholder')}
 						/>
 					</div>
 					<div className="flex flex-col gap-1.5">

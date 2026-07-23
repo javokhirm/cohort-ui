@@ -74,6 +74,9 @@ export const uz = {
 			/** Only for failures the backend never saw — otherwise show `error.message`. */
 			network: 'Serverga ulanib boʻlmadi. Internet aloqasini tekshiring.',
 			unknown: 'Nimadir xato ketdi. Qayta urinib koʻring.',
+			/** 403 — the server saw the request but refused it. */
+			forbidden: 'Sizda bu amalni bajarish huquqi yoʻq.',
+			requestFailed: 'Soʻrov bajarilmadi.',
 		},
 		language: {
 			label: 'Til',

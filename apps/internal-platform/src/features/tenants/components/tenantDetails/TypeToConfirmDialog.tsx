@@ -11,6 +11,7 @@ import {
 	Input,
 	Label,
 } from '@repo/ui';
+import { useT } from '@repo/i18n';
 
 interface TypeToConfirmDialogProps {
 	open: boolean;
@@ -35,6 +36,7 @@ export function TypeToConfirmDialog({
 	loading = false,
 	variant = 'default',
 }: TypeToConfirmDialogProps) {
+	const tc = useT('common');
 	const [value, setValue] = useState('');
 
 	function handleOpenChange(next: boolean) {
@@ -62,7 +64,7 @@ export function TypeToConfirmDialog({
 				</div>
 				<DialogFooter>
 					<Button variant="outline" onClick={() => handleOpenChange(false)}>
-						Cancel
+						{tc('action.cancel')}
 					</Button>
 					<Button
 						variant={variant === 'destructive' ? 'destructive' : 'default'}

@@ -8,6 +8,7 @@ import { CommitImportDialog } from '@/features/student-imports/components/Commit
 import { ImportRowsTable } from '@/features/student-imports/components/ImportRowsTable';
 import { ImportSummary } from '@/features/student-imports/components/ImportSummary';
 import { useStudentImport } from '@/features/student-imports/hooks';
+import { useAppT } from '@/locales';
 
 type RowFilter = 'ALL' | 'INVALID' | ImportRowOutcome;
 
@@ -28,6 +29,7 @@ const FILTERS: { value: RowFilter; label: string }[] = [
  * download.
  */
 export function ImportSessionPage() {
+	const t = useAppT('imports');
 	const { tenantId, sessionId } = useParams({ strict: false }) as {
 		tenantId?: string;
 		sessionId?: string;
@@ -87,7 +89,7 @@ export function ImportSessionPage() {
 	return (
 		<div className="flex flex-col gap-6">
 			<PageHeader
-				title="Student import"
+				title={t('title')}
 				description={`Center #${numericTenantId}`}
 				actions={
 					<div className="flex gap-2">
@@ -101,12 +103,12 @@ export function ImportSessionPage() {
 									)
 								}
 							>
-								Download rejected rows
+								{t('downloadRejected')}
 							</Button>
 						)}
 						{isReview && session.counters.validRows > 0 && (
 							<Button onClick={() => setCommitOpen(true)}>
-								Import students
+								{t('importStudents')}
 							</Button>
 						)}
 					</div>

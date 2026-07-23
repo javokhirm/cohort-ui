@@ -19,6 +19,7 @@ import { useSessionDetail, useSessionMarks } from '@/features/marks/api/marks.qu
 import { type MarkInput, useSaveMarks } from '@/features/marks/api/marks.mutations';
 import { MarksList } from '@/features/marks/components/MarksList';
 import { markDisplay, parseScoreInput } from '@/features/marks/lib/scale';
+import { useAppT } from '@/locales';
 
 /**
  * Enter a session's daily marks (`GET`/`POST`/`PATCH /teach/sessions/:id/marks`,
@@ -32,6 +33,11 @@ import { markDisplay, parseScoreInput } from '@/features/marks/lib/scale';
  * view).
  */
 export function MarksRoute() {
+	const t = useAppT('marks');
+	const tShell = useAppT('shell');
+	const tGroups = useAppT('groups');
+	const tAttendance = useAppT('attendance');
+	const tSchedule = useAppT('schedule');
 	const navigate = useNavigate();
 	const { sessionId: sessionIdParam } = useParams({
 		from: '/_authed/sessions/$sessionId/marks',
@@ -116,7 +122,7 @@ export function MarksRoute() {
 			{
 				onSuccess: () => {
 					setOverrides(new Map());
-					toast.success('Marks saved');
+					toast.success(t('saved'));
 				},
 			},
 		);
@@ -139,10 +145,10 @@ export function MarksRoute() {
 			}}
 		>
 			<TabsList>
-				<TabsTrigger value="table" aria-label="Table view">
+				<TabsTrigger value="table" aria-label={tShell('tableView')}>
 					<LayoutGrid />
 				</TabsTrigger>
-				<TabsTrigger value="list" aria-label="List view">
+				<TabsTrigger value="list" aria-label={tShell('listView')}>
 					<List />
 				</TabsTrigger>
 			</TabsList>
@@ -168,8 +174,8 @@ export function MarksRoute() {
 			<div className="rounded-2xl border border-border bg-card">
 				<EmptyState
 					icon={<Star />}
-					title="Couldn't load this session"
-					description="Something went wrong. Try again in a moment."
+					title={tSchedule('sessionErrorTitle')}
+					description={tShell('genericErrorDescription')}
 					action={
 						<Button
 							variant="outline"
@@ -178,7 +184,7 @@ export function MarksRoute() {
 								void marksQuery.refetch();
 							}}
 						>
-							Try again
+							{tShell('tryAgain')}
 						</Button>
 					}
 				/>
@@ -197,8 +203,8 @@ export function MarksRoute() {
 			<div className="rounded-2xl border border-border bg-card">
 				<EmptyState
 					icon={<Ban />}
-					title="This session is cancelled"
-					description="Marks can't be entered for a cancelled session."
+					title={tAttendance('cancelledTitle')}
+					description={t('cancelledDescription')}
 				/>
 			</div>
 		);
@@ -207,8 +213,8 @@ export function MarksRoute() {
 			<div className="rounded-2xl border border-border bg-card">
 				<EmptyState
 					icon={<Star />}
-					title="No students enrolled"
-					description="This group has no active students to mark yet."
+					title={tGroups('rosterEmptyTitle')}
+					description={tAttendance('noStudentsDescription')}
 				/>
 			</div>
 		);

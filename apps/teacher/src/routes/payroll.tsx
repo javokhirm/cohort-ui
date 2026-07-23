@@ -12,6 +12,7 @@ import { AdvancesList } from '@/features/payroll/components/AdvancesList';
 import { BreakdownList } from '@/features/payroll/components/BreakdownList';
 import { EarningsSummary } from '@/features/payroll/components/EarningsSummary';
 import { MonthPicker } from '@/features/payroll/components/MonthPicker';
+import { useAppT } from '@/locales';
 
 /**
  * The teacher's own pay (`GET /teach/payroll`, api-reference §4.9) — the design's
@@ -20,6 +21,7 @@ import { MonthPicker } from '@/features/payroll/components/MonthPicker';
  * finalizes it the figures freeze.
  */
 export function PayrollRoute() {
+	const t = useAppT('payroll');
 	const { data: periods, isPending, isError } = useMyPayrollPeriods();
 	const [selected, setSelected] = useState<string | null>(null);
 
@@ -43,8 +45,8 @@ export function PayrollRoute() {
 				<div className="rounded-xl border border-border bg-card">
 					<EmptyState
 						icon={<Wallet />}
-						title="Couldn't load your pay"
-						description="Something went wrong fetching your payroll. Try again in a moment."
+						title={t('errorTitle')}
+						description={t('errorDescription')}
 					/>
 				</div>
 			</div>
@@ -57,8 +59,8 @@ export function PayrollRoute() {
 				<div className="rounded-xl border border-border bg-card">
 					<EmptyState
 						icon={<Wallet />}
-						title="No pay to show yet"
-						description="Your pay appears here once the office sets up your pay model and you have completed sessions."
+						title={t('emptyTitle')}
+						description={t('emptyDescription')}
 					/>
 				</div>
 			</div>

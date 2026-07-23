@@ -25,6 +25,7 @@ import {
 	isTodayIso,
 } from '@/features/marks/lib/month';
 import { SCORE_BANDS } from '@/features/marks/lib/scale';
+import { useAppT } from '@/locales';
 
 /**
  * A group's monthly marks table (`GET /teach/groups/:id/marks`, §1.1): rows are
@@ -42,6 +43,11 @@ import { SCORE_BANDS } from '@/features/marks/lib/scale';
  * 10 or out of 100.
  */
 export function GroupMarksRoute() {
+	const t = useAppT('marks');
+	const tShell = useAppT('shell');
+	const tGroups = useAppT('groups');
+	const tAttendance = useAppT('attendance');
+	const tSchedule = useAppT('schedule');
 	const navigate = useNavigate();
 	const { groupId: groupIdParam } = useParams({
 		from: '/_authed/groups/$groupId/marks',
@@ -94,11 +100,11 @@ export function GroupMarksRoute() {
 		body = stateCard(
 			<EmptyState
 				icon={<Star />}
-				title="Couldn't load marks"
-				description="Something went wrong. Try again in a moment."
+				title={t('errorTitle')}
+				description={tShell('genericErrorDescription')}
 				action={
 					<Button variant="outline" onClick={() => void gridQuery.refetch()}>
-						Try again
+						{tShell('tryAgain')}
 					</Button>
 				}
 			/>,
@@ -109,15 +115,15 @@ export function GroupMarksRoute() {
 		body = stateCard(
 			<EmptyState
 				icon={<Star />}
-				title="No sessions this month"
-				description="This group has no scheduled sessions in the selected month."
+				title={tSchedule('noSessionsThisMonth')}
+				description={tSchedule('noSessionsThisMonthDescription')}
 				action={
 					month !== currentMonth() && (
 						<Button
 							variant="outline"
 							onClick={() => goToMonth(currentMonth())}
 						>
-							Go to this month
+							{tShell('goToThisMonth')}
 						</Button>
 					)
 				}
@@ -127,8 +133,8 @@ export function GroupMarksRoute() {
 		body = stateCard(
 			<EmptyState
 				icon={<Users />}
-				title="No students enrolled"
-				description="This group has no active students to mark yet."
+				title={tGroups('rosterEmptyTitle')}
+				description={tAttendance('noStudentsDescription')}
 			/>,
 		);
 	} else {
@@ -162,13 +168,13 @@ export function GroupMarksRoute() {
 						}}
 					>
 						<TabsList>
-							<TabsTrigger value="table" aria-label="Table view">
+							<TabsTrigger value="table" aria-label={tShell('tableView')}>
 								<LayoutGrid />
 							</TabsTrigger>
 							<TabsTrigger
 								value="list"
 								disabled={!todaySessionId}
-								aria-label="List view"
+								aria-label={tShell('listView')}
 							>
 								<List />
 							</TabsTrigger>

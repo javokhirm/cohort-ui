@@ -26,6 +26,7 @@ import { useT } from '@repo/i18n';
 import { credentialsSchema, otpSchema, type CredentialsInput } from '../schemas';
 import { useRequestOtp, useVerifyOtp } from '../hooks';
 import { useLocalePreference } from '@/hooks/useLocalePreference';
+import { useAppT } from '@/locales';
 
 function errorMessage(error: unknown, fallback: string): string {
 	return isApiError(error) ? error.message : fallback;
@@ -33,6 +34,8 @@ function errorMessage(error: unknown, fallback: string): string {
 
 /** Cohort "E" mark + wordmark + INTERNAL badge — shared by the rail and the mobile header. */
 function BrandLockup({ compact = false }: { compact?: boolean }) {
+	const t = useAppT('shell');
+
 	return (
 		<div className="flex items-center gap-2.5">
 			<span
@@ -43,10 +46,10 @@ function BrandLockup({ compact = false }: { compact?: boolean }) {
 				E
 			</span>
 			<span className="text-[15px] font-bold tracking-tight text-foreground">
-				Cohort
+				{t('brand')}
 			</span>
 			<span className="rounded-[5px] border border-tone-amber-fg/25 bg-tone-amber-bg px-1.5 py-0.5 text-[10px] font-bold uppercase tracking-widest text-tone-amber-fg">
-				Internal
+				{t('brandSurface')}
 			</span>
 		</div>
 	);

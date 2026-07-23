@@ -147,22 +147,39 @@ const form = useForm<StudentForm>({ resolver: zodResolver(schema) });
   active locale as the `x-lang` header (injected into `@repo/api-client` via `getLocale`), so
   backend `error.message` comes back translated — surface it directly, don't re-map it.
 
-**Migrating strings (the phase-1 rule):**
+**Where a string lives:**
 
-- `const t = useT('nav')` at the top of the component; call `t('item.students')`. Shared shell
-  text (nav, auth, common actions, table empty/error, enum labels, validation) lives in
-  `@repo/i18n`; feature-screen text stays in the app under `apps/<app>/src/locales/…` and is
-  registered with `i18n.addResourceBundle` — promote a string to the package only when a second
-  app needs it.
+- **Two translators, one per side of the split.** `useT('nav')` reaches the shared shell catalog
+  in `@repo/i18n` (nav, auth, common actions, table empty/error, `common:state.*`, validation).
+  `useAppT('students')` reaches the app's own catalog under `apps/<app>/src/locales/` — feature
+  copy, one namespace per feature folder. Both are key-checked; promote a string to the package
+  only when a second app needs it.
+- **An app's catalogs are wired once**, in `apps/<app>/src/locales/index.ts`:
+  `registerAppLocales({ uz, ru, en })` merges them into the shared i18next instance and
+  `createAppT<typeof uz>()` produces the typed `useAppT`. `initAppLocales()` is called from
+  `main.tsx` **after** `initI18n(...)` — i18next has no resource store before that.
+- **`uz` is the source of truth**; `ru`/`en` annotate themselves `TranslationsOf<typeof uz>`, so a
+  key added to `uz` without a translation fails `check-types` in the translation file itself.
 - **No string concatenation** — use interpolation: `t('greeting', { name })`, not
-  `` `Hi ${name}` ``. Counts use i18next plurals (`_one`/`_other`, plus `_many` for `ru`).
-- **Module-level nav/config arrays hold keys, not display text** — resolve with `t()` at
-  render, never at module load, so a language switch re-translates. Type the key fields as leaf
-  unions (not `string`) so `t()` stays key-checked.
+  `` `Hi ${name}` ``. Counts use i18next plurals (`_one`/`_other`, plus `_few`/`_many` for `ru`;
+  `TranslationsOf` lets a translation add the plural forms its own grammar needs).
+- **Module-level nav/config/column arrays hold keys, not display text** — resolve with `t()` at
+  render, never at module load, so a language switch re-translates. A `ColumnDef[]` with headers
+  therefore becomes a `buildColumns(t)` factory. Type the key fields as leaf unions (not
+  `string`) so `t()` stays key-checked.
+- **Zod schemas are factories**, not module constants: `createBranchSchema(t)` takes a
+  `Translator<'validation'>` and callers memoise on it (`useMemo(() => schema(tv), [tv])`). A
+  message captured at module load would never re-translate.
 - **`@repo/ui` never imports `@repo/i18n`** (they are peers). Presentational components take
   copy as props (e.g. `LoginCard`'s `labels`); the app passes its `useT(...)` values in.
+  `@repo/ui`'s `STATUS_MAPS` owns the _tone_ of a status pill — the _words_ come from
+  `useStatusLabel()` and land on `StatusBadge` as `children`.
+- **Outside React** (query/mutation cache handlers and other module-scope code) use
+  `translate(ns, key)`. It reads the same instance but does not re-render, so it is only correct
+  for one-shot output like a toast.
 - **Tests** initialise i18next to English in the app's `test/setup.ts`
-  (`initI18n(...) ; setLocale('en')`), so assertions read the English catalog.
+  (`initI18n(...) ; initAppLocales() ; setLocale('en')`), so assertions read the English catalog.
+  Pure schema tests pass a stub translator that echoes its key.
 
 ---
 

@@ -3,6 +3,7 @@ import { cn, TONE_CLASSES } from '@repo/ui';
 import { BadgeCell } from './BadgeCell';
 import { InputCell } from './InputCell';
 import type { SheetTableProps } from './types';
+import { useAppT } from '@/locales';
 
 /** Fallback width for a right-hand summary column that declares none. */
 const DEFAULT_RIGHT_W = '64px';
@@ -99,6 +100,7 @@ export function SheetTable({
 	rightCols,
 	className,
 }: SheetTableProps) {
+	const tMarks = useAppT('marks');
 	return (
 		<div
 			className={cn(
@@ -122,7 +124,7 @@ export function SheetTable({
 							)}
 							style={{ width: nameW }}
 						>
-							Student
+							{tMarks('column.student')}
 						</div>
 						{dates.map((d, i) => (
 							<div

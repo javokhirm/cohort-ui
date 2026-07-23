@@ -13,6 +13,7 @@ import { ATTENDANCE_STATUSES, type AttendanceStatus } from '../api/attendance.qu
 import type { AttendanceGrid as GridData } from '../api/attendance-grid.queries';
 import { isTodayIso } from '../lib/month';
 import { rateTone } from '../lib/rate';
+import { useAppT } from '@/locales';
 
 interface AttendanceGridProps {
 	grid: GridData;
@@ -33,6 +34,7 @@ const CELL_W_PX = 52;
  * frozen header and student column need the grid to own its own scroll.
  */
 export function AttendanceGrid({ grid, onEditCell }: AttendanceGridProps) {
+	const tm = useAppT('marks');
 	const [openCell, setOpenCell] = useState<string | null>(null);
 
 	const rows: SheetRow[] = grid.rows.map((row, i) => ({
@@ -108,7 +110,7 @@ export function AttendanceGrid({ grid, onEditCell }: AttendanceGridProps) {
 					}`,
 				}))}
 				rows={rows}
-				rightCols={[{ label: 'Rate', width: '64px' }]}
+				rightCols={[{ label: tm('column.rate'), width: '64px' }]}
 			/>
 		</>
 	);

@@ -6,6 +6,8 @@ import type { PlanView } from '@/api/plans/types';
 
 import { FEATURE_LABELS } from '../constants';
 import { limitLabel, planFeatures } from '../utils';
+import { useAppT } from '@/locales';
+import { useT } from '@repo/i18n';
 
 export function PlanCard({
 	plan,
@@ -16,6 +18,9 @@ export function PlanCard({
 	onEdit: (plan: PlanView) => void;
 	onDeactivate: (plan: PlanView) => void;
 }) {
+	const t = useAppT('plans');
+	const tt = useAppT('tenants');
+	const tc = useT('common');
 	const isCustom = plan.priceMonthly === 0;
 	const features = planFeatures(plan);
 
@@ -33,7 +38,7 @@ export function PlanCard({
 							variant="outline"
 							className="mt-1 text-xs text-muted-foreground"
 						>
-							Inactive
+							{tc('state.inactive')}
 						</Badge>
 					)}
 				</div>
@@ -41,7 +46,7 @@ export function PlanCard({
 				<div>
 					{isCustom ? (
 						<p className="text-base font-semibold text-muted-foreground">
-							Custom pricing
+							{t('customPricing')}
 						</p>
 					) : (
 						<p className="text-2xl font-bold tabular-nums leading-none">
@@ -80,7 +85,7 @@ export function PlanCard({
 							onClick={() => onEdit(plan)}
 						>
 							<Pencil className="size-3.5" />
-							Edit
+							{tc('action.edit')}
 						</Button>
 						<Button
 							variant="ghost"
@@ -89,7 +94,7 @@ export function PlanCard({
 							onClick={() => onDeactivate(plan)}
 							disabled={!plan.isActive}
 						>
-							Deactivate
+							{tt('danger.deactivate')}
 						</Button>
 					</div>
 				</div>

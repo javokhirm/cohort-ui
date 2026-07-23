@@ -1,6 +1,7 @@
 import { Button, Card, CardContent, Input, Label } from '@repo/ui';
 
 import type { OnboardFormData } from './types';
+import { useAppT } from '@/locales';
 
 export function BranchStep({
 	data,
@@ -13,6 +14,7 @@ export function BranchStep({
 	onBack: () => void;
 	onNext: () => void;
 }) {
+	const t = useAppT('tenants');
 	return (
 		<Card>
 			<CardContent className="flex flex-col gap-6 pt-6">
@@ -30,7 +32,7 @@ export function BranchStep({
 							id="branch-name"
 							value={data.branchName}
 							onChange={(e) => onChange({ branchName: e.target.value })}
-							placeholder="e.g. Main Campus"
+							placeholder={t('onboarding.branchNamePlaceholder')}
 						/>
 					</div>
 					<div className="flex flex-col gap-1.5">
@@ -45,7 +47,7 @@ export function BranchStep({
 										.replace(/[^A-Z0-9-]/g, ''),
 								})
 							}
-							placeholder="e.g. BR-001"
+							placeholder={t('onboarding.branchCodePlaceholder')}
 						/>
 						<p className="text-xs text-muted-foreground">
 							Short unique identifier used in reports.
@@ -55,13 +57,13 @@ export function BranchStep({
 
 				<div className="flex justify-between">
 					<Button variant="outline" onClick={onBack}>
-						Back
+						{t('back')}
 					</Button>
 					<Button
 						onClick={onNext}
 						disabled={!data.branchName.trim() || !data.branchCode.trim()}
 					>
-						Continue
+						{t('onboarding.continue')}
 					</Button>
 				</div>
 			</CardContent>

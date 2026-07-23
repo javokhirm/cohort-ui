@@ -21,6 +21,7 @@ import {
 	scoreTone,
 } from '../lib/scale';
 import { MarkInput } from './MarkInput';
+import { useAppT } from '@/locales';
 
 interface MarksListProps {
 	roster: SessionRosterEntry[];
@@ -56,6 +57,7 @@ export function MarksList({
 	onChange,
 	onSave,
 }: MarksListProps) {
+	const t = useAppT('marks');
 	const isLetter = isLetterScale(config);
 	const progress = roster.length > 0 ? (markedCount / roster.length) * 100 : 0;
 
@@ -138,7 +140,7 @@ export function MarksList({
 				action={
 					<Button onClick={onSave} disabled={!isDirty || isSaving}>
 						<Check className="size-4" />
-						Save marks
+						{t('save')}
 					</Button>
 				}
 			/>

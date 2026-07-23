@@ -11,8 +11,10 @@ import {
 } from '@repo/ui';
 import { useAuth, useOperator } from '@/features/auth/hooks';
 import { MOCK_SECURITY } from './_mock';
+import { useAppT } from '@/locales';
 
 export function ProfilePage() {
+	const t = useAppT('users');
 	const { user } = useAuth();
 	const { data: profile } = useOperator();
 
@@ -110,7 +112,7 @@ export function ProfilePage() {
 							size="sm"
 							className="text-tone-red-fg hover:text-tone-red-fg"
 						>
-							Revoke all
+							{t('revokeAll')}
 						</Button>
 					</div>
 				</Card>

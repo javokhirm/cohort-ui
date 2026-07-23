@@ -13,6 +13,8 @@ import {
 } from '@repo/ui';
 
 import { useDeactivateUser } from '../hooks';
+import { useAppT } from '@/locales';
+import { useT } from '@repo/i18n';
 
 export function DeactivateDialog({
 	userId,
@@ -25,6 +27,8 @@ export function DeactivateDialog({
 	open: boolean;
 	onOpenChange: (open: boolean) => void;
 }) {
+	const tt = useAppT('tenants');
+	const tc = useT('common');
 	const mutation = useDeactivateUser(userId, {
 		onSuccess: () => onOpenChange(false),
 	});
@@ -58,7 +62,7 @@ export function DeactivateDialog({
 						onClick={() => handleOpenChange(false)}
 						disabled={mutation.isPending}
 					>
-						Cancel
+						{tc('action.cancel')}
 					</Button>
 					<Button
 						variant="destructive"
@@ -66,7 +70,7 @@ export function DeactivateDialog({
 						onClick={() => mutation.mutate()}
 					>
 						{mutation.isPending && <Spinner className="mr-2 size-4" />}
-						Deactivate
+						{tt('danger.deactivate')}
 					</Button>
 				</DialogFooter>
 			</DialogContent>

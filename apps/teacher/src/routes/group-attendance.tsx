@@ -35,6 +35,7 @@ import {
 	isTodayIso,
 } from '@/features/attendance/lib/month';
 import { useSessions } from '@/features/schedule/api/sessions.queries';
+import { useAppT } from '@/locales';
 
 /** The grid's colour key, read straight off the shared attendance status map. */
 const LEGEND: LegendItem[] = ATTENDANCE_STATUSES.map((status) => {
@@ -61,6 +62,10 @@ const LEGEND: LegendItem[] = ATTENDANCE_STATUSES.map((status) => {
  * still open the table on mobile without immediately bouncing back.
  */
 export function GroupAttendanceRoute() {
+	const t = useAppT('attendance');
+	const tShell = useAppT('shell');
+	const tGroups = useAppT('groups');
+	const tSchedule = useAppT('schedule');
 	const navigate = useNavigate();
 	const { groupId: groupIdParam } = useParams({
 		from: '/_authed/groups/$groupId/attendance',
@@ -128,7 +133,7 @@ export function GroupAttendanceRoute() {
 			.map((row) => row.studentId);
 		markAllPresent.mutate(
 			{ sessionId, studentIds, alreadyMarkedIds },
-			{ onSuccess: () => toast.success('Marked everyone present') },
+			{ onSuccess: () => toast.success(t('markedAllPresent')) },
 		);
 	};
 
@@ -143,11 +148,11 @@ export function GroupAttendanceRoute() {
 		body = stateCard(
 			<EmptyState
 				icon={<CalendarX />}
-				title="Couldn't load attendance"
-				description="Something went wrong. Try again in a moment."
+				title={t('errorTitle')}
+				description={tShell('genericErrorDescription')}
 				action={
 					<Button variant="outline" onClick={() => void gridQuery.refetch()}>
-						Try again
+						{tShell('tryAgain')}
 					</Button>
 				}
 			/>,
@@ -158,15 +163,15 @@ export function GroupAttendanceRoute() {
 		body = stateCard(
 			<EmptyState
 				icon={<CalendarX />}
-				title="No sessions this month"
-				description="This group has no scheduled sessions in the selected month."
+				title={tSchedule('noSessionsThisMonth')}
+				description={tSchedule('noSessionsThisMonthDescription')}
 				action={
 					month !== currentMonth() && (
 						<Button
 							variant="outline"
 							onClick={() => goToMonth(currentMonth())}
 						>
-							Go to this month
+							{tShell('goToThisMonth')}
 						</Button>
 					)
 				}
@@ -176,8 +181,8 @@ export function GroupAttendanceRoute() {
 		body = stateCard(
 			<EmptyState
 				icon={<Users />}
-				title="No students enrolled"
-				description="This group has no active students to mark yet."
+				title={tGroups('rosterEmptyTitle')}
+				description={t('noStudentsDescription')}
 			/>,
 		);
 	} else {
@@ -211,13 +216,13 @@ export function GroupAttendanceRoute() {
 						}}
 					>
 						<TabsList>
-							<TabsTrigger value="table" aria-label="Table view">
+							<TabsTrigger value="table" aria-label={tShell('tableView')}>
 								<LayoutGrid />
 							</TabsTrigger>
 							<TabsTrigger
 								value="list"
 								disabled={!todaySession}
-								aria-label="List view"
+								aria-label={tShell('listView')}
 							>
 								<List />
 							</TabsTrigger>
@@ -245,7 +250,7 @@ export function GroupAttendanceRoute() {
 								onClick={onMarkAllPresent}
 							>
 								<CheckCheck className="size-4" />
-								Mark all present
+								{t('markAllPresent')}
 							</Button>
 						</span>
 					</TooltipTrigger>

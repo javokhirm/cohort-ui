@@ -55,6 +55,8 @@ export const en = {
 		error: {
 			network: 'Could not reach the server. Check your internet connection.',
 			unknown: 'Something went wrong. Please try again.',
+			forbidden: 'You do not have permission to do that.',
+			requestFailed: 'Request failed.',
 		},
 		language: {
 			label: 'Language',

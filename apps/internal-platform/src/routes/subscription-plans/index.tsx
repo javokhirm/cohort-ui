@@ -17,8 +17,10 @@ import {
 	type DrawerMode,
 	type PlanFormValues,
 } from '@/features/subscription-plans/schemas';
+import { useAppT } from '@/locales';
 
 export function SubscriptionPlansPage() {
+	const t = useAppT('plans');
 	const [drawerOpen, setDrawerOpen] = useState(false);
 	const [drawerMode, setDrawerMode] = useState<DrawerMode>({ kind: 'create' });
 
@@ -57,16 +59,14 @@ export function SubscriptionPlansPage() {
 		<div className="flex flex-col gap-6">
 			<div className="flex items-start justify-between">
 				<div>
-					<h1 className="text-xl font-semibold tracking-tight">
-						Subscription Plans
-					</h1>
+					<h1 className="text-xl font-semibold tracking-tight">{t('title')}</h1>
 					<p className="text-sm text-muted-foreground">
 						Tiers, pricing and feature flags applied across every tenant.
 					</p>
 				</div>
 				<Button onClick={openCreate} className="gap-1.5" disabled={isLoading}>
 					<Plus className="size-4" />
-					Create plan
+					{t('create')}
 				</Button>
 			</div>
 
@@ -80,7 +80,7 @@ export function SubscriptionPlansPage() {
 
 			{isError && (
 				<div className="rounded-lg border border-destructive/30 bg-destructive/5 px-4 py-3 text-sm text-destructive">
-					Failed to load plans
+					{t('loadError')}
 					{error instanceof Error ? `: ${error.message}` : '.'} Please refresh.
 				</div>
 			)}

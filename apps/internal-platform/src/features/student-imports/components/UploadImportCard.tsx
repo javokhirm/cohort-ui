@@ -6,6 +6,7 @@ import { IMPORT_COLUMNS } from '@/api/student-imports/types';
 import type { StudentImportSessionView } from '@/api/student-imports/types';
 
 import { useUploadStudentImport } from '../hooks';
+import { useAppT } from '@/locales';
 
 interface UploadImportCardProps {
 	tenantId: number;
@@ -17,6 +18,7 @@ interface UploadImportCardProps {
  * the upload produces a report, and the operator decides what to do with it.
  */
 export function UploadImportCard({ tenantId, onUploaded }: UploadImportCardProps) {
+	const t = useAppT('imports');
 	const [file, setFile] = useState<File | null>(null);
 	const inputRef = useRef<HTMLInputElement>(null);
 
@@ -69,7 +71,7 @@ export function UploadImportCard({ tenantId, onUploaded }: UploadImportCardProps
 					{mutation.isPending ? 'Checking…' : 'Upload and check'}
 				</Button>
 				<Button variant="outline" onClick={downloadImportTemplate}>
-					Download template
+					{t('downloadTemplate')}
 				</Button>
 			</div>
 

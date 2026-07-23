@@ -18,8 +18,10 @@ import type {
 	OnboardFormData,
 	OnboardStep,
 } from '@/features/tenants/components/onboarding/types';
+import { useAppT } from '@/locales';
 
 export function OnboardTenantPage() {
+	const t = useAppT('tenants');
 	const navigate = useNavigate();
 	const queryClient = useQueryClient();
 	const [step, setStep] = useState<OnboardStep>(1);
@@ -78,9 +80,7 @@ export function OnboardTenantPage() {
 			</Link>
 
 			<div>
-				<h1 className="text-2xl font-bold tracking-tight">
-					Onboard a new center
-				</h1>
+				<h1 className="text-2xl font-bold tracking-tight">{t('onboard')}</h1>
 				<p className="text-sm text-muted-foreground">
 					Set up a new tenant on the Cohort platform.
 				</p>

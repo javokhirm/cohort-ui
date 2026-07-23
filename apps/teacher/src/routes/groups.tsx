@@ -7,6 +7,7 @@ import { useTeachBranches } from '@/api/branches';
 import { GroupCard } from '@/features/groups/components/GroupCard';
 import { useGroups } from '@/features/groups/api/groups.queries';
 import { useBranchFilter } from '@/store/branchStore';
+import { useAppT } from '@/locales';
 
 /**
  * The groups this teacher teaches (`GET /teach/groups`, api-reference §4.2),
@@ -19,6 +20,7 @@ import { useBranchFilter } from '@/store/branchStore';
  * attendance and marks grids are reached from.
  */
 export function GroupsRoute() {
+	const t = useAppT('groups');
 	const navigate = useNavigate();
 	const { data: branches } = useTeachBranches();
 	const { data, isPending, isError } = useGroups();
@@ -51,8 +53,8 @@ export function GroupsRoute() {
 				<div className="rounded-xl border border-border bg-card">
 					<EmptyState
 						icon={<LayoutGrid />}
-						title="Couldn't load your groups"
-						description="Something went wrong fetching the groups you teach. Try again in a moment."
+						title={t('errorTitle')}
+						description={t('errorDescription')}
 					/>
 				</div>
 			</div>

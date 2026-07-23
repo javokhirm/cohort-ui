@@ -5,6 +5,7 @@ import type { PlanView } from '@/api/plans/types';
 import type { OnboardFormData } from './types';
 import { planLimits } from './types';
 import { formatPrice } from '@repo/utils';
+import { useAppT } from '@/locales';
 
 export function PlanStep({
 	data,
@@ -21,6 +22,7 @@ export function PlanStep({
 	plans: PlanView[];
 	plansLoading: boolean;
 }) {
+	const t = useAppT('tenants');
 	return (
 		<Card>
 			<CardContent className="flex flex-col gap-6 pt-6">
@@ -95,10 +97,10 @@ export function PlanStep({
 
 				<div className="flex justify-between">
 					<Button variant="outline" onClick={onBack}>
-						Back
+						{t('back')}
 					</Button>
 					<Button onClick={onNext} disabled={data.planId === null}>
-						Continue
+						{t('onboarding.continue')}
 					</Button>
 				</div>
 			</CardContent>

@@ -1,4 +1,5 @@
 import * as React from 'react';
+import i18next from 'i18next';
 import { useTranslation } from 'react-i18next';
 import type { Locale } from '@repo/utils';
 
@@ -39,4 +40,21 @@ interface UseLocaleResult {
 export function useLocale(): UseLocaleResult {
 	const current = React.useSyncExternalStore(subscribeToLocale, getLocale, getLocale);
 	return { locale: current, setLocale, locales: SUPPORTED_LOCALES };
+}
+
+/**
+ * Translate outside React.
+ *
+ * A few call sites are module-scope and can never call a hook — the TanStack
+ * Query/Mutation cache error handlers being the canonical case. They still need
+ * localized copy, so this reads the same i18next instance `useT` does. Prefer
+ * {@link useT} everywhere a hook is legal: unlike a hook, this does not
+ * re-render anything when the language changes, which is fine for a toast fired
+ * at the moment of the failure but wrong for rendered copy.
+ */
+export function translate<N extends Namespace>(
+	ns: N,
+	key: Parameters<Translator<N>>[0],
+): string {
+	return i18next.t(key as never, { ns }) as string;
 }

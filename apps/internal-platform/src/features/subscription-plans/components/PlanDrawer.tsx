@@ -27,6 +27,8 @@ import {
 	type DrawerMode,
 	type PlanFormValues,
 } from '../schemas';
+import { useAppT } from '@/locales';
+import { useT } from '@repo/i18n';
 
 export function PlanDrawer({
 	mode,
@@ -41,6 +43,8 @@ export function PlanDrawer({
 	onSave: (values: PlanFormValues) => void;
 	saving: boolean;
 }) {
+	const t = useAppT('plans');
+	const tc = useT('common');
 	const isEdit = mode.kind === 'edit';
 	const defaultValues = isEdit ? planToFormValues(mode.plan) : EMPTY_FORM;
 
@@ -176,7 +180,7 @@ export function PlanDrawer({
 
 						<div className="flex flex-col gap-3">
 							<Label className="text-sm font-medium">
-								Features included
+								{t('featuresIncluded')}
 							</Label>
 							{ALL_FEATURES.map((feature) => (
 								<FormField
@@ -213,7 +217,7 @@ export function PlanDrawer({
 								className="flex-1"
 								onClick={() => onOpenChange(false)}
 							>
-								Cancel
+								{tc('action.cancel')}
 							</Button>
 							<Button type="submit" className="flex-1" disabled={saving}>
 								{saving

@@ -3,6 +3,7 @@ import { Card, ProgressBar, StatusBadge } from '@repo/ui';
 import type { StudentImportSessionView } from '@/api/student-imports/types';
 
 import { IMPORT_STATUS_LABEL, IMPORT_STATUS_TONE } from '../constants';
+import { useAppT } from '@/locales';
 
 function Stat({
 	label,
@@ -38,6 +39,7 @@ function Stat({
  * progress bar. Afterwards, it is what actually happened.
  */
 export function ImportSummary({ session }: { session: StudentImportSessionView }) {
+	const t = useAppT('imports');
 	const { counters, status } = session;
 	const isApplying = status === 'QUEUED' || status === 'APPLYING';
 	const isDone = status === 'COMPLETED';
@@ -83,28 +85,35 @@ export function ImportSummary({ session }: { session: StudentImportSessionView }
 			{isDone ? (
 				<div className="grid grid-cols-2 gap-3 md:grid-cols-4">
 					<Stat
-						label="Students imported"
+						label={t('stat.studentsImported')}
 						value={counters.createdStudentCount}
 					/>
-					<Stat label="Enrollments created" value={counters.createdCount} />
 					<Stat
-						label="Already enrolled"
+						label={t('stat.enrollmentsCreated')}
+						value={counters.createdCount}
+					/>
+					<Stat
+						label={t('stat.alreadyEnrolled')}
 						value={counters.skippedCount}
 						tone="muted"
 					/>
-					<Stat label="Failed" value={counters.failedCount} tone="danger" />
+					<Stat
+						label={t('stat.failed')}
+						value={counters.failedCount}
+						tone="danger"
+					/>
 				</div>
 			) : (
 				<div className="grid grid-cols-2 gap-3 md:grid-cols-4">
-					<Stat label="Rows in file" value={counters.totalRows} />
-					<Stat label="Will import" value={counters.validRows} />
+					<Stat label={t('stat.rowsInFile')} value={counters.totalRows} />
+					<Stat label={t('stat.willImport')} value={counters.validRows} />
 					<Stat
-						label="Blocked by errors"
+						label={t('stat.blockedByErrors')}
 						value={counters.invalidRows}
 						tone={counters.invalidRows > 0 ? 'danger' : 'muted'}
 					/>
 					<Stat
-						label="With warnings"
+						label={t('stat.withWarnings')}
 						value={counters.warningRows}
 						tone={counters.warningRows > 0 ? 'warn' : 'muted'}
 					/>

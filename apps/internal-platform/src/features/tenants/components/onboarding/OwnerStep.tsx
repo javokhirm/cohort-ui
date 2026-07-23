@@ -10,6 +10,7 @@ import {
 import { UZ_PHONE_REGEX } from '@repo/utils';
 
 import type { OnboardFormData } from './types';
+import { useAppT } from '@/locales';
 
 export function OwnerStep({
 	data,
@@ -22,6 +23,7 @@ export function OwnerStep({
 	onBack: () => void;
 	onNext: () => void;
 }) {
+	const t = useAppT('tenants');
 	const canProceed =
 		data.ownerFirstName.trim() &&
 		data.ownerLastName.trim() &&
@@ -48,7 +50,7 @@ export function OwnerStep({
 								onChange={(e) =>
 									onChange({ ownerFirstName: e.target.value })
 								}
-								placeholder="Aziz"
+								placeholder={t('onboarding.ownerFirstNamePlaceholder')}
 							/>
 						</div>
 						<div className="flex flex-col gap-1.5">
@@ -59,7 +61,7 @@ export function OwnerStep({
 								onChange={(e) =>
 									onChange({ ownerLastName: e.target.value })
 								}
-								placeholder="Yusupov"
+								placeholder={t('onboarding.ownerLastNamePlaceholder')}
 							/>
 						</div>
 					</div>
@@ -81,7 +83,7 @@ export function OwnerStep({
 							type="email"
 							value={data.ownerEmail}
 							onChange={(e) => onChange({ ownerEmail: e.target.value })}
-							placeholder="aziz@zabon.uz"
+							placeholder={t('onboarding.ownerEmailPlaceholder')}
 						/>
 					</div>
 					<div className="flex flex-col gap-1.5">
@@ -90,7 +92,7 @@ export function OwnerStep({
 							id="owner-password"
 							value={data.ownerPassword}
 							onChange={(e) => onChange({ ownerPassword: e.target.value })}
-							placeholder="Min. 8 characters"
+							placeholder={t('onboarding.newPasswordPlaceholder')}
 						/>
 						<p className="text-xs text-muted-foreground">
 							The owner should change this on first login.
@@ -100,10 +102,10 @@ export function OwnerStep({
 
 				<div className="flex justify-between">
 					<Button variant="outline" onClick={onBack}>
-						Back
+						{t('back')}
 					</Button>
 					<Button onClick={onNext} disabled={!canProceed}>
-						Continue
+						{t('onboarding.continue')}
 					</Button>
 				</div>
 			</CardContent>

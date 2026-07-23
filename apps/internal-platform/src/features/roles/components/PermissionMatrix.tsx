@@ -1,5 +1,6 @@
 import { Checkbox, cn } from '@repo/ui';
 import type { PermissionCatalog, RoleView } from '@/api/roles/types';
+import { useAppT } from '@/locales';
 
 interface PermissionMatrixProps {
 	roles: RoleView[];
@@ -14,6 +15,7 @@ export function PermissionMatrix({
 	onToggle,
 	savingRole,
 }: PermissionMatrixProps) {
+	const t = useAppT('roles');
 	const permissionSet = new Map<string, Set<string>>();
 	for (const role of roles) {
 		permissionSet.set(role.name, new Set(role.permissions));
@@ -25,7 +27,7 @@ export function PermissionMatrix({
 				<thead>
 					<tr className="border-b border-border bg-muted/40">
 						<th className="sticky left-0 bg-muted/40 px-4 py-3 text-left text-xs font-semibold uppercase tracking-wider text-muted-foreground">
-							Permission
+							{t('permission')}
 						</th>
 						{roles.map((role) => (
 							<th

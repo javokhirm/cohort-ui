@@ -6,6 +6,7 @@ import { Avatar, AvatarFallback, cn, EmptyState, Skeleton, StatusBadge } from '@
 import { useGroupStudents, type TeachGroupStudent } from '../api/groups.queries';
 import { attendanceToneClass } from '../lib/capacity';
 import { fullName, initials } from '../lib/student-name';
+import { useAppT } from '@/locales';
 
 interface GroupRosterTabProps {
 	groupId: number;
@@ -81,6 +82,7 @@ function RosterRow({ student, onOpen }: RosterRowProps) {
  * perfect absence.
  */
 export function GroupRosterTab({ groupId, onOpenStudent }: GroupRosterTabProps) {
+	const t = useAppT('groups');
 	const { data: students, isPending, isError } = useGroupStudents(groupId);
 
 	if (isPending) {
@@ -98,8 +100,8 @@ export function GroupRosterTab({ groupId, onOpenStudent }: GroupRosterTabProps) 
 			<div className="rounded-xl border border-border bg-card">
 				<EmptyState
 					icon={<Users />}
-					title="Couldn't load the roster"
-					description="Something went wrong fetching this group's students. Try again in a moment."
+					title={t('rosterErrorTitle')}
+					description={t('rosterErrorDescription')}
 				/>
 			</div>
 		);
@@ -110,8 +112,8 @@ export function GroupRosterTab({ groupId, onOpenStudent }: GroupRosterTabProps) 
 			<div className="rounded-xl border border-border bg-card">
 				<EmptyState
 					icon={<Users />}
-					title="No students enrolled"
-					description="Students enrolled in this group will appear here."
+					title={t('rosterEmptyTitle')}
+					description={t('rosterEmptyDescription')}
 				/>
 			</div>
 		);

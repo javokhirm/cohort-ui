@@ -33,6 +33,7 @@ import {
 	billingPolicySchema,
 	type BillingPolicyFormValues,
 } from '../../schemas/billing-policy-form.schema';
+import { useAppT } from '@/locales';
 
 const BILLING_MODE_OPTIONS = [
 	{ value: 'PREPAID', label: 'Prepaid' },
@@ -224,6 +225,7 @@ export function BillingPolicyForm({
 	tenantId: number;
 	policy: TenantBillingPolicy;
 }) {
+	const t = useAppT('tenants');
 	const form = useForm<BillingPolicyFormValues>({
 		resolver: zodResolver(billingPolicySchema),
 		defaultValues: toDefaults(policy),
@@ -270,7 +272,7 @@ export function BillingPolicyForm({
 				autoSuspendAfterDays: values.autoSuspendAfterDays,
 				autoCancelAfterDays: values.autoCancelAfterDays,
 			});
-			toast.success('Billing policy saved');
+			toast.success(t('policy.saved'));
 		} catch (err) {
 			// The server re-validates the cross-field rules against the merged
 			// result and is the source of truth — surface its message verbatim.
@@ -286,7 +288,9 @@ export function BillingPolicyForm({
 			>
 				<Card className={CARD_CLASS}>
 					<CardHeader className={CARD_HEADER_CLASS}>
-						<CardTitle className={CARD_TITLE_CLASS}>Billing basics</CardTitle>
+						<CardTitle className={CARD_TITLE_CLASS}>
+							{t('policy.billingMode')}
+						</CardTitle>
 						<p className="text-xs text-muted-foreground">
 							Defaults for invoice generation. Fee plans may override the
 							due-day and proration per plan.
@@ -297,7 +301,7 @@ export function BillingPolicyForm({
 							<FormSelect
 								control={form.control}
 								name="billingMode"
-								label="Billing mode"
+								label={t('policy.billingMode')}
 								options={BILLING_MODE_OPTIONS}
 							/>
 							<p className="text-xs text-muted-foreground">
@@ -308,7 +312,7 @@ export function BillingPolicyForm({
 							<FormSelect
 								control={form.control}
 								name="billingCycleAnchor"
-								label="Billing cycle"
+								label={t('policy.billingCycle')}
 								options={BILLING_CYCLE_ANCHOR_OPTIONS}
 							/>
 							<p className="text-xs text-muted-foreground">
@@ -319,14 +323,14 @@ export function BillingPolicyForm({
 							<FormSelect
 								control={form.control}
 								name="prorationMethod"
-								label="Default proration"
+								label={t('policy.defaultProration')}
 								options={PRORATION_OPTIONS}
 							/>
 							{isAnniversary ? (
 								<NumberField
 									control={form.control}
 									name="dueOffsetDays"
-									label="Due offset (days into the cycle)"
+									label={t('policy.dueOffset')}
 									min={0}
 									max={28}
 									hint="Days after a student's cycle starts that their invoice falls due; 0 = due on the day the cycle begins."
@@ -336,7 +340,7 @@ export function BillingPolicyForm({
 									<NumberField
 										control={form.control}
 										name="billingDay"
-										label="Billing day (1–28)"
+										label={t('policy.billingDay')}
 										min={1}
 										max={28}
 										hint="Day the daily cycle generates that period's invoices."
@@ -344,7 +348,7 @@ export function BillingPolicyForm({
 									<NumberField
 										control={form.control}
 										name="dueDay"
-										label="Default due day (1–28)"
+										label={t('policy.defaultDueDay')}
 										min={1}
 										max={28}
 									/>
@@ -353,7 +357,7 @@ export function BillingPolicyForm({
 							<NumberField
 								control={form.control}
 								name="immediateDueDays"
-								label="Immediate due offset (days)"
+								label={t('policy.immediateDueOffset')}
 								min={0}
 								max={28}
 								hint="Due offset for charge-on-enrollment invoices; 0 = same day."
@@ -361,7 +365,7 @@ export function BillingPolicyForm({
 							<NumberField
 								control={form.control}
 								name="graceDays"
-								label="Grace days (0–60)"
+								label={t('policy.graceDays')}
 								min={0}
 								max={60}
 								hint="Days past due before an invoice flips to OVERDUE."
@@ -382,13 +386,15 @@ export function BillingPolicyForm({
 
 				<Card className={CARD_CLASS}>
 					<CardHeader className={CARD_HEADER_CLASS}>
-						<CardTitle className={CARD_TITLE_CLASS}>Enrollment</CardTitle>
+						<CardTitle className={CARD_TITLE_CLASS}>
+							{t('policy.chargeOnEnrollment')}
+						</CardTitle>
 					</CardHeader>
 					<CardContent className={CARD_CONTENT_CLASS}>
 						<SwitchField
 							control={form.control}
 							name="chargeOnEnrollment"
-							label="Charge on enrollment"
+							label={t('policy.chargeOnEnrollment')}
 							description={
 								isAnniversary
 									? "Issue the first full-cycle invoice immediately when a student is enrolled onto a monthly fee plan, instead of waiting for that night's run."
@@ -400,30 +406,31 @@ export function BillingPolicyForm({
 
 				<Card className={CARD_CLASS}>
 					<CardHeader className={CARD_HEADER_CLASS}>
-						<CardTitle className={CARD_TITLE_CLASS}>Late fees</CardTitle>
+						<CardTitle className={CARD_TITLE_CLASS}>
+							{t('policy.lateFeeType')}
+						</CardTitle>
 						<p className="text-xs text-muted-foreground">
-							Applied automatically by the nightly dunning job once an
-							invoice is overdue.
+							{t('policy.dunningHint')}
 						</p>
 					</CardHeader>
 					<CardContent className={CARD_CONTENT_CLASS}>
 						<SwitchField
 							control={form.control}
 							name="lateFeeEnabled"
-							label="Enable late fees"
+							label={t('policy.enableLateFees')}
 						/>
 						<div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
 							<FormSelect
 								control={form.control}
 								name="lateFeeType"
-								label="Late fee type"
+								label={t('policy.lateFeeType')}
 								options={LATE_FEE_TYPE_OPTIONS}
 								disabled={!lateFeeEnabled}
 							/>
 							<NumberField
 								control={form.control}
 								name="lateFeeAmount"
-								label="Late fee amount"
+								label={t('policy.lateFeeAmount')}
 								min={0}
 								hint="A percentage must be ≤ 100."
 								disabled={!lateFeeEnabled}
@@ -431,17 +438,17 @@ export function BillingPolicyForm({
 							<FormSelect
 								control={form.control}
 								name="lateFeeRecurrence"
-								label="Recurrence"
+								label={t('policy.recurrence')}
 								options={LATE_FEE_RECURRENCE_OPTIONS}
 								disabled={!lateFeeEnabled}
 							/>
 							<NumberField
 								control={form.control}
 								name="lateFeeMaxTotal"
-								label="Max total (blank = uncapped)"
+								label={t('policy.maxTotal')}
 								min={0}
 								nullable
-								placeholder="Uncapped"
+								placeholder={t('policy.maxTotalPlaceholder')}
 								disabled={!lateFeeEnabled}
 							/>
 						</div>
@@ -450,7 +457,9 @@ export function BillingPolicyForm({
 
 				<Card className={CARD_CLASS}>
 					<CardHeader className={CARD_HEADER_CLASS}>
-						<CardTitle className={CARD_TITLE_CLASS}>Dunning</CardTitle>
+						<CardTitle className={CARD_TITLE_CLASS}>
+							{t('policy.recurrence')}
+						</CardTitle>
 						<p className="text-xs text-muted-foreground">
 							Runs nightly per tenant: suspends, then cancels, enrollments
 							whose invoices stay unpaid. Auto-cancel days must exceed
@@ -462,19 +471,19 @@ export function BillingPolicyForm({
 							<NumberField
 								control={form.control}
 								name="autoSuspendAfterDays"
-								label="Auto-suspend after (days)"
+								label={t('policy.autoSuspendAfter')}
 								min={1}
 								nullable
-								placeholder="Disabled"
+								placeholder={t('policy.disabledPlaceholder')}
 								hint="Days past the invoice's due date before its enrollment is auto-suspended."
 							/>
 							<NumberField
 								control={form.control}
 								name="autoCancelAfterDays"
-								label="Auto-cancel after (days)"
+								label={t('policy.autoCancelAfter')}
 								min={1}
 								nullable
-								placeholder="Disabled"
+								placeholder={t('policy.disabledPlaceholder')}
 								hint="Days past the invoice's due date before its enrollment is auto-dropped."
 							/>
 						</div>
@@ -487,15 +496,17 @@ export function BillingPolicyForm({
 						<SwitchField
 							control={form.control}
 							name="remindersEnabled"
-							label="Payment reminders"
-							description="Fires the Payment Reminder Rules the tenant has configured as invoices approach and pass their due date."
+							label={t('policy.paymentReminders')}
+							description={t('policy.paymentRemindersDescription')}
 						/>
 					</CardContent>
 				</Card>
 
 				<Card className={CARD_CLASS}>
 					<CardHeader className={CARD_HEADER_CLASS}>
-						<CardTitle className={CARD_TITLE_CLASS}>Advanced</CardTitle>
+						<CardTitle className={CARD_TITLE_CLASS}>
+							{t('policy.consumptionRule')}
+						</CardTitle>
 						<p className="text-xs text-muted-foreground">
 							Consumption rule for per-session billing, plus how wallet
 							credit is applied to invoices.
@@ -506,7 +517,7 @@ export function BillingPolicyForm({
 							<FormSelect
 								control={form.control}
 								name="consumptionRule"
-								label="Consumption rule"
+								label={t('policy.consumptionRule')}
 								options={CONSUMPTION_OPTIONS}
 							/>
 							<p className="text-xs text-muted-foreground">
@@ -519,8 +530,8 @@ export function BillingPolicyForm({
 						<SwitchField
 							control={form.control}
 							name="autoApplyCredit"
-							label="Auto-apply wallet credit"
-							description="Automatically applies any available wallet credit when an invoice is issued."
+							label={t('policy.autoApplyWalletCredit')}
+							description={t('policy.autoApplyDescription')}
 						/>
 					</CardContent>
 				</Card>
@@ -532,11 +543,11 @@ export function BillingPolicyForm({
 						onClick={() => form.reset(toDefaults(policy))}
 						disabled={updatePolicy.isPending}
 					>
-						Reset
+						{t('policy.reset')}
 					</Button>
 					<Button type="submit" disabled={updatePolicy.isPending}>
 						{updatePolicy.isPending && <Spinner className="mr-2 size-4" />}
-						Save policy
+						{t('policy.save')}
 					</Button>
 				</div>
 			</form>

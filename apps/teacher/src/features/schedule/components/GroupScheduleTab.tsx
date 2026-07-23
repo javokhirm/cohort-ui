@@ -6,6 +6,7 @@ import { formatTime, formatWeekday } from '@repo/utils';
 
 import { useGroupSessions, type TeachSession } from '../api/sessions.queries';
 import { formatDayMonth } from '../lib/session-date';
+import { useAppT } from '@/locales';
 
 interface GroupScheduleTabProps {
 	groupId: number;
@@ -69,6 +70,7 @@ function SessionRow({ session, onOpen }: SessionRowProps) {
  * surface, and features here never import each other's internals.
  */
 export function GroupScheduleTab({ groupId, onOpenSession }: GroupScheduleTabProps) {
+	const t = useAppT('schedule');
 	const { data: sessions, isPending, isError } = useGroupSessions(groupId);
 
 	if (isPending) {
@@ -86,8 +88,8 @@ export function GroupScheduleTab({ groupId, onOpenSession }: GroupScheduleTabPro
 			<div className="rounded-xl border border-border bg-card">
 				<EmptyState
 					icon={<CalendarX />}
-					title="Couldn't load the schedule"
-					description="Something went wrong fetching this group's sessions. Try again in a moment."
+					title={t('errorTitle')}
+					description={t('sessionsErrorDescription')}
 				/>
 			</div>
 		);
@@ -98,8 +100,8 @@ export function GroupScheduleTab({ groupId, onOpenSession }: GroupScheduleTabPro
 			<div className="rounded-xl border border-border bg-card">
 				<EmptyState
 					icon={<CalendarX />}
-					title="No sessions scheduled"
-					description="Sessions are generated from the group's weekly schedule once it has a start and end date."
+					title={t('noSessionsTitle')}
+					description={t('noSessionsDescription')}
 				/>
 			</div>
 		);

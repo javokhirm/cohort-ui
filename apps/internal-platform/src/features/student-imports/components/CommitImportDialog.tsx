@@ -14,6 +14,7 @@ import {
 import type { StudentImportSessionView } from '@/api/student-imports/types';
 
 import { useCommitStudentImport } from '../hooks';
+import { useT } from '@repo/i18n';
 
 interface CommitImportDialogProps {
 	tenantId: number;
@@ -33,6 +34,7 @@ export function CommitImportDialog({
 	open,
 	onOpenChange,
 }: CommitImportDialogProps) {
+	const tc = useT('common');
 	const [skipInvalidRows, setSkipInvalidRows] = useState(false);
 	const { counters } = session;
 	const hasInvalidRows = counters.invalidRows > 0;
@@ -100,7 +102,7 @@ export function CommitImportDialog({
 
 				<DialogFooter>
 					<Button variant="outline" onClick={() => handleOpenChange(false)}>
-						Cancel
+						{tc('action.cancel')}
 					</Button>
 					<Button
 						disabled={blocked || mutation.isPending}

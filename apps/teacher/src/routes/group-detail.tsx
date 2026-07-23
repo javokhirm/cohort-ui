@@ -18,6 +18,7 @@ import { GroupHeaderCard } from '@/features/groups/components/GroupHeaderCard';
 import { GroupRosterTab } from '@/features/groups/components/GroupRosterTab';
 import { GroupGradingTab } from '@/features/marks/components/GroupGradingTab';
 import { GroupScheduleTab } from '@/features/schedule/components/GroupScheduleTab';
+import { useAppT } from '@/locales';
 
 /** The group screen's tabs. `roster` is the default and stays out of the URL. */
 export type GroupTab = 'roster' | 'schedule' | 'grading';
@@ -35,6 +36,7 @@ export type GroupTab = 'roster' | 'schedule' | 'grading';
  * and marks grids — are buttons on the header card.
  */
 export function GroupDetailRoute() {
+	const t = useAppT('groups');
 	const navigate = useNavigate();
 	const { groupId: groupIdParam } = useParams({ from: '/_authed/groups/$groupId' });
 	const { tab } = useSearch({ from: '/_authed/groups/$groupId' });
@@ -54,7 +56,7 @@ export function GroupDetailRoute() {
 				onClick={backToGroups}
 			>
 				<ArrowLeft className="size-3.5" />
-				Back to groups
+				{t('back')}
 			</Button>
 			<PageHeader title={group?.name ?? 'Group'} description={group?.courseName} />
 		</div>
@@ -79,11 +81,11 @@ export function GroupDetailRoute() {
 				<div className="rounded-xl border border-border bg-card">
 					<EmptyState
 						icon={<LayoutGrid />}
-						title="Couldn't load this group"
-						description="It may not exist, or it may not be one of the groups you teach."
+						title={t('notFoundTitle')}
+						description={t('notFoundDescription')}
 						action={
 							<Button variant="outline" size="sm" onClick={backToGroups}>
-								Back to groups
+								{t('back')}
 							</Button>
 						}
 					/>

@@ -26,6 +26,7 @@ import {
 	useSetSessionTopic,
 } from '@/features/attendance/api/attendance.mutations';
 import { AttendanceList } from '@/features/attendance/components/AttendanceList';
+import { useAppT } from '@/locales';
 
 /**
  * Take attendance for a session (`GET`/`POST`/`PATCH /teach/sessions/:id/attendances`,
@@ -41,6 +42,10 @@ import { AttendanceList } from '@/features/attendance/components/AttendanceList'
  * pick, mirroring `?view=table` on `group-attendance.tsx`.
  */
 export function AttendanceRoute() {
+	const t = useAppT('attendance');
+	const tShell = useAppT('shell');
+	const tGroups = useAppT('groups');
+	const tSchedule = useAppT('schedule');
 	const navigate = useNavigate();
 	const { sessionId: sessionIdParam } = useParams({
 		from: '/_authed/sessions/$sessionId/attendance',
@@ -138,7 +143,7 @@ export function AttendanceRoute() {
 			.then(() => {
 				setOverrides(new Map());
 				setTopicOverride(null);
-				toast.success('Attendance saved');
+				toast.success(t('saved'));
 			})
 			// Failures are surfaced by the global mutation error handler.
 			.catch(() => undefined);
@@ -161,10 +166,10 @@ export function AttendanceRoute() {
 			}}
 		>
 			<TabsList>
-				<TabsTrigger value="table" aria-label="Table view">
+				<TabsTrigger value="table" aria-label={tShell('tableView')}>
 					<LayoutGrid />
 				</TabsTrigger>
-				<TabsTrigger value="list" aria-label="List view">
+				<TabsTrigger value="list" aria-label={tShell('listView')}>
 					<List />
 				</TabsTrigger>
 			</TabsList>
@@ -190,8 +195,8 @@ export function AttendanceRoute() {
 			<div className="rounded-2xl border border-border bg-card">
 				<EmptyState
 					icon={<ClipboardCheck />}
-					title="Couldn't load this session"
-					description="Something went wrong. Try again in a moment."
+					title={tSchedule('sessionErrorTitle')}
+					description={tShell('genericErrorDescription')}
 					action={
 						<Button
 							variant="outline"
@@ -200,7 +205,7 @@ export function AttendanceRoute() {
 								void recordsQuery.refetch();
 							}}
 						>
-							Try again
+							{tShell('tryAgain')}
 						</Button>
 					}
 				/>
@@ -219,8 +224,8 @@ export function AttendanceRoute() {
 			<div className="rounded-2xl border border-border bg-card">
 				<EmptyState
 					icon={<Ban />}
-					title="This session is cancelled"
-					description="Attendance can't be taken for a cancelled session."
+					title={t('cancelledTitle')}
+					description={t('cancelledDescription')}
 				/>
 			</div>
 		);
@@ -229,8 +234,8 @@ export function AttendanceRoute() {
 			<div className="rounded-2xl border border-border bg-card">
 				<EmptyState
 					icon={<ClipboardCheck />}
-					title="No students enrolled"
-					description="This group has no active students to mark yet."
+					title={tGroups('rosterEmptyTitle')}
+					description={t('noStudentsDescription')}
 				/>
 			</div>
 		);

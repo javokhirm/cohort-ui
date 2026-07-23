@@ -5,6 +5,7 @@ import { Button, Card, CardContent, cn } from '@repo/ui';
 import type { PlanView } from '@/api/plans/types';
 
 import type { OnboardFormData } from './types';
+import { useAppT } from '@/locales';
 
 export function ReviewStep({
 	data,
@@ -19,6 +20,7 @@ export function ReviewStep({
 	submitting: boolean;
 	plans: PlanView[];
 }) {
+	const t = useAppT('tenants');
 	const plan = plans.find((p) => p.id === data.planId);
 
 	const rows: { label: string; value: string }[] = [
@@ -67,7 +69,7 @@ export function ReviewStep({
 
 				<div className="flex justify-between">
 					<Button variant="outline" onClick={onBack} disabled={submitting}>
-						Back
+						{t('back')}
 					</Button>
 					<Button
 						className="bg-tone-green-fg text-background hover:bg-tone-green-fg/90"

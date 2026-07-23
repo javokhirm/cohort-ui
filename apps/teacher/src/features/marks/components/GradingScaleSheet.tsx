@@ -24,6 +24,7 @@ import {
 	type SaveGradingConfigInput,
 	useSetGradingConfig,
 } from '../api/grading-config.mutations';
+import { useAppT } from '@/locales';
 
 interface GradingScaleSheetProps {
 	groupId: number;
@@ -67,6 +68,7 @@ export function GradingScaleSheet({
 	open,
 	onOpenChange,
 }: GradingScaleSheetProps) {
+	const t = useAppT('marks');
 	const configQuery = useGradingConfig(groupId, open);
 	const setConfig = useSetGradingConfig(groupId);
 	const current = configQuery.data?.current ?? null;
@@ -74,7 +76,7 @@ export function GradingScaleSheet({
 	const onSave = (input: SaveGradingConfigInput) =>
 		setConfig.mutate(input, {
 			onSuccess: () => {
-				toast.success('Grading scale updated');
+				toast.success(t('gradingScaleUpdated'));
 				onOpenChange(false);
 			},
 		});
@@ -122,6 +124,7 @@ interface GradingScaleFormProps {
  * the backend's default (Points, max 10) when the group has none yet.
  */
 function GradingScaleForm({ current, submitting, onSave }: GradingScaleFormProps) {
+	const t = useAppT('marks');
 	const seedType = current?.type ?? 'POINTS';
 	const [type, setType] = useState<GradingType>(seedType);
 	const [maxPoints, setMaxPoints] = useState(
@@ -212,7 +215,7 @@ function GradingScaleForm({ current, submitting, onSave }: GradingScaleFormProps
 
 			<SheetFooter>
 				<Button onClick={submit} disabled={numericInvalid || submitting}>
-					Save grading scale
+					{t('saveGradingScale')}
 				</Button>
 			</SheetFooter>
 		</>

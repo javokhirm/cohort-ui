@@ -35,8 +35,11 @@ import {
 	useUnsuspendTenant,
 	useUpdateTenant,
 } from '@/features/tenants/hooks';
+import { useAppT } from '@/locales';
 
 export function TenantDetailPage() {
+	const t = useAppT('tenants');
+	const tShell = useAppT('shell');
 	const { tenantId } = useParams({ strict: false }) as { tenantId?: string };
 	const numericId = tenantId ? parseInt(tenantId, 10) : NaN;
 	const isValidId = !isNaN(numericId);
@@ -110,35 +113,35 @@ export function TenantDetailPage() {
 
 				<Button variant="outline" size="sm" className="gap-1.5" disabled>
 					<Eye className="size-4" />
-					Impersonate
+					{tShell('impersonate')}
 				</Button>
 			</div>
 
 			<Tabs defaultValue="overview" className="gap-0">
 				<TabsList className="h-auto w-full justify-start rounded-none border-b border-border bg-transparent p-0">
 					<TabsTrigger value="overview" className={TAB_TRIGGER_CLASS}>
-						Overview
+						{t('tab.overview')}
 					</TabsTrigger>
 					<TabsTrigger value="subscription" className={TAB_TRIGGER_CLASS}>
-						Subscription
+						{t('tab.subscription')}
 					</TabsTrigger>
 					<TabsTrigger value="billing-policy" className={TAB_TRIGGER_CLASS}>
-						Billing policy
+						{t('tab.billingPolicy')}
 					</TabsTrigger>
 					<TabsTrigger value="branches" className={TAB_TRIGGER_CLASS}>
-						Branches
+						{t('tab.branches')}
 					</TabsTrigger>
 					<TabsTrigger value="members" className={TAB_TRIGGER_CLASS}>
-						Members
+						{t('tab.members')}
 					</TabsTrigger>
 					<TabsTrigger value="imports" className={TAB_TRIGGER_CLASS}>
-						Imports
+						{t('tab.imports')}
 					</TabsTrigger>
 					<TabsTrigger value="settings" className={TAB_TRIGGER_CLASS}>
-						Settings
+						{t('tab.settings')}
 					</TabsTrigger>
 					<TabsTrigger value="audit" className={TAB_TRIGGER_CLASS}>
-						Audit
+						{t('tab.audit')}
 					</TabsTrigger>
 					<TabsTrigger
 						value="danger"
@@ -147,7 +150,7 @@ export function TenantDetailPage() {
 							'text-destructive data-[state=active]:border-b-destructive data-[state=active]:text-destructive',
 						)}
 					>
-						Danger zone
+						{t('danger.zone')}
 						<span className="ml-1 size-1.5 rounded-full bg-destructive" />
 					</TabsTrigger>
 				</TabsList>
@@ -207,9 +210,9 @@ export function TenantDetailPage() {
 			<TypeToConfirmDialog
 				open={suspendOpen}
 				onOpenChange={setSuspendOpen}
-				title="Suspend tenant"
-				description="This will immediately lock out all staff, teachers, students and parents. You can reactivate at any time."
-				confirmLabel="Suspend tenant"
+				title={t('danger.suspend')}
+				description={t('danger.suspendDescription')}
+				confirmLabel={t('danger.suspend')}
 				tenantName={tenant.name}
 				loading={suspendMutation.isPending}
 				onConfirm={() => suspendMutation.mutate(undefined)}
@@ -218,9 +221,9 @@ export function TenantDetailPage() {
 			<TypeToConfirmDialog
 				open={unsuspendOpen}
 				onOpenChange={setUnsuspendOpen}
-				title="Unsuspend tenant"
-				description="This will restore access for all staff, teachers, students and parents."
-				confirmLabel="Unsuspend tenant"
+				title={t('danger.unsuspend')}
+				description={t('danger.unsuspendDescription')}
+				confirmLabel={t('danger.unsuspend')}
 				tenantName={tenant.name}
 				loading={unsuspendMutation.isPending}
 				onConfirm={() => unsuspendMutation.mutate(undefined)}
@@ -229,9 +232,9 @@ export function TenantDetailPage() {
 			<TypeToConfirmDialog
 				open={cancelOpen}
 				onOpenChange={setCancelOpen}
-				title="Cancel account"
-				description="This will terminate the subscription and schedule all tenant data for deletion after 30 days. This action is permanent and cannot be undone."
-				confirmLabel="Cancel account"
+				title={t('danger.cancelAccount')}
+				description={t('danger.cancelDescription')}
+				confirmLabel={t('danger.cancelAccount')}
 				tenantName={tenant.name}
 				loading={cancelMutation.isPending}
 				onConfirm={() => cancelMutation.mutate(undefined)}

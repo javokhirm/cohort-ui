@@ -45,8 +45,10 @@ import {
 } from '../constants';
 import { getInitials } from '../utils';
 import { TrendChip } from './TrendChip';
+import { useAppT } from '@/locales';
 
 export function DashboardContent({ data }: { data: DashboardKpis }) {
+	const t = useAppT('dashboard');
 	const trendData = data.mrr.trend.slice(-6).map((p) => ({
 		month: p.periodMonth.slice(5),
 		revenue: p.mrr,
@@ -66,20 +68,20 @@ export function DashboardContent({ data }: { data: DashboardKpis }) {
 			{/* ── Section A: KPI strip ─────────────────────────────────── */}
 			<div className="grid grid-cols-2 gap-4 md:grid-cols-3 xl:grid-cols-6">
 				<StatCard
-					label="Total Tenants"
+					label={t('stat.totalTenants')}
 					value={data.tenants.total}
 					icon={<Building2 />}
 					delta={{ value: `+${data.tenants.newThisMonth} this month` }}
 					hint="all time"
 				/>
 				<StatCard
-					label="Active Tenants"
+					label={t('stat.activeTenants')}
 					value={data.tenants.active}
 					icon={<Building2 />}
 					hint={`of ${data.tenants.total} total`}
 				/>
 				<StatCard
-					label="MRR"
+					label={t('stat.mrr')}
 					value={formatPriceCompact(data.mrr.current)}
 					icon={<Wallet />}
 					delta={{
@@ -91,18 +93,18 @@ export function DashboardContent({ data }: { data: DashboardKpis }) {
 					hint="vs last month"
 				/>
 				<StatCard
-					label="Total Students"
+					label={t('stat.totalStudents')}
 					value={formatNumber(data.students.active)}
 					icon={<Users />}
 				/>
 				<StatCard
-					label="New This Month"
+					label={t('stat.newThisMonth')}
 					value={data.tenants.newThisMonth}
 					icon={<ArrowUpRight />}
 					hint="tenant sign-ups"
 				/>
 				<StatCard
-					label="Churn Rate"
+					label={t('stat.churnRate')}
 					value={formatPercent(data.mrr.churnRate)}
 					icon={<Activity />}
 					delta={{
@@ -118,7 +120,7 @@ export function DashboardContent({ data }: { data: DashboardKpis }) {
 				<Card className="gap-0 py-0">
 					<CardHeader className="border-b border-border px-5 py-4">
 						<CardTitle className="text-sm font-semibold">
-							Revenue Trend
+							{t('card.revenueTrend')}
 						</CardTitle>
 						<p className="text-xs text-muted-foreground">
 							Last 6 months (UZS)
@@ -162,7 +164,7 @@ export function DashboardContent({ data }: { data: DashboardKpis }) {
 				<Card className="gap-0 py-0">
 					<CardHeader className="border-b border-border px-5 py-4">
 						<CardTitle className="text-sm font-semibold">
-							New Signups
+							{t('card.newSignups')}
 						</CardTitle>
 						<p className="text-xs text-muted-foreground">Tenants per month</p>
 					</CardHeader>
@@ -201,10 +203,10 @@ export function DashboardContent({ data }: { data: DashboardKpis }) {
 				<Card className="gap-0 py-0">
 					<CardHeader className="border-b border-border px-5 py-4">
 						<CardTitle className="text-sm font-semibold">
-							Tenant Status
+							{t('card.tenantStatus')}
 						</CardTitle>
 						<p className="text-xs text-muted-foreground">
-							Lifecycle breakdown
+							{t('card.lifecycleBreakdown')}
 						</p>
 					</CardHeader>
 					<CardContent className="flex items-center justify-center px-2 py-4">
@@ -246,7 +248,7 @@ export function DashboardContent({ data }: { data: DashboardKpis }) {
 				<Card className="gap-0 py-0">
 					<CardHeader className="border-b border-border px-5 py-4">
 						<CardTitle className="text-sm font-semibold">
-							Needs Attention
+							{t('card.needsAttention')}
 						</CardTitle>
 						<p className="text-xs text-muted-foreground">
 							Suspended or at-risk tenants
@@ -280,7 +282,7 @@ export function DashboardContent({ data }: { data: DashboardKpis }) {
 												size="sm"
 												className="shrink-0 text-xs"
 											>
-												View
+												{t('view')}
 											</Button>
 										</div>
 									</li>
@@ -294,10 +296,10 @@ export function DashboardContent({ data }: { data: DashboardKpis }) {
 				<Card className="gap-0 py-0">
 					<CardHeader className="border-b border-border px-5 py-4">
 						<CardTitle className="text-sm font-semibold">
-							Monthly Highlights
+							{t('card.monthlyHighlights')}
 						</CardTitle>
 						<p className="text-xs text-muted-foreground">
-							Current period at a glance
+							{t('card.currentPeriod')}
 						</p>
 					</CardHeader>
 					<CardContent className="px-0 py-0">
@@ -365,7 +367,7 @@ export function DashboardContent({ data }: { data: DashboardKpis }) {
 			<Card className="gap-0 py-0">
 				<CardHeader className="border-b border-border px-5 py-4">
 					<CardTitle className="text-sm font-semibold">
-						System Services
+						{t('card.systemServices')}
 					</CardTitle>
 					<p className="text-xs text-muted-foreground">
 						Live status — all times UTC+5

@@ -67,11 +67,7 @@ export function formatGradingScale(
 }
 
 /** Preview label for the pending form values (max is still a raw string). */
-export function gradingPreview(
-	t: GroupsT,
-	type: GradingType,
-	maxPoints: string,
-): string {
+export function gradingPreview(t: GroupsT, type: GradingType, maxPoints: string): string {
 	switch (type) {
 		case 'POINTS':
 			return t('grading.summary.dailyPoints', { max: maxPoints || '—' });
@@ -178,10 +174,7 @@ export function toYmd(date: Date): string {
 }
 
 /** "Mon · Wed · Fri · 09:00–10:30" — a one-line schedule summary. */
-export function formatScheduleRule(
-	t: GroupsT,
-	rule: ScheduleRule | null,
-): string | null {
+export function formatScheduleRule(t: GroupsT, rule: ScheduleRule | null): string | null {
 	if (!rule || rule.days.length === 0) return null;
 	const days = sortDays(rule.days)
 		.map((d) => t(`day.${d}`))

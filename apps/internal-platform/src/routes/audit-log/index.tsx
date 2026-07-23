@@ -7,78 +7,86 @@ import { Card, DataTable, Pagination, type ColumnDef } from '@repo/ui';
 import { formatDateTime as formatTimestamp } from '@repo/utils';
 import { useAuditLogs } from '@/features/audit-log/hooks';
 import { PAGE_SIZE } from '@/features/audit-log/constants';
+import { useAppT } from '@/locales';
 
 type AuditLogRow = NonNullable<ReturnType<typeof useAuditLogs>['data']>['rows'][number];
 
-const columns: ColumnDef<AuditLogRow>[] = [
-	{
-		accessorKey: 'timestamp',
-		header: 'Timestamp',
-		cell: ({ getValue }) => (
-			<span className="text-xs text-muted-foreground tabular-nums">
-				{formatTimestamp(getValue<string>())}
-			</span>
-		),
-	},
-	{
-		id: 'actor',
-		header: 'Actor',
-		cell: ({ row }) => (
-			<div className="text-sm">
-				<div className="font-medium">{row.original.actor.name ?? '—'}</div>
-				{row.original.actor.role && (
-					<div className="text-xs text-muted-foreground">
-						{row.original.actor.role}
-					</div>
-				)}
-			</div>
-		),
-	},
-	{
-		id: 'tenant',
-		header: 'Tenant',
-		cell: ({ row }) => (
-			<span className="text-sm text-muted-foreground">
-				{row.original.tenant ? (
-					row.original.tenant.name
-				) : (
-					<span className="italic">Platform</span>
-				)}
-			</span>
-		),
-	},
-	{
-		accessorKey: 'action',
-		header: 'Action',
-		cell: ({ getValue }) => (
-			<code className="rounded bg-muted px-1.5 py-0.5 font-mono text-xs">
-				{getValue<string>()}
-			</code>
-		),
-	},
-	{
-		id: 'entity',
-		header: 'Entity',
-		cell: ({ row }) => (
-			<span className="text-xs text-muted-foreground">
-				{row.original.entityType
-					? `${row.original.entityType}${row.original.entityId != null ? ` #${row.original.entityId}` : ''}`
-					: '—'}
-			</span>
-		),
-	},
-	{
-		accessorKey: 'ipAddress',
-		header: 'IP Address',
-		cell: ({ getValue }) => (
-			<span className="text-xs text-muted-foreground tabular-nums">
-				{getValue<string | null>() ?? '—'}
-			</span>
-		),
-	},
-];
+/**
+ * Built per render rather than held at module scope: the headers are
+ * user-facing, so they must re-resolve when the language changes.
+ */
+function buildColumns(t: ReturnType<typeof useAppT<'audit'>>): ColumnDef<AuditLogRow>[] {
+	return [
+		{
+			accessorKey: 'timestamp',
+			header: t('column.timestamp'),
+			cell: ({ getValue }) => (
+				<span className="text-xs text-muted-foreground tabular-nums">
+					{formatTimestamp(getValue<string>())}
+				</span>
+			),
+		},
+		{
+			id: 'actor',
+			header: t('column.actor'),
+			cell: ({ row }) => (
+				<div className="text-sm">
+					<div className="font-medium">{row.original.actor.name ?? '—'}</div>
+					{row.original.actor.role && (
+						<div className="text-xs text-muted-foreground">
+							{row.original.actor.role}
+						</div>
+					)}
+				</div>
+			),
+		},
+		{
+			id: 'tenant',
+			header: t('column.tenant'),
+			cell: ({ row }) => (
+				<span className="text-sm text-muted-foreground">
+					{row.original.tenant ? (
+						row.original.tenant.name
+					) : (
+						<span className="italic">Platform</span>
+					)}
+				</span>
+			),
+		},
+		{
+			accessorKey: 'action',
+			header: t('column.action'),
+			cell: ({ getValue }) => (
+				<code className="rounded bg-muted px-1.5 py-0.5 font-mono text-xs">
+					{getValue<string>()}
+				</code>
+			),
+		},
+		{
+			id: 'entity',
+			header: t('column.entity'),
+			cell: ({ row }) => (
+				<span className="text-xs text-muted-foreground">
+					{row.original.entityType
+						? `${row.original.entityType}${row.original.entityId != null ? ` #${row.original.entityId}` : ''}`
+						: '—'}
+				</span>
+			),
+		},
+		{
+			accessorKey: 'ipAddress',
+			header: t('column.ipAddress'),
+			cell: ({ getValue }) => (
+				<span className="text-xs text-muted-foreground tabular-nums">
+					{getValue<string | null>() ?? '—'}
+				</span>
+			),
+		},
+	];
+}
 
 export function AuditLogPage() {
+	const t = useAppT('audit');
 	const navigate = useNavigate();
 	const [search, setSearch] = useState('');
 	const [debouncedSearch, setDebouncedSearch] = useState('');
@@ -119,7 +127,7 @@ export function AuditLogPage() {
 						type="search"
 						value={search}
 						onChange={handleSearch}
-						placeholder="Search action, actor, tenant…"
+						placeholder={t('searchPlaceholder')}
 						className="h-9 w-72 rounded-md border border-input bg-background pl-8 pr-3 text-sm shadow-sm placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring"
 					/>
 				</div>
@@ -133,7 +141,7 @@ export function AuditLogPage() {
 
 			<Card className="gap-0 overflow-hidden py-0">
 				<DataTable
-					columns={columns}
+					columns={buildColumns(t)}
 					data={data?.rows ?? []}
 					isLoading={isLoading}
 					getRowId={(row) => String(row.id)}

@@ -6,6 +6,7 @@ import { EmptyState, Skeleton } from '@repo/ui';
 import { useGradingConfig } from '../api/grading-config.queries';
 import { scaleShortLabel } from '../lib/scale';
 import { GradingScaleSheet } from './GradingScaleSheet';
+import { useAppT } from '@/locales';
 
 interface GroupGradingTabProps {
 	groupId: number;
@@ -20,6 +21,7 @@ interface GroupGradingTabProps {
  * explanatory card below the button is there to say.
  */
 export function GroupGradingTab({ groupId }: GroupGradingTabProps) {
+	const t = useAppT('marks');
 	const [scaleOpen, setScaleOpen] = useState(false);
 	const { data, isPending, isError } = useGradingConfig(groupId);
 	const current = data?.current ?? null;
@@ -33,8 +35,8 @@ export function GroupGradingTab({ groupId }: GroupGradingTabProps) {
 			<div className="rounded-xl border border-border bg-card">
 				<EmptyState
 					icon={<SlidersHorizontal />}
-					title="Couldn't load the grading scale"
-					description="Something went wrong fetching this group's grading configuration. Try again in a moment."
+					title={t('gradingScaleErrorTitle')}
+					description={t('gradingScaleErrorDescription')}
 				/>
 			</div>
 		);
@@ -52,7 +54,7 @@ export function GroupGradingTab({ groupId }: GroupGradingTabProps) {
 				</span>
 				<span className="min-w-0 flex-1">
 					<span className="block text-[13.5px] font-bold text-foreground">
-						Grading scale
+						{t('gradingScale')}
 					</span>
 					<span className="block truncate text-[11.5px] text-muted-foreground">
 						{current
@@ -64,9 +66,7 @@ export function GroupGradingTab({ groupId }: GroupGradingTabProps) {
 			</button>
 
 			<p className="rounded-xl border border-border bg-card p-3.5 text-[12px] leading-relaxed text-muted-foreground shadow-xs">
-				This scale controls how daily marks are entered and how averages are
-				calculated for this group. Changing it does not convert marks already
-				saved.
+				{t('gradingScaleHint')}
 			</p>
 
 			<GradingScaleSheet

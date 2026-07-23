@@ -7,6 +7,7 @@ import { formatDate } from '@repo/utils';
 import { useStudent, type StudentGender } from '@/features/students/api/students.queries';
 import { GuardianList } from '@/features/students/components/GuardianList';
 import { StudentHeaderCard } from '@/features/students/components/StudentHeaderCard';
+import { useAppT } from '@/locales';
 
 const GENDER_LABELS: Record<StudentGender, string> = {
 	M: 'Male',
@@ -31,6 +32,8 @@ function SectionLabel({ children }: { children: string }) {
  * financial data — so there is nothing here to hide behind a permission check.
  */
 export function StudentDetailRoute() {
+	const t = useAppT('students');
+	const tShell = useAppT('shell');
 	const navigate = useNavigate();
 	const router = useRouter();
 	const { studentId: studentIdParam } = useParams({
@@ -58,9 +61,9 @@ export function StudentDetailRoute() {
 				onClick={goBack}
 			>
 				<ArrowLeft className="size-3.5" />
-				Back
+				{tShell('back')}
 			</Button>
-			<PageHeader title="Student profile" />
+			<PageHeader title={t('profileTitle')} />
 		</div>
 	);
 
@@ -81,8 +84,8 @@ export function StudentDetailRoute() {
 				<div className="rounded-xl border border-border bg-card">
 					<EmptyState
 						icon={<UserRound />}
-						title="Couldn't load this student"
-						description="They may not exist, or they may not be enrolled in one of the groups you teach."
+						title={t('errorTitle')}
+						description={t('errorDescription')}
 					/>
 				</div>
 			</div>
