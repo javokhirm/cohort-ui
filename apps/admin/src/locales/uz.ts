@@ -139,9 +139,9 @@ export const uz = {
 			status: 'Holati',
 		},
 		feePlanEmpty:
-			'Bu filial uchun faol toʻlov rejasi yoʻq. Avval «Toʻlov rejalari» sahifasida yarating — kurs oʻz guruhlari hisob-fakturalari asoslanadigan rejasiz mavjud boʻlolmaydi.',
+			'Bu filial uchun faol toʻlov rejasi yoʻq. Avval «Toʻlov rejalari» sahifasida yarating — kurs oʻz guruhlari invoyslari asoslanadigan rejasiz mavjud boʻlolmaydi.',
 		planChangeWarning:
-			'Rejani oʻzgartirsangiz, bu kurs guruhlarining kelgusi barcha hisob-fakturalari qayta narxlanadi. Allaqachon chiqarilgan hisob-fakturalar oʻz rejasida qoladi.',
+			'Rejani oʻzgartirsangiz, bu kurs guruhlarining kelgusi barcha invoyslari qayta narxlanadi. Allaqachon chiqarilgan invoyslar oʻz rejasida qoladi.',
 		detail: {
 			back: 'Kurslarga qaytish',
 			notFound: 'Kurs topilmadi.',
@@ -384,7 +384,7 @@ export const uz = {
 			action: {
 				edit: 'Tahrirlash',
 				message: 'Xabar yuborish',
-				createInvoice: 'Hisob-faktura yaratish',
+				createInvoice: 'Invoys yaratish',
 			},
 			tab: {
 				overview: 'Umumiy',
@@ -392,7 +392,7 @@ export const uz = {
 				enrollments: 'Qabullar',
 				attendance: 'Davomat',
 				grades: 'Baholar',
-				billing: 'Hisob-fakturalar',
+				billing: 'Invoyslar',
 				wallet: 'Hamyon',
 			},
 			overview: {
@@ -430,9 +430,9 @@ export const uz = {
 				empty: 'Baholar qayd etilmagan',
 			},
 			billing: {
-				empty: 'Hisob-fakturalar yoʻq',
+				empty: 'Invoyslar yoʻq',
 				column: {
-					invoice: 'Hisob-faktura',
+					invoice: 'Invoys',
 					date: 'Sana',
 					total: 'Jami',
 					status: 'Holati',
@@ -446,12 +446,12 @@ export const uz = {
 			recent: 'Soʻngi tranzaksiyalar',
 			emptyTitle: 'Hali tranzaksiyalar yoʻq',
 			emptyDescription:
-				'Toʻldirishlar, tuzatishlar va hisob-faktura harakatlari shu yerda koʻrinadi.',
+				'Toʻldirishlar, tuzatishlar va invoys harakatlari shu yerda koʻrinadi.',
 			txType: {
 				DEPOSIT: 'Toʻldirish',
 				OVERPAYMENT: 'Ortiqcha toʻlov',
 				REFUND_CREDIT: 'Qaytarilgan mablagʻ',
-				INVOICE_APPLICATION: 'Hisob-faktura toʻlovi',
+				INVOICE_APPLICATION: 'Invoys toʻlovi',
 				ADJUSTMENT: 'Tuzatish',
 				CASHOUT: 'Naqd yechish',
 			},
@@ -714,6 +714,8 @@ export const uz = {
 		noSchedule: 'Jadval belgilanmagan',
 		loadError: 'Guruhlarni yuklab boʻlmadi. Sahifani yangilang.',
 		emptyFiltered: 'Bu filtrlarga mos guruh topilmadi.',
+		seats_one: '{{count}} oʻrin',
+		seats_other: '{{count}} oʻrin',
 		status: {
 			PLANNED: 'Rejalashtirilgan',
 			ACTIVE: 'Faol',
@@ -939,7 +941,7 @@ export const uz = {
 			loadError: 'Jadvalni yuklab boʻlmadi. Sahifani yangilang.',
 		},
 		enrollmentDateError:
-			'Bu boshlanish sanasi oʻquvchiga hech qachon hisob-faktura chiqarilmaydigan billing davrlarini oʻtkazib yuboradi. {{from}} va {{to}} orasidagi sanani tanlang.',
+			'Bu boshlanish sanasi oʻquvchiga hech qachon invoys chiqarilmaydigan billing davrlarini oʻtkazib yuboradi. {{from}} va {{to}} orasidagi sanani tanlang.',
 	},
 	billing: {
 		paymentMethod: {
@@ -964,18 +966,18 @@ export const uz = {
 			PER_SESSION: 'Har dars uchun',
 		},
 		invoices: {
-			title: 'Hisob-fakturalar',
-			description: 'Oʻquvchilarga chiqarilgan hisob-fakturalar va ularning holati',
-			searchPlaceholder: 'Hisob-faktura yoki oʻquvchi boʻyicha qidirish…',
-			generate: 'Hisob-fakturalarni yaratish',
-			create: 'Hisob-faktura yaratish',
-			loadError: 'Hisob-fakturalarni yuklab boʻlmadi. Sahifani yangilang.',
-			emptyFiltered: 'Bu filtrga mos hisob-faktura topilmadi.',
-			created: 'Hisob-faktura yaratildi',
-			back: 'Hisob-fakturalarga qaytish',
-			notFound: 'Hisob-faktura topilmadi.',
+			title: 'Invoyslar',
+			description: 'Oʻquvchilarga chiqarilgan invoyslar va ularning holati',
+			searchPlaceholder: 'Invoys yoki oʻquvchi boʻyicha qidirish…',
+			generate: 'Invoyslarni yaratish',
+			create: 'Invoys yaratish',
+			loadError: 'Invoyslarni yuklab boʻlmadi. Sahifani yangilang.',
+			emptyFiltered: 'Bu filtrga mos invoys topilmadi.',
+			created: 'Invoys yaratildi',
+			back: 'Invoyslarga qaytish',
+			notFound: 'Invoys topilmadi.',
 			column: {
-				invoice: 'Hisob-faktura',
+				invoice: 'Invoys',
 				student: 'Oʻquvchi',
 				issued: 'Chiqarilgan',
 				due: 'Toʻlov muddati',
@@ -1006,15 +1008,15 @@ export const uz = {
 				amount: 'Summa',
 			},
 			generateDialog: {
-				title: 'Hisob-fakturalarni yaratish',
+				title: 'Invoyslarni yaratish',
 				description:
-					'Tanlangan davr uchun faol qabullarga hisob-fakturalar yaratiladi. Allaqachon chiqarilganlari takrorlanmaydi.',
+					'Tanlangan davr uchun faol qabullarga invoyslar yaratiladi. Allaqachon chiqarilganlari takrorlanmaydi.',
 				period: 'Davr',
 				confirm: 'Yaratish',
-				done: '{{count}} ta hisob-faktura yaratildi',
+				done: '{{count}} ta invoys yaratildi',
 			},
 			form: {
-				title: 'Hisob-faktura yaratish',
+				title: 'Invoys yaratish',
 				requiredHint: '* bilan belgilangan maydonlar majburiy',
 				student: 'Oʻquvchi *',
 				studentPlaceholder: 'Oʻquvchini tanlang',
@@ -1027,12 +1029,12 @@ export const uz = {
 				lineType: 'Turi',
 				lineQty: 'Soni',
 				lineUnit: 'Birlik narxi',
-				submit: 'Hisob-fakturani yaratish',
+				submit: 'Invoysni yaratish',
 			},
 		},
 		payments: {
 			title: 'Toʻlovlar',
-			description: 'Barcha hisob-fakturalar boʻyicha qabul qilingan toʻlovlar',
+			description: 'Barcha invoyslar boʻyicha qabul qilingan toʻlovlar',
 			searchPlaceholder: 'Toʻlov yoki oʻquvchi boʻyicha qidirish…',
 			allMethods: 'Barcha usullar',
 			loadError: 'Toʻlovlarni yuklab boʻlmadi. Sahifani yangilang.',
@@ -1041,7 +1043,7 @@ export const uz = {
 			column: {
 				payment: 'Toʻlov',
 				student: 'Oʻquvchi',
-				invoice: 'Hisob-faktura',
+				invoice: 'Invoys',
 				method: 'Usuli',
 				date: 'Sana',
 				amount: 'Summa',
@@ -1049,8 +1051,7 @@ export const uz = {
 			},
 			record: {
 				title: 'Toʻlovni qayd etish',
-				description:
-					'Ushbu hisob-faktura boʻyicha qabul qilingan toʻlovni yozing.',
+				description: 'Ushbu invoys boʻyicha qabul qilingan toʻlovni yozing.',
 				amount: 'Summa *',
 				method: 'Usuli *',
 				date: 'Sana *',
@@ -1064,7 +1065,7 @@ export const uz = {
 				action: 'Qaytarish',
 				title: 'Toʻlovni qaytarish',
 				description:
-					'Bu toʻlovni toʻliq yoki qisman qaytaradi. Qaytarilgan summa hisob-faktura qoldigʻiga qaytariladi.',
+					'Bu toʻlovni toʻliq yoki qisman qaytaradi. Qaytarilgan summa invoys qoldigʻiga qaytariladi.',
 				amount: 'Qaytariladigan summa *',
 				reason: 'Sabab *',
 				reasonPlaceholder: 'masalan, ortiqcha toʻlov, bekor qilingan qabul…',
@@ -1075,7 +1076,7 @@ export const uz = {
 		},
 		feePlans: {
 			title: 'Toʻlov rejalari',
-			description: 'Kurslar hisob-fakturalari asoslanadigan narx rejalari',
+			description: 'Kurslar invoyslari asoslanadigan narx rejalari',
 			add: 'Yangi reja',
 			addSheet: 'Toʻlov rejasini qoʻshish',
 			edit: 'Toʻlov rejasini tahrirlash',
@@ -1106,8 +1107,7 @@ export const uz = {
 		},
 		discounts: {
 			title: 'Chegirmalar',
-			description:
-				'Hisob-fakturalarga qoʻllanadigan qayta ishlatiladigan chegirmalar',
+			description: 'Invoyslarga qoʻllanadigan qayta ishlatiladigan chegirmalar',
 			add: 'Yangi chegirma',
 			addSheet: 'Chegirma qoʻshish',
 			edit: 'Chegirmani tahrirlash',
@@ -1130,7 +1130,7 @@ export const uz = {
 			},
 			apply: {
 				title: 'Chegirma qoʻllash',
-				description: 'Ushbu hisob-fakturaga chegirma qoʻllang.',
+				description: 'Ushbu invoysga chegirma qoʻllang.',
 				discount: 'Chegirma *',
 				discountPlaceholder: 'Chegirmani tanlang',
 				confirm: 'Chegirmani qoʻllash',
@@ -1145,7 +1145,7 @@ export const uz = {
 				remove: 'Olib tashlash',
 				sheetTitle: '{{group}} uchun doimiy chegirma',
 				description:
-					'Doimiy chegirma ushbu qabul boʻyicha har bir kelgusi hisob-fakturaga avtomatik qoʻllanadi.',
+					'Doimiy chegirma ushbu qabul boʻyicha har bir kelgusi invoysga avtomatik qoʻllanadi.',
 				saved: 'Doimiy chegirma saqlandi',
 				removed: 'Doimiy chegirma olib tashlandi',
 			},
@@ -1154,10 +1154,10 @@ export const uz = {
 			issue: 'Kredit-nota chiqarish',
 			title: 'Kredit-nota chiqarish',
 			description:
-				'Kredit-nota ushbu hisob-fakturaning bir qismini yoki barchasini bekor qiladi. Maksimal: {{max}}.',
+				'Kredit-nota ushbu invoysning bir qismini yoki barchasini bekor qiladi. Maksimal: {{max}}.',
 			amount: 'Summa *',
 			reason: 'Sabab *',
-			reasonPlaceholder: 'masalan, xizmat koʻrsatilmadi, hisob-faktura xatosi…',
+			reasonPlaceholder: 'masalan, xizmat koʻrsatilmadi, invoys xatosi…',
 			confirm: 'Kredit-notani chiqarish',
 			done: 'Kredit-nota chiqarildi',
 			failed: 'Kredit-notani chiqarib boʻlmadi',
@@ -1167,8 +1167,7 @@ export const uz = {
 		},
 		policy: {
 			title: 'Billing siyosati',
-			description:
-				'Hisob-fakturalar qachon chiqarilishi va qanday qoidalar amal qilishi',
+			description: 'Invoyslar qachon chiqarilishi va qanday qoidalar amal qilishi',
 			loadError: 'Billing siyosatini yuklab boʻlmadi.',
 			anchorLabel: 'Hisob-kitob sanasi',
 			anchorValue: 'Har oyning {{day}}-kuni',
@@ -1189,13 +1188,13 @@ export const uz = {
 		},
 		allBranches: 'Barcha filiallar',
 		invoiceExtra: {
-			void: 'Hisob-fakturani bekor qilish',
-			voidTitle: 'Bu hisob-faktura bekor qilinsinmi?',
+			void: 'Invoysni bekor qilish',
+			voidTitle: 'Bu invoys bekor qilinsinmi?',
 			voidDescription:
-				'Bekor qilishni ortga qaytarib boʻlmaydi. Ushbu hisob-fakturada qayd etilgan toʻlovlar avtomatik qaytarilmaydi.',
-			voided: 'Hisob-faktura bekor qilindi',
-			issued: 'Hisob-faktura chiqarildi',
-			updated: 'Hisob-faktura yangilandi',
+				'Bekor qilishni ortga qaytarib boʻlmaydi. Ushbu invoysda qayd etilgan toʻlovlar avtomatik qaytarilmaydi.',
+			voided: 'Invoys bekor qilindi',
+			issued: 'Invoys chiqarildi',
+			updated: 'Invoys yangilandi',
 			downloadPdf: 'PDF yuklab olish',
 			sendReminder: 'Eslatma yuborish',
 			notAvailableYet: 'Hali mavjud emas',
@@ -1257,8 +1256,8 @@ export const uz = {
 			close: 'Yopish',
 			done: 'Tayyor',
 			runAnotherPeriod: 'Boshqa davrni ishga tushirish',
-			generateMonthly: 'Oylik hisob-fakturalarni yaratish',
-			issueInvoice: 'Hisob-fakturani chiqarish',
+			generateMonthly: 'Oylik invoyslarni yaratish',
+			issueInvoice: 'Invoysni chiqarish',
 			applyWalletCredit: 'Hamyon mablagʻini qoʻllash',
 			void: 'Bekor qilish',
 			tax: 'Soliq',
@@ -1272,16 +1271,16 @@ export const uz = {
 			managedByCohort: 'Cohort tomonidan boshqariladi',
 			transaction: 'Tranzaksiya',
 			providerTransactionId: 'Provayder tranzaksiya IDsi',
-			linkedInvoice: 'Bogʻlangan hisob-faktura',
-			invoiceReference: 'Hisob-faktura raqami',
-			viewInvoice: 'Hisob-fakturani koʻrish',
+			linkedInvoice: 'Bogʻlangan invoys',
+			invoiceReference: 'Invoys raqami',
+			viewInvoice: 'Invoysni koʻrish',
 			appliedBeforeThis:
-				'Shu sanadan oldin yaratilgan har bir oylik hisob-fakturaga qoʻllangan',
+				'Shu sanadan oldin yaratilgan har bir oylik invoysga qoʻllangan',
 		},
 		policySections: {
 			pageTitle: 'Billing siyosati',
 			pageDescription:
-				'Ushbu markazning hisob-fakturalari qanday yaratilishi, qachon toʻlanishi kerakligi va muddati oʻtgan hisoblar qanday koʻrib chiqilishi',
+				'Ushbu markazning invoyslari qanday yaratilishi, qachon toʻlanishi kerakligi va muddati oʻtgan hisoblar qanday koʻrib chiqilishi',
 			basics: 'Billing asoslari',
 			enrollment: 'Qabul',
 			lateFees: 'Kechikish jarimalari',
@@ -1289,26 +1288,26 @@ export const uz = {
 			advanced: 'Qoʻshimcha',
 		},
 		invoiceForm: {
-			editTitle: 'Hisob-fakturani tahrirlash',
+			editTitle: 'Invoysni tahrirlash',
 			editDescription:
 				'Muddati va izohlarni faqat qoralama holatida oʻzgartirish mumkin.',
 			saveChanges: 'Oʻzgarishlarni saqlash',
 			noDiscount: 'Chegirmasiz',
 			item: 'Qator {{index}}',
-			createFailed: 'Hisob-fakturani yaratib boʻlmadi',
+			createFailed: 'Invoysni yaratib boʻlmadi',
 			discountApplyFailed:
-				'Hisob-faktura {{number}} yaratildi, lekin chegirma qoʻllanmadi: {{error}}',
+				'Invoys {{number}} yaratildi, lekin chegirma qoʻllanmadi: {{error}}',
 			unknownError: 'nomaʼlum xatolik',
 			zeroTotalWarning:
 				'Bu chegirma jami summani 0 UZS ga tushiradi — hech narsa hisoblanmaydi.',
 		},
 		invoiceActions: {
 			outstandingHint: 'Qoldiq balans bor — yangilash uchun toʻlovni qayd eting.',
-			issueFailed: 'Hisob-fakturani chiqarib boʻlmadi',
+			issueFailed: 'Invoysni chiqarib boʻlmadi',
 			walletApplied: '{{amount}} UZS hamyon mablagʻi qoʻllandi',
 			noWalletCredit: 'Qoʻllash uchun hamyon mablagʻi yoʻq',
 			applyWalletFailed: 'Hamyon mablagʻini qoʻllab boʻlmadi',
-			voidFailed: 'Hisob-fakturani bekor qilib boʻlmadi',
+			voidFailed: 'Invoysni bekor qilib boʻlmadi',
 			issuedInline: 'Chiqarilgan',
 			dueInline: 'Toʻlov muddati',
 		},
@@ -1318,15 +1317,15 @@ export const uz = {
 			cannotUndo: 'Buni ortga qaytarib boʻlmaydi.',
 			destination: 'Yoʻnalish *',
 			walletOnlyHint:
-				'Bu toʻlov hisob-fakturaga bogʻlanmagan, shuning uchun faqat naqd sifatida qaytariladi.',
+				'Bu toʻlov invoysga bogʻlanmagan, shuning uchun faqat naqd sifatida qaytariladi.',
 		},
 		creditNoteForm: {
 			dialogDescription:
-				'Bu hisob-faktura toʻlovlarining bir qismini bekor qiladi. Buni ortga qaytarib boʻlmaydi.',
+				'Bu invoys toʻlovlarining bir qismini bekor qiladi. Buni ortga qaytarib boʻlmaydi.',
 			maxCreditable: 'Maksimal {{max}} UZS qaytarish mumkin.',
 		},
 		applyDiscount: {
-			allApplied: 'Har bir faol chegirma bu hisob-fakturaga allaqachon qoʻllangan.',
+			allApplied: 'Har bir faol chegirma bu invoysga allaqachon qoʻllangan.',
 			noneAvailable:
 				'Faol chegirmalar yoʻq. Avval «Chegirmalar» boʻlimida yarating.',
 			zeroTotalWarning:
@@ -1344,7 +1343,7 @@ export const uz = {
 			usageUncapped_other: '{{count}} marta ishlatilgan',
 		},
 		enrollmentDiscount: {
-			hint: 'Bu qabulning oylik hisob-fakturasiga har oy, muddati tugaguncha avtomatik qoʻllanadi. Asosdagi promo-kodning foydalanish chekloviga doimiy biriktirmalar taʼsir qilmaydi.',
+			hint: 'Bu qabulning oylik invoyssiga har oy, muddati tugaguncha avtomatik qoʻllanadi. Asosdagi promo-kodning foydalanish chekloviga doimiy biriktirmalar taʼsir qilmaydi.',
 			removeConfirm: '«{{name}}» doimiy chegirmasi olib tashlansinmi?',
 			removeAria: '{{name}}ni olib tashlash',
 			validUntilShort: '{{date}} gacha',
@@ -1353,24 +1352,24 @@ export const uz = {
 			noneToAssign:
 				'Biriktirish uchun faol chegirma yoʻq — avval «Chegirmalar» boʻlimida yarating.',
 			validUntilHint:
-				'Shu sanagacha yaratilgan har bir oylik hisob-fakturaga qoʻllanadi. Muddatsiz qoldirish uchun boʻsh qoldiring.',
+				'Shu sanagacha yaratilgan har bir oylik invoysga qoʻllanadi. Muddatsiz qoldirish uchun boʻsh qoldiring.',
 		},
 		feePlanForm: {
 			sharedOption: 'Umumiy — barcha filiallar',
 			standaloneHint:
 				'Rejalar mustaqil. Saqlaganingizdan soʻng uni kursga biriktiring — oʻsha kursning har bir guruhi shu reja boʻyicha hisob chiqaradi.',
 			repriceHint:
-				'Summa yoki davrni oʻzgartirsangiz, bu guruhlarning kelgusi barcha hisob-fakturalari qayta narxlanadi. Allaqachon chiqarilgan hisob-fakturalar oʻz rejasida qoladi.',
+				'Summa yoki davrni oʻzgartirsangiz, bu guruhlarning kelgusi barcha invoyslari qayta narxlanadi. Allaqachon chiqarilgan invoyslar oʻz rejasida qoladi.',
 			noGroupsHint:
 				'Bu rejada hali guruh yoʻq. Guruh uni kursidan meros qilib oladi — kursni yaratganingizda yoki tahrirlaganingizda rejani biriktiring.',
 			loadError: 'Guruhlarni yuklab boʻlmadi. Sahifani yangilang.',
 			loadingGroups: 'Guruhlar yuklanmoqda…',
 		},
 		generateExtra: {
-			failed: 'Hisob-fakturalarni yaratib boʻlmadi',
-			titleAnniversary: 'Muddati kelgan hisob-fakturalarni yaratish',
+			failed: 'Invoyslarni yaratib boʻlmadi',
+			titleAnniversary: 'Muddati kelgan invoyslarni yaratish',
 			descAnniversary:
-				'Oʻz davri boshlangan, lekin hali hisob chiqarilmagan har bir oʻquvchiga hisob-faktura chiqaradi. Har bir oʻquvchi oʻz davri — qabul yilligida boshlangan davr — uchun hisoblanadi, shuning uchun oy tanlanmaydi.',
+				'Oʻz davri boshlangan, lekin hali hisob chiqarilmagan har bir oʻquvchiga invoys chiqaradi. Har bir oʻquvchi oʻz davri — qabul yilligida boshlangan davr — uchun hisoblanadi, shuning uchun oy tanlanmaydi.',
 			descPostpaid:
 				'Tanlangan oyni toʻliq oʻtgach hisoblaydi — bu bitta ishga tushirish ham vaqtga asoslangan oylik qismini, ham dars sarfiga asoslangan qismini qamrab oladi.',
 			descPrepaid: 'Tanlangan oyni boshlanishidan oldin, oldindan hisoblaydi.',
@@ -1379,12 +1378,12 @@ export const uz = {
 			hintAnniversary:
 				'Tungi ishga tushirish buni allaqachon bajaradi. Undan uzilishdan keyin yetib olish uchun foydalaning — joriy davri uchun allaqachon hisob chiqarilgan oʻquvchilar tegilmaydi.',
 			hintPostpaid:
-				'{{period}} da sarflangan qabullar uchun hisob-fakturalar yaratadi. Bu davr uchun mavjud hisob-fakturalar tegilmaydi.',
+				'{{period}} da sarflangan qabullar uchun invoyslar yaratadi. Bu davr uchun mavjud invoyslar tegilmaydi.',
 			hintPrepaid:
-				'{{period}} uchun oldindan hisob-fakturalar yaratadi. Bu davr uchun mavjud hisob-fakturalar tegilmaydi.',
-			resultTitle: '{{period}} uchun hisob-fakturalar yaratildi',
-			invoicesCreated_one: '{{count}} ta hisob-faktura yaratildi',
-			invoicesCreated_other: '{{count}} ta hisob-faktura yaratildi',
+				'{{period}} uchun oldindan invoyslar yaratadi. Bu davr uchun mavjud invoyslar tegilmaydi.',
+			resultTitle: '{{period}} uchun invoyslar yaratildi',
+			invoicesCreated_one: '{{count}} ta invoys yaratildi',
+			invoicesCreated_other: '{{count}} ta invoys yaratildi',
 			proratedSuffix_one: ' ({{count}} ta qismli)',
 			proratedSuffix_other: ' ({{count}} ta qismli)',
 			errorsTitle_one: '{{count}} ta qabulda yaratib boʻlmadi',
@@ -1394,7 +1393,7 @@ export const uz = {
 		},
 		policyPage: {
 			managedDescription:
-				'Bu siyosat markazingiz chiqaradigan har bir hisob-fakturani boshqaradi, shuning uchun u shu yerda emas, Cohort jamoasi tomonidan sozlanadi. Oʻzgartirish uchun qoʻllab-quvvatlashga murojaat qiling — u keyingi hisob-kitob ishga tushishidan boshlab kuchga kiradi va allaqachon chiqarilgan hisob-fakturalarni oʻzgartirmaydi.',
+				'Bu siyosat markazingiz chiqaradigan har bir invoysni boshqaradi, shuning uchun u shu yerda emas, Cohort jamoasi tomonidan sozlanadi. Oʻzgartirish uchun qoʻllab-quvvatlashga murojaat qiling — u keyingi hisob-kitob ishga tushishidan boshlab kuchga kiradi va allaqachon chiqarilgan invoyslarni oʻzgartirmaydi.',
 			forbidden: 'Billing siyosatini koʻrish uchun ruxsatingiz yoʻq.',
 			loading: 'Billing siyosati yuklanmoqda…',
 		},
@@ -1405,7 +1404,7 @@ export const uz = {
 		paymentDetail: {
 			dateTime: 'Sana va vaqt',
 			notYetSettled: 'Hali hisoblanmagan',
-			notLinkedToInvoice: 'Hisob-fakturaga bogʻlanmagan.',
+			notLinkedToInvoice: 'Invoysga bogʻlanmagan.',
 		},
 		policyDetail: {
 			billingMode: 'Hisob-kitob rejimi',
@@ -1421,7 +1420,7 @@ export const uz = {
 			type: 'Turi',
 			amount: 'Summa',
 			recurrence: 'Takrorlanishi',
-			maxPerInvoice: 'Hisob-fakturaga maksimal',
+			maxPerInvoice: 'Invoysga maksimal',
 			autoSuspend: 'Qabulni avtomatik toʻxtatish',
 			autoCancel: 'Qabulni avtomatik bekor qilish',
 			paymentReminders: 'Toʻlov eslatmalari',
@@ -1438,7 +1437,7 @@ export const uz = {
 			consumptionAllScheduled: 'Barcha rejalashtirilgan',
 			consumptionAttendedOnly: 'Faqat qatnashgan',
 			lateFeeFixed: 'Belgilangan summa',
-			lateFeePercent: 'Hisob-faktura foizi',
+			lateFeePercent: 'Invoys foizi',
 			recurrenceOneTime: 'Bir marta',
 			recurrenceDaily: 'Kunlik',
 			recurrenceWeekly: 'Haftalik',
@@ -1453,10 +1452,9 @@ export const uz = {
 			sameDay: 'Oʻsha kuni',
 			daysValue: '{{days}} kun',
 			graceNone: 'Yoʻq — toʻlov muddatida muddati oʻtadi',
-			graceValue:
-				'Hisob-faktura muddati oʻtgan deb belgilanishidan {{days}} kun oldin',
+			graceValue: 'Invoys muddati oʻtgan deb belgilanishidan {{days}} kun oldin',
 			chargeOnFirstCycle: 'Yoqilgan — birinchi toʻliq davr darhol hisoblanadi',
-			chargeOnProrated: 'Yoqilgan — qismli hisob-faktura darhol chiqariladi',
+			chargeOnProrated: 'Yoqilgan — qismli invoys darhol chiqariladi',
 			chargeOff: 'Oʻchirilgan — keyingi ishga tushishda hisoblanadi',
 			uncapped: 'Cheklovsiz',
 		},
@@ -1611,7 +1609,7 @@ export const uz = {
 		overdueDays_other: '{{count}} kun',
 		newGroup: 'Yangi guruh',
 		addStudent: 'Oʻquvchi qoʻshish',
-		createInvoice: 'Hisob-faktura yaratish',
+		createInvoice: 'Invoys yaratish',
 		greeting: {
 			morning: 'Xayrli tong',
 			afternoon: 'Xayrli kun',
@@ -1632,9 +1630,9 @@ export const uz = {
 			recentPayments: 'Soʻngi toʻlovlar',
 			noPaymentsTitle: 'Hali toʻlovlar yoʻq',
 			noPaymentsDescription: 'Qayd etilgan toʻlovlar shu yerda koʻrinadi.',
-			overdueInvoices: 'Muddati oʻtgan hisob-fakturalar',
+			overdueInvoices: 'Muddati oʻtgan invoyslar',
 			nothingOverdueTitle: 'Muddati oʻtganlari yoʻq',
-			nothingOverdueDescription: 'Barcha hisob-fakturalar rejada.',
+			nothingOverdueDescription: 'Barcha invoyslar rejada.',
 			leadFunnel: 'Lidlar voronkasi',
 			noLeadActivityTitle: 'Lid faoliyati yoʻq',
 			noLeadActivityDescription:

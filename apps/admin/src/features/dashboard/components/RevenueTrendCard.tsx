@@ -8,7 +8,7 @@ import {
 	YAxis,
 } from 'recharts';
 
-import { formatPriceAxis, formatPriceCompact } from '@repo/utils';
+import { formatMonthShort, formatPriceAxis, formatPriceCompact } from '@repo/utils';
 
 import { useRevenueTrend } from '../api/dashboard.queries';
 import { AXIS_TICK, CHART, TOOLTIP_STYLE } from './chartTheme';
@@ -17,12 +17,6 @@ import { PanelCard } from './PanelCard';
 import { PanelError } from './PanelError';
 import { TrendChip } from './TrendChip';
 import { useAppT } from '@/locales';
-
-/** `YYYY-MM` → short month label (`Jul`). */
-function monthLabel(month: string): string {
-	const date = new Date(`${month}-01T00:00:00`);
-	return date.toLocaleString('en-US', { month: 'short' });
-}
 
 /** Revenue trend — settled payments per month, last 12 months. */
 export function RevenueTrendCard() {
@@ -34,7 +28,7 @@ export function RevenueTrendCard() {
 		return <PanelError title={t('card.revenueTrend')} onRetry={refetch} />;
 
 	const chartData = data.points.map((p) => ({
-		month: monthLabel(p.month),
+		month: formatMonthShort(p.month),
 		revenue: p.revenue,
 	}));
 

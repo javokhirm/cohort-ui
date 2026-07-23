@@ -36,6 +36,9 @@ export const en = {
 			active: 'Active',
 			inactive: 'Inactive',
 		},
+		field: {
+			selectDate: 'Select date',
+		},
 		table: {
 			empty: 'Nothing here yet',
 			emptyFiltered: 'No results match the selected filters',

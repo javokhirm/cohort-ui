@@ -36,6 +36,9 @@ export const ru = {
 			active: 'Активен',
 			inactive: 'Неактивен',
 		},
+		field: {
+			selectDate: 'Выберите дату',
+		},
 		table: {
 			empty: 'Здесь пока нет данных',
 			emptyFiltered: 'По выбранным фильтрам ничего не найдено',

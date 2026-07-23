@@ -78,7 +78,7 @@ export function GroupTable({ groups, isLoading }: GroupTableProps) {
 				const cap = getValue<number | null>();
 				return (
 					<span className="text-sm tabular-nums text-muted-foreground">
-						{cap == null ? '—' : `${cap} seats`}
+						{cap == null ? '—' : t('seats', { count: cap })}
 					</span>
 				);
 			},

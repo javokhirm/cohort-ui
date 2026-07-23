@@ -1,6 +1,6 @@
 import i18next from 'i18next';
 import { initReactI18next } from 'react-i18next';
-import type { Locale } from '@repo/utils';
+import { setDateLocale, type Locale } from '@repo/utils';
 
 import {
 	DEFAULT_NS,
@@ -40,6 +40,11 @@ function applyLocale(next: Locale): void {
 	locale = next;
 	// Drives `:lang()` styling, hyphenation, and screen-reader pronunciation.
 	document.documentElement.lang = next;
+	// Keep the date helpers' month/weekday/relative-time names in step with the UI
+	// language. `@repo/utils` can't import this package (dependency direction), so
+	// the locale is pushed to it here — the one place that already knows the
+	// language just changed.
+	setDateLocale(next);
 	void i18next.changeLanguage(next);
 	for (const listener of listeners) listener();
 }
