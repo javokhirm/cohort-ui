@@ -919,6 +919,13 @@ export const en: TranslationsOf<typeof uz> = {
 			title: 'Schedule',
 			description: 'Session calendar across all groups',
 			loadError: 'Failed to load the schedule. Please refresh.',
+			view: {
+				week: 'Week',
+				month: 'Month',
+			},
+			monthYear: '{{month}} {{year}}',
+			sessionCount_one: '{{count}} session',
+			sessionCount_other: '{{count}} sessions',
 		},
 		enrollmentDateError:
 			'That start date would skip billing cycles the student would never be invoiced for. Pick a date between {{from}} and {{to}}.',

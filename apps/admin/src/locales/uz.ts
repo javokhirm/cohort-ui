@@ -947,6 +947,13 @@ export const uz = {
 			title: 'Dars jadvali',
 			description: 'Barcha guruhlar boʻyicha darslar kalendari',
 			loadError: 'Jadvalni yuklab boʻlmadi. Sahifani yangilang.',
+			view: {
+				week: 'Hafta',
+				month: 'Oy',
+			},
+			monthYear: '{{month}} {{year}}',
+			sessionCount_one: '{{count}} ta dars',
+			sessionCount_other: '{{count}} ta dars',
 		},
 		enrollmentDateError:
 			'Bu boshlanish sanasi oʻquvchiga hech qachon invoys chiqarilmaydigan billing davrlarini oʻtkazib yuboradi. {{from}} va {{to}} orasidagi sanani tanlang.',

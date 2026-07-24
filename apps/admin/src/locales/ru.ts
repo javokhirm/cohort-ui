@@ -942,6 +942,13 @@ export const ru: TranslationsOf<typeof uz> = {
 			title: 'Расписание',
 			description: 'Календарь занятий по всем группам',
 			loadError: 'Не удалось загрузить расписание. Обновите страницу.',
+			view: {
+				week: 'Неделя',
+				month: 'Месяц',
+			},
+			monthYear: '{{month}} {{year}}',
+			sessionCount_one: '{{count}} занятие',
+			sessionCount_other: '{{count}} занятий',
 		},
 		enrollmentDateError:
 			'Такая дата начала пропустит расчётные периоды, за которые ученику никогда не выставят счёт. Выберите дату между {{from}} и {{to}}.',
