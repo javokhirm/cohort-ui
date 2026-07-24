@@ -44,6 +44,8 @@ export const en: TranslationsOf<typeof uz> = {
 			'Enjoy the break. Your next teaching day is dotted on the strip above.',
 		attendanceAction: 'Attendance',
 		marksAction: 'Marks',
+		studentCount_one: '{{count}} student',
+		studentCount_other: '{{count}} students',
 		noSessionsTitle: 'No sessions scheduled',
 		noSessionsDescription:
 			"Sessions are generated from the group's weekly schedule once it has a start and end date.",

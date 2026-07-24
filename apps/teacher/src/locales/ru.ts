@@ -43,6 +43,10 @@ export const ru: TranslationsOf<typeof uz> = {
 			'Отдыхайте. Ваш следующий учебный день отмечен точкой на полосе выше.',
 		attendanceAction: 'Посещаемость',
 		marksAction: 'Оценки',
+		studentCount_one: '{{count}} ученик',
+		studentCount_few: '{{count}} ученика',
+		studentCount_many: '{{count}} учеников',
+		studentCount_other: '{{count}} учеников',
 		noSessionsTitle: 'Занятия не запланированы',
 		noSessionsDescription:
 			'Занятия создаются из недельного расписания группы, когда у неё заданы даты начала и окончания.',
