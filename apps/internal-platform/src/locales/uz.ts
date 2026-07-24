@@ -265,7 +265,7 @@ export const uz = {
 			saveError: 'Billing siyosatini saqlab boʻlmadi',
 			loadError:
 				'Bu tashkilotning billing siyosatini yuklab boʻlmadi. Sahifani yangilang.',
-			warningTitle: 'Bu tashkilotning pul generatsiyasini boshqaradi.',
+			warningTitle: 'Bu tashkilotning daromad hosil qilishini boshqaradi.',
 			warningBody:
 				'Oʻzgarishlar keyingi billing ishidan boshlab qoʻllanadi — allaqachon chiqarilgan invoyslar hech qachon oʻzgartirilmaydi. Har bir saqlash platforma audit izida sizning hisobingizga yoziladi. Tashkilot bu siyosatni koʻra oladi, lekin oʻzgartira olmaydi.',
 			reset: 'Tozalash',
@@ -273,10 +273,10 @@ export const uz = {
 			prepaid: 'Oldindan toʻlov',
 			postpaid: 'Keyin toʻlov (qarz)',
 			billingModeHint:
-				'Invoys chiqarish uchun standart qiymatlar. Fee-rejalar toʻlov kuni va qismli hisoblashni har bir reja uchun oʻzgartirishi mumkin.',
+				'Invoys chiqarish uchun standart qiymatlar. Toʻlov rejalari har bir reja uchun toʻlov kunini va qismli hisoblashni oʻzgartirishi mumkin.',
 			prepaidHint: 'Joriy oyni boshlanishidan oldin, oldindan hisoblaydi.',
 			postpaidHint:
-				'Toʻliq oʻtgan oldingi oyni qarzga hisoblaydi, ikki mustaqil qism orqali: Oylik fee-rejalar uchun vaqtga asoslangan qism va Har bir dars rejalari uchun (quyidagi hisoblash qoidasi boʻyicha, haqiqatan isteʼmol qilingan darslar boʻyicha) isteʼmolga asoslangan qism. Har bir qabul aynan bitta qism boʻyicha hisoblanadi — hech qachon ikkalasi ham emas.',
+				'Toʻliq oʻtgan oldingi oyni qarzga hisoblaydi, ikki mustaqil qism orqali: Oylik toʻlov rejalari uchun vaqtga asoslangan qism va Har bir dars rejalari uchun (quyidagi hisoblash qoidasi boʻyicha, haqiqatan isteʼmol qilingan darslar boʻyicha) isteʼmolga asoslangan qism. Har bir qabul aynan bitta qism boʻyicha hisoblanadi — hech qachon ikkalasi ham emas.',
 			billingCycle: 'Hisob-kitob davri',
 			calendarMonth: 'Kalendar oyi',
 			enrollmentAnniversary: 'Qabul sanasi boʻyicha',
@@ -289,18 +289,18 @@ export const uz = {
 			defaultDueDay: 'Standart toʻlov kuni (1–28)',
 			dueOffset: 'Toʻlov muddati (davr boshidan kunlar)',
 			dueOffsetHint:
-				'Oʻquvchining sikli boshlangach invoyssi toʻlanishi kerak boʻlgan kunlar soni; 0 = sikl boshlangan kuni.',
+				'Oʻquvchining sikli boshlangach invoysi toʻlanishi kerak boʻlgan kunlar soni; 0 = sikl boshlangan kuni.',
 			immediateDueOffset: 'Darhol toʻlov muddati (kunlar)',
 			immediateDueHint: 'Qabulda hisoblash invoyslari uchun muddat; 0 = oʻsha kun.',
 			defaultProration: 'Standart qismli hisoblash',
 			chargeOnEnrollment: 'Qabulda hisoblash',
 			chargeOnEnrollmentHintAnniversary:
-				'Oʻquvchi oylik fee-rejaga qabul qilinganda birinchi toʻliq sikl invoyssini oʻsha tungi ishni kutmasdan darhol chiqaradi.',
+				'Oʻquvchi oylik toʻlov rejasiga qabul qilinganda birinchi toʻliq sikl invoysini oʻsha tungi ishni kutmasdan darhol chiqaradi.',
 			chargeOnEnrollmentHint:
-				'Oʻquvchi oylik fee-rejaga qabul qilinganda darhol qismli invoys chiqaradi.',
+				'Oʻquvchi oylik toʻlov rejasiga qabul qilinganda darhol qismli invoys chiqaradi.',
 			consumptionRule: 'Hisoblash qoidasi',
 			consumptionRuleHint:
-				'Har bir dars fee-rejasi invoyssida qaysi darslar hisoblanadi: qatnashgan darslar va sababsiz qoldirishlar, har bir rejalashtirilgan dars yoki faqat haqiqatan qatnashilgan darslar.',
+				'Har bir dars toʻlov rejasi invoysida qaysi darslar hisoblanadi: qatnashgan darslar va sababsiz qoldirishlar, har bir rejalashtirilgan dars yoki faqat haqiqatan qatnashilgan darslar.',
 			attendedOnly: 'Faqat qatnashganlar',
 			attendedUnexcused: 'Qatnashgan + sababsiz',
 			allScheduled: 'Barcha rejalashtirilganlar',
@@ -577,7 +577,7 @@ export const uz = {
 			'Har bir oʻquvchi va guruh uchun bitta qator. Fayl import qilishdan oldin ushbu markazga tekshiriladi — tasdiqlashdan avval nima boʻlishini aniq koʻrasiz.',
 		columns: 'Ustunlar',
 		nextBillingHint:
-			'bu oʻquvchining oldingi markazi keyingi marta hisob chiqaradigan kun. Bu yerda uning billing sanasiga aylanadi — birinchi invoyssi bugun emas, oʻsha sanada chiqariladi.',
+			'bu oʻquvchining oldingi markazi keyingi marta hisob chiqaradigan kun. Bu yerda uning billing sanasiga aylanadi — birinchi invoysi bugun emas, oʻsha sanada chiqariladi.',
 		uploadAndCheck: 'Yuklash va tekshirish',
 		checking: 'Tekshirilmoqda…',
 		uploadError: 'Faylni oʻqib boʻlmadi. Uni tekshirib, qayta urinib koʻring.',

@@ -432,7 +432,7 @@ export const uz = {
 			attendance: {
 				empty: 'Davomat yozuvlari yoʻq',
 				rate: 'Davomat koʻrsatkichi',
-				rateWindow: 'SoʻngSoʻngii 90 kun',
+				rateWindow: 'Soʻngi 90 kun',
 			},
 			grades: {
 				empty: 'Baholar qayd etilmagan',
@@ -871,7 +871,7 @@ export const uz = {
 			emptyFiltered: 'Bu holatdagi qabullar yoʻq.',
 			noMatchingStudents: 'Mos oʻquvchi topilmadi.',
 			startDateHint:
-				'Oʻquvchi haqiqatda boshlagan kun. Bu ularning billing yilligini belgilaydi, shuning uchun ularni kech qoʻshsangiz, sanani orqaga suring.',
+				'Oʻquvchi haqiqatda boshlagan kun. Bu ularning billing sanasini belgilaydi, shuning uchun ularni kech qoʻshsangiz, sanani orqaga suring.',
 			enrolledToast_one: '{{count}} ta oʻquvchi qabul qilindi',
 			enrolledToast_other: '{{count}} ta oʻquvchi qabul qilindi',
 			drop: 'Oʻquvchini chiqarish',
@@ -1358,7 +1358,7 @@ export const uz = {
 			usageUncapped_other: '{{count}} marta ishlatilgan',
 		},
 		enrollmentDiscount: {
-			hint: 'Bu qabulning oylik invoyssiga har oy, muddati tugaguncha avtomatik qoʻllanadi. Asosdagi promo-kodning foydalanish chekloviga doimiy biriktirmalar taʼsir qilmaydi.',
+			hint: 'Bu qabulning oylik invoysiga har oy, muddati tugaguncha avtomatik qoʻllanadi. Asosdagi promo-kodning foydalanish chekloviga doimiy biriktirmalar taʼsir qilmaydi.',
 			removeConfirm: '«{{name}}» doimiy chegirmasi olib tashlansinmi?',
 			removeAria: '{{name}}ni olib tashlash',
 			validUntilShort: '{{date}} gacha',
