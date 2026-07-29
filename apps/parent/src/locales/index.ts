@@ -5,10 +5,10 @@ import { ru } from './ru';
 import { uz } from './uz';
 
 /**
- * The portal's feature catalogs.
+ * The parent app's feature catalogs.
  *
  * Shell copy (nav, auth, common actions, enum labels, validation) lives in
- * `@repo/i18n` and is reached with `useT(...)`; everything a `/portal` screen
+ * `@repo/i18n` and is reached with `useT(...)`; everything a parent screen
  * says lives here and is reached with {@link useAppT}. The split keeps admin's
  * billing and payroll copy out of this phone-first bundle
  * (docs/folder-structure.md).

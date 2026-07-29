@@ -9,7 +9,8 @@ adding an app, a package, or a cross-package dependency.
 
 1. **Mirror the backend's domain boundaries — as the default, not a law.** The backend is
    domain-first with role-gated API surfaces. The frontend mirrors it for navigability: **one
-   app per role-gated surface**, and inside each app, **feature folders named after the
+   app per role-gated surface** (unless one surface serves two audiences — see `student` +
+   `parent` on `/portal` in §2), and inside each app, **feature folders named after the
    backend domains**. But group by _what changes together_: tightly-coupled domains may merge
    into one feature (e.g. billing/finance/payments → `features/billing`), identity lives in
    `packages/auth` (not a feature), and cross-domain dashboards get their own `features/dashboard`.
@@ -34,7 +35,8 @@ adding an app, a package, or a cross-package dependency.
 
 ```
                 ┌──────────────────────────────────────────────┐
-   apps/        │  staff  (teacher · portal · admin — later)    │   composition + routing
+   apps/        │  admin · internal-platform · teacher          │   composition + routing
+                │  student · parent  (shells)                   │
                 └───────────────┬──────────────────────────────┘
                                 │ imports barrels only
                 ┌───────────────▼──────────────────────────────┐
@@ -45,16 +47,23 @@ adding an app, a package, or a cross-package dependency.
 
 ### Apps (`apps/*`)
 
-Each app maps to **one role-gated backend surface** and the roles that use it, and also
+An app maps to **one role-gated backend surface** and the roles that use it, and also
 consumes the shared `/api/v1/public/*` surface for authentication. Today `admin`
 (`/manage`), `internal-platform` (`/super-admin`) and `teacher` (`/teach`) are built against
-shipped surfaces, and `portal` (`/portal`, STUDENT + PARENT) exists as an **empty shell**.
-Each reuses every package unchanged, which is the whole point of doing the package split.
+shipped surfaces, and `student` + `parent` exist as **empty shells**. Each reuses every
+package unchanged, which is the whole point of doing the package split.
+
+> **The mapping is one-way, not one-to-one.** `/api/v1/portal/*` is gated
+> `TenantRoleGuard(['STUDENT', 'PARENT'])` and backs **two** apps: a learner sees _their_
+> schedule, a guardian watches _their children's_, and the multi-child model
+> (`GET /children`, `?studentId=`) is meaningless in the student app. Two shells beat one
+> app branching on role at every screen. Each app narrows the surface to its own role at
+> login and in its route guard; the server still allows both, so this is UX, not security.
 
 > An app shell is scaffolded only on the engineer's call — idle apps are maintenance cost
-> (build, lint, deps) for no value, and `apps/portal` is the one standing exception: its
-> shell exists, but the backend surface does not, so it stays at one placeholder page until
-> `/api/v1/portal/*` ships. The rule it must not break is the general one — **don't build a
+> (build, lint, deps) for no value, and `student`/`parent` are the standing exception: their
+> shells exist, but the backend surface does not, so they stay at one placeholder page until
+> `/api/v1/portal/*` ships. The rule they must not break is the general one — **don't build a
 > feature ahead of its endpoints**. The package boundaries are what make adding an app cheap.
 
 ### Packages (`packages/*`)

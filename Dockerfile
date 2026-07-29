@@ -2,7 +2,7 @@
 #
 # Builds ONE Vite SPA from this pnpm/turbo monorepo and serves its static
 # `dist/` from a tiny nginx container. Which app is chosen by the APP build-arg
-# (admin | internal-platform). Vite env vars are compile-time, so
+# (admin | internal-platform | teacher | student | parent). Vite env vars are compile-time, so
 # VITE_API_ORIGIN / VITE_APP_ENV are baked in here (per environment) via
 # build-args. TLS, compression and security headers live at the edge Caddy
 # (cohort-be/deploy/Caddyfile) — this image only serves plain HTTP on :80
@@ -22,7 +22,8 @@ COPY pnpm-lock.yaml pnpm-workspace.yaml package.json turbo.json ./
 COPY apps/internal-platform/package.json           ./apps/internal-platform/
 COPY apps/admin/package.json           ./apps/admin/
 COPY apps/teacher/package.json           ./apps/teacher/
-COPY apps/portal/package.json            ./apps/portal/
+COPY apps/student/package.json           ./apps/student/
+COPY apps/parent/package.json            ./apps/parent/
 COPY packages/api-client/package.json  ./packages/api-client/
 COPY packages/ui/package.json          ./packages/ui/
 COPY packages/utils/package.json       ./packages/utils/

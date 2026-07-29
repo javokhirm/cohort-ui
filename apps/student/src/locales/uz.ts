@@ -1,10 +1,10 @@
 /**
- * Portal — **source-of-truth catalog** for this app's feature screens.
+ * Student app — **source-of-truth catalog** for this app's feature screens.
  *
  * Shell vocabulary (nav, auth, common actions, table states, enum labels,
  * validation) is NOT here — it lives in `@repo/i18n` and is reached with
- * `useT(...)`. This file holds only copy that belongs to the `/portal` surface,
- * so the admin, teacher and internal-platform bundles never carry it
+ * `useT(...)`. This file holds only copy this app's screens say, so the admin,
+ * teacher, parent and internal-platform bundles never carry it
  * (docs/folder-structure.md).
  *
  * One namespace per feature folder under `src/features/`. `ru.ts` and `en.ts`
@@ -16,8 +16,8 @@
  */
 export const uz = {
 	shell: {
-		placeholderTitle: 'Portal tez orada',
+		placeholderTitle: 'Oʻquvchi kabineti tez orada',
 		placeholderDescription:
-			'Oʻquvchilar va ota-onalar uchun shaxsiy kabinet hozircha tayyorlanmoqda.',
+			'Dars jadvali, davomat va toʻlovlaringizni koʻrish imkoniyati hozircha tayyorlanmoqda.',
 	},
 } as const;

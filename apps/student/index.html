@@ -5,14 +5,14 @@
 		<link rel="icon" type="image/svg+xml" href="/favicon.svg" />
 		<meta name="viewport" content="width=device-width, initial-scale=1.0" />
 		<meta name="color-scheme" content="light dark" />
-		<title>Portal</title>
+		<title>Student</title>
 		<script>
 			// Resolve the theme before the stylesheet paints, so the page never flashes
 			// the wrong palette. Mirrors `initTheme` in @repo/ui, which owns the state
 			// from boot onwards — keep the storage key in step with main.tsx.
 			(function () {
 				try {
-					var stored = localStorage.getItem('cohort.portal.theme');
+					var stored = localStorage.getItem('cohort.student.theme');
 					var dark =
 						stored === 'dark' ||
 						(stored !== 'light' &&

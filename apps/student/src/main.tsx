@@ -12,10 +12,10 @@ import { initAppLocales } from './locales';
 import { App } from './App';
 
 // Key must match the pre-paint bootstrap script in index.html.
-initTheme({ storageKey: 'cohort.portal.theme' });
+initTheme({ storageKey: 'cohort.student.theme' });
 // Resolves localStorage → 'uz' now; once login lands, the signed-in user's
 // stored preference arrives on the login/refresh response.
-initI18n({ storageKey: 'cohort.portal.locale' });
+initI18n({ storageKey: 'cohort.student.locale' });
 // Feature-screen catalogs — must follow initI18n, which creates the resource store.
 initAppLocales();
 
