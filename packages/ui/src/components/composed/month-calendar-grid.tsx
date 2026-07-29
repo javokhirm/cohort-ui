@@ -13,9 +13,20 @@ interface MonthCalendarGridProps extends React.ComponentProps<'div'> {
 	/** Full weeks (each exactly 7 entries, Mon–Sun) covering the displayed month. */
 	weeks: MonthCalendarDay[][];
 	onDayClick?: (date: Date) => void;
+	/**
+	 * Localized Mon→Sun weekday headers (exactly 7). `@repo/ui` can't depend on
+	 * i18n, so the labels are pushed in; defaults to English abbreviations.
+	 */
+	weekdayHeaders?: readonly string[];
+	/** Localized per-day session-count badge label; defaults to English. */
+	formatSessionCount?: (count: number) => string;
 }
 
 const DOW_HEADERS = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'] as const;
+
+function defaultSessionCount(count: number): string {
+	return `${count} ${count === 1 ? 'session' : 'sessions'}`;
+}
 
 function isToday(date: Date): boolean {
 	const today = new Date();
@@ -30,6 +41,8 @@ function MonthCalendarGrid({
 	className,
 	weeks,
 	onDayClick,
+	weekdayHeaders = DOW_HEADERS,
+	formatSessionCount = defaultSessionCount,
 	...props
 }: MonthCalendarGridProps) {
 	return (
@@ -42,9 +55,9 @@ function MonthCalendarGrid({
 			{...props}
 		>
 			<div className="grid grid-cols-7 border-b border-border">
-				{DOW_HEADERS.map((d, i) => (
+				{weekdayHeaders.map((d, i) => (
 					<div
-						key={d}
+						key={i}
 						className={cn(
 							'py-2 text-center text-[10.5px] font-semibold uppercase tracking-wide text-muted-foreground',
 							i >= 5 && 'bg-muted/40',
@@ -86,8 +99,7 @@ function MonthCalendarGrid({
 								</div>
 								{day.sessionCount > 0 && (
 									<span className="w-fit rounded-md bg-primary/10 px-1.5 py-0.5 text-[10.5px] font-semibold text-primary">
-										{day.sessionCount}{' '}
-										{day.sessionCount === 1 ? 'session' : 'sessions'}
+										{formatSessionCount(day.sessionCount)}
 									</span>
 								)}
 							</button>

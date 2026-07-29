@@ -56,6 +56,8 @@ export const uz = {
 			'Dam oling. Keyingi dars kuningiz yuqoridagi chiziqda belgilangan.',
 		attendanceAction: 'Davomat',
 		marksAction: 'Baholar',
+		studentCount_one: '{{count}} oʻquvchi',
+		studentCount_other: '{{count}} oʻquvchi',
 		noSessionsTitle: 'Rejalashtirilgan darslar yoʻq',
 		noSessionsDescription:
 			'Darslar guruhning haftalik jadvalidan, unga boshlanish va tugash sanasi belgilangach yaratiladi.',

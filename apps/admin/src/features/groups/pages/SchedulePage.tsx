@@ -15,7 +15,7 @@ import {
 	type MonthCalendarDay,
 	type WeekCalendarDay,
 } from '@repo/ui';
-import { formatDate } from '@repo/utils';
+import { formatDate, formatMonthShort } from '@repo/utils';
 import { useT } from '@repo/i18n';
 import { useAppT } from '@/locales';
 
@@ -27,6 +27,11 @@ import { SessionDetailSheet } from '../components/SessionDetailSheet';
 
 type CalendarView = 'week' | 'month';
 const SESSION_STATUS_LEGEND: SessionStatus[] = ['SCHEDULED', 'COMPLETED', 'CANCELLED'];
+
+/** `Date.getDay()` (0 = Sun) → the `groups` catalog `day.*` key. */
+const DOW_KEYS = ['SUN', 'MON', 'TUE', 'WED', 'THU', 'FRI', 'SAT'] as const;
+/** Month-grid headers, Monday-first, as `groups` catalog `day.*` keys. */
+const MONTH_HEADER_KEYS = ['MON', 'TUE', 'WED', 'THU', 'FRI', 'SAT', 'SUN'] as const;
 
 /** Monday 00:00 of the week containing `d`. */
 function startOfWeek(d: Date): Date {
@@ -156,9 +161,9 @@ export function SchedulePage() {
 	const rangeLabel =
 		view === 'week'
 			? `${formatDate(fromYmd)} – ${formatDate(toYmdStr)}`
-			: selectedDate.toLocaleDateString('en-US', {
-					month: 'long',
-					year: 'numeric',
+			: t('schedule.monthYear', {
+					month: formatMonthShort(toYmd(selectedDate).slice(0, 7)),
+					year: selectedDate.getFullYear(),
 				});
 
 	return (
@@ -207,7 +212,7 @@ export function SchedulePage() {
 					<div className="flex items-center gap-4">
 						<div className="flex items-center gap-3 text-xs text-muted-foreground">
 							{SESSION_STATUS_LEGEND.map((s) => {
-								const { label, tone } = resolveStatus('session', s);
+								const { tone } = resolveStatus('session', s);
 								return (
 									<span key={s} className="flex items-center gap-1.5">
 										<span
@@ -216,7 +221,7 @@ export function SchedulePage() {
 												TONE_ACCENT_CLASSES[tone].dot,
 											)}
 										/>
-										{label}
+										{t(`sessionStatus.${s}`)}
 									</span>
 								);
 							})}
@@ -229,13 +234,13 @@ export function SchedulePage() {
 									type="button"
 									onClick={() => setSearch({ view: v })}
 									className={cn(
-										'rounded-md px-3 py-1 text-xs font-semibold capitalize transition-colors',
+										'rounded-md px-3 py-1 text-xs font-semibold transition-colors',
 										view === v
 											? 'bg-background text-foreground shadow-sm'
 											: 'text-muted-foreground',
 									)}
 								>
-									{v}
+									{t(`schedule.view.${v}`)}
 								</button>
 							))}
 						</div>
@@ -257,11 +262,16 @@ export function SchedulePage() {
 				) : view === 'week' ? (
 					<WeekCalendarGrid
 						days={weekDays}
+						formatWeekday={(d) => t(`day.${DOW_KEYS[d.getDay()]!}`)}
 						onSessionClick={(s) => setOpenSessionId(s.id)}
 					/>
 				) : (
 					<MonthCalendarGrid
 						weeks={monthWeeks}
+						weekdayHeaders={MONTH_HEADER_KEYS.map((k) => t(`day.${k}`))}
+						formatSessionCount={(count) =>
+							t('schedule.sessionCount', { count })
+						}
 						onDayClick={(d) => setSearch({ view: 'week', date: toYmd(d) })}
 					/>
 				)}

@@ -21,8 +21,19 @@ interface SessionCardProps extends Omit<React.ComponentProps<'div'>, 'onClick'> 
 	/** Raw backend status value — resolved via `statusKind`. */
 	status: string;
 	statusKind?: StatusKind;
+	/**
+	 * Localized status words for the badge. `@repo/ui` owns the badge's tone but
+	 * not its copy — the label is pushed in (via `useStatusLabel`); without it the
+	 * badge falls back to its built-in English label.
+	 */
+	statusLabel?: string;
 	topic?: string;
 	studentCount?: number;
+	/**
+	 * Localized label for the student count. `@repo/ui` can't depend on i18n, so
+	 * the label is pushed in; defaults to English (`"N students"`).
+	 */
+	formatStudentCount?: (count: number) => string;
 	/** A single footer action. Prefer `actions` when there is more than one. */
 	action?: SessionCardAction;
 	/**
@@ -34,6 +45,10 @@ interface SessionCardProps extends Omit<React.ComponentProps<'div'>, 'onClick'> 
 	onClick?: (e: React.MouseEvent) => void;
 }
 
+function defaultStudentCount(count: number): string {
+	return `${count} ${count === 1 ? 'student' : 'students'}`;
+}
+
 function SessionCard({
 	className,
 	startTime,
@@ -43,8 +58,10 @@ function SessionCard({
 	room,
 	status,
 	statusKind = 'session',
+	statusLabel,
 	topic,
 	studentCount,
+	formatStudentCount = defaultStudentCount,
 	action,
 	actions,
 	onClick,
@@ -85,7 +102,9 @@ function SessionCard({
 							kind={statusKind}
 							status={status}
 							className="shrink-0"
-						/>
+						>
+							{statusLabel}
+						</StatusBadge>
 					</div>
 					{(courseName || room) && (
 						<div className="mt-1 flex flex-wrap items-center gap-1.5 text-xs text-muted-foreground">
@@ -117,7 +136,7 @@ function SessionCard({
 						{hasStudentCount && (
 							<span className="flex items-center gap-1.5 text-xs text-muted-foreground">
 								<Users className="size-3.5" />
-								{studentCount} students
+								{formatStudentCount(studentCount)}
 							</span>
 						)}
 						<div className="flex gap-2">
@@ -140,7 +159,7 @@ function SessionCard({
 						{hasStudentCount ? (
 							<span className="flex items-center gap-1.5 text-xs text-muted-foreground">
 								<Users className="size-3.5" />
-								{studentCount} students
+								{formatStudentCount(studentCount)}
 							</span>
 						) : (
 							<span />

@@ -32,6 +32,10 @@ jobs:
             image: cohort-web-internal
           - app: teacher
             image: cohort-web-teach
+          - app: student
+            image: cohort-web-student
+          - app: parent
+            image: cohort-web-parent
     steps:
       - uses: actions/checkout@v4
 
@@ -97,16 +101,18 @@ jobs:
             # name, and differs prod/dev). A missing one is NOT a compose error —
             # the service just gets an empty network alias, the deploy goes green,
             # and the hostname 502s forever. Fail loudly instead.
-            for var in ADMIN_ALIAS INTERNAL_ALIAS TEACH_ALIAS; do
+            for var in ADMIN_ALIAS INTERNAL_ALIAS TEACH_ALIAS STUDENT_ALIAS PARENT_ALIAS; do
               grep -q "^${var}=" .env || { echo "FATAL: ${var} missing from $(pwd)/.env"; exit 1; }
             done
             export ADMIN_IMAGE=ghcr.io/${{ github.repository_owner }}/cohort-web-admin:${{ github.sha }}
             export INTERNAL_IMAGE=ghcr.io/${{ github.repository_owner }}/cohort-web-internal:${{ github.sha }}
             export TEACH_IMAGE=ghcr.io/${{ github.repository_owner }}/cohort-web-teach:${{ github.sha }}
+            export STUDENT_IMAGE=ghcr.io/${{ github.repository_owner }}/cohort-web-student:${{ github.sha }}
+            export PARENT_IMAGE=ghcr.io/${{ github.repository_owner }}/cohort-web-parent:${{ github.sha }}
             COMPOSE="docker compose -f docker-compose.web.yml"
 
             $COMPOSE pull
             # Recreate on the new images; --wait blocks until healthchecks pass.
             # The edge Caddy's lb_try_duration bridges the ~1s swap, so no 502s.
-            $COMPOSE up -d --no-deps --wait web-admin web-internal web-teach
+            $COMPOSE up -d --no-deps --wait web-admin web-internal web-teach web-student web-parent
             docker image prune -f

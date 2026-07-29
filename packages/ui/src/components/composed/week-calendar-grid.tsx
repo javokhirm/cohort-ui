@@ -23,9 +23,18 @@ interface WeekCalendarGridProps extends React.ComponentProps<'div'> {
 	days: WeekCalendarDay[];
 	statusKind?: StatusKind;
 	onSessionClick?: (session: WeekCalendarSession) => void;
+	/**
+	 * Localized weekday abbreviation for a column's date. `@repo/ui` can't depend
+	 * on i18n, so the label is pushed in; defaults to English abbreviations.
+	 */
+	formatWeekday?: (date: Date) => string;
 }
 
 const DOW = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'] as const;
+
+function defaultWeekday(date: Date): string {
+	return DOW[date.getDay()]!;
+}
 
 function isToday(date: Date): boolean {
 	const today = new Date();
@@ -41,6 +50,7 @@ function WeekCalendarGrid({
 	days,
 	statusKind = 'session',
 	onSessionClick,
+	formatWeekday = defaultWeekday,
 	...props
 }: WeekCalendarGridProps) {
 	return (
@@ -67,7 +77,7 @@ function WeekCalendarGrid({
 							)}
 						>
 							<div className="text-[11px] font-semibold uppercase tracking-wide text-muted-foreground">
-								{DOW[day.date.getDay()]}
+								{formatWeekday(day.date)}
 							</div>
 							<div
 								className={cn(

@@ -132,7 +132,7 @@ export function StudentTable({ students, isLoading }: StudentTableProps) {
 			getRowId={(row) => String(row.id)}
 			rowSelection={rowSelection}
 			onRowSelectionChange={setRowSelection}
-			onRowClick={(row) => void navigate({ to: `/students/${row.id}` as any })}
+			onRowClick={(row) => void navigate({ to: `/students/${row.id}` })}
 			className="rounded-none border-0"
 		/>
 	);

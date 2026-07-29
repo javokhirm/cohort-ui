@@ -2,6 +2,7 @@ import { CalendarDays, ClipboardCheck, Star } from 'lucide-react';
 
 import { EmptyState, SessionCard, Skeleton } from '@repo/ui';
 import { formatTime } from '@repo/utils';
+import { useStatusLabel } from '@repo/i18n';
 
 import type { TeachSession } from '../api/sessions.queries';
 import { useAppT } from '@/locales';
@@ -35,6 +36,7 @@ export function TodaySessions({
 	onEnterMarks,
 }: TodaySessionsProps) {
 	const t = useAppT('schedule');
+	const statusLabel = useStatusLabel();
 	if (isPending) {
 		return (
 			<div className="space-y-3">
@@ -91,7 +93,9 @@ export function TodaySessions({
 						room={session.roomName ?? undefined}
 						topic={session.topic ?? undefined}
 						status={session.status}
+						statusLabel={statusLabel('session', session.status)}
 						studentCount={session.studentCount}
+						formatStudentCount={(count) => t('studentCount', { count })}
 						className={isCancelled ? 'opacity-60' : undefined}
 						actions={
 							isCancelled

@@ -1,0 +1,7 @@
+/* Portal app styles. The design system (Tailwind v4 import + Cohort tokens,
+   light & dark) lives in @repo/ui; this app runs light by default and toggles
+   the `dark` class on <html> (see `initTheme` in main.tsx). Scan this app's own
+   sources for utility classes. */
+@import '@repo/ui/globals.css';
+
+@source '../**/*.{ts,tsx}';
