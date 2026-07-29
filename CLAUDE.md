@@ -141,7 +141,9 @@ A pre-commit hook (husky + lint-staged) runs prettier/eslint on staged files. Se
 cohort-fe/
 ├── apps/
 │   ├── internal-platform/       # Internal Platform Web App (/api/v1/super-admin/* surface)
-│   └── admin/       # Admin Web App (/api/v1/manage/* surface)
+│   ├── admin/       # Admin Web App (/api/v1/manage/* surface)
+│   ├── teacher/     # Teacher Web App (/api/v1/teach/* surface)
+│   └── portal/      # Portal Web App — shell only; /api/v1/portal/* is unbuilt
 ├── packages/
 │   ├── ui/           # shadcn primitives + composed components
 │   ├── api-client/   # generated types, typed HTTP client, query-key + pagination helpers
@@ -158,19 +160,27 @@ Full detail in [docs/folder-structure.md](docs/folder-structure.md).
 
 The backend exposes **four role-gated API surfaces** (plus a shared, unauthenticated
 `/public` surface used by every app for auth). Each role-gated surface becomes its own app
-**when its roadmap phase arrives** — today `admin` and `internal-platform` exist:
+**when its roadmap phase arrives** — today `admin`, `internal-platform` and `teacher` are
+built, and `portal` exists as an empty shell:
 
 | App                       | Backend surface         | Roles                 | Host                 |
 | ------------------------- | ----------------------- | --------------------- | -------------------- |
 | `admin` (now)             | `/api/v1/manage/*`      | OWNER, ADMIN, MANAGER | `admin.cohort.uz`    |
 | `internal-platform` (now) | `/api/v1/super-admin/*` | SUPER_ADMIN           | `internal.cohort.uz` |
 | `teacher` (now)           | `/api/v1/teach/*`       | TEACHER               | `teach.cohort.uz`    |
-| `portal` (future)         | `/api/v1/portal/*`      | STUDENT, PARENT       | —                    |
+| `portal` (shell only)     | `/api/v1/portal/*`      | STUDENT, PARENT       | —                    |
 
 > The `/api/v1/teach/*` surface is **shipped** (schedule, groups, attendance,
 > assessments, materials, student profiles, grading scales) — the teacher app is
 > not building ahead of it. Note there is **no `/teach/me`**: a teacher's identity
-> comes from the login/refresh `user` summary. `portal` remains unbuilt on both sides.
+> comes from the login/refresh `user` summary.
+>
+> **`portal` is a scaffold, not a feature.** The backend has **not** built
+> `/api/v1/portal/*` (`cohort-be/src/api/` ships `manage`, `public`, `super-admin`,
+> `teach` only — §5 of the API reference is a spec). `apps/portal` holds the app
+> shell and one placeholder page, with no auth and no api-client. Do not add
+> screens or data hooks there until the endpoints exist — see
+> [apps/portal/CLAUDE.md](apps/portal/CLAUDE.md).
 
 Every app also talks to `/api/v1/public/*` for login/refresh. Inside an app, `src/features/*`
 folders mirror the backend domains (`people`, `academics`, `billing`, …) — grouped by what

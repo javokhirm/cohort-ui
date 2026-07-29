@@ -46,13 +46,16 @@ adding an app, a package, or a cross-package dependency.
 ### Apps (`apps/*`)
 
 Each app maps to **one role-gated backend surface** and the roles that use it, and also
-consumes the shared `/api/v1/public/*` surface for authentication. **Today there is one app,
-`staff`** (Phase-1 MVP = Staff Web App, on `/manage` + `/public`). `teacher`, `portal`, and
-`admin` are added as sibling apps when their roadmap phase arrives — they reuse every package
-unchanged, which is the whole point of doing the package split now.
+consumes the shared `/api/v1/public/*` surface for authentication. Today `admin`
+(`/manage`), `internal-platform` (`/super-admin`) and `teacher` (`/teach`) are built against
+shipped surfaces, and `portal` (`/portal`, STUDENT + PARENT) exists as an **empty shell**.
+Each reuses every package unchanged, which is the whole point of doing the package split.
 
-> We deliberately did **not** scaffold empty app shells. Idle apps are maintenance cost
-> (build, lint, deps) for no value. The package boundaries are what make adding an app cheap.
+> An app shell is scaffolded only on the engineer's call — idle apps are maintenance cost
+> (build, lint, deps) for no value, and `apps/portal` is the one standing exception: its
+> shell exists, but the backend surface does not, so it stays at one placeholder page until
+> `/api/v1/portal/*` ships. The rule it must not break is the general one — **don't build a
+> feature ahead of its endpoints**. The package boundaries are what make adding an app cheap.
 
 ### Packages (`packages/*`)
 
