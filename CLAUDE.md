@@ -143,7 +143,7 @@ cohort-fe/
 │   ├── internal-platform/       # Internal Platform Web App (/api/v1/super-admin/* surface)
 │   ├── admin/       # Admin Web App (/api/v1/manage/* surface)
 │   ├── teacher/     # Teacher Web App (/api/v1/teach/* surface)
-│   ├── student/     # Student Web App — shell only; /api/v1/portal/* is unbuilt
+│   ├── student/     # Student Web App (/api/v1/student/* surface)
 │   └── parent/      # Parent Web App  — shell only; /api/v1/portal/* is unbuilt
 ├── packages/
 │   ├── ui/           # shadcn primitives + composed components
@@ -159,17 +159,17 @@ Full detail in [docs/folder-structure.md](docs/folder-structure.md).
 
 ### Apps mirror backend surfaces; features mirror backend domains
 
-The backend exposes **four role-gated API surfaces** (plus a shared, unauthenticated
+The backend exposes **five role-gated API surfaces** (plus a shared, unauthenticated
 `/public` surface used by every app for auth). A surface becomes an app **when its roadmap
-phase arrives** — today `admin`, `internal-platform` and `teacher` are built, and `student`
-and `parent` exist as empty shells:
+phase arrives** — today `admin`, `internal-platform`, `teacher` and `student` are built,
+and `parent` exists as an empty shell:
 
 | App                       | Backend surface         | Roles                 | Host                 |
 | ------------------------- | ----------------------- | --------------------- | -------------------- |
 | `admin` (now)             | `/api/v1/manage/*`      | OWNER, ADMIN, MANAGER | `admin.cohort.uz`    |
 | `internal-platform` (now) | `/api/v1/super-admin/*` | SUPER_ADMIN           | `internal.cohort.uz` |
 | `teacher` (now)           | `/api/v1/teach/*`       | TEACHER               | `teach.cohort.uz`    |
-| `student` (shell only)    | `/api/v1/portal/*`      | STUDENT               | `student.cohort.uz`  |
+| `student` (now)           | `/api/v1/student/*`     | STUDENT               | `student.cohort.uz`  |
 | `parent` (shell only)     | `/api/v1/portal/*`      | PARENT                | `parent.cohort.uz`   |
 
 > The `/api/v1/teach/*` surface is **shipped** (schedule, groups, attendance,
@@ -177,17 +177,19 @@ and `parent` exist as empty shells:
 > not building ahead of it. Note there is **no `/teach/me`**: a teacher's identity
 > comes from the login/refresh `user` summary.
 >
-> **One surface, two apps.** `/api/v1/portal/*` is gated
-> `TenantRoleGuard(['STUDENT', 'PARENT'])` and backs **both** `student` and `parent` —
-> a deliberate exception to "one app per surface", because the two audiences want
-> different products rather than one app branching on role. Each app must reject the
-> other's role at login and in its route guard.
+> **The student surface has shipped and superseded the old `/portal` spec.**
+> `cohort-be/src/api/student/` (`/api/v1/student/*`, `STUDENT` role only) is now real,
+> shipped code — `manage`, `public`, `super-admin`, `teach` and `student` all exist under
+> `cohort-be/src/api/`. It replaces what `docs/api-reference.md` §5 used to describe as
+> `/api/v1/portal/*`: the student surface is student-only (no `PARENT` role, no
+> `?studentId=`/child-switcher concepts) and mirrors `TeachApi()`'s guard chain exactly,
+> including **no `/student/me` boot fetch** — the login/refresh `user` summary is the
+> whole session. See [apps/student/CLAUDE.md](apps/student/CLAUDE.md).
 >
-> **Both are scaffolds, not features.** The backend has **not** built
-> `/api/v1/portal/*` (`cohort-be/src/api/` ships `manage`, `public`, `super-admin`,
-> `teach` only — §5 of the API reference is a spec). Each app holds the shell and one
-> placeholder page, with no auth and no api-client. Do not add screens or data hooks
-> until the endpoints exist — see [apps/student/CLAUDE.md](apps/student/CLAUDE.md) and
+> **`parent` remains a scaffold.** `/api/v1/portal/*` for the `PARENT` role
+> (`?studentId=`, `GET /children`, a child switcher) has not been built — that app holds
+> the shell and one placeholder page, with no auth and no api-client. Do not add screens
+> or data hooks there until the endpoints exist — see
 > [apps/parent/CLAUDE.md](apps/parent/CLAUDE.md).
 
 Every app also talks to `/api/v1/public/*` for login/refresh. Inside an app, `src/features/*`

@@ -15,13 +15,24 @@ export interface BottomTabItem {
 
 interface BottomTabBarProps extends React.ComponentProps<'nav'> {
 	items: BottomTabItem[];
+	/**
+	 * Draws a short accent bar along the top edge of the active tab. Opt-in: the
+	 * consoles that predate it read the active state from the tinted icon+label
+	 * alone.
+	 */
+	showActiveIndicator?: boolean;
 }
 
 /**
  * Mobile bottom navigation bar used by MANAGE, TEACH, and PORTAL. Each tab
  * shows an icon + label and an optional numeric badge.
  */
-function BottomTabBar({ className, items, ...props }: BottomTabBarProps) {
+function BottomTabBar({
+	className,
+	items,
+	showActiveIndicator,
+	...props
+}: BottomTabBarProps) {
 	return (
 		<nav
 			data-slot="bottom-tab-bar"
@@ -34,10 +45,13 @@ function BottomTabBar({ className, items, ...props }: BottomTabBarProps) {
 					type="button"
 					onClick={item.onClick}
 					className={cn(
-						'flex flex-1 flex-col items-center gap-1 pb-4 pt-2.5 transition-colors',
+						'relative flex flex-1 flex-col items-center gap-1 pb-4 pt-2.5 transition-colors',
 						item.active ? 'text-primary' : 'text-muted-foreground',
 					)}
 				>
+					{showActiveIndicator && item.active && (
+						<span className="absolute left-1/2 top-0 h-[3px] w-6 -translate-x-1/2 rounded-b-[3px] bg-primary" />
+					)}
 					<span className="relative flex items-center justify-center [&>svg]:size-[22px]">
 						{item.active && item.activeIcon ? item.activeIcon : item.icon}
 						{item.badge !== undefined && (

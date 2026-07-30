@@ -16,8 +16,32 @@
  */
 export const uz = {
 	shell: {
-		placeholderTitle: 'Oʻquvchi kabineti tez orada',
-		placeholderDescription:
-			'Dars jadvali, davomat va toʻlovlaringizni koʻrish imkoniyati hozircha tayyorlanmoqda.',
+		notStudentTitle: 'Bu ilova oʻquvchilar uchun',
+		notStudentDescription:
+			'Bu hisobingiz oʻquvchi sifatida ruxsatga ega emas. Boshqa hisob bilan kiring.',
+		backToSignIn: 'Kirish sahifasiga qaytish',
+		/** App-bar subtitles, one per destination (the design's `barSub`). */
+		scheduleSubtitle: 'Darslarni koʻrish uchun kunni tanlang',
+		progressSubtitle: 'Natijalar, izohlar va davomat',
+		billingSubtitle: 'Invoyslar va toʻlovlar',
+		openNotifications: 'Bildirishnomalarni ochish',
+		openProfile: 'Profilni ochish',
+	},
+	home: {
+		greetingMorning: 'Xayrli tong, {{name}}',
+		greetingAfternoon: 'Xayrli kun, {{name}}',
+		greetingEvening: 'Xayrli kech, {{name}}',
+		todaySectionTitle: 'Bugun',
+		todayEmptyTitle: 'Bugun darslar yoʻq',
+		todayEmptyDescription: 'Bugungi kunga rejalashtirilgan darsingiz yoʻq.',
+		attendanceRate: 'Davomat',
+		streak: 'Ketma-ketlik',
+		streakHint: 'dars',
+		unread: 'Oʻqilmagan',
+		balanceDue: '{{amount}} toʻlov muddati yetib keldi',
+		latestResult: 'Soʻnggi natija',
+		errorTitle: 'Maʼlumotlarni yuklab boʻlmadi',
+		errorDescription: 'Qayta urinib koʻring yoki sahifani yangilang.',
+		retry: 'Qayta urinish',
 	},
 } as const;

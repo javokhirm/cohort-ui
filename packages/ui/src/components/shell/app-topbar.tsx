@@ -19,6 +19,11 @@ interface AppTopbarProps extends React.ComponentProps<'header'> {
 	/** Shows a red unread dot on the notification bell icon. */
 	hasNotifications?: boolean;
 	onNotificationsClick?: () => void;
+	/**
+	 * Trailing slot, after the notification bell — where an identity avatar goes on the
+	 * consoles whose phone layout has no sidebar to carry one.
+	 */
+	trailing?: React.ReactNode;
 }
 
 /**
@@ -37,6 +42,7 @@ function AppTopbar({
 	branch,
 	hasNotifications,
 	onNotificationsClick,
+	trailing,
 	...props
 }: AppTopbarProps) {
 	return (
@@ -85,6 +91,8 @@ function AppTopbar({
 					)}
 				</button>
 			)}
+
+			{trailing}
 		</header>
 	);
 }
