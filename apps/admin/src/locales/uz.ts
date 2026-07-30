@@ -434,15 +434,21 @@ export const uz = {
 				},
 			},
 			attendance: {
-				empty: 'Davomat yozuvlari yoʻq',
+				emptyTitle: 'Davomat yozuvlari yoʻq',
+				emptyDescription:
+					'Oʻquvchi guruhlarida darslar belgilangach, davomat shu yerda koʻrinadi.',
 				rate: 'Davomat koʻrsatkichi',
-				rateWindow: 'Soʻngi 90 kun',
+				rateWindow: 'Butun davr uchun',
 			},
 			grades: {
-				empty: 'Baholar qayd etilmagan',
+				emptyTitle: 'Baholar qayd etilmagan',
+				emptyDescription:
+					'Faqat eʼlon qilingan baholashlar koʻrsatiladi. Oʻqituvchi natijalarni eʼlon qilgach, ular shu yerda paydo boʻladi.',
+				notGraded: 'Baholanmagan',
 			},
 			billing: {
-				empty: 'Invoyslar yoʻq',
+				emptyTitle: 'Invoyslar yoʻq',
+				emptyDescription: 'Bu oʻquvchi uchun hali invoys yaratilmagan.',
 				column: {
 					invoice: 'Invoys',
 					date: 'Sana',

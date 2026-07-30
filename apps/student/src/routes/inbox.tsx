@@ -4,7 +4,10 @@ import { AlertTriangle, Bell, CheckCheck } from 'lucide-react';
 import { Button, EmptyState, Skeleton } from '@repo/ui';
 
 import { useMarkAllRead } from '@/features/inbox/api/notifications.mutations';
-import { useNotifications, useUnreadCount } from '@/features/inbox/api/notifications.queries';
+import {
+	useNotifications,
+	useUnreadCount,
+} from '@/features/inbox/api/notifications.queries';
 import { NotificationRow } from '@/features/inbox/components/NotificationRow';
 import { useAppT } from '@/locales';
 

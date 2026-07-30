@@ -32,7 +32,9 @@ export function WeekNav({ rangeLabel, summary, onPrevWeek, onNextWeek }: WeekNav
 				<ChevronLeft className="size-4" />
 			</Button>
 			<div className="min-w-0 flex-1 text-center">
-				<div className="text-[13.5px] font-bold text-foreground">{rangeLabel}</div>
+				<div className="text-[13.5px] font-bold text-foreground">
+					{rangeLabel}
+				</div>
 				<div className="mt-px text-[11px] text-muted-foreground">{summary}</div>
 			</div>
 			<Button

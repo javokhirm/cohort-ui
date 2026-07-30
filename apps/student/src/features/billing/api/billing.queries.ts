@@ -6,13 +6,7 @@ import { studentApi } from '@/api/apiClient';
 export type StudentInvoiceStatus = 'UNPAID' | 'PARTIAL' | 'PAID' | 'OVERDUE';
 
 export type StudentPaymentMethod =
-	| 'CASH'
-	| 'CLICK'
-	| 'PAYME'
-	| 'UZUM'
-	| 'CARD'
-	| 'BANK_TRANSFER'
-	| 'CREDIT';
+	'CASH' | 'CLICK' | 'PAYME' | 'UZUM' | 'CARD' | 'BANK_TRANSFER' | 'CREDIT';
 
 /**
  * Billing header (`GET /student/billing/summary`, api-reference §5.8) — the outstanding

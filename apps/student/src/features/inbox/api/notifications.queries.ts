@@ -4,11 +4,7 @@ import { studentApi } from '@/api/apiClient';
 
 /** Categories the backend derives from the notification's template code (§5.10). */
 export type NotificationCategory =
-	| 'payment'
-	| 'grade'
-	| 'schedule'
-	| 'absence'
-	| 'notice';
+	'payment' | 'grade' | 'schedule' | 'absence' | 'notice';
 
 /**
  * One row in the student's inbox (`GET /student/notifications`, api-reference §5.10).

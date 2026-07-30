@@ -26,7 +26,12 @@ export function resolveNextClass(todaySessions: StudentSession[]): NextClassInfo
 		const progressPct = isLive
 			? Math.min(
 					100,
-					Math.max(0, ((now.getTime() - start.getTime()) / (end.getTime() - start.getTime())) * 100),
+					Math.max(
+						0,
+						((now.getTime() - start.getTime()) /
+							(end.getTime() - start.getTime())) *
+							100,
+					),
 				)
 			: 0;
 		return { session: upcoming, isLive, isDone: false, progressPct };
