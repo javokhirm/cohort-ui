@@ -1,6 +1,6 @@
-import { CalendarDays } from 'lucide-react';
+import { CalendarDays, MapPin } from 'lucide-react';
 
-import { EmptyState, SessionCard } from '@repo/ui';
+import { Card, EmptyState, Separator, StatusBadge } from '@repo/ui';
 import { formatTime } from '@repo/utils';
 import { useStatusLabel } from '@repo/i18n';
 
@@ -12,10 +12,10 @@ interface TodaySessionListProps {
 }
 
 /**
- * Today's sessions. Loading/error for the whole Home screen (this list included) is
- * handled one level up by `routes/home.tsx`, since every section here comes from the same
- * `GET /student/home` call — this component only needs its own empty state.
- * Read-only view: no attendance/marks actions, those belong to the teacher console.
+ * Today's sessions as a single timeline card (time · group · badge per row), matching the
+ * design's Home screen. Loading/error for the whole Home screen is handled one level up by
+ * `routes/home.tsx` — this component only needs its own empty state. Read-only: no
+ * attendance/marks actions, those belong to the teacher console.
  */
 export function TodaySessionList({ sessions }: TodaySessionListProps) {
 	const t = useAppT('home');
@@ -34,21 +34,42 @@ export function TodaySessionList({ sessions }: TodaySessionListProps) {
 	}
 
 	return (
-		<div className="grid gap-3 sm:grid-cols-2">
-			{sessions.map((session) => (
-				<SessionCard
-					key={session.id}
-					startTime={formatTime(session.startTime)}
-					endTime={formatTime(session.endTime)}
-					groupName={session.groupName}
-					courseName={session.courseName}
-					room={session.roomName ?? undefined}
-					topic={session.topic ?? undefined}
-					status={session.status}
-					statusLabel={statusLabel('session', session.status)}
-					className={session.status === 'CANCELLED' ? 'opacity-60' : undefined}
-				/>
+		<Card className="gap-0 py-1.5">
+			{sessions.map((session, i) => (
+				<div key={session.id}>
+					{i > 0 && <Separator />}
+					<div className="flex items-center gap-3.5 px-4 py-3">
+						<div className="flex w-13 shrink-0 flex-col items-end text-right">
+							<span className="text-[13.5px] font-bold tabular-nums text-foreground">
+								{formatTime(session.startTime)}
+							</span>
+							<span className="text-[10.5px] tabular-nums text-muted-foreground">
+								{formatTime(session.endTime)}
+							</span>
+						</div>
+						<div className="min-w-0 flex-1">
+							<p className="truncate text-[13.5px] font-semibold text-foreground">
+								{session.groupName}
+							</p>
+							<p className="mt-0.5 flex items-center gap-1.5 truncate text-[11.5px] text-muted-foreground">
+								{session.roomName && (
+									<span className="flex shrink-0 items-center gap-0.5">
+										<MapPin className="size-3" />
+										{session.roomName}
+									</span>
+								)}
+								{session.roomName && session.teacherName && (
+									<span className="size-0.75 shrink-0 rounded-full bg-muted-foreground/40" />
+								)}
+								{session.teacherName && <span className="truncate">{session.teacherName}</span>}
+							</p>
+						</div>
+						<StatusBadge kind="session" status={session.status} className="shrink-0">
+							{statusLabel('session', session.status)}
+						</StatusBadge>
+					</div>
+				</div>
 			))}
-		</div>
+		</Card>
 	);
 }
