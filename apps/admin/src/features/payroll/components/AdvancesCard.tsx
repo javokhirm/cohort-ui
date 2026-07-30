@@ -74,24 +74,26 @@ function AddAdvanceForm({ period }: { period: PayrollStaffPeriodResponse }) {
 				onSubmit={(e) => void form.handleSubmit(onSubmit)(e)}
 				className="flex flex-col gap-2.5 border-b border-border px-5 py-3.5"
 			>
-				<FormInput
-					control={form.control}
-					name="label"
-					placeholder={t('advance.reasonPlaceholder')}
-				/>
 				<div className="flex items-start gap-2">
-					<div className="flex-1">
+					<div className="min-w-0 flex-1">
 						<FormMoneyInput
 							control={form.control}
 							name="amount"
 							placeholder={t('advance.amountPlaceholder')}
 						/>
 					</div>
-					<FormDatePicker
-						control={form.control}
-						name="advanceDate"
-						className="w-36"
-					/>
+					<FormDatePicker control={form.control} name="advanceDate" />
+				</div>
+
+				<div className="flex items-start gap-2">
+					<div className="min-w-0 flex-1">
+						<FormInput
+							control={form.control}
+							name="label"
+							placeholder={t('advance.reasonPlaceholder')}
+						/>
+					</div>
+
 					<Button type="submit" disabled={createAdvance.isPending}>
 						<Plus className="mr-1 size-4" />
 						{t('record')}
