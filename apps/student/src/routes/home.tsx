@@ -1,5 +1,5 @@
 import { AlertTriangle } from 'lucide-react';
-import { Link } from '@tanstack/react-router';
+import { Link, useNavigate } from '@tanstack/react-router';
 
 import { Button, EmptyState, Skeleton } from '@repo/ui';
 import { formatShortDate, todayIsoDate } from '@repo/utils';
@@ -23,7 +23,14 @@ import { useAppT } from '@/locales';
  */
 export function HomeRoute() {
 	const t = useAppT('home');
+	const navigate = useNavigate();
 	const { data, isPending, isError, refetch } = useHome();
+
+	const openSession = (sessionId: number) =>
+		void navigate({
+			to: '/schedule/$sessionId',
+			params: { sessionId: String(sessionId) },
+		});
 
 	if (isPending) {
 		return (
@@ -60,12 +67,18 @@ export function HomeRoute() {
 
 	return (
 		<div className="mx-auto flex w-full max-w-200 flex-col gap-4 pb-8">
-			{nextClass && <NextClassCard info={nextClass} />}
+			{nextClass && (
+				<NextClassCard
+					info={nextClass}
+					onOpen={() => openSession(nextClass.session.id)}
+				/>
+			)}
 
 			{data.outstanding > 0 && (
 				<BalanceDueBanner
 					outstanding={data.outstanding}
 					currency={data.currency}
+					onOpen={() => void navigate({ to: '/billing' })}
 				/>
 			)}
 
@@ -83,10 +96,20 @@ export function HomeRoute() {
 						{t('fullSchedule')}
 					</Link>
 				</div>
-				<TodaySessionList sessions={data.todaySessions} />
+				<TodaySessionList
+					sessions={data.todaySessions}
+					onOpenSession={openSession}
+				/>
 			</div>
 
-			{data.latestResult && <LatestResultCard result={data.latestResult} />}
+			{data.latestResult && (
+				<LatestResultCard
+					result={data.latestResult}
+					onOpen={() =>
+						void navigate({ to: '/progress', search: { tab: 'grades' } })
+					}
+				/>
+			)}
 		</div>
 	);
 }

@@ -7,8 +7,8 @@ import { currentHour, formatFullDate, todayIsoDate } from '@repo/utils';
 
 import { useSessionStore } from '@/store/sessionStore';
 import { useMe } from '@/features/profile/api/profile.queries';
-import { BAR_COPY, NAV_ITEMS } from '@/layouts/nav';
-import type { StudentRoute } from '@/layouts/nav';
+import { useUnreadCount } from '@/features/inbox/api/notifications.queries';
+import { BAR_COPY, barRouteFor, NAV_ITEMS } from '@/layouts/nav';
 import { AvatarButton } from '@/layouts/AvatarButton';
 import { OverflowMenu } from '@/layouts/OverflowMenu';
 import { useAppT } from '@/locales';
@@ -55,6 +55,9 @@ export function AuthedLayout() {
 	const onProfile = pathname === '/profile';
 	const { data: me } = useMe({ enabled: onProfile });
 
+	// The bell's red dot — the same unread total the inbox header shows.
+	const { data: unreadCount } = useUnreadCount();
+
 	useEffect(() => {
 		if (status !== 'authenticated') {
 			void navigate({ to: '/login' });
@@ -76,9 +79,10 @@ export function AuthedLayout() {
 		onClick: () => void navigate({ to: href }),
 	}));
 
-	// Every screen but Home reads its app-bar pair from the catalog; Home composes its
-	// own — the time-of-day greeting over today's date.
-	const bar = BAR_COPY[pathname as StudentRoute];
+	// Every screen but Home reads its app-bar pair from the catalog (detail routes keep
+	// their section's copy); Home composes its own — the greeting over today's date.
+	const barRoute = barRouteFor(pathname);
+	const bar = barRoute ? BAR_COPY[barRoute] : undefined;
 	const title = bar
 		? t(`item.${bar.title}`)
 		: tHome(greetingKey(), { name: user?.firstName ?? '' });
@@ -105,6 +109,7 @@ export function AuthedLayout() {
 				<AppTopbar
 					title={title}
 					subtitle={subtitle}
+					hasNotifications={(unreadCount ?? 0) > 0}
 					onNotificationsClick={() => void navigate({ to: '/inbox' })}
 					trailing={
 						<AvatarButton

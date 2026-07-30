@@ -14,7 +14,7 @@ export function HomeStats({ attendance }: HomeStatsProps) {
 	const t = useAppT('home');
 
 	return (
-		<div className="grid grid-cols-3 gap-3">
+		<div className="grid grid-cols-2 gap-3">
 			<StatCard
 				label={t('streak')}
 				value={attendance.streak}

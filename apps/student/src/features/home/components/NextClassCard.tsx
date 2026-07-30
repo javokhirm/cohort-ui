@@ -8,15 +8,20 @@ import { useAppT } from '@/locales';
 
 interface NextClassCardProps {
 	info: NextClassInfo;
+	/** Opens the session's detail screen. */
+	onOpen: () => void;
 }
 
 /** The Home screen's hero: today's current or next class, or a quiet "done for today" state. */
-export function NextClassCard({ info }: NextClassCardProps) {
+export function NextClassCard({ info, onOpen }: NextClassCardProps) {
 	const t = useAppT('home');
 	const { session, isLive, isDone, progressPct } = info;
 
 	return (
-		<Card className="gap-0 py-0">
+		<Card
+			onClick={onOpen}
+			className="cursor-pointer gap-0 py-0 transition-colors hover:border-primary"
+		>
 			<div className="flex flex-col gap-3.5 p-4">
 				<div className="flex items-center gap-2">
 					<StatusBadge tone={isDone ? 'slate' : isLive ? 'indigo' : 'blue'}>

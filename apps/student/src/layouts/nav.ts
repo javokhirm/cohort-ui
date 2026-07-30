@@ -65,3 +65,15 @@ export const BAR_COPY: Partial<
 	'/inbox': { title: 'notifications' },
 	'/profile': { title: 'profile' },
 };
+
+/**
+ * The `BAR_COPY` section a pathname belongs to — detail routes (`/schedule/12`,
+ * `/billing/3`, `/inbox/7`) keep their section's app-bar copy rather than falling back
+ * to Home's greeting. `/` (Home) resolves to `undefined`, as it has no `BAR_COPY` entry.
+ */
+export function barRouteFor(pathname: string): StudentRoute | undefined {
+	const sections = Object.keys(BAR_COPY) as StudentRoute[];
+	return sections.find(
+		(route) => pathname === route || pathname.startsWith(`${route}/`),
+	);
+}

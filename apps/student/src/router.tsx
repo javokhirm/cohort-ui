@@ -16,9 +16,14 @@ import { LoginRoute } from '@/routes/login';
 import { ForbiddenPage } from '@/routes/forbidden';
 import { HomeRoute } from '@/routes/home';
 import { ScheduleRoute } from '@/routes/schedule';
+import { SessionDetailRoute } from '@/routes/session-detail';
 import { ProgressRoute } from '@/routes/progress';
+import type { ProgressTab } from '@/routes/progress';
 import { BillingRoute } from '@/routes/billing';
+import type { BillingView } from '@/routes/billing';
+import { InvoiceDetailRoute } from '@/routes/invoice-detail';
 import { InboxRoute } from '@/routes/inbox';
+import { NoteDetailRoute } from '@/routes/note-detail';
 import { ProfileRoute } from '@/routes/profile';
 
 const rootRoute = createRootRoute({
@@ -76,22 +81,60 @@ const scheduleRoute = createRoute({
 	component: ScheduleRoute,
 });
 
+const sessionDetailRoute = createRoute({
+	getParentRoute: () => authedRoute,
+	path: '/schedule/$sessionId',
+	component: SessionDetailRoute,
+});
+
 const progressRoute = createRoute({
 	getParentRoute: () => authedRoute,
 	path: '/progress',
+	// Optional so plain `/progress` navigations stay valid; the screen defaults to Grades.
+	validateSearch: (search: Record<string, unknown>): { tab?: ProgressTab } => ({
+		tab:
+			search.tab === 'attendance'
+				? 'attendance'
+				: search.tab === 'grades'
+					? 'grades'
+					: undefined,
+	}),
 	component: ProgressRoute,
 });
 
 const billingRoute = createRoute({
 	getParentRoute: () => authedRoute,
 	path: '/billing',
+	// Optional so plain `/billing` navigations stay valid; the screen defaults to Invoices.
+	validateSearch: (search: Record<string, unknown>): { view?: BillingView } => ({
+		view:
+			search.view === 'wallet'
+				? 'wallet'
+				: search.view === 'payments'
+					? 'payments'
+					: search.view === 'invoices'
+						? 'invoices'
+						: undefined,
+	}),
 	component: BillingRoute,
+});
+
+const invoiceDetailRoute = createRoute({
+	getParentRoute: () => authedRoute,
+	path: '/billing/$invoiceId',
+	component: InvoiceDetailRoute,
 });
 
 const inboxRoute = createRoute({
 	getParentRoute: () => authedRoute,
 	path: '/inbox',
 	component: InboxRoute,
+});
+
+const noteDetailRoute = createRoute({
+	getParentRoute: () => authedRoute,
+	path: '/inbox/$noteId',
+	component: NoteDetailRoute,
 });
 
 const profileRoute = createRoute({
@@ -106,9 +149,12 @@ const routeTree = rootRoute.addChildren([
 	authedRoute.addChildren([
 		homeRoute,
 		scheduleRoute,
+		sessionDetailRoute,
 		progressRoute,
 		billingRoute,
+		invoiceDetailRoute,
 		inboxRoute,
+		noteDetailRoute,
 		profileRoute,
 	]),
 ]);

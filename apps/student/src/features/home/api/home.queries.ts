@@ -1,28 +1,9 @@
 import { useQuery } from '@tanstack/react-query';
 
 import { studentApi } from '@/api/apiClient';
+import type { StudentSession } from '@/features/schedule/api/sessions.queries';
 
-/**
- * A session in today's calendar, as returned inside `StudentHome.todaySessions`
- * (`GET /student/home`, composed from api-reference §5.3's session shape).
- *
- * Hand-mirrored from the backend's `StudentSessionDto`: the student controllers declare
- * no `@ApiOkResponse`, so the OpenAPI document carries no response schema to generate
- * from (same convention as `apps/teacher`'s `TeachSession`).
- */
-export interface StudentSession {
-	id: number;
-	groupId: number;
-	groupName: string;
-	courseName: string;
-	roomName: string | null;
-	teacherName: string | null;
-	sessionDate: string;
-	startTime: string;
-	endTime: string;
-	topic: string | null;
-	status: 'SCHEDULED' | 'COMPLETED' | 'CANCELLED';
-}
+export type { StudentSession };
 
 export interface StudentLatestResult {
 	id: number;

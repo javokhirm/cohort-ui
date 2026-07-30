@@ -7,13 +7,18 @@ import { useAppT } from '@/locales';
 
 interface LatestResultCardProps {
 	result: StudentLatestResult;
+	/** Opens the Progress screen's Grades tab. */
+	onOpen: () => void;
 }
 
-export function LatestResultCard({ result }: LatestResultCardProps) {
+export function LatestResultCard({ result, onOpen }: LatestResultCardProps) {
 	const t = useAppT('home');
 
 	return (
-		<Card className="gap-0 py-0">
+		<Card
+			onClick={onOpen}
+			className="cursor-pointer gap-0 py-0 transition-colors hover:border-primary"
+		>
 			<div className="flex flex-col gap-1 p-4">
 				<div className="flex items-center justify-between gap-2">
 					<span className="text-[11px] font-bold uppercase tracking-wide text-muted-foreground">

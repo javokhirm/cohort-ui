@@ -9,6 +9,8 @@ import { useAppT } from '@/locales';
 
 interface TodaySessionListProps {
 	sessions: StudentSession[];
+	/** Opens a session's detail screen. */
+	onOpenSession: (sessionId: number) => void;
 }
 
 /**
@@ -17,7 +19,7 @@ interface TodaySessionListProps {
  * `routes/home.tsx` — this component only needs its own empty state. Read-only: no
  * attendance/marks actions, those belong to the teacher console.
  */
-export function TodaySessionList({ sessions }: TodaySessionListProps) {
+export function TodaySessionList({ sessions, onOpenSession }: TodaySessionListProps) {
 	const t = useAppT('home');
 	const statusLabel = useStatusLabel();
 
@@ -38,7 +40,15 @@ export function TodaySessionList({ sessions }: TodaySessionListProps) {
 			{sessions.map((session, i) => (
 				<div key={session.id}>
 					{i > 0 && <Separator />}
-					<div className="flex items-center gap-3.5 px-4 py-3">
+					<div
+						role="button"
+						tabIndex={0}
+						onClick={() => onOpenSession(session.id)}
+						onKeyDown={(e) => {
+							if (e.key === 'Enter') onOpenSession(session.id);
+						}}
+						className="flex cursor-pointer items-center gap-3.5 px-4 py-3 transition-colors hover:bg-muted/60"
+					>
 						<div className="flex w-13 shrink-0 flex-col items-end text-right">
 							<span className="text-[13.5px] font-bold tabular-nums text-foreground">
 								{formatTime(session.startTime)}
@@ -61,10 +71,18 @@ export function TodaySessionList({ sessions }: TodaySessionListProps) {
 								{session.roomName && session.teacherName && (
 									<span className="size-0.75 shrink-0 rounded-full bg-muted-foreground/40" />
 								)}
-								{session.teacherName && <span className="truncate">{session.teacherName}</span>}
+								{session.teacherName && (
+									<span className="truncate">
+										{session.teacherName}
+									</span>
+								)}
 							</p>
 						</div>
-						<StatusBadge kind="session" status={session.status} className="shrink-0">
+						<StatusBadge
+							kind="session"
+							status={session.status}
+							className="shrink-0"
+						>
 							{statusLabel('session', session.status)}
 						</StatusBadge>
 					</div>
