@@ -6,6 +6,7 @@ import { useT } from '@repo/i18n';
 import { currentHour, formatFullDate, todayIsoDate } from '@repo/utils';
 
 import { useSessionStore } from '@/store/sessionStore';
+import { useMe } from '@/features/profile/api/profile.queries';
 import { BAR_COPY, NAV_ITEMS } from '@/layouts/nav';
 import type { StudentRoute } from '@/layouts/nav';
 import { AvatarButton } from '@/layouts/AvatarButton';
@@ -47,6 +48,13 @@ export function AuthedLayout() {
 	const tShell = useAppT('shell');
 	const tHome = useAppT('home');
 
+	// Profile's subtitle is the student code and branch, which live on `/student/me`. The
+	// query is route-scoped so nothing fetches it until Profile is entered — the identity
+	// on every other screen still comes from the login/refresh summary alone — and it
+	// shares its cache entry with the screen itself, so this costs no extra request.
+	const onProfile = pathname === '/profile';
+	const { data: me } = useMe({ enabled: onProfile });
+
 	useEffect(() => {
 		if (status !== 'authenticated') {
 			void navigate({ to: '/login' });
@@ -74,9 +82,12 @@ export function AuthedLayout() {
 	const title = bar
 		? t(`item.${bar.title}`)
 		: tHome(greetingKey(), { name: user?.firstName ?? '' });
-	const subtitle = bar
-		? bar.subtitle && tShell(bar.subtitle)
-		: formatFullDate(todayIsoDate());
+	const subtitle = onProfile
+		? me &&
+			tShell('profileSubtitle', { code: me.studentCode, branch: me.branch.name })
+		: bar
+			? bar.subtitle && tShell(bar.subtitle)
+			: formatFullDate(todayIsoDate());
 
 	return (
 		<div className="flex h-svh overflow-hidden bg-background text-foreground">
