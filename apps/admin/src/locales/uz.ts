@@ -360,6 +360,7 @@ export const uz = {
 				contact: 'Aloqa',
 				guardian: 'Vasiy',
 				enrollment: 'Dastlabki qabul',
+				access: 'Kirish huquqi',
 				status: 'Holati',
 			},
 			field: {
@@ -381,7 +382,10 @@ export const uz = {
 				guardianPhone: 'Vasiy telefoni *',
 				group: 'Guruh',
 				studentStatus: 'Oʻquvchi holati',
+				password: 'Parol',
+				passwordPlaceholder: 'Kamida 8 ta belgi',
 			},
+			passwordHint: 'Joriy parolni saqlab qolish uchun boʻsh qoldiring.',
 			validation: {
 				guardianFullName: 'Ism va familiyani toʻliq kiriting',
 			},

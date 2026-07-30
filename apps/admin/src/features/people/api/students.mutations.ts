@@ -33,6 +33,7 @@ export interface UpdateStudentInput {
 	address?: string;
 	notes?: string;
 	status?: 'ACTIVE' | 'INACTIVE' | 'GRADUATED' | 'SUSPENDED';
+	password?: string;
 }
 
 export interface AddGuardianInput {

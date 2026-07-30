@@ -10,6 +10,7 @@ import {
 	Form,
 	FormDatePicker,
 	FormInput,
+	FormPasswordInput,
 	FormPhoneInput,
 	FormSelect,
 	Spinner,
@@ -339,6 +340,7 @@ function EditStudentForm({
 			branchId: student.branchId,
 			address: '',
 			status: student.status,
+			password: '',
 		},
 	});
 
@@ -353,6 +355,7 @@ function EditStudentForm({
 			branchId: student.branchId,
 			address: '',
 			status: student.status,
+			password: '',
 		});
 	}, [student, form]);
 
@@ -374,6 +377,7 @@ function EditStudentForm({
 			gender: values.gender,
 			address: values.address || undefined,
 			status: values.status,
+			password: values.password || undefined,
 		});
 		toast.success(t('updated'));
 		onSuccess();
@@ -453,6 +457,22 @@ function EditStudentForm({
 							label={t('form.field.address')}
 							placeholder={t('form.field.addressPlaceholder')}
 						/>
+					</FieldGroup>
+				</FormSection>
+
+				{/* ACCESS */}
+				<FormSection title={t('form.section.access')}>
+					<FieldGroup>
+						<FormPasswordInput
+							control={form.control}
+							name="password"
+							label={t('form.field.password')}
+							autoComplete="new-password"
+							placeholder={t('form.field.passwordPlaceholder')}
+						/>
+						<p className="text-xs text-muted-foreground">
+							{t('form.passwordHint')}
+						</p>
 					</FieldGroup>
 				</FormSection>
 
