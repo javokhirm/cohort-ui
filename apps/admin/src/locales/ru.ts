@@ -353,6 +353,7 @@ export const ru: TranslationsOf<typeof uz> = {
 				contact: 'Контакты',
 				guardian: 'Представитель',
 				enrollment: 'Первичное зачисление',
+				access: 'Доступ',
 				status: 'Статус',
 			},
 			field: {
@@ -374,7 +375,10 @@ export const ru: TranslationsOf<typeof uz> = {
 				guardianPhone: 'Телефон представителя *',
 				group: 'Группа',
 				studentStatus: 'Статус ученика',
+				password: 'Пароль',
+				passwordPlaceholder: 'Минимум 8 символов',
 			},
+			passwordHint: 'Оставьте пустым, чтобы сохранить текущий пароль.',
 			validation: {
 				guardianFullName: 'Укажите имя и фамилию полностью',
 			},

@@ -340,6 +340,7 @@ export const en: TranslationsOf<typeof uz> = {
 				contact: 'Contact',
 				guardian: 'Guardian',
 				enrollment: 'Initial enrollment',
+				access: 'Access',
 				status: 'Status',
 			},
 			field: {
@@ -361,7 +362,10 @@ export const en: TranslationsOf<typeof uz> = {
 				guardianPhone: 'Guardian phone *',
 				group: 'Group',
 				studentStatus: 'Student status',
+				password: 'Password',
+				passwordPlaceholder: 'At least 8 characters',
 			},
+			passwordHint: 'Leave blank to keep the current password.',
 			validation: {
 				guardianFullName: 'Please enter both first and last name',
 			},

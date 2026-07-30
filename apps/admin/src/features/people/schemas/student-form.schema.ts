@@ -17,6 +17,18 @@ function phoneField(t: Translator<'validation'>) {
 	return z.string().min(1, t('required')).regex(UZ_PHONE_REGEX, t('phoneInvalid'));
 }
 
+function optionalPasswordField(t: Translator<'validation'>) {
+	return z
+		.union([
+			z.literal(''),
+			z
+				.string()
+				.min(8, t('passwordMin', { count: 8 }))
+				.max(128, t('maxLength', { count: 128 })),
+		])
+		.optional();
+}
+
 function guardianNameField(t: Translator<'validation'>, tp: PeopleT) {
 	return z
 		.string()
@@ -83,6 +95,7 @@ export function editStudentSchema(t: Translator<'validation'>) {
 		branchId: z.number({ error: t('required') }).min(1, t('required')),
 		address: z.string().optional(),
 		status: z.enum(['ACTIVE', 'INACTIVE', 'GRADUATED', 'SUSPENDED']).optional(),
+		password: optionalPasswordField(t),
 	});
 }
 
