@@ -17,10 +17,14 @@ export const peopleKeys = {
 		[...peopleKeys.students(), id, 'guardians'] as const,
 	studentEnrollments: (id: number) =>
 		[...peopleKeys.students(), id, 'enrollments'] as const,
-	studentAttendances: (id: number) =>
-		[...peopleKeys.students(), id, 'attendances'] as const,
-	studentResults: (id: number) => [...peopleKeys.students(), id, 'results'] as const,
-	studentInvoices: (id: number) => [...peopleKeys.students(), id, 'invoices'] as const,
+	studentAttendances: (id: number, page: number) =>
+		[...peopleKeys.students(), id, 'attendances', page] as const,
+	studentAttendanceSummary: (id: number) =>
+		[...peopleKeys.students(), id, 'attendances', 'summary'] as const,
+	studentResults: (id: number, page: number) =>
+		[...peopleKeys.students(), id, 'results', page] as const,
+	studentInvoices: (id: number, page: number) =>
+		[...peopleKeys.students(), id, 'invoices', page] as const,
 	studentWallet: (id: number) => [...peopleKeys.students(), id, 'wallet'] as const,
 
 	groups: (filters?: { branchIds?: number[]; status?: string }) =>

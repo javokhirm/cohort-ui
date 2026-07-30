@@ -427,15 +427,22 @@ export const ru: TranslationsOf<typeof uz> = {
 				},
 			},
 			attendance: {
-				empty: 'Записей о посещаемости нет',
+				emptyTitle: 'Записей о посещаемости нет',
+				emptyDescription:
+					'Посещаемость появится здесь, как только занятия в группах учащегося будут отмечены.',
 				rate: 'Посещаемость',
-				rateWindow: 'Последние 90 дней',
+				rateWindow: 'За всё время',
 			},
 			grades: {
-				empty: 'Оценок нет',
+				emptyTitle: 'Оценок нет',
+				emptyDescription:
+					'Показываются только опубликованные работы. Оценки появятся здесь, когда преподаватель их опубликует.',
+				notGraded: 'Без оценки',
 			},
 			billing: {
-				empty: 'Счетов нет',
+				emptyTitle: 'Счетов нет',
+				emptyDescription:
+					'Для этого учащегося ещё не выставлено ни одного счёта.',
 				column: {
 					invoice: 'Счёт',
 					date: 'Дата',

@@ -132,7 +132,11 @@ export function InvoiceDetailRoute() {
 										{discount.name}
 									</span>
 									<span className="text-[13.5px] font-semibold tabular-nums text-tone-green-fg">
-										−{formatMoney(discount.appliedAmount, data.currency)}
+										−
+										{formatMoney(
+											discount.appliedAmount,
+											data.currency,
+										)}
 									</span>
 								</div>
 							))}

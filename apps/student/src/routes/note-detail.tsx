@@ -116,7 +116,10 @@ export function NoteDetailRoute() {
 					)}
 
 					{linkToken && (
-						<Button className="mt-5 gap-1.5" onClick={() => openLink(linkToken)}>
+						<Button
+							className="mt-5 gap-1.5"
+							onClick={() => openLink(linkToken)}
+						>
 							{t(LINK_LABELS[linkToken])}
 							<ChevronRight className="size-4" />
 						</Button>

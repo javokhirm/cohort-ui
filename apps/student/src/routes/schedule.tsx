@@ -81,7 +81,9 @@ export function ScheduleRoute() {
 		<div className="mx-auto w-full max-w-210 pb-8">
 			<WeekNav
 				rangeLabel={
-					isToday ? `${t('thisWeek')} · ${formatWeekRange(selectedDate)}` : formatWeekRange(selectedDate)
+					isToday
+						? `${t('thisWeek')} · ${formatWeekRange(selectedDate)}`
+						: formatWeekRange(selectedDate)
 				}
 				summary={summary}
 				onPrevWeek={() => setSelectedDate(addDays(startOfWeek(selectedDate), -7))}
@@ -135,7 +137,9 @@ export function ScheduleRoute() {
 						title={t('emptyDayTitle')}
 						description={
 							nextClassDate
-								? t('emptyDayNext', { date: formatShortDate(nextClassDate) })
+								? t('emptyDayNext', {
+										date: formatShortDate(nextClassDate),
+									})
 								: t('emptyDayDescription')
 						}
 						action={

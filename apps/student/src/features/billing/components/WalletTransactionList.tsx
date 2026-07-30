@@ -89,7 +89,10 @@ export function WalletTransactionList({ wallet }: WalletTransactionListProps) {
 										)}
 									>
 										{isDebit ? '−' : '+'}
-										{formatMoney(Math.abs(tx.amount), wallet.currency)}
+										{formatMoney(
+											Math.abs(tx.amount),
+											wallet.currency,
+										)}
 									</span>
 								</div>
 							</div>

@@ -23,7 +23,7 @@ import {
 	toast,
 	type ColumnDef,
 } from '@repo/ui';
-import { formatDate, formatMoney } from '@repo/utils';
+import { formatDate } from '@repo/utils';
 import { useStatusLabel, useT } from '@repo/i18n';
 
 import { Can } from '@/components/Can';
@@ -35,18 +35,12 @@ import {
 	useStudent,
 	useStudentGuardians,
 	useStudentEnrollments,
-	useStudentAttendances,
-	useStudentResults,
-	useStudentInvoices,
 } from '../api/students.queries';
-import type {
-	Guardian,
-	Enrollment,
-	Grade,
-	Invoice,
-	AttendanceRecord,
-} from '../api/students.queries';
+import type { Guardian, Enrollment } from '../api/students.queries';
 import { useRemoveGuardian } from '../api/students.mutations';
+import { AttendanceTab } from '../components/AttendanceTab';
+import { BillingTab } from '../components/BillingTab';
+import { GradesTab } from '../components/GradesTab';
 import { StudentForm } from '../components/StudentForm';
 import { WalletSection } from '../components/WalletSection';
 
@@ -418,180 +412,6 @@ function EnrollmentsTab({ studentId }: { studentId: number }) {
 				}
 			/>
 		</div>
-	);
-}
-
-// ─── Attendance tab ───────────────────────────────────────────────────────────
-
-function AttendanceTab({ studentId }: { studentId: number }) {
-	const t = useAppT('people');
-	const statusLabel = useStatusLabel();
-	const { data: attendance, isLoading } = useStudentAttendances(studentId);
-
-	if (isLoading) {
-		return <Skeleton className="h-32 rounded-xl" />;
-	}
-
-	const records: AttendanceRecord[] = attendance?.records ?? [];
-	const rate = attendance?.rate;
-
-	if (records.length === 0) {
-		return (
-			<div className="flex min-h-32 items-center justify-center rounded-xl border text-sm text-muted-foreground">
-				{t('detail.attendance.empty')}
-			</div>
-		);
-	}
-
-	return (
-		<div className="grid gap-4 lg:grid-cols-4">
-			{rate != null && (
-				<Card>
-					<CardContent className="flex flex-col items-center justify-center pt-6 text-center">
-						<p className="text-sm text-muted-foreground">
-							{t('detail.attendance.rate')}
-						</p>
-						<p className="mt-1 text-4xl font-bold text-tone-green-fg">
-							{rate}%
-						</p>
-						<p className="mt-1 text-xs text-muted-foreground">
-							{t('detail.attendance.rateWindow')}
-						</p>
-					</CardContent>
-				</Card>
-			)}
-			<div
-				className={`rounded-xl border bg-card ${rate != null ? 'lg:col-span-3' : 'lg:col-span-4'}`}
-			>
-				{records.map((r: AttendanceRecord, i) => (
-					<div key={r.id}>
-						{i > 0 && <Separator />}
-						<div className="flex items-center justify-between px-4 py-3">
-							<div>
-								<p className="text-sm font-medium">{r.courseName}</p>
-								<p className="text-xs text-muted-foreground">
-									{formatDate(r.sessionDate)}
-								</p>
-							</div>
-							<StatusBadge kind="attendance" status={r.status}>
-								{statusLabel('attendance', r.status)}
-							</StatusBadge>
-						</div>
-					</div>
-				))}
-			</div>
-		</div>
-	);
-}
-
-// ─── Grades tab ───────────────────────────────────────────────────────────────
-
-function GradesTab({ studentId }: { studentId: number }) {
-	const t = useAppT('people');
-	const { data: grades = [], isLoading } = useStudentResults(studentId);
-
-	if (isLoading) {
-		return <Skeleton className="h-32 rounded-xl" />;
-	}
-
-	if (grades.length === 0) {
-		return (
-			<div className="flex min-h-32 items-center justify-center rounded-xl border text-sm text-muted-foreground">
-				{t('detail.grades.empty')}
-			</div>
-		);
-	}
-
-	return (
-		<div className="rounded-xl border bg-card">
-			{(grades as Grade[]).map((g: Grade, i) => (
-				<div key={g.id}>
-					{i > 0 && <Separator />}
-					<div className="flex items-center justify-between px-4 py-3">
-						<div>
-							<p className="text-sm font-medium">{g.assessmentName}</p>
-							<p className="text-xs text-muted-foreground">
-								{formatDate(g.date)}
-							</p>
-						</div>
-						<div className="text-right">
-							<span className="text-base font-bold">{g.score}</span>
-							<span className="text-sm text-muted-foreground">
-								{' '}
-								/ {g.maxScore}
-							</span>
-						</div>
-					</div>
-				</div>
-			))}
-		</div>
-	);
-}
-
-// ─── Billing tab ──────────────────────────────────────────────────────────────
-
-const buildInvoiceColumns = (
-	t: PeopleT,
-	statusLabel: ReturnType<typeof useStatusLabel>,
-): ColumnDef<Invoice>[] => [
-	{
-		accessorKey: 'invoiceCode',
-		header: t('detail.billing.column.invoice'),
-		cell: ({ getValue }) => (
-			<span className="font-mono text-xs">{getValue<string>()}</span>
-		),
-	},
-	{
-		accessorKey: 'date',
-		header: t('detail.billing.column.date'),
-		cell: ({ getValue }) => (
-			<span className="text-muted-foreground">
-				{formatDate(getValue<string>())}
-			</span>
-		),
-	},
-	{
-		accessorKey: 'total',
-		header: () => (
-			<div className="text-right">{t('detail.billing.column.total')}</div>
-		),
-		cell: ({ getValue }) => (
-			<div className="text-right font-medium">
-				{formatMoney(getValue<number>())}
-			</div>
-		),
-	},
-	{
-		accessorKey: 'status',
-		header: t('detail.billing.column.status'),
-		cell: ({ getValue }) => (
-			<StatusBadge kind="invoice" status={getValue<string>()}>
-				{statusLabel('invoice', getValue<string>())}
-			</StatusBadge>
-		),
-	},
-];
-
-function BillingTab({ studentId }: { studentId: number }) {
-	const t = useAppT('people');
-	const statusLabel = useStatusLabel();
-	const { data: invoices = [], isLoading } = useStudentInvoices(studentId);
-
-	if (isLoading) {
-		return <Skeleton className="h-32 rounded-xl" />;
-	}
-
-	return (
-		<DataTable
-			columns={buildInvoiceColumns(t, statusLabel)}
-			data={invoices as Invoice[]}
-			getRowId={(row) => String(row.id)}
-			emptyState={
-				<div className="flex min-h-32 items-center justify-center text-sm text-muted-foreground">
-					{t('detail.billing.empty')}
-				</div>
-			}
-		/>
 	);
 }
 

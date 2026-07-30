@@ -6,6 +6,12 @@ import type { PaginatedResult } from '@repo/api-client';
 
 import { peopleKeys, type StudentListFilters } from './keys';
 
+/**
+ * Rows per page in the student-detail tabs (attendance, grades, billing). Small
+ * on purpose — these sit inside a tab panel, not a full-page table.
+ */
+export const STUDENT_TAB_PAGE_SIZE = 10;
+
 // ─── Domain types ────────────────────────────────────────────────────────────
 
 export interface Group {
@@ -71,32 +77,75 @@ export interface Enrollment {
 	completedAt: string | null;
 }
 
+export type AttendanceStatus = 'PRESENT' | 'ABSENT' | 'LATE' | 'EXCUSED';
+
+/** One row of the attendance tab — a marked record in one of the student's groups. */
 export interface AttendanceRecord {
 	id: number;
 	sessionDate: string;
-	courseName: string;
-	status: 'PRESENT' | 'ABSENT' | 'LATE' | 'EXCUSED';
+	groupId: number;
+	groupName: string;
+	status: AttendanceStatus;
+	note: string | null;
 }
 
+/**
+ * The attendance tab's rate card. Computed over the student's whole marked
+ * history, not a rolling window. `rate` is null when nothing has been marked —
+ * distinct from a genuine 0%, which is why `totalMarked` comes along.
+ */
 export interface AttendanceSummary {
-	rate?: number;
-	records: AttendanceRecord[];
+	rate: number | null;
+	counts: { present: number; absent: number; late: number; excused: number };
+	streak: number;
+	totalMarked: number;
 }
 
-export interface Grade {
+export type AssessmentType = 'QUIZ' | 'MIDTERM' | 'FINAL' | 'MOCK' | 'HOMEWORK';
+
+/**
+ * One row of the grades tab. Published assessments only — the backend hard-filters
+ * unpublished ones, so an in-progress grading run never surfaces here.
+ */
+export interface StudentResult {
 	id: number;
-	assessmentName: string;
-	date: string;
-	score: number;
+	assessmentId: number;
+	groupId: number;
+	groupName: string;
+	title: string;
+	type: AssessmentType;
+	examDate: string | null;
+	/** Null when the assessment exists but this student has no score yet. */
+	score: number | null;
 	maxScore: number;
+	gradeLabel: string | null;
+	percentileRank: number | null;
+	feedback: string | null;
+	teacherName: string | null;
+	gradedAt: string | null;
 }
+
+export type InvoiceStatus = 'DRAFT' | 'UNPAID' | 'PARTIAL' | 'PAID' | 'OVERDUE' | 'VOID';
 
 export interface Invoice {
 	id: number;
-	invoiceCode: string;
-	date: string;
+	branchId: number;
+	invoiceNumber: string;
+	studentId: number;
+	studentName: string;
+	enrollmentId: number | null;
+	issueDate: string;
+	dueDate: string;
+	subtotal: number;
+	discountAmount: number;
+	taxAmount: number;
 	total: number;
-	status: 'DRAFT' | 'UNPAID' | 'PARTIAL' | 'PAID' | 'OVERDUE' | 'VOID';
+	amountPaid: number;
+	/** `total − amountPaid`, never negative. */
+	amountDue: number;
+	currency: string;
+	status: InvoiceStatus;
+	notes: string | null;
 }
 
 // ─── Queries ─────────────────────────────────────────────────────────────────
@@ -144,28 +193,56 @@ export function useStudentEnrollments(studentId: number) {
 	});
 }
 
-export function useStudentAttendances(studentId: number) {
+export function useStudentAttendances(studentId: number, page: number) {
 	return useQuery({
-		queryKey: peopleKeys.studentAttendances(studentId),
+		queryKey: peopleKeys.studentAttendances(studentId, page),
 		queryFn: () =>
-			manageApi.get<AttendanceSummary>(`/students/${studentId}/attendances`),
+			manageApi.getPaginated<AttendanceRecord>(
+				`/students/${studentId}/attendances`,
+				{ params: { page, limit: STUDENT_TAB_PAGE_SIZE } },
+			) as Promise<PaginatedResult<AttendanceRecord>>,
+		enabled: studentId > 0,
+		placeholderData: keepPreviousData,
+	});
+}
+
+/**
+ * The rate card above the attendance list. Separate from the list query on
+ * purpose: it aggregates the whole history, so it must not refetch when the
+ * user pages through the records below it.
+ */
+export function useStudentAttendanceSummary(studentId: number) {
+	return useQuery({
+		queryKey: peopleKeys.studentAttendanceSummary(studentId),
+		queryFn: () =>
+			manageApi.get<AttendanceSummary>(
+				`/students/${studentId}/attendances/summary`,
+			),
 		enabled: studentId > 0,
 	});
 }
 
-export function useStudentResults(studentId: number) {
+export function useStudentResults(studentId: number, page: number) {
 	return useQuery({
-		queryKey: peopleKeys.studentResults(studentId),
-		queryFn: () => manageApi.get<Grade[]>(`/students/${studentId}/results`),
+		queryKey: peopleKeys.studentResults(studentId, page),
+		queryFn: () =>
+			manageApi.getPaginated<StudentResult>(`/students/${studentId}/results`, {
+				params: { page, limit: STUDENT_TAB_PAGE_SIZE },
+			}) as Promise<PaginatedResult<StudentResult>>,
 		enabled: studentId > 0,
+		placeholderData: keepPreviousData,
 	});
 }
 
-export function useStudentInvoices(studentId: number) {
+export function useStudentInvoices(studentId: number, page: number) {
 	return useQuery({
-		queryKey: peopleKeys.studentInvoices(studentId),
-		queryFn: () => manageApi.get<Invoice[]>(`/students/${studentId}/invoices`),
+		queryKey: peopleKeys.studentInvoices(studentId, page),
+		queryFn: () =>
+			manageApi.getPaginated<Invoice>(`/students/${studentId}/invoices`, {
+				params: { page, limit: STUDENT_TAB_PAGE_SIZE },
+			}) as Promise<PaginatedResult<Invoice>>,
 		enabled: studentId > 0,
+		placeholderData: keepPreviousData,
 	});
 }
 

@@ -31,7 +31,10 @@ export function HowToPaySheet({ invoice, open, onOpenChange }: HowToPaySheetProp
 
 	return (
 		<Sheet open={open} onOpenChange={onOpenChange}>
-			<SheetContent side="bottom" className="mx-auto max-h-[92svh] overflow-y-auto rounded-t-[22px] sm:max-w-md sm:rounded-t-2xl">
+			<SheetContent
+				side="bottom"
+				className="mx-auto max-h-[92svh] overflow-y-auto rounded-t-[22px] sm:max-w-md sm:rounded-t-2xl"
+			>
 				<SheetHeader className="pb-0">
 					<SheetTitle>{t('howToPay')}</SheetTitle>
 					<SheetDescription className="sr-only">

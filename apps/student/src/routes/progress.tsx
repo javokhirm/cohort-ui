@@ -4,7 +4,10 @@ import { AlertTriangle, Star } from 'lucide-react';
 
 import { Button, EmptyState, Skeleton, Tabs, TabsList, TabsTrigger } from '@repo/ui';
 
-import { useAttendanceHistory, useAttendanceSummary } from '@/features/progress/api/attendance.queries';
+import {
+	useAttendanceHistory,
+	useAttendanceSummary,
+} from '@/features/progress/api/attendance.queries';
 import { useMyGroups } from '@/features/progress/api/groups.queries';
 import { useResults } from '@/features/progress/api/results.queries';
 import { AttendanceHistoryRow } from '@/features/progress/components/AttendanceHistoryRow';
@@ -103,7 +106,10 @@ function AttendanceTab() {
 			</h2>
 			{rows.length === 0 ? (
 				<div className="rounded-2xl border border-dashed border-border bg-card">
-					<EmptyState title={t('noHistoryTitle')} description={t('noHistoryDescription')} />
+					<EmptyState
+						title={t('noHistoryTitle')}
+						description={t('noHistoryDescription')}
+					/>
 				</div>
 			) : (
 				<>

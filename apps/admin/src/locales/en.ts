@@ -414,15 +414,21 @@ export const en: TranslationsOf<typeof uz> = {
 				},
 			},
 			attendance: {
-				empty: 'No attendance records',
+				emptyTitle: 'No attendance records',
+				emptyDescription:
+					"Attendance appears here once sessions in this student's groups are marked.",
 				rate: 'Attendance rate',
-				rateWindow: 'Last 90 days',
+				rateWindow: 'All time',
 			},
 			grades: {
-				empty: 'No grades recorded',
+				emptyTitle: 'No grades recorded',
+				emptyDescription:
+					'Only published assessments are shown. Grades appear here once the teacher publishes them.',
+				notGraded: 'Not graded',
 			},
 			billing: {
-				empty: 'No invoices',
+				emptyTitle: 'No invoices',
+				emptyDescription: 'No invoice has been issued for this student yet.',
 				column: {
 					invoice: 'Invoice',
 					date: 'Date',

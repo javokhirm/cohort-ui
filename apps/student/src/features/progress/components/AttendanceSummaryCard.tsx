@@ -132,7 +132,9 @@ export function AttendanceSummaryCard({ summary }: AttendanceSummaryCardProps) {
 						</div>
 						<div className="mt-1.5 flex justify-between text-[10.5px] text-muted-foreground">
 							<span>{formatShortDate(strip[0]!.sessionDate)}</span>
-							<span>{formatShortDate(strip[strip.length - 1]!.sessionDate)}</span>
+							<span>
+								{formatShortDate(strip[strip.length - 1]!.sessionDate)}
+							</span>
 						</div>
 					</>
 				)}
