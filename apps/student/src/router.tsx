@@ -18,7 +18,6 @@ import { HomeRoute } from '@/routes/home';
 import { ScheduleRoute } from '@/routes/schedule';
 import { SessionDetailRoute } from '@/routes/session-detail';
 import { ProgressRoute } from '@/routes/progress';
-import type { ProgressTab } from '@/routes/progress';
 import { BillingRoute } from '@/routes/billing';
 import type { BillingView } from '@/routes/billing';
 import { InvoiceDetailRoute } from '@/routes/invoice-detail';
@@ -90,15 +89,15 @@ const sessionDetailRoute = createRoute({
 const progressRoute = createRoute({
 	getParentRoute: () => authedRoute,
 	path: '/progress',
-	// Optional so plain `/progress` navigations stay valid; the screen defaults to Grades.
-	validateSearch: (search: Record<string, unknown>): { tab?: ProgressTab } => ({
-		tab:
-			search.tab === 'attendance'
-				? 'attendance'
-				: search.tab === 'grades'
-					? 'grades'
-					: undefined,
-	}),
+	// Optional so plain `/progress` stays valid; absent means "all groups". A
+	// non-numeric or non-positive value is dropped rather than sent to the API,
+	// which would 400 on it.
+	validateSearch: (search: Record<string, unknown>): { groupId?: number } => {
+		const groupId = Number(search.groupId);
+		return {
+			groupId: Number.isInteger(groupId) && groupId > 0 ? groupId : undefined,
+		};
+	},
 	component: ProgressRoute,
 });
 

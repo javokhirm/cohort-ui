@@ -50,14 +50,14 @@ export function NoteDetailRoute() {
 			case 'invoices':
 				void navigate({ to: '/billing' });
 				break;
+			// Marks and attendance now live on one screen — the class log — so both
+			// tokens land in the same place, unfiltered.
 			case 'results':
-				void navigate({ to: '/progress', search: { tab: 'grades' } });
+			case 'attendance':
+				void navigate({ to: '/progress', search: { groupId: undefined } });
 				break;
 			case 'schedule':
 				void navigate({ to: '/schedule' });
-				break;
-			case 'attendance':
-				void navigate({ to: '/progress', search: { tab: 'attendance' } });
 				break;
 		}
 	}

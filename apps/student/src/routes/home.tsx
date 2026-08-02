@@ -8,7 +8,7 @@ import { useHome } from '@/features/home/api/home.queries';
 import { resolveNextClass } from '@/features/home/lib/next-class';
 import { BalanceDueBanner } from '@/features/home/components/BalanceDueBanner';
 import { HomeStats } from '@/features/home/components/HomeStats';
-import { LatestResultCard } from '@/features/home/components/LatestResultCard';
+import { LatestMarkCard } from '@/features/home/components/LatestMarkCard';
 import { NextClassCard } from '@/features/home/components/NextClassCard';
 import { TodaySessionList } from '@/features/home/components/TodaySessionList';
 import { useAppT } from '@/locales';
@@ -16,7 +16,7 @@ import { useAppT } from '@/locales';
 /**
  * The student's Home screen (composed from `GET /student/home`): the next/current class,
  * an outstanding-balance banner, the momentum row (streak / attendance rate), today's
- * timeline, and the latest published result. The greeting and today's date are the app
+ * timeline, and the latest daily class mark. The greeting and today's date are the app
  * bar's title and subtitle, so this column carries no heading of its own. Each section
  * shows only when its backing data is present — this screen never fabricates content the
  * endpoint didn't return.
@@ -102,11 +102,15 @@ export function HomeRoute() {
 				/>
 			</div>
 
-			{data.latestResult && (
-				<LatestResultCard
-					result={data.latestResult}
+			{data.latestMark && (
+				<LatestMarkCard
+					latest={data.latestMark}
 					onOpen={() =>
-						void navigate({ to: '/progress', search: { tab: 'grades' } })
+						void navigate({
+							to: '/progress',
+							// Land on the log already filtered to the mark's group.
+							search: { groupId: data.latestMark!.groupId },
+						})
 					}
 				/>
 			)}

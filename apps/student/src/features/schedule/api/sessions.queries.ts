@@ -1,6 +1,7 @@
 import { useQuery } from '@tanstack/react-query';
 
 import { studentApi } from '@/api/apiClient';
+import type { StudentMark } from '@/features/progress/api/marks.queries';
 
 /**
  * A session in the student's calendar (`GET /student/sessions`, api-reference §5.3) and
@@ -24,10 +25,18 @@ export interface StudentSession {
 	status: 'SCHEDULED' | 'COMPLETED' | 'CANCELLED';
 }
 
-/** Full session detail (`GET /student/sessions/:id`) — adds the cancellation reason. */
+/**
+ * Full session detail (`GET /student/sessions/:id`) — adds the cancellation
+ * reason and the student's own daily mark for the session.
+ */
 export interface StudentSessionDetail extends StudentSession {
 	/** Set only when status is CANCELLED. */
 	cancellationReason: string | null;
+	/**
+	 * My mark for this class, in the scale stamped when the teacher entered it —
+	 * not the group's currently-active scale. `null` when it was not marked for me.
+	 */
+	mark: StudentMark | null;
 }
 
 export interface SessionRangeFilters {

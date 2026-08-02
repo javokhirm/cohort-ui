@@ -26,13 +26,22 @@ const STRIP_CELL_CLASS: Record<AttendanceStatus, string> = {
 
 interface AttendanceSummaryCardProps {
 	summary: StudentAttendanceSummary;
+	/**
+	 * What the figures cover — the selected group's name, or "all groups". The
+	 * group filter chips drive this card alongside the mark average and the log,
+	 * so the subtitle has to say which scope the rate belongs to.
+	 */
+	scopeLabel: string;
 }
 
 /**
- * The Attendance tab's header card per the design: the rate ring, per-status counts,
- * a streak banner (when a streak is running) and the recent-classes strip.
+ * The Progress screen's attendance card per the design: the rate ring, per-status
+ * counts, a streak banner (when a streak is running) and the recent-classes strip.
  */
-export function AttendanceSummaryCard({ summary }: AttendanceSummaryCardProps) {
+export function AttendanceSummaryCard({
+	summary,
+	scopeLabel,
+}: AttendanceSummaryCardProps) {
 	const t = useAppT('progress');
 	const statusLabel = useStatusLabel();
 	const rate = summary.rate;
@@ -77,7 +86,7 @@ export function AttendanceSummaryCard({ summary }: AttendanceSummaryCardProps) {
 							{t('attendanceRateTitle')}
 						</p>
 						<p className="mb-2 mt-px text-xs text-muted-foreground">
-							{t('attendanceRateSub')}
+							{t('attendanceRateSub', { scope: scopeLabel })}
 						</p>
 						<div className="flex flex-wrap gap-x-2.5 gap-y-1">
 							{counts.map(({ status, n }) => (

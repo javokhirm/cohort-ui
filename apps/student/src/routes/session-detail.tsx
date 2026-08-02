@@ -15,16 +15,20 @@ import type { DetailRow } from '@repo/ui';
 import { formatShortDate, formatTime } from '@repo/utils';
 import { useStatusLabel } from '@repo/i18n';
 
+import { MarkChip } from '@/features/progress/components/MarkChip';
+import { scaleNameLabel } from '@/features/progress/lib/mark-format';
 import { useSessionDetail } from '@/features/schedule/api/sessions.queries';
 import { useAppT } from '@/locales';
 
 /**
  * Read-only session detail (`GET /student/sessions/:id`), per the design: back link, a
  * header card with the status badge and date, a cancellation note when the center
- * cancelled the class, and the time/room/teacher/topic rows.
+ * cancelled the class, this session's daily mark in its stamped scale, and the
+ * time/room/teacher/topic rows.
  */
 export function SessionDetailRoute() {
 	const t = useAppT('schedule');
+	const tProgress = useAppT('progress');
 	const statusLabel = useStatusLabel();
 	const { sessionId } = useParams({ from: '/_authed/schedule/$sessionId' });
 	const { data, isPending, isError } = useSessionDetail(Number(sessionId));
@@ -83,6 +87,32 @@ export function SessionDetailRoute() {
 										</p>
 									)}
 								</div>
+							</div>
+						)}
+
+						{data.mark && (
+							<div className="border-b border-border px-4 py-3.5">
+								<div className="flex items-center gap-3">
+									<MarkChip mark={data.mark} size="lg" />
+									<div className="min-w-0">
+										<p className="text-[12.5px] font-bold text-foreground">
+											{t('dailyMark')}
+										</p>
+										<p className="mt-0.5 text-[11.5px] text-muted-foreground">
+											{tProgress('singleScaleNote', {
+												scale: scaleNameLabel(
+													data.mark.scale,
+													tProgress,
+												),
+											})}
+										</p>
+									</div>
+								</div>
+								{data.mark.comment && (
+									<p className="mt-3 rounded-xl bg-muted px-3 py-2.5 text-[12.5px] leading-relaxed text-foreground/70">
+										{data.mark.comment}
+									</p>
+								)}
 							</div>
 						)}
 
