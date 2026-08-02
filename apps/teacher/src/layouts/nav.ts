@@ -34,13 +34,13 @@ export const NAV_ITEMS: TeacherNavItem[] = [
 		Icon: LayoutGrid,
 		title: 'myGroups',
 	},
-	{
-		id: 'payroll',
-		label: 'pay',
-		href: '/payroll',
-		Icon: Wallet,
-		title: 'myPay',
-	},
+	// {
+	// 	id: 'payroll',
+	// 	label: 'pay',
+	// 	href: '/payroll',
+	// 	Icon: Wallet,
+	// 	title: 'myPay',
+	// },
 	{
 		id: 'profile',
 		label: 'profile',
