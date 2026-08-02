@@ -15,7 +15,10 @@ import {
 import { useIsMobile } from '@/hooks/use-is-mobile';
 import { type LegendItem, ToneLegend } from '@/components/ToneLegend';
 import { useMarksGrid } from '@/features/marks/api/marks-grid.queries';
-import { useUpsertMarkCell } from '@/features/marks/api/marks-grid.mutations';
+import {
+	useClearMarkCell,
+	useUpsertMarkCell,
+} from '@/features/marks/api/marks-grid.mutations';
 import { MarksGrid } from '@/features/marks/components/MarksGrid';
 import { MonthNav } from '@/features/marks/components/MonthNav';
 import {
@@ -29,8 +32,9 @@ import { useAppT } from '@/locales';
 
 /**
  * A group's monthly marks table (`GET /teach/groups/:id/marks`, §1.1): rows are
- * the roster, columns are the month's sessions, and only today's column is
- * editable — each cell saves instantly (optimistic). Per-student AVG% and RANK
+ * the roster, columns are the month's sessions, and any past-or-today column
+ * is editable (today's is tinted, but that's a visual cue only) — each cell
+ * saves instantly (optimistic). Per-student AVG% and RANK
  * are frozen on the right. The month is URL-driven (`?month=YYYY-MM`); the view
  * toggle jumps to today's session for the current-day list. On a phone the grid
  * is hard to work with, so a fresh visit auto-redirects to today's session list.
@@ -61,6 +65,7 @@ export function GroupMarksRoute() {
 
 	const gridQuery = useMarksGrid(groupId, month);
 	const upsertCell = useUpsertMarkCell(groupId, month);
+	const clearCell = useClearMarkCell(groupId, month);
 
 	// The grid's colour key. The tone→band mapping mirrors `scoreTone`; labels are
 	// built at render so they re-resolve when the locale changes.
@@ -152,6 +157,9 @@ export function GroupMarksRoute() {
 				onEditCell={(sessionId, studentId, value) =>
 					upsertCell.mutate({ sessionId, studentId, ...value })
 				}
+				onClearCell={(sessionId, studentId) =>
+					clearCell.mutate({ sessionId, studentId })
+				}
 			/>
 		);
 	}
@@ -204,7 +212,7 @@ export function GroupMarksRoute() {
 			<div className="mt-2 flex shrink-0 flex-wrap items-center justify-between gap-x-4 gap-y-1.5">
 				<ToneLegend items={scoreBands} />
 				<p className="text-[11px] text-muted-foreground">
-					{tAttendance('onlyTodayEditable')}
+					{tAttendance('pastAndTodayEditable')}
 				</p>
 			</div>
 

@@ -8,7 +8,7 @@ export interface SheetDateColumn {
 	label: string;
 	/** Secondary line above the label, e.g. the short weekday "Wed". */
 	sublabel?: string;
-	/** Marks this column as today: tinted, emphasised, and the editable one. */
+	/** Marks this column as today: tinted and emphasised (not the only editable one — past columns are editable too). */
 	accent?: boolean;
 	/** Dims the column, e.g. a cancelled session. */
 	muted?: boolean;
@@ -21,6 +21,8 @@ export interface SheetDropOption {
 	label: string;
 	tone: StatusTone;
 	selected?: boolean;
+	/** Renders as a divided, red "remove" row (icon instead of the tone dot) — e.g. "Clear mark". */
+	destructive?: boolean;
 	onSelect: () => void;
 }
 

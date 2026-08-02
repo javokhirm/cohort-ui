@@ -39,10 +39,11 @@ import { useAppT } from '@/locales';
 
 /**
  * A group's monthly attendance table (`GET /teach/groups/:id/attendance`,
- * api-reference §4.3): rows are the roster, columns are the month's sessions, and
- * only today's column is editable — each cell saves instantly (optimistic). The
- * month is URL-driven (`?month=YYYY-MM`); the view toggle jumps to today's
- * session for the current-day list.
+ * api-reference §4.3): rows are the roster, columns are the month's sessions,
+ * and any past-or-today column is editable (today's is tinted, but that's a
+ * visual cue only) — each cell saves instantly (optimistic). The month is
+ * URL-driven (`?month=YYYY-MM`); the view toggle jumps to today's session for
+ * the current-day list.
  *
  * The page is a bounded flex column so the grid owns its own scroll: that is
  * what keeps the date header and the student column pinned while a teacher
@@ -110,8 +111,9 @@ export function GroupAttendanceRoute() {
 	const rows = grid?.rows ?? [];
 	const columns = grid?.columns ?? [];
 
-	// Today's column is the grid's only editable one — "mark all present" only
-	// makes sense while it's visible (the currently viewed month) and open.
+	// "Mark all present" is a today-only shortcut (unrelated to the grid's
+	// past-or-today editability) — it only makes sense while today's column is
+	// visible (the currently viewed month) and open.
 	const todayColumn = columns.find((col) => isTodayIso(col.date));
 	const canMarkAllPresent =
 		!!todayColumn && todayColumn.status !== 'CANCELLED' && rows.length > 0;
@@ -261,7 +263,7 @@ export function GroupAttendanceRoute() {
 			<div className="mt-2 flex shrink-0 flex-wrap items-center justify-between gap-x-4 gap-y-1.5">
 				<ToneLegend items={legend} />
 				<p className="text-[11px] text-muted-foreground">
-					{t('onlyTodayEditable')}
+					{t('pastAndTodayEditable')}
 				</p>
 			</div>
 

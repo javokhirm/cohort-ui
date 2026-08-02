@@ -11,7 +11,7 @@ import {
 
 import { ATTENDANCE_STATUSES, type AttendanceStatus } from '../api/attendance.queries';
 import type { AttendanceGrid as GridData } from '../api/attendance-grid.queries';
-import { isTodayIso } from '../lib/month';
+import { isPastOrTodayIso, isTodayIso } from '../lib/month';
 import { rateTone } from '../lib/rate';
 import { useAppT } from '@/locales';
 
@@ -24,11 +24,12 @@ const CELL_W_PX = 52;
 
 /**
  * The monthly attendance matrix, rendered with the shared `SheetTable` grid: a
- * frozen student column, one column per session date (today's is tinted and is
- * the only editable one, via a status popover), and a frozen RATE column banded
- * green/amber/red. Popover state is lifted here (one cell open at a time) with a
- * full-screen click-catcher to close it on an outside click, per SheetTable's
- * controlled-popover contract.
+ * frozen student column, one column per session date (any past-or-today,
+ * non-cancelled session is editable via a status popover — today's is tinted
+ * but that's a visual cue only, not an editability gate), and a frozen RATE
+ * column banded green/amber/red. Popover state is lifted here (one cell open
+ * at a time) with a full-screen click-catcher to close it on an outside
+ * click, per SheetTable's controlled-popover contract.
  *
  * Sized to fill its parent, so render it inside a bounded flex column — the
  * frozen header and student column need the grid to own its own scroll.
@@ -53,7 +54,7 @@ export function AttendanceGrid({ grid, onEditCell }: AttendanceGridProps) {
 			const cellKey = `${row.studentId}:${col.sessionId}`;
 			const status = row.cells[col.sessionId]?.status;
 			const today = isTodayIso(col.date);
-			const editable = today && col.status !== 'CANCELLED';
+			const editable = isPastOrTodayIso(col.date) && col.status !== 'CANCELLED';
 			const descriptor = status ? resolveStatus('attendance', status) : null;
 
 			const dropOpts: SheetDropOption[] | undefined = editable

@@ -10,7 +10,7 @@ import {
 
 import { LETTER_GRADES } from '../api/marks.queries';
 import type { MarksGrid as GridData } from '../api/marks-grid.queries';
-import { isTodayIso } from '../lib/month';
+import { isPastOrTodayIso, isTodayIso } from '../lib/month';
 import { normalizedPctFor, parseScoreInput, scoreTone } from '../lib/scale';
 import { useAppT } from '@/locales';
 
@@ -22,23 +22,25 @@ interface MarkCellValue {
 interface MarksGridProps {
 	grid: GridData;
 	onEditCell: (sessionId: number, studentId: number, value: MarkCellValue) => void;
+	onClearCell: (sessionId: number, studentId: number) => void;
 }
 
 const CELL_W_PX = 56;
 
 /**
  * The monthly marks matrix, rendered with the shared `SheetTable` grid: a frozen
- * student column, one column per session date (today's is tinted and is the only
- * editable one), and frozen AVG / RANK summary columns. The editable shape
- * follows the scale — a numeric input for POINTS/PERCENTAGE (committed on
- * blur/Enter) or an A–F popover for LETTER (parent-owned open state, per
- * SheetTable's contract). Past columns display read-only score/letter chips
- * tinted by their band.
+ * student column, one column per session date (any past-or-today, non-cancelled
+ * session is editable — today's is tinted but that's a visual cue only), and
+ * frozen AVG / RANK summary columns. The editable shape follows the scale — a
+ * numeric input for POINTS/PERCENTAGE (committed on blur/Enter; blanking it
+ * clears the mark) or an A–F popover for LETTER (parent-owned open state, plus
+ * a "Clear" entry once a letter is set, per SheetTable's contract). Future
+ * columns display read-only score/letter chips tinted by their band.
  *
  * Sized to fill its parent, so render it inside a bounded flex column — the
  * frozen header and student column need the grid to own its own scroll.
  */
-export function MarksGrid({ grid, onEditCell }: MarksGridProps) {
+export function MarksGrid({ grid, onEditCell, onClearCell }: MarksGridProps) {
 	const t = useAppT('marks');
 	const [openCell, setOpenCell] = useState<string | null>(null);
 	const [editing, setEditing] = useState<Record<string, string>>({});
@@ -66,21 +68,40 @@ export function MarksGrid({ grid, onEditCell }: MarksGridProps) {
 			const cellKey = `${row.studentId}:${col.sessionId}`;
 			const cell = row.cells[col.sessionId];
 			const today = isTodayIso(col.date);
-			const editable = today && col.status !== 'CANCELLED';
+			const editable = isPastOrTodayIso(col.date) && col.status !== 'CANCELLED';
 			const name = row.studentName ?? t('column.student');
 			const date = formatFullDate(col.date);
 
 			if (isLetter) {
 				const dropOpts: SheetDropOption[] | undefined = editable
-					? LETTER_GRADES.map((l) => ({
-							label: l,
-							tone: scoreTone(normalizedPctFor(grid.config, { letter: l })),
-							selected: cell?.letter === l,
-							onSelect: () => {
-								onEditCell(col.sessionId, row.studentId, { letter: l });
-								setOpenCell(null);
-							},
-						}))
+					? [
+							...LETTER_GRADES.map((l) => ({
+								label: l,
+								tone: scoreTone(
+									normalizedPctFor(grid.config, { letter: l }),
+								),
+								selected: cell?.letter === l,
+								onSelect: () => {
+									onEditCell(col.sessionId, row.studentId, {
+										letter: l,
+									});
+									setOpenCell(null);
+								},
+							})),
+							...(cell?.letter
+								? [
+										{
+											label: t('clearMark'),
+											tone: 'red' as const,
+											destructive: true,
+											onSelect: () => {
+												onClearCell(col.sessionId, row.studentId);
+												setOpenCell(null);
+											},
+										},
+									]
+								: []),
+						]
 					: undefined;
 				return {
 					kind: 'badge' as const,
@@ -100,7 +121,8 @@ export function MarksGrid({ grid, onEditCell }: MarksGridProps) {
 				};
 			}
 
-			// Numeric scale: today is an input cell; past columns are read-only chips.
+			// Numeric scale: any past-or-today, non-cancelled column is an input
+			// cell; future columns are read-only chips.
 			if (editable) {
 				const savedStr = cell?.rawScore != null ? String(cell.rawScore) : '';
 				return {
@@ -121,8 +143,14 @@ export function MarksGrid({ grid, onEditCell }: MarksGridProps) {
 							return next;
 						});
 						if (value.trim() === savedStr) return; // unchanged
+						if (value.trim() === '') {
+							// Blanking a saved score clears the mark entirely.
+							if (savedStr !== '')
+								onClearCell(col.sessionId, row.studentId);
+							return;
+						}
 						const parsed = parseScoreInput(value);
-						if (parsed === null) return; // empty/invalid: can't clear a mark here
+						if (parsed === null) return; // invalid: ignore, reverts to savedStr
 						onEditCell(col.sessionId, row.studentId, { rawScore: parsed });
 					},
 				};
