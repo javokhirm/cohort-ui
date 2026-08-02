@@ -4,7 +4,11 @@ import { manageApi } from '@/api/apiClient';
 import { useActiveBranchIds } from '@/store/branchStore';
 import type { PaginatedResult } from '@repo/api-client';
 
-import { peopleKeys, type StudentListFilters } from './keys';
+import {
+	peopleKeys,
+	type StudentListFilters,
+	type StudentPerformanceFilters,
+} from './keys';
 
 /**
  * Rows per page in the student-detail tabs (attendance, grades, billing). Small
@@ -79,26 +83,86 @@ export interface Enrollment {
 
 export type AttendanceStatus = 'PRESENT' | 'ABSENT' | 'LATE' | 'EXCUSED';
 
-/** One row of the attendance tab — a marked record in one of the student's groups. */
-export interface AttendanceRecord {
+// ─── Performance tab ─────────────────────────────────────────────────────────
+
+/**
+ * The immutable grading scale a mark was stamped with when the teacher entered
+ * it — never the group's currently active one. The API sends no prose for it
+ * (only `type`/`maxPoints`), so the unit and scale name are composed and
+ * translated client-side in `../lib/mark-format`.
+ */
+export interface MarkScale {
+	configId: number;
+	type: 'POINTS' | 'PERCENTAGE' | 'LETTER';
+	/** Numeric max for POINTS/PERCENTAGE; null for LETTER. */
+	maxPoints: number | null;
+	allowHalf: boolean;
+}
+
+/** One session's daily mark, in its stamped scale. */
+export interface SessionMark {
 	id: number;
-	sessionDate: string;
-	groupId: number;
-	groupName: string;
-	status: AttendanceStatus;
-	note: string | null;
+	scale: MarkScale;
+	/** On the scale's own axis (e.g. 8 of 10); null for LETTER. */
+	rawScore: number | null;
+	/** A–F; null for POINTS/PERCENTAGE. */
+	letter: string | null;
+	/** 0–100 — the only figure comparable across scales. */
+	normalizedPct: number;
+	comment: string | null;
+	markedByName: string | null;
+	markedAt: string | null;
 }
 
 /**
- * The attendance tab's rate card. Computed over the student's whole marked
- * history, not a rolling window. `rate` is null when nothing has been marked —
- * distinct from a genuine 0%, which is why `totalMarked` comes along.
+ * One row of the Performance tab's session history. Attendance-driven, so
+ * `mark: null` covers two cases the UI renders differently: an ABSENT/EXCUSED
+ * class never expected a mark, while a PRESENT/LATE one is teacher backlog
+ * ("Not marked"). `status` is what tells them apart.
  */
-export interface AttendanceSummary {
-	rate: number | null;
-	counts: { present: number; absent: number; late: number; excused: number };
-	streak: number;
-	totalMarked: number;
+export interface PerformanceSession {
+	/** The attendance record id — the row identity; a mark may not exist. */
+	id: number;
+	sessionId: number;
+	sessionDate: string;
+	groupId: number;
+	groupName: string;
+	topic: string | null;
+	status: AttendanceStatus;
+	/** The attendance note, not the mark's comment. */
+	note: string | null;
+	mark: SessionMark | null;
+}
+
+/**
+ * The Performance tab's two KPI cards. Aggregated over the whole period/group
+ * window rather than the visible page, so paging the list never moves them.
+ */
+export interface PerformanceSummary {
+	attendance: {
+		/** PRESENT+LATE over every marked record; null when nothing was marked. */
+		rate: number | null;
+		counts: { present: number; absent: number; late: number; excused: number };
+		totalMarked: number;
+		/** The floor `belowAlertThreshold` was evaluated against, server-owned. */
+		alertThresholdPct: number;
+		belowAlertThreshold: boolean;
+	};
+	marks: {
+		averagePct: number | null;
+		/**
+		 * The average on the scale's own axis (e.g. 8.4 of 10) — non-null only
+		 * when every mark in the window shares one numeric scale. Fall back to
+		 * `averagePct` when it is null.
+		 */
+		averageRaw: number | null;
+		markedCount: number;
+		/** Attended classes with no mark yet — teacher backlog. */
+		unmarkedCount: number;
+		scales: MarkScale[];
+	};
+	/** The first/last session actually found — not the requested bounds. */
+	span: { firstSessionDate: string | null; lastSessionDate: string | null };
 }
 
 export type AssessmentType = 'QUIZ' | 'MIDTERM' | 'FINAL' | 'MOCK' | 'HOMEWORK';
@@ -193,32 +257,41 @@ export function useStudentEnrollments(studentId: number) {
 	});
 }
 
-export function useStudentAttendances(studentId: number, page: number) {
+/**
+ * The Performance tab's KPI cards. Takes the period/group filters but **not**
+ * `status` or `page`: the cards aggregate the whole window, so neither the
+ * status select nor paging the list below may refetch or move them.
+ */
+export function useStudentPerformance(
+	studentId: number,
+	filters: Omit<StudentPerformanceFilters, 'status'>,
+) {
 	return useQuery({
-		queryKey: peopleKeys.studentAttendances(studentId, page),
+		queryKey: peopleKeys.studentPerformance(studentId, filters),
 		queryFn: () =>
-			manageApi.getPaginated<AttendanceRecord>(
-				`/students/${studentId}/attendances`,
-				{ params: { page, limit: STUDENT_TAB_PAGE_SIZE } },
-			) as Promise<PaginatedResult<AttendanceRecord>>,
+			manageApi.get<PerformanceSummary>(`/students/${studentId}/performance`, {
+				params: filters,
+			}),
 		enabled: studentId > 0,
 		placeholderData: keepPreviousData,
 	});
 }
 
-/**
- * The rate card above the attendance list. Separate from the list query on
- * purpose: it aggregates the whole history, so it must not refetch when the
- * user pages through the records below it.
- */
-export function useStudentAttendanceSummary(studentId: number) {
+/** The Performance tab's session history — attendance + that session's mark. */
+export function useStudentPerformanceSessions(
+	studentId: number,
+	filters: StudentPerformanceFilters,
+	page: number,
+) {
 	return useQuery({
-		queryKey: peopleKeys.studentAttendanceSummary(studentId),
+		queryKey: peopleKeys.studentPerformanceSessions(studentId, filters, page),
 		queryFn: () =>
-			manageApi.get<AttendanceSummary>(
-				`/students/${studentId}/attendances/summary`,
-			),
+			manageApi.getPaginated<PerformanceSession>(
+				`/students/${studentId}/performance/sessions`,
+				{ params: { ...filters, page, limit: STUDENT_TAB_PAGE_SIZE } },
+			) as Promise<PaginatedResult<PerformanceSession>>,
 		enabled: studentId > 0,
+		placeholderData: keepPreviousData,
 	});
 }
 

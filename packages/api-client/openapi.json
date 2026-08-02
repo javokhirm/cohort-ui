@@ -26,6 +26,31 @@
         ]
       }
     },
+    "/api/v1/public/auth/student/login": {
+      "post": {
+        "operationId": "AuthController_studentLogin",
+        "parameters": [],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/StudentLoginDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        },
+        "summary": "Authenticate a student with studentCode + password (the code identifies the tenant)",
+        "tags": [
+          "Auth"
+        ]
+      }
+    },
     "/api/v1/public/auth/refresh": {
       "post": {
         "operationId": "AuthController_refresh",
@@ -2512,7 +2537,53 @@
     "/api/v1/manage/students/{id}/invoices": {
       "get": {
         "operationId": "StudentsController_listInvoices",
-        "parameters": [],
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "number"
+            }
+          },
+          {
+            "name": "page",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "minimum": 1,
+              "default": 1,
+              "type": "number"
+            }
+          },
+          {
+            "name": "limit",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "minimum": 1,
+              "maximum": 100,
+              "default": 20,
+              "type": "number"
+            }
+          },
+          {
+            "name": "status",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "type": "string",
+              "enum": [
+                "DRAFT",
+                "UNPAID",
+                "PARTIAL",
+                "PAID",
+                "OVERDUE",
+                "VOID"
+              ]
+            }
+          }
+        ],
         "responses": {
           "200": {
             "description": ""
@@ -2523,7 +2594,7 @@
             "bearer": []
           }
         ],
-        "summary": "List a student's invoices (stub)",
+        "summary": "List a student's invoices, newest first",
         "tags": [
           "Manage / Students"
         ]
@@ -2552,7 +2623,55 @@
     "/api/v1/manage/students/{id}/attendances": {
       "get": {
         "operationId": "StudentsController_listAttendances",
-        "parameters": [],
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "number"
+            }
+          },
+          {
+            "name": "page",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "minimum": 1,
+              "default": 1,
+              "type": "number"
+            }
+          },
+          {
+            "name": "limit",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "minimum": 1,
+              "maximum": 100,
+              "default": 20,
+              "type": "number"
+            }
+          },
+          {
+            "name": "from",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "example": "2026-04-01",
+              "type": "string"
+            }
+          },
+          {
+            "name": "to",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "example": "2026-06-30",
+              "type": "string"
+            }
+          }
+        ],
         "responses": {
           "200": {
             "description": ""
@@ -2563,7 +2682,36 @@
             "bearer": []
           }
         ],
-        "summary": "List a student's attendances (stub)",
+        "summary": "List a student's attendances, newest session first",
+        "tags": [
+          "Manage / Students"
+        ]
+      }
+    },
+    "/api/v1/manage/students/{id}/attendances/summary": {
+      "get": {
+        "operationId": "StudentsController_attendanceSummary",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "number"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "A student's attendance rate and per-status counts, over all time",
         "tags": [
           "Manage / Students"
         ]
@@ -2572,7 +2720,46 @@
     "/api/v1/manage/students/{id}/results": {
       "get": {
         "operationId": "StudentsController_listResults",
-        "parameters": [],
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "number"
+            }
+          },
+          {
+            "name": "page",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "minimum": 1,
+              "default": 1,
+              "type": "number"
+            }
+          },
+          {
+            "name": "limit",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "minimum": 1,
+              "maximum": 100,
+              "default": 20,
+              "type": "number"
+            }
+          },
+          {
+            "name": "groupId",
+            "required": false,
+            "in": "query",
+            "description": "Narrow to one of the student's groups; omit for all of them.",
+            "schema": {
+              "type": "number"
+            }
+          }
+        ],
         "responses": {
           "200": {
             "description": ""
@@ -2583,7 +2770,7 @@
             "bearer": []
           }
         ],
-        "summary": "List a student's results (stub)",
+        "summary": "List a student's published results, newest exam first",
         "tags": [
           "Manage / Students"
         ]
@@ -7681,6 +7868,786 @@
           "Teach / Grading Scales"
         ]
       }
+    },
+    "/api/v1/student/me": {
+      "get": {
+        "operationId": "MeController_me",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "The authenticated student's own bootstrap profile",
+        "tags": [
+          "Student / Me"
+        ]
+      },
+      "patch": {
+        "operationId": "MeController_update",
+        "parameters": [],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/UpdateMyProfileDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Update the authenticated student's own contact details",
+        "tags": [
+          "Student / Me"
+        ]
+      }
+    },
+    "/api/v1/student/home": {
+      "get": {
+        "operationId": "HomeController_home",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Home screen: today, attendance, latest mark, balance, unread",
+        "tags": [
+          "Student / Home"
+        ]
+      }
+    },
+    "/api/v1/student/sessions": {
+      "get": {
+        "operationId": "MySessionsController_calendar",
+        "parameters": [
+          {
+            "name": "from",
+            "required": true,
+            "in": "query",
+            "description": "Required. Start of window.",
+            "schema": {
+              "example": "2025-01-01",
+              "type": "string"
+            }
+          },
+          {
+            "name": "to",
+            "required": true,
+            "in": "query",
+            "description": "Required. End of window (max 90 days).",
+            "schema": {
+              "example": "2025-03-31",
+              "type": "string"
+            }
+          },
+          {
+            "name": "status",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "type": "string",
+              "enum": [
+                "SCHEDULED",
+                "COMPLETED",
+                "CANCELLED"
+              ]
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "My calendar: sessions across the groups I am enrolled in, in a date window (from + to required, max 90 days)",
+        "tags": [
+          "Student / My Sessions"
+        ]
+      }
+    },
+    "/api/v1/student/sessions/{id}": {
+      "get": {
+        "operationId": "MySessionsController_findOne",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "number"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Session detail with my daily mark for it (must be a session in a group I am/was enrolled in)",
+        "tags": [
+          "Student / My Sessions"
+        ]
+      }
+    },
+    "/api/v1/student/groups": {
+      "get": {
+        "operationId": "MyGroupsController_list",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Groups I am (or was) enrolled in",
+        "tags": [
+          "Student / My Groups"
+        ]
+      }
+    },
+    "/api/v1/student/results": {
+      "get": {
+        "operationId": "ResultsController_list",
+        "parameters": [
+          {
+            "name": "page",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "minimum": 1,
+              "default": 1,
+              "type": "number"
+            }
+          },
+          {
+            "name": "limit",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "minimum": 1,
+              "maximum": 100,
+              "default": 20,
+              "type": "number"
+            }
+          },
+          {
+            "name": "groupId",
+            "required": false,
+            "in": "query",
+            "description": "Narrow to one of my groups.",
+            "schema": {
+              "type": "number"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "My published results, newest exam first (optional group filter)",
+        "tags": [
+          "Student / Results"
+        ]
+      }
+    },
+    "/api/v1/student/results/{id}": {
+      "get": {
+        "operationId": "ResultsController_findOne",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "number"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "A single published result of mine",
+        "tags": [
+          "Student / Results"
+        ]
+      }
+    },
+    "/api/v1/student/attendance": {
+      "get": {
+        "operationId": "AttendanceController_list",
+        "parameters": [
+          {
+            "name": "page",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "minimum": 1,
+              "default": 1,
+              "type": "number"
+            }
+          },
+          {
+            "name": "limit",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "minimum": 1,
+              "maximum": 100,
+              "default": 20,
+              "type": "number"
+            }
+          },
+          {
+            "name": "groupId",
+            "required": false,
+            "in": "query",
+            "description": "Narrow to one of my groups.",
+            "schema": {
+              "type": "number"
+            }
+          },
+          {
+            "name": "from",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "example": "2025-09-01",
+              "type": "string"
+            }
+          },
+          {
+            "name": "to",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "example": "2025-12-31",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "My attendance history, newest session first",
+        "tags": [
+          "Student / Attendance"
+        ]
+      }
+    },
+    "/api/v1/student/attendance/summary": {
+      "get": {
+        "operationId": "AttendanceController_summary",
+        "parameters": [
+          {
+            "name": "groupId",
+            "required": false,
+            "in": "query",
+            "description": "Narrow to one of my groups.",
+            "schema": {
+              "type": "number"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "My attendance snapshot: rate, counts, streak and the last 14 classes",
+        "tags": [
+          "Student / Attendance"
+        ]
+      }
+    },
+    "/api/v1/student/class-log": {
+      "get": {
+        "operationId": "ClassLogController_list",
+        "parameters": [
+          {
+            "name": "page",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "minimum": 1,
+              "default": 1,
+              "type": "number"
+            }
+          },
+          {
+            "name": "limit",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "minimum": 1,
+              "maximum": 100,
+              "default": 20,
+              "type": "number"
+            }
+          },
+          {
+            "name": "groupId",
+            "required": false,
+            "in": "query",
+            "description": "Narrow to one of my groups.",
+            "schema": {
+              "type": "number"
+            }
+          },
+          {
+            "name": "from",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "example": "2025-09-01",
+              "type": "string"
+            }
+          },
+          {
+            "name": "to",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "example": "2025-12-31",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "My class log: attendance + the daily mark for each class, newest first",
+        "tags": [
+          "Student / Class Log"
+        ]
+      }
+    },
+    "/api/v1/student/marks/summary": {
+      "get": {
+        "operationId": "MarksController_summary",
+        "parameters": [
+          {
+            "name": "groupId",
+            "required": false,
+            "in": "query",
+            "description": "Narrow to one of my groups.",
+            "schema": {
+              "type": "number"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "My daily-mark average, trend, last 10 marks and the scales in use",
+        "tags": [
+          "Student / Marks"
+        ]
+      }
+    },
+    "/api/v1/student/billing/summary": {
+      "get": {
+        "operationId": "BillingController_summary",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Billing header: outstanding balance, open/overdue counts, oldest due date, wallet",
+        "tags": [
+          "Student / Billing"
+        ]
+      }
+    },
+    "/api/v1/student/billing/payment-instructions": {
+      "get": {
+        "operationId": "BillingController_paymentInstructions",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "How to pay: reception + branch contact details",
+        "tags": [
+          "Student / Billing"
+        ]
+      }
+    },
+    "/api/v1/student/invoices": {
+      "get": {
+        "operationId": "InvoicesController_list",
+        "parameters": [
+          {
+            "name": "page",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "minimum": 1,
+              "default": 1,
+              "type": "number"
+            }
+          },
+          {
+            "name": "limit",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "minimum": 1,
+              "maximum": 100,
+              "default": 20,
+              "type": "number"
+            }
+          },
+          {
+            "name": "status",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "type": "string",
+              "enum": [
+                "UNPAID",
+                "PARTIAL",
+                "PAID",
+                "OVERDUE"
+              ]
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "My invoices (DRAFT/VOID are never shown)",
+        "tags": [
+          "Student / Invoices"
+        ]
+      }
+    },
+    "/api/v1/student/invoices/{id}": {
+      "get": {
+        "operationId": "InvoicesController_findOne",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "number"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Invoice detail: line items, discounts, payments",
+        "tags": [
+          "Student / Invoices"
+        ]
+      }
+    },
+    "/api/v1/student/payments": {
+      "get": {
+        "operationId": "PaymentsController_payments",
+        "parameters": [
+          {
+            "name": "page",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "minimum": 1,
+              "default": 1,
+              "type": "number"
+            }
+          },
+          {
+            "name": "limit",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "minimum": 1,
+              "maximum": 100,
+              "default": 20,
+              "type": "number"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "My payment history, newest first",
+        "tags": [
+          "Student / Payments"
+        ]
+      }
+    },
+    "/api/v1/student/wallet": {
+      "get": {
+        "operationId": "PaymentsController_wallet",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "My credit wallet: balance + recent ledger movements",
+        "tags": [
+          "Student / Payments"
+        ]
+      }
+    },
+    "/api/v1/student/notifications": {
+      "get": {
+        "operationId": "NotificationsController_list",
+        "parameters": [
+          {
+            "name": "page",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "minimum": 1,
+              "default": 1,
+              "type": "number"
+            }
+          },
+          {
+            "name": "limit",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "minimum": 1,
+              "maximum": 100,
+              "default": 20,
+              "type": "number"
+            }
+          },
+          {
+            "name": "category",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "type": "string",
+              "enum": [
+                "payment",
+                "grade",
+                "schedule",
+                "absence",
+                "notice"
+              ]
+            }
+          },
+          {
+            "name": "unread",
+            "required": false,
+            "in": "query",
+            "description": "true = unread only, false = read only.",
+            "schema": {
+              "type": "boolean"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "My notifications, newest first",
+        "tags": [
+          "Student / Notifications"
+        ]
+      }
+    },
+    "/api/v1/student/notifications/{id}": {
+      "get": {
+        "operationId": "NotificationsController_findOne",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "number"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "A single notification of mine",
+        "tags": [
+          "Student / Notifications"
+        ]
+      }
+    },
+    "/api/v1/student/notifications/{id}/read": {
+      "patch": {
+        "operationId": "NotificationsController_markRead",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "number"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Mark one notification read (opening it in the inbox)",
+        "tags": [
+          "Student / Notifications"
+        ]
+      }
+    },
+    "/api/v1/student/notifications/read-all": {
+      "post": {
+        "operationId": "NotificationsController_markAllRead",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Mark every unread notification of mine as read",
+        "tags": [
+          "Student / Notifications"
+        ]
+      }
     }
   },
   "info": {
@@ -7715,6 +8682,24 @@
         },
         "required": [
           "phone",
+          "password"
+        ]
+      },
+      "StudentLoginDto": {
+        "type": "object",
+        "properties": {
+          "studentCode": {
+            "type": "string",
+            "example": "A1000042",
+            "description": "One letter + 7 digits"
+          },
+          "password": {
+            "type": "string",
+            "example": "S3cret-pass"
+          }
+        },
+        "required": [
+          "studentCode",
           "password"
         ]
       },
@@ -8348,6 +9333,12 @@
               "GRADUATED",
               "SUSPENDED"
             ]
+          },
+          "password": {
+            "type": "string",
+            "minLength": 8,
+            "maxLength": 128,
+            "description": "Overwrites the student's login password."
           }
         }
       },
@@ -10053,6 +11044,31 @@
         "required": [
           "results"
         ]
+      },
+      "UpdateMyProfileDto": {
+        "type": "object",
+        "properties": {
+          "phone": {
+            "type": "string",
+            "example": "+998901234567",
+            "description": "E.164 phone number"
+          },
+          "email": {
+            "type": "string"
+          },
+          "avatarUrl": {
+            "type": "string",
+            "description": "From a prior file upload."
+          },
+          "preferredLanguage": {
+            "type": "string",
+            "enum": [
+              "uz",
+              "ru",
+              "en"
+            ]
+          }
+        }
       }
     }
   }

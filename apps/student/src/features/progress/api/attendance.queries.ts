@@ -1,17 +1,10 @@
-import { useInfiniteQuery, useQuery } from '@tanstack/react-query';
+import { useQuery } from '@tanstack/react-query';
 
 import { studentApi } from '@/api/apiClient';
 
-export type AttendanceStatus = 'PRESENT' | 'ABSENT' | 'LATE' | 'EXCUSED';
+import type { AttendanceStatus } from './class-log.queries';
 
-/** One of the student's attendance records (`GET /student/attendance`, §5.4). */
-export interface StudentAttendanceRecord {
-	id: number;
-	sessionDate: string;
-	groupName: string;
-	status: AttendanceStatus;
-	note: string | null;
-}
+export type { AttendanceStatus };
 
 /**
  * Attendance snapshot (`GET /student/attendance/summary`, §5.4): the rate ring,
@@ -26,35 +19,27 @@ export interface StudentAttendanceSummary {
 	recent: { sessionDate: string; status: AttendanceStatus }[];
 }
 
-const HISTORY_PAGE_SIZE = 8;
-
 export const attendanceKeys = {
 	all: ['attendance'] as const,
-	summary: () => [...attendanceKeys.all, 'summary'] as const,
-	history: () => [...attendanceKeys.all, 'history'] as const,
+	summary: (groupId: number | undefined) =>
+		[...attendanceKeys.all, 'summary', groupId] as const,
 };
 
-/** The Attendance tab's header card: rate, counts, streak, recent strip. */
-export function useAttendanceSummary() {
-	return useQuery({
-		queryKey: attendanceKeys.summary(),
-		queryFn: () => studentApi.get<StudentAttendanceSummary>('/attendance/summary'),
-	});
-}
-
 /**
- * The paginated attendance history, newest session first — the design's "Load 8 more"
- * list, so pages are 8 rows and accumulate.
+ * The Progress screen's attendance card: rate, counts, streak, recent strip —
+ * narrowed to one group when a filter chip is active, so the donut and the strip
+ * always describe the same classes as the mark average and the log beside them.
+ *
+ * The paginated `GET /student/attendance` history is no longer used here: the
+ * class log supersedes it, since it carries the same attendance rows *plus* each
+ * session's daily mark.
  */
-export function useAttendanceHistory() {
-	return useInfiniteQuery({
-		queryKey: attendanceKeys.history(),
-		queryFn: ({ pageParam }) =>
-			studentApi.getPaginated<StudentAttendanceRecord>('/attendance', {
-				params: { page: pageParam, limit: HISTORY_PAGE_SIZE },
+export function useAttendanceSummary(groupId?: number) {
+	return useQuery({
+		queryKey: attendanceKeys.summary(groupId),
+		queryFn: () =>
+			studentApi.get<StudentAttendanceSummary>('/attendance/summary', {
+				params: { groupId },
 			}),
-		initialPageParam: 1,
-		getNextPageParam: (last) =>
-			last.page < last.totalPages ? last.page + 1 : undefined,
 	});
 }

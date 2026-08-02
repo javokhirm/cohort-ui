@@ -151,7 +151,7 @@ export function AdvancesCard({ period }: { period: PayrollStaffPeriodResponse })
 						className="flex items-center justify-between gap-3 border-b border-border px-5 py-3"
 					>
 						<div className="min-w-0">
-							<div className="truncate text-sm font-medium text-tone-red-fg">
+							<div className="text-sm font-medium text-tone-red-fg">
 								{advance.label ?? t('advance.defaultLabel')}
 							</div>
 							<div className="mt-0.5 text-xs text-muted-foreground">
