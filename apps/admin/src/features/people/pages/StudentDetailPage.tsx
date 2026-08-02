@@ -38,9 +38,9 @@ import {
 } from '../api/students.queries';
 import type { Guardian, Enrollment } from '../api/students.queries';
 import { useRemoveGuardian } from '../api/students.mutations';
-import { AttendanceTab } from '../components/AttendanceTab';
 import { BillingTab } from '../components/BillingTab';
 import { GradesTab } from '../components/GradesTab';
+import { PerformanceTab } from '../components/PerformanceTab';
 import { StudentForm } from '../components/StudentForm';
 import { WalletSection } from '../components/WalletSection';
 
@@ -451,8 +451,8 @@ export function StudentDetailPage({ studentId }: StudentDetailPageProps) {
 					<TabsTrigger value="enrollments">
 						{t('detail.tab.enrollments')}
 					</TabsTrigger>
-					<TabsTrigger value="attendance">
-						{t('detail.tab.attendance')}
+					<TabsTrigger value="performance">
+						{t('detail.tab.performance')}
 					</TabsTrigger>
 					<TabsTrigger value="grades">{t('detail.tab.grades')}</TabsTrigger>
 					<TabsTrigger value="billing">{t('detail.tab.billing')}</TabsTrigger>
@@ -471,8 +471,8 @@ export function StudentDetailPage({ studentId }: StudentDetailPageProps) {
 					<TabsContent value="enrollments">
 						<EnrollmentsTab studentId={studentId} />
 					</TabsContent>
-					<TabsContent value="attendance">
-						<AttendanceTab studentId={studentId} />
+					<TabsContent value="performance">
+						<PerformanceTab studentId={studentId} />
 					</TabsContent>
 					<TabsContent value="grades">
 						<GradesTab studentId={studentId} />
