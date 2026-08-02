@@ -45,3 +45,8 @@ export function formatMonthLabel(month: string): string {
 export function isTodayIso(date: string): boolean {
 	return date === todayIsoDate();
 }
+
+/** Whether an ISO date (`YYYY-MM-DD`) is today or earlier — the editable window (D4). */
+export function isPastOrTodayIso(date: string): boolean {
+	return date <= todayIsoDate();
+}

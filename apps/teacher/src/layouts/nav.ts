@@ -1,4 +1,4 @@
-import { Home, LayoutGrid, User, Wallet } from 'lucide-react';
+import { Home, LayoutGrid, User } from 'lucide-react';
 import type { LucideIcon } from 'lucide-react';
 
 /** Leaf keys under the `nav:item.*` catalog — resolved with `t()` at render. */
@@ -8,7 +8,7 @@ export interface TeacherNavItem {
 	id: string;
 	/** i18n key for the sidebar / bottom-tab label. */
 	label: NavKey;
-	href: '/' | '/groups' | '/payroll' | '/profile';
+	href: '/' | '/groups' | '/profile';
 	Icon: LucideIcon;
 	/** i18n key for the topbar title; omitted where the screen shows none. */
 	title?: NavKey;
@@ -34,13 +34,13 @@ export const NAV_ITEMS: TeacherNavItem[] = [
 		Icon: LayoutGrid,
 		title: 'myGroups',
 	},
-	{
-		id: 'payroll',
-		label: 'pay',
-		href: '/payroll',
-		Icon: Wallet,
-		title: 'myPay',
-	},
+	// {
+	// 	id: 'payroll',
+	// 	label: 'pay',
+	// 	href: '/payroll',
+	// 	Icon: Wallet,
+	// 	title: 'myPay',
+	// },
 	{
 		id: 'profile',
 		label: 'profile',

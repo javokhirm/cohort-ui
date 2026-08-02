@@ -1,7 +1,6 @@
 import { Flame } from 'lucide-react';
 
-import { Card, cn, Separator } from '@repo/ui';
-import { formatShortDate } from '@repo/utils';
+import { Card, cn } from '@repo/ui';
 import { useStatusLabel } from '@repo/i18n';
 
 import type {
@@ -16,14 +15,6 @@ const STATUS_DOT_CLASS: Record<AttendanceStatus, string> = {
 	ABSENT: 'bg-tone-red-fg',
 	EXCUSED: 'bg-tone-slate-fg',
 };
-
-const STRIP_CELL_CLASS: Record<AttendanceStatus, string> = {
-	PRESENT: 'bg-tone-green-bg',
-	LATE: 'bg-tone-amber-bg',
-	ABSENT: 'border border-tone-red-fg bg-tone-red-bg',
-	EXCUSED: 'bg-tone-slate-bg',
-};
-
 interface AttendanceSummaryCardProps {
 	summary: StudentAttendanceSummary;
 	/**
@@ -61,8 +52,6 @@ export function AttendanceSummaryCard({
 		{ status: 'ABSENT', n: summary.counts.absent },
 		{ status: 'EXCUSED', n: summary.counts.excused },
 	];
-
-	const strip = [...summary.recent].reverse();
 
 	return (
 		<Card className="gap-0 rounded-[17px] py-0">
@@ -119,33 +108,6 @@ export function AttendanceSummaryCard({
 							</p>
 						</div>
 					</div>
-				)}
-
-				{strip.length > 0 && (
-					<>
-						<Separator className="my-3.5" />
-						<p className="mb-2 text-[10.5px] font-bold uppercase tracking-wider text-muted-foreground">
-							{t('lastClasses', { count: strip.length })}
-						</p>
-						<div className="flex gap-1">
-							{strip.map((r, i) => (
-								<span
-									key={`${r.sessionDate}-${i}`}
-									title={`${formatShortDate(r.sessionDate)} · ${statusLabel('attendance', r.status)}`}
-									className={cn(
-										'h-7.5 flex-1 rounded-[7px]',
-										STRIP_CELL_CLASS[r.status],
-									)}
-								/>
-							))}
-						</div>
-						<div className="mt-1.5 flex justify-between text-[10.5px] text-muted-foreground">
-							<span>{formatShortDate(strip[0]!.sessionDate)}</span>
-							<span>
-								{formatShortDate(strip[strip.length - 1]!.sessionDate)}
-							</span>
-						</div>
-					</>
 				)}
 			</div>
 		</Card>

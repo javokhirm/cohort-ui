@@ -14,10 +14,11 @@ interface UpsertCellVars {
 
 /**
  * Instant single-cell save for the table view (`PUT
- * /teach/sessions/:id/attendances/:studentId`) — only today's column is
- * editable. Optimistic: the cell flips immediately, rolls back on error (the
- * global mutation handler shows the toast), and reconciles on settle. The
- * grid's month-scoped RATE refreshes on the invalidation, not optimistically.
+ * /teach/sessions/:id/attendances/:studentId`) — editable for any
+ * past-or-today, non-cancelled session. Optimistic: the cell flips
+ * immediately, rolls back on error (the global mutation handler shows the
+ * toast), and reconciles on settle. The grid's month-scoped RATE refreshes on
+ * the invalidation, not optimistically.
  */
 export function useUpsertAttendanceCell(groupId: number, month: string) {
 	const qc = useQueryClient();

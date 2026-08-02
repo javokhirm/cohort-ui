@@ -1,4 +1,5 @@
 import * as React from 'react';
+import { Trash2 } from 'lucide-react';
 import { createPortal } from 'react-dom';
 
 import { Button, cn, TONE_ACCENT_CLASSES, TONE_CLASSES } from '@repo/ui';
@@ -108,15 +109,28 @@ export function BadgeCell({
 								className={cn(
 									'h-auto w-full justify-start gap-2 rounded-lg px-2.5 py-1.5 font-semibold',
 									opt.selected && 'bg-muted',
+									opt.destructive &&
+										'mt-1 rounded-t-none border-t border-border pt-2 hover:bg-destructive/10',
 								)}
 							>
+								{opt.destructive ? (
+									<Trash2 className="size-3.5 shrink-0 text-destructive" />
+								) : (
+									<span
+										className={cn(
+											'size-2 shrink-0 rounded-full',
+											TONE_ACCENT_CLASSES[opt.tone].dot,
+										)}
+									/>
+								)}
 								<span
 									className={cn(
-										'size-2 shrink-0 rounded-full',
-										TONE_ACCENT_CLASSES[opt.tone].dot,
+										'text-[12.5px]',
+										opt.destructive
+											? 'text-destructive'
+											: 'text-foreground',
 									)}
-								/>
-								<span className="text-[12.5px] text-foreground">
+								>
 									{opt.label}
 								</span>
 							</Button>
