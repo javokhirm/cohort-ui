@@ -1745,5 +1745,6 @@ export const uz = {
 		nextMonth: 'Keyingi oy',
 		brandSurface: 'BOSHQARUV',
 		backToSignIn: 'Kirishga qaytish',
+		accountMenu: 'Hisob menyusi',
 	},
 } as const;

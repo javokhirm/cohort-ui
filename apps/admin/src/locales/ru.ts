@@ -1749,5 +1749,6 @@ export const ru: TranslationsOf<typeof uz> = {
 		nextMonth: 'Следующий месяц',
 		brandSurface: 'УПРАВЛЕНИЕ',
 		backToSignIn: 'Вернуться ко входу',
+		accountMenu: 'Меню аккаунта',
 	},
 };

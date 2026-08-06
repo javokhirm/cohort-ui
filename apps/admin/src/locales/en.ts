@@ -1710,5 +1710,6 @@ export const en: TranslationsOf<typeof uz> = {
 		nextMonth: 'Next month',
 		brandSurface: 'MANAGE',
 		backToSignIn: 'Back to sign in',
+		accountMenu: 'Account menu',
 	},
 };

@@ -12,29 +12,16 @@ import {
 	GraduationCap,
 	LayoutDashboard,
 	Layers,
-	LogOut,
-	MoreHorizontal,
 	Receipt,
 	SlidersHorizontal,
 	Tag,
-	User,
 	Wallet,
 } from 'lucide-react';
 import type { LucideIcon } from 'lucide-react';
 
-import {
-	cn,
-	DropdownMenu,
-	DropdownMenuContent,
-	DropdownMenuItem,
-	DropdownMenuSeparator,
-	DropdownMenuTrigger,
-	Tooltip,
-	TooltipContent,
-	TooltipTrigger,
-} from '@repo/ui';
+import { cn, Tooltip, TooltipContent, TooltipTrigger } from '@repo/ui';
 import { useT } from '@repo/i18n';
-import { useAuth, usePermissions } from '@/features/auth/hooks';
+import { usePermissions } from '@/features/auth/hooks';
 import type { PermissionRequirement } from '@/lib/auth/permissions';
 import { useAppT } from '@/locales';
 
@@ -371,12 +358,9 @@ function NavButton({
 }
 
 export function Sidebar({ collapsed }: SidebarProps) {
-	const { user, logout } = useAuth();
 	const { can, permissionsLoaded } = usePermissions();
 	const pathname = useRouterState({ select: (s) => s.location.pathname });
-	const navigate = useNavigate();
 	const t = useT('nav');
-	const tAuth = useT('auth');
 	const tApp = useAppT('shell');
 
 	// Cosmetic nav filtering — show only what the resolved permissions allow, and
@@ -395,12 +379,6 @@ export function Sidebar({ collapsed }: SidebarProps) {
 	// so the header carries the product brand rather than a tenant name.
 	const tenantName = 'Cohort';
 	const tenantInitial = 'C';
-
-	const fullName = user ? `${user.firstName} ${user.lastName}`.trim() : '';
-	const initials = user
-		? `${user.firstName?.[0] ?? ''}${user.lastName?.[0] ?? ''}`.toUpperCase()
-		: '?';
-	const primaryRole = user?.roles[0] ?? '';
 
 	return (
 		<aside
@@ -461,78 +439,6 @@ export function Sidebar({ collapsed }: SidebarProps) {
 					</div>
 				))}
 			</nav>
-
-			{/* User footer */}
-			<div className="shrink-0 border-t border-sidebar-border p-2.5">
-				<div className="flex items-center gap-2.5 rounded-xl p-2">
-					<Tooltip>
-						<TooltipTrigger asChild>
-							<div className="flex size-8 shrink-0 items-center justify-center rounded-lg bg-primary text-xs font-bold text-primary-foreground">
-								{initials}
-							</div>
-						</TooltipTrigger>
-						{collapsed && (
-							<TooltipContent side="right" sideOffset={8}>
-								<div className="font-semibold">{fullName}</div>
-								{primaryRole && (
-									<div className="text-[10px] text-muted-foreground">
-										{primaryRole}
-									</div>
-								)}
-							</TooltipContent>
-						)}
-					</Tooltip>
-
-					<div
-						style={{ transitionDelay: collapsed ? '0ms' : '80ms' }}
-						className={cn(
-							'flex min-w-0 flex-1 items-center gap-1.5 overflow-hidden whitespace-nowrap',
-							'transition-opacity duration-120',
-							collapsed ? 'opacity-0' : 'opacity-100',
-						)}
-					>
-						<div className="min-w-0 flex-1">
-							<div className="truncate text-[12.5px] font-semibold text-foreground">
-								{fullName}
-							</div>
-							{primaryRole && (
-								<div className="mt-0.5">
-									<span className="rounded-md bg-tone-indigo-bg px-1.5 py-px text-[9.5px] font-semibold uppercase tracking-wide text-tone-indigo-fg">
-										{primaryRole}
-									</span>
-								</div>
-							)}
-						</div>
-
-						<DropdownMenu>
-							<DropdownMenuTrigger asChild>
-								<button
-									type="button"
-									className="flex size-7 shrink-0 items-center justify-center rounded-md text-muted-foreground hover:bg-muted"
-								>
-									<MoreHorizontal className="size-4" />
-								</button>
-							</DropdownMenuTrigger>
-							<DropdownMenuContent side="top" align="end" className="w-40">
-								<DropdownMenuItem
-									onClick={() => void navigate({ to: '/account' })}
-								>
-									<User className="mr-2 size-4" />
-									{t('item.profile')}
-								</DropdownMenuItem>
-								<DropdownMenuSeparator />
-								<DropdownMenuItem
-									className="text-destructive focus:text-destructive"
-									onClick={logout}
-								>
-									<LogOut className="mr-2 size-4" />
-									{tAuth('signOut')}
-								</DropdownMenuItem>
-							</DropdownMenuContent>
-						</DropdownMenu>
-					</div>
-				</div>
-			</div>
 		</aside>
 	);
 }
