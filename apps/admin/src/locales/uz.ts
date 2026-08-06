@@ -1364,6 +1364,17 @@ export const uz = {
 			issuedInline: 'Chiqarilgan',
 			dueInline: 'Toʻlov muddati',
 		},
+		applyWallet: {
+			title: 'Hamyon mablagʻini qoʻllash',
+			walletBalance: 'Hamyon balansi',
+			amountDue: 'Toʻlanishi kerak',
+			willApply: 'Qoʻllanadi',
+			remaining: 'Hamyonda qoladi',
+			cannotUndo:
+				'Buni ortga qaytarib boʻlmaydi — hamyon toʻlovini qaytarib boʻlmaydi. Agar oʻquvchi naqd yoki karta orqali toʻlagan boʻlsa, buning oʻrniga «Toʻlovni qayd etish»dan foydalaning.',
+			emptyWallet: 'Bu oʻquvchining hamyonida mablagʻ yoʻq.',
+			loadFailed: 'Hamyon balansini yuklab boʻlmadi',
+		},
 		refundForm: {
 			destinationWallet: 'Hamyon',
 			destinationCashOut: 'Naqd yechish',

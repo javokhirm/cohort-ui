@@ -1365,6 +1365,17 @@ export const ru: TranslationsOf<typeof uz> = {
 			issuedInline: 'Выставлен',
 			dueInline: 'Срок оплаты',
 		},
+		applyWallet: {
+			title: 'Применить средства кошелька',
+			walletBalance: 'Баланс кошелька',
+			amountDue: 'К оплате',
+			willApply: 'Будет применено',
+			remaining: 'Останется в кошельке',
+			cannotUndo:
+				'Это действие необратимо — платёж из кошелька нельзя вернуть. Если студент заплатил наличными или картой, используйте «Записать платёж».',
+			emptyWallet: 'В кошельке этого студента нет средств.',
+			loadFailed: 'Не удалось загрузить баланс кошелька',
+		},
 		refundForm: {
 			destinationWallet: 'Кошелёк',
 			destinationCashOut: 'Наличными',
