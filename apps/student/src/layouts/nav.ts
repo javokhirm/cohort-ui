@@ -2,14 +2,24 @@ import { CalendarDays, CreditCard, Home, Target } from 'lucide-react';
 import type { LucideIcon } from 'lucide-react';
 
 /** Leaf keys under the `nav:item.*` catalog — resolved with `t()` at render. */
-type NavKey = 'home' | 'schedule' | 'progress' | 'billing' | 'notifications' | 'profile';
+type NavKey =
+	| 'home'
+	| 'schedule'
+	| 'progress'
+	| 'leaderboard'
+	| 'billing'
+	| 'notifications'
+	| 'profile';
 
 /** Leaf keys under this app's `shell.*` catalog — the app-bar subtitles. */
 type SubtitleKey = 'scheduleSubtitle' | 'progressSubtitle' | 'billingSubtitle';
 
-/** Every destination the shell can reach — the four tabs plus the bell and the avatar. */
+/**
+ * Every destination the shell can reach — the four tabs, the bell, the avatar,
+ * and `/leaderboard`, which only Home's card links to.
+ */
 export type StudentRoute =
-	'/' | '/schedule' | '/progress' | '/billing' | '/inbox' | '/profile';
+	'/' | '/schedule' | '/progress' | '/leaderboard' | '/billing' | '/inbox' | '/profile';
 
 export interface StudentNavItem {
 	id: string;
@@ -55,12 +65,16 @@ export const NAV_ITEMS: StudentNavItem[] = [
 /**
  * What the app bar says on each destination. Home is absent because it composes its own
  * pair at render — the time-of-day greeting over today's date — rather than a fixed key.
+ *
+ * `/leaderboard` appears here but not in {@link NAV_ITEMS}: like `/inbox` and
+ * `/profile` it is reached from within a screen (Home's card), not from a tab.
  */
 export const BAR_COPY: Partial<
 	Record<StudentRoute, { title: NavKey; subtitle?: SubtitleKey }>
 > = {
 	'/schedule': { title: 'schedule', subtitle: 'scheduleSubtitle' },
 	'/progress': { title: 'progress', subtitle: 'progressSubtitle' },
+	'/leaderboard': { title: 'leaderboard' },
 	'/billing': { title: 'billing', subtitle: 'billingSubtitle' },
 	'/inbox': { title: 'notifications' },
 	'/profile': { title: 'profile' },

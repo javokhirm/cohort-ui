@@ -170,6 +170,7 @@ export const en = {
 			// student console
 			home: 'Home',
 			progress: 'Progress',
+			leaderboard: 'Leaderboard',
 			billing: 'Billing',
 			notifications: 'Notifications',
 		},

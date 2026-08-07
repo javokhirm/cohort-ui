@@ -18,6 +18,9 @@ import { HomeRoute } from '@/routes/home';
 import { ScheduleRoute } from '@/routes/schedule';
 import { SessionDetailRoute } from '@/routes/session-detail';
 import { ProgressRoute } from '@/routes/progress';
+import { LeaderboardRoute } from '@/routes/leaderboard';
+import { parsePeriod } from '@/features/leaderboard/lib/period';
+import type { LeaderboardPeriod } from '@/features/leaderboard/lib/period';
 import { BillingRoute } from '@/routes/billing';
 import type { BillingView } from '@/routes/billing';
 import { InvoiceDetailRoute } from '@/routes/invoice-detail';
@@ -101,6 +104,25 @@ const progressRoute = createRoute({
 	component: ProgressRoute,
 });
 
+const leaderboardRoute = createRoute({
+	getParentRoute: () => authedRoute,
+	path: '/leaderboard',
+	// Both selectors live in the URL so back/forward restore what the student was
+	// looking at. `groupId` is dropped when it isn't a positive integer (the
+	// screen then falls back to the first rankable group rather than 400ing);
+	// `period` always resolves to a valid window.
+	validateSearch: (
+		search: Record<string, unknown>,
+	): { groupId?: number; period: LeaderboardPeriod } => {
+		const groupId = Number(search.groupId);
+		return {
+			groupId: Number.isInteger(groupId) && groupId > 0 ? groupId : undefined,
+			period: parsePeriod(search.period),
+		};
+	},
+	component: LeaderboardRoute,
+});
+
 const billingRoute = createRoute({
 	getParentRoute: () => authedRoute,
 	path: '/billing',
@@ -150,6 +172,7 @@ const routeTree = rootRoute.addChildren([
 		scheduleRoute,
 		sessionDetailRoute,
 		progressRoute,
+		leaderboardRoute,
 		billingRoute,
 		invoiceDetailRoute,
 		inboxRoute,

@@ -1085,6 +1085,40 @@ export interface paths {
 		patch?: never;
 		trace?: never;
 	};
+	'/api/v1/manage/students/{id}/performance': {
+		parameters: {
+			query?: never;
+			header?: never;
+			path?: never;
+			cookie?: never;
+		};
+		/** A student's attendance rate and average session mark over a period */
+		get: operations['StudentsController_performanceSummary'];
+		put?: never;
+		post?: never;
+		delete?: never;
+		options?: never;
+		head?: never;
+		patch?: never;
+		trace?: never;
+	};
+	'/api/v1/manage/students/{id}/performance/sessions': {
+		parameters: {
+			query?: never;
+			header?: never;
+			path?: never;
+			cookie?: never;
+		};
+		/** A student's session history with attendance + daily mark, newest first */
+		get: operations['StudentsController_performanceSessions'];
+		put?: never;
+		post?: never;
+		delete?: never;
+		options?: never;
+		head?: never;
+		patch?: never;
+		trace?: never;
+	};
 	'/api/v1/manage/students/{id}/results': {
 		parameters: {
 			query?: never;
@@ -2389,7 +2423,7 @@ export interface paths {
 			cookie?: never;
 		};
 		get?: never;
-		/** Upsert one student's attendance for today's session (table-view instant save; only today's session is editable) */
+		/** Upsert one student's attendance for a session I teach (table-view instant save; editable any past-or-today session, not a future one) */
 		put: operations['AttendanceController_upsert'];
 		post?: never;
 		delete?: never;
@@ -2425,10 +2459,11 @@ export interface paths {
 			cookie?: never;
 		};
 		get?: never;
-		/** Upsert one student's mark for today's session (table-view instant save; only today's session is editable) */
+		/** Upsert one student's mark for a session I teach (table-view instant save; editable any past-or-today session, not a future one) */
 		put: operations['SessionMarksController_upsert'];
 		post?: never;
-		delete?: never;
+		/** Clear a student's mark for a session I teach (table-view instant clear; idempotent, same past-or-today editability rule as the PUT upsert) */
+		delete: operations['SessionMarksController_clear'];
 		options?: never;
 		head?: never;
 		patch?: never;
@@ -2737,6 +2772,23 @@ export interface paths {
 		};
 		/** My daily-mark average, trend, last 10 marks and the scales in use */
 		get: operations['MarksController_summary'];
+		put?: never;
+		post?: never;
+		delete?: never;
+		options?: never;
+		head?: never;
+		patch?: never;
+		trace?: never;
+	};
+	'/api/v1/student/leaderboard': {
+		parameters: {
+			query?: never;
+			header?: never;
+			path?: never;
+			cookie?: never;
+		};
+		/** Where I rank in one of my groups, this month or all-time */
+		get: operations['LeaderboardController_board'];
 		put?: never;
 		post?: never;
 		delete?: never;
@@ -3867,6 +3919,41 @@ export interface components {
 			avatarUrl?: string;
 			/** @enum {string} */
 			preferredLanguage?: 'uz' | 'ru' | 'en';
+		};
+		StudentLeaderboardRowDto: {
+			/** @description Competition rank (1, 2, 2, 4 …) — ties share a rank. Null when the student has fewer than `minMarks` marks and is therefore unranked. */
+			rank: number | null;
+			/** @description First name + last initial ("Dilnoza A."), or null for an anonymous peer. Non-null only for my own row and, when `namesRevealed`, the top placings. */
+			displayName: string | null;
+			/** @description This is my row — the client labels it "You". */
+			isMe: boolean;
+			/** @description Mean normalizedPct over the window. */
+			averagePct: number | null;
+			/** @description Marks the average was computed over. */
+			markedCount: number;
+			/** @description Another ranked student shares this rank. */
+			tied: boolean;
+		};
+		StudentLeaderboardDto: {
+			groupId: number;
+			groupName: string;
+			/** @enum {string} */
+			period: 'month' | 'all';
+			/** @description The month covered (YYYY-MM) in the group's clock; null for all-time. */
+			month: string | null;
+			/** @description Students on the roster — the population ranked over. */
+			cohortSize: number;
+			/** @description How many cleared minMarks and carry a rank. */
+			rankedCount: number;
+			/** @description Marks needed in this window to be ranked. */
+			minMarks: number;
+			/** @description Mean of the ranked students' averages; null when nobody is ranked. */
+			groupAveragePct: number | null;
+			/** @description Whether the top placings are named. False keeps every peer anonymous. */
+			namesRevealed: boolean;
+			me: components['schemas']['StudentLeaderboardRowDto'];
+			/** @description Ranked, best first. */
+			rows: components['schemas']['StudentLeaderboardRowDto'][];
 		};
 	};
 	responses: never;
@@ -5420,6 +5507,57 @@ export interface operations {
 	StudentsController_attendanceSummary: {
 		parameters: {
 			query?: never;
+			header?: never;
+			path: {
+				id: number;
+			};
+			cookie?: never;
+		};
+		requestBody?: never;
+		responses: {
+			200: {
+				headers: {
+					[name: string]: unknown;
+				};
+				content?: never;
+			};
+		};
+	};
+	StudentsController_performanceSummary: {
+		parameters: {
+			query?: {
+				from?: string;
+				to?: string;
+				/** @description Narrow to one of the student's groups; omit for all of them. A group the student was never enrolled in yields an empty result, not an error. */
+				groupId?: number;
+			};
+			header?: never;
+			path: {
+				id: number;
+			};
+			cookie?: never;
+		};
+		requestBody?: never;
+		responses: {
+			200: {
+				headers: {
+					[name: string]: unknown;
+				};
+				content?: never;
+			};
+		};
+	};
+	StudentsController_performanceSessions: {
+		parameters: {
+			query?: {
+				page?: number;
+				limit?: number;
+				from?: string;
+				to?: string;
+				/** @description Narrow to one of the student's groups; omit for all of them. */
+				groupId?: number;
+				status?: 'PRESENT' | 'ABSENT' | 'LATE' | 'EXCUSED';
+			};
 			header?: never;
 			path: {
 				id: number;
@@ -7944,6 +8082,26 @@ export interface operations {
 			};
 		};
 	};
+	SessionMarksController_clear: {
+		parameters: {
+			query?: never;
+			header?: never;
+			path: {
+				id: number;
+				studentId: number;
+			};
+			cookie?: never;
+		};
+		requestBody?: never;
+		responses: {
+			204: {
+				headers: {
+					[name: string]: unknown;
+				};
+				content?: never;
+			};
+		};
+	};
 	AssessmentsController_list: {
 		parameters: {
 			query?: {
@@ -8413,6 +8571,30 @@ export interface operations {
 					[name: string]: unknown;
 				};
 				content?: never;
+			};
+		};
+	};
+	LeaderboardController_board: {
+		parameters: {
+			query: {
+				/** @description The group to rank within — one I am enrolled in. */
+				groupId: number;
+				/** @description Window to rank over. Defaults to the current calendar month. */
+				period?: 'month' | 'all';
+			};
+			header?: never;
+			path?: never;
+			cookie?: never;
+		};
+		requestBody?: never;
+		responses: {
+			200: {
+				headers: {
+					[name: string]: unknown;
+				};
+				content: {
+					'application/json': components['schemas']['StudentLeaderboardDto'];
+				};
 			};
 		};
 	};

@@ -94,7 +94,7 @@ export function AuthedLayout() {
 			: formatFullDate(todayIsoDate());
 
 	return (
-		<div className="flex h-svh overflow-hidden bg-background text-foreground">
+		<div className="flex h-dvh overflow-hidden bg-background text-foreground">
 			<AppSidebar
 				className="hidden md:flex"
 				logo={<BrandLogo />}
@@ -121,7 +121,7 @@ export function AuthedLayout() {
 					}
 				/>
 
-				<main className="flex-1 overflow-y-auto bg-muted px-4 pt-3.5 md:px-6 md:pt-5">
+				<main className="min-h-0 flex-1 overflow-y-auto overscroll-contain bg-muted px-4 pt-3.5 md:px-6 md:pt-5">
 					<Outlet />
 				</main>
 

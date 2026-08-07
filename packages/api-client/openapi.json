@@ -2717,6 +2717,153 @@
         ]
       }
     },
+    "/api/v1/manage/students/{id}/performance": {
+      "get": {
+        "operationId": "StudentsController_performanceSummary",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "number"
+            }
+          },
+          {
+            "name": "from",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "example": "2026-04-01",
+              "type": "string"
+            }
+          },
+          {
+            "name": "to",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "example": "2026-06-30",
+              "type": "string"
+            }
+          },
+          {
+            "name": "groupId",
+            "required": false,
+            "in": "query",
+            "description": "Narrow to one of the student's groups; omit for all of them. A group the student was never enrolled in yields an empty result, not an error.",
+            "schema": {
+              "type": "number"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "A student's attendance rate and average session mark over a period",
+        "tags": [
+          "Manage / Students"
+        ]
+      }
+    },
+    "/api/v1/manage/students/{id}/performance/sessions": {
+      "get": {
+        "operationId": "StudentsController_performanceSessions",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "number"
+            }
+          },
+          {
+            "name": "page",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "minimum": 1,
+              "default": 1,
+              "type": "number"
+            }
+          },
+          {
+            "name": "limit",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "minimum": 1,
+              "maximum": 100,
+              "default": 20,
+              "type": "number"
+            }
+          },
+          {
+            "name": "from",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "example": "2026-04-01",
+              "type": "string"
+            }
+          },
+          {
+            "name": "to",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "example": "2026-06-30",
+              "type": "string"
+            }
+          },
+          {
+            "name": "groupId",
+            "required": false,
+            "in": "query",
+            "description": "Narrow to one of the student's groups; omit for all of them.",
+            "schema": {
+              "type": "number"
+            }
+          },
+          {
+            "name": "status",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "type": "string",
+              "enum": [
+                "PRESENT",
+                "ABSENT",
+                "LATE",
+                "EXCUSED"
+              ]
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "A student's session history with attendance + daily mark, newest first",
+        "tags": [
+          "Manage / Students"
+        ]
+      }
+    },
     "/api/v1/manage/students/{id}/results": {
       "get": {
         "operationId": "StudentsController_listResults",
@@ -7323,7 +7470,7 @@
             "bearer": []
           }
         ],
-        "summary": "Upsert one student's attendance for today's session (table-view instant save; only today's session is editable)",
+        "summary": "Upsert one student's attendance for a session I teach (table-view instant save; editable any past-or-today session, not a future one)",
         "tags": [
           "Teach / Attendance"
         ]
@@ -7473,7 +7620,42 @@
             "bearer": []
           }
         ],
-        "summary": "Upsert one student's mark for today's session (table-view instant save; only today's session is editable)",
+        "summary": "Upsert one student's mark for a session I teach (table-view instant save; editable any past-or-today session, not a future one)",
+        "tags": [
+          "Teach / Marks"
+        ]
+      },
+      "delete": {
+        "operationId": "SessionMarksController_clear",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "number"
+            }
+          },
+          {
+            "name": "studentId",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "number"
+            }
+          }
+        ],
+        "responses": {
+          "204": {
+            "description": ""
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Clear a student's mark for a session I teach (table-view instant clear; idempotent, same past-or-today editability rule as the PUT upsert)",
         "tags": [
           "Teach / Marks"
         ]
@@ -8315,6 +8497,57 @@
         "summary": "My daily-mark average, trend, last 10 marks and the scales in use",
         "tags": [
           "Student / Marks"
+        ]
+      }
+    },
+    "/api/v1/student/leaderboard": {
+      "get": {
+        "operationId": "LeaderboardController_board",
+        "parameters": [
+          {
+            "name": "groupId",
+            "required": true,
+            "in": "query",
+            "description": "The group to rank within — one I am enrolled in.",
+            "schema": {
+              "type": "number"
+            }
+          },
+          {
+            "name": "period",
+            "required": false,
+            "in": "query",
+            "description": "Window to rank over. Defaults to the current calendar month.",
+            "schema": {
+              "default": "month",
+              "type": "string",
+              "enum": [
+                "month",
+                "all"
+              ]
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/StudentLeaderboardDto"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Where I rank in one of my groups, this month or all-time",
+        "tags": [
+          "Student / Leaderboard"
         ]
       }
     },
@@ -11069,6 +11302,113 @@
             ]
           }
         }
+      },
+      "StudentLeaderboardRowDto": {
+        "type": "object",
+        "properties": {
+          "rank": {
+            "type": "number",
+            "nullable": true,
+            "description": "Competition rank (1, 2, 2, 4 …) — ties share a rank. Null when the student has fewer than `minMarks` marks and is therefore unranked."
+          },
+          "displayName": {
+            "type": "string",
+            "nullable": true,
+            "description": "First name + last initial (\"Dilnoza A.\"), or null for an anonymous peer. Non-null only for my own row and, when `namesRevealed`, the top placings."
+          },
+          "isMe": {
+            "type": "boolean",
+            "description": "This is my row — the client labels it \"You\"."
+          },
+          "averagePct": {
+            "type": "number",
+            "nullable": true,
+            "description": "Mean normalizedPct over the window."
+          },
+          "markedCount": {
+            "type": "number",
+            "description": "Marks the average was computed over."
+          },
+          "tied": {
+            "type": "boolean",
+            "description": "Another ranked student shares this rank."
+          }
+        },
+        "required": [
+          "rank",
+          "displayName",
+          "isMe",
+          "averagePct",
+          "markedCount",
+          "tied"
+        ]
+      },
+      "StudentLeaderboardDto": {
+        "type": "object",
+        "properties": {
+          "groupId": {
+            "type": "number"
+          },
+          "groupName": {
+            "type": "string"
+          },
+          "period": {
+            "type": "string",
+            "enum": [
+              "month",
+              "all"
+            ]
+          },
+          "month": {
+            "type": "string",
+            "nullable": true,
+            "description": "The month covered (YYYY-MM) in the group's clock; null for all-time."
+          },
+          "cohortSize": {
+            "type": "number",
+            "description": "Students on the roster — the population ranked over."
+          },
+          "rankedCount": {
+            "type": "number",
+            "description": "How many cleared minMarks and carry a rank."
+          },
+          "minMarks": {
+            "type": "number",
+            "description": "Marks needed in this window to be ranked."
+          },
+          "groupAveragePct": {
+            "type": "number",
+            "nullable": true,
+            "description": "Mean of the ranked students' averages; null when nobody is ranked."
+          },
+          "namesRevealed": {
+            "type": "boolean",
+            "description": "Whether the top placings are named. False keeps every peer anonymous."
+          },
+          "me": {
+            "$ref": "#/components/schemas/StudentLeaderboardRowDto"
+          },
+          "rows": {
+            "description": "Ranked, best first.",
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/StudentLeaderboardRowDto"
+            }
+          }
+        },
+        "required": [
+          "groupId",
+          "groupName",
+          "period",
+          "month",
+          "cohortSize",
+          "rankedCount",
+          "minMarks",
+          "groupAveragePct",
+          "namesRevealed",
+          "me",
+          "rows"
+        ]
       }
     }
   }
