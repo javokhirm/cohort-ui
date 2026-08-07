@@ -11,15 +11,16 @@ import { HomeStats } from '@/features/home/components/HomeStats';
 import { LatestMarkCard } from '@/features/home/components/LatestMarkCard';
 import { NextClassCard } from '@/features/home/components/NextClassCard';
 import { TodaySessionList } from '@/features/home/components/TodaySessionList';
+import { HomeLeaderboardCard } from '@/features/leaderboard/components/HomeLeaderboardCard';
 import { useAppT } from '@/locales';
 
 /**
  * The student's Home screen (composed from `GET /student/home`): the next/current class,
- * an outstanding-balance banner, the momentum row (streak / attendance rate), today's
- * timeline, and the latest daily class mark. The greeting and today's date are the app
- * bar's title and subtitle, so this column carries no heading of its own. Each section
- * shows only when its backing data is present — this screen never fabricates content the
- * endpoint didn't return.
+ * an outstanding-balance banner, the momentum row (streak / attendance rate), this
+ * month's leaderboard standing, today's timeline, and the latest daily class mark. The
+ * greeting and today's date are the app bar's title and subtitle, so this column carries
+ * no heading of its own. Each section shows only when its backing data is present — this
+ * screen never fabricates content the endpoint didn't return.
  */
 export function HomeRoute() {
 	const t = useAppT('home');
@@ -36,8 +37,8 @@ export function HomeRoute() {
 		return (
 			<div className="mx-auto flex w-full max-w-200 flex-col gap-4">
 				<Skeleton className="h-36 w-full rounded-xl" />
-				<div className="grid grid-cols-3 gap-3">
-					<Skeleton className="h-24 rounded-xl" />
+				{/* Two columns, matching `HomeStats` — streak and attendance rate. */}
+				<div className="grid grid-cols-2 gap-3">
 					<Skeleton className="h-24 rounded-xl" />
 					<Skeleton className="h-24 rounded-xl" />
 				</div>
@@ -83,6 +84,22 @@ export function HomeRoute() {
 			)}
 
 			<HomeStats attendance={data.attendance} />
+
+			{data.leaderboard && (
+				<HomeLeaderboardCard
+					standing={data.leaderboard}
+					onOpen={() =>
+						void navigate({
+							to: '/leaderboard',
+							// Land on the board for the group the standing describes.
+							search: {
+								groupId: data.leaderboard!.groupId,
+								period: 'month',
+							},
+						})
+					}
+				/>
+			)}
 
 			<div>
 				<div className="mb-2.5 flex items-center justify-between gap-2">

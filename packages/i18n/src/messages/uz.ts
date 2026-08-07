@@ -192,6 +192,7 @@ export const uz = {
 			// student console
 			home: 'Bosh sahifa',
 			progress: 'Natijalar',
+			leaderboard: 'Reyting',
 			billing: 'Toʻlovlar',
 			notifications: 'Bildirishnomalar',
 		},

@@ -171,6 +171,7 @@ export const ru = {
 			// student console
 			home: 'Главная',
 			progress: 'Успеваемость',
+			leaderboard: 'Рейтинг',
 			billing: 'Платежи',
 			notifications: 'Уведомления',
 		},

@@ -1,10 +1,11 @@
 import { PanelLeft, Search } from 'lucide-react';
 
-import { NotificationBell, ThemeToggle } from '@repo/ui';
+import { NotificationBell, Separator, ThemeToggle } from '@repo/ui';
 import { useT } from '@repo/i18n';
 
 import { BranchSelector } from './BranchSelector';
 import { LanguageMenu } from './LanguageMenu';
+import { UserMenu } from './UserMenu';
 
 interface HeaderProps {
 	sidebarCollapsed: boolean;
@@ -47,14 +48,22 @@ export function Header({ sidebarCollapsed, onSidebarToggle }: HeaderProps) {
 
 			<div className="flex-1" />
 
-			{/* Language picker */}
-			<LanguageMenu />
+			{/* Trailing cluster — tools first, identity last */}
+			<div className="flex items-center gap-1">
+				{/* Language picker */}
+				<LanguageMenu />
 
-			{/* Notifications */}
-			<NotificationBell unreadCount={0} />
+				{/* Notifications */}
+				<NotificationBell unreadCount={0} />
 
-			{/* Theme toggle */}
-			<ThemeToggle className="size-8 rounded-lg" />
+				{/* Theme toggle */}
+				<ThemeToggle className="size-8 rounded-lg" />
+
+				<Separator orientation="vertical" className="mx-1 h-5" />
+
+				{/* Account */}
+				<UserMenu />
+			</div>
 		</header>
 	);
 }

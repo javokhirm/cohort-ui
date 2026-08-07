@@ -1335,6 +1335,17 @@ export const en: TranslationsOf<typeof uz> = {
 			issuedInline: 'Issued',
 			dueInline: 'Due',
 		},
+		applyWallet: {
+			title: 'Apply wallet credit',
+			walletBalance: 'Wallet balance',
+			amountDue: 'Amount due',
+			willApply: 'Will be applied',
+			remaining: 'Left in wallet',
+			cannotUndo:
+				"This can't be undone — a wallet payment is not refundable. If the student paid in cash or by card, use “Record payment” instead.",
+			emptyWallet: 'This student has no wallet credit.',
+			loadFailed: 'Failed to load the wallet balance',
+		},
 		refundForm: {
 			destinationWallet: 'Wallet',
 			destinationCashOut: 'Cash out',
@@ -1699,5 +1710,6 @@ export const en: TranslationsOf<typeof uz> = {
 		nextMonth: 'Next month',
 		brandSurface: 'MANAGE',
 		backToSignIn: 'Back to sign in',
+		accountMenu: 'Account menu',
 	},
 };

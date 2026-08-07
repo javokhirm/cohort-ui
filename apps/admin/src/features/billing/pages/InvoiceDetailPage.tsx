@@ -36,8 +36,9 @@ import { useAppT } from '@/locales';
 
 import { Can } from '@/components/Can';
 import { useInvoice, type InvoiceDetail } from '../api/invoices.queries';
-import { useApplyWalletCredit, useUpdateInvoice } from '../api/invoices.mutations';
+import { useUpdateInvoice } from '../api/invoices.mutations';
 import { ApplyDiscountDialog } from '../components/ApplyDiscountDialog';
+import { ApplyWalletCreditDialog } from '../components/ApplyWalletCreditDialog';
 import { CreditNotesCard } from '../components/CreditNotesCard';
 import { InvoiceForm } from '../components/InvoiceForm';
 import { RecordPaymentDialog } from '../components/RecordPaymentDialog';
@@ -72,7 +73,6 @@ function InvoiceHeader({
 	onApplyDiscount,
 	onVoid,
 	actionPending,
-	applyCreditPending,
 }: {
 	invoice: InvoiceDetail;
 	onEdit: () => void;
@@ -82,7 +82,6 @@ function InvoiceHeader({
 	onApplyDiscount: () => void;
 	onVoid: () => void;
 	actionPending: boolean;
-	applyCreditPending: boolean;
 }) {
 	const tc = useT('common');
 	const t = useAppT('billing');
@@ -166,11 +165,7 @@ function InvoiceHeader({
 
 					{canApplyCredit && (
 						<Can permission="wallet.apply">
-							<Button
-								variant="outline"
-								onClick={onApplyCredit}
-								disabled={applyCreditPending}
-							>
+							<Button variant="outline" onClick={onApplyCredit}>
 								<Landmark className="mr-1.5 size-4" />
 								{t('misc.applyWalletCredit')}
 							</Button>
@@ -400,10 +395,10 @@ export function InvoiceDetailPage({ invoiceId }: InvoiceDetailPageProps) {
 	const [editOpen, setEditOpen] = useState(false);
 	const [paymentOpen, setPaymentOpen] = useState(false);
 	const [discountOpen, setDiscountOpen] = useState(false);
+	const [walletCreditOpen, setWalletCreditOpen] = useState(false);
 	const [voidOpen, setVoidOpen] = useState(false);
 
 	const updateInvoice = useUpdateInvoice();
-	const applyWalletCredit = useApplyWalletCredit();
 
 	async function handleIssue() {
 		if (!invoice) return;
@@ -412,24 +407,6 @@ export function InvoiceDetailPage({ invoiceId }: InvoiceDetailPageProps) {
 			toast.success(t('invoiceExtra.issued'));
 		} catch (err) {
 			toast.error(isApiError(err) ? err.message : t('invoiceActions.issueFailed'));
-		}
-	}
-
-	async function handleApplyCredit() {
-		if (!invoice) return;
-		try {
-			const result = await applyWalletCredit.mutateAsync(invoice.id);
-			toast.success(
-				result.applied > 0
-					? t('invoiceActions.walletApplied', {
-							amount: formatPrice(result.applied),
-						})
-					: t('invoiceActions.noWalletCredit'),
-			);
-		} catch (err) {
-			toast.error(
-				isApiError(err) ? err.message : t('invoiceActions.applyWalletFailed'),
-			);
 		}
 	}
 
@@ -467,11 +444,10 @@ export function InvoiceDetailPage({ invoiceId }: InvoiceDetailPageProps) {
 						onEdit={() => setEditOpen(true)}
 						onIssue={() => void handleIssue()}
 						onRecordPayment={() => setPaymentOpen(true)}
-						onApplyCredit={() => void handleApplyCredit()}
+						onApplyCredit={() => setWalletCreditOpen(true)}
 						onApplyDiscount={() => setDiscountOpen(true)}
 						onVoid={() => setVoidOpen(true)}
 						actionPending={updateInvoice.isPending}
-						applyCreditPending={applyWalletCredit.isPending}
 					/>
 
 					<div className="grid grid-cols-1 gap-5 lg:grid-cols-3">
@@ -499,6 +475,11 @@ export function InvoiceDetailPage({ invoiceId }: InvoiceDetailPageProps) {
 						invoice={invoice}
 						open={discountOpen}
 						onOpenChange={setDiscountOpen}
+					/>
+					<ApplyWalletCreditDialog
+						invoice={invoice}
+						open={walletCreditOpen}
+						onOpenChange={setWalletCreditOpen}
 					/>
 					<ConfirmDialog
 						open={voidOpen}
