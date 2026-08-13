@@ -9,8 +9,7 @@ import { useSessionStore } from '@/store/sessionStore';
 import { useMe } from '@/features/profile/api/profile.queries';
 import { useUnreadCount } from '@/features/inbox/api/notifications.queries';
 import { BAR_COPY, barRouteFor, NAV_ITEMS } from '@/layouts/nav';
-import { AvatarButton } from '@/layouts/AvatarButton';
-import { OverflowMenu } from '@/layouts/OverflowMenu';
+import { UserMenu } from '@/layouts/UserMenu';
 import { useAppT } from '@/locales';
 
 /** Gradient brand mark shown in the sidebar header. */
@@ -66,11 +65,6 @@ export function AuthedLayout() {
 
 	if (status !== 'authenticated') return null;
 
-	const fullName = user ? `${user.firstName} ${user.lastName}`.trim() : '';
-	const initials = user
-		? `${user.firstName?.[0] ?? ''}${user.lastName?.[0] ?? ''}`.toUpperCase()
-		: '?';
-
 	const navItems = NAV_ITEMS.map(({ id, label, href, Icon }) => ({
 		id,
 		label: t(`item.${label}`),
@@ -100,9 +94,6 @@ export function AuthedLayout() {
 				logo={<BrandLogo />}
 				centerName="Cohort"
 				navItems={navItems}
-				user={{ name: fullName, initials, role: 'STUDENT' }}
-				onUserClick={() => void navigate({ to: '/profile' })}
-				userActions={<OverflowMenu />}
 			/>
 
 			<div className="flex min-w-0 flex-1 flex-col overflow-hidden">
@@ -111,14 +102,7 @@ export function AuthedLayout() {
 					subtitle={subtitle}
 					hasNotifications={(unreadCount ?? 0) > 0}
 					onNotificationsClick={() => void navigate({ to: '/inbox' })}
-					trailing={
-						<AvatarButton
-							className="md:hidden"
-							initials={initials}
-							label={tShell('openProfile')}
-							onClick={() => void navigate({ to: '/profile' })}
-						/>
-					}
+					trailing={<UserMenu />}
 				/>
 
 				<main className="min-h-0 flex-1 overflow-y-auto overscroll-contain bg-muted px-4 pt-3.5 md:px-6 md:pt-5">

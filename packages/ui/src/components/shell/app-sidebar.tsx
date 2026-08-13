@@ -25,7 +25,11 @@ interface AppSidebarProps extends React.ComponentProps<'aside'> {
 	/** Surface label shown in monospace below the center name (e.g. "MANAGE"). */
 	surface?: string;
 	navItems: SidebarNavItem[];
-	user: SidebarUser;
+	/**
+	 * Identity footer. Optional: consoles that surface identity elsewhere (e.g. a
+	 * topbar account menu) omit it and the footer isn't rendered.
+	 */
+	user?: SidebarUser;
 	onUserClick?: () => void;
 	/** Optional trailing slot in the user footer row (e.g. a dots-menu button). */
 	userActions?: React.ReactNode;
@@ -105,28 +109,30 @@ function AppSidebar({
 			</nav>
 
 			{/* User footer */}
-			<div className="shrink-0 border-t border-sidebar-border p-2.5">
-				<button
-					type="button"
-					onClick={onUserClick}
-					className="flex w-full items-center gap-2.5 rounded-xl p-2 transition-colors hover:bg-muted"
-				>
-					<div className="flex size-9 shrink-0 items-center justify-center rounded-xl bg-tone-indigo-bg text-sm font-semibold text-tone-indigo-fg">
-						{user.initials}
-					</div>
-					<div className="min-w-0 flex-1 text-left">
-						<div className="truncate text-[12.5px] font-semibold text-foreground">
-							{user.name}
+			{user && (
+				<div className="shrink-0 border-t border-sidebar-border p-2.5">
+					<button
+						type="button"
+						onClick={onUserClick}
+						className="flex w-full items-center gap-2.5 rounded-xl p-2 transition-colors hover:bg-muted"
+					>
+						<div className="flex size-9 shrink-0 items-center justify-center rounded-xl bg-tone-indigo-bg text-sm font-semibold text-tone-indigo-fg">
+							{user.initials}
 						</div>
-						<div className="mt-0.5">
-							<span className="rounded-md bg-tone-indigo-bg px-1.5 py-px text-[9.5px] font-semibold uppercase tracking-wide text-tone-indigo-fg">
-								{user.role}
-							</span>
+						<div className="min-w-0 flex-1 text-left">
+							<div className="truncate text-[12.5px] font-semibold text-foreground">
+								{user.name}
+							</div>
+							<div className="mt-0.5">
+								<span className="rounded-md bg-tone-indigo-bg px-1.5 py-px text-[9.5px] font-semibold uppercase tracking-wide text-tone-indigo-fg">
+									{user.role}
+								</span>
+							</div>
 						</div>
-					</div>
-					{userActions && <div className="shrink-0">{userActions}</div>}
-				</button>
-			</div>
+						{userActions && <div className="shrink-0">{userActions}</div>}
+					</button>
+				</div>
+			)}
 		</aside>
 	);
 }

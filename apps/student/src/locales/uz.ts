@@ -25,7 +25,7 @@ export const uz = {
 		leaderboardSubtitle: 'Guruhdagi oʻrningiz',
 		billingSubtitle: 'Invoyslar va toʻlovlar',
 		openNotifications: 'Bildirishnomalarni ochish',
-		openProfile: 'Profilni ochish',
+		accountMenu: 'Hisob menyusi',
 		profileSubtitle: '{{code}} · {{branch}}',
 	},
 	home: {

@@ -14,7 +14,7 @@ export const en: TranslationsOf<typeof uz> = {
 		leaderboardSubtitle: 'Where you stand in the group',
 		billingSubtitle: 'Invoices & payments',
 		openNotifications: 'Open notifications',
-		openProfile: 'Open profile',
+		accountMenu: 'Account menu',
 		profileSubtitle: '{{code}} · {{branch}}',
 	},
 	home: {

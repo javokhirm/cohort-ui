@@ -14,7 +14,7 @@ export const ru: TranslationsOf<typeof uz> = {
 		leaderboardSubtitle: 'Ваше место в группе',
 		billingSubtitle: 'Счета и платежи',
 		openNotifications: 'Открыть уведомления',
-		openProfile: 'Открыть профиль',
+		accountMenu: 'Меню аккаунта',
 		profileSubtitle: '{{code}} · {{branch}}',
 	},
 	home: {
