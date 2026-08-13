@@ -1,3 +1,4 @@
+import { useEffect } from 'react';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 
@@ -6,10 +7,13 @@ import {
 	Checkbox,
 	Form,
 	FormControl,
+	FormDescription,
 	FormField,
+	FormInput,
 	FormItem,
 	FormLabel,
 	FormMessage,
+	FormMoneyInput,
 	Input,
 	Label,
 	Sheet,
@@ -53,6 +57,13 @@ export function PlanDrawer({
 		defaultValues,
 	});
 
+	useEffect(() => {
+		if (open) {
+			form.reset(defaultValues);
+		}
+		// eslint-disable-next-line react-hooks/exhaustive-deps
+	}, [open, mode]);
+
 	return (
 		<Sheet open={open} onOpenChange={onOpenChange}>
 			<SheetContent
@@ -68,65 +79,25 @@ export function PlanDrawer({
 						onSubmit={form.handleSubmit(onSave)}
 						className="flex flex-1 flex-col gap-5 px-4 py-2"
 					>
-						<FormField
+						<FormInput
 							control={form.control}
 							name="name"
-							render={({ field }) => (
-								<FormItem>
-									<FormLabel>{t('planName')}</FormLabel>
-									<FormControl>
-										<Input
-											placeholder={t('planNamePlaceholder')}
-											{...field}
-										/>
-									</FormControl>
-									<FormMessage />
-								</FormItem>
-							)}
+							label={t('planName')}
+							placeholder={t('planNamePlaceholder')}
 						/>
 
 						<div className="grid grid-cols-2 gap-4">
-							<FormField
+							<FormMoneyInput
 								control={form.control}
 								name="priceMonthly"
-								render={({ field }) => (
-									<FormItem>
-										<FormLabel>{t('monthlyPrice')}</FormLabel>
-										<FormControl>
-											<Input
-												type="number"
-												min={0}
-												placeholder="2400000"
-												{...field}
-												onChange={(e) =>
-													field.onChange(Number(e.target.value))
-												}
-											/>
-										</FormControl>
-										<FormMessage />
-									</FormItem>
-								)}
+								label={t('monthlyPrice')}
+								placeholder="2400000"
 							/>
-							<FormField
+							<FormMoneyInput
 								control={form.control}
 								name="priceAnnual"
-								render={({ field }) => (
-									<FormItem>
-										<FormLabel>{t('annualPrice')}</FormLabel>
-										<FormControl>
-											<Input
-												type="number"
-												min={0}
-												placeholder="24000000"
-												{...field}
-												onChange={(e) =>
-													field.onChange(Number(e.target.value))
-												}
-											/>
-										</FormControl>
-										<FormMessage />
-									</FormItem>
-								)}
+								label={t('annualPrice')}
+								placeholder="24000000"
 							/>
 						</div>
 
@@ -139,7 +110,6 @@ export function PlanDrawer({
 										<FormLabel>{t('studentLimit')}</FormLabel>
 										<FormControl>
 											<Input
-												type="number"
 												min={0}
 												placeholder="300"
 												{...field}
@@ -148,9 +118,9 @@ export function PlanDrawer({
 												}
 											/>
 										</FormControl>
-										<p className="text-xs text-muted-foreground">
+										<FormDescription>
 											{t('unlimitedHint')}
-										</p>
+										</FormDescription>
 										<FormMessage />
 									</FormItem>
 								)}
@@ -163,7 +133,6 @@ export function PlanDrawer({
 										<FormLabel>{t('branchLimit')}</FormLabel>
 										<FormControl>
 											<Input
-												type="number"
 												min={0}
 												placeholder="5"
 												{...field}
@@ -172,9 +141,9 @@ export function PlanDrawer({
 												}
 											/>
 										</FormControl>
-										<p className="text-xs text-muted-foreground">
+										<FormDescription>
 											{t('unlimitedHint')}
-										</p>
+										</FormDescription>
 										<FormMessage />
 									</FormItem>
 								)}
