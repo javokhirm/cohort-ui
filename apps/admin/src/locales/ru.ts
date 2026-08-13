@@ -900,6 +900,7 @@ export const ru: TranslationsOf<typeof uz> = {
 		},
 		roster: {
 			title: 'Список',
+			rowActionsAria: 'Действия с зачислением',
 			enrolledSummary: '{{filled}} зачислено',
 			enrolledOn: 'зачислен {{date}}',
 			enroll: 'Зачислить учеников',

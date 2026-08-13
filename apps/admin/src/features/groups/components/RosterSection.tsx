@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { Pause, Plus, RotateCcw, UserMinus, Users } from 'lucide-react';
+import { MoreHorizontal, Pause, Plus, RotateCcw, UserMinus, Users } from 'lucide-react';
 
 import {
 	Button,
@@ -11,6 +11,10 @@ import {
 	DialogFooter,
 	DialogHeader,
 	DialogTitle,
+	DropdownMenu,
+	DropdownMenuContent,
+	DropdownMenuItem,
+	DropdownMenuTrigger,
 	EmptyState,
 	Label,
 	Select,
@@ -150,6 +154,10 @@ export function RosterSection({ groupId, capacity }: RosterSectionProps) {
 				<Card className="gap-0 divide-y divide-border py-0">
 					{visibleEnrollments.map((e) => {
 						const transitions = ENROLLMENT_TRANSITIONS[e.status];
+						const canReactivate = transitions.includes('ACTIVE');
+						const canSuspend = transitions.includes('SUSPENDED');
+						const canDrop = transitions.includes('DROPPED');
+						const hasActions = canReactivate || canSuspend || canDrop;
 						return (
 							<div
 								key={e.id}
@@ -170,41 +178,49 @@ export function RosterSection({ groupId, capacity }: RosterSectionProps) {
 									<StatusBadge kind="enrollment" status={e.status}>
 										{statusLabel('enrollment', e.status)}
 									</StatusBadge>
-									<Can permission="enrollment.update">
-										<div className="flex items-center gap-1">
-											{transitions.includes('ACTIVE') && (
-												<Button
-													variant="ghost"
-													size="sm"
-													onClick={() => setReactivateTarget(e)}
-												>
-													<RotateCcw className="mr-1.5 size-3.5" />
-													{t('actions.reactivate')}
-												</Button>
-											)}
-											{transitions.includes('SUSPENDED') && (
-												<Button
-													variant="ghost"
-													size="sm"
-													onClick={() => setSuspendTarget(e)}
-												>
-													<Pause className="mr-1.5 size-3.5" />
-													{t('actions.suspend')}
-												</Button>
-											)}
-											{transitions.includes('DROPPED') && (
-												<Button
-													variant="ghost"
-													size="sm"
-													className="text-destructive hover:text-destructive"
-													onClick={() => setDropTarget(e)}
-												>
-													<UserMinus className="mr-1.5 size-3.5" />
-													{t('actions.drop')}
-												</Button>
-											)}
-										</div>
-									</Can>
+									{hasActions && (
+										<Can permission="enrollment.update">
+											<DropdownMenu>
+												<DropdownMenuTrigger asChild>
+													<Button
+														variant="ghost"
+														size="sm"
+														className="size-8 p-0"
+														aria-label={t('roster.rowActionsAria')}
+													>
+														<MoreHorizontal className="size-4" />
+													</Button>
+												</DropdownMenuTrigger>
+												<DropdownMenuContent align="end">
+													{canReactivate && (
+														<DropdownMenuItem
+															onClick={() => setReactivateTarget(e)}
+														>
+															<RotateCcw />
+															{t('actions.reactivate')}
+														</DropdownMenuItem>
+													)}
+													{canSuspend && (
+														<DropdownMenuItem
+															onClick={() => setSuspendTarget(e)}
+														>
+															<Pause />
+															{t('actions.suspend')}
+														</DropdownMenuItem>
+													)}
+													{canDrop && (
+														<DropdownMenuItem
+															variant="destructive"
+															onClick={() => setDropTarget(e)}
+														>
+															<UserMinus />
+															{t('actions.drop')}
+														</DropdownMenuItem>
+													)}
+												</DropdownMenuContent>
+											</DropdownMenu>
+										</Can>
+									)}
 								</div>
 							</div>
 						);

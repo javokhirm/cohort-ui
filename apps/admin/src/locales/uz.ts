@@ -898,6 +898,7 @@ export const uz = {
 		},
 		roster: {
 			title: 'Roʻyxat',
+			rowActionsAria: 'Qabul amallari',
 			enrolledSummary: '{{filled}} qabul qilingan',
 			enrolledOn: 'qabul qilingan {{date}}',
 			enroll: 'Oʻquvchilarni qabul qilish',

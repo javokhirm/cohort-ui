@@ -873,6 +873,7 @@ export const en: TranslationsOf<typeof uz> = {
 		},
 		roster: {
 			title: 'Roster',
+			rowActionsAria: 'Enrollment actions',
 			enrolledSummary: '{{filled}} enrolled',
 			enrolledOn: 'enrolled {{date}}',
 			enroll: 'Enroll students',
