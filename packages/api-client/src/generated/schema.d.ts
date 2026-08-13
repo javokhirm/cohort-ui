@@ -3947,8 +3947,8 @@ export interface components {
 			rankedCount: number;
 			/** @description Marks needed in this window to be ranked. */
 			minMarks: number;
-			/** @description Mean of the ranked students' averages; null when nobody is ranked. */
-			groupAveragePct: number | null;
+			/** @description Students needed on the roster before any ranking is reported. Below it `rows` is empty and every rank is null — the client explains the empty board with this figure rather than assuming the threshold. */
+			minCohort: number;
 			/** @description Whether the top placings are named. False keeps every peer anonymous. */
 			namesRevealed: boolean;
 			me: components['schemas']['StudentLeaderboardRowDto'];

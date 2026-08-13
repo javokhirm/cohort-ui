@@ -4,6 +4,7 @@ import { Card, ProgressBar, StatusBadge } from '@repo/ui';
 import { formatTime } from '@repo/utils';
 
 import type { NextClassInfo } from '../lib/next-class';
+import { clickableCardProps } from '@/lib/clickable-card';
 import { useAppT } from '@/locales';
 
 interface NextClassCardProps {
@@ -12,15 +13,19 @@ interface NextClassCardProps {
 	onOpen: () => void;
 }
 
-/** The Home screen's hero: today's current or next class, or a quiet "done for today" state. */
+/**
+ * The Home screen's hero: today's current or next class, or a quiet "done for
+ * today" state. The whole card opens the session, so it carries a button's role
+ * and keyboard behaviour — see `lib/clickable-card.ts`.
+ */
 export function NextClassCard({ info, onOpen }: NextClassCardProps) {
 	const t = useAppT('home');
 	const { session, isLive, isDone, progressPct } = info;
 
 	return (
 		<Card
-			onClick={onOpen}
-			className="cursor-pointer gap-0 py-0 transition-colors hover:border-primary"
+			{...clickableCardProps(onOpen)}
+			className="cursor-pointer gap-0 py-0 transition-colors hover:border-primary focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2 focus-visible:ring-offset-background"
 		>
 			<div className="flex flex-col gap-3.5 p-4">
 				<div className="flex items-center gap-2">

@@ -15,6 +15,10 @@ interface GroupSelectChipsProps {
  * a student against classmates they have never shared a class with.
  *
  * Renders nothing for a single group — a switch with one option is noise.
+ *
+ * The chip itself is Progress's, down to the radius and the active tint: it is
+ * the same control doing the same job two screens apart, and a student should
+ * not have to learn it twice. Only the option set differs.
  */
 export function GroupSelectChips({ groups, selected, onSelect }: GroupSelectChipsProps) {
 	if (groups.length < 2) return null;
@@ -30,9 +34,9 @@ export function GroupSelectChips({ groups, selected, onSelect }: GroupSelectChip
 						onClick={() => onSelect(group.id)}
 						aria-pressed={active}
 						className={cn(
-							'inline-flex h-8 shrink-0 cursor-pointer items-center rounded-full border px-3.5 text-[12.5px] font-semibold transition-colors',
+							'inline-flex h-8 shrink-0 cursor-pointer items-center rounded-[9px] border px-3.5 text-[12.5px] font-semibold transition-colors',
 							active
-								? 'border-primary bg-primary text-primary-foreground shadow-sm'
+								? 'border-primary bg-tone-indigo-bg text-tone-indigo-fg'
 								: 'border-border bg-card text-foreground/70 hover:border-primary',
 						)}
 					>

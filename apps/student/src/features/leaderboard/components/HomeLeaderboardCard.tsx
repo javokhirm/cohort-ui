@@ -4,6 +4,8 @@ import { Card, cn } from '@repo/ui';
 
 import type { StudentHomeLeaderboard } from '@/features/home/api/home.queries';
 import { isPodiumRank, placeStyle } from '../lib/place';
+import { topPercentile } from '../lib/standing';
+import { clickableCardProps } from '@/lib/clickable-card';
 import { useAppT } from '@/locales';
 
 interface HomeLeaderboardCardProps {
@@ -24,20 +26,22 @@ interface HomeLeaderboardCardProps {
  * extra request. The server returns `null` whenever there is no rank worth
  * reporting, and Home skips the card entirely in that case; nothing here has to
  * decide whether the standing is meaningful.
+ *
+ * The whole card is the target, so it carries a button's role and keyboard
+ * behaviour rather than a bare `onClick` — see `lib/clickable-card.ts`.
  */
 export function HomeLeaderboardCard({ standing, onOpen }: HomeLeaderboardCardProps) {
 	const t = useAppT('leaderboard');
 	const medal = isPodiumRank(standing.rank) ? placeStyle(standing.rank) : null;
 	const Icon = medal?.Icon ?? Trophy;
-	const topPct =
-		standing.rankedCount > 0
-			? Math.max(1, Math.round((standing.rank / standing.rankedCount) * 100))
-			: null;
+	// Same rule the board applies, from one place — Home must not congratulate a
+	// student the board itself would not.
+	const topPct = topPercentile(standing.rank, standing.rankedCount);
 
 	return (
 		<Card
-			onClick={onOpen}
-			className="cursor-pointer gap-0 overflow-hidden py-0 transition-colors hover:border-primary"
+			{...clickableCardProps(onOpen)}
+			className="cursor-pointer gap-0 overflow-hidden py-0 transition-colors hover:border-primary focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2 focus-visible:ring-offset-background"
 		>
 			<div className="flex items-center gap-3 p-4">
 				<span

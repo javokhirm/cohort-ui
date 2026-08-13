@@ -11376,10 +11376,9 @@
             "type": "number",
             "description": "Marks needed in this window to be ranked."
           },
-          "groupAveragePct": {
+          "minCohort": {
             "type": "number",
-            "nullable": true,
-            "description": "Mean of the ranked students' averages; null when nobody is ranked."
+            "description": "Students needed on the roster before any ranking is reported. Below it `rows` is empty and every rank is null — the client explains the empty board with this figure rather than assuming the threshold."
           },
           "namesRevealed": {
             "type": "boolean",
@@ -11404,7 +11403,7 @@
           "cohortSize",
           "rankedCount",
           "minMarks",
-          "groupAveragePct",
+          "minCohort",
           "namesRevealed",
           "me",
           "rows"

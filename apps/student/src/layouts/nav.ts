@@ -12,7 +12,8 @@ type NavKey =
 	| 'profile';
 
 /** Leaf keys under this app's `shell.*` catalog — the app-bar subtitles. */
-type SubtitleKey = 'scheduleSubtitle' | 'progressSubtitle' | 'billingSubtitle';
+type SubtitleKey =
+	'scheduleSubtitle' | 'progressSubtitle' | 'leaderboardSubtitle' | 'billingSubtitle';
 
 /**
  * Every destination the shell can reach — the four tabs, the bell, the avatar,
@@ -74,7 +75,7 @@ export const BAR_COPY: Partial<
 > = {
 	'/schedule': { title: 'schedule', subtitle: 'scheduleSubtitle' },
 	'/progress': { title: 'progress', subtitle: 'progressSubtitle' },
-	'/leaderboard': { title: 'leaderboard' },
+	'/leaderboard': { title: 'leaderboard', subtitle: 'leaderboardSubtitle' },
 	'/billing': { title: 'billing', subtitle: 'billingSubtitle' },
 	'/inbox': { title: 'notifications' },
 	'/profile': { title: 'profile' },
