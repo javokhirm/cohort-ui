@@ -186,7 +186,9 @@ export function RosterSection({ groupId, capacity }: RosterSectionProps) {
 														variant="ghost"
 														size="sm"
 														className="size-8 p-0"
-														aria-label={t('roster.rowActionsAria')}
+														aria-label={t(
+															'roster.rowActionsAria',
+														)}
 													>
 														<MoreHorizontal className="size-4" />
 													</Button>
@@ -194,7 +196,9 @@ export function RosterSection({ groupId, capacity }: RosterSectionProps) {
 												<DropdownMenuContent align="end">
 													{canReactivate && (
 														<DropdownMenuItem
-															onClick={() => setReactivateTarget(e)}
+															onClick={() =>
+																setReactivateTarget(e)
+															}
 														>
 															<RotateCcw />
 															{t('actions.reactivate')}
@@ -202,7 +206,9 @@ export function RosterSection({ groupId, capacity }: RosterSectionProps) {
 													)}
 													{canSuspend && (
 														<DropdownMenuItem
-															onClick={() => setSuspendTarget(e)}
+															onClick={() =>
+																setSuspendTarget(e)
+															}
 														>
 															<Pause />
 															{t('actions.suspend')}
@@ -211,7 +217,9 @@ export function RosterSection({ groupId, capacity }: RosterSectionProps) {
 													{canDrop && (
 														<DropdownMenuItem
 															variant="destructive"
-															onClick={() => setDropTarget(e)}
+															onClick={() =>
+																setDropTarget(e)
+															}
 														>
 															<UserMinus />
 															{t('actions.drop')}

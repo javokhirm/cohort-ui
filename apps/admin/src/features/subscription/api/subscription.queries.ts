@@ -128,7 +128,10 @@ export interface SubscriptionInvoice {
 	createdAt: string;
 }
 
-export function useSubscriptionInvoices(params: { page: number; limit: number }) {
+export function useSubscriptionInvoices(
+	params: { page: number; limit: number },
+	enabled = true,
+) {
 	return useQuery({
 		queryKey: subscriptionKeys.invoices(params),
 		queryFn: () =>
@@ -136,6 +139,7 @@ export function useSubscriptionInvoices(params: { page: number; limit: number })
 				params,
 			}) as Promise<PaginatedResult<SubscriptionInvoice>>,
 		placeholderData: keepPreviousData,
+		enabled,
 	});
 }
 
@@ -161,7 +165,10 @@ export interface SubscriptionPayment {
 	createdAt: string;
 }
 
-export function useSubscriptionPayments(params: { page: number; limit: number }) {
+export function useSubscriptionPayments(
+	params: { page: number; limit: number },
+	enabled = true,
+) {
 	return useQuery({
 		queryKey: subscriptionKeys.payments(params),
 		queryFn: () =>
@@ -169,5 +176,6 @@ export function useSubscriptionPayments(params: { page: number; limit: number })
 				params,
 			}) as Promise<PaginatedResult<SubscriptionPayment>>,
 		placeholderData: keepPreviousData,
+		enabled,
 	});
 }

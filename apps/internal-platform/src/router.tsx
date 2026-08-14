@@ -17,6 +17,8 @@ import { TenantDetailPage } from './routes/tenants/$tenantId/index';
 import { OnboardTenantPage } from './routes/tenants/onboard';
 import { SubscriptionPlansPage } from './routes/subscription-plans/index';
 import { SubscriptionsPage } from './routes/subscriptions/index';
+import { SubscriptionPaymentsPage } from './routes/subscription-payments/index';
+import { SubscriptionInvoicesPage } from './routes/subscription-invoices/index';
 import { UserDirectoryPage } from './routes/users/index';
 import { UserDetailPage } from './routes/users/$userId/index';
 import { ProfilePage } from './routes/profile/index';
@@ -131,6 +133,89 @@ const subscriptionsRoute = createRoute({
 	component: SubscriptionsPage,
 });
 
+const subscriptionPaymentsRoute = createRoute({
+	getParentRoute: () => authedRoute,
+	path: '/subscription-payments',
+	validateSearch: (
+		search: Record<string, unknown>,
+	): {
+		page?: number;
+		tenantId?: number;
+		status?: 'PENDING' | 'SUCCEEDED' | 'FAILED' | 'REFUNDED';
+		method?: 'CLICK' | 'PAYME' | 'UZUM' | 'BANK_TRANSFER' | 'CASH';
+		search?: string;
+		from?: string;
+		to?: string;
+	} => {
+		const STATUSES = ['PENDING', 'SUCCEEDED', 'FAILED', 'REFUNDED'] as const;
+		const METHODS = ['CLICK', 'PAYME', 'UZUM', 'BANK_TRANSFER', 'CASH'] as const;
+		type St = (typeof STATUSES)[number];
+		type Me = (typeof METHODS)[number];
+		const page =
+			typeof search.page === 'number' &&
+			Number.isFinite(search.page) &&
+			search.page >= 1
+				? Math.floor(search.page)
+				: undefined;
+		const tenantId =
+			typeof search.tenantId === 'number' &&
+			Number.isFinite(search.tenantId) &&
+			search.tenantId >= 1
+				? Math.floor(search.tenantId)
+				: undefined;
+		const status = STATUSES.includes(search.status as St)
+			? (search.status as St)
+			: undefined;
+		const method = METHODS.includes(search.method as Me)
+			? (search.method as Me)
+			: undefined;
+		const q =
+			typeof search.search === 'string' && search.search.trim()
+				? search.search.trim()
+				: undefined;
+		const from = typeof search.from === 'string' ? search.from : undefined;
+		const to = typeof search.to === 'string' ? search.to : undefined;
+		return { page, tenantId, status, method, search: q, from, to };
+	},
+	component: SubscriptionPaymentsPage,
+});
+
+const subscriptionInvoicesRoute = createRoute({
+	getParentRoute: () => authedRoute,
+	path: '/subscription-invoices',
+	validateSearch: (
+		search: Record<string, unknown>,
+	): {
+		page?: number;
+		tenantId?: number;
+		status?: 'PAID' | 'UNPAID' | 'FAILED' | 'REFUNDED';
+		from?: string;
+		to?: string;
+	} => {
+		const STATUSES = ['PAID', 'UNPAID', 'FAILED', 'REFUNDED'] as const;
+		type St = (typeof STATUSES)[number];
+		const page =
+			typeof search.page === 'number' &&
+			Number.isFinite(search.page) &&
+			search.page >= 1
+				? Math.floor(search.page)
+				: undefined;
+		const tenantId =
+			typeof search.tenantId === 'number' &&
+			Number.isFinite(search.tenantId) &&
+			search.tenantId >= 1
+				? Math.floor(search.tenantId)
+				: undefined;
+		const status = STATUSES.includes(search.status as St)
+			? (search.status as St)
+			: undefined;
+		const from = typeof search.from === 'string' ? search.from : undefined;
+		const to = typeof search.to === 'string' ? search.to : undefined;
+		return { page, tenantId, status, from, to };
+	},
+	component: SubscriptionInvoicesPage,
+});
+
 const userIndexRoute = createRoute({
 	getParentRoute: () => authedRoute,
 	path: '/users',
@@ -194,6 +279,8 @@ const routeTree = rootRoute.addChildren([
 		tenantDetailRoute,
 		subscriptionPlansRoute,
 		subscriptionsRoute,
+		subscriptionPaymentsRoute,
+		subscriptionInvoicesRoute,
 		userIndexRoute,
 		userDetailRoute,
 		profileRoute,

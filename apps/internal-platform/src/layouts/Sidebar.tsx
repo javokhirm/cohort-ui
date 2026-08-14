@@ -5,12 +5,14 @@ import {
 	ChevronLeft,
 	ChevronRight,
 	CreditCard,
+	FileText,
 	LayoutDashboard,
 	Receipt,
 	ScrollText,
 	Settings,
 	Shield,
 	Users,
+	Wallet,
 } from 'lucide-react';
 import type { LucideIcon } from 'lucide-react';
 
@@ -24,6 +26,8 @@ type NavItemKey =
 	| 'userDirectory'
 	| 'subscriptionPlans'
 	| 'subscriptions'
+	| 'payments'
+	| 'invoices'
 	| 'roleTemplates'
 	| 'auditLog'
 	| 'settings';
@@ -79,6 +83,20 @@ const REVENUE_ITEMS: NavItemDef[] = [
 		Icon: Receipt,
 		href: '/subscriptions',
 		match: '/subscriptions',
+	},
+	{
+		id: 'subscription-payments',
+		label: 'payments',
+		Icon: Wallet,
+		href: '/subscription-payments',
+		match: '/subscription-payments',
+	},
+	{
+		id: 'subscription-invoices',
+		label: 'invoices',
+		Icon: FileText,
+		href: '/subscription-invoices',
+		match: '/subscription-invoices',
 	},
 ];
 

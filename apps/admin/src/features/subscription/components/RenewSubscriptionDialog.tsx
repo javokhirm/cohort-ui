@@ -40,13 +40,7 @@ import {
 	type SubscriptionPaymentMethod,
 } from '../api/subscription.queries';
 
-const PAYMENT_METHODS: SubscriptionPaymentMethod[] = [
-	'CLICK',
-	'PAYME',
-	'UZUM',
-	'BANK_TRANSFER',
-	'CASH',
-];
+const PAYMENT_METHODS: SubscriptionPaymentMethod[] = ['CLICK', 'PAYME', 'UZUM'];
 const INTERVALS: BillingInterval[] = ['MONTHLY', 'ANNUAL'];
 
 interface RenewSubscriptionDialogProps {

@@ -66,16 +66,21 @@ export function SubscriptionPage() {
 		},
 	});
 
+	// History (invoices + payments) is only relevant when managing an active
+	// subscription. When access is blocked the page is the full-screen renewal
+	// gate — show only the renew CTA and its details, and skip the fetches.
+	const hasAccess = subscription?.hasAccess ?? false;
+
 	const [invoicePage, setInvoicePage] = useState(1);
 	const [paymentPage, setPaymentPage] = useState(1);
-	const invoicesQuery = useSubscriptionInvoices({
-		page: invoicePage,
-		limit: PAGE_SIZE,
-	});
-	const paymentsQuery = useSubscriptionPayments({
-		page: paymentPage,
-		limit: PAGE_SIZE,
-	});
+	const invoicesQuery = useSubscriptionInvoices(
+		{ page: invoicePage, limit: PAGE_SIZE },
+		hasAccess,
+	);
+	const paymentsQuery = useSubscriptionPayments(
+		{ page: paymentPage, limit: PAGE_SIZE },
+		hasAccess,
+	);
 
 	function handleRenewed(result: RenewSubscriptionResult) {
 		setPendingResult(result);
@@ -124,7 +129,7 @@ export function SubscriptionPage() {
 						/>
 					)}
 
-					{subscription.hasAccess ? (
+					{hasAccess ? (
 						<ActiveSubscriptionCard
 							subscription={subscription}
 							onRenew={() => setRenewOpen(true)}
@@ -136,48 +141,50 @@ export function SubscriptionPage() {
 						/>
 					)}
 
-					<Card className="gap-0 overflow-hidden py-0">
-						<Tabs defaultValue="invoices" className="gap-0">
-							<div className="border-b border-border p-4">
-								<TabsList>
-									<TabsTrigger value="invoices">
-										{t('history.invoicesTab')}
-									</TabsTrigger>
-									<TabsTrigger value="payments">
-										{t('history.paymentsTab')}
-									</TabsTrigger>
-								</TabsList>
-							</div>
-							<TabsContent value="invoices" className="mt-0">
-								<SubscriptionInvoicesTable
-									invoices={invoicesQuery.data?.rows ?? []}
-									isLoading={invoicesQuery.isLoading}
-								/>
-								<div className="border-t border-border px-4 py-3">
-									<Pagination
-										page={invoicePage}
-										pageSize={PAGE_SIZE}
-										total={invoicesQuery.data?.total ?? 0}
-										onPageChange={setInvoicePage}
-									/>
+					{hasAccess && (
+						<Card className="gap-0 overflow-hidden py-0">
+							<Tabs defaultValue="invoices" className="gap-0">
+								<div className="border-b border-border p-4">
+									<TabsList>
+										<TabsTrigger value="invoices">
+											{t('history.invoicesTab')}
+										</TabsTrigger>
+										<TabsTrigger value="payments">
+											{t('history.paymentsTab')}
+										</TabsTrigger>
+									</TabsList>
 								</div>
-							</TabsContent>
-							<TabsContent value="payments" className="mt-0">
-								<SubscriptionPaymentsTable
-									payments={paymentsQuery.data?.rows ?? []}
-									isLoading={paymentsQuery.isLoading}
-								/>
-								<div className="border-t border-border px-4 py-3">
-									<Pagination
-										page={paymentPage}
-										pageSize={PAGE_SIZE}
-										total={paymentsQuery.data?.total ?? 0}
-										onPageChange={setPaymentPage}
+								<TabsContent value="invoices" className="mt-0">
+									<SubscriptionInvoicesTable
+										invoices={invoicesQuery.data?.rows ?? []}
+										isLoading={invoicesQuery.isLoading}
 									/>
-								</div>
-							</TabsContent>
-						</Tabs>
-					</Card>
+									<div className="border-t border-border px-4 py-3">
+										<Pagination
+											page={invoicePage}
+											pageSize={PAGE_SIZE}
+											total={invoicesQuery.data?.total ?? 0}
+											onPageChange={setInvoicePage}
+										/>
+									</div>
+								</TabsContent>
+								<TabsContent value="payments" className="mt-0">
+									<SubscriptionPaymentsTable
+										payments={paymentsQuery.data?.rows ?? []}
+										isLoading={paymentsQuery.isLoading}
+									/>
+									<div className="border-t border-border px-4 py-3">
+										<Pagination
+											page={paymentPage}
+											pageSize={PAGE_SIZE}
+											total={paymentsQuery.data?.total ?? 0}
+											onPageChange={setPaymentPage}
+										/>
+									</div>
+								</TabsContent>
+							</Tabs>
+						</Card>
+					)}
 
 					<RenewSubscriptionDialog
 						open={renewOpen}

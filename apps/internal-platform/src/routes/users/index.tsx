@@ -100,9 +100,13 @@ export function UserDirectoryPage() {
 
 	const [inputValue, setInputValue] = useState(searchParam ?? '');
 
-	useEffect(() => {
+	// Keep the input in step when the URL search changes externally, via React's
+	// render-time "adjust state" pattern rather than an effect.
+	const [syncedSearch, setSyncedSearch] = useState(searchParam);
+	if (searchParam !== syncedSearch) {
+		setSyncedSearch(searchParam);
 		setInputValue(searchParam ?? '');
-	}, [searchParam]);
+	}
 
 	useEffect(() => {
 		const timer = setTimeout(() => {
