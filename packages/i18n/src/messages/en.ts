@@ -371,4 +371,14 @@ export const en = {
 		timeRangeInvalid: 'End time must be after the start time',
 		passwordMismatch: 'Passwords do not match',
 	},
+
+	subscription: {
+		expired: {
+			title: 'Subscription expired',
+			description:
+				"Your center's subscription has expired. Contact your center's administrator to restore access.",
+			planLabel: 'Plan',
+			expiredOnLabel: 'Expired on',
+		},
+	},
 } as const;

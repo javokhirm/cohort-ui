@@ -8,6 +8,7 @@ import { useSessionStore } from '@/store/sessionStore';
 import { BranchSelector } from '@/layouts/BranchSelector';
 import { NAV_ITEMS } from '@/layouts/nav';
 import { OverflowMenu } from '@/layouts/OverflowMenu';
+import { SubscriptionBlock } from '@/features/subscription';
 
 /** Gradient brand mark shown in the sidebar header. */
 function BrandLogo() {
@@ -27,6 +28,8 @@ function BrandLogo() {
 export function AuthedLayout() {
 	const status = useSessionStore((s) => s.status);
 	const user = useSessionStore((s) => s.user);
+	const subscription = useSessionStore((s) => s.subscription);
+	const subscriptionBlock = useSessionStore((s) => s.subscriptionBlock);
 	const navigate = useNavigate();
 	const pathname = useRouterState({ select: (s) => s.location.pathname });
 	const t = useT('nav');
@@ -38,6 +41,14 @@ export function AuthedLayout() {
 	}, [status, navigate]);
 
 	if (status !== 'authenticated') return null;
+
+	// The center's plan has lapsed — replace the whole shell with the full-screen
+	// block so no teach screen renders and no tenant-gated query fires. Gating here
+	// (the parent of every authed route) is what makes manual URL entry unable to
+	// bypass it. Read reactively so a mid-session 402 flips straight into the block.
+	const blocked =
+		subscriptionBlock != null || (subscription != null && !subscription.hasAccess);
+	if (blocked) return <SubscriptionBlock />;
 
 	const active = NAV_ITEMS.find((item) => item.href === pathname) ?? NAV_ITEMS[0]!;
 

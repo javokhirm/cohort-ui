@@ -372,4 +372,14 @@ export const ru = {
 		timeRangeInvalid: 'Время окончания должно быть позже времени начала',
 		passwordMismatch: 'Пароли не совпадают',
 	},
+
+	subscription: {
+		expired: {
+			title: 'Срок подписки истёк',
+			description:
+				'Срок подписки вашего центра истёк. Обратитесь к администратору центра, чтобы восстановить доступ.',
+			planLabel: 'Тариф',
+			expiredOnLabel: 'Дата окончания',
+		},
+	},
 } as const;

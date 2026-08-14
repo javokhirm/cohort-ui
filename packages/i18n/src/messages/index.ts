@@ -15,7 +15,14 @@ export const SUPPORTED_LOCALES = ['uz', 'ru', 'en'] as const satisfies readonly 
 export const FALLBACK_LOCALE: Locale = 'uz';
 
 /** i18next namespaces, derived from the catalog so the two can never drift. */
-export const NAMESPACES = ['common', 'auth', 'nav', 'enums', 'validation'] as const;
+export const NAMESPACES = [
+	'common',
+	'auth',
+	'nav',
+	'enums',
+	'validation',
+	'subscription',
+] as const;
 
 export const DEFAULT_NS = 'common' as const;
 

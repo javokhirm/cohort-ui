@@ -404,4 +404,21 @@ export const uz = {
 		timeRangeInvalid: 'Tugash vaqti boshlanish vaqtidan keyin boʻlishi kerak',
 		passwordMismatch: 'Parollar mos kelmadi',
 	},
+
+	/**
+	 * The full-screen subscription-block state, shared by the read-only consoles
+	 * (teacher, student). These roles cannot pay — only an OWNER on the admin
+	 * console can — so the copy points to the center's administrator and offers no
+	 * renew action. Rendered when access is lapsed (a 402 on any tenant route, or
+	 * `subscription.hasAccess === false` from login/refresh).
+	 */
+	subscription: {
+		expired: {
+			title: 'Obuna muddati tugagan',
+			description:
+				'Markazingiz obunasi muddati tugagan. Kirishni tiklash uchun markaz administratori bilan bogʻlaning.',
+			planLabel: 'Reja',
+			expiredOnLabel: 'Tugagan sana',
+		},
+	},
 } as const;
