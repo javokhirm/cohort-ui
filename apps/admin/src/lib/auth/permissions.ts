@@ -122,6 +122,9 @@ export const PERMISSION_CODES = [
 	'branch.read',
 	'branch.create',
 	'branch.update',
+	// subscription — the center's own Cohort plan (renewal is OWNER-only, like payroll.pay)
+	'subscription.read',
+	'subscription.renew',
 ] as const;
 
 /** A single permission code from the catalog (e.g. `'invoice.void'`). */

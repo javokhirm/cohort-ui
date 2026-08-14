@@ -1,4 +1,4 @@
-import { isApiError } from '@repo/api-client';
+import { defaultQueryRetry, isApiError } from '@repo/api-client';
 import { toast } from '@repo/ui';
 import { translate } from '@repo/i18n';
 import { MutationCache, QueryCache, QueryClient } from '@tanstack/react-query';
@@ -20,7 +20,7 @@ function notifyError(error: unknown): void {
 export const queryClient = new QueryClient({
 	defaultOptions: {
 		queries: {
-			retry: 1,
+			retry: defaultQueryRetry,
 			staleTime: 30_000,
 			refetchOnWindowFocus: false,
 		},

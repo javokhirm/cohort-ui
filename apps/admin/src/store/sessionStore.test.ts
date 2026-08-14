@@ -15,6 +15,7 @@ const AUTH: AuthResult = {
 		branchScope: null,
 		preferredLanguage: null,
 	},
+	subscription: null,
 };
 
 describe('sessionStore — permissions', () => {
@@ -25,6 +26,8 @@ describe('sessionStore — permissions', () => {
 			status: 'unknown',
 			permissions: [],
 			permissionsLoaded: false,
+			subscription: null,
+			subscriptionBlock: null,
 		});
 		localStorage.clear();
 	});

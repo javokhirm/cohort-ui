@@ -5,6 +5,7 @@
  * never sent by the client.
  */
 import type { Locale } from '@repo/utils';
+import type { SubscriptionAccessView } from '@repo/api-client';
 
 export interface AuthUserSummary {
 	id: number;
@@ -27,4 +28,11 @@ export interface AuthResult {
 	/** Access-token lifetime in seconds. */
 	expiresIn: number;
 	user: AuthUserSummary;
+	/**
+	 * The tenant's derived subscription access state. Login/refresh are never
+	 * blocked by a lapsed subscription (only what its plan buys), so this is what
+	 * routes a signed-in user straight to `/subscription` before the shell ever
+	 * mounts. `null` only for the platform tenant, which this app never is.
+	 */
+	subscription: SubscriptionAccessView | null;
 }

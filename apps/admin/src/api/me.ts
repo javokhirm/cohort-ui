@@ -1,4 +1,5 @@
 import type { Locale } from '@repo/utils';
+import type { SubscriptionAccessView } from '@repo/api-client';
 
 import { manageApi } from '@/api/apiClient';
 import { useSessionStore } from '@/store/sessionStore';
@@ -22,6 +23,8 @@ export interface ManageProfile {
 	branchScope: number[] | null;
 	/** Effective permission codes (e.g. `['student.read']`), sorted, deduped. */
 	permissions: string[];
+	/** The tenant's derived subscription access state. `null` only for the platform tenant, which this app never is. */
+	subscription: SubscriptionAccessView | null;
 }
 
 /** Fetch the current staff member's profile + resolved permission codes. */
@@ -50,6 +53,10 @@ export async function loadPermissions(): Promise<void> {
 	try {
 		const profile = await fetchManageProfile();
 		useSessionStore.getState().setPermissions(profile.permissions);
+		// `/me` carries `@AllowExpiredSubscription()`, so it always resolves
+		// regardless of the block — this is what keeps the session store's
+		// subscription state fresh on every boot and route-guard check.
+		useSessionStore.getState().setSubscription(profile.subscription);
 	} catch {
 		/* leave permissionsLoaded=false → gates fail open; server enforces */
 	}

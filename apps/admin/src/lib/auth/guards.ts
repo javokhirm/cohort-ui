@@ -1,6 +1,11 @@
 import { redirect } from '@tanstack/react-router';
 
-import { hasPermission, hasRole, useSessionStore } from '@/store/sessionStore';
+import {
+	hasPermission,
+	hasRole,
+	isSubscriptionBlocked,
+	useSessionStore,
+} from '@/store/sessionStore';
 import type { PermissionRequirement } from '@/lib/auth/permissions';
 
 /**
@@ -31,5 +36,21 @@ export function requirePermission(required: PermissionRequirement): void {
 	if (!useSessionStore.getState().permissionsLoaded) return;
 	if (!hasPermission(required)) {
 		throw redirect({ to: '/forbidden' });
+	}
+}
+
+/**
+ * The global 402 block. Redirects to the full-page `/subscription` screen
+ * whenever the tenant's access is blocked — run from `authedRoute.beforeLoad`
+ * so it covers every nested route, including one reached by typing a URL
+ * directly. `/subscription` itself is exempt so the block screen can render;
+ * an in-flight request that 402s mid-session is caught separately by the
+ * query/mutation cache (`api/queryClient.ts`), which navigates immediately
+ * instead of waiting for the next route change.
+ */
+export function requireSubscriptionAccess(pathname: string): void {
+	if (pathname === '/subscription') return;
+	if (isSubscriptionBlocked()) {
+		throw redirect({ to: '/subscription' });
 	}
 }
