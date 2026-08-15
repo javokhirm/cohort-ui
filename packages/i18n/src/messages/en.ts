@@ -127,6 +127,7 @@ export const en = {
 			people: 'People',
 			academics: 'Academics',
 			finance: 'Finance',
+			engagement: 'Engagement',
 			administration: 'Administration',
 			platform: 'Platform',
 			customers: 'Customers',

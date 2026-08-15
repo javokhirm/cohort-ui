@@ -111,8 +111,11 @@ export const PERMISSION_CODES = [
 	// notification
 	'notification-template.manage',
 	'notification.send',
-	// reminder
-	'reminder-rule.manage',
+	'notification-rule.manage',
+	// Separate from `notification-rule.manage` because this surface holds the SMS
+	// provider credentials and the channel-wide kill switch — it is OWNER-only,
+	// alongside `settings.manage`.
+	'notification-settings.manage',
 	// audit
 	'audit.read',
 	// dashboard

@@ -149,6 +149,7 @@ export const uz = {
 			people: 'Odamlar',
 			academics: 'Oʻquv jarayoni',
 			finance: 'Moliya',
+			engagement: 'Aloqa',
 			administration: 'Boshqaruv',
 			platform: 'Platforma',
 			customers: 'Mijozlar',

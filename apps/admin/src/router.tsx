@@ -29,6 +29,7 @@ import { DiscountsRoute } from '@/routes/_authed.discounts';
 import { InvoicesRoute } from '@/routes/_authed.invoices';
 import { InvoiceDetailRoute } from '@/routes/_authed.invoices.$id';
 import { BranchesRoute } from '@/routes/_authed.branches';
+import { NotificationsRoute } from '@/routes/_authed.notifications';
 import { CoursesRoute } from '@/routes/_authed.courses';
 import { CourseDetailRoute } from '@/routes/_authed.courses.$id';
 import { GroupsRoute } from '@/routes/_authed.groups';
@@ -393,6 +394,25 @@ const branchesRoute = createRoute({
 	component: BranchesRoute,
 });
 
+/**
+ * The communication console. Guarded on *any* of the four communication
+ * permissions, because the page is a tab shell and each tab gates itself — an
+ * ADMIN without `notification-settings.manage` (OWNER-only) still belongs here for
+ * the other three.
+ */
+const notificationsRoute = createRoute({
+	getParentRoute: () => authedRoute,
+	path: '/notifications',
+	beforeLoad: () =>
+		requirePermission([
+			'notification-rule.manage',
+			'notification-template.manage',
+			'notification.send',
+			'notification-settings.manage',
+		]),
+	component: NotificationsRoute,
+});
+
 const coursesRoute = createRoute({
 	getParentRoute: () => authedRoute,
 	path: '/courses',
@@ -687,6 +707,7 @@ const routeTree = rootRoute.addChildren([
 		invoiceDetailRoute,
 		paymentsRoute,
 		branchesRoute,
+		notificationsRoute,
 		coursesRoute,
 		courseDetailRoute,
 		groupsRoute,

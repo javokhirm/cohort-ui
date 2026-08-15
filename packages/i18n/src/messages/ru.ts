@@ -128,6 +128,7 @@ export const ru = {
 			people: 'Люди',
 			academics: 'Учебный процесс',
 			finance: 'Финансы',
+			engagement: 'Коммуникации',
 			administration: 'Администрирование',
 			platform: 'Платформа',
 			customers: 'Клиенты',

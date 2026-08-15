@@ -12,6 +12,7 @@ import {
 	GraduationCap,
 	LayoutDashboard,
 	Layers,
+	MessageSquare,
 	Receipt,
 	SlidersHorizontal,
 	Tag,
@@ -29,7 +30,13 @@ import { useAppT } from '@/locales';
  * render, not module load, so language switches re-translate the sidebar. Typed
  * as unions (not `string`) so a typo or a removed catalog key fails check-types. */
 type NavGroupKey =
-	'overview' | 'crm' | 'people' | 'academics' | 'finance' | 'administration';
+	| 'overview'
+	| 'crm'
+	| 'people'
+	| 'academics'
+	| 'finance'
+	| 'engagement'
+	| 'administration';
 type NavItemKey =
 	| 'dashboard'
 	| 'leads'
@@ -46,6 +53,7 @@ type NavItemKey =
 	| 'discounts'
 	| 'expenses'
 	| 'payroll'
+	| 'notifications'
 	| 'branches';
 
 type NavItemDef = {
@@ -223,29 +231,33 @@ const NAV_GROUPS: NavGroupDef[] = [
 			},
 		],
 	},
-	// {
-	// 	label: 'engagement',
-	// 	items: [
-	// 		{
-	// 			id: 'communication',
-	// 			label: 'communication',
-	// 			Icon: MessageSquare,
-	// 			href: '/communication',
-	// 			permission: [
-	// 				'notification.send',
-	// 				'notification-template.manage',
-	// 				'reminder-rule.manage',
-	// 			],
-	// 		},
-	// 		{
-	// 			id: 'materials',
-	// 			label: 'materials',
-	// 			Icon: FolderOpen,
-	// 			href: '/materials',
-	// 			permission: 'material.read',
-	// 		},
-	// 	],
-	// },
+	{
+		label: 'engagement',
+		items: [
+			{
+				id: 'notifications',
+				label: 'notifications',
+				Icon: MessageSquare,
+				href: '/notifications',
+				// Any-of, mirroring the route guard: the page is a tab shell and each
+				// tab gates itself, so an ADMIN without the OWNER-only settings
+				// permission still belongs here.
+				permission: [
+					'notification-rule.manage',
+					'notification-template.manage',
+					'notification.send',
+					'notification-settings.manage',
+				],
+			},
+			// {
+			// 	id: 'materials',
+			// 	label: 'materials',
+			// 	Icon: FolderOpen,
+			// 	href: '/materials',
+			// 	permission: 'material.read',
+			// },
+		],
+	},
 	{
 		label: 'administration',
 		items: [
