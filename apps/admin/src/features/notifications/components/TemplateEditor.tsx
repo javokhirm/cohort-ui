@@ -20,14 +20,17 @@ import { useAppT } from '@/locales';
 import type {
 	NotificationTemplate,
 	NotificationTrigger,
+	TemplateModeration,
 } from '../api/notifications.queries';
 import {
 	useCreateNotificationTemplate,
 	useDeleteNotificationTemplate,
 	useUpdateNotificationTemplate,
 } from '../api/notifications.mutations';
+import { isModeratedChannel, moderationFor } from '../lib/moderation';
 import { referencedVariables, renderWithSamples } from '../lib/sample-values';
 import { analyzeSms } from '../lib/sms-segments';
+import { TemplateModerationBadge } from './TemplateModerationBadge';
 
 /** A demo SMS originator for the preview bubble — sample data, nothing is sent. */
 const PREVIEW_SENDER = '4546';
@@ -38,6 +41,8 @@ interface TemplateEditorProps {
 	triggers: NotificationTrigger[] | undefined;
 	/** How many rules reference this template's code (for the subtitle). */
 	ruleCount: number;
+	/** SMS moderation state, indexed by the body it was submitted from. */
+	moderation: Map<string, TemplateModeration>;
 }
 
 /**
@@ -53,7 +58,12 @@ interface TemplateEditorProps {
  * message (sample values substituted), because UCS-2 vs GSM-7 and the part count
  * are properties of what actually goes on the wire — not the raw `{{body}}`.
  */
-export function TemplateEditor({ template, triggers, ruleCount }: TemplateEditorProps) {
+export function TemplateEditor({
+	template,
+	triggers,
+	ruleCount,
+	moderation,
+}: TemplateEditorProps) {
 	const tn = useAppT('notifications');
 
 	const createTemplate = useCreateNotificationTemplate();
@@ -100,6 +110,15 @@ export function TemplateEditor({ template, triggers, ruleCount }: TemplateEditor
 	const dirty =
 		body !== template.body || (isEmail && subject !== (template.subject ?? ''));
 	const isSaving = createTemplate.isPending || updateTemplate.isPending;
+
+	/**
+	 * The gateway's verdict on the **saved** copy — deliberately looked up by
+	 * `template.body`, not the draft in the textarea. A body the user is still
+	 * typing has never been submitted, so there is no verdict on it; showing the
+	 * saved one plus {@link tn}`('moderation.dirtyNote')` is the honest reading.
+	 */
+	const templateModeration = moderationFor(moderation, template);
+	const showModeration = isModeratedChannel(template.channel);
 
 	const insertVariable = (name: string) => {
 		const token = `{{${name}}}`;
@@ -249,6 +268,7 @@ export function TemplateEditor({ template, triggers, ruleCount }: TemplateEditor
 					<span>
 						{tn('templates.charCount', {
 							chars: analysis.chars,
+							perSegment: analysis.perSegment,
 							encoding: analysis.encoding,
 							segments: analysis.segments,
 						})}
@@ -289,13 +309,17 @@ export function TemplateEditor({ template, triggers, ruleCount }: TemplateEditor
 				)}
 			</Card>
 
+			{/*
+			 * Sits directly under the body it renders: the draft as a recipient
+			 * would read it, sample values substituted, updating as you type. It
+			 * deliberately precedes the moderation card, which shows the *saved*
+			 * copy in the gateway's own syntax — draft first, then the verdict on
+			 * what was already submitted.
+			 */}
 			<Card className="gap-3 p-4">
 				<div className="flex items-center justify-between gap-2">
 					<span className="text-sm font-semibold text-foreground">
 						{tn('templates.livePreview')}
-					</span>
-					<span className="text-xs text-muted-foreground">
-						{tn('templates.livePreviewHint')}
 					</span>
 				</div>
 
@@ -313,20 +337,68 @@ export function TemplateEditor({ template, triggers, ruleCount }: TemplateEditor
 								!rendered && 'text-muted-foreground',
 							)}
 						>
-							{rendered || tn('templates.preview.empty')}
+							{rendered || tn('templates.previewEmpty')}
 						</p>
 					</div>
 				</div>
-
-				<span className="text-xs text-muted-foreground">
-					{tn('templates.previewMeta', {
-						segments: analysis.segments,
-						encoding: analysis.encoding,
-						chars: analysis.chars,
-						perSegment: analysis.perSegment,
-					})}
-				</span>
 			</Card>
+
+			{/*
+			 * Between saving and approval, every message on this copy is rejected
+			 * by the gateway — a gap that is otherwise invisible until it surfaces
+			 * in the outbox as a Russian gateway error days later.
+			 */}
+			{showModeration && (
+				<Card className="gap-3 p-4">
+					<div className="flex items-center justify-between gap-2">
+						<span className="text-sm font-semibold text-foreground">
+							{tn('moderation.title')}
+						</span>
+						<TemplateModerationBadge
+							moderation={templateModeration}
+							withTooltip
+						/>
+					</div>
+
+					{templateModeration ? (
+						<>
+							<p className="text-xs text-muted-foreground">
+								{tn(`moderation.hint.${templateModeration.status}`)}
+							</p>
+
+							<div className="flex flex-col gap-1.5">
+								<span className="text-[11px] font-semibold uppercase tracking-wide text-muted-foreground">
+									{tn('moderation.submittedAs')}
+								</span>
+								<code className="whitespace-pre-wrap break-words rounded-lg bg-muted p-3 font-mono text-xs">
+									{templateModeration.templateText}
+								</code>
+							</div>
+
+							{templateModeration.error && (
+								<p className="text-xs text-destructive">
+									{`${tn('moderation.errorLabel')}: ${templateModeration.error}`}
+								</p>
+							)}
+						</>
+					) : (
+						<div className="flex flex-col gap-1">
+							<p className="text-xs text-muted-foreground">
+								{tn('moderation.unavailable')}
+							</p>
+							<p className="text-xs text-muted-foreground">
+								{tn('moderation.unavailableHint')}
+							</p>
+						</div>
+					)}
+
+					{dirty && (
+						<p className="text-xs text-tone-amber-fg">
+							{tn('moderation.dirtyNote')}
+						</p>
+					)}
+				</Card>
+			)}
 
 			<ConfirmDialog
 				open={revertOpen}

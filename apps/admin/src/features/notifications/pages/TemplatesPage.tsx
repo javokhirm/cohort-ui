@@ -10,10 +10,12 @@ import {
 	useNotificationRules,
 	useNotificationTemplates,
 	useNotificationTriggers,
+	useTemplateModeration,
 	type NotificationTemplate,
 } from '../api/notifications.queries';
 import { TemplateEditor } from '../components/TemplateEditor';
 import { TemplateList } from '../components/TemplateList';
+import { indexModeration } from '../lib/moderation';
 import {
 	resolveTemplateKey,
 	templateKey,
@@ -51,10 +53,15 @@ export function TemplatesPage({ focusRequest }: TemplatesPageProps) {
 	// Gated on the rules permission so a template-only manager doesn't 403; when
 	// they cannot read rules we simply don't hide anything (see activeRuleCodes).
 	const { data: rulesData } = useNotificationRules({ limit: 100 }, canRules);
+	// Same permission as the template list, so no extra gate. Failures are left
+	// unhandled on purpose: an unreachable gateway must not take the editor down
+	// with it — the moderation panel simply reports the state as unknown.
+	const { data: moderationRows } = useTemplateModeration();
 
 	const [query, setQuery] = useState('');
 
 	const rows = useMemo(() => data?.rows ?? [], [data]);
+	const moderation = useMemo(() => indexModeration(moderationRows), [moderationRows]);
 
 	// Rule count per template code, for the editor's "Used by N rules" subtitle.
 	const rulesByCode = useMemo(() => {
@@ -153,6 +160,7 @@ export function TemplatesPage({ focusRequest }: TemplatesPageProps) {
 				onSelect={(t) => setSelectedKey(templateKey(t))}
 				query={query}
 				onQueryChange={setQuery}
+				moderation={moderation}
 			/>
 
 			{selected ? (
@@ -163,6 +171,7 @@ export function TemplatesPage({ focusRequest }: TemplatesPageProps) {
 					template={selected}
 					triggers={triggers}
 					ruleCount={rulesByCode.get(selected.code) ?? 0}
+					moderation={moderation}
 				/>
 			) : (
 				<Card className="py-0">

@@ -107,6 +107,42 @@ export interface NotificationTemplate {
 	updatedAt: string | null;
 }
 
+/**
+ * Where a message text stands with the SMS gateway's moderators.
+ *
+ * Uzbek gateways deliver only **pre-approved** copy — sending an unmoderated body
+ * is rejected outright, and no retry helps. Every default template and every
+ * customization is therefore submitted for approval when it is saved.
+ *
+ * - `PENDING` — Cohort never reached the gateway (see `error`); it retries on the
+ *   next save.
+ * - `MODERATION` — submitted, awaiting a human decision.
+ * - `APPROVED` — sendable.
+ * - `REJECTED` — refused. The **copy must change**; resubmitting the identical
+ *   text only earns the identical refusal.
+ */
+export const TEMPLATE_MODERATION_STATUSES = [
+	'PENDING',
+	'MODERATION',
+	'APPROVED',
+	'REJECTED',
+] as const;
+export type TemplateModerationStatus = (typeof TEMPLATE_MODERATION_STATUSES)[number];
+
+export interface TemplateModeration {
+	/** The Cohort body, `{{placeholders}}` intact — how a row joins to a template. */
+	sourceBody: string;
+	/** What was submitted, in the gateway's syntax: `%w+: %w+ uchun %w %w …`. */
+	templateText: string;
+	status: TemplateModerationStatus;
+	/** Gateway-side template id, once a status refresh has learned it. */
+	providerRef: string | null;
+	submittedAt: string | null;
+	lastCheckedAt: string | null;
+	/** Why the last attempt failed — set while `status` is `PENDING`. */
+	error: string | null;
+}
+
 export interface TemplatePreview {
 	body: string;
 	/**
@@ -212,6 +248,30 @@ export function useNotificationTemplates(filters: TemplateListFilters, enabled =
 				params: filters,
 			}) as Promise<PaginatedResult<NotificationTemplate>>,
 		placeholderData: keepPreviousData,
+		enabled,
+	});
+}
+
+/**
+ * SMS gateway moderation state for this center's copy.
+ *
+ * Scoped server-side to the gateway **account** the center resolves to — the
+ * shared platform account for most centers, its own for a center with its own
+ * Eskiz contract — so it is a small, flat list, not a paginated one. Returns `[]`
+ * when no SMS credentials resolve, which reads correctly as "nothing has been
+ * submitted anywhere".
+ *
+ * No refetch interval: a moderator decides on a human timescale (hours), and the
+ * backend calls the gateway on every read, so polling would spend gateway
+ * round-trips to watch something that rarely moves. `staleTime` keeps tab
+ * switching cheap while still refreshing on a real revisit.
+ */
+export function useTemplateModeration(enabled = true) {
+	return useQuery({
+		queryKey: notificationTemplatesKeys.moderation(),
+		queryFn: () =>
+			manageApi.get<TemplateModeration[]>('/notification-templates/moderation'),
+		staleTime: 60 * 1000,
 		enabled,
 	});
 }

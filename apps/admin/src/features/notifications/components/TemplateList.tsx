@@ -5,8 +5,13 @@ import { cn, Input, StatusBadge } from '@repo/ui';
 
 import { useAppT } from '@/locales';
 
-import type { NotificationTemplate } from '../api/notifications.queries';
+import type {
+	NotificationTemplate,
+	TemplateModeration,
+} from '../api/notifications.queries';
+import { moderationFor } from '../lib/moderation';
 import { templateKey } from '../lib/template-key';
+import { TemplateModerationIcon } from './TemplateModerationBadge';
 
 interface TemplateListProps {
 	templates: NotificationTemplate[];
@@ -14,6 +19,8 @@ interface TemplateListProps {
 	onSelect: (template: NotificationTemplate) => void;
 	query: string;
 	onQueryChange: (query: string) => void;
+	/** SMS moderation state, indexed by the body it was submitted from. */
+	moderation: Map<string, TemplateModeration>;
 }
 
 /**
@@ -31,6 +38,7 @@ export function TemplateList({
 	onSelect,
 	query,
 	onQueryChange,
+	moderation,
 }: TemplateListProps) {
 	const tn = useAppT('notifications');
 
@@ -92,6 +100,14 @@ export function TemplateList({
 												{template.body}
 											</span>
 										</span>
+										{/* Only copy the gateway will not currently
+										    deliver — approved rows stay quiet. */}
+										<TemplateModerationIcon
+											moderation={moderationFor(
+												moderation,
+												template,
+											)}
+										/>
 										<StatusBadge
 											kind="channel"
 											status={template.channel}

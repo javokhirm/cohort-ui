@@ -1952,14 +1952,6 @@ export const en: TranslationsOf<typeof uz> = {
 				bodyHint: 'Click a variable to insert it',
 				isActive: 'Active',
 			},
-			preview: {
-				title: 'Preview',
-				run: 'Preview',
-				empty: 'Enter a body and press preview to see the result.',
-				segments: '{{count}} SMS',
-				segmentsHint:
-					'Cyrillic and the ʻ character give 70 characters per part instead of 160 for Latin — which is why the cost differs.',
-			},
 			insertVariable: 'Insert {{name}}',
 			new: 'New template',
 			searchPlaceholder: 'Filter by code, channel, language',
@@ -1976,12 +1968,11 @@ export const en: TranslationsOf<typeof uz> = {
 			unknownVars:
 				'{{vars}} — the trigger does not provide it, so it renders empty for every recipient.',
 			livePreview: 'Live preview',
-			livePreviewHint: 'rendered with sample data · nothing is sent',
 			previewFrom: 'from {{sender}}',
+			previewEmpty: 'Enter a body — the preview appears here.',
 			segmentsCounted: 'counted on the rendered message, not the raw body',
-			charCount: '{{chars}} chars · {{encoding}} · {{segments}} segments',
-			previewMeta:
-				'{{segments}} segments · {{encoding}} · {{chars}}/{{perSegment}} chars per segment',
+			charCount:
+				'{{chars}}/{{perSegment}} chars · {{encoding}} · {{segments}} segments',
 			sourceDefault: 'Default',
 			sourceCustom: 'Customized',
 			revertTitle: 'Revert to default',
@@ -1991,6 +1982,32 @@ export const en: TranslationsOf<typeof uz> = {
 			filterEmpty: 'No templates match this filter',
 			noActive: 'No templates with an active rule',
 			noActiveHint: 'Turn a rule on to configure the messages it sends.',
+		},
+		moderation: {
+			title: 'SMS gateway approval',
+			status: {
+				PENDING: 'Not submitted',
+				MODERATION: 'In review',
+				APPROVED: 'Approved',
+				REJECTED: 'Rejected',
+			},
+			hint: {
+				PENDING:
+					'The text could not be sent to the gateway. It is resubmitted automatically the next time you save the template.',
+				MODERATION:
+					'Sent to the gateway and awaiting review. Until it is approved, SMS using this text are not delivered.',
+				APPROVED:
+					'The gateway approved this text — SMS using this template are delivered.',
+				REJECTED:
+					'The gateway refused this text. Resubmitting the same text will not help — change the copy and save.',
+			},
+			submittedAs: 'Submitted as',
+			errorLabel: 'Error',
+			dirtyNote:
+				'This status is for the saved text. Your new copy is submitted for approval once you save it.',
+			unavailable: 'This text has not been sent to the gateway yet.',
+			unavailableHint:
+				'SMS may not be configured. Check the SMS channel under Settings.',
 		},
 		outbox: {
 			title: 'Delivery log',
@@ -2115,6 +2132,8 @@ export const en: TranslationsOf<typeof uz> = {
 				cleared: 'Provider credentials cleared',
 				usingPlatform: 'Using the platform provider account',
 				usingOwn: 'Own credentials stored · {{login}}',
+				moderationNote:
+					'Gateway approval is granted per account. Switching to your own account resubmits every template for approval — SMS are not delivered until they clear. Track the status under Templates.',
 			},
 			balance: {
 				title: 'Provider balance',

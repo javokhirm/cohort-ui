@@ -48,6 +48,12 @@ export const notificationTemplatesKeys = {
 	list: (filters: TemplateListFilters) =>
 		[...notificationTemplatesKeys.all, 'list', filters] as const,
 	detail: (id: number) => [...notificationTemplatesKeys.all, 'detail', id] as const,
+	/**
+	 * SMS gateway moderation state. Nested under `all` on purpose: saving a
+	 * template submits its copy for approval, so the existing template mutations
+	 * already invalidate this slice without naming it.
+	 */
+	moderation: () => [...notificationTemplatesKeys.all, 'moderation'] as const,
 };
 
 export interface OutboxListFilters {

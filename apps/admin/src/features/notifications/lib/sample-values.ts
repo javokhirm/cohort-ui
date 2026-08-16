@@ -4,31 +4,54 @@
  * fall back to the variable's own name, which still shows where it lands in the
  * sentence.
  *
+ * **Mirrors the backend's `VARIABLE_EXAMPLES`** (`domain/communication/defaults/
+ * template-variable-examples.ts`) value for value, and must stay in sync with it.
+ * That map is what the backend submits to Eskiz for SMS moderation, so a preview
+ * built from the same values is the same text a moderator — and a recipient —
+ * actually reads. Two consequences that look like bugs but aren't:
+ *
+ * - Money is the raw shape a `decimal` column stringifies to (`1500000` — no
+ *   thousands separator, no trailing `.00`), **not** `formatPrice` output. These
+ *   are substitution literals standing in for the server renderer's output, not
+ *   money rendered by this UI, so the shared formatters deliberately don't apply.
+ * - Dates are the renderer's `YYYY-MM-DD`, not a locale-formatted date.
+ *
  * Shared by the template sheet and the inline template editor.
  */
 const SAMPLES: Record<string, string> = {
-	centerName: 'Bright Future',
-	studentName: 'Ali Valiyev',
-	parentName: 'Aziza Valiyeva',
-	recipientName: 'Aziza Valiyeva',
-	amount: '450 000',
-	lateFeeAmount: '25 000',
-	remainingBalance: '150 000',
+	// Free text a center or a parent typed.
+	centerName: 'Ravnaq Talim',
+	studentName: 'Anvar Tursunov',
+	parentName: 'Dilnoza Yusupova',
+	groupName: '789-A',
+	assessmentName: 'IELTS Mock Test',
+	tierName: 'Standart',
+
+	// Money. Rendered straight off a `decimal` column, so the sample keeps the
+	// same shape: no thousands separator, no trailing `.00`.
+	amount: '1500000',
+	lateFeeAmount: '50000',
+	remainingBalance: '250000',
+
+	// Codes and dates: rendered verbatim off their column, same as above.
 	currency: 'UZS',
-	invoiceNumber: 'INV-2026-00042',
-	dueDate: '2026-07-01',
-	paidAt: '2026-06-28',
-	sessionDate: '2026-06-26',
-	groupName: 'IELTS Morning A',
-	assessmentName: 'Unit 4 Test',
+	invoiceNumber: 'INV-00042',
+	dueDate: '2026-08-20',
+	sessionDate: '2026-08-16',
+	paidAt: '2026-08-16',
+	expiresAt: '2026-08-31',
+	expiredAt: '2026-08-10',
+	periodEnd: '2026-08-31',
+
+	// Plain integers.
 	daysUntilDue: '3',
 	daysOverdue: '5',
 	daysRemaining: '7',
-	expiresAt: '2026-08-01',
-	expiredAt: '2026-08-01',
-	periodEnd: '2026-09-01',
-	tierName: 'Pro',
-	reason: '—',
+
+	// Not a trigger-catalog variable — the dispatcher supplies it from the
+	// resolved recipient, so no backend example covers it and the server's own
+	// unknown-name fallback (a generic full name) is what it would render.
+	recipientName: 'Anvar Tursunov',
 };
 
 export function sampleFor(name: string): string {

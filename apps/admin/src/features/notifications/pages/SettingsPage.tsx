@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { AlertTriangle, Lock, MessageSquare, RefreshCw, Send } from 'lucide-react';
+import { AlertTriangle, Info, Lock, MessageSquare, RefreshCw, Send } from 'lucide-react';
 
 import { isApiError } from '@repo/api-client';
 import {
@@ -268,6 +268,20 @@ function SmsSettingsForm({ setting: sms }: { setting: ChannelSetting }) {
 							{useOwnCredentials && (
 								<>
 									<Separator />
+									{/*
+									 * Gateway approval is granted per account: an
+									 * account switch inherits none of the platform's
+									 * approvals, so SMS goes quiet until the
+									 * resubmitted copy clears. Saying so here is the
+									 * difference between an expected pause and a
+									 * support ticket.
+									 */}
+									<Alert>
+										<Info className="size-4" />
+										<AlertDescription>
+											{tn('settings.credentials.moderationNote')}
+										</AlertDescription>
+									</Alert>
 									<div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
 										<div className="flex flex-col gap-1.5">
 											<Label htmlFor="smsLogin">

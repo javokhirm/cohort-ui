@@ -1990,14 +1990,6 @@ export const uz = {
 				bodyHint: 'Oʻzgaruvchini qoʻshish uchun quyidagilardan birini bosing',
 				isActive: 'Faol',
 			},
-			preview: {
-				title: 'Koʻrib chiqish',
-				run: 'Koʻrib chiqish',
-				empty: 'Matn kiriting va natijani koʻrish uchun bosing.',
-				segments: '{{count}} SMS',
-				segmentsHint:
-					'Kirill yoki ʻ harflari bilan yozilgan matn 70 belgidan, lotin matni 160 belgidan boʻlinadi — shuning uchun narx farq qiladi.',
-			},
 			insertVariable: '{{name}} qoʻshish',
 			new: 'Yangi shablon',
 			searchPlaceholder: 'Kod, kanal yoki til boʻyicha filtrlash',
@@ -2014,12 +2006,11 @@ export const uz = {
 			unknownVars:
 				'{{vars}} — hodisa buni bermaydi, shuning uchun u har bir qabul qiluvchi uchun boʻsh chiqadi.',
 			livePreview: 'Jonli koʻrinish',
-			livePreviewHint: 'namuna maʼlumotlar bilan · hech narsa yuborilmaydi',
 			previewFrom: '{{sender}} dan',
+			previewEmpty: 'Matn kiriting — koʻrinishi shu yerda chiqadi.',
 			segmentsCounted: 'xom matn emas, tayyor xabar boʻyicha hisoblanadi',
-			charCount: '{{chars}} belgi · {{encoding}} · {{segments}} segment',
-			previewMeta:
-				'{{segments}} segment · {{encoding}} · {{chars}}/{{perSegment}} belgi/segment',
+			charCount:
+				'{{chars}}/{{perSegment}} belgi · {{encoding}} · {{segments}} segment',
 			sourceDefault: 'Standart',
 			sourceCustom: 'Moslashtirilgan',
 			revertTitle: 'Standartga qaytarish',
@@ -2029,6 +2020,32 @@ export const uz = {
 			filterEmpty: 'Filtrga mos shablon yoʻq',
 			noActive: 'Yoqilgan qoidaga ega shablon yoʻq',
 			noActiveHint: 'Shablonlarni sozlash uchun biror qoidani yoqing.',
+		},
+		moderation: {
+			title: 'SMS operator tasdigi',
+			status: {
+				PENDING: 'Yuborilmadi',
+				MODERATION: 'Tekshiruvda',
+				APPROVED: 'Tasdiqlangan',
+				REJECTED: 'Rad etilgan',
+			},
+			hint: {
+				PENDING:
+					'Matnni operatorga yuborib boʻlmadi. Shablonni keyingi saqlashda avtomatik qayta yuboriladi.',
+				MODERATION:
+					'Matn operatorga yuborildi va tasdiqlanishini kutmoqda. Tasdiqlanmaguncha bu matnli SMS yetkazilmaydi.',
+				APPROVED:
+					'Operator matnni tasdiqladi — bu shablon boʻyicha SMS yetkaziladi.',
+				REJECTED:
+					'Operator matnni rad etdi. Aynan shu matnni qayta yuborish yordam bermaydi — matnni oʻzgartirib saqlang.',
+			},
+			submittedAs: 'Yuborilgan koʻrinishi',
+			errorLabel: 'Xatolik',
+			dirtyNote:
+				'Holat saqlangan matnga tegishli. Yangi matn saqlaganingizdan soʻng tasdiqqa yuboriladi.',
+			unavailable: 'Bu matn hali operatorga yuborilmagan.',
+			unavailableHint:
+				'SMS sozlanmagan boʻlishi mumkin. Sozlamalar boʻlimida SMS kanalini tekshiring.',
 		},
 		outbox: {
 			title: 'Yuborilgan xabarlar',
@@ -2153,6 +2170,8 @@ export const uz = {
 				cleared: 'Provayder maʼlumotlari tozalandi',
 				usingPlatform: 'Platforma provayder hisobi ishlatilmoqda',
 				usingOwn: 'Oʻz maʼlumotlari saqlangan · {{login}}',
+				moderationNote:
+					'Operator tasdigi har bir hisob uchun alohida beriladi. Oʻz hisobingizga oʻtganingizda barcha shablonlar qaytadan tasdiqqa yuboriladi — tasdiqlanmaguncha SMS yetkazilmaydi. Holatni Shablonlar boʻlimida kuzating.',
 			},
 			balance: {
 				title: 'Provayder balansi',
