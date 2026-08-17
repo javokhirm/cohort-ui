@@ -413,6 +413,38 @@ export const uz = {
 		},
 	},
 
+	leads: {
+		title: 'Lidlar',
+		subtitle: 'Marketing sahifalaridan kelib tushgan soʻrovlar.',
+		searchPlaceholder: 'Ism, pochta, telefon yoki markaz nomi boʻyicha qidirish…',
+		loadError: 'Lidlarni yuklab boʻlmadi. Sahifani yangilang.',
+		empty: 'Qidiruvingizga mos lid topilmadi.',
+		filter: {
+			allSources: 'Barcha manbalar',
+			clear: 'Tozalash',
+		},
+		column: {
+			name: 'Ism',
+			phone: 'Telefon',
+			center: 'Taʼlim markazi',
+			source: 'Manba',
+			createdAt: 'Yuborilgan sana',
+		},
+		source: {
+			website: 'Vebsayt',
+		},
+		detail: {
+			title: 'Lid tafsilotlari',
+			subtitle: 'Ushbu soʻrov haqida toʻliq maʼlumot.',
+			email: 'Elektron pochta',
+			phone: 'Telefon',
+			center: 'Taʼlim markazi',
+			source: 'Manba',
+			createdAt: 'Yuborilgan sana',
+			message: 'Xabar',
+		},
+	},
+
 	profile: {
 		title: 'Profil va xavfsizlik',
 		subtitle: 'Sizning platforma operatori hisobingiz.',

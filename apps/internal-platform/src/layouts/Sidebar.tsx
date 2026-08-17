@@ -4,6 +4,7 @@ import {
 	Building2,
 	ChevronLeft,
 	ChevronRight,
+	Contact2,
 	CreditCard,
 	FileText,
 	LayoutDashboard,
@@ -24,6 +25,7 @@ type NavItemKey =
 	| 'platformDashboard'
 	| 'tenants'
 	| 'userDirectory'
+	| 'platformLeads'
 	| 'subscriptionPlans'
 	| 'subscriptions'
 	| 'payments'
@@ -66,6 +68,13 @@ const CUSTOMERS_ITEMS: NavItemDef[] = [
 		Icon: Users,
 		href: '/users',
 		match: '/users',
+	},
+	{
+		id: 'leads',
+		label: 'platformLeads',
+		Icon: Contact2,
+		href: '/leads',
+		match: '/leads',
 	},
 ];
 

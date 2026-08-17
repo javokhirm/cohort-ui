@@ -399,6 +399,38 @@ export const ru: TranslationsOf<typeof uz> = {
 		},
 	},
 
+	leads: {
+		title: 'Лиды',
+		subtitle: 'Заявки, полученные с маркетинговых страниц.',
+		searchPlaceholder: 'Поиск по имени, почте, телефону или названию центра…',
+		loadError: 'Не удалось загрузить лиды. Обновите страницу.',
+		empty: 'Нет лидов по вашему запросу.',
+		filter: {
+			allSources: 'Все источники',
+			clear: 'Очистить',
+		},
+		column: {
+			name: 'Имя',
+			phone: 'Телефон',
+			center: 'Центр',
+			source: 'Источник',
+			createdAt: 'Отправлено',
+		},
+		source: {
+			website: 'Сайт',
+		},
+		detail: {
+			title: 'Детали лида',
+			subtitle: 'Полная информация об этой заявке.',
+			email: 'Электронная почта',
+			phone: 'Телефон',
+			center: 'Центр',
+			source: 'Источник',
+			createdAt: 'Отправлено',
+			message: 'Сообщение',
+		},
+	},
+
 	profile: {
 		title: 'Профиль и безопасность',
 		subtitle: 'Ваш аккаунт оператора платформы.',

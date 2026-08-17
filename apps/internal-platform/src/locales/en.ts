@@ -400,6 +400,38 @@ export const en: TranslationsOf<typeof uz> = {
 		},
 	},
 
+	leads: {
+		title: 'Leads',
+		subtitle: 'Requests captured from marketing pages.',
+		searchPlaceholder: 'Search by name, email, phone or center name…',
+		loadError: 'Failed to load leads. Refresh the page.',
+		empty: 'No leads match your search.',
+		filter: {
+			allSources: 'All sources',
+			clear: 'Clear',
+		},
+		column: {
+			name: 'Name',
+			phone: 'Phone',
+			center: 'Center',
+			source: 'Source',
+			createdAt: 'Submitted',
+		},
+		source: {
+			website: 'Website',
+		},
+		detail: {
+			title: 'Lead details',
+			subtitle: 'Full detail for this request.',
+			email: 'Email',
+			phone: 'Phone',
+			center: 'Center',
+			source: 'Source',
+			createdAt: 'Submitted',
+			message: 'Message',
+		},
+	},
+
 	profile: {
 		title: 'Profile & Security',
 		subtitle: 'Your platform operator account.',

@@ -155,6 +155,7 @@ export const en = {
 			platformDashboard: 'Platform Dashboard',
 			tenants: 'Tenants',
 			userDirectory: 'User Directory',
+			platformLeads: 'Leads',
 			subscriptionPlans: 'Subscription Plans',
 			subscriptions: 'Subscriptions',
 			roleTemplates: 'Role Templates',

@@ -177,6 +177,7 @@ export const uz = {
 			platformDashboard: 'Platforma paneli',
 			tenants: 'Tashkilotlar',
 			userDirectory: 'Foydalanuvchilar',
+			platformLeads: 'Lidlar',
 			subscriptionPlans: 'Obuna rejalari',
 			subscriptions: 'Obunalar',
 			roleTemplates: 'Rol shablonlari',

@@ -156,6 +156,7 @@ export const ru = {
 			platformDashboard: 'Дашборд платформы',
 			tenants: 'Организации',
 			userDirectory: 'Пользователи',
+			platformLeads: 'Лиды',
 			subscriptionPlans: 'Тарифы подписки',
 			subscriptions: 'Подписки',
 			roleTemplates: 'Шаблоны ролей',

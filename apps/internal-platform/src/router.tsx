@@ -19,6 +19,7 @@ import { SubscriptionPlansPage } from './routes/subscription-plans/index';
 import { SubscriptionsPage } from './routes/subscriptions/index';
 import { SubscriptionPaymentsPage } from './routes/subscription-payments/index';
 import { SubscriptionInvoicesPage } from './routes/subscription-invoices/index';
+import { LeadsPage } from './routes/leads/index';
 import { UserDirectoryPage } from './routes/users/index';
 import { UserDetailPage } from './routes/users/$userId/index';
 import { ProfilePage } from './routes/profile/index';
@@ -243,6 +244,31 @@ const userDetailRoute = createRoute({
 	component: UserDetailPage,
 });
 
+const leadsRoute = createRoute({
+	getParentRoute: () => authedRoute,
+	path: '/leads',
+	validateSearch: (
+		search: Record<string, unknown>,
+	): { page?: number; search?: string; source?: string } => {
+		const page =
+			typeof search.page === 'number' &&
+			Number.isFinite(search.page) &&
+			search.page >= 1
+				? Math.floor(search.page)
+				: undefined;
+		const q =
+			typeof search.search === 'string' && search.search.trim()
+				? search.search.trim()
+				: undefined;
+		const source =
+			typeof search.source === 'string' && search.source.trim()
+				? search.source.trim()
+				: undefined;
+		return { page, search: q, source };
+	},
+	component: LeadsPage,
+});
+
 const profileRoute = createRoute({
 	getParentRoute: () => authedRoute,
 	path: '/profile',
@@ -283,6 +309,7 @@ const routeTree = rootRoute.addChildren([
 		subscriptionInvoicesRoute,
 		userIndexRoute,
 		userDetailRoute,
+		leadsRoute,
 		profileRoute,
 		auditLogRoute,
 		auditLogDetailRoute,
