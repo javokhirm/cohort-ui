@@ -56,7 +56,7 @@ export function LeadFilters({
 
 	return (
 		<div className="flex flex-wrap items-center gap-2">
-			<div className="relative min-w-64 flex-1">
+			<div className="relative w-auto">
 				<Search className="absolute top-1/2 left-3 size-4 -translate-y-1/2 text-muted-foreground" />
 				<Input
 					value={searchInput}
@@ -67,6 +67,7 @@ export function LeadFilters({
 			</div>
 
 			<Select
+				className="w-auto"
 				value={values.source ?? ALL}
 				onValueChange={(v) => onChange({ source: v === ALL ? undefined : v })}
 			>

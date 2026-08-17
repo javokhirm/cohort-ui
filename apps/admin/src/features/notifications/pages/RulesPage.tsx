@@ -23,7 +23,6 @@ import { useAppT } from '@/locales';
 import {
 	useNotificationRules,
 	useNotificationTriggers,
-	type NotificationChannel,
 	type NotificationRule,
 	type NotificationTrigger,
 } from '../api/notifications.queries';
@@ -130,8 +129,8 @@ function offsetLabel(rule: NotificationRule): string {
  * on a hunch.
  */
 interface RulesPageProps {
-	/** Jump to a rule's template in the Templates tab; omitted when that tab isn't reachable. */
-	onOpenTemplate?: (code: string, channels: NotificationChannel[]) => void;
+	/** Jump to the Templates tab, search bar seeded with a rule's template code; omitted when that tab isn't reachable. */
+	onOpenTemplate?: (code: string) => void;
 }
 
 export function RulesPage({ onOpenTemplate }: RulesPageProps) {
@@ -399,7 +398,6 @@ export function RulesPage({ onOpenTemplate }: RulesPageProps) {
 														onClick={() =>
 															onOpenTemplate(
 																rule.templateCode,
-																rule.channels,
 															)
 														}
 														title={tn(

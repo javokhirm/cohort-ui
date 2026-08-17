@@ -16,14 +16,10 @@ import {
 import { TemplateEditor } from '../components/TemplateEditor';
 import { TemplateList } from '../components/TemplateList';
 import { indexModeration } from '../lib/moderation';
-import {
-	resolveTemplateKey,
-	templateKey,
-	type TemplateFocusRequest,
-} from '../lib/template-key';
+import { templateKey, type TemplateFocusRequest } from '../lib/template-key';
 
 interface TemplatesPageProps {
-	/** A rule's template, requested from its trigger badge in the Rules tab; seeds the initial selection. */
+	/** A rule's template code, requested from its trigger badge in the Rules tab; seeds the initial search query. */
 	focusRequest?: TemplateFocusRequest | null;
 }
 
@@ -38,10 +34,11 @@ interface TemplatesPageProps {
  * {@link TemplateEditor}.
  *
  * `focusRequest` (a click on a rule's trigger badge, from the Rules tab) seeds
- * which row starts selected — see {@link resolveTemplateKey}. It is only read
- * on mount: this page unmounts whenever the tab isn't active (Radix drops
- * inactive `TabsContent`), so every arrival here is a fresh mount, and a later
- * manual pick in {@link TemplateList} is never overridden by a stale request.
+ * the search bar with that rule's template code, filtering {@link TemplateList}
+ * down to it rather than jumping straight to one row. It is only read on mount:
+ * this page unmounts whenever the tab isn't active (Radix drops inactive
+ * `TabsContent`), so every arrival here is a fresh mount, and a later manual
+ * edit of the search box is never overridden by a stale request.
  */
 export function TemplatesPage({ focusRequest }: TemplatesPageProps) {
 	const tn = useAppT('notifications');
@@ -58,7 +55,9 @@ export function TemplatesPage({ focusRequest }: TemplatesPageProps) {
 	// with it — the moderation panel simply reports the state as unknown.
 	const { data: moderationRows } = useTemplateModeration();
 
-	const [query, setQuery] = useState('');
+	// Lazy init only: seeded once from this mount's `focusRequest`, never re-run
+	// on refetch, so a later manual edit of the search box is never clobbered.
+	const [query, setQuery] = useState(() => focusRequest?.code ?? '');
 
 	const rows = useMemo(() => data?.rows ?? [], [data]);
 	const moderation = useMemo(() => indexModeration(moderationRows), [moderationRows]);
@@ -90,14 +89,7 @@ export function TemplatesPage({ focusRequest }: TemplatesPageProps) {
 		[rows, activeRuleCodes],
 	);
 
-	// Lazy init only: resolved once against this mount's first `visibleRows`,
-	// never re-run on refetch, so it can't clobber a selection the user makes
-	// afterward (see the `focusRequest` note on the component doc comment).
-	const [selectedKey, setSelectedKey] = useState<string | null>(() =>
-		focusRequest
-			? resolveTemplateKey(visibleRows, focusRequest.code, focusRequest.channels)
-			: null,
-	);
+	const [selectedKey, setSelectedKey] = useState<string | null>(null);
 
 	// Derive the effective selection during render (no effect, so no cascading
 	// renders): the chosen key when it still exists among the visible rows,

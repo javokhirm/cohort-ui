@@ -10,7 +10,6 @@ import {
 	useNotificationRules,
 	useNotificationStats,
 	useNotificationTemplates,
-	type NotificationChannel,
 } from '../api/notifications.queries';
 import { NotificationComposeSheet } from '../components/NotificationComposeSheet';
 import { SmsStatusPill } from '../components/SmsStatusPill';
@@ -127,9 +126,10 @@ export function NotificationsPage() {
 	const [tab, setTab] = useState(() => tabs[0]?.value);
 	const [composeOpen, setComposeOpen] = useState(false);
 
-	// Set by a rule's trigger badge (Rules tab) to jump to and preselect its
-	// template; cleared on leaving the Templates tab so a later, ordinary visit
-	// doesn't keep re-landing on a stale rule's template.
+	// Set by a rule's trigger badge (Rules tab) to jump to the Templates tab with
+	// its search bar seeded with the rule's template code; cleared on leaving the
+	// Templates tab so a later, ordinary visit doesn't keep re-seeding the search
+	// from a stale rule.
 	const [templateFocus, setTemplateFocus] = useState<TemplateFocusRequest | null>(null);
 
 	const handleTabChange = (value: string) => {
@@ -137,8 +137,8 @@ export function NotificationsPage() {
 		if (value !== 'templates') setTemplateFocus(null);
 	};
 
-	const handleOpenTemplate = (code: string, channels: NotificationChannel[]) => {
-		setTemplateFocus({ code, channels });
+	const handleOpenTemplate = (code: string) => {
+		setTemplateFocus({ code });
 		setTab('templates');
 	};
 
