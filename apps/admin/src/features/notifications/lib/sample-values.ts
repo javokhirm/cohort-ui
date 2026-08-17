@@ -19,8 +19,6 @@
  * Shared by the template sheet and the inline template editor.
  */
 const SAMPLES: Record<string, string> = {
-	// Free text a center or a parent typed.
-	centerName: 'Ravnaq Talim',
 	studentName: 'Anvar Tursunov',
 	parentName: 'Dilnoza Yusupova',
 	groupName: '789-A',

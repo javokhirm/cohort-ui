@@ -81,7 +81,7 @@ export function TemplateEditor({
 
 	/**
 	 * Variables this code may use: the union across every trigger that defaults to
-	 * it, plus the universal `{{centerName}}`. A code no trigger references (a
+	 * it. A code no trigger references (a
 	 * center's own broadcast) has no declared set, so nothing is offered or checked.
 	 */
 	const { availableVariables, hasDeclaredSet } = useMemo(() => {
@@ -90,7 +90,7 @@ export function TemplateEditor({
 		);
 		const vars = [...new Set(matching.flatMap((t) => t.variables))];
 		return {
-			availableVariables: [...new Set([...vars, 'centerName'])].sort(),
+			availableVariables: [...new Set([...vars])].sort(),
 			hasDeclaredSet: matching.length > 0,
 		};
 	}, [triggers, template.code]);
