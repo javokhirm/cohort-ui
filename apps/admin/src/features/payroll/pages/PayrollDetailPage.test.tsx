@@ -30,6 +30,7 @@ function resetSession(permissions: string[] = []) {
 			id: 1,
 			firstName: 'M',
 			lastName: 'M',
+			email: null,
 			roles: ['MANAGER'],
 			branchScope: null,
 			preferredLanguage: null,

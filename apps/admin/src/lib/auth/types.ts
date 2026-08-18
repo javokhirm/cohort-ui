@@ -7,10 +7,21 @@
 import type { Locale } from '@repo/utils';
 import type { SubscriptionAccessView } from '@repo/api-client';
 
+/**
+ * The tenant identity embedded in the login/refresh `user` summary and in
+ * `GET /manage/me` — grouped separately from the principal's own fields, so
+ * it can be read (e.g. for a header/logo) independent of the user's own profile.
+ */
+export interface TenantSummary {
+	id: number;
+	name: string;
+}
+
 export interface AuthUserSummary {
 	id: number;
 	firstName: string;
 	lastName: string;
+	email: string | null;
 	roles: string[];
 	/** null = all branches; array = restricted to those branch ids. */
 	branchScope: number[] | null;
@@ -28,6 +39,13 @@ export interface AuthResult {
 	/** Access-token lifetime in seconds. */
 	expiresIn: number;
 	user: AuthUserSummary;
+	/**
+	 * The tenant behind the user's single ACTIVE membership, kept as its own
+	 * top-level field (rather than nested on `user`) since it identifies the
+	 * business, not the principal. Only ever available here — no bootstrap
+	 * profile on this surface repeats it.
+	 */
+	tenant: TenantSummary;
 	/**
 	 * The tenant's derived subscription access state. Login/refresh are never
 	 * blocked by a lapsed subscription (only what its plan buys), so this is what

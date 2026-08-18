@@ -3,9 +3,10 @@ import { create } from 'zustand';
 import { setLocale } from '@repo/i18n';
 import type { SubscriptionAccessView, SubscriptionBlockDetails } from '@repo/api-client';
 
-import type { AuthResult, AuthUserSummary } from '@/lib/auth/types';
+import type { AuthResult, AuthUserSummary, TenantSummary } from '@/lib/auth/types';
 import { permitted, type PermissionRequirement } from '@/lib/auth/permissions';
 import { clearStoredRefreshToken, setStoredRefreshToken } from '@/lib/auth/tokenStorage';
+import { clearIdentity, identify } from '@/lib/third-party/fullstory';
 
 export type SessionStatus = 'unknown' | 'authenticated' | 'anonymous';
 
@@ -25,6 +26,8 @@ interface SessionState {
 	/** Access token — memory only, never persisted. */
 	accessToken: string | null;
 	user: AuthUserSummary | null;
+	/** The business behind the user's single ACTIVE membership, from login/refresh. */
+	tenant: TenantSummary | null;
 	status: SessionStatus;
 	/**
 	 * Effective permission codes resolved from `GET /manage/me`. Empty until the
@@ -60,6 +63,7 @@ interface SessionState {
 export const useSessionStore = create<SessionState>((set) => ({
 	accessToken: null,
 	user: null,
+	tenant: null,
 	status: 'unknown',
 	permissions: [],
 	permissionsLoaded: false,
@@ -72,9 +76,11 @@ export const useSessionStore = create<SessionState>((set) => ({
 		// user's own choice and should win over what `initI18n` resolved from
 		// localStorage. A `null` preference is ignored (setLocale no-ops).
 		setLocale(result.user.preferredLanguage);
+		identify(result.user, result.tenant);
 		set((state) => ({
 			accessToken: result.accessToken,
 			user: result.user,
+			tenant: result.tenant,
 			status: 'authenticated',
 			subscription: result.subscription,
 			subscriptionBlock: nextSubscriptionBlock(
@@ -93,21 +99,26 @@ export const useSessionStore = create<SessionState>((set) => ({
 			),
 		})),
 	setSubscriptionBlock: (details) => set({ subscriptionBlock: details }),
-	setAnonymous: () =>
+	setAnonymous: () => {
+		clearIdentity();
 		set({
 			accessToken: null,
 			user: null,
+			tenant: null,
 			status: 'anonymous',
 			permissions: [],
 			permissionsLoaded: false,
 			subscription: null,
 			subscriptionBlock: null,
-		}),
+		});
+	},
 	clear: () => {
 		clearStoredRefreshToken();
+		clearIdentity();
 		set({
 			accessToken: null,
 			user: null,
+			tenant: null,
 			status: 'anonymous',
 			permissions: [],
 			permissionsLoaded: false,

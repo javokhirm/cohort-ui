@@ -1395,9 +1395,11 @@ export const handlers = [
 					id: 1,
 					firstName: 'Olim',
 					lastName: 'Owner',
+					email: null,
 					roles: ['OWNER'],
 					branchScope: null,
 				},
+				tenant: { id: 1, name: 'Ravnaq Talim' },
 			});
 		}
 		return fail(401, 'INVALID_TOKEN', 'Invalid refresh token.');

@@ -20,6 +20,9 @@ importers:
 
   apps/admin:
     dependencies:
+      '@fullstory/browser':
+        specifier: ^2.0.8
+        version: 2.0.8
       '@hookform/resolvers':
         specifier: ^5.4.0
         version: 5.4.0(react-hook-form@7.81.0(react@19.2.7))
@@ -821,6 +824,12 @@ packages:
 
   '@floating-ui/utils@0.2.12':
     resolution: {integrity: sha512-HpCo8tmWzLVad5s2d19EhAz5zqrrQ6s69qd6moPMQvkOuSwDT1YgRfWSVuc4ennqrgv3OHppiOGMQ7oC13yIww==}
+
+  '@fullstory/browser@2.0.8':
+    resolution: {integrity: sha512-MOylRaBAs7y7xFLvBQo446/xbTZ9MbPZSn3B4go4+eXI1o/uY7F+30ow6CA1i8fVoE4ScXDYpRtffDBBFsd8CQ==}
+
+  '@fullstory/snippet@2.0.6':
+    resolution: {integrity: sha512-GECETOTiW8XhRAr4q94rXY8Uc315KGmSepZQvBKW1LONJiKFvKzKpm/6Lystw/8lHFsDT7hD5VIZntMNOO2VAQ==}
 
   '@hookform/resolvers@5.4.0':
     resolution: {integrity: sha512-EIsqr/t/qbinPIhGjMdtvutIN1Kk4uwbROE9/UQ93CAVGR7GkA7Y92+fX80OzXi/OB67jVFYwKGO1WzkxmkFZw==}
@@ -4268,6 +4277,12 @@ snapshots:
       react-dom: 19.2.7(react@19.2.7)
 
   '@floating-ui/utils@0.2.12': {}
+
+  '@fullstory/browser@2.0.8':
+    dependencies:
+      '@fullstory/snippet': 2.0.6
+
+  '@fullstory/snippet@2.0.6': {}
 
   '@hookform/resolvers@5.4.0(react-hook-form@7.81.0(react@19.2.7))':
     dependencies:
