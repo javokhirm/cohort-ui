@@ -11,10 +11,12 @@ const AUTH: AuthResult = {
 		id: 1,
 		firstName: 'Olim',
 		lastName: 'Owner',
+		email: null,
 		roles: ['OWNER'],
 		branchScope: null,
 		preferredLanguage: null,
 	},
+	tenant: { id: 1, name: 'Ravnaq Talim' },
 	subscription: null,
 };
 
@@ -23,6 +25,7 @@ describe('sessionStore — permissions', () => {
 		useSessionStore.setState({
 			accessToken: null,
 			user: null,
+			tenant: null,
 			status: 'unknown',
 			permissions: [],
 			permissionsLoaded: false,
