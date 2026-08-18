@@ -1,5 +1,13 @@
 import { useState } from 'react';
-import { AlertTriangle, Info, Lock, MessageSquare, RefreshCw, Send } from 'lucide-react';
+import {
+	AlertTriangle,
+	Building2,
+	Info,
+	Lock,
+	MessageSquare,
+	RefreshCw,
+	Send,
+} from 'lucide-react';
 
 import { isApiError } from '@repo/api-client';
 import {
@@ -77,13 +85,17 @@ function SmsSettingsForm({ setting: sms }: { setting: ChannelSetting }) {
 	const upsert = useUpsertChannelSetting();
 	const testChannel = useTestChannel();
 
-	// Balance is only meaningful once credentials resolve; asking otherwise 400s.
+	// Balance, test-sending and default-template moderation for the *shared*
+	// platform account are managed centrally from the internal platform console
+	// (many tenants resolve to that one account, so per-tenant controls over it
+	// would be confusing at best and a quota-draining footgun at worst). Only a
+	// center with its own Eskiz account gets these controls here.
 	const {
 		data: balance,
 		dataUpdatedAt: balanceFetchedAt,
 		isFetching: isBalanceFetching,
 		refetch: refetchBalance,
-	} = useChannelBalance('SMS', sms.isOperational);
+	} = useChannelBalance('SMS', sms.hasOwnCredentials);
 
 	// --- local form state, seeded from the loaded setting ---------------------
 	const [isEnabled, setIsEnabled] = useState(sms.isEnabled);
@@ -210,46 +222,6 @@ function SmsSettingsForm({ setting: sms }: { setting: ChannelSetting }) {
 
 					<Card>
 						<CardContent className="flex flex-col gap-4">
-							<span className="text-sm font-semibold">
-								{tn('settings.senderLimits.title')}
-							</span>
-							<div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
-								<div className="flex flex-col gap-1.5">
-									<Label htmlFor="senderName">
-										{tn('settings.field.senderName')}
-									</Label>
-									<Input
-										id="senderName"
-										value={senderName}
-										onChange={(e) => setSenderName(e.target.value)}
-										placeholder="4546"
-									/>
-									<p className="text-xs text-muted-foreground">
-										{tn('settings.field.senderNameHint')}
-									</p>
-								</div>
-								<div className="flex flex-col gap-1.5">
-									<Label htmlFor="dailyLimit">
-										{tn('settings.field.dailyLimit')}
-									</Label>
-									<Input
-										id="dailyLimit"
-										type="number"
-										min={1}
-										value={dailyLimit}
-										onChange={(e) => setDailyLimit(e.target.value)}
-									/>
-								</div>
-							</div>
-						</CardContent>
-					</Card>
-
-					<Card>
-						<CardContent className="flex flex-col gap-4">
-							<span className="text-sm font-semibold">
-								{tn('settings.credentials.title')}
-							</span>
-
 							<div className="flex items-center justify-between gap-4">
 								<div className="flex flex-col gap-0.5">
 									<span className="text-sm font-semibold">
@@ -334,6 +306,36 @@ function SmsSettingsForm({ setting: sms }: { setting: ChannelSetting }) {
 							)}
 
 							<Separator />
+							<div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
+								<div className="flex flex-col gap-1.5">
+									<Label htmlFor="senderName">
+										{tn('settings.field.senderName')}
+									</Label>
+									<Input
+										id="senderName"
+										value={senderName}
+										onChange={(e) => setSenderName(e.target.value)}
+										placeholder="4546"
+									/>
+									<p className="text-xs text-muted-foreground">
+										{tn('settings.field.senderNameHint')}
+									</p>
+								</div>
+								<div className="flex flex-col gap-1.5">
+									<Label htmlFor="dailyLimit">
+										{tn('settings.field.dailyLimit')}
+									</Label>
+									<Input
+										id="dailyLimit"
+										type="number"
+										min={1}
+										value={dailyLimit}
+										onChange={(e) => setDailyLimit(e.target.value)}
+									/>
+								</div>
+							</div>
+
+							<Separator />
 							<div className="flex flex-wrap items-center justify-between gap-3">
 								<span className="text-xs text-muted-foreground">
 									{sms.hasOwnCredentials
@@ -357,113 +359,121 @@ function SmsSettingsForm({ setting: sms }: { setting: ChannelSetting }) {
 				</div>
 
 				<div className="flex flex-col gap-6">
-					{sms.isOperational && (
-						<Card>
-							<CardContent className="flex flex-col gap-4">
-								<div className="flex items-start justify-between gap-3">
-									<div className="flex flex-col gap-0.5">
-										<span className="text-sm font-semibold">
-											{tn('settings.balance.title')}
-										</span>
-										{balanceFetchedAt > 0 && (
-											<span className="text-xs text-muted-foreground">
-												{tn('settings.balance.fetched', {
-													date: formatDateTime(
-														new Date(
-															balanceFetchedAt,
-														).toISOString(),
-													),
-												})}
+					{sms.hasOwnCredentials ? (
+						<>
+							{sms.isOperational && (
+								<Card>
+									<CardContent className="flex flex-col gap-4">
+										<div className="flex items-start justify-between gap-3">
+											<div className="flex flex-col gap-0.5">
+												<span className="text-sm font-semibold">
+													{tn('settings.balance.title')}
+												</span>
+												{balanceFetchedAt > 0 && (
+													<span className="text-xs text-muted-foreground">
+														{tn('settings.balance.fetched', {
+															date: formatDateTime(
+																new Date(
+																	balanceFetchedAt,
+																).toISOString(),
+															),
+														})}
+													</span>
+												)}
+											</div>
+											<Button
+												variant="outline"
+												size="icon"
+												className="size-8"
+												onClick={() => void refetchBalance()}
+												disabled={isBalanceFetching}
+											>
+												{isBalanceFetching ? (
+													<Spinner className="size-4" />
+												) : (
+													<RefreshCw className="size-4" />
+												)}
+											</Button>
+										</div>
+
+										{balance?.amount != null ? (
+											<span className="text-2xl font-bold tabular-nums">
+												{formatPrice(balance.amount)}{' '}
+												{balance.currency ?? 'UZS'}
+											</span>
+										) : (
+											<span className="text-sm text-muted-foreground">
+												{tn('settings.balanceUnknown')}
 											</span>
 										)}
+									</CardContent>
+								</Card>
+							)}
+
+							<Card>
+								<CardContent className="flex flex-col gap-4">
+									<div className="flex flex-col gap-0.5">
+										<span className="text-sm font-semibold">
+											{tn('settings.test.title')}
+										</span>
+										<p className="text-xs text-muted-foreground">
+											{tn('settings.test.description')}
+										</p>
+									</div>
+									<div className="flex flex-col gap-1.5">
+										<Label htmlFor="testPhone">
+											{tn('settings.test.phone')}
+										</Label>
+										<PhoneInput
+											id="testPhone"
+											value={testPhone}
+											onChange={setTestPhone}
+										/>
+									</div>
+									<div className="flex flex-col gap-1.5">
+										<Label htmlFor="testMessage">
+											{tn('settings.test.message')}
+										</Label>
+										<Textarea
+											id="testMessage"
+											value={testMessage}
+											onChange={(e) =>
+												setTestMessage(e.target.value)
+											}
+											placeholder={tn(
+												'settings.test.messagePlaceholder',
+											)}
+											rows={3}
+										/>
 									</div>
 									<Button
-										variant="outline"
-										size="icon"
-										className="size-8"
-										onClick={() => void refetchBalance()}
-										disabled={isBalanceFetching}
+										className="w-full"
+										onClick={() => void sendTest()}
+										disabled={testChannel.isPending}
 									>
-										{isBalanceFetching ? (
-											<Spinner className="size-4" />
+										{testChannel.isPending ? (
+											<Spinner className="mr-1.5 size-4" />
 										) : (
-											<RefreshCw className="size-4" />
+											<Send className="mr-1.5 size-4" />
 										)}
+										{tn('settings.test.send')}
 									</Button>
+								</CardContent>
+							</Card>
+						</>
+					) : (
+						<Card>
+							<CardContent className="flex flex-col gap-2">
+								<div className="flex items-center gap-2 text-sm font-semibold">
+									<Building2 className="size-4 text-muted-foreground" />
+									{tn('settings.platformManaged.title')}
 								</div>
-
-								{balance?.amount != null ? (
-									<span className="text-2xl font-bold tabular-nums">
-										{formatPrice(balance.amount)}{' '}
-										{balance.currency ?? 'UZS'}
-									</span>
-								) : (
-									<span className="text-sm text-muted-foreground">
-										{tn('settings.balanceUnknown')}
-									</span>
-								)}
+								<p className="text-xs text-muted-foreground">
+									{tn('settings.platformManaged.description')}
+								</p>
 							</CardContent>
 						</Card>
 					)}
-
-					<Card>
-						<CardContent className="flex flex-col gap-4">
-							<div className="flex flex-col gap-0.5">
-								<span className="text-sm font-semibold">
-									{tn('settings.test.title')}
-								</span>
-								<p className="text-xs text-muted-foreground">
-									{tn('settings.test.description')}
-								</p>
-							</div>
-							<div className="flex flex-col gap-1.5">
-								<Label htmlFor="testPhone">
-									{tn('settings.test.phone')}
-								</Label>
-								<PhoneInput
-									id="testPhone"
-									value={testPhone}
-									onChange={setTestPhone}
-								/>
-							</div>
-							<div className="flex flex-col gap-1.5">
-								<Label htmlFor="testMessage">
-									{tn('settings.test.message')}
-								</Label>
-								<Textarea
-									id="testMessage"
-									value={testMessage}
-									onChange={(e) => setTestMessage(e.target.value)}
-									placeholder={tn('settings.test.messagePlaceholder')}
-									rows={3}
-								/>
-							</div>
-							<Button
-								className="w-full"
-								onClick={() => void sendTest()}
-								disabled={testChannel.isPending}
-							>
-								{testChannel.isPending ? (
-									<Spinner className="mr-1.5 size-4" />
-								) : (
-									<Send className="mr-1.5 size-4" />
-								)}
-								{tn('settings.test.send')}
-							</Button>
-						</CardContent>
-					</Card>
-
-					<Card>
-						<CardContent className="flex flex-col gap-2">
-							<div className="flex items-center gap-2 text-sm font-semibold">
-								<Lock className="size-4 text-muted-foreground" />
-								{tn('settings.ownerOnly.title')}
-							</div>
-							<p className="text-xs text-muted-foreground">
-								{tn('settings.ownerOnly.description')}
-							</p>
-						</CardContent>
-					</Card>
 				</div>
 			</div>
 		</div>

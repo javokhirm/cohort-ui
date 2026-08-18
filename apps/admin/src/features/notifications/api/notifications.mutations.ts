@@ -202,6 +202,39 @@ export function usePreviewNotificationTemplate() {
 	});
 }
 
+export interface SmsModerationSyncResult {
+	/** Texts newly sent to the gateway's moderators. */
+	submitted: number;
+	/** Texts the gateway already held verbatim; the existing decision was adopted. */
+	matched: number;
+	/** Texts already settled locally — no gateway call needed. */
+	skipped: number;
+	/** Submissions the gateway refused or that could not be delivered. */
+	failed: number;
+}
+
+/**
+ * Operator-triggered sweep: submit the code-owned default SMS copy the gateway
+ * doesn't already hold. Deliberately not run automatically — moderation is a
+ * human review queue at the gateway, so it only fires when someone presses the
+ * button. Safe to repeat: the backend reconciles against the account's existing
+ * templates first and submits only what's missing.
+ */
+export function useSyncTemplateModeration() {
+	const qc = useQueryClient();
+	return useMutation({
+		mutationFn: () =>
+			manageApi.post<SmsModerationSyncResult>(
+				'/notification-templates/moderation/sync',
+			),
+		onSuccess: () => {
+			void qc.invalidateQueries({
+				queryKey: notificationTemplatesKeys.moderation(),
+			});
+		},
+	});
+}
+
 // ─── Channel settings ────────────────────────────────────────────────────────
 
 export function useUpsertChannelSetting() {

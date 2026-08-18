@@ -124,12 +124,11 @@ const PLATFORM_ITEMS: NavItemDef[] = [
 		href: '/audit-log',
 		match: '/audit-log',
 	},
-	// TODO: href → '/settings' once route exists
 	{
 		id: 'settings',
 		label: 'settings',
 		Icon: Settings,
-		href: '/',
+		href: '/settings',
 		match: '/settings',
 	},
 ];

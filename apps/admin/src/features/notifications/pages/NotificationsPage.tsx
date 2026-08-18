@@ -33,12 +33,6 @@ import { TemplatesPage } from './TemplatesPage';
  * principal can actually see.
  */
 
-/** Underline-tab styling (the design's tabs), applied over the shared pill Tabs. */
-const TAB_LIST_CLASS =
-	'h-auto w-full justify-start gap-1 rounded-none border-b border-border bg-transparent p-0';
-const TAB_TRIGGER_CLASS =
-	'-mb-px h-auto flex-none gap-1.5 rounded-none border-x-0 border-t-0 border-b-2 border-transparent px-3.5 pb-2.5 pt-2 text-[13px] font-medium text-muted-foreground shadow-none data-[state=active]:border-primary data-[state=active]:bg-transparent data-[state=active]:font-semibold data-[state=active]:text-foreground data-[state=active]:shadow-none';
-
 export function NotificationsPage() {
 	const tn = useAppT('notifications');
 	const { can } = usePermissions();
@@ -165,14 +159,11 @@ export function NotificationsPage() {
 					value={tab}
 					onValueChange={handleTabChange}
 					className="flex flex-col gap-6"
+					variant="underline"
 				>
-					<TabsList className={TAB_LIST_CLASS}>
+					<TabsList>
 						{tabs.map((item) => (
-							<TabsTrigger
-								key={item.value}
-								value={item.value}
-								className={TAB_TRIGGER_CLASS}
-							>
+							<TabsTrigger key={item.value} value={item.value}>
 								{item.label}
 								{item.count}
 							</TabsTrigger>

@@ -2046,6 +2046,10 @@ export const uz = {
 			unavailable: 'Bu matn hali operatorga yuborilmagan.',
 			unavailableHint:
 				'SMS sozlanmagan boʻlishi mumkin. Sozlamalar boʻlimida SMS kanalini tekshiring.',
+			sync: 'Operator bilan sinxronlash',
+			syncResult:
+				'Yuborildi: {{submitted}}, mos keldi: {{matched}}, oʻtkazib yuborildi: {{skipped}}, xato: {{failed}}',
+			syncFailed: 'SMS operatoriga ulanib boʻlmadi',
 		},
 		outbox: {
 			title: 'Yuborilgan xabarlar',
@@ -2149,9 +2153,6 @@ export const uz = {
 				meta: 'Provayder: {{provider}} · yangilangan {{date}}',
 				metaNoDate: 'Provayder: {{provider}}',
 			},
-			senderLimits: {
-				title: 'Joʻnatuvchi va cheklovlar',
-			},
 			field: {
 				senderName: 'Joʻnatuvchi nomi',
 				senderNameHint: 'Provayder paneli orqali belgilanadi, bu yerda emas.',
@@ -2162,7 +2163,6 @@ export const uz = {
 				dailyLimit: 'Kunlik cheklov (xabarlar)',
 			},
 			credentials: {
-				title: 'Kirish maʼlumotlari',
 				useOwn: 'Ushbu markazning oʻz hisobi',
 				useOwnHint:
 					'Markazning oʻz provayder loginidan va tasdiqlangan joʻnatuvchi nomidan foydalanish.',
@@ -2189,10 +2189,10 @@ export const uz = {
 				success: 'Sinov xabari yuborildi',
 				failure: 'Sinov xabari yuborilmadi: {{error}}',
 			},
-			ownerOnly: {
-				title: 'Faqat egasi uchun',
+			platformManaged: {
+				title: 'Cohort tomonidan boshqariladi',
 				description:
-					'Provayder sozlamalari markazning toʻlov xavfini oʻz ichiga oladi, shuning uchun bu boʻlimni faqat OWNER koʻradi. Admin va menejerlar qoidalar, shablonlar va yuborilganlar boʻlimiga ega boʻlishda davom etadi.',
+					'Ushbu markaz Cohortning umumiy SMS hisobi orqali yuboradi. Ushbu hisob balansi, sinov xabarlari va standart shablonlar tasdigʻi Cohort xodimlari tomonidan markazlashgan holda boshqariladi. Buni oʻzingiz boshqarish uchun yuqorida oʻz Eskiz hisobingizni ulang.',
 			},
 			validation: {
 				credentialsPair: 'Login va parolni birgalikda kiriting',

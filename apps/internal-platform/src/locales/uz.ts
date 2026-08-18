@@ -828,4 +828,55 @@ export const uz = {
 			status: 'Holati',
 		},
 	},
+	smsSettings: {
+		title: 'Platforma SMS hisobi',
+		description:
+			'Cohortning umumiy Eskiz hisobi — oʻz hisobini ulamagan barcha markazlar shu orqali yuboradi.',
+		loadError: 'Holatni yuklab boʻlmadi. Sahifani yangilang.',
+		notConfigured:
+			'Platforma Eskiz hisobi sozlanmagan. Backendda ESKIZ_SMS_LOGIN va ESKIZ_SMS_PASSWORD oʻzgaruvchilarini kiriting.',
+		accountMeta: 'Provayder: {{provider}} · joʻnatuvchi: {{sender}}',
+		balance: {
+			title: 'Hisob balansi',
+			unknown: 'Balans maʼlum emas',
+			unavailable: 'Hisob sozlanmaguncha balans mavjud emas',
+		},
+		test: {
+			title: 'Sinov yuborish',
+			description: 'Platforma hisobi orqali haqiqiy SMS yuboradi.',
+			phone: 'Telefon',
+			message: 'Xabar (ixtiyoriy)',
+			messagePlaceholder: 'Standart holatda qisqa tekshiruv xabari yuboriladi.',
+			send: 'Sinov yuborish',
+			invalidPhone: 'Telefon raqami notoʻgʻri',
+			success: 'Sinov xabari yuborildi',
+			failure: 'Sinov xabari yuborilmadi: {{error}}',
+			requestFailed: 'Sinov xabarini yuborib boʻlmadi',
+		},
+		defaults: {
+			title: 'Standart SMS shablonlari',
+			description:
+				'Kod orqali belgilangan standart matnlar — barcha markazlar uchun umumiy, faqat kodda oʻzgaradi.',
+			empty: 'Standart shablonlar topilmadi.',
+			column: {
+				code: 'Kod',
+				locale: 'Til',
+				body: 'Matn',
+				status: 'Holati',
+			},
+		},
+		moderation: {
+			sync: 'Operator bilan sinxronlash',
+			syncResult:
+				'Yuborildi: {{submitted}}, mos keldi: {{matched}}, oʻtkazib yuborildi: {{skipped}}, xato: {{failed}}',
+			syncFailed: 'SMS operatoriga ulanib boʻlmadi',
+			status: {
+				PENDING: 'Yuborilmadi',
+				MODERATION: 'Tekshiruvda',
+				APPROVED: 'Tasdiqlangan',
+				REJECTED: 'Rad etilgan',
+				UNKNOWN: 'Nomaʼlum',
+			},
+		},
+	},
 } as const;

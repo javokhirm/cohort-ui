@@ -2008,6 +2008,10 @@ export const en: TranslationsOf<typeof uz> = {
 			unavailable: 'This text has not been sent to the gateway yet.',
 			unavailableHint:
 				'SMS may not be configured. Check the SMS channel under Settings.',
+			sync: 'Sync with gateway',
+			syncResult:
+				'Submitted {{submitted}}, matched {{matched}}, skipped {{skipped}}, failed {{failed}}',
+			syncFailed: 'Could not reach the SMS gateway',
 		},
 		outbox: {
 			title: 'Delivery log',
@@ -2111,9 +2115,6 @@ export const en: TranslationsOf<typeof uz> = {
 				meta: 'Provider: {{provider}} · updated {{date}}',
 				metaNoDate: 'Provider: {{provider}}',
 			},
-			senderLimits: {
-				title: 'Sender & limits',
-			},
 			field: {
 				senderName: 'Sender name',
 				senderNameHint: 'Set from the provider dashboard, not here.',
@@ -2124,7 +2125,6 @@ export const en: TranslationsOf<typeof uz> = {
 				dailyLimit: 'Daily cap (messages)',
 			},
 			credentials: {
-				title: 'Credentials',
 				useOwn: "This center's own account",
 				useOwnHint:
 					"Use the center's own provider login and approved sender name.",
@@ -2150,10 +2150,10 @@ export const en: TranslationsOf<typeof uz> = {
 				success: 'Test message sent',
 				failure: 'Test message failed: {{error}}',
 			},
-			ownerOnly: {
-				title: 'Owner-only area',
+			platformManaged: {
+				title: 'Managed by Cohort',
 				description:
-					"Provider settings carry the center's billing risk, so only the OWNER sees this tab. Admins and managers still get rules, templates and the outbox.",
+					"This center sends through Cohort's shared SMS account. That account's balance, test messages and default-template moderation are managed centrally by Cohort staff. Connect your own Eskiz account above to manage these yourself.",
 			},
 			validation: {
 				credentialsPair: 'Enter the login and password together',

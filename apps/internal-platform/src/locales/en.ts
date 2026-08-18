@@ -810,4 +810,55 @@ export const en: TranslationsOf<typeof uz> = {
 			status: 'Status',
 		},
 	},
+	smsSettings: {
+		title: 'Platform SMS account',
+		description:
+			"Cohort's shared Eskiz account — every center that hasn't connected its own resolves through this one.",
+		loadError: 'Could not load the status. Refresh the page.',
+		notConfigured:
+			'The platform Eskiz account is not configured. Set ESKIZ_SMS_LOGIN and ESKIZ_SMS_PASSWORD on the backend.',
+		accountMeta: 'Provider: {{provider}} · sender: {{sender}}',
+		balance: {
+			title: 'Account balance',
+			unknown: 'Balance unknown',
+			unavailable: 'Balance is unavailable until the account is configured',
+		},
+		test: {
+			title: 'Send a test',
+			description: 'Sends one real SMS through the platform account.',
+			phone: 'Phone',
+			message: 'Message (optional)',
+			messagePlaceholder: 'A short check message is sent by default.',
+			send: 'Send test',
+			invalidPhone: 'Invalid phone number',
+			success: 'Test message sent',
+			failure: 'Test message failed: {{error}}',
+			requestFailed: 'Could not send the test message',
+		},
+		defaults: {
+			title: 'Default SMS templates',
+			description:
+				'Code-owned default copy, shared by every center and changed only in the codebase.',
+			empty: 'No default templates found.',
+			column: {
+				code: 'Code',
+				locale: 'Locale',
+				body: 'Body',
+				status: 'Status',
+			},
+		},
+		moderation: {
+			sync: 'Sync with gateway',
+			syncResult:
+				'Submitted {{submitted}}, matched {{matched}}, skipped {{skipped}}, failed {{failed}}',
+			syncFailed: 'Could not reach the SMS gateway',
+			status: {
+				PENDING: 'Not submitted',
+				MODERATION: 'In review',
+				APPROVED: 'Approved',
+				REJECTED: 'Rejected',
+				UNKNOWN: 'Unknown',
+			},
+		},
+	},
 };
