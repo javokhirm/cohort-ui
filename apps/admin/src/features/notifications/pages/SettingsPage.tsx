@@ -3,7 +3,6 @@ import {
 	AlertTriangle,
 	Building2,
 	Info,
-	Lock,
 	MessageSquare,
 	RefreshCw,
 	Send,
