@@ -13,6 +13,7 @@
 		"check-types": "tsc -b --noEmit"
 	},
 	"dependencies": {
+		"@fullstory/browser": "^2.0.8",
 		"@hookform/resolvers": "^5.4.0",
 		"@repo/api-client": "workspace:*",
 		"@repo/i18n": "workspace:*",
