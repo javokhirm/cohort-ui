@@ -1,4 +1,3 @@
-import { cn } from '@repo/ui';
 import type { StatusTone } from '@repo/ui';
 
 import type { SubscriptionStatus, TenantStatus } from '@/api/tenants/types';
@@ -68,12 +67,3 @@ export function tenantSubStatusLabel(t: TenantsT, status: SubscriptionStatus): s
 			return status;
 	}
 }
-
-// ─── Detail page ──────────────────────────────────────────────────────────────
-
-export const TAB_TRIGGER_CLASS = cn(
-	'cursor-pointer -mb-px rounded-none border-b-2 border-b-transparent px-4 pb-3 pt-2',
-	'text-sm font-medium text-muted-foreground transition-colors hover:text-foreground',
-	'data-[state=active]:border-b-primary data-[state=active]:bg-transparent',
-	'data-[state=active]:text-primary data-[state=active]:shadow-none',
-);

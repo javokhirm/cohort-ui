@@ -55,9 +55,10 @@ export function useNotification(id: number) {
 
 /**
  * The unread total for the app bar's bell dot and the inbox header — a one-row unread
- * page read purely for its pagination total.
+ * page read purely for its pagination total. `enabled` lets the shell suppress it while
+ * the subscription block is up, so no tenant-gated request fires from a blocked layout.
  */
-export function useUnreadCount() {
+export function useUnreadCount(options?: { enabled?: boolean }) {
 	return useQuery({
 		queryKey: inboxKeys.unreadCount(),
 		queryFn: async () => {
@@ -67,5 +68,6 @@ export function useUnreadCount() {
 			);
 			return page.total;
 		},
+		enabled: options?.enabled ?? true,
 	});
 }

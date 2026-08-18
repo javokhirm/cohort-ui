@@ -307,7 +307,7 @@ export function StaffDetailPage({ staffId }: StaffDetailPageProps) {
 						}
 					/>
 
-					<Tabs defaultValue="overview">
+					<Tabs defaultValue="overview" variant="underline">
 						<TabsList>
 							<TabsTrigger value="overview">
 								{t('detail.tab.overview')}

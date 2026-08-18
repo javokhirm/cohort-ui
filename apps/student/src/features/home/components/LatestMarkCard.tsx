@@ -5,6 +5,7 @@ import { formatShortDate } from '@repo/utils';
 
 import type { StudentLatestMark } from '../api/home.queries';
 import { markValueLabel, scaleUnitLabel } from '@/features/progress/lib/mark-format';
+import { clickableCardProps } from '@/lib/clickable-card';
 import { useAppT } from '@/locales';
 
 interface LatestMarkCardProps {
@@ -19,6 +20,9 @@ interface LatestMarkCardProps {
  *
  * The delta is same-group only (the API enforces this), so the card never
  * compares an `8/10` in one course against a `B` in another.
+ *
+ * The whole card opens Progress, so it carries a button's role and keyboard
+ * behaviour — see `lib/clickable-card.ts`.
  */
 export function LatestMarkCard({ latest, onOpen }: LatestMarkCardProps) {
 	const t = useAppT('home');
@@ -30,8 +34,8 @@ export function LatestMarkCard({ latest, onOpen }: LatestMarkCardProps) {
 
 	return (
 		<Card
-			onClick={onOpen}
-			className="cursor-pointer gap-0 py-0 transition-colors hover:border-primary"
+			{...clickableCardProps(onOpen)}
+			className="cursor-pointer gap-0 py-0 transition-colors hover:border-primary focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2 focus-visible:ring-offset-background"
 		>
 			<div className="flex flex-col gap-1 p-4">
 				<div className="flex items-center justify-between gap-2">

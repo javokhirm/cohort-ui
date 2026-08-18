@@ -189,7 +189,7 @@ export function GroupDetailPage({ groupId }: GroupDetailPageProps) {
 						}
 					/>
 
-					<Tabs defaultValue="roster" className="gap-4">
+					<Tabs defaultValue="roster" className="gap-4" variant="underline">
 						<TabsList>
 							<TabsTrigger value="roster">
 								{t('detail.tab.roster')}

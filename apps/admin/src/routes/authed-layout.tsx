@@ -4,6 +4,7 @@ import { Outlet, useNavigate } from '@tanstack/react-router';
 import { useSessionStore } from '@/store/sessionStore';
 import { Header } from '@/layouts/Header';
 import { Sidebar } from '@/layouts/Sidebar';
+import { SubscriptionBanner } from '@/features/subscription';
 
 /**
  * Layout for the authenticated staff console. `beforeLoad` guards initial entry;
@@ -33,6 +34,7 @@ export function AuthedLayout() {
 					onSidebarToggle={() => setSidebarCollapsed((c) => !c)}
 				/>
 				<main className="bg-muted flex-1 overflow-y-auto px-6 py-8">
+					<SubscriptionBanner />
 					<Outlet />
 				</main>
 			</div>

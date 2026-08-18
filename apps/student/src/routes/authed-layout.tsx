@@ -9,8 +9,8 @@ import { useSessionStore } from '@/store/sessionStore';
 import { useMe } from '@/features/profile/api/profile.queries';
 import { useUnreadCount } from '@/features/inbox/api/notifications.queries';
 import { BAR_COPY, barRouteFor, NAV_ITEMS } from '@/layouts/nav';
-import { AvatarButton } from '@/layouts/AvatarButton';
-import { OverflowMenu } from '@/layouts/OverflowMenu';
+import { UserMenu } from '@/layouts/UserMenu';
+import { SubscriptionBlock } from '@/features/subscription';
 import { useAppT } from '@/locales';
 
 /** Gradient brand mark shown in the sidebar header. */
@@ -42,21 +42,29 @@ function greetingKey(): 'greetingMorning' | 'greetingAfternoon' | 'greetingEveni
 export function AuthedLayout() {
 	const status = useSessionStore((s) => s.status);
 	const user = useSessionStore((s) => s.user);
+	const subscription = useSessionStore((s) => s.subscription);
+	const subscriptionBlock = useSessionStore((s) => s.subscriptionBlock);
 	const navigate = useNavigate();
 	const pathname = useRouterState({ select: (s) => s.location.pathname });
 	const t = useT('nav');
 	const tShell = useAppT('shell');
 	const tHome = useAppT('home');
 
+	// The center's plan has lapsed — a 402 on any student route, or a login/refresh
+	// read saying so. Suppress the shell's own tenant-gated reads below and, after
+	// the hooks, render the full-screen block in place of the shell.
+	const blocked =
+		subscriptionBlock != null || (subscription != null && !subscription.hasAccess);
+
 	// Profile's subtitle is the student code and branch, which live on `/student/me`. The
 	// query is route-scoped so nothing fetches it until Profile is entered — the identity
 	// on every other screen still comes from the login/refresh summary alone — and it
 	// shares its cache entry with the screen itself, so this costs no extra request.
 	const onProfile = pathname === '/profile';
-	const { data: me } = useMe({ enabled: onProfile });
+	const { data: me } = useMe({ enabled: onProfile && !blocked });
 
 	// The bell's red dot — the same unread total the inbox header shows.
-	const { data: unreadCount } = useUnreadCount();
+	const { data: unreadCount } = useUnreadCount({ enabled: !blocked });
 
 	useEffect(() => {
 		if (status !== 'authenticated') {
@@ -66,10 +74,9 @@ export function AuthedLayout() {
 
 	if (status !== 'authenticated') return null;
 
-	const fullName = user ? `${user.firstName} ${user.lastName}`.trim() : '';
-	const initials = user
-		? `${user.firstName?.[0] ?? ''}${user.lastName?.[0] ?? ''}`.toUpperCase()
-		: '?';
+	// Gating here (the parent of every authed route) is what makes manual URL entry
+	// unable to bypass it: no student screen mounts and no tenant-gated query fires.
+	if (blocked) return <SubscriptionBlock />;
 
 	const navItems = NAV_ITEMS.map(({ id, label, href, Icon }) => ({
 		id,
@@ -100,9 +107,6 @@ export function AuthedLayout() {
 				logo={<BrandLogo />}
 				centerName="Cohort"
 				navItems={navItems}
-				user={{ name: fullName, initials, role: 'STUDENT' }}
-				onUserClick={() => void navigate({ to: '/profile' })}
-				userActions={<OverflowMenu />}
 			/>
 
 			<div className="flex min-w-0 flex-1 flex-col overflow-hidden">
@@ -111,14 +115,7 @@ export function AuthedLayout() {
 					subtitle={subtitle}
 					hasNotifications={(unreadCount ?? 0) > 0}
 					onNotificationsClick={() => void navigate({ to: '/inbox' })}
-					trailing={
-						<AvatarButton
-							className="md:hidden"
-							initials={initials}
-							label={tShell('openProfile')}
-							onClick={() => void navigate({ to: '/profile' })}
-						/>
-					}
+					trailing={<UserMenu />}
 				/>
 
 				<main className="min-h-0 flex-1 overflow-y-auto overscroll-contain bg-muted px-4 pt-3.5 md:px-6 md:pt-5">

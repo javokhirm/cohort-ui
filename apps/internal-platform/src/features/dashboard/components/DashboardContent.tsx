@@ -1,3 +1,4 @@
+import { Link } from '@tanstack/react-router';
 import { Activity, ArrowUpRight, Building2, Users, Wallet } from 'lucide-react';
 import {
 	Bar,
@@ -36,15 +37,20 @@ import {
 import type { DashboardKpis } from '@/api/dashboard/types';
 
 import {
+	AT_RISK_REASON_TONE,
 	AXIS_TICK,
 	CHART,
+	atRiskReasonLabel,
 	buildServices,
 	TENANT_STATUS_COLORS,
 	TENANT_STATUS_FALLBACK,
 	TOOLTIP_STYLE,
 } from '../constants';
 import { getInitials } from '../utils';
+import { SubscriptionBillingCard } from './SubscriptionBillingCard';
+import { SubscriptionCounters } from './SubscriptionCounters';
 import { TrendChip } from './TrendChip';
+import { UpcomingExpirationsCard } from './UpcomingExpirationsCard';
 import { useAppT } from '@/locales';
 import { TENANT_STATUS_TONE, tenantStatusLabel } from '@/features/tenants/constants';
 import type { TenantStatus } from '@/api/tenants/types';
@@ -119,6 +125,14 @@ export function DashboardContent({ data }: { data: DashboardKpis }) {
 					}}
 					hint={t('hint.thisPeriod')}
 				/>
+			</div>
+
+			{/* ── Section A2: Subscription health ───────────────────────── */}
+			<div className="grid grid-cols-1 gap-4 lg:grid-cols-3">
+				<div className="lg:col-span-2">
+					<SubscriptionCounters counts={data.subscriptions} />
+				</div>
+				<SubscriptionBillingCard billing={data.subscriptionBilling} />
 			</div>
 
 			{/* ── Section B: Charts ─────────────────────────────────────── */}
@@ -251,6 +265,9 @@ export function DashboardContent({ data }: { data: DashboardKpis }) {
 				</Card>
 			</div>
 
+			{/* ── Section B2: Upcoming renewals (outreach) ──────────────── */}
+			<UpcomingExpirationsCard expirations={data.upcomingExpirations} />
+
 			{/* ── Section C: Attention + Monthly Highlights ─────────────── */}
 			<div className="grid grid-cols-1 gap-4 lg:grid-cols-2">
 				{/* Needs Attention */}
@@ -287,12 +304,25 @@ export function DashboardContent({ data }: { data: DashboardKpis }) {
 											>
 												{tenantStatusLabel(tt, tenant.status)}
 											</StatusBadge>
+											<StatusBadge
+												tone={AT_RISK_REASON_TONE[tenant.reason]}
+											>
+												{atRiskReasonLabel(t, tenant.reason)}
+											</StatusBadge>
 											<Button
+												asChild
 												variant="outline"
 												size="sm"
 												className="shrink-0 text-xs"
 											>
-												{t('view')}
+												<Link
+													to="/tenants/$tenantId"
+													params={{
+														tenantId: String(tenant.tenantId),
+													}}
+												>
+													{t('view')}
+												</Link>
 											</Button>
 										</div>
 									</li>

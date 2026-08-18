@@ -128,6 +128,7 @@ export const ru = {
 			people: 'Люди',
 			academics: 'Учебный процесс',
 			finance: 'Финансы',
+			engagement: 'Коммуникации',
 			administration: 'Администрирование',
 			platform: 'Платформа',
 			customers: 'Клиенты',
@@ -155,6 +156,7 @@ export const ru = {
 			platformDashboard: 'Дашборд платформы',
 			tenants: 'Организации',
 			userDirectory: 'Пользователи',
+			platformLeads: 'Лиды',
 			subscriptionPlans: 'Тарифы подписки',
 			subscriptions: 'Подписки',
 			roleTemplates: 'Шаблоны ролей',
@@ -371,5 +373,15 @@ export const ru = {
 		dateRangeInvalid: 'Дата окончания должна быть позже даты начала',
 		timeRangeInvalid: 'Время окончания должно быть позже времени начала',
 		passwordMismatch: 'Пароли не совпадают',
+	},
+
+	subscription: {
+		expired: {
+			title: 'Срок подписки истёк',
+			description:
+				'Срок подписки вашего центра истёк. Обратитесь к администратору центра, чтобы восстановить доступ.',
+			planLabel: 'Тариф',
+			expiredOnLabel: 'Дата окончания',
+		},
 	},
 } as const;

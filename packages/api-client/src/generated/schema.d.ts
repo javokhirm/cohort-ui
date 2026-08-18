@@ -140,6 +140,23 @@ export interface paths {
 		patch?: never;
 		trace?: never;
 	};
+	'/api/v1/webhooks/subscriptions/{provider}': {
+		parameters: {
+			query?: never;
+			header?: never;
+			path?: never;
+			cookie?: never;
+		};
+		get?: never;
+		put?: never;
+		/** Subscription payment webhook (signature-verified, no JWT) */
+		post: operations['WebhooksController_subscription'];
+		delete?: never;
+		options?: never;
+		head?: never;
+		patch?: never;
+		trace?: never;
+	};
 	'/api/v1/super-admin/me': {
 		parameters: {
 			query?: never;
@@ -340,6 +357,23 @@ export interface paths {
 		put?: never;
 		/** Change a tenant subscription plan (immediate, no proration) */
 		post: operations['TenantsController_changePlan'];
+		delete?: never;
+		options?: never;
+		head?: never;
+		patch?: never;
+		trace?: never;
+	};
+	'/api/v1/super-admin/tenants/{id}/subscription/record-payment': {
+		parameters: {
+			query?: never;
+			header?: never;
+			path?: never;
+			cookie?: never;
+		};
+		get?: never;
+		put?: never;
+		/** Record an offline subscription payment (bank transfer/cash) */
+		post: operations['TenantsController_recordSubscriptionPayment'];
 		delete?: never;
 		options?: never;
 		head?: never;
@@ -665,6 +699,91 @@ export interface paths {
 		};
 		/** List subscriptions across tenants (status/tier filters) */
 		get: operations['SubscriptionsController_list'];
+		put?: never;
+		post?: never;
+		delete?: never;
+		options?: never;
+		head?: never;
+		patch?: never;
+		trace?: never;
+	};
+	'/api/v1/super-admin/subscription-payments': {
+		parameters: {
+			query?: never;
+			header?: never;
+			path?: never;
+			cookie?: never;
+		};
+		/** Payments across tenants (tenant/status/method/provider/date filters) */
+		get: operations['SubscriptionPaymentsController_listPayments'];
+		put?: never;
+		post?: never;
+		delete?: never;
+		options?: never;
+		head?: never;
+		patch?: never;
+		trace?: never;
+	};
+	'/api/v1/super-admin/subscription-payments/{id}': {
+		parameters: {
+			query?: never;
+			header?: never;
+			path?: never;
+			cookie?: never;
+		};
+		/** A single payment, with its invoice reference */
+		get: operations['SubscriptionPaymentsController_paymentDetail'];
+		put?: never;
+		post?: never;
+		delete?: never;
+		options?: never;
+		head?: never;
+		patch?: never;
+		trace?: never;
+	};
+	'/api/v1/super-admin/subscription-payments/{id}/refund': {
+		parameters: {
+			query?: never;
+			header?: never;
+			path?: never;
+			cookie?: never;
+		};
+		get?: never;
+		put?: never;
+		/** Refund a succeeded payment (does not retract the period) */
+		post: operations['SubscriptionPaymentsController_refund'];
+		delete?: never;
+		options?: never;
+		head?: never;
+		patch?: never;
+		trace?: never;
+	};
+	'/api/v1/super-admin/subscription-invoices': {
+		parameters: {
+			query?: never;
+			header?: never;
+			path?: never;
+			cookie?: never;
+		};
+		/** Subscription invoices across tenants (period history) */
+		get: operations['SubscriptionPaymentsController_listInvoices'];
+		put?: never;
+		post?: never;
+		delete?: never;
+		options?: never;
+		head?: never;
+		patch?: never;
+		trace?: never;
+	};
+	'/api/v1/super-admin/subscription-invoices/{id}': {
+		parameters: {
+			query?: never;
+			header?: never;
+			path?: never;
+			cookie?: never;
+		};
+		/** A single subscription invoice */
+		get: operations['SubscriptionPaymentsController_invoiceDetail'];
 		put?: never;
 		post?: never;
 		delete?: never;
@@ -1130,6 +1249,108 @@ export interface paths {
 		get: operations['StudentsController_listResults'];
 		put?: never;
 		post?: never;
+		delete?: never;
+		options?: never;
+		head?: never;
+		patch?: never;
+		trace?: never;
+	};
+	'/api/v1/manage/subscription': {
+		parameters: {
+			query?: never;
+			header?: never;
+			path?: never;
+			cookie?: never;
+		};
+		/** The center's subscription state, plan and period */
+		get: operations['SubscriptionController_current'];
+		put?: never;
+		post?: never;
+		delete?: never;
+		options?: never;
+		head?: never;
+		patch?: never;
+		trace?: never;
+	};
+	'/api/v1/manage/subscription/quote': {
+		parameters: {
+			query?: never;
+			header?: never;
+			path?: never;
+			cookie?: never;
+		};
+		/** Price and period a renewal would buy, without committing */
+		get: operations['SubscriptionController_quote'];
+		put?: never;
+		post?: never;
+		delete?: never;
+		options?: never;
+		head?: never;
+		patch?: never;
+		trace?: never;
+	};
+	'/api/v1/manage/subscription/plans': {
+		parameters: {
+			query?: never;
+			header?: never;
+			path?: never;
+			cookie?: never;
+		};
+		/** Plans available to renew or upgrade onto */
+		get: operations['SubscriptionController_availablePlans'];
+		put?: never;
+		post?: never;
+		delete?: never;
+		options?: never;
+		head?: never;
+		patch?: never;
+		trace?: never;
+	};
+	'/api/v1/manage/subscription/invoices': {
+		parameters: {
+			query?: never;
+			header?: never;
+			path?: never;
+			cookie?: never;
+		};
+		/** The center's subscription invoices (period history) */
+		get: operations['SubscriptionController_invoices'];
+		put?: never;
+		post?: never;
+		delete?: never;
+		options?: never;
+		head?: never;
+		patch?: never;
+		trace?: never;
+	};
+	'/api/v1/manage/subscription/payments': {
+		parameters: {
+			query?: never;
+			header?: never;
+			path?: never;
+			cookie?: never;
+		};
+		/** The center's subscription payment history */
+		get: operations['SubscriptionController_payments'];
+		put?: never;
+		post?: never;
+		delete?: never;
+		options?: never;
+		head?: never;
+		patch?: never;
+		trace?: never;
+	};
+	'/api/v1/manage/subscription/renew': {
+		parameters: {
+			query?: never;
+			header?: never;
+			path?: never;
+			cookie?: never;
+		};
+		get?: never;
+		put?: never;
+		/** Issue a renewal invoice and start its payment */
+		post: operations['SubscriptionController_renew'];
 		delete?: never;
 		options?: never;
 		head?: never;
@@ -3071,6 +3292,16 @@ export interface components {
 			/** @enum {string} */
 			billingInterval?: 'MONTHLY' | 'ANNUAL';
 		};
+		RecordSubscriptionPaymentDto: {
+			/** @enum {string} */
+			method: 'BANK_TRANSFER' | 'CASH';
+			/** @description Plan to renew onto; omit to keep the current one */
+			subscriptionTierId?: number;
+			/** @enum {string} */
+			billingInterval?: 'MONTHLY' | 'ANNUAL';
+			/** @description Bank/transfer reference, kept for the audit trail */
+			reference?: string;
+		};
 		UpdateTenantDto: {
 			/** @example Asia/Tashkent */
 			timezone?: string;
@@ -3202,6 +3433,12 @@ export interface components {
 			features?: Record<string, never>;
 			isActive?: boolean;
 		};
+		RefundSubscriptionPaymentDto: {
+			/** @description Amount to return. Omit to refund in full; may not exceed the payment amount. */
+			amount?: number;
+			/** @description Reason, recorded on the audit entry */
+			reason?: string;
+		};
 		ChangeMyPasswordDto: {
 			newPassword: string;
 		};
@@ -3281,6 +3518,20 @@ export interface components {
 			amount: number;
 			/** @example Goodwill correction for a scheduling error */
 			reason: string;
+		};
+		RenewSubscriptionDto: {
+			/**
+			 * @description Gateway to settle through. Offline methods (BANK_TRANSFER, CASH) are accepted here but only a Super Admin can mark them paid.
+			 * @enum {string}
+			 */
+			method: 'CLICK' | 'PAYME' | 'UZUM' | 'BANK_TRANSFER' | 'CASH';
+			/** @description Plan to renew onto. Omit to renew the current plan unchanged. */
+			subscriptionTierId?: number;
+			/**
+			 * @description Cadence to buy. Omit to keep the subscription's current interval.
+			 * @enum {string}
+			 */
+			billingInterval?: 'MONTHLY' | 'ANNUAL';
 		};
 		CreateStaffDto: {
 			branchId: number;
@@ -3947,8 +4198,8 @@ export interface components {
 			rankedCount: number;
 			/** @description Marks needed in this window to be ranked. */
 			minMarks: number;
-			/** @description Mean of the ranked students' averages; null when nobody is ranked. */
-			groupAveragePct: number | null;
+			/** @description Students needed on the roster before any ranking is reported. Below it `rows` is empty and every rank is null — the client explains the empty board with this figure rather than assuming the threshold. */
+			minCohort: number;
 			/** @description Whether the top placings are named. False keeps every peer anonymous. */
 			namesRevealed: boolean;
 			me: components['schemas']['StudentLeaderboardRowDto'];
@@ -4114,6 +4365,27 @@ export interface operations {
 				'x-click-signature': string;
 			};
 			path?: never;
+			cookie?: never;
+		};
+		requestBody?: never;
+		responses: {
+			200: {
+				headers: {
+					[name: string]: unknown;
+				};
+				content?: never;
+			};
+		};
+	};
+	WebhooksController_subscription: {
+		parameters: {
+			query?: never;
+			header: {
+				'x-payment-signature': string;
+			};
+			path: {
+				provider: string;
+			};
 			cookie?: never;
 		};
 		requestBody?: never;
@@ -4409,6 +4681,29 @@ export interface operations {
 		};
 		responses: {
 			200: {
+				headers: {
+					[name: string]: unknown;
+				};
+				content?: never;
+			};
+		};
+	};
+	TenantsController_recordSubscriptionPayment: {
+		parameters: {
+			query?: never;
+			header?: never;
+			path: {
+				id: number;
+			};
+			cookie?: never;
+		};
+		requestBody: {
+			content: {
+				'application/json': components['schemas']['RecordSubscriptionPaymentDto'];
+			};
+		};
+		responses: {
+			201: {
 				headers: {
 					[name: string]: unknown;
 				};
@@ -4888,11 +5183,126 @@ export interface operations {
 			query?: {
 				page?: number;
 				limit?: number;
-				status?: 'TRIALING' | 'ACTIVE' | 'PAST_DUE' | 'CANCELLED';
+				status?: 'TRIALING' | 'ACTIVE' | 'PAST_DUE' | 'EXPIRED' | 'CANCELLED';
 				tierId?: number;
 			};
 			header?: never;
 			path?: never;
+			cookie?: never;
+		};
+		requestBody?: never;
+		responses: {
+			200: {
+				headers: {
+					[name: string]: unknown;
+				};
+				content?: never;
+			};
+		};
+	};
+	SubscriptionPaymentsController_listPayments: {
+		parameters: {
+			query?: {
+				page?: number;
+				limit?: number;
+				/** @description Restrict to one education center */
+				tenantId?: number;
+				status?: 'PENDING' | 'SUCCEEDED' | 'FAILED' | 'REFUNDED';
+				method?: 'CLICK' | 'PAYME' | 'UZUM' | 'BANK_TRANSFER' | 'CASH';
+				provider?: string;
+				/** @description Free-text over the gateway transaction id and the invoice code */
+				search?: string;
+				from?: string;
+				to?: string;
+			};
+			header?: never;
+			path?: never;
+			cookie?: never;
+		};
+		requestBody?: never;
+		responses: {
+			200: {
+				headers: {
+					[name: string]: unknown;
+				};
+				content?: never;
+			};
+		};
+	};
+	SubscriptionPaymentsController_paymentDetail: {
+		parameters: {
+			query?: never;
+			header?: never;
+			path: {
+				id: number;
+			};
+			cookie?: never;
+		};
+		requestBody?: never;
+		responses: {
+			200: {
+				headers: {
+					[name: string]: unknown;
+				};
+				content?: never;
+			};
+		};
+	};
+	SubscriptionPaymentsController_refund: {
+		parameters: {
+			query?: never;
+			header?: never;
+			path: {
+				id: number;
+			};
+			cookie?: never;
+		};
+		requestBody: {
+			content: {
+				'application/json': components['schemas']['RefundSubscriptionPaymentDto'];
+			};
+		};
+		responses: {
+			201: {
+				headers: {
+					[name: string]: unknown;
+				};
+				content?: never;
+			};
+		};
+	};
+	SubscriptionPaymentsController_listInvoices: {
+		parameters: {
+			query?: {
+				page?: number;
+				limit?: number;
+				/** @description Restrict to one education center */
+				tenantId?: number;
+				status?: 'PAID' | 'UNPAID' | 'FAILED' | 'REFUNDED';
+				from?: string;
+				to?: string;
+			};
+			header?: never;
+			path?: never;
+			cookie?: never;
+		};
+		requestBody?: never;
+		responses: {
+			200: {
+				headers: {
+					[name: string]: unknown;
+				};
+				content?: never;
+			};
+		};
+	};
+	SubscriptionPaymentsController_invoiceDetail: {
+		parameters: {
+			query?: never;
+			header?: never;
+			path: {
+				id: number;
+			};
 			cookie?: never;
 		};
 		requestBody?: never;
@@ -4930,6 +5340,10 @@ export interface operations {
 					| 'SUBSCRIPTION_CHANGED'
 					| 'SUBSCRIPTION_CANCELLED'
 					| 'SUBSCRIPTION_INVOICE_PAID'
+					| 'SUBSCRIPTION_RENEWAL_INITIATED'
+					| 'SUBSCRIPTION_RENEWED'
+					| 'SUBSCRIPTION_EXPIRED'
+					| 'SUBSCRIPTION_PAYMENT_REFUNDED'
 					| 'SUPER_ADMIN_LOGIN'
 					| 'ROLE_PERMISSIONS_UPDATED'
 					| 'USER_PASSWORD_RESET'
@@ -5591,6 +6005,118 @@ export interface operations {
 		requestBody?: never;
 		responses: {
 			200: {
+				headers: {
+					[name: string]: unknown;
+				};
+				content?: never;
+			};
+		};
+	};
+	SubscriptionController_current: {
+		parameters: {
+			query?: never;
+			header?: never;
+			path?: never;
+			cookie?: never;
+		};
+		requestBody?: never;
+		responses: {
+			200: {
+				headers: {
+					[name: string]: unknown;
+				};
+				content?: never;
+			};
+		};
+	};
+	SubscriptionController_quote: {
+		parameters: {
+			query?: never;
+			header?: never;
+			path?: never;
+			cookie?: never;
+		};
+		requestBody?: never;
+		responses: {
+			200: {
+				headers: {
+					[name: string]: unknown;
+				};
+				content?: never;
+			};
+		};
+	};
+	SubscriptionController_availablePlans: {
+		parameters: {
+			query?: never;
+			header?: never;
+			path?: never;
+			cookie?: never;
+		};
+		requestBody?: never;
+		responses: {
+			200: {
+				headers: {
+					[name: string]: unknown;
+				};
+				content?: never;
+			};
+		};
+	};
+	SubscriptionController_invoices: {
+		parameters: {
+			query?: {
+				page?: number;
+				limit?: number;
+			};
+			header?: never;
+			path?: never;
+			cookie?: never;
+		};
+		requestBody?: never;
+		responses: {
+			200: {
+				headers: {
+					[name: string]: unknown;
+				};
+				content?: never;
+			};
+		};
+	};
+	SubscriptionController_payments: {
+		parameters: {
+			query?: {
+				page?: number;
+				limit?: number;
+			};
+			header?: never;
+			path?: never;
+			cookie?: never;
+		};
+		requestBody?: never;
+		responses: {
+			200: {
+				headers: {
+					[name: string]: unknown;
+				};
+				content?: never;
+			};
+		};
+	};
+	SubscriptionController_renew: {
+		parameters: {
+			query?: never;
+			header?: never;
+			path?: never;
+			cookie?: never;
+		};
+		requestBody: {
+			content: {
+				'application/json': components['schemas']['RenewSubscriptionDto'];
+			};
+		};
+		responses: {
+			201: {
 				headers: {
 					[name: string]: unknown;
 				};

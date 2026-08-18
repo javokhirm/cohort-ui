@@ -4,26 +4,24 @@ import { useNavigate, useSearch } from '@tanstack/react-router';
 import { Button, EmptyState, Skeleton } from '@repo/ui';
 
 import { useLeaderboard } from '@/features/leaderboard/api/leaderboard.queries';
-import { BoardStatsStrip } from '@/features/leaderboard/components/BoardStatsStrip';
 import { GroupSelectChips } from '@/features/leaderboard/components/GroupSelectChips';
 import { LeaderboardPodium } from '@/features/leaderboard/components/LeaderboardPodium';
 import { LeaderboardRow } from '@/features/leaderboard/components/LeaderboardRow';
-import { MyRankCard } from '@/features/leaderboard/components/MyRankCard';
 import { PeriodToggle } from '@/features/leaderboard/components/PeriodToggle';
 import type { LeaderboardPeriod } from '@/features/leaderboard/lib/period';
+import { RANKABLE_ENROLLMENTS } from '@/features/leaderboard/lib/standing';
 import { useMyGroups } from '@/features/progress/api/groups.queries';
 import { useAppT } from '@/locales';
-
-/** Enrollments that get a board — matches the server's roster rule. */
-const RANKABLE_ENROLLMENTS = new Set(['ACTIVE', 'COMPLETED']);
 
 /**
  * The group leaderboard screen — reachable only from Home's card, deliberately
  * not a fifth bottom tab (`layouts/nav.ts`).
  *
- * Both selectors live in the URL, so the back button restores the group and the
- * window the student was looking at, and a link can point at a specific board.
- * The group defaults to the first rankable enrollment when the URL says nothing.
+ * Both selectors live in the URL, so a reload keeps the board the student was
+ * reading and a link can point at a specific one. They are written with
+ * `replace`, though: switching group or window is a filter, not a destination,
+ * so Back leaves the screen rather than unwinding a run of chip taps. The group
+ * defaults to the first rankable enrollment when the URL says nothing.
  */
 export function LeaderboardRoute() {
 	const t = useAppT('leaderboard');
@@ -52,11 +50,11 @@ export function LeaderboardRoute() {
 
 	if (groups.isPending) {
 		return (
-			<div className="mx-auto flex w-full max-w-200 flex-col gap-4">
+			<Shell>
 				<Skeleton className="h-9 w-full rounded-xl" />
 				<Skeleton className="h-28 w-full rounded-xl" />
 				<Skeleton className="h-24 w-full rounded-xl" />
-			</div>
+			</Shell>
 		);
 	}
 
@@ -95,13 +93,7 @@ export function LeaderboardRoute() {
 
 			{board.isPending ? (
 				<>
-					<div className="grid gap-3 md:grid-cols-2">
-						<Skeleton className="h-52 w-full rounded-2xl" />
-						<div className="flex flex-col gap-3">
-							<Skeleton className="h-36 w-full rounded-2xl" />
-							<Skeleton className="h-16 w-full rounded-2xl" />
-						</div>
-					</div>
+					<Skeleton className="h-52 w-full rounded-2xl" />
 					<Skeleton className="h-40 w-full rounded-xl" />
 				</>
 			) : board.isError || !board.data ? (
@@ -148,9 +140,7 @@ function BoardError({ onRetry }: { onRetry: () => void }) {
  * gates apply them: a cohort too small to rank at all, a window nobody has been
  * marked in yet, and the ranked board.
  *
- * On a phone it reads top to bottom — podium, my standing, the rest. From `md`
- * the podium and the standing sit side by side, because the podium is a squat
- * block that would otherwise leave half the row empty.
+ * It reads top to bottom at every width — the podium, then the ranked list.
  */
 function Board({
 	board,
@@ -160,41 +150,47 @@ function Board({
 	onShowAllTime: () => void;
 }) {
 	const t = useAppT('leaderboard');
+	const thisMonth = board.period === 'month';
 
-	if (board.cohortSize < 3) {
+	// The threshold is the server's, read off the response rather than mirrored
+	// here — the two "no board" states have different causes (too few classmates
+	// vs. nobody marked yet) and must not be allowed to blur into each other.
+	if (board.cohortSize < board.minCohort) {
 		return (
-			<>
-				<MyRankCard board={board} />
-				<div className="rounded-2xl border border-border bg-card">
-					<EmptyState
-						icon={<Users />}
-						title={t('smallCohortTitle')}
-						description={t('smallCohortDescription')}
-					/>
-				</div>
-			</>
+			<div className="rounded-2xl border border-border bg-card">
+				<EmptyState
+					icon={<Users />}
+					title={t('smallCohortTitle')}
+					description={t('smallCohortDescription', {
+						count: board.minCohort,
+					})}
+				/>
+			</div>
 		);
 	}
 
 	if (board.rankedCount === 0) {
 		return (
-			<>
-				<MyRankCard board={board} />
-				<div className="rounded-2xl border border-border bg-card">
-					<EmptyState
-						icon={<Trophy />}
-						title={t('noMarksTitle')}
-						description={t('noMarksDescription')}
-						action={
-							board.period === 'month' ? (
-								<Button variant="outline" onClick={onShowAllTime}>
-									{t('tryAllTime')}
-								</Button>
-							) : undefined
-						}
-					/>
-				</div>
-			</>
+			<div className="rounded-2xl border border-border bg-card">
+				<EmptyState
+					icon={<Trophy />}
+					// "No marks this month" is a lie on the all-time board, which
+					// covers every session the group ever had.
+					title={thisMonth ? t('noMarksTitle') : t('noMarksAllTimeTitle')}
+					description={
+						thisMonth
+							? t('noMarksDescription')
+							: t('noMarksAllTimeDescription')
+					}
+					action={
+						thisMonth ? (
+							<Button variant="outline" onClick={onShowAllTime}>
+								{t('tryAllTime')}
+							</Button>
+						) : undefined
+					}
+				/>
+			</div>
 		);
 	}
 
@@ -206,13 +202,7 @@ function Board({
 
 	return (
 		<>
-			<div className="grid gap-3 md:grid-cols-2 md:items-start">
-				<LeaderboardPodium rows={podium} />
-				<div className="flex flex-col gap-3">
-					<MyRankCard board={board} />
-					<BoardStatsStrip board={board} />
-				</div>
-			</div>
+			<LeaderboardPodium rows={podium} />
 
 			{rest.length > 0 && (
 				<section className="mt-1">
@@ -247,7 +237,10 @@ function Board({
 			)}
 
 			<p className="px-1 text-[11px] leading-relaxed text-muted-foreground">
-				{t('namesHiddenNote')} {t('minMarksNote', { count: board.minMarks })}
+				{/* Below the naming floor *nobody* is named, not even the podium —
+				    promising "only the top three" would contradict the rows above. */}
+				{board.namesRevealed ? t('namesHiddenNote') : t('allNamesHiddenNote')}{' '}
+				{t('minMarksNote', { count: board.minMarks })}
 			</p>
 		</>
 	);

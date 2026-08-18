@@ -1,0 +1,248 @@
+import { useMemo, useState, type ReactNode } from 'react';
+import { MessageSquare, RefreshCw } from 'lucide-react';
+
+import { isApiError } from '@repo/api-client';
+import {
+	Alert,
+	AlertDescription,
+	Button,
+	Card,
+	EmptyState,
+	Spinner,
+	toast,
+} from '@repo/ui';
+
+import { Can } from '@/components/Can';
+import { usePermissions } from '@/features/auth/hooks';
+import { useAppT } from '@/locales';
+
+import {
+	useChannelSettings,
+	useNotificationRules,
+	useNotificationTemplates,
+	useNotificationTriggers,
+	useTemplateModeration,
+	type NotificationTemplate,
+} from '../api/notifications.queries';
+import { useSyncTemplateModeration } from '../api/notifications.mutations';
+import { TemplateEditor } from '../components/TemplateEditor';
+import { TemplateList } from '../components/TemplateList';
+import { indexModeration } from '../lib/moderation';
+import { templateKey, type TemplateFocusRequest } from '../lib/template-key';
+
+interface TemplatesPageProps {
+	/** A rule's template code, requested from its trigger badge in the Rules tab; seeds the initial search query. */
+	focusRequest?: TemplateFocusRequest | null;
+}
+
+/**
+ * The Templates tab — a master/detail console. The left pane lists the messages
+ * that actually go out — the code-owned defaults merged with the center's own
+ * customizations, one row per code / channel / language, and **only for codes an
+ * active rule sends** (a template whose rule is off never fires, so it is noise
+ * here). The right pane edits the selected one, with a live cost counter,
+ * insertable variables and a sample preview. Editing a default saves a
+ * customization; reverting deletes it. See {@link TemplateList} and
+ * {@link TemplateEditor}.
+ *
+ * `focusRequest` (a click on a rule's trigger badge, from the Rules tab) seeds
+ * the search bar with that rule's template code, filtering {@link TemplateList}
+ * down to it rather than jumping straight to one row. It is only read on mount:
+ * this page unmounts whenever the tab isn't active (Radix drops inactive
+ * `TabsContent`), so every arrival here is a fresh mount, and a later manual
+ * edit of the search box is never overridden by a stale request.
+ */
+export function TemplatesPage({ focusRequest }: TemplatesPageProps) {
+	const tn = useAppT('notifications');
+	const { can } = usePermissions();
+	const canRules = can('notification-rule.manage');
+	// Settings is OWNER-only (it exposes credentials), so a template-only manager
+	// simply never sees `hasOwnCredentials` — see the sync button below.
+	const canSettings = can('notification-settings.manage');
+
+	const { data, isLoading, isError } = useNotificationTemplates({ limit: 100 });
+	const { data: triggers } = useNotificationTriggers();
+	// Gated on the rules permission so a template-only manager doesn't 403; when
+	// they cannot read rules we simply don't hide anything (see activeRuleCodes).
+	const { data: rulesData } = useNotificationRules({ limit: 100 }, canRules);
+	const { data: channels } = useChannelSettings(canSettings);
+	const smsHasOwnCredentials =
+		channels?.find((channel) => channel.channel === 'SMS')?.hasOwnCredentials ??
+		false;
+	// Same permission as the template list, so no extra gate. Failures are left
+	// unhandled on purpose: an unreachable gateway must not take the editor down
+	// with it — the moderation panel simply reports the state as unknown.
+	const { data: moderationRows } = useTemplateModeration();
+	const syncModeration = useSyncTemplateModeration();
+
+	// Lazy init only: seeded once from this mount's `focusRequest`, never re-run
+	// on refetch, so a later manual edit of the search box is never clobbered.
+	const [query, setQuery] = useState(() => focusRequest?.code ?? '');
+
+	const rows = useMemo(() => data?.rows ?? [], [data]);
+	const moderation = useMemo(() => indexModeration(moderationRows), [moderationRows]);
+
+	// Rule count per template code, for the editor's "Used by N rules" subtitle.
+	const rulesByCode = useMemo(() => {
+		const map = new Map<string, number>();
+		for (const rule of rulesData?.rows ?? []) {
+			map.set(rule.templateCode, (map.get(rule.templateCode) ?? 0) + 1);
+		}
+		return map;
+	}, [rulesData]);
+
+	/**
+	 * The set of codes an *active* rule sends. `null` when rules are unavailable
+	 * (the principal cannot read them), in which case nothing is hidden.
+	 */
+	const activeRuleCodes = useMemo(() => {
+		if (!rulesData) return null;
+		const codes = new Set<string>();
+		for (const rule of rulesData.rows) {
+			if (rule.isActive) codes.add(rule.templateCode);
+		}
+		return codes;
+	}, [rulesData]);
+
+	const visibleRows = useMemo(
+		() => (activeRuleCodes ? rows.filter((r) => activeRuleCodes.has(r.code)) : rows),
+		[rows, activeRuleCodes],
+	);
+
+	const [selectedKey, setSelectedKey] = useState<string | null>(null);
+
+	// Derive the effective selection during render (no effect, so no cascading
+	// renders): the chosen key when it still exists among the visible rows,
+	// otherwise the first visible row.
+	const effectiveKey = useMemo(() => {
+		if (visibleRows.length === 0) return null;
+		if (selectedKey && visibleRows.some((r) => templateKey(r) === selectedKey)) {
+			return selectedKey;
+		}
+		return templateKey(visibleRows[0]);
+	}, [visibleRows, selectedKey]);
+
+	const selected: NotificationTemplate | undefined = useMemo(
+		() => visibleRows.find((r) => templateKey(r) === effectiveKey),
+		[visibleRows, effectiveKey],
+	);
+
+	/**
+	 * Submits the code-owned SMS defaults the gateway doesn't already hold.
+	 * Account-wide, not tied to the selected row, so it lives above the
+	 * master/detail grid rather than in the editor's per-template moderation card.
+	 */
+	const handleSync = async () => {
+		try {
+			const result = await syncModeration.mutateAsync();
+			toast.success(
+				tn('moderation.syncResult', {
+					submitted: result.submitted,
+					matched: result.matched,
+					skipped: result.skipped,
+					failed: result.failed,
+				}),
+			);
+		} catch (err) {
+			toast.error(isApiError(err) ? err.message : tn('moderation.syncFailed'));
+		}
+	};
+
+	// Syncing submits this account's copy to the gateway for moderation. For a
+	// center on the shared platform account that account is managed from the
+	// internal platform console instead — surfacing the button here would let
+	// every such center trigger the same platform-wide sync.
+	const syncButton = smsHasOwnCredentials && (
+		<Can permission="notification-template.manage">
+			<Button
+				variant="outline"
+				size="sm"
+				onClick={() => void handleSync()}
+				disabled={syncModeration.isPending}
+			>
+				{syncModeration.isPending ? (
+					<Spinner className="mr-1.5 size-4" />
+				) : (
+					<RefreshCw className="mr-1.5 size-4" />
+				)}
+				{tn('moderation.sync')}
+			</Button>
+		</Can>
+	);
+
+	if (isError) {
+		return (
+			<Alert variant="destructive">
+				<AlertDescription>{tn('templates.loadError')}</AlertDescription>
+			</Alert>
+		);
+	}
+
+	if (isLoading) {
+		return (
+			<div className="flex items-center justify-center py-16 text-muted-foreground">
+				<Spinner className="size-5" />
+			</div>
+		);
+	}
+
+	let content: ReactNode;
+	if (rows.length === 0) {
+		content = (
+			<Card className="py-0">
+				<EmptyState icon={<MessageSquare />} title={tn('templates.empty')} />
+			</Card>
+		);
+	} else if (visibleRows.length === 0) {
+		// Templates exist, but none are sent by an active rule.
+		content = (
+			<Card className="py-0">
+				<EmptyState
+					icon={<MessageSquare />}
+					title={tn('templates.noActive')}
+					description={tn('templates.noActiveHint')}
+				/>
+			</Card>
+		);
+	} else {
+		content = (
+			<div className="grid grid-cols-1 gap-4 lg:grid-cols-[minmax(0,22rem)_minmax(0,1fr)]">
+				<TemplateList
+					templates={visibleRows}
+					selectedKey={effectiveKey}
+					onSelect={(t) => setSelectedKey(templateKey(t))}
+					query={query}
+					onQueryChange={setQuery}
+					moderation={moderation}
+				/>
+
+				{selected ? (
+					<TemplateEditor
+						// Encode source/id so a save (SYSTEM→TENANT) or revert
+						// (TENANT→SYSTEM) remounts the editor with the server's copy.
+						key={`${effectiveKey}:${selected.source}:${selected.id ?? 'default'}`}
+						template={selected}
+						triggers={triggers}
+						ruleCount={rulesByCode.get(selected.code) ?? 0}
+						moderation={moderation}
+					/>
+				) : (
+					<Card className="py-0">
+						<EmptyState
+							icon={<MessageSquare />}
+							title={tn('templates.selectPrompt')}
+							description={tn('templates.selectPromptHint')}
+						/>
+					</Card>
+				)}
+			</div>
+		);
+	}
+
+	return (
+		<div className="flex flex-col gap-4">
+			<div className="flex justify-end">{syncButton}</div>
+			{content}
+		</div>
+	);
+}

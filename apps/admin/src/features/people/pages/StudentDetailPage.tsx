@@ -442,7 +442,7 @@ export function StudentDetailPage({ studentId }: StudentDetailPageProps) {
 
 			<StudentHeader studentId={studentId} onEdit={() => setEditOpen(true)} />
 
-			<Tabs defaultValue="overview">
+			<Tabs defaultValue="overview" variant="underline">
 				<TabsList>
 					<TabsTrigger value="overview">{t('detail.tab.overview')}</TabsTrigger>
 					<TabsTrigger value="guardians">

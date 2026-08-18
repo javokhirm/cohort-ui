@@ -27,11 +27,7 @@ import { SettingsTab } from '@/features/tenants/components/tenantDetails/Setting
 import { SubscriptionTab } from '@/features/tenants/components/tenantDetails/SubscriptionTab';
 import { TypeToConfirmDialog } from '@/features/tenants/components/tenantDetails/TypeToConfirmDialog';
 import { avatarClass, getInitials } from '@/features/tenants/utils';
-import {
-	TAB_TRIGGER_CLASS,
-	TENANT_STATUS_TONE,
-	tenantStatusLabel,
-} from '@/features/tenants/constants';
+import { TENANT_STATUS_TONE, tenantStatusLabel } from '@/features/tenants/constants';
 import {
 	useCancelTenant,
 	useSuspendTenant,
@@ -123,38 +119,23 @@ export function TenantDetailPage() {
 				</Button>
 			</div>
 
-			<Tabs defaultValue="overview" className="gap-0">
-				<TabsList className="h-auto w-full justify-start rounded-none border-b border-border bg-transparent p-0">
-					<TabsTrigger value="overview" className={TAB_TRIGGER_CLASS}>
-						{t('tab.overview')}
-					</TabsTrigger>
-					<TabsTrigger value="subscription" className={TAB_TRIGGER_CLASS}>
+			<Tabs defaultValue="overview" className="gap-0" variant="underline">
+				<TabsList>
+					<TabsTrigger value="overview">{t('tab.overview')}</TabsTrigger>
+					<TabsTrigger value="subscription">
 						{t('tab.subscription')}
 					</TabsTrigger>
-					<TabsTrigger value="billing-policy" className={TAB_TRIGGER_CLASS}>
+					<TabsTrigger value="billing-policy">
 						{t('tab.billingPolicy')}
 					</TabsTrigger>
-					<TabsTrigger value="branches" className={TAB_TRIGGER_CLASS}>
-						{t('tab.branches')}
-					</TabsTrigger>
-					<TabsTrigger value="members" className={TAB_TRIGGER_CLASS}>
-						{t('tab.members')}
-					</TabsTrigger>
-					<TabsTrigger value="imports" className={TAB_TRIGGER_CLASS}>
-						{t('tab.imports')}
-					</TabsTrigger>
-					<TabsTrigger value="settings" className={TAB_TRIGGER_CLASS}>
-						{t('tab.settings')}
-					</TabsTrigger>
-					<TabsTrigger value="audit" className={TAB_TRIGGER_CLASS}>
-						{t('tab.audit')}
-					</TabsTrigger>
+					<TabsTrigger value="branches">{t('tab.branches')}</TabsTrigger>
+					<TabsTrigger value="members">{t('tab.members')}</TabsTrigger>
+					<TabsTrigger value="imports">{t('tab.imports')}</TabsTrigger>
+					<TabsTrigger value="settings">{t('tab.settings')}</TabsTrigger>
+					<TabsTrigger value="audit">{t('tab.audit')}</TabsTrigger>
 					<TabsTrigger
 						value="danger"
-						className={cn(
-							TAB_TRIGGER_CLASS,
-							'text-destructive data-[state=active]:border-b-destructive data-[state=active]:text-destructive',
-						)}
+						className="text-destructive data-[state=active]:border-b-destructive data-[state=active]:text-destructive"
 					>
 						{t('danger.zone')}
 						<span className="ml-1 size-1.5 rounded-full bg-destructive" />

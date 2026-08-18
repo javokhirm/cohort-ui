@@ -7,11 +7,16 @@ import {
 } from '@tanstack/react-router';
 
 import { Toaster } from '@repo/ui';
-import { requireAuth, requirePermission } from '@/lib/auth/guards';
+import {
+	requireAuth,
+	requirePermission,
+	requireSubscriptionAccess,
+} from '@/lib/auth/guards';
 import { LoginRoute } from '@/routes/login';
 import { AuthedLayout } from '@/routes/authed-layout';
 import { DashboardPage } from '@/routes/dashboard';
 import { ForbiddenPage } from '@/routes/forbidden';
+import { SubscriptionRoute } from '@/routes/subscription';
 import { StudentsRoute } from '@/routes/_authed.students';
 import { StudentDetailRoute } from '@/routes/_authed.students.$id';
 import { StaffRoute } from '@/routes/_authed.staff';
@@ -24,6 +29,7 @@ import { DiscountsRoute } from '@/routes/_authed.discounts';
 import { InvoicesRoute } from '@/routes/_authed.invoices';
 import { InvoiceDetailRoute } from '@/routes/_authed.invoices.$id';
 import { BranchesRoute } from '@/routes/_authed.branches';
+import { NotificationsRoute } from '@/routes/_authed.notifications';
 import { CoursesRoute } from '@/routes/_authed.courses';
 import { CourseDetailRoute } from '@/routes/_authed.courses.$id';
 import { GroupsRoute } from '@/routes/_authed.groups';
@@ -71,11 +77,29 @@ const forbiddenRoute = createRoute({
 	component: ForbiddenPage,
 });
 
+/**
+ * The global 402 block's landing screen (root CLAUDE.md task). Deliberately a
+ * top-level route — not nested under `authedRoute`/`AuthedLayout` — so it
+ * renders standalone, without the sidebar/branch-selector chrome that would
+ * fire their own manage-surface requests (and 402 again) while the tenant is
+ * blocked. Reachable any time, not just while blocked: it is also where an
+ * OWNER/ADMIN checks billing history or changes plan.
+ */
+const subscriptionRoute = createRoute({
+	getParentRoute: () => rootRoute,
+	path: '/subscription',
+	beforeLoad: ({ location }) => requireAuth(location.href),
+	component: SubscriptionRoute,
+});
+
 const authedRoute = createRoute({
 	getParentRoute: () => rootRoute,
 	id: '_authed',
 	beforeLoad: ({ location }) => {
 		requireAuth(location.href);
+		// Runs for every nested route, including one reached by typing a URL
+		// directly — the "must not be able to escape it" requirement.
+		requireSubscriptionAccess(location.pathname);
 	},
 	component: AuthedLayout,
 });
@@ -370,6 +394,25 @@ const branchesRoute = createRoute({
 	component: BranchesRoute,
 });
 
+/**
+ * The communication console. Guarded on *any* of the four communication
+ * permissions, because the page is a tab shell and each tab gates itself — an
+ * ADMIN without `notification-settings.manage` (OWNER-only) still belongs here for
+ * the other three.
+ */
+const notificationsRoute = createRoute({
+	getParentRoute: () => authedRoute,
+	path: '/notifications',
+	beforeLoad: () =>
+		requirePermission([
+			'notification-rule.manage',
+			'notification-template.manage',
+			'notification.send',
+			'notification-settings.manage',
+		]),
+	component: NotificationsRoute,
+});
+
 const coursesRoute = createRoute({
 	getParentRoute: () => authedRoute,
 	path: '/courses',
@@ -648,6 +691,7 @@ const leadsRoute = createRoute({
 const routeTree = rootRoute.addChildren([
 	loginRoute,
 	forbiddenRoute,
+	subscriptionRoute,
 	authedRoute.addChildren([
 		dashboardRoute,
 		studentsRoute,
@@ -663,6 +707,7 @@ const routeTree = rootRoute.addChildren([
 		invoiceDetailRoute,
 		paymentsRoute,
 		branchesRoute,
+		notificationsRoute,
 		coursesRoute,
 		courseDetailRoute,
 		groupsRoute,

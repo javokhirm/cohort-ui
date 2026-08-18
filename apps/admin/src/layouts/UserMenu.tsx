@@ -1,5 +1,5 @@
 import { useNavigate } from '@tanstack/react-router';
-import { ChevronDown, LogOut, User } from 'lucide-react';
+import { ChevronDown, CreditCard, LogOut, User } from 'lucide-react';
 
 import {
 	Avatar,
@@ -12,6 +12,7 @@ import {
 } from '@repo/ui';
 import { useT } from '@repo/i18n';
 
+import { Can } from '@/components/Can';
 import { useAuth } from '@/features/auth/hooks';
 import { useAppT } from '@/locales';
 
@@ -31,6 +32,7 @@ export function UserMenu() {
 	const t = useT('nav');
 	const tAuth = useT('auth');
 	const tApp = useAppT('shell');
+	const tSubscription = useAppT('subscription');
 
 	// The shell renders only behind the authed guard, but the session is cleared
 	// before the redirect lands — render nothing rather than a `?` avatar.
@@ -78,6 +80,15 @@ export function UserMenu() {
 					<User className="mr-2 size-4" />
 					{t('item.profile')}
 				</DropdownMenuItem>
+
+				<Can permission="subscription.read">
+					<DropdownMenuItem
+						onClick={() => void navigate({ to: '/subscription' })}
+					>
+						<CreditCard className="mr-2 size-4" />
+						{tSubscription('menuLabel')}
+					</DropdownMenuItem>
+				</Can>
 
 				<DropdownMenuSeparator />
 

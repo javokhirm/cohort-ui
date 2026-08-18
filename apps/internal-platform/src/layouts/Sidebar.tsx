@@ -4,13 +4,16 @@ import {
 	Building2,
 	ChevronLeft,
 	ChevronRight,
+	Contact2,
 	CreditCard,
+	FileText,
 	LayoutDashboard,
 	Receipt,
 	ScrollText,
 	Settings,
 	Shield,
 	Users,
+	Wallet,
 } from 'lucide-react';
 import type { LucideIcon } from 'lucide-react';
 
@@ -22,8 +25,11 @@ type NavItemKey =
 	| 'platformDashboard'
 	| 'tenants'
 	| 'userDirectory'
+	| 'platformLeads'
 	| 'subscriptionPlans'
 	| 'subscriptions'
+	| 'payments'
+	| 'invoices'
 	| 'roleTemplates'
 	| 'auditLog'
 	| 'settings';
@@ -63,6 +69,13 @@ const CUSTOMERS_ITEMS: NavItemDef[] = [
 		href: '/users',
 		match: '/users',
 	},
+	{
+		id: 'leads',
+		label: 'platformLeads',
+		Icon: Contact2,
+		href: '/leads',
+		match: '/leads',
+	},
 ];
 
 const REVENUE_ITEMS: NavItemDef[] = [
@@ -79,6 +92,20 @@ const REVENUE_ITEMS: NavItemDef[] = [
 		Icon: Receipt,
 		href: '/subscriptions',
 		match: '/subscriptions',
+	},
+	{
+		id: 'subscription-payments',
+		label: 'payments',
+		Icon: Wallet,
+		href: '/subscription-payments',
+		match: '/subscription-payments',
+	},
+	{
+		id: 'subscription-invoices',
+		label: 'invoices',
+		Icon: FileText,
+		href: '/subscription-invoices',
+		match: '/subscription-invoices',
 	},
 ];
 
@@ -97,12 +124,11 @@ const PLATFORM_ITEMS: NavItemDef[] = [
 		href: '/audit-log',
 		match: '/audit-log',
 	},
-	// TODO: href → '/settings' once route exists
 	{
 		id: 'settings',
 		label: 'settings',
 		Icon: Settings,
-		href: '/',
+		href: '/settings',
 		match: '/settings',
 	},
 ];

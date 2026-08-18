@@ -38,9 +38,11 @@ export function LeaderboardRow({ row, position }: LeaderboardRowProps) {
 					: 'border-border bg-card',
 			)}
 		>
+			{/* `min-w-7` rather than a fixed square: rows run to rank 10, and a
+			    tied one is prefixed, so "=10" has to fit without clipping. */}
 			<span
 				className={cn(
-					'flex size-7 shrink-0 items-center justify-center rounded-lg text-[12px] font-black tabular-nums',
+					'flex h-7 min-w-7 shrink-0 items-center justify-center rounded-lg px-1 text-[12px] font-black tabular-nums',
 					row.isMe && 'bg-primary text-primary-foreground',
 					!row.isMe && medal && medal.chip,
 					!row.isMe && !medal && 'bg-muted text-muted-foreground',

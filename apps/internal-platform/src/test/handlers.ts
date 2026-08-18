@@ -396,8 +396,43 @@ export const MOCK_DASHBOARD = {
 		processedThisMonth: 2_400_000,
 		currency: 'UZS',
 	},
+	subscriptions: {
+		TRIALING: 1,
+		ACTIVE: 1,
+		PAST_DUE: 1,
+		EXPIRED: 0,
+		CANCELLED: 0,
+	},
+	subscriptionBilling: {
+		revenueThisMonth: 4_800_000,
+		paymentsThisMonth: 2,
+		failedPaymentsThisMonth: 1,
+		currency: 'UZS',
+	},
+	upcomingExpirations: [
+		{
+			tenantId: 1,
+			tenantName: 'Zabon Academy',
+			subscriptionId: 101,
+			planName: 'Growth',
+			currentPeriodEnd: '2026-07-05T00:00:00Z',
+			daysRemaining: 5,
+			renewalPrice: 2_400_000,
+			currency: 'UZS',
+		},
+		{
+			tenantId: 2,
+			tenantName: 'Tafakkur School',
+			subscriptionId: 102,
+			planName: 'Starter',
+			currentPeriodEnd: '2026-07-22T00:00:00Z',
+			daysRemaining: 22,
+			renewalPrice: 900_000,
+			currency: 'UZS',
+		},
+	],
 	atRisk: {
-		count: 1,
+		count: 2,
 		tenants: [
 			{
 				tenantId: 3,
@@ -408,9 +443,98 @@ export const MOCK_DASHBOARD = {
 				trialEndsAt: null,
 				daysUntilTrialEnd: null,
 			},
+			{
+				tenantId: 4,
+				name: 'Bilim Markazi',
+				status: 'ACTIVE',
+				reason: 'EXPIRED',
+				reasons: ['EXPIRED'],
+				trialEndsAt: null,
+				daysUntilTrialEnd: null,
+			},
 		],
 	},
 };
+
+// ─── Subscription billing fixtures ────────────────────────────────────────────
+
+export const MOCK_SUBSCRIPTION_INVOICES = [
+	{
+		id: 5001,
+		tenantId: 1,
+		subscriptionId: 101,
+		code: 'SUB-2026-00042',
+		tierName: 'Growth',
+		subscriptionTierId: 2,
+		billingInterval: 'MONTHLY',
+		unitPrice: 2_400_000,
+		amount: 2_400_000,
+		currency: 'UZS',
+		status: 'PAID',
+		issueDate: '2026-06-01T00:00:00Z',
+		periodStart: '2026-06-01T00:00:00Z',
+		periodEnd: '2026-07-01T00:00:00Z',
+		paidAt: '2026-06-01T09:12:00Z',
+		createdAt: '2026-06-01T00:00:00Z',
+	},
+	{
+		id: 5002,
+		tenantId: 3,
+		subscriptionId: 103,
+		code: 'SUB-2026-00043',
+		tierName: 'Growth',
+		subscriptionTierId: 2,
+		billingInterval: 'MONTHLY',
+		unitPrice: 2_400_000,
+		amount: 2_400_000,
+		currency: 'UZS',
+		status: 'UNPAID',
+		issueDate: '2026-06-23T00:00:00Z',
+		periodStart: '2026-06-23T00:00:00Z',
+		periodEnd: '2026-07-23T00:00:00Z',
+		paidAt: null,
+		createdAt: '2026-06-23T00:00:00Z',
+	},
+];
+
+export const MOCK_SUBSCRIPTION_PAYMENTS = [
+	{
+		id: 7001,
+		tenantId: 1,
+		subscriptionId: 101,
+		subscriptionInvoiceId: 5001,
+		invoiceCode: 'SUB-2026-00042',
+		amount: 2_400_000,
+		currency: 'UZS',
+		method: 'CLICK',
+		provider: 'click',
+		providerTxnId: 'click_98a1f0c2',
+		status: 'SUCCEEDED',
+		paidAt: '2026-06-01T09:12:00Z',
+		failureReason: null,
+		refundedAt: null,
+		refundedAmount: null,
+		createdAt: '2026-06-01T09:11:00Z',
+	},
+	{
+		id: 7002,
+		tenantId: 3,
+		subscriptionId: 103,
+		subscriptionInvoiceId: 5002,
+		invoiceCode: 'SUB-2026-00043',
+		amount: 2_400_000,
+		currency: 'UZS',
+		method: 'PAYME',
+		provider: 'payme',
+		providerTxnId: 'payme_7731ab',
+		status: 'FAILED',
+		paidAt: null,
+		failureReason: 'Insufficient funds',
+		refundedAt: null,
+		refundedAmount: null,
+		createdAt: '2026-06-23T10:02:00Z',
+	},
+];
 
 // ─── Tenant fixtures ──────────────────────────────────────────────────────────
 
@@ -780,6 +904,127 @@ export const handlers = [
 	// ── Dashboard ──────────────────────────────────────────────────────────────
 
 	http.get(`${BASE}/super-admin/dashboard`, () => ok(MOCK_DASHBOARD)),
+
+	// ── Subscription payments ────────────────────────────────────────────────────
+
+	http.get(`${BASE}/super-admin/subscription-payments`, ({ request }) => {
+		const url = new URL(request.url);
+		const tenantId = url.searchParams.get('tenantId');
+		const status = url.searchParams.get('status');
+		const method = url.searchParams.get('method');
+		const provider = url.searchParams.get('provider');
+		const search = url.searchParams.get('search')?.toLowerCase() ?? '';
+		const page = Number(url.searchParams.get('page') ?? 1);
+		const limit = Number(url.searchParams.get('limit') ?? 20);
+
+		let rows = MOCK_SUBSCRIPTION_PAYMENTS;
+		if (tenantId) rows = rows.filter((p) => p.tenantId === Number(tenantId));
+		if (status) rows = rows.filter((p) => p.status === status);
+		if (method) rows = rows.filter((p) => p.method === method);
+		if (provider) rows = rows.filter((p) => p.provider === provider);
+		if (search)
+			rows = rows.filter(
+				(p) =>
+					p.providerTxnId?.toLowerCase().includes(search) ||
+					p.invoiceCode?.toLowerCase().includes(search),
+			);
+
+		const total = rows.length;
+		const start = (page - 1) * limit;
+		return okPaged(rows.slice(start, start + limit), page, limit, total);
+	}),
+
+	http.get(`${BASE}/super-admin/subscription-payments/:id`, ({ params }) => {
+		const payment = MOCK_SUBSCRIPTION_PAYMENTS.find(
+			(p) => p.id === Number(params['id']),
+		);
+		if (!payment)
+			return fail(404, 'SUBSCRIPTION_PAYMENT_NOT_FOUND', 'Payment not found.');
+		return ok(payment);
+	}),
+
+	http.post(
+		`${BASE}/super-admin/subscription-payments/:id/refund`,
+		async ({ params, request }) => {
+			const payment = MOCK_SUBSCRIPTION_PAYMENTS.find(
+				(p) => p.id === Number(params['id']),
+			);
+			if (!payment)
+				return fail(404, 'SUBSCRIPTION_PAYMENT_NOT_FOUND', 'Payment not found.');
+			if (payment.status !== 'SUCCEEDED')
+				return fail(
+					400,
+					'SUBSCRIPTION_PAYMENT_NOT_REFUNDABLE',
+					'Only a succeeded payment can be refunded.',
+				);
+			const body = (await request.json().catch(() => ({}))) as {
+				amount?: number;
+				reason?: string;
+			};
+			const refundedAmount = body.amount ?? payment.amount;
+			return ok({
+				...payment,
+				status: 'REFUNDED',
+				refundedAt: '2026-06-30T12:00:00Z',
+				refundedAmount,
+			});
+		},
+	),
+
+	http.post(
+		`${BASE}/super-admin/tenants/:id/subscription/record-payment`,
+		async ({ params, request }) => {
+			const tenantId = Number(params['id']);
+			const body = (await request.json().catch(() => ({}))) as {
+				method?: string;
+			};
+			return ok({
+				id: 7999,
+				tenantId,
+				subscriptionId: 199,
+				subscriptionInvoiceId: 5999,
+				invoiceCode: 'SUB-2026-09999',
+				amount: 2_400_000,
+				currency: 'UZS',
+				method: body.method ?? 'BANK_TRANSFER',
+				provider: null,
+				providerTxnId: null,
+				status: 'SUCCEEDED',
+				paidAt: '2026-06-30T12:00:00Z',
+				failureReason: null,
+				refundedAt: null,
+				refundedAmount: null,
+				createdAt: '2026-06-30T12:00:00Z',
+			});
+		},
+	),
+
+	// ── Subscription invoices ────────────────────────────────────────────────────
+
+	http.get(`${BASE}/super-admin/subscription-invoices`, ({ request }) => {
+		const url = new URL(request.url);
+		const tenantId = url.searchParams.get('tenantId');
+		const status = url.searchParams.get('status');
+		const page = Number(url.searchParams.get('page') ?? 1);
+		const limit = Number(url.searchParams.get('limit') ?? 20);
+
+		let rows = MOCK_SUBSCRIPTION_INVOICES;
+		if (tenantId) rows = rows.filter((i) => i.tenantId === Number(tenantId));
+		if (status) rows = rows.filter((i) => i.status === status);
+
+		const total = rows.length;
+		const start = (page - 1) * limit;
+		return okPaged(rows.slice(start, start + limit), page, limit, total);
+	}),
+
+	http.get(`${BASE}/super-admin/subscription-invoices/:id`, ({ params }) => {
+		const invoice = MOCK_SUBSCRIPTION_INVOICES.find(
+			(i) => i.id === Number(params['id']),
+		);
+		if (!invoice)
+			return fail(404, 'SUBSCRIPTION_INVOICE_NOT_FOUND', 'Invoice not found.');
+		return ok(invoice);
+	}),
 
 	// ── Tenant queries ─────────────────────────────────────────────────────────
 

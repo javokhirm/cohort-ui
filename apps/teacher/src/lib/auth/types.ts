@@ -10,6 +10,7 @@
  * a language change); it is a write, not the identity source.
  */
 import type { Locale } from '@repo/utils';
+import type { SubscriptionAccessView } from '@repo/api-client';
 
 export interface AuthUserSummary {
 	id: number;
@@ -28,4 +29,14 @@ export interface AuthResult {
 	/** Access-token lifetime in seconds. */
 	expiresIn: number;
 	user: AuthUserSummary;
+	/**
+	 * The tenant's derived subscription state at login/refresh time. An expired
+	 * center still authenticates successfully and receives a full token pair — the
+	 * account is valid, only the application access its plan grants is not. The
+	 * client reads `subscription.hasAccess` to decide between the app and the
+	 * full-screen block, and gets `state`/`currentPeriodEnd`/plan to render it
+	 * without a second call. `null` only for the platform tenant, which this app
+	 * never is.
+	 */
+	subscription: SubscriptionAccessView | null;
 }

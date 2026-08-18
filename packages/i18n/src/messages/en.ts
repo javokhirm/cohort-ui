@@ -127,6 +127,7 @@ export const en = {
 			people: 'People',
 			academics: 'Academics',
 			finance: 'Finance',
+			engagement: 'Engagement',
 			administration: 'Administration',
 			platform: 'Platform',
 			customers: 'Customers',
@@ -154,6 +155,7 @@ export const en = {
 			platformDashboard: 'Platform Dashboard',
 			tenants: 'Tenants',
 			userDirectory: 'User Directory',
+			platformLeads: 'Leads',
 			subscriptionPlans: 'Subscription Plans',
 			subscriptions: 'Subscriptions',
 			roleTemplates: 'Role Templates',
@@ -370,5 +372,15 @@ export const en = {
 		dateRangeInvalid: 'End date must be after the start date',
 		timeRangeInvalid: 'End time must be after the start time',
 		passwordMismatch: 'Passwords do not match',
+	},
+
+	subscription: {
+		expired: {
+			title: 'Subscription expired',
+			description:
+				"Your center's subscription has expired. Contact your center's administrator to restore access.",
+			planLabel: 'Plan',
+			expiredOnLabel: 'Expired on',
+		},
 	},
 } as const;

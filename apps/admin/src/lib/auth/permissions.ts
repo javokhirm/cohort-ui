@@ -111,8 +111,11 @@ export const PERMISSION_CODES = [
 	// notification
 	'notification-template.manage',
 	'notification.send',
-	// reminder
-	'reminder-rule.manage',
+	'notification-rule.manage',
+	// Separate from `notification-rule.manage` because this surface holds the SMS
+	// provider credentials and the channel-wide kill switch — it is OWNER-only,
+	// alongside `settings.manage`.
+	'notification-settings.manage',
 	// audit
 	'audit.read',
 	// dashboard
@@ -122,6 +125,9 @@ export const PERMISSION_CODES = [
 	'branch.read',
 	'branch.create',
 	'branch.update',
+	// subscription — the center's own Cohort plan (renewal is OWNER-only, like payroll.pay)
+	'subscription.read',
+	'subscription.renew',
 ] as const;
 
 /** A single permission code from the catalog (e.g. `'invoice.void'`). */
