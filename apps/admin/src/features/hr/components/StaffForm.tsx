@@ -70,12 +70,12 @@ function CreateStaffForm({
 		defaultValues: {
 			firstName: '',
 			lastName: '',
-			roleName: 'TEACHER',
+			roleName: undefined,
 			branchId: defaultBranchId,
 			position: '',
 			phone: '',
 			email: '',
-			employmentType: 'FULL_TIME',
+			employmentType: undefined,
 			hireDate: '',
 			specialization: '',
 			password: '',
@@ -134,6 +134,7 @@ function CreateStaffForm({
 								control={form.control}
 								name="roleName"
 								label={t('form.field.role')}
+								placeholder={t('form.field.rolePlaceholder')}
 								options={ROLE_OPTIONS.map((o) => ({
 									value: o.value,
 									label: statusLabel('role', o.value),
@@ -196,6 +197,7 @@ function CreateStaffForm({
 								control={form.control}
 								name="employmentType"
 								label={t('form.field.contract')}
+								placeholder={t('form.field.contractPlaceholder')}
 								options={EMPLOYMENT_OPTIONS.map((o) => ({
 									value: o.value,
 									label: t(`employment.${o.value}`),

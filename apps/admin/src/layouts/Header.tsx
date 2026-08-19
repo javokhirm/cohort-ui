@@ -1,4 +1,4 @@
-import { PanelLeft, Search } from 'lucide-react';
+import { ChevronsLeft, ChevronsRight, Search } from 'lucide-react';
 
 import { NotificationBell, Separator, ThemeToggle } from '@repo/ui';
 import { useT } from '@repo/i18n';
@@ -25,9 +25,13 @@ export function Header({ sidebarCollapsed, onSidebarToggle }: HeaderProps) {
 						? t('shell.expandSidebar')
 						: t('shell.collapseSidebar')
 				}
-				className="flex size-8 items-center justify-center rounded-lg text-muted-foreground hover:bg-muted"
+				className="flex size-8 items-center justify-center rounded-lg text-muted-foreground bg-muted"
 			>
-				<PanelLeft className="size-4" />
+				{sidebarCollapsed ? (
+					<ChevronsRight className="size-4" />
+				) : (
+					<ChevronsLeft className="size-4" />
+				)}
 			</button>
 
 			{/* Global branch selector (multi-select; hidden for single-branch users) */}

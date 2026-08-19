@@ -24,9 +24,12 @@ import {
 } from '@repo/ui';
 import { useT } from '@repo/i18n';
 
+import { Link } from '@tanstack/react-router';
+
 import { useBranches } from '@/api/branches';
 import { FormSection } from '@/components/FormSection';
 import { FormSheet } from '@/components/FormSheet';
+import { DependencyMissingAlert } from '@/components/DependencyMissingAlert';
 import { useGroupList } from '@/features/groups/api/groups.queries';
 import { useAppT } from '@/locales';
 
@@ -60,7 +63,7 @@ export function NotificationComposeSheet({
 
 	const send = useSendNotification();
 	const { data: branches } = useBranches();
-	const { data: groups } = useGroupList({ limit: 100 });
+	const { data: groups, isPending: groupsPending } = useGroupList({ limit: 100 });
 
 	const schema = useMemo(
 		() =>
@@ -237,12 +240,30 @@ export function NotificationComposeSheet({
 									options={branchOptions}
 								/>
 							) : (
-								<FormSelect
-									control={form.control}
-									name="groupId"
-									label={tn('outbox.field.group')}
-									options={groupOptions}
-								/>
+								<>
+									{!groupsPending && groupOptions.length === 0 && (
+										<DependencyMissingAlert
+											description={tn(
+												'outbox.compose.groupMissing',
+											)}
+											action={
+												<Link
+													to="/groups"
+													className="font-medium text-tone-blue-fg underline underline-offset-2"
+												>
+													{tn('outbox.compose.groupMissingCta')}
+												</Link>
+											}
+										/>
+									)}
+									<FormSelect
+										control={form.control}
+										name="groupId"
+										label={tn('outbox.field.group')}
+										options={groupOptions}
+										disabled={groupOptions.length === 0}
+									/>
+								</>
 							)}
 						</FieldGroup>
 					</FormSection>
