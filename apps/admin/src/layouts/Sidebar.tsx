@@ -24,7 +24,14 @@ import { cn, Tooltip, TooltipContent, TooltipTrigger } from '@repo/ui';
 import { useT } from '@repo/i18n';
 import { usePermissions } from '@/features/auth/hooks';
 import type { PermissionRequirement } from '@/lib/auth/permissions';
+import { useSessionStore } from '@/store/sessionStore';
 import { useAppT } from '@/locales';
+
+/** First letter of the first word, plus the second word's if there is one — capped at 2. */
+function tenantInitials(name: string): string {
+	const words = name.trim().split(/\s+/).filter(Boolean);
+	return `${words[0]?.[0] ?? ''}${words[1]?.[0] ?? ''}`.toUpperCase() || '?';
+}
 
 /** Leaf keys under the `nav` namespace's `group.*` / `item.*` — resolved at
  * render, not module load, so language switches re-translate the sidebar. Typed
@@ -374,6 +381,7 @@ export function Sidebar({ collapsed }: SidebarProps) {
 	const pathname = useRouterState({ select: (s) => s.location.pathname });
 	const t = useT('nav');
 	const tApp = useAppT('shell');
+	const tenant = useSessionStore((s) => s.tenant);
 
 	// Cosmetic nav filtering — show only what the resolved permissions allow, and
 	// drop a group once all its items are hidden. The backend enforces access.
@@ -387,10 +395,10 @@ export function Sidebar({ collapsed }: SidebarProps) {
 			})).filter((group) => group.items.length > 0)
 		: NAV_GROUPS;
 
-	// One fixed host serves every education center,
-	// so the header carries the product brand rather than a tenant name.
-	const tenantName = 'Cohort';
-	const tenantInitial = 'C';
+	// The build is shared across every education center, so the header carries
+	// the signed-in user's own tenant rather than the product brand.
+	const tenantName = tenant?.name ?? 'Cohort';
+	const tenantInitial = tenantInitials(tenantName);
 
 	return (
 		<aside

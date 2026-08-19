@@ -587,6 +587,7 @@ export const ru: TranslationsOf<typeof uz> = {
 				lastName: 'Фамилия *',
 				lastNamePlaceholder: 'например, Рустамов',
 				role: 'Роль *',
+				rolePlaceholder: 'Выберите роль',
 				branch: 'Филиал *',
 				position: 'Должность',
 				positionPlaceholder: 'например, Старший преподаватель IELTS',
@@ -596,6 +597,7 @@ export const ru: TranslationsOf<typeof uz> = {
 				password: 'Пароль',
 				passwordPlaceholder: 'Мин. 8 символов',
 				contract: 'Тип договора',
+				contractPlaceholder: 'Выберите тип договора',
 				startDate: 'Дата начала',
 				specialization: 'Предметы / специализация',
 				specializationPlaceholder: 'например, IELTS, общий английский',
@@ -838,6 +840,8 @@ export const ru: TranslationsOf<typeof uz> = {
 				weeklySchedule: 'Недельное расписание',
 				days: 'Дни *',
 			},
+			courseMissing: 'В этом филиале нет активного курса — группу создать нельзя.',
+			courseMissingCta: 'Создать курс',
 			previewTitle: 'Предпросмотр занятий',
 			previewEmpty: 'Выберите дни и период, чтобы увидеть занятия',
 			previewCount_one: 'Это правило создаёт {{count}} занятие',
@@ -2137,6 +2141,8 @@ export const ru: TranslationsOf<typeof uz> = {
 				description:
 					'Выберите получателей, напишите сообщение и отправьте сразу или запланируйте.',
 				recipientRequired: 'Выберите филиал или группу',
+				groupMissing: 'Пока нет ни одной группы — отправить в группу нельзя.',
+				groupMissingCta: 'Создать группу',
 			},
 		},
 		settings: {

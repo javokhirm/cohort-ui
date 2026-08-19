@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react';
 import { Outlet, useNavigate } from '@tanstack/react-router';
 
 import { useSessionStore } from '@/store/sessionStore';
+import { useIsMobile } from '@/hooks/useIsMobile';
 import { Header } from '@/layouts/Header';
 import { Sidebar } from '@/layouts/Sidebar';
 
@@ -13,7 +14,10 @@ import { Sidebar } from '@/layouts/Sidebar';
 export function AuthedLayout() {
 	const status = useSessionStore((s) => s.status);
 	const navigate = useNavigate();
-	const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
+	const isMobile = useIsMobile();
+	// Mobile starts collapsed to save screen space; the lazy initializer reads
+	// the viewport only once, so a later resize never fights a manual toggle.
+	const [sidebarCollapsed, setSidebarCollapsed] = useState(() => isMobile);
 
 	useEffect(() => {
 		if (status !== 'authenticated') {

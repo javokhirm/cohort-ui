@@ -23,6 +23,7 @@ import { useAppT } from '@/locales';
 
 import { FormSection } from '@/components/FormSection';
 import { BranchSelectField } from '@/components/BranchSelectField';
+import { DependencyMissingAlert } from '@/components/DependencyMissingAlert';
 import { useBranchStore } from '@/store/branchStore';
 import { useCourseList } from '@/features/courses/api/courses.queries';
 import { useStaffList } from '@/features/hr/api/staff.queries';
@@ -52,7 +53,10 @@ import { SessionPreviewCard } from '../components/SessionPreviewCard';
 /** Pickers for the group form. Rooms narrow to the chosen branch. */
 function useGroupFormOptions(branchId: string) {
 	const t = useAppT('groups');
-	const { data: courseData } = useCourseList({ limit: 100, isActive: true });
+	const { data: courseData, isPending: coursesPending } = useCourseList({
+		limit: 100,
+		isActive: true,
+	});
 	const { data: teacherData } = useStaffList({ role: 'TEACHER', limit: 100 });
 	const branchNum = branchId && branchId !== '' ? Number(branchId) : undefined;
 	const { data: roomData } = useRoomList({
@@ -80,7 +84,7 @@ function useGroupFormOptions(branchId: string) {
 		})),
 	];
 
-	return { courseOptions, teacherOptions, roomOptions };
+	return { courseOptions, coursesPending, teacherOptions, roomOptions };
 }
 
 // ─── Shared field layout (used by create + edit via FormProvider) ─────────────
@@ -108,7 +112,10 @@ function GroupFields({
 	const startDate = form.watch('startDate');
 	const endDate = form.watch('endDate');
 	const startTime = form.watch('startTime');
-	const { courseOptions, teacherOptions, roomOptions } = useGroupFormOptions(branchId);
+	const { courseOptions, coursesPending, teacherOptions, roomOptions } =
+		useGroupFormOptions(branchId);
+	const showCourseMissingAlert =
+		mode === 'create' && !coursesPending && courseOptions.length === 0;
 
 	return (
 		<div className="grid grid-cols-1 gap-4 lg:grid-cols-[1fr_420px] lg:items-start">
@@ -117,6 +124,19 @@ function GroupFields({
 					title={t('form.section.details')}
 					className="border border-border bg-card shadow-xs"
 				>
+					{showCourseMissingAlert && (
+						<DependencyMissingAlert
+							description={t('form.courseMissing')}
+							action={
+								<Link
+									to="/courses"
+									className="font-medium text-tone-blue-fg underline underline-offset-2"
+								>
+									{t('form.courseMissingCta')}
+								</Link>
+							}
+						/>
+					)}
 					<FieldGroup>
 						<FormInput
 							control={form.control}
@@ -169,7 +189,7 @@ function GroupFields({
 								label={t('form.field.course')}
 								placeholder={t('form.field.coursePlaceholder')}
 								options={courseOptions}
-								disabled={mode === 'edit'}
+								disabled={mode === 'edit' || courseOptions.length === 0}
 							/>
 						</div>
 

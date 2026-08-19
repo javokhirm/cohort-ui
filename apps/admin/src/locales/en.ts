@@ -566,6 +566,7 @@ export const en: TranslationsOf<typeof uz> = {
 				lastName: 'Last name *',
 				lastNamePlaceholder: 'e.g. Rustamov',
 				role: 'Role *',
+				rolePlaceholder: 'Select role',
 				branch: 'Branch *',
 				position: 'Position title',
 				positionPlaceholder: 'e.g. Senior IELTS Teacher',
@@ -575,6 +576,7 @@ export const en: TranslationsOf<typeof uz> = {
 				password: 'Password',
 				passwordPlaceholder: 'Min. 8 characters',
 				contract: 'Contract',
+				contractPlaceholder: 'Select contract type',
 				startDate: 'Start date',
 				specialization: 'Subjects / specialization',
 				specializationPlaceholder: 'e.g. IELTS, General English',
@@ -812,6 +814,8 @@ export const en: TranslationsOf<typeof uz> = {
 				weeklySchedule: 'Weekly schedule',
 				days: 'Days *',
 			},
+			courseMissing: "This branch has no active course — a group can't be created.",
+			courseMissingCta: 'Create course',
 			previewTitle: 'Session preview',
 			previewEmpty: 'Pick days and a date range to preview sessions',
 			previewCount_one: 'This rule generates {{count}} session',
@@ -2095,6 +2099,8 @@ export const en: TranslationsOf<typeof uz> = {
 				description:
 					'Choose who receives it, write the message, then send now or schedule it.',
 				recipientRequired: 'Choose a branch or a group',
+				groupMissing: "There are no groups yet — you can't send to one.",
+				groupMissingCta: 'Create group',
 			},
 		},
 		settings: {

@@ -588,6 +588,7 @@ export const uz = {
 				lastName: 'Familiya *',
 				lastNamePlaceholder: 'masalan, Rustamov',
 				role: 'Roli *',
+				rolePlaceholder: 'Rolni tanlang',
 				branch: 'Filial *',
 				position: 'Lavozimi',
 				positionPlaceholder: 'masalan, Katta IELTS oʻqituvchisi',
@@ -597,6 +598,7 @@ export const uz = {
 				password: 'Parol',
 				passwordPlaceholder: 'Kamida 8 ta belgi',
 				contract: 'Shartnoma turi',
+				contractPlaceholder: 'Shartnoma turini tanlang',
 				startDate: 'Ish boshlagan sana',
 				specialization: 'Fanlar / mutaxassislik',
 				specializationPlaceholder: 'masalan, IELTS, Umumiy ingliz tili',
@@ -836,6 +838,8 @@ export const uz = {
 				weeklySchedule: 'Haftalik jadval',
 				days: 'Kunlar *',
 			},
+			courseMissing: 'Bu filialda faol kurs yoʻq — guruh yaratib boʻlmaydi.',
+			courseMissingCta: 'Kurs yaratish',
 			previewTitle: 'Darslar koʻrinishi',
 			previewEmpty: 'Darslarni koʻrish uchun kunlar va sana oraligʻini tanlang',
 			previewCount_one: 'Bu qoida {{count}} ta dars yaratadi',
@@ -2134,6 +2138,8 @@ export const uz = {
 				description:
 					'Kimga borishini tanlang, xabarni yozing, soʻng darhol yuboring yoki vaqtini belgilang.',
 				recipientRequired: 'Filial yoki guruhni tanlang',
+				groupMissing: 'Hozircha guruhlar yoʻq — guruhga yubora olmaysiz.',
+				groupMissingCta: 'Guruh yaratish',
 			},
 		},
 		settings: {

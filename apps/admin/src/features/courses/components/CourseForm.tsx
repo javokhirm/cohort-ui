@@ -2,11 +2,8 @@ import { useEffect, useMemo, useState } from 'react';
 import { useForm, type Control, type FieldPath, type FieldValues } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { Link } from '@tanstack/react-router';
-import { AlertTriangle } from 'lucide-react';
 
 import {
-	Alert,
-	AlertDescription,
 	Button,
 	FieldGroup,
 	Form,
@@ -23,6 +20,7 @@ import { useT } from '@repo/i18n';
 import { FormSection } from '@/components/FormSection';
 import { FormSheet } from '@/components/FormSheet';
 import { BranchSelectField } from '@/components/BranchSelectField';
+import { DependencyMissingAlert } from '@/components/DependencyMissingAlert';
 import { useAppT } from '@/locales';
 import { SHARED_BRANCH_VALUE, branchToForm, branchToPayload } from '@/lib/branch';
 import { useFeePlanList } from '@/features/billing/api/fee-plans.queries';
@@ -71,26 +69,6 @@ function useFeePlanOptions(branch: string) {
 	// `isPending` matters: until the plans land, "no options" means "not loaded",
 	// not "none compatible" — callers must not act on an empty list before then.
 	return { options, isPending };
-}
-
-/** Warns that this branch has no active fee plan; belongs at the top of the form. */
-function FeePlanMissingAlert() {
-	const t = useAppT('courses');
-
-	return (
-		<Alert variant="warning">
-			<AlertTriangle />
-			<AlertDescription className="flex flex-col items-start gap-1">
-				<span>{t('feePlanEmpty')}</span>
-				<Link
-					to="/fee-plans"
-					className="font-medium text-tone-blue-fg underline underline-offset-2"
-				>
-					{t('feePlanEmptyCta')}
-				</Link>
-			</AlertDescription>
-		</Alert>
-	);
 }
 
 /** Required fee-plan picker; disabled when no compatible plan exists. */
@@ -198,7 +176,19 @@ function CreateCourseForm({
 				onSubmit={(e) => void form.handleSubmit(onSubmit)(e)}
 				className="flex flex-col gap-4"
 			>
-				{!plansPending && feePlanOptions.length === 0 && <FeePlanMissingAlert />}
+				{!plansPending && feePlanOptions.length === 0 && (
+					<DependencyMissingAlert
+						description={t('feePlanEmpty')}
+						action={
+							<Link
+								to="/fee-plans"
+								className="font-medium text-tone-blue-fg underline underline-offset-2"
+							>
+								{t('feePlanEmptyCta')}
+							</Link>
+						}
+					/>
+				)}
 				<FormSection>
 					<FieldGroup>
 						<FormInput
@@ -444,7 +434,10 @@ export function CourseForm(props: CourseFormProps) {
 			}
 		>
 			{mode === 'create' ? (
-				<CreateCourseForm onSuccess={handleClose} onPendingChange={setIsPending} />
+				<CreateCourseForm
+					onSuccess={handleClose}
+					onPendingChange={setIsPending}
+				/>
 			) : (
 				<EditCourseForm
 					course={(props as EditProps).course}
