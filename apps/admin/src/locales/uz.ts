@@ -139,7 +139,8 @@ export const uz = {
 			status: 'Holati',
 		},
 		feePlanEmpty:
-			'Bu filial uchun faol toʻlov rejasi yoʻq. Avval «Toʻlov rejalari» sahifasida yarating — kurs oʻz guruhlari invoyslari asoslanadigan rejasiz mavjud boʻlolmaydi.',
+			'Bu filialda faol toʻlov rejasi yoʻq — shu sababli kurs yaratib boʻlmaydi.',
+		feePlanEmptyCta: 'Toʻlov rejasini yaratish',
 		planChangeWarning:
 			'Rejani oʻzgartirsangiz, bu kurs guruhlarining kelgusi barcha invoyslari qayta narxlanadi. Allaqachon chiqarilgan invoyslar oʻz rejasida qoladi.',
 		detail: {

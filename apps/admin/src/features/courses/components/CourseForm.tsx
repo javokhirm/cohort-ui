@@ -1,13 +1,18 @@
 import { useEffect, useMemo, useState } from 'react';
 import { useForm, type Control, type FieldPath, type FieldValues } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
+import { Link } from '@tanstack/react-router';
+import { AlertTriangle } from 'lucide-react';
 
 import {
+	Alert,
+	AlertDescription,
 	Button,
 	FieldGroup,
 	Form,
 	FormInput,
 	FormSelect,
+	Skeleton,
 	Spinner,
 	toast,
 } from '@repo/ui';
@@ -68,32 +73,54 @@ function useFeePlanOptions(branch: string) {
 	return { options, isPending };
 }
 
-/** Required fee-plan picker; explains itself when no compatible plan exists. */
+/** Warns that this branch has no active fee plan; belongs at the top of the form. */
+function FeePlanMissingAlert() {
+	const t = useAppT('courses');
+
+	return (
+		<Alert variant="warning">
+			<AlertTriangle />
+			<AlertDescription className="flex flex-col items-start gap-1">
+				<span>{t('feePlanEmpty')}</span>
+				<Link
+					to="/fee-plans"
+					className="font-medium text-tone-blue-fg underline underline-offset-2"
+				>
+					{t('feePlanEmptyCta')}
+				</Link>
+			</AlertDescription>
+		</Alert>
+	);
+}
+
+/** Required fee-plan picker; disabled when no compatible plan exists. */
 function FeePlanField<T extends FieldValues>({
 	control,
 	options,
+	isPending,
 }: {
 	control: Control<T>;
 	options: { value: string; label: string }[];
+	isPending: boolean;
 }) {
 	const t = useAppT('courses');
 
-	if (options.length === 0) {
+	if (isPending) {
 		return (
 			<div className="flex flex-col gap-1.5">
 				<span className="text-sm font-medium">{t('field.feePlan')}</span>
-				<p className="rounded-lg border border-border bg-muted/40 p-3 text-xs text-muted-foreground">
-					{t('feePlanEmpty')}
-				</p>
+				<Skeleton className="h-9 w-full" />
 			</div>
 		);
 	}
+
 	return (
 		<FormSelect
 			control={control}
 			name={'feePlan' as FieldPath<T>}
 			label={t('field.feePlan')}
 			options={options}
+			disabled={options.length === 0}
 		/>
 	);
 }
@@ -171,6 +198,7 @@ function CreateCourseForm({
 				onSubmit={(e) => void form.handleSubmit(onSubmit)(e)}
 				className="flex flex-col gap-4"
 			>
+				{!plansPending && feePlanOptions.length === 0 && <FeePlanMissingAlert />}
 				<FormSection>
 					<FieldGroup>
 						<FormInput
@@ -185,7 +213,11 @@ function CreateCourseForm({
 							label={t('field.branch')}
 							sharedLabel={t('sharedOption')}
 						/>
-						<FeePlanField control={form.control} options={feePlanOptions} />
+						<FeePlanField
+							control={form.control}
+							options={feePlanOptions}
+							isPending={plansPending}
+						/>
 						<div className="grid grid-cols-2 gap-3">
 							<FormInput
 								control={form.control}
@@ -311,6 +343,7 @@ function EditCourseForm({
 				onSubmit={(e) => void form.handleSubmit(onSubmit)(e)}
 				className="flex flex-col gap-4"
 			>
+				{!plansPending && feePlanOptions.length === 0 && <FeePlanMissingAlert />}
 				<FormSection>
 					<FieldGroup>
 						<FormInput
@@ -325,7 +358,11 @@ function EditCourseForm({
 							label={t('field.branch')}
 							sharedLabel={t('sharedOption')}
 						/>
-						<FeePlanField control={form.control} options={feePlanOptions} />
+						<FeePlanField
+							control={form.control}
+							options={feePlanOptions}
+							isPending={plansPending}
+						/>
 						<p className="text-xs text-muted-foreground">
 							{t('planChangeWarning')}
 						</p>
@@ -407,10 +444,7 @@ export function CourseForm(props: CourseFormProps) {
 			}
 		>
 			{mode === 'create' ? (
-				<CreateCourseForm
-					onSuccess={handleClose}
-					onPendingChange={setIsPending}
-				/>
+				<CreateCourseForm onSuccess={handleClose} onPendingChange={setIsPending} />
 			) : (
 				<EditCourseForm
 					course={(props as EditProps).course}
