@@ -333,7 +333,19 @@ function EditCourseForm({
 				onSubmit={(e) => void form.handleSubmit(onSubmit)(e)}
 				className="flex flex-col gap-4"
 			>
-				{!plansPending && feePlanOptions.length === 0 && <FeePlanMissingAlert />}
+				{!plansPending && feePlanOptions.length === 0 && (
+					<DependencyMissingAlert
+						description={t('feePlanEmpty')}
+						action={
+							<Link
+								to="/fee-plans"
+								className="font-medium text-tone-blue-fg underline underline-offset-2"
+							>
+								{t('feePlanEmptyCta')}
+							</Link>
+						}
+					/>
+				)}
 				<FormSection>
 					<FieldGroup>
 						<FormInput
