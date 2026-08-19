@@ -121,8 +121,8 @@ export const en: TranslationsOf<typeof uz> = {
 			descriptionPlaceholder: 'Short summary of the course',
 			status: 'Status',
 		},
-		feePlanEmpty:
-			'No active fee plan is available for this branch. Create one on the Fee plans page first — a course cannot exist without the plan its groups bill on.',
+		feePlanEmpty: "This branch has no active fee plan — a course can't be created.",
+		feePlanEmptyCta: 'Create fee plan',
 		planChangeWarning:
 			"Changing the plan re-prices every future invoice for this course's groups. Invoices already issued keep their original plan.",
 		detail: {
