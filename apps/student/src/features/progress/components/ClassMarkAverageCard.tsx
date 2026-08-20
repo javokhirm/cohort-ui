@@ -102,14 +102,14 @@ export function ClassMarkAverageCard({ summary }: ClassMarkAverageCardProps) {
 										key={bar.sessionId}
 										title={`${formatShortDate(bar.sessionDate)} · ${bar.normalizedPct}%`}
 										className={cn(
-											'flex h-full flex-1 flex-col items-center justify-end gap-1.5',
+											'flex h-full min-w-0 flex-1 flex-col items-center justify-end gap-1.5',
 											breaks &&
 												'border-l-[1.5px] border-dashed border-border pl-2',
 										)}
 									>
 										<span
 											className={cn(
-												'text-[10.5px] font-bold tabular-nums',
+												'max-w-full truncate text-[10.5px] font-bold tabular-nums',
 												tone.fg,
 											)}
 										>
@@ -129,7 +129,7 @@ export function ClassMarkAverageCard({ summary }: ClassMarkAverageCardProps) {
 												height: `${markBarHeightPct(bar.normalizedPct)}%`,
 											}}
 										/>
-										<span className="whitespace-nowrap text-[9px] text-muted-foreground">
+										<span className="max-w-full truncate text-[9px] text-muted-foreground">
 											{formatShortDate(bar.sessionDate)}
 										</span>
 									</div>
