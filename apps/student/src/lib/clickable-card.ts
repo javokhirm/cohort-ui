@@ -34,3 +34,19 @@ export function clickableCardProps(onActivate: () => void) {
 		},
 	} as const;
 }
+
+/**
+ * The focus ring every clickable surface on Home shares.
+ *
+ * It lives beside `clickableCardProps` because it is the visual half of the same
+ * concern: a `role="button"` card gets no ring from the browser, so the ring is
+ * the caller's to draw — and it has to be the same ring on all of them. The one
+ * real `<button>` in that column (`BalanceDueBanner`) wears it too, so the whole
+ * screen focuses identically whatever element each card happens to be.
+ *
+ * The offset is `muted` because that is the canvas the cards sit on
+ * (`authed-layout.tsx`), in both themes — offsetting against `background` would
+ * paint a white gap between a card's edge and its ring.
+ */
+export const FOCUS_RING =
+	'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2 focus-visible:ring-offset-muted';

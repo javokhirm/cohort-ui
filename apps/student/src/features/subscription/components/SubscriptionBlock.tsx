@@ -29,7 +29,7 @@ export function SubscriptionBlock() {
 	const expiresOn = subscription?.currentPeriodEnd ?? block?.currentPeriodEnd ?? null;
 
 	return (
-		<div className="flex min-h-dvh flex-col items-center justify-center bg-muted px-4 py-10">
+		<div className="flex min-h-dvh flex-col items-center justify-center bg-background px-4 py-10 dark:bg-muted">
 			<Card className="w-full max-w-md">
 				<CardContent className="flex flex-col items-center gap-5 px-6 py-8 text-center">
 					<div className="flex size-14 items-center justify-center rounded-full bg-destructive/10 text-destructive">
