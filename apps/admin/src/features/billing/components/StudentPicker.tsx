@@ -29,7 +29,6 @@ export function StudentPicker({ value, onChange, disabled }: StudentPickerProps)
 
 	const { data: selected } = useStudent(value ?? 0);
 	const { data, isLoading } = useStudents({
-		status: 'ACTIVE',
 		search: search || undefined,
 		limit: 20,
 	});
