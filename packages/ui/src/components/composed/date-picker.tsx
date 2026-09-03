@@ -3,11 +3,11 @@ import { CalendarIcon } from 'lucide-react';
 import type { Matcher } from 'react-day-picker';
 import { formatDate, type DateFnsLocale } from '@repo/utils';
 
-import { cn } from '../../lib/utils';
 import { Button } from '../button';
 import { Calendar } from '../calendar';
 import { Popover, PopoverContent, PopoverTrigger } from '../popover';
 import { useDatePickerLocale, useDatePickerPlaceholder } from './date-picker-locale';
+import { cn } from '@repo/ui/lib/utils';
 
 export interface DatePickerProps {
 	/** Selected date as an ISO calendar date ("YYYY-MM-DD"), or undefined when empty. */
@@ -98,6 +98,7 @@ function DatePicker({
 				<Calendar
 					mode="single"
 					selected={selected}
+					defaultMonth={selected}
 					locale={resolvedLocale}
 					captionLayout="dropdown"
 					startMonth={new Date(currentYear - 100, 0)}

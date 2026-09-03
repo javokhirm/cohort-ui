@@ -820,6 +820,10 @@ export const en: TranslationsOf<typeof uz> = {
 			previewEmpty: 'Pick days and a date range to preview sessions',
 			previewCount_one: 'This rule generates {{count}} session',
 			previewCount_other: 'This rule generates {{count}} sessions',
+			previewMore_one: 'and {{count}} more session',
+			previewMore_other: 'and {{count}} more sessions',
+			lockedHint:
+				'Branch and course are set when the group is created and cannot be changed.',
 			saveChanges: 'Save changes',
 			reschedule: {
 				title: 'Reschedule sessions?',
@@ -844,7 +848,6 @@ export const en: TranslationsOf<typeof uz> = {
 			letterHint: 'Letter grades A–F are entered directly on the marks sheet.',
 			allowHalf: 'Allow half-point scores',
 			preview: 'Preview',
-			appliesTo: 'Daily marks use {{scale}}.',
 			historyKept_one: '{{count}} previous scale kept for past marks.',
 			historyKept_other: '{{count}} previous scales kept for past marks.',
 			maxPoints: 'Maximum points',
@@ -856,13 +859,13 @@ export const en: TranslationsOf<typeof uz> = {
 				LETTER: 'Letter',
 			},
 			summary: {
-				points: 'Points · max {{max}}',
 				percentage: 'Percentage · 0–{{max}}',
 				letter: 'Letter grade · A–F',
 				dailyPoints: 'Daily points · max {{max}}',
 			},
 		},
 		detail: {
+			notFound: 'Group not found.',
 			tab: {
 				overview: 'Overview',
 				roster: 'Roster',

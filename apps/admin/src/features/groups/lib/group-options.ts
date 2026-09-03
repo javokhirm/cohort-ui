@@ -51,21 +51,6 @@ export const GROUP_STATUS_OPTIONS = (
 /** Segmented scale-type options for the grading control. */
 export const GRADING_TYPE_OPTIONS = GRADING_CONFIG_TYPES.map((value) => ({ value }));
 
-/** A short label for a grading scale, e.g. "Points · max 10" / "Letter · A–F". */
-export function formatGradingScale(
-	t: GroupsT,
-	config: { type: GradingType; maxPoints: number | null },
-): string {
-	switch (config.type) {
-		case 'POINTS':
-			return t('grading.summary.points', { max: config.maxPoints ?? '—' });
-		case 'PERCENTAGE':
-			return t('grading.summary.percentage', { max: config.maxPoints ?? 100 });
-		case 'LETTER':
-			return t('grading.summary.letter');
-	}
-}
-
 /** Preview label for the pending form values (max is still a raw string). */
 export function gradingPreview(t: GroupsT, type: GradingType, maxPoints: string): string {
 	switch (type) {

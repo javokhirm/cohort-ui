@@ -45,7 +45,7 @@ export function GroupEditPage({ groupId }: GroupEditPageProps) {
 					{t('back')}
 				</Link>
 				<div className="flex min-h-40 items-center justify-center rounded-xl border text-sm text-muted-foreground">
-					Group not found.
+					{t('detail.notFound')}
 				</div>
 			</div>
 		);

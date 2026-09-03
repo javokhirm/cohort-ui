@@ -846,6 +846,13 @@ export const ru: TranslationsOf<typeof uz> = {
 			previewEmpty: 'Выберите дни и период, чтобы увидеть занятия',
 			previewCount_one: 'Это правило создаёт {{count}} занятие',
 			previewCount_other: 'Это правило создаёт {{count}} занятий',
+			previewCount_few: 'Это правило создаёт {{count}} занятия',
+			previewCount_many: 'Это правило создаёт {{count}} занятий',
+			previewMore_one: 'и ещё {{count}} занятие',
+			previewMore_few: 'и ещё {{count}} занятия',
+			previewMore_many: 'и ещё {{count}} занятий',
+			previewMore_other: 'и ещё {{count}} занятий',
+			lockedHint: 'Филиал и курс задаются при создании группы и потом не меняются.',
 			saveChanges: 'Сохранить изменения',
 			reschedule: {
 				title: 'Перестроить расписание?',
@@ -870,7 +877,6 @@ export const ru: TranslationsOf<typeof uz> = {
 			letterHint: 'Буквенные оценки A–F выставляются прямо в ведомости.',
 			allowHalf: 'Разрешить половинные баллы',
 			preview: 'Предпросмотр',
-			appliesTo: 'Ежедневные оценки в этой группе выставляются по шкале {{scale}}.',
 			historyKept_one: 'Сохранена {{count}} предыдущая шкала для прошлых оценок.',
 			historyKept_few: 'Сохранены {{count}} предыдущие шкалы для прошлых оценок.',
 			historyKept_many: 'Сохранено {{count}} предыдущих шкал для прошлых оценок.',
@@ -884,13 +890,13 @@ export const ru: TranslationsOf<typeof uz> = {
 				LETTER: 'Буквы',
 			},
 			summary: {
-				points: 'Баллы · максимум {{max}}',
 				percentage: 'Проценты · 0–{{max}}',
 				letter: 'Буквенная оценка · A–F',
 				dailyPoints: 'Ежедневные баллы · максимум {{max}}',
 			},
 		},
 		detail: {
+			notFound: 'Группа не найдена.',
 			tab: {
 				overview: 'Обзор',
 				roster: 'Состав',

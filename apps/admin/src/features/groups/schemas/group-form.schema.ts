@@ -1,5 +1,7 @@
 import { z } from 'zod';
 
+import type { Translator } from '@repo/i18n';
+
 import {
 	GROUP_STATUSES,
 	SCHEDULE_DAYS,
@@ -13,6 +15,7 @@ import type {
 	GradingConfigInput,
 	UpdateGroupInput,
 } from '../api/groups.mutations';
+import type { GroupsT } from '../lib/group-options';
 
 /** Optional teacher/room selects can't use an empty string (Radix reserves it). */
 export const NONE_VALUE = 'none';
@@ -20,36 +23,42 @@ export const NONE_VALUE = 'none';
 const TIME_RE = /^([01]\d|2[0-3]):[0-5]\d$/;
 const DATE_RE = /^\d{4}-\d{2}-\d{2}$/;
 
-const optionalDate = z
-	.string()
-	.regex(DATE_RE, 'Use YYYY-MM-DD')
-	.optional()
-	.or(z.literal(''));
+/**
+ * Schema factories — every message is user-facing, so it resolves at render
+ * from the shared `validation` catalog plus the group-specific
+ * `groups.form.validation.*` keys, never at module load (conventions.md §7).
+ * Callers memoise on the translators.
+ */
+function baseGroupSchema(tv: Translator<'validation'>, t: GroupsT) {
+	const optionalDate = z
+		.string()
+		.regex(DATE_RE, t('form.validation.dateFormat'))
+		.optional()
+		.or(z.literal(''));
 
-const capacity = z
-	.number({ error: 'Enter a whole number' })
-	.int('Enter a whole number')
-	.min(1, 'Capacity must be at least 1')
-	.optional();
-
-const baseGroupSchema = z.object({
-	name: z.string().min(1, 'Group name is required'),
-	branchId: z.string().min(1, 'Branch is required'),
-	courseId: z.string().min(1, 'Course is required'),
-	teacherId: z.string(),
-	roomId: z.string(),
-	capacity,
-	startDate: optionalDate,
-	endDate: optionalDate,
-	// Weekly schedule rule — always required; auto-generates sessions when a
-	// date range is also set.
-	days: z.array(z.enum(SCHEDULE_DAYS)),
-	startTime: z.string(),
-	endTime: z.string(),
-});
+	return z.object({
+		name: z.string().min(1, tv('required')),
+		branchId: z.string().min(1, tv('required')),
+		courseId: z.string().min(1, tv('required')),
+		teacherId: z.string(),
+		roomId: z.string(),
+		capacity: z
+			.number({ error: tv('integerInvalid') })
+			.int(tv('integerInvalid'))
+			.min(1, t('form.validation.capacityMin'))
+			.optional(),
+		startDate: optionalDate,
+		endDate: optionalDate,
+		days: z.array(z.enum(SCHEDULE_DAYS)),
+		startTime: z.string(),
+		endTime: z.string(),
+	});
+}
 
 /** Shared cross-field checks for the schedule rule + date range. */
 function refineGroup(
+	tv: Translator<'validation'>,
+	t: GroupsT,
 	val: {
 		days: ScheduleDay[];
 		startTime: string;
@@ -63,21 +72,21 @@ function refineGroup(
 		ctx.addIssue({
 			code: 'custom',
 			path: ['days'],
-			message: 'Pick at least one day',
+			message: t('form.validation.pickDay'),
 		});
 	}
 	if (!TIME_RE.test(val.startTime)) {
 		ctx.addIssue({
 			code: 'custom',
 			path: ['startTime'],
-			message: 'Use HH:mm (24h)',
+			message: t('form.validation.timeFormat'),
 		});
 	}
 	if (!TIME_RE.test(val.endTime)) {
 		ctx.addIssue({
 			code: 'custom',
 			path: ['endTime'],
-			message: 'Use HH:mm (24h)',
+			message: t('form.validation.timeFormat'),
 		});
 	}
 	if (
@@ -88,46 +97,48 @@ function refineGroup(
 		ctx.addIssue({
 			code: 'custom',
 			path: ['endTime'],
-			message: 'End time must be after start time',
+			message: tv('timeRangeInvalid'),
 		});
 	}
 	if (val.startDate && val.endDate && val.endDate < val.startDate) {
 		ctx.addIssue({
 			code: 'custom',
 			path: ['endDate'],
-			message: 'End date must be after start date',
+			message: tv('dateRangeInvalid'),
 		});
 	}
 }
 
-export const createGroupSchema = baseGroupSchema
-	.extend({
-		// Initial grading scale (§1.1). `gradingMaxPoints` is a string (raw input),
-		// validated/parsed on submit; ignored for the LETTER type.
-		gradingType: z.enum(GRADING_CONFIG_TYPES),
-		gradingMaxPoints: z.string(),
-		gradingAllowHalf: z.boolean(),
-	})
-	.superRefine((val, ctx) => {
-		refineGroup(val, ctx);
-		if (val.gradingType !== 'LETTER' && !(Number(val.gradingMaxPoints) > 0)) {
-			ctx.addIssue({
-				code: 'custom',
-				path: ['gradingMaxPoints'],
-				message: 'Enter a positive maximum',
-			});
-		}
-	});
+export function createGroupSchema(tv: Translator<'validation'>, t: GroupsT) {
+	return baseGroupSchema(tv, t)
+		.extend({
+			gradingType: z.enum(GRADING_CONFIG_TYPES),
+			gradingMaxPoints: z.string(),
+			gradingAllowHalf: z.boolean(),
+		})
+		.superRefine((val, ctx) => {
+			refineGroup(tv, t, val, ctx);
+			if (val.gradingType !== 'LETTER' && !(Number(val.gradingMaxPoints) > 0)) {
+				ctx.addIssue({
+					code: 'custom',
+					path: ['gradingMaxPoints'],
+					message: t('form.validation.gradingMax'),
+				});
+			}
+		});
+}
 
-export const editGroupSchema = baseGroupSchema
-	.extend({
-		status: z.enum(GROUP_STATUSES),
-		regenerateSessions: z.boolean(),
-	})
-	.superRefine(refineGroup);
+export function editGroupSchema(tv: Translator<'validation'>, t: GroupsT) {
+	return baseGroupSchema(tv, t)
+		.extend({
+			status: z.enum(GROUP_STATUSES),
+			regenerateSessions: z.boolean(),
+		})
+		.superRefine((val, ctx) => refineGroup(tv, t, val, ctx));
+}
 
-export type CreateGroupFormValues = z.infer<typeof createGroupSchema>;
-export type EditGroupFormValues = z.infer<typeof editGroupSchema>;
+export type CreateGroupFormValues = z.infer<ReturnType<typeof createGroupSchema>>;
+export type EditGroupFormValues = z.infer<ReturnType<typeof editGroupSchema>>;
 
 // ─── Conversions ─────────────────────────────────────────────────────────────
 

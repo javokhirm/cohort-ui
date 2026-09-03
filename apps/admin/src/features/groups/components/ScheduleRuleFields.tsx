@@ -1,6 +1,7 @@
+import { useId } from 'react';
 import { useFormContext } from 'react-hook-form';
 
-import { cn, FormInput } from '@repo/ui';
+import { Button, cn, FormInput } from '@repo/ui';
 import { useAppT } from '@/locales';
 
 import { SCHEDULE_DAYS, type ScheduleDay } from '../api/groups.queries';
@@ -18,6 +19,7 @@ export function ScheduleRuleFields() {
 	const form = useFormContext<CreateGroupFormValues>();
 	const days = form.watch('days');
 	const daysError = form.formState.errors.days?.message;
+	const daysLabelId = useId();
 
 	function toggleDay(day: ScheduleDay) {
 		const next = days.includes(day) ? days.filter((d) => d !== day) : [...days, day];
@@ -26,31 +28,39 @@ export function ScheduleRuleFields() {
 
 	return (
 		<div className="flex flex-col gap-3">
-			<div className="flex flex-col gap-1.5">
-				<span className="text-sm font-medium">{t('form.field.days')}</span>
+			<div
+				role="group"
+				aria-labelledby={daysLabelId}
+				className="flex flex-col gap-1.5"
+			>
+				<span id={daysLabelId} className="text-sm font-medium">
+					{t('form.field.days')}
+				</span>
 				<div className="flex flex-wrap gap-1.5">
 					{SCHEDULE_DAYS.map((day) => {
 						const active = days.includes(day);
 						return (
-							<button
+							<Button
 								key={day}
 								type="button"
+								size="sm"
+								variant={active ? 'default' : 'outline'}
 								onClick={() => toggleDay(day)}
 								aria-pressed={active}
 								className={cn(
-									'h-9 w-11 rounded-lg border text-xs font-semibold transition-colors',
-									active
-										? 'border-primary bg-primary text-primary-foreground'
-										: 'border-border bg-card text-muted-foreground hover:bg-muted',
+									'min-w-11 px-2.5 text-xs',
+									!active && 'text-muted-foreground',
 								)}
 							>
 								{t(`day.${day}`)}
-							</button>
+							</Button>
 						);
 					})}
 				</div>
 				{daysError && (
-					<span className="text-sm text-destructive">{daysError}</span>
+					<span role="alert" className="text-sm font-medium text-destructive">
+						{daysError}
+					</span>
 				)}
 			</div>
 
