@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useMemo, useRef, useState } from 'react';
 import { FormProvider, useForm, useFormContext } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { Link, useNavigate } from '@tanstack/react-router';
@@ -48,6 +48,9 @@ import { GradingScaleFields } from '../components/GradingScaleFields';
 import { GradingScaleSection } from '../components/GradingScaleSection';
 import { SessionPreviewCard } from '../components/SessionPreviewCard';
 
+/** Every section on this page wears the same card shell. */
+const SECTION_CLASS = 'border border-border bg-card shadow-xs';
+
 // ─── Option hooks ────────────────────────────────────────────────────────────
 
 /** Pickers for the group form. Rooms narrow to the chosen branch. */
@@ -87,23 +90,53 @@ function useGroupFormOptions(branchId: string) {
 	return { courseOptions, coursesPending, teacherOptions, roomOptions };
 }
 
+/**
+ * A room belongs to one branch, so switching branch strands the chosen room:
+ * it drops out of the narrowed options, leaving the trigger blank while the
+ * stale id is still submitted (and rejected by the server). Reset to "no room"
+ * the moment the branch changes — never on mount, so a group already assigned
+ * to a room the picker can't list (an inactive one) keeps it.
+ */
+function useResetRoomOnBranchChange() {
+	const form = useFormContext<CreateGroupFormValues>();
+	const branchId = form.watch('branchId');
+	const lastBranchId = useRef(branchId);
+
+	useEffect(() => {
+		if (lastBranchId.current === branchId) return;
+		lastBranchId.current = branchId;
+		if (form.getValues('roomId') !== NONE_VALUE) {
+			form.setValue('roomId', NONE_VALUE);
+		}
+	}, [branchId, form]);
+}
+
 // ─── Shared field layout (used by create + edit via FormProvider) ─────────────
 
 function GroupFields({
 	mode,
+	formId,
+	onSubmit,
 	gradingSection,
 	extraSection,
+	actions,
 }: {
 	mode: 'create' | 'edit';
+	/** Id the page's submit button targets with `form={formId}`. */
+	formId: string;
+	onSubmit: React.FormEventHandler<HTMLFormElement>;
 	/** The grading-scale editor. On create it's part of this form
 	 * (`GradingScaleFields`, submitted as `gradingConfig`); on edit it's a
 	 * self-contained section wired to the separate, immutable grading-config
-	 * endpoint — injected by the caller, which has the group id. */
+	 * endpoint — injected by the caller, which has the group id, and rendered
+	 * outside the `<form>` so its own inputs and Save can't submit this one. */
 	gradingSection?: React.ReactNode;
 	/** Edit-only sections (e.g. Status) that need `EditGroupFormValues`'s wider
 	 * field set — injected by the caller so this component can stay on the
 	 * shared `CreateGroupFormValues` shape. */
 	extraSection?: React.ReactNode;
+	/** Cancel/Save row, rendered under the fields it belongs to. */
+	actions: React.ReactNode;
 }) {
 	const t = useAppT('groups');
 	const form = useFormContext<CreateGroupFormValues>();
@@ -112,121 +145,149 @@ function GroupFields({
 	const startDate = form.watch('startDate');
 	const endDate = form.watch('endDate');
 	const startTime = form.watch('startTime');
+	const endTime = form.watch('endTime');
 	const { courseOptions, coursesPending, teacherOptions, roomOptions } =
 		useGroupFormOptions(branchId);
+	useResetRoomOnBranchChange();
 	const showCourseMissingAlert =
 		mode === 'create' && !coursesPending && courseOptions.length === 0;
 
 	return (
-		<div className="grid grid-cols-1 gap-4 lg:grid-cols-[1fr_420px] lg:items-start">
-			<div className="flex flex-col gap-4">
-				<FormSection
-					title={t('form.section.details')}
-					className="border border-border bg-card shadow-xs"
-				>
-					{showCourseMissingAlert && (
-						<DependencyMissingAlert
-							description={t('form.courseMissing')}
-							action={
-								<Link
-									to="/courses"
-									className="font-medium text-tone-blue-fg underline underline-offset-2"
-								>
-									{t('form.courseMissingCta')}
-								</Link>
-							}
-						/>
-					)}
-					<FieldGroup>
-						<FormInput
-							control={form.control}
-							name="name"
-							label={t('form.field.name')}
-							placeholder={t('form.field.namePlaceholder')}
-						/>
-						<div className="grid grid-cols-1 gap-3 sm:grid-cols-[minmax(0,1fr)_minmax(0,1fr)_minmax(0,0.5fr)]">
-							<FormSelect
-								control={form.control}
-								name="teacherId"
-								label={t('form.field.teacher')}
-								options={teacherOptions}
-							/>
-							<FormSelect
-								control={form.control}
-								name="roomId"
-								label={t('form.field.room')}
-								options={roomOptions}
-							/>
-							<FormInput
-								control={form.control}
-								name="capacity"
-								label={t('form.field.capacity')}
-								type="number"
-								min={1}
-								placeholder={t('form.field.capacityPlaceholder')}
-								onChange={(e) =>
-									form.setValue(
-										'capacity',
-										e.target.value === ''
-											? undefined
-											: Number(e.target.value),
-										{ shouldValidate: true },
-									)
-								}
-							/>
-						</div>
-						<div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
-							<BranchSelectField
-								control={form.control}
-								name="branchId"
-								label={t('form.field.branch')}
-								placeholder={t('form.field.branchPlaceholder')}
-								disabled={mode === 'edit'}
-							/>
-							<FormSelect
-								control={form.control}
-								name="courseId"
-								label={t('form.field.course')}
-								placeholder={t('form.field.coursePlaceholder')}
-								options={courseOptions}
-								disabled={mode === 'edit' || courseOptions.length === 0}
-							/>
-						</div>
-
-						<div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
-							<FormDatePicker
-								control={form.control}
-								name="startDate"
-								label={t('form.field.startDate')}
-							/>
-							<FormDatePicker
-								control={form.control}
-								name="endDate"
-								label={t('form.field.endDate')}
-							/>
-						</div>
-					</FieldGroup>
-				</FormSection>
-
-				<FormSection
-					title={t('form.section.scheduleRule')}
-					className="border border-border bg-card shadow-xs"
-				>
-					<ScheduleRuleFields />
-				</FormSection>
-
-				{mode === 'create' ? (
-					<FormSection
-						title={t('form.section.gradingScale')}
-						className="border border-border bg-card shadow-xs"
-					>
-						<GradingScaleFields />
-					</FormSection>
-				) : (
-					gradingSection
+		<div className="grid grid-cols-1 items-start gap-4 lg:grid-cols-[minmax(0,1fr)_360px]">
+			<div className="flex min-w-0 flex-col gap-4">
+				{showCourseMissingAlert && (
+					<DependencyMissingAlert
+						description={t('form.courseMissing')}
+						action={
+							<Link
+								to="/courses"
+								className="font-medium text-tone-blue-fg underline underline-offset-2"
+							>
+								{t('form.courseMissingCta')}
+							</Link>
+						}
+					/>
 				)}
 
-				{extraSection}
+				<form
+					id={formId}
+					onSubmit={onSubmit}
+					className="flex flex-col gap-4"
+					noValidate
+				>
+					<FormSection
+						title={t('form.section.details')}
+						className={SECTION_CLASS}
+					>
+						<FieldGroup>
+							<FormInput
+								control={form.control}
+								name="name"
+								label={t('form.field.name')}
+								placeholder={t('form.field.namePlaceholder')}
+							/>
+							{/* Branch and course come first: the branch narrows the
+							    room options below it. */}
+							<div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
+								<BranchSelectField
+									control={form.control}
+									name="branchId"
+									label={t('form.field.branch')}
+									placeholder={t('form.field.branchPlaceholder')}
+									disabled={mode === 'edit'}
+								/>
+								<FormSelect
+									control={form.control}
+									name="courseId"
+									label={t('form.field.course')}
+									placeholder={t('form.field.coursePlaceholder')}
+									options={courseOptions}
+									disabled={
+										mode === 'edit' ||
+										coursesPending ||
+										courseOptions.length === 0
+									}
+								/>
+							</div>
+							{mode === 'edit' && (
+								<p className="text-xs text-muted-foreground">
+									{t('form.lockedHint')}
+								</p>
+							)}
+
+							<div className="grid grid-cols-1 gap-3 sm:grid-cols-[minmax(0,1fr)_minmax(0,1fr)_minmax(0,0.6fr)]">
+								<FormSelect
+									control={form.control}
+									name="teacherId"
+									label={t('form.field.teacher')}
+									options={teacherOptions}
+								/>
+								<FormSelect
+									control={form.control}
+									name="roomId"
+									label={t('form.field.room')}
+									options={roomOptions}
+								/>
+								<FormInput
+									control={form.control}
+									name="capacity"
+									label={t('form.field.capacity')}
+									type="number"
+									min={1}
+									placeholder={t('form.field.capacityPlaceholder')}
+									onChange={(e) =>
+										form.setValue(
+											'capacity',
+											e.target.value === ''
+												? undefined
+												: Number(e.target.value),
+											{ shouldValidate: true },
+										)
+									}
+								/>
+							</div>
+
+							{/* Each picker bounds the other, so an inverted range
+							    can't be selected in the first place. */}
+							<div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
+								<FormDatePicker
+									control={form.control}
+									name="startDate"
+									label={t('form.field.startDate')}
+									maxDate={endDate || undefined}
+								/>
+								<FormDatePicker
+									control={form.control}
+									name="endDate"
+									label={t('form.field.endDate')}
+									minDate={startDate || undefined}
+								/>
+							</div>
+						</FieldGroup>
+					</FormSection>
+
+					<FormSection
+						title={t('form.section.scheduleRule')}
+						className={SECTION_CLASS}
+					>
+						<ScheduleRuleFields />
+					</FormSection>
+
+					{mode === 'create' && (
+						<FormSection
+							title={t('form.section.gradingScale')}
+							className={SECTION_CLASS}
+						>
+							<GradingScaleFields />
+						</FormSection>
+					)}
+
+					{extraSection}
+				</form>
+
+				{mode === 'edit' && gradingSection}
+
+				{actions}
 			</div>
 
 			<SessionPreviewCard
@@ -234,6 +295,7 @@ function GroupFields({
 				startDate={startDate}
 				endDate={endDate}
 				startTime={startTime}
+				endTime={endTime}
 			/>
 		</div>
 	);
@@ -260,19 +322,23 @@ function notifyGroupMutationError(t: GroupsT, tc: Translator<'common'>, err: unk
 function CreateGroupForm({
 	onSuccess,
 	onPendingChange,
+	actions,
 }: {
 	onSuccess: (groupId: number) => void;
 	onPendingChange: (pending: boolean) => void;
+	actions: React.ReactNode;
 }) {
 	const t = useAppT('groups');
 	const tc = useT('common');
+	const tv = useT('validation');
+	const schema = useMemo(() => createGroupSchema(tv, t), [tv, t]);
 	// When exactly one branch is selected globally, pre-fill it (still editable).
 	const activeBranchIds = useBranchStore((s) => s.activeBranchIds);
 	const defaultBranchId =
 		activeBranchIds?.length === 1 ? String(activeBranchIds[0]) : '';
 
 	const form = useForm<CreateGroupFormValues>({
-		resolver: zodResolver(createGroupSchema),
+		resolver: zodResolver(schema),
 		defaultValues: {
 			name: '',
 			branchId: defaultBranchId,
@@ -311,12 +377,12 @@ function CreateGroupForm({
 
 	return (
 		<FormProvider {...form}>
-			<form
-				id="create-group-form"
+			<GroupFields
+				mode="create"
+				formId="create-group-form"
 				onSubmit={(e) => void form.handleSubmit(onSubmit)(e)}
-			>
-				<GroupFields mode="create" />
-			</form>
+				actions={actions}
+			/>
 		</FormProvider>
 	);
 }
@@ -327,20 +393,25 @@ function EditGroupForm({
 	group,
 	onSuccess,
 	onPendingChange,
+	actions,
 }: {
 	group: GroupDetail;
 	onSuccess: (groupId: number) => void;
 	onPendingChange: (pending: boolean) => void;
+	actions: React.ReactNode;
 }) {
 	const t = useAppT('groups');
 	const tc = useT('common');
+	const tv = useT('validation');
+	const schema = useMemo(() => editGroupSchema(tv, t), [tv, t]);
 	const form = useForm<EditGroupFormValues>({
-		resolver: zodResolver(editGroupSchema),
+		resolver: zodResolver(schema),
 		defaultValues: groupToFormValues(group),
 	});
 
 	useEffect(() => {
 		form.reset(groupToFormValues(group));
+		// eslint-disable-next-line react-hooks/exhaustive-deps
 	}, [group]);
 
 	const updateGroup = useUpdateGroup();
@@ -379,33 +450,31 @@ function EditGroupForm({
 
 	return (
 		<FormProvider {...form}>
-			<form
-				id="edit-group-form"
+			<GroupFields
+				mode="edit"
+				formId="edit-group-form"
 				onSubmit={(e) => void form.handleSubmit(onSubmit)(e)}
-			>
-				<GroupFields
-					mode="edit"
-					gradingSection={<GradingScaleSection groupId={group.id} />}
-					extraSection={
-						<FormSection
-							title={t('form.section.status')}
-							className="border border-border bg-card shadow-xs"
-						>
-							<FieldGroup>
-								<FormSelect
-									control={form.control}
-									name="status"
-									label={t('form.field.groupStatus')}
-									options={GROUP_STATUS_OPTIONS.map((o) => ({
-										value: o.value,
-										label: t(`status.${o.value}`),
-									}))}
-								/>
-							</FieldGroup>
-						</FormSection>
-					}
-				/>
-			</form>
+				gradingSection={<GradingScaleSection groupId={group.id} />}
+				extraSection={
+					<FormSection
+						title={t('form.section.status')}
+						className={SECTION_CLASS}
+					>
+						<FieldGroup>
+							<FormSelect
+								control={form.control}
+								name="status"
+								label={t('form.field.groupStatus')}
+								options={GROUP_STATUS_OPTIONS.map((o) => ({
+									value: o.value,
+									label: t(`status.${o.value}`),
+								}))}
+							/>
+						</FieldGroup>
+					</FormSection>
+				}
+				actions={actions}
+			/>
 
 			<ConfirmDialog
 				open={pendingReschedule !== null}
@@ -484,6 +553,26 @@ export function GroupFormPage(props: GroupFormPageProps) {
 		void navigate({ to: '/groups/$groupId', params: { groupId: String(groupId) } });
 	}
 
+	// Rendered inside the field column, so Save sits under the fields it saves
+	// rather than out beside the session preview.
+	const actions = (
+		<div className="flex justify-end gap-2">
+			<Button
+				type="button"
+				variant="outline"
+				onClick={
+					props.mode === 'create' ? goToGroups : () => goToGroup(props.group.id)
+				}
+			>
+				{tc('action.cancel')}
+			</Button>
+			<Button type="submit" form={formId} disabled={isPending}>
+				{isPending && <Spinner className="mr-2 size-4" />}
+				{props.mode === 'create' ? t('create') : t('form.saveChanges')}
+			</Button>
+		</div>
+	);
+
 	return (
 		<div className="mx-auto flex max-w-6xl flex-col gap-5">
 			<Link
@@ -504,32 +593,19 @@ export function GroupFormPage(props: GroupFormPageProps) {
 			<PageHeader title={props.mode === 'create' ? t('create') : t('edit')} />
 
 			{props.mode === 'create' ? (
-				<CreateGroupForm onSuccess={goToGroup} onPendingChange={setIsPending} />
+				<CreateGroupForm
+					onSuccess={goToGroup}
+					onPendingChange={setIsPending}
+					actions={actions}
+				/>
 			) : (
 				<EditGroupForm
 					group={props.group}
 					onSuccess={goToGroup}
 					onPendingChange={setIsPending}
+					actions={actions}
 				/>
 			)}
-
-			<div className="flex justify-end gap-2">
-				<Button
-					type="button"
-					variant="outline"
-					onClick={
-						props.mode === 'create'
-							? goToGroups
-							: () => goToGroup(props.group.id)
-					}
-				>
-					{tc('action.cancel')}
-				</Button>
-				<Button type="submit" form={formId} disabled={isPending}>
-					{isPending && <Spinner className="mr-2 size-4" />}
-					{props.mode === 'create' ? t('create') : t('form.saveChanges')}
-				</Button>
-			</div>
 		</div>
 	);
 }

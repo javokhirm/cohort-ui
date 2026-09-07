@@ -844,6 +844,10 @@ export const uz = {
 			previewEmpty: 'Darslarni koʻrish uchun kunlar va sana oraligʻini tanlang',
 			previewCount_one: 'Bu qoida {{count}} ta dars yaratadi',
 			previewCount_other: 'Bu qoida {{count}} ta dars yaratadi',
+			previewMore_one: 'va yana {{count}} ta dars',
+			previewMore_other: 'va yana {{count}} ta dars',
+			lockedHint:
+				'Filial va kurs guruh yaratilganda belgilanadi va keyin oʻzgartirilmaydi.',
 			saveChanges: 'Oʻzgarishlarni saqlash',
 			reschedule: {
 				title: 'Darslar qayta rejalashtirilsinmi?',
@@ -868,7 +872,6 @@ export const uz = {
 			letterHint: 'A–F harfli baholar bevosita baholar varaqasida qoʻyiladi.',
 			allowHalf: 'Yarim ballarga ruxsat berish',
 			preview: 'Koʻrinishi',
-			appliesTo: 'Bu guruhda kundalik baholar {{scale}} asosida qoʻyiladi.',
 			historyKept_one:
 				'Oʻtgan baholar uchun {{count}} ta oldingi shkala saqlangan.',
 			historyKept_other:
@@ -882,13 +885,13 @@ export const uz = {
 				LETTER: 'Harf',
 			},
 			summary: {
-				points: 'Ball · maksimum {{max}}',
 				percentage: 'Foiz · 0–{{max}}',
 				letter: 'Harfli baho · A–F',
 				dailyPoints: 'Kundalik ball · maksimum {{max}}',
 			},
 		},
 		detail: {
+			notFound: 'Guruh topilmadi.',
 			tab: {
 				overview: 'Umumiy',
 				roster: 'Roʻyxat',
