@@ -24,18 +24,21 @@ function Tabs({
 	);
 }
 
-const tabsListVariants = cva('inline-flex items-center text-muted-foreground', {
-	variants: {
-		variant: {
-			pill: 'h-9 w-fit justify-center rounded-lg bg-muted p-1',
-			underline:
-				'h-auto w-full justify-start gap-1 rounded-none border-b border-border bg-transparent p-0',
+const tabsListVariants = cva(
+	'no-scrollbar inline-flex items-center overflow-x-auto overflow-y-hidden text-muted-foreground',
+	{
+		variants: {
+			variant: {
+				pill: 'h-9 w-fit max-w-full justify-center rounded-lg bg-muted p-1',
+				underline:
+					'h-auto w-full justify-start gap-1 rounded-none border-b border-border bg-transparent p-0',
+			},
+		},
+		defaultVariants: {
+			variant: 'underline',
 		},
 	},
-	defaultVariants: {
-		variant: 'underline',
-	},
-});
+);
 
 function TabsList({
 	className,

@@ -1744,6 +1744,9 @@ export const uz = {
 			'Ismingiz yoki aloqa maʼlumotlaringizni oʻzgartirish uchun administratorga murojaat qiling.',
 		changeDescription:
 			'Oʻz hisobingiz uchun yangi parol belgilang. Siz tizimda qolasiz — yangi parol keyingi kirishda kerak boʻladi.',
+		preferencesCardTitle: 'Sozlamalar',
+		preferencesHint:
+			'Interfeys tili hisobingizga saqlanadi va barcha qurilmalaringizda qoʻllanadi.',
 		changeFailed: 'Parolni oʻzgartirib boʻlmadi. Qayta urinib koʻring.',
 	},
 
@@ -2242,5 +2245,6 @@ export const uz = {
 		brandSurface: 'BOSHQARUV',
 		backToSignIn: 'Kirishga qaytish',
 		accountMenu: 'Hisob menyusi',
+		openMenu: 'Menyuni ochish',
 	},
 } as const;

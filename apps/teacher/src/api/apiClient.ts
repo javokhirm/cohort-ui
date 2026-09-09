@@ -9,9 +9,10 @@ import { getStoredRefreshToken } from '@/lib/auth/tokenStorage';
 const apiBase = `${env.VITE_API_ORIGIN}/api/v1`;
 
 /**
- * Unauthenticated surface: staff login and token refresh. Shared by every
- * console — a TEACHER signs in through the same endpoint as an admin, and the
- * backend gates by role at the API surface, not at login.
+ * Unauthenticated surface: staff login and token refresh. The endpoint is
+ * shared by every console — a TEACHER signs in through the same one as an
+ * admin — so the login call names this console in `x-client-app` and the backend
+ * refuses roles it does not serve (see `auth.mutations.ts`).
  * No bearer token and no refresh-on-401 — these *are* the auth endpoints.
  * Still sends `x-lang` so pre-login errors come back localised.
  */

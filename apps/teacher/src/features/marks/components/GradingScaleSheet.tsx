@@ -67,7 +67,7 @@ export function GradingScaleSheet({
 
 	return (
 		<Sheet open={open} onOpenChange={onOpenChange}>
-			<SheetContent side="bottom" className="mx-auto max-w-lg rounded-t-2xl">
+			<SheetContent side="bottom" className="rounded-t-2xl sm:mx-auto sm:max-w-lg">
 				<SheetHeader>
 					<SheetTitle>{t('gradingScale')}</SheetTitle>
 					<SheetDescription>{t('gradingScaleDescription')}</SheetDescription>

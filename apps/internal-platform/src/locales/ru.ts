@@ -7,13 +7,13 @@ export const ru: TranslationsOf<typeof uz> = {
 	shell: {
 		brand: 'Cohort',
 		brandSurface: 'Internal',
-		brandBadge: 'INTERNAL · КОНСОЛЬ ПЛАТФОРМЫ',
 		operatorBadge: 'ОПЕРАТОР ПЛАТФОРМЫ',
 		env: 'PROD',
 		forbiddenTitle: 'Нет доступа',
 		forbiddenDescription: 'Эта консоль доступна только супер-админам платформы.',
 		backToSignIn: 'Вернуться ко входу',
 		impersonate: 'Войти от имени',
+		openMenu: 'Открыть меню',
 	},
 
 	dashboard: {
@@ -441,6 +441,8 @@ export const ru: TranslationsOf<typeof uz> = {
 		disabled: 'Отключено',
 		activeSessions: 'Активные сессии',
 		devices: '{{count}} устройств',
+		preferences: 'Настройки',
+		languageHint: 'Сохраняется в вашем аккаунте',
 	},
 
 	subscriptions: {

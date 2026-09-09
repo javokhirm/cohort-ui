@@ -1,18 +1,41 @@
-import { useEffect } from 'react';
-import { Outlet, useNavigate } from '@tanstack/react-router';
+import { useEffect, useState } from 'react';
+import { Outlet, useNavigate, useRouterState } from '@tanstack/react-router';
 
 import { useSessionStore } from '@/store/sessionStore';
-import { Sidebar } from '@/layouts/Sidebar';
 import { Header } from '@/layouts/Header';
+import { MobileNavSheet } from '@/layouts/MobileNavSheet';
+import { Sidebar } from '@/layouts/Sidebar';
 
 /**
  * Layout for the authenticated console. `beforeLoad` guards the initial entry;
  * this effect handles the session being lost *after* entry (e.g. a 401 whose
  * silent refresh failed → the store flips to `anonymous`) by redirecting to login.
+ *
+ * The rail runs the full viewport height, as a column beside the header+main
+ * column — not a full-width header with the rail docked underneath it, which
+ * is what this used to be. The header (and its collapse toggle) then only
+ * spans the column to the rail's right, so the toggle reads as sitting at the
+ * rail's own right edge rather than floating at the top of the whole page.
+ *
+ * Two nav chromes, chosen by CSS rather than by a media-query hook so there's no
+ * hydration flicker and no state to keep in step with the viewport: the rail is
+ * `hidden md:flex`, and below `md` the same nav is the `MobileNavSheet` overlay.
+ * The rail used to render in-flow at every width, which left a phone almost no
+ * content width and scrolled the page sideways.
  */
 export function AuthedLayout() {
 	const status = useSessionStore((s) => s.status);
 	const navigate = useNavigate();
+	const pathname = useRouterState({ select: (s) => s.location.pathname });
+	const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
+
+	// The drawer's open state is the route it was opened on, so *any*
+	// navigation closes it — a browser back gesture as much as tapping a nav
+	// row. Derived rather than synchronised in an effect, so there's no
+	// cascading render and no window where the drawer covers a page it no
+	// longer belongs to.
+	const [openedOnPath, setOpenedOnPath] = useState<string | null>(null);
+	const mobileNavOpen = openedOnPath === pathname;
 
 	useEffect(() => {
 		if (status !== 'authenticated') {
@@ -23,13 +46,32 @@ export function AuthedLayout() {
 	if (status !== 'authenticated') return null;
 
 	return (
-		<div className="flex h-svh flex-col overflow-hidden bg-background text-foreground">
-			<Header />
+		// `pl-safe-l pr-safe-r`: `viewport-fit=cover` (index.html) is what lets
+		// the drawer footer clear the home indicator, but it also stops the
+		// browser insetting content from a landscape notch — so the shell does
+		// it here.
+		<div className="flex h-svh overflow-hidden bg-background pl-safe-l pr-safe-r text-foreground">
+			<Sidebar collapsed={sidebarCollapsed} />
 
-			<div className="flex flex-1 overflow-hidden">
-				<Sidebar />
-				<main className="flex-1 overflow-y-auto px-6 py-8">
-					<Outlet />
+			<MobileNavSheet
+				open={mobileNavOpen}
+				onOpenChange={(next) => setOpenedOnPath(next ? pathname : null)}
+			/>
+
+			<div className="flex min-w-0 flex-1 flex-col overflow-hidden">
+				<Header
+					sidebarCollapsed={sidebarCollapsed}
+					onSidebarToggle={() => setSidebarCollapsed((c) => !c)}
+					onMenuOpen={() => setOpenedOnPath(pathname)}
+				/>
+
+				<main className="flex-1 overflow-y-auto overscroll-contain px-4 py-5 md:px-6 md:py-8">
+					{/* The inset goes on a wrapper, not on `main`: `pb-safe-b` would
+					    replace the `py-*` bottom padding rather than add to it, and
+					    resolves to 0 on hardware with no home indicator. */}
+					<div className="pb-safe-b">
+						<Outlet />
+					</div>
 				</main>
 			</div>
 		</div>

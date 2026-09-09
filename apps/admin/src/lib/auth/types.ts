@@ -17,6 +17,15 @@ export interface TenantSummary {
 	name: string;
 }
 
+/**
+ * This console's identity for the shared `POST /public/auth/login` endpoint —
+ * sent as the `x-client-app` header (see `api/auth/auth.mutations.ts`) so the backend
+ * can refuse a role this console does not serve.
+ */
+export enum ClientApp {
+	ADMIN = 'admin',
+}
+
 export interface AuthUserSummary {
 	id: number;
 	firstName: string;

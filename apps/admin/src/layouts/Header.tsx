@@ -1,22 +1,50 @@
-import { ChevronsLeft, ChevronsRight, Search } from 'lucide-react';
+import { ChevronsLeft, ChevronsRight, Menu } from 'lucide-react';
 
 import { NotificationBell, Separator, ThemeToggle } from '@repo/ui';
 import { useT } from '@repo/i18n';
 
+import { useAppT } from '@/locales';
+
 import { BranchSelector } from './BranchSelector';
-import { LanguageMenu } from './LanguageMenu';
 import { UserMenu } from './UserMenu';
 
 interface HeaderProps {
+	/** Desktop rail state — meaningless below `md`, where there is no rail. */
 	sidebarCollapsed: boolean;
 	onSidebarToggle: () => void;
+	/** Opens the phone nav drawer. */
+	onMenuOpen: () => void;
 }
 
-export function Header({ sidebarCollapsed, onSidebarToggle }: HeaderProps) {
+/**
+ * The console topbar.
+ *
+ * The leading control changes meaning with the viewport: below `md` it's a
+ * hamburger that opens the nav drawer, from `md` up it's the rail's
+ * collapse/expand toggle. The trailing cluster thins out on a phone — language
+ * moved to the profile page (it's an account setting, not a per-session
+ * toggle) — but theme stays here on every viewport for now rather than
+ * dropping into the drawer, and the branch selector stays too, because it
+ * scopes every list query and hiding it would leave an admin unsure which
+ * branches they're even looking at.
+ */
+export function Header({ sidebarCollapsed, onSidebarToggle, onMenuOpen }: HeaderProps) {
 	const t = useT('nav');
+	const tApp = useAppT('shell');
+
 	return (
 		<header className="z-40 flex h-14 shrink-0 items-center gap-2 border-b border-border bg-card px-3">
-			{/* Sidebar toggle */}
+			{/* Phone: open the nav drawer. 40px target, per touch guidance. */}
+			<button
+				type="button"
+				onClick={onMenuOpen}
+				aria-label={tApp('openMenu')}
+				className="flex size-10 items-center justify-center rounded-lg bg-muted text-muted-foreground md:hidden"
+			>
+				<Menu className="size-4.5" />
+			</button>
+
+			{/* Desktop: collapse/expand the rail. */}
 			<button
 				type="button"
 				onClick={onSidebarToggle}
@@ -25,7 +53,7 @@ export function Header({ sidebarCollapsed, onSidebarToggle }: HeaderProps) {
 						? t('shell.expandSidebar')
 						: t('shell.collapseSidebar')
 				}
-				className="flex size-8 items-center justify-center rounded-lg text-muted-foreground bg-muted"
+				className="hidden size-8 items-center justify-center rounded-lg bg-muted text-muted-foreground md:flex"
 			>
 				{sidebarCollapsed ? (
 					<ChevronsRight className="size-4" />
@@ -34,38 +62,21 @@ export function Header({ sidebarCollapsed, onSidebarToggle }: HeaderProps) {
 				)}
 			</button>
 
-			{/* Global branch selector (multi-select; hidden for single-branch users) */}
+			{/* Global branch selector (multi-select; hidden for single-branch users).
+			    Stays on every viewport — it decides what data the page is showing. */}
 			<BranchSelector />
-
-			{/* Search */}
-			<div className="relative flex h-8 max-w-xs flex-1 items-center">
-				<Search className="absolute left-2.5 size-3.5 text-muted-foreground" />
-				<input
-					type="search"
-					placeholder={t('shell.searchPlaceholder')}
-					className="h-full w-full rounded-lg border border-border bg-muted/50 pl-8 pr-10 text-sm placeholder:text-muted-foreground focus:outline-none focus:ring-1 focus:ring-ring"
-				/>
-				<kbd className="pointer-events-none absolute right-2 flex h-5 items-center rounded border border-border bg-background px-1 text-[10px] font-medium text-muted-foreground">
-					⌘K
-				</kbd>
-			</div>
 
 			<div className="flex-1" />
 
-			{/* Trailing cluster — tools first, identity last */}
+			{/* Trailing cluster — tools first, identity last. Language is not here:
+			    it is an account setting, and lives on the profile page. */}
 			<div className="flex items-center gap-1">
-				{/* Language picker */}
-				<LanguageMenu />
-
-				{/* Notifications */}
 				<NotificationBell unreadCount={0} />
 
-				{/* Theme toggle */}
 				<ThemeToggle className="size-8 rounded-lg" />
 
-				<Separator orientation="vertical" className="mx-1 h-5" />
+				<Separator orientation="vertical" className="mx-1 hidden h-5 md:block" />
 
-				{/* Account */}
 				<UserMenu />
 			</div>
 		</header>

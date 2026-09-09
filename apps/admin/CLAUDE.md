@@ -12,6 +12,13 @@ The admin app is the back-office console for education-center admins. It serves 
   backend from the user's single membership (one user = one business) — the client never
   sends it. Access token → memory (Zustand); refresh token → `localStorage` under the
   admin-scoped key in `lib/auth/tokenStorage.ts`.
+- **This console declares itself at login.** `/public/auth/login` is shared by every
+  console, so `api/auth/auth.mutations.ts` sends `x-client-app: admin` with it. The backend
+  then refuses a user holding none of OWNER/ADMIN/MANAGER with 403
+  `CONSOLE_ROLE_NOT_ALLOWED` — a TEACHER cannot sign in here at all, rather than landing in
+  a shell whose every request 403s. `LoginForm` surfaces the message as-is (it arrives
+  localised via `x-lang`), so no app-local copy of that error text exists. Keep the header
+  in sync if this app's role set ever changes; see `cohort-be/docs/api-reference.md` §1.1.
 - **Silent refresh**: `runRefresh()` in `api/apiClient.ts` is both the boot check and the
   `manageApi` 401 hook (single-flight lives inside `@repo/api-client`).
 - **Gating is cosmetic.** Use `hasRole()` / `requireRole()` for UX only. Permission-code gating is

@@ -66,10 +66,7 @@ export function PlanDrawer({
 
 	return (
 		<Sheet open={open} onOpenChange={onOpenChange}>
-			<SheetContent
-				side="right"
-				className="w-[480px] sm:max-w-[480px] overflow-y-auto"
-			>
+			<SheetContent side="right" className="overflow-y-auto sm:max-w-120">
 				<SheetHeader className="pb-2">
 					<SheetTitle>{isEdit ? t('editPlan') : t('create')}</SheetTitle>
 				</SheetHeader>

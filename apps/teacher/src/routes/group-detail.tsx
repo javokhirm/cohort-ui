@@ -128,8 +128,7 @@ export function GroupDetailRoute() {
 			/>
 
 			<Tabs value={tab ?? 'roster'} onValueChange={goToTab} className="gap-4">
-				{/* Scrolls rather than wrapping at 375px. */}
-				<TabsList className="w-full max-w-sm overflow-x-auto">
+				<TabsList>
 					<TabsTrigger value="roster">{t('tabRoster')}</TabsTrigger>
 					<TabsTrigger value="schedule">{t('tabSchedule')}</TabsTrigger>
 					<TabsTrigger value="grading">{t('tabGrading')}</TabsTrigger>
