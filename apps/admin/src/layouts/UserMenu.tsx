@@ -49,9 +49,12 @@ export function UserMenu() {
 				<button
 					type="button"
 					aria-label={tApp('accountMenu')}
-					className="flex h-8 cursor-pointer items-center gap-2 rounded-lg pl-0.5 pr-1 transition-colors hover:bg-muted focus-visible:outline-none focus-visible:ring-[3px] focus-visible:ring-ring/40 data-[state=open]:bg-muted lg:pr-1.5"
+					// 40px tall on a phone, where it is one of only three controls
+					// left in the header and has to be thumb-reliable; back to the
+					// desktop topbar's 32px density from `md` up.
+					className="flex h-10 cursor-pointer items-center gap-2 rounded-lg pl-0.5 pr-1 transition-colors hover:bg-muted focus-visible:outline-none focus-visible:ring-[3px] focus-visible:ring-ring/40 data-[state=open]:bg-muted md:h-8 lg:pr-1.5"
 				>
-					<Avatar className="size-7">
+					<Avatar className="size-8 md:size-7">
 						<AvatarFallback className="bg-primary text-[11px] font-bold text-primary-foreground">
 							{initials}
 						</AvatarFallback>

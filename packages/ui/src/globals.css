@@ -11,6 +11,17 @@
 @source './components/**/*.{ts,tsx}';
 @source './lib/**/*.{ts,tsx}';
 
+/* Hides the native scrollbar on an overflow-x-auto element (e.g. a scrollable
+   tab strip) while leaving it scrollable by touch/trackpad/drag. */
+@utility no-scrollbar {
+	scrollbar-width: none;
+	-ms-overflow-style: none;
+
+	&::-webkit-scrollbar {
+		display: none;
+	}
+}
+
 :root {
 	--radius: 0.625rem;
 
@@ -208,6 +219,16 @@
 	--radius-md: calc(var(--radius) - 2px);
 	--radius-lg: var(--radius);
 	--radius-xl: calc(var(--radius) + 4px);
+
+	/* Device safe-area insets, as spacing so they compose with any side utility
+	   (`pb-safe-b`, `pt-safe-t`, …). Needed wherever app chrome or the last row
+	   of scrollable content would otherwise sit under a notch or the iPhone home
+	   indicator. Each resolves to 0 on hardware with no inset, and on iOS only
+	   once the document opts in with `viewport-fit=cover`. */
+	--spacing-safe-t: env(safe-area-inset-top);
+	--spacing-safe-b: env(safe-area-inset-bottom);
+	--spacing-safe-l: env(safe-area-inset-left);
+	--spacing-safe-r: env(safe-area-inset-right);
 }
 
 @layer base {

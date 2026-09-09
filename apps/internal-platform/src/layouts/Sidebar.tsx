@@ -1,291 +1,80 @@
-import { useState } from 'react';
-import { Link, useRouterState } from '@tanstack/react-router';
-import {
-	Building2,
-	ChevronLeft,
-	ChevronRight,
-	Contact2,
-	CreditCard,
-	FileText,
-	LayoutDashboard,
-	Receipt,
-	ScrollText,
-	Settings,
-	Shield,
-	Users,
-	Wallet,
-} from 'lucide-react';
-import type { LucideIcon } from 'lucide-react';
+import { useRouterState } from '@tanstack/react-router';
 
-import { cn, Separator, Tooltip, TooltipContent, TooltipTrigger } from '@repo/ui';
-import { useT } from '@repo/i18n';
+import { cn, Separator } from '@repo/ui';
 
-/** Leaf key under `nav:item.*` — resolved with `t()` at render (typed, not `string`). */
-type NavItemKey =
-	| 'platformDashboard'
-	| 'tenants'
-	| 'userDirectory'
-	| 'platformLeads'
-	| 'subscriptionPlans'
-	| 'subscriptions'
-	| 'payments'
-	| 'invoices'
-	| 'roleTemplates'
-	| 'auditLog'
-	| 'settings';
-/** Leaf key under `nav:group.*`. */
-type NavGroupKey = 'overview' | 'customers' | 'revenue' | 'platform';
+import { useAppT } from '@/locales';
 
-type NavItemDef = {
-	id: string;
-	label: NavItemKey;
-	Icon: LucideIcon;
-	href: string;
-	match: string;
-};
+import { FOOTER_NAV_GROUP, NAV_GROUPS } from './nav';
+import { NavGroup } from './NavGroup';
 
-const OVERVIEW_ITEMS: NavItemDef[] = [
-	{
-		id: 'dashboard',
-		label: 'platformDashboard',
-		Icon: LayoutDashboard,
-		href: '/',
-		match: '/',
-	},
-];
-
-const CUSTOMERS_ITEMS: NavItemDef[] = [
-	{
-		id: 'tenants',
-		label: 'tenants',
-		Icon: Building2,
-		href: '/tenants',
-		match: '/tenants',
-	},
-	{
-		id: 'users',
-		label: 'userDirectory',
-		Icon: Users,
-		href: '/users',
-		match: '/users',
-	},
-	{
-		id: 'leads',
-		label: 'platformLeads',
-		Icon: Contact2,
-		href: '/leads',
-		match: '/leads',
-	},
-];
-
-const REVENUE_ITEMS: NavItemDef[] = [
-	{
-		id: 'subscription-plans',
-		label: 'subscriptionPlans',
-		Icon: CreditCard,
-		href: '/subscription-plans',
-		match: '/subscription-plans',
-	},
-	{
-		id: 'subscriptions',
-		label: 'subscriptions',
-		Icon: Receipt,
-		href: '/subscriptions',
-		match: '/subscriptions',
-	},
-	{
-		id: 'subscription-payments',
-		label: 'payments',
-		Icon: Wallet,
-		href: '/subscription-payments',
-		match: '/subscription-payments',
-	},
-	{
-		id: 'subscription-invoices',
-		label: 'invoices',
-		Icon: FileText,
-		href: '/subscription-invoices',
-		match: '/subscription-invoices',
-	},
-];
-
-const PLATFORM_ITEMS: NavItemDef[] = [
-	{
-		id: 'roles',
-		label: 'roleTemplates',
-		Icon: Shield,
-		href: '/roles',
-		match: '/roles',
-	},
-	{
-		id: 'audit-log',
-		label: 'auditLog',
-		Icon: ScrollText,
-		href: '/audit-log',
-		match: '/audit-log',
-	},
-	{
-		id: 'settings',
-		label: 'settings',
-		Icon: Settings,
-		href: '/settings',
-		match: '/settings',
-	},
-];
-
-function NavItemLink({
-	item,
-	collapsed,
-	active,
-}: {
-	item: NavItemDef;
+interface SidebarProps {
 	collapsed: boolean;
-	active: boolean;
-}) {
-	const { Icon } = item;
-	const t = useT('nav');
-	return (
-		<Link
-			to={item.href}
-			className={cn(
-				'flex h-9 w-full items-center rounded-md text-sm transition-colors',
-				collapsed ? 'justify-center' : 'gap-3 px-3',
-				active
-					? 'bg-(--console-accent) font-medium text-(--console-accent-fg)'
-					: 'text-(--console-muted-fg) hover:bg-(--console-hover) hover:text-(--console-fg)',
-			)}
-		>
-			<Icon className="size-4 shrink-0" />
-			{!collapsed && <span className="truncate">{t(`item.${item.label}`)}</span>}
-		</Link>
-	);
 }
 
-function NavItem({
-	item,
-	collapsed,
-	pathname,
-}: {
-	item: NavItemDef;
-	collapsed: boolean;
-	pathname: string;
-}) {
-	const active = pathname === item.match;
-	const t = useT('nav');
-
-	if (collapsed) {
-		return (
-			<Tooltip>
-				<TooltipTrigger asChild>
-					<NavItemLink item={item} collapsed={collapsed} active={active} />
-				</TooltipTrigger>
-				<TooltipContent side="right" sideOffset={8}>
-					{t(`item.${item.label}`)}
-				</TooltipContent>
-			</Tooltip>
-		);
-	}
-
-	return <NavItemLink item={item} collapsed={collapsed} active={active} />;
-}
-
-function NavGroup({
-	label,
-	items,
-	collapsed,
-	pathname,
-}: {
-	label: string;
-	items: NavItemDef[];
-	collapsed: boolean;
-	pathname: string;
-}) {
-	return (
-		<div className="flex flex-col gap-0.5">
-			{!collapsed && (
-				<div className="mb-1 px-3 text-[10px] font-semibold uppercase tracking-widest text-(--console-muted-fg)">
-					{label}
-				</div>
-			)}
-			{items.map((item) => (
-				<NavItem
-					key={item.id}
-					item={item}
-					collapsed={collapsed}
-					pathname={pathname}
-				/>
-			))}
-		</div>
-	);
-}
-
-export function Sidebar() {
-	const [collapsed, setCollapsed] = useState(false);
+/**
+ * The desktop navigation rail, collapsible to icons. Rendered from `md` up
+ * only — below that the same nav is an overlay drawer (`MobileNavSheet`),
+ * because an in-flow 240px column leaves a phone almost no content width.
+ *
+ * The collapse/expand control used to live here, as its own row at the
+ * bottom of the rail. It now lives in the `Header`, next to the mobile
+ * drawer's hamburger — one control, in one place, for both viewports —
+ * so the rail owns nothing but navigation.
+ */
+export function Sidebar({ collapsed }: SidebarProps) {
 	const pathname = useRouterState({ select: (s) => s.location.pathname });
-	const t = useT('nav');
-
-	const groupLabel = (key: NavGroupKey) => t(`group.${key}`);
+	const tApp = useAppT('shell');
 
 	return (
 		<aside
 			className={cn(
-				'flex shrink-0 flex-col border-r border-(--console-line) bg-(--console) transition-[width] duration-200',
+				'hidden shrink-0 flex-col border-r border-(--console-line) bg-(--console) transition-[width] duration-200 md:flex',
 				collapsed ? 'w-14' : 'w-60',
 			)}
 		>
+			{/* Brand header — the rail had none; only the topbar carried the mark.
+			    Collapses the same way a nav row does: drop the padding, center the
+			    tile, instead of a separate fade transition this app's rail doesn't
+			    otherwise use. */}
+			<div
+				className={cn(
+					'flex h-13.5 shrink-0 items-center gap-2.5 border-b border-(--console-line)',
+					collapsed ? 'justify-center' : 'px-4',
+				)}
+			>
+				<div className="flex size-7.5 shrink-0 items-center justify-center rounded-lg bg-primary text-sm font-extrabold text-primary-foreground">
+					C
+				</div>
+				{!collapsed && (
+					<div className="min-w-0">
+						<div className="truncate text-sm font-bold text-(--console-fg)">
+							{tApp('brand')}
+						</div>
+						<div className="text-[10px] font-bold tracking-wide text-(--console-muted-fg) uppercase">
+							{tApp('brandSurface')}
+						</div>
+					</div>
+				)}
+			</div>
+
 			<nav className="flex flex-1 flex-col gap-4 overflow-y-auto p-3">
-				<NavGroup
-					label={groupLabel('overview')}
-					items={OVERVIEW_ITEMS}
-					collapsed={collapsed}
-					pathname={pathname}
-				/>
-				<NavGroup
-					label={groupLabel('customers')}
-					items={CUSTOMERS_ITEMS}
-					collapsed={collapsed}
-					pathname={pathname}
-				/>
-				<NavGroup
-					label={groupLabel('revenue')}
-					items={REVENUE_ITEMS}
-					collapsed={collapsed}
-					pathname={pathname}
-				/>
+				{NAV_GROUPS.map((group) => (
+					<NavGroup
+						key={group.label}
+						group={group}
+						collapsed={collapsed}
+						pathname={pathname}
+					/>
+				))}
 				<div className="mt-auto flex flex-col gap-4">
 					<Separator className="bg-(--console-line)" />
 					<NavGroup
-						label={groupLabel('platform')}
-						items={PLATFORM_ITEMS}
+						group={FOOTER_NAV_GROUP}
 						collapsed={collapsed}
 						pathname={pathname}
 					/>
 				</div>
 			</nav>
-
-			{/* Toggle */}
-			<div className="shrink-0 border-t border-(--console-line) p-3">
-				<button
-					type="button"
-					onClick={() => setCollapsed((c) => !c)}
-					aria-label={
-						collapsed ? t('shell.expandSidebar') : t('shell.collapseSidebar')
-					}
-					className={cn(
-						'flex h-9 w-full items-center rounded-md text-sm text-(--console-muted-fg) transition-colors hover:bg-(--console-hover) hover:text-(--console-fg)',
-						collapsed ? 'justify-center' : 'gap-2 px-3',
-					)}
-				>
-					{collapsed ? (
-						<ChevronRight className="size-4 shrink-0" />
-					) : (
-						<>
-							<ChevronLeft className="size-4 shrink-0" />
-							<span>{t('shell.collapse')}</span>
-						</>
-					)}
-				</button>
-			</div>
 		</aside>
 	);
 }

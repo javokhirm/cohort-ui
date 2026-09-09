@@ -7,13 +7,13 @@ export const en: TranslationsOf<typeof uz> = {
 	shell: {
 		brand: 'Cohort',
 		brandSurface: 'Internal',
-		brandBadge: 'INTERNAL · PLATFORM CONSOLE',
 		operatorBadge: 'PLATFORM OPERATOR',
 		env: 'PROD',
 		forbiddenTitle: 'Not permitted',
 		forbiddenDescription: 'This console is restricted to platform super-admins.',
 		backToSignIn: 'Back to sign in',
 		impersonate: 'Impersonate',
+		openMenu: 'Open menu',
 	},
 
 	dashboard: {
@@ -442,6 +442,8 @@ export const en: TranslationsOf<typeof uz> = {
 		disabled: 'Disabled',
 		activeSessions: 'Active sessions',
 		devices: '{{count}} devices',
+		preferences: 'Preferences',
+		languageHint: 'Saved to your account',
 	},
 
 	subscriptions: {

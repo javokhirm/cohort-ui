@@ -19,13 +19,13 @@ export const uz = {
 	shell: {
 		brand: 'Cohort',
 		brandSurface: 'Internal',
-		brandBadge: 'INTERNAL · PLATFORMA KONSOLI',
 		operatorBadge: 'PLATFORMA OPERATORI',
 		env: 'PROD',
 		forbiddenTitle: 'Ruxsat yoʻq',
 		forbiddenDescription: 'Bu konsol faqat platforma super-adminlari uchun.',
 		backToSignIn: 'Kirishga qaytish',
 		impersonate: 'Nomidan kirish',
+		openMenu: 'Menyuni ochish',
 	},
 
 	dashboard: {
@@ -455,6 +455,8 @@ export const uz = {
 		disabled: 'Oʻchirilgan',
 		activeSessions: 'Faol sessiyalar',
 		devices: '{{count}} ta qurilma',
+		preferences: 'Sozlamalar',
+		languageHint: 'Hisobingizga saqlanadi',
 	},
 
 	subscriptions: {

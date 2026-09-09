@@ -1708,6 +1708,9 @@ export const en: TranslationsOf<typeof uz> = {
 		identityHint: 'Ask an administrator to change your name or contact details.',
 		changeDescription:
 			'Set a new password for your own account. You stay signed in — the new password is needed the next time you sign in.',
+		preferencesCardTitle: 'Preferences',
+		preferencesHint:
+			'Your interface language is saved to your account and applies on all your devices.',
 		changeFailed: 'Failed to change password. Please try again.',
 	},
 
@@ -2202,5 +2205,6 @@ export const en: TranslationsOf<typeof uz> = {
 		brandSurface: 'MANAGE',
 		backToSignIn: 'Back to sign in',
 		accountMenu: 'Account menu',
+		openMenu: 'Open menu',
 	},
 };

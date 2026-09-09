@@ -10,6 +10,7 @@ import {
 	StatusBadge,
 } from '@repo/ui';
 import { useAuth, useOperator } from '@/features/auth/hooks';
+import { PreferencesSection } from '@/features/profile/components/PreferencesSection';
 import { MOCK_SECURITY } from './_mock';
 import { useAppT } from '@/locales';
 
@@ -112,6 +113,8 @@ export function ProfilePage() {
 					</div>
 				</Card>
 			</div>
+
+			<PreferencesSection />
 		</div>
 	);
 }

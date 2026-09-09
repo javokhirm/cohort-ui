@@ -11,6 +11,7 @@ import {
 
 import { useMyProfile } from '../api/profile.queries';
 import { ChangePasswordForm } from '../components/ChangePasswordForm';
+import { PreferencesCard } from '../components/PreferencesCard';
 import { useAppT } from '@/locales';
 
 /** A labelled, non-editable identity value. Name/phone/email are not editable here. */
@@ -67,7 +68,10 @@ export function AccountPage() {
 				</Card>
 			)}
 
-			{/* Independent of the profile query — changing your password does not need it. */}
+			{/* Both are independent of the profile query — neither your language
+			    preference nor a password change needs it to have resolved. */}
+			<PreferencesCard />
+
 			<ChangePasswordForm />
 		</div>
 	);
