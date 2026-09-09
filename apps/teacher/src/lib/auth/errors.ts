@@ -1,8 +1,11 @@
 /**
- * `POST /public/auth/login` is shared by every console and does no role checking
- * — an admin's credentials authenticate here just as a teacher's do. The teach
- * API surface would then 403 every request. Rather than seat a non-teacher in a
- * console that cannot load anything, we reject at sign-in and say why.
+ * `POST /public/auth/login` is shared by every console. The backend now gates
+ * it on the `x-client-app` header we send, so a non-teacher is refused there with
+ * 403 `CONSOLE_ROLE_NOT_ALLOWED` and never reaches this error.
+ *
+ * This stays as the client-side fallback: if a session ever reaches the store
+ * without having passed that server gate, we still refuse to seat a
+ * non-teacher in a console whose every request would 403.
  */
 export class RoleNotAllowedError extends Error {
 	readonly name = 'RoleNotAllowedError';

@@ -12,6 +12,15 @@
 import type { Locale } from '@repo/utils';
 import type { SubscriptionAccessView } from '@repo/api-client';
 
+/**
+ * This console's identity for the shared `POST /public/auth/login` endpoint —
+ * sent as the `x-client-app` header (see `api/auth/auth.mutations.ts`) so the backend
+ * can refuse a role this console does not serve.
+ */
+export enum ClientApp {
+	TEACHER = 'teacher',
+}
+
 export interface AuthUserSummary {
 	id: number;
 	firstName: string;

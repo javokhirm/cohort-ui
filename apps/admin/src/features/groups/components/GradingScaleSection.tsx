@@ -42,9 +42,7 @@ export function GradingScaleSection({ groupId }: GradingScaleSectionProps) {
 			title={t('form.section.gradingScale')}
 			className="border border-border bg-card shadow-xs"
 		>
-			<p className="text-sm text-muted-foreground">
-				{t('grading.description')}
-			</p>
+			<p className="text-sm text-muted-foreground">{t('grading.description')}</p>
 
 			{query.isLoading ? (
 				<Skeleton className="h-40 w-full rounded-xl" />
