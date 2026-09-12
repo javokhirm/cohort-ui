@@ -1090,6 +1090,14 @@ export const ru: TranslationsOf<typeof uz> = {
 			created: 'Счёт создан',
 			back: 'Назад к счетам',
 			notFound: 'Счёт не найден.',
+			filters: {
+				title: 'Фильтры',
+				group: 'Группа',
+				rangeBoth: '{{from}} – {{to}}',
+				rangeFrom: 'С {{from}}',
+				rangeTo: 'До {{to}}',
+				remove: 'Убрать фильтр: {{filter}}',
+			},
 			column: {
 				invoice: 'Счёт',
 				student: 'Ученик',
@@ -1525,7 +1533,9 @@ export const ru: TranslationsOf<typeof uz> = {
 		},
 		pickerExtra: {
 			selectGroup: 'Выберите группу…',
+			allGroups: 'Все группы',
 			selectStudent: 'Выберите ученика…',
+			allStudents: 'Все ученики',
 		},
 		paymentDetail: {
 			dateTime: 'Дата и время',

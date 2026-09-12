@@ -1,7 +1,15 @@
 import { useMemo, useState } from 'react';
 import { Search } from 'lucide-react';
 
-import { Button, cn, Input, Popover, PopoverContent, PopoverTrigger } from '@repo/ui';
+import {
+	Button,
+	cn,
+	Input,
+	Popover,
+	PopoverContent,
+	PopoverTrigger,
+	Separator,
+} from '@repo/ui';
 import { useT } from '@repo/i18n';
 import { useAppT } from '@/locales';
 
@@ -10,6 +18,12 @@ import { useGroup, useGroupList } from '@/features/groups/api/groups.queries';
 interface GroupPickerProps {
 	value: number | undefined;
 	onChange: (groupId: number) => void;
+	/**
+	 * Makes the selection clearable — pass it wherever the picker is a filter, so
+	 * the only way out of a choice isn't resetting every other filter too. Omit it
+	 * on a required form field, where an empty value is not a valid state.
+	 */
+	onClear?: () => void;
 	disabled?: boolean;
 }
 
@@ -19,7 +33,7 @@ interface GroupPickerProps {
  * no `Combobox` primitive exists yet in `@repo/ui`. All statuses are shown —
  * invoices can belong to a completed group's historical enrollments too.
  */
-export function GroupPicker({ value, onChange, disabled }: GroupPickerProps) {
+export function GroupPicker({ value, onChange, onClear, disabled }: GroupPickerProps) {
 	const t = useAppT('billing');
 	const tc = useT('common');
 	const [open, setOpen] = useState(false);
@@ -42,6 +56,12 @@ export function GroupPicker({ value, onChange, disabled }: GroupPickerProps) {
 
 	function pick(id: number) {
 		onChange(id);
+		setOpen(false);
+		setInput('');
+	}
+
+	function clear() {
+		onClear?.();
 		setOpen(false);
 		setInput('');
 	}
@@ -77,6 +97,18 @@ export function GroupPicker({ value, onChange, disabled }: GroupPickerProps) {
 						autoFocus
 					/>
 				</div>
+				{onClear && value != null && (
+					<>
+						<button
+							type="button"
+							onClick={clear}
+							className="w-full px-3 py-2 text-left text-sm text-muted-foreground hover:bg-muted"
+						>
+							{t('pickerExtra.allGroups')}
+						</button>
+						<Separator />
+					</>
+				)}
 				<div className="max-h-64 overflow-y-auto p-1">
 					{isLoading ? (
 						<div className="px-3 py-4 text-sm text-muted-foreground">

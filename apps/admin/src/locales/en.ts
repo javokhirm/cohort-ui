@@ -1054,6 +1054,14 @@ export const en: TranslationsOf<typeof uz> = {
 			created: 'Invoice created',
 			back: 'Back to invoices',
 			notFound: 'Invoice not found.',
+			filters: {
+				title: 'Filters',
+				group: 'Group',
+				rangeBoth: '{{from}} – {{to}}',
+				rangeFrom: 'From {{from}}',
+				rangeTo: 'Until {{to}}',
+				remove: 'Remove filter: {{filter}}',
+			},
 			column: {
 				invoice: 'Invoice',
 				student: 'Student',
@@ -1487,7 +1495,9 @@ export const en: TranslationsOf<typeof uz> = {
 		},
 		pickerExtra: {
 			selectGroup: 'Select group…',
+			allGroups: 'All groups',
 			selectStudent: 'Select student…',
+			allStudents: 'All students',
 		},
 		paymentDetail: {
 			dateTime: 'Date & time',

@@ -14,14 +14,23 @@ import type {
  * item types resolve against the app's `billing` namespace.
  */
 
-/** Status filter chips for the invoice list toolbar (maps to `?status=`). */
+/**
+ * Status filter chips for the invoice list toolbar (maps to `?status=`).
+ *
+ * Ordered by how often an admin reaches for them — what's owed first, then
+ * what's settled, then the two states that carry no money (`DRAFT` not yet
+ * issued, `VOID` cancelled). `VOID` is included because the list shows void
+ * invoices in every other tab: without a chip they can only be read mixed into
+ * "All", never isolated.
+ */
 export const INVOICE_STATUS_FILTERS: { value: InvoiceStatus | undefined }[] = [
 	{ value: undefined },
 	{ value: 'UNPAID' },
 	{ value: 'PARTIAL' },
-	{ value: 'PAID' },
 	{ value: 'OVERDUE' },
+	{ value: 'PAID' },
 	{ value: 'DRAFT' },
+	{ value: 'VOID' },
 ];
 
 /** Method choices for the Record Payment form — only what `POST /invoices/:id/payments` accepts. */

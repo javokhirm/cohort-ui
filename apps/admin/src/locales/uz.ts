@@ -1083,6 +1083,14 @@ export const uz = {
 			created: 'Invoys yaratildi',
 			back: 'Invoyslarga qaytish',
 			notFound: 'Invoys topilmadi.',
+			filters: {
+				title: 'Filtrlar',
+				group: 'Guruh',
+				rangeBoth: '{{from}} – {{to}}',
+				rangeFrom: '{{from}} dan boshlab',
+				rangeTo: '{{to}} gacha',
+				remove: 'Filtrni olib tashlash: {{filter}}',
+			},
 			column: {
 				invoice: 'Invoys',
 				student: 'Oʻquvchi',
@@ -1517,7 +1525,9 @@ export const uz = {
 		},
 		pickerExtra: {
 			selectGroup: 'Guruhni tanlang…',
+			allGroups: 'Barcha guruhlar',
 			selectStudent: 'Oʻquvchini tanlang…',
+			allStudents: 'Barcha oʻquvchilar',
 		},
 		paymentDetail: {
 			dateTime: 'Sana va vaqt',
