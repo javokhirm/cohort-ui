@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { useNavigate, useSearch } from '@tanstack/react-router';
-import { CalendarClock, Download, Plus, SearchX, X } from 'lucide-react';
+import { Download, Plus, SearchX, X } from 'lucide-react';
 
 import {
 	ActiveFilterChips,
@@ -31,7 +31,6 @@ import type { InvoiceListFilters, InvoiceSummaryFilters } from '../api/keys';
 import { INVOICE_STATUS_FILTERS } from '../lib/invoice-options';
 import { InvoiceTable } from '../components/InvoiceTable';
 import { InvoiceForm } from '../components/InvoiceForm';
-import { GenerateInvoicesDialog } from '../components/GenerateInvoicesDialog';
 import { StudentPicker } from '../components/StudentPicker';
 import { GroupPicker } from '../components/GroupPicker';
 
@@ -61,7 +60,6 @@ export function InvoiceListPage() {
 	});
 
 	const [createOpen, setCreateOpen] = useState(false);
-	const [generateOpen, setGenerateOpen] = useState(false);
 
 	const filters: InvoiceListFilters = {
 		page,
@@ -201,15 +199,6 @@ export function InvoiceListPage() {
 				description={t('invoices.description')}
 				actions={
 					<>
-						<Can permission="invoice.generate">
-							<Button
-								variant="outline"
-								onClick={() => setGenerateOpen(true)}
-							>
-								<CalendarClock className="mr-1.5 size-4" />
-								{t('misc.generateMonthly')}
-							</Button>
-						</Can>
 						<Can permission="invoice.create">
 							<Button onClick={() => setCreateOpen(true)}>
 								<Plus className="mr-1.5 size-4" />
@@ -407,7 +396,6 @@ export function InvoiceListPage() {
 			</div>
 
 			<InvoiceForm mode="create" open={createOpen} onOpenChange={setCreateOpen} />
-			<GenerateInvoicesDialog open={generateOpen} onOpenChange={setGenerateOpen} />
 		</div>
 	);
 }

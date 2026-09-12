@@ -1076,7 +1076,6 @@ export const uz = {
 			title: 'Invoyslar',
 			description: 'Oʻquvchilarga chiqarilgan invoyslar va ularning holati',
 			searchPlaceholder: 'Invoys yoki oʻquvchi boʻyicha qidirish…',
-			generate: 'Invoyslarni yaratish',
 			create: 'Invoys yaratish',
 			loadError: 'Invoyslarni yuklab boʻlmadi. Sahifani yangilang.',
 			emptyFiltered: 'Bu filtrga mos invoys topilmadi.',
@@ -1121,14 +1120,6 @@ export const uz = {
 				qty: 'Soni',
 				unit: 'Narxi',
 				amount: 'Summa',
-			},
-			generateDialog: {
-				title: 'Invoyslarni yaratish',
-				description:
-					'Tanlangan davr uchun faol qabullarga invoyslar yaratiladi. Allaqachon chiqarilganlari takrorlanmaydi.',
-				period: 'Davr',
-				confirm: 'Yaratish',
-				done: '{{count}} ta invoys yaratildi',
 			},
 			form: {
 				title: 'Invoys yaratish',
@@ -1325,13 +1316,7 @@ export const uz = {
 			amountPlaceholder: 'masalan, 1 300 000',
 		},
 		generate: {
-			generated: 'Yaratilgan',
 			totalInvoiced: 'Jami hisoblangan',
-			prorated: 'Qismli hisoblangan',
-			skippedAlreadyInvoiced: 'Oʻtkazib yuborildi — allaqachon chiqarilgan',
-			skippedNoFeePlan: 'Oʻtkazib yuborildi — toʻlov rejasi yoʻq',
-			skippedNoSessions: 'Oʻtkazib yuborildi — bu davrda dars boʻlmagan',
-			skippedSuspended: 'Oʻtkazib yuborildi — butun davr toʻxtatilgan',
 		},
 		discountExtra: {
 			promoCode: 'Promo-kod',
@@ -1369,9 +1354,6 @@ export const uz = {
 			current: 'Joriy',
 			manage: 'Boshqarish',
 			close: 'Yopish',
-			done: 'Tayyor',
-			runAnotherPeriod: 'Boshqa davrni ishga tushirish',
-			generateMonthly: 'Oylik invoyslarni yaratish',
 			issueInvoice: 'Invoysni chiqarish',
 			applyWalletCredit: 'Hamyon mablagʻini qoʻllash',
 			void: 'Bekor qilish',
@@ -1490,32 +1472,6 @@ export const uz = {
 				'Bu rejada hali guruh yoʻq. Guruh uni kursidan meros qilib oladi — kursni yaratganingizda yoki tahrirlaganingizda rejani biriktiring.',
 			loadError: 'Guruhlarni yuklab boʻlmadi. Sahifani yangilang.',
 			loadingGroups: 'Guruhlar yuklanmoqda…',
-		},
-		generateExtra: {
-			failed: 'Invoyslarni yaratib boʻlmadi',
-			titleAnniversary: 'Muddati kelgan invoyslarni yaratish',
-			descAnniversary:
-				'Oʻz davri boshlangan, lekin hali hisob chiqarilmagan har bir oʻquvchiga invoys chiqaradi. Har bir oʻquvchi oʻz davri — qabul yilligida boshlangan davr — uchun hisoblanadi, shuning uchun oy tanlanmaydi.',
-			descPostpaid:
-				'Tanlangan oyni toʻliq oʻtgach hisoblaydi — bu bitta ishga tushirish ham vaqtga asoslangan oylik qismini, ham dars sarfiga asoslangan qismini qamrab oladi.',
-			descPrepaid: 'Tanlangan oyni boshlanishidan oldin, oldindan hisoblaydi.',
-			consumedMonth: 'Sarflangan oy',
-			billingMonth: 'Hisob-kitob oyi',
-			hintAnniversary:
-				'Tungi ishga tushirish buni allaqachon bajaradi. Undan uzilishdan keyin yetib olish uchun foydalaning — joriy davri uchun allaqachon hisob chiqarilgan oʻquvchilar tegilmaydi.',
-			hintPostpaid:
-				'{{period}} da sarflangan qabullar uchun invoyslar yaratadi. Bu davr uchun mavjud invoyslar tegilmaydi.',
-			hintPrepaid:
-				'{{period}} uchun oldindan invoyslar yaratadi. Bu davr uchun mavjud invoyslar tegilmaydi.',
-			resultTitle: '{{period}} uchun invoyslar yaratildi',
-			invoicesCreated_one: '{{count}} ta invoys yaratildi',
-			invoicesCreated_other: '{{count}} ta invoys yaratildi',
-			proratedSuffix_one: ' ({{count}} ta qismli)',
-			proratedSuffix_other: ' ({{count}} ta qismli)',
-			errorsTitle_one: '{{count}} ta qabulda yaratib boʻlmadi',
-			errorsTitle_other: '{{count}} ta qabulda yaratib boʻlmadi',
-			errorsDescription:
-				'Qolgan ishga tushirish yakunlandi — bular oʻtkazib yuborildi, hisoblanmadi. Qayta ishga tushirib koʻring; sabab uchun server jurnallarini tekshiring.',
 		},
 		policyPage: {
 			managedDescription:

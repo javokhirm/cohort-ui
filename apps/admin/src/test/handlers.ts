@@ -1837,29 +1837,6 @@ export const handlers = [
 	// here would let a test pass against an endpoint that no longer exists.
 	http.get(`${MANAGE}/billing-policy`, () => ok(MOCK_BILLING_POLICY)),
 
-	// ── Invoices — manual generate-monthly run ─────────────────────────────────
-	http.post(`${MANAGE}/invoices/generate-monthly`, async ({ request }) => {
-		const body = (await request.json()) as {
-			year?: number;
-			month?: number;
-			branchId?: number;
-		};
-		const now = new Date();
-		return ok({
-			period: {
-				year: body.year ?? now.getFullYear(),
-				month: body.month ?? now.getMonth() + 1,
-			},
-			generated: 3,
-			prorated: 1,
-			skippedExisting: 1,
-			skippedNoFeePlan: 0,
-			skippedZeroConsumption: 1,
-			skippedSuspended: 0,
-			errors: [] as { message: string }[],
-		});
-	}),
-
 	// ── Wallet credit application ────────────────────────────────────────────
 	http.post(`${MANAGE}/invoices/:id/apply-credit`, ({ params }) => {
 		const invoiceId = Number(params['id']);
