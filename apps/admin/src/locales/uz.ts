@@ -756,7 +756,6 @@ export const uz = {
 		updated: 'Guruh yangilandi',
 		searchPlaceholder: 'Nomi yoki kodi boʻyicha qidirish…',
 		allCourses: 'Barcha kurslar',
-		allStatuses: 'Barcha holatlar',
 		notSet: 'Belgilanmagan',
 		noRoom: 'Xona yoʻq',
 		unassigned: 'Biriktirilmagan',
@@ -802,8 +801,9 @@ export const uz = {
 			course: 'Kurs',
 			teacher: 'Oʻqituvchi',
 			room: 'Xona',
+			branch: 'Filial',
 			schedule: 'Jadval',
-			enrolled: 'Qabul qilingan',
+			seats: 'Oʻrinlar',
 			capacity: 'Sigʻimi',
 			status: 'Holati',
 		},
@@ -892,30 +892,37 @@ export const uz = {
 		},
 		detail: {
 			notFound: 'Guruh topilmadi.',
+			notFoundDescription:
+				'Havolani tekshirib koʻring yoki guruhlar roʻyxatiga qayting.',
+			actionsLabel: 'Guruh amallari',
 			tab: {
-				overview: 'Umumiy',
-				roster: 'Roʻyxat',
-				sessions: 'Darslar',
+				students: 'Oʻquvchilar',
+				schedule: 'Darslar',
 			},
 			stat: {
-				enrolled: 'Qabul qilingan',
-				capacity: 'Sigʻimi',
-				sessions: 'Darslar',
 				duration: 'Davomiyligi',
 			},
 		},
 		roster: {
-			title: 'Roʻyxat',
+			title: 'Oʻquvchilar',
 			rowActionsAria: 'Qabul amallari',
-			enrolledSummary: '{{filled}} qabul qilingan',
+			seatsOf: '{{capacity}} oʻrindan {{filled}} tasi band',
+			headcount_one: '{{count}} oʻquvchi',
+			headcount_other: '{{count}} oʻquvchi',
+			past_one: '{{count}} oldingi oʻquvchi',
+			past_other: '{{count}} oldingi oʻquvchi',
+			pastHint: 'Chiqarilgan, yakunlagan va koʻchirilgan qabullar.',
+			openStudentAria: '{{name}} profilini ochish',
 			enrolledOn: 'qabul qilingan {{date}}',
 			enroll: 'Oʻquvchilarni qabul qilish',
+			enrollAction: 'Qabul qilish',
+			enrollCount: 'Qabul qilish ({{count}})',
+			loadingStudents: 'Oʻquvchilar yuklanmoqda…',
 			enrollSearchHint:
 				'Faol oʻquvchilarni qidiring va ularni ushbu guruhga qoʻshing.',
 			enrollDescription:
 				'Bu guruh roʻyxatini shakllantirish uchun faol oʻquvchilarni qabul qiling.',
 			emptyTitle: 'Hali oʻquvchi qabul qilinmagan',
-			emptyFiltered: 'Bu holatdagi qabullar yoʻq.',
 			noMatchingStudents: 'Mos oʻquvchi topilmadi.',
 			startDateHint:
 				'Oʻquvchi haqiqatda boshlagan kun. Bu ularning billing sanasini belgilaydi, shuning uchun ularni kech qoʻshsangiz, sanani orqaga suring.',
@@ -946,7 +953,25 @@ export const uz = {
 			emptyTitle: 'Hali darslar yoʻq',
 			emptyDescription:
 				'Darslarni yaratish uchun guruhga boshlanish sanasi, tugash sanasi va haftalik jadval belgilang.',
+			emptyFiltered: 'Bu koʻrinishda darslar yoʻq.',
 			detailTitle: 'Dars tafsilotlari',
+			filter: {
+				upcoming: 'Kelgusi',
+				past: 'Oʻtgan',
+				cancelled: 'Bekor qilingan',
+			},
+			restore: {
+				action: 'Darsni tiklash',
+				confirm: 'Tiklash',
+				done: 'Dars tiklandi',
+				hint: 'Dars jadvalga qaytariladi va xona hamda oʻqituvchi bandligi qayta tekshiriladi.',
+			},
+			topic: {
+				action: 'Mavzuni belgilash',
+				confirm: 'Mavzuni saqlash',
+				done: 'Mavzu saqlandi',
+				placeholder: 'masalan, Oʻqish mashqi',
+			},
 			column: {
 				date: 'Sana',
 				start: 'Boshlanishi',
@@ -963,7 +988,7 @@ export const uz = {
 				reasonPlaceholder: 'masalan, oʻqituvchi band, bayram kuni…',
 				done: 'Dars bekor qilindi',
 				warning:
-					'Qabul qilingan oʻquvchilarga xabar beriladi. Buni ortga qaytarib boʻlmaydi.',
+					'Qabul qilingan oʻquvchilarga xabar beriladi. Darsni keyinroq tiklash mumkin, lekin yuborilgan xabarni qaytarib boʻlmaydi.',
 				reasonRequired: 'Sabab *',
 			},
 			reschedule: {
@@ -988,7 +1013,27 @@ export const uz = {
 			drop: 'Chiqarish',
 			reschedule: 'Koʻchirish',
 			substitute: 'Oʻrinbosar',
+			gradingScale: 'Baholash shkalasi',
 			saveGradingScale: 'Baholash shkalasini saqlash',
+			markActive: 'Faol deb belgilash',
+			markCompleted: 'Yakunlangan deb belgilash',
+			cancelGroup: 'Guruhni bekor qilish',
+			viewInvoices: 'Bu guruh invoyslari',
+		},
+		statusChange: {
+			done: 'Guruh holati yangilandi',
+			COMPLETED: {
+				title: 'Guruh yakunlangan deb belgilansinmi?',
+				description:
+					'Hali oʻtilmagan barcha darslar bekor qilinadi va qabul qilingan oʻquvchilarga xabar beriladi. Oʻtgan darslar, davomat va baholar saqlanadi. Buni ortga qaytarib boʻlmaydi.',
+				confirm: 'Yakunlangan deb belgilash',
+			},
+			CANCELLED: {
+				title: 'Guruh bekor qilinsinmi?',
+				description:
+					'Hali oʻtilmagan barcha darslar bekor qilinadi va qabul qilingan oʻquvchilarga xabar beriladi. Oʻtgan darslar, davomat va baholar saqlanadi. Buni ortga qaytarib boʻlmaydi.',
+				confirm: 'Guruhni bekor qilish',
+			},
 		},
 		schedule: {
 			title: 'Dars jadvali',

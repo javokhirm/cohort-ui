@@ -3,15 +3,23 @@ import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { manageApi } from '@/api/apiClient';
 
 import { groupsKeys } from './keys';
-import type { SessionDetail, SessionStatus } from './groups.queries';
+import type { SessionDetail } from './groups.queries';
+
+/**
+ * The statuses `PATCH /manage/sessions/:id` accepts. `COMPLETED` is absent by
+ * design — the backend derives it from the clock once a session's end time
+ * passes and rejects it here (400), because a caller who could pre-complete a
+ * class would inflate a teacher's payroll.
+ */
+export type PatchableSessionStatus = 'SCHEDULED' | 'CANCELLED';
 
 // ─── Input types ─────────────────────────────────────────────────────────────
 
 /**
  * Session override (`PATCH /manage/sessions/:id`) — reschedule, room change,
- * substitute teacher, set topic, or cancel. Room/teacher changes are
- * conflict-checked server-side (409 on double-book); `CANCELLED` requires a
- * `cancellationReason`.
+ * substitute teacher, set topic, cancel, or restore a cancelled session.
+ * Room/teacher changes are conflict-checked server-side (409 on double-book);
+ * `CANCELLED` requires a `cancellationReason`.
  */
 export interface UpdateSessionInput {
 	id: number;
@@ -23,7 +31,7 @@ export interface UpdateSessionInput {
 	roomId?: number | null;
 	teacherId?: number | null;
 	topic?: string | null;
-	status?: SessionStatus;
+	status?: PatchableSessionStatus;
 	cancellationReason?: string | null;
 }
 

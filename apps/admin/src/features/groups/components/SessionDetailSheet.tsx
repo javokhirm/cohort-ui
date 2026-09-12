@@ -1,11 +1,19 @@
 import { useState, type ReactNode } from 'react';
-import { AlertTriangle, CalendarClock, UserCog, X } from 'lucide-react';
+import {
+	AlertTriangle,
+	CalendarClock,
+	PenLine,
+	RotateCcw,
+	UserCog,
+	X,
+} from 'lucide-react';
 
 import {
 	Avatar,
 	AvatarFallback,
 	Button,
 	DatePicker,
+	Input,
 	Label,
 	Select,
 	SelectContent,
@@ -37,7 +45,7 @@ import { useUpdateSession } from '../api/sessions.mutations';
 import type { SessionDetail } from '../api/groups.queries';
 import { formatSessionDuration, hhmm } from '../lib/group-options';
 
-type Mode = 'view' | 'reschedule' | 'substitute' | 'cancel';
+type Mode = 'view' | 'reschedule' | 'substitute' | 'cancel' | 'topic' | 'restore';
 
 const NONE = 'none';
 
@@ -124,7 +132,6 @@ function SessionBody({
 	const [mode, setMode] = useState<Mode>('view');
 	const [conflict, setConflict] = useState<string | null>(null);
 	const cancelled = session.status === 'CANCELLED';
-	const completed = session.status === 'COMPLETED';
 
 	const { data: branches = [] } = useBranches();
 	const branchName = branches.find((b) => b.id === session.branchId)?.name ?? '—';
@@ -226,25 +233,41 @@ function SessionBody({
 				</div>
 			</div>
 
-			{/* Actions — reschedule / substitute / cancel all PATCH the session */}
-			{!cancelled && !completed && (
-				<Can permission="session.update">
-					<SessionActions
-						session={session}
-						mode={mode}
-						setMode={setMode}
-						setConflict={setConflict}
-						groupId={groupId}
-						onDone={onDone}
-					/>
-				</Can>
-			)}
+			{/* Every action here is one `PATCH /sessions/:id`; which ones are
+			    offered depends on the session's state (see SessionActions). */}
+			<Can permission="session.update">
+				<SessionActions
+					session={session}
+					mode={mode}
+					setMode={setMode}
+					setConflict={setConflict}
+					groupId={groupId}
+					onDone={onDone}
+				/>
+			</Can>
 		</div>
 	);
 }
 
-// ─── Actions (reschedule / substitute / cancel) ──────────────────────────────
+// ─── Actions (reschedule / substitute / topic / cancel / restore) ────────────
 
+/**
+ * What can be done to a session, by state — all through `PATCH /sessions/:id`:
+ *
+ * - **Cancelled** — only *restore* (`status: 'SCHEDULED'`, accepted by the
+ *   contract). The sheet used to offer nothing at all here, so a class cancelled
+ *   by mistake — a notification-sending, irreversible-looking action — had no
+ *   way back through the UI.
+ * - **Completed** — topic and *cancel*. Completion is automatic once the end
+ *   time passes, and "a class that did not happen must be cancelled, not left
+ *   alone" (api-reference.md §3.7): an uncancelled session pays its teacher, and
+ *   `CANCELLED` is accepted from any state. Hiding cancel here left no way to
+ *   take a class that never ran off payroll.
+ * - **Scheduled** — everything.
+ *
+ * Rescheduling or substituting a delivered class is never offered: it would move
+ * money between teachers for work already done.
+ */
 function SessionActions({
 	session,
 	mode,
@@ -284,6 +307,7 @@ function SessionActions({
 		session.teacherId != null ? String(session.teacherId) : NONE,
 	);
 	const [reason, setReason] = useState('');
+	const [topic, setTopic] = useState(session.topic ?? '');
 
 	async function run(
 		payload: Parameters<typeof updateSession.mutateAsync>[0],
@@ -306,20 +330,39 @@ function SessionActions({
 	}
 
 	const pending = updateSession.isPending;
+	const cancelled = session.status === 'CANCELLED';
+	const completed = session.status === 'COMPLETED';
 
 	if (mode === 'view') {
-		return (
-			<div className="flex flex-col gap-2 border-t pt-4">
-				<div className="grid grid-cols-2 gap-2">
-					<Button variant="outline" onClick={() => setMode('reschedule')}>
-						<CalendarClock className="mr-2 size-4" />
-						{t('actions.reschedule')}
-					</Button>
-					<Button variant="outline" onClick={() => setMode('substitute')}>
-						<UserCog className="mr-2 size-4" />
-						{t('actions.substitute')}
+		if (cancelled) {
+			return (
+				<div className="flex flex-col gap-2 border-t pt-4">
+					<Button variant="outline" onClick={() => setMode('restore')}>
+						<RotateCcw className="mr-2 size-4" />
+						{t('sessions.restore.action')}
 					</Button>
 				</div>
+			);
+		}
+
+		return (
+			<div className="flex flex-col gap-2 border-t pt-4">
+				{!completed && (
+					<div className="grid grid-cols-2 gap-2">
+						<Button variant="outline" onClick={() => setMode('reschedule')}>
+							<CalendarClock className="mr-2 size-4" />
+							{t('actions.reschedule')}
+						</Button>
+						<Button variant="outline" onClick={() => setMode('substitute')}>
+							<UserCog className="mr-2 size-4" />
+							{t('actions.substitute')}
+						</Button>
+					</div>
+				)}
+				<Button variant="outline" onClick={() => setMode('topic')}>
+					<PenLine className="mr-2 size-4" />
+					{t('sessions.topic.action')}
+				</Button>
 				<Button
 					variant="outline"
 					className="border-destructive/30 text-destructive hover:bg-destructive/5 hover:text-destructive"
@@ -328,6 +371,64 @@ function SessionActions({
 					<X className="mr-2 size-4" />
 					{t('sessions.cancel.action')}
 				</Button>
+			</div>
+		);
+	}
+
+	if (mode === 'restore') {
+		return (
+			<div className="flex flex-col gap-3 border-t pt-4">
+				<h3 className="text-sm font-semibold">{t('sessions.restore.action')}</h3>
+				<p className="text-sm text-muted-foreground">
+					{t('sessions.restore.hint')}
+				</p>
+				<ActionButtons
+					onCancel={() => setMode('view')}
+					pending={pending}
+					confirmLabel={t('sessions.restore.confirm')}
+					onConfirm={() =>
+						void run(
+							{
+								id: session.id,
+								status: 'SCHEDULED',
+								cancellationReason: null,
+							},
+							t('sessions.restore.done'),
+						)
+					}
+				/>
+			</div>
+		);
+	}
+
+	if (mode === 'topic') {
+		return (
+			<div className="flex flex-col gap-3 border-t pt-4">
+				<h3 className="text-sm font-semibold">{t('sessions.topic.action')}</h3>
+				<div>
+					<Label className="mb-1.5">{t('sessions.column.topic')}</Label>
+					<Input
+						value={topic}
+						onChange={(e) => setTopic(e.target.value)}
+						placeholder={t('sessions.topic.placeholder')}
+					/>
+				</div>
+				<ActionButtons
+					onCancel={() => setMode('view')}
+					pending={pending}
+					confirmLabel={t('sessions.topic.confirm')}
+					onConfirm={() =>
+						void run(
+							{
+								id: session.id,
+								// Clearing the box unsets the topic rather than
+								// storing an empty string.
+								topic: topic.trim() === '' ? null : topic.trim(),
+							},
+							t('sessions.topic.done'),
+						)
+					}
+				/>
 			</div>
 		);
 	}
