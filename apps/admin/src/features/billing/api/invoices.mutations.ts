@@ -57,42 +57,6 @@ export interface ApplyDiscountInput {
 	discountId: number;
 }
 
-/** `POST /invoices/generate-monthly` body — omit `year`/`month` for the natural current period. */
-export interface GenerateMonthlyInvoicesInput {
-	year?: number;
-	month?: number;
-	branchId?: number;
-}
-
-/**
- * `POST /invoices/generate-monthly` response. For a `POSTPAID` tenant a single
- * call resolves both the `MONTHLY` and `PER_SESSION` legs for the period, so
- * the counts below are the combined total across both legs.
- */
-export interface GenerateMonthlyInvoicesResult {
-	/**
-	 * What the run billed: the calendar month as `yyyy-MM` under CALENDAR
-	 * anchoring, or — under ENROLLMENT anchoring, where each student is on their
-	 * own cycle and there is no single billed period — the run's as-of date as
-	 * `yyyy-MM-dd`.
-	 */
-	period: string;
-	/** Invoices created. */
-	generated: number;
-	/** Of `generated`, how many were prorated (mid-cycle enrollment). */
-	prorated: number;
-	/** Enrollment already had an invoice for this period. */
-	skippedExisting: number;
-	/** Enrollment has no resolvable fee plan. */
-	skippedNoFeePlan: number;
-	/** `PER_SESSION` enrollment had zero chargeable sessions in the period — no invoice, not a zero-value one. */
-	skippedZeroConsumption: number;
-	/** Enrollment was suspended for the entire period. */
-	skippedSuspended: number;
-	/** Enrollments whose generation threw; the batch continued past them. */
-	errors: number;
-}
-
 /** `POST /invoices/:id/apply-credit` response — mirrors `ApplyCreditResponseDto`. */
 export interface ApplyCreditResult {
 	applied: number;
@@ -174,26 +138,6 @@ export function useApplyWalletCredit() {
 			void qc.invalidateQueries({
 				queryKey: peopleKeys.studentWallet(data.invoice.studentId),
 			});
-		},
-	});
-}
-
-/**
- * The manual "generate monthly invoices" run (`POST /invoices/generate-monthly`).
- * Mode-aware on the backend: for a `PREPAID` tenant the period is the month
- * being billed in advance; for `POSTPAID` it's the previous, fully-elapsed
- * month, and this single call resolves both billing legs for it.
- */
-export function useGenerateMonthlyInvoices() {
-	const qc = useQueryClient();
-	return useMutation({
-		mutationFn: (input: GenerateMonthlyInvoicesInput) =>
-			manageApi.post<GenerateMonthlyInvoicesResult>(
-				'/invoices/generate-monthly',
-				input,
-			),
-		onSuccess: () => {
-			void qc.invalidateQueries({ queryKey: invoicesKeys.invoices() });
 		},
 	});
 }

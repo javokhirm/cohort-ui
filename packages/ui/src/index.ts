@@ -40,6 +40,7 @@ export * from './components/composed/session-card';
 export * from './components/composed/week-calendar-grid';
 // Inputs & controls
 export * from './components/composed/actions-menu';
+export * from './components/composed/active-filter-chips';
 export * from './components/composed/branch-switcher';
 export * from './components/composed/confirm-dialog';
 export * from './components/composed/date-picker';

@@ -480,10 +480,26 @@ const groupNewRoute = createRoute({
 	component: GroupCreateRoute,
 });
 
+type GroupTabSearch = 'students' | 'schedule';
+
+const GROUP_TABS: GroupTabSearch[] = ['students', 'schedule'];
+
 const groupDetailRoute = createRoute({
 	getParentRoute: () => authedRoute,
 	path: '/groups/$groupId',
 	beforeLoad: () => requirePermission('group.read'),
+	// The open tab is URL state so the screen is linkable and survives a round
+	// trip out to a student or the edit form. `students` is the default and is
+	// normalised away, so `/groups/7` and `/groups/7?tab=students` are one URL.
+	validateSearch: (search: Record<string, unknown>): { tab?: GroupTabSearch } => {
+		const tab = search.tab;
+		return {
+			tab:
+				GROUP_TABS.includes(tab as GroupTabSearch) && tab !== 'students'
+					? (tab as GroupTabSearch)
+					: undefined,
+		};
+	},
 	component: () => {
 		const { groupId } = groupDetailRoute.useParams();
 		return <GroupDetailRoute id={groupId} />;

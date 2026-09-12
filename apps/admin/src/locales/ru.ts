@@ -756,7 +756,6 @@ export const ru: TranslationsOf<typeof uz> = {
 		updated: 'Группа обновлена',
 		searchPlaceholder: 'Поиск по названию или коду…',
 		allCourses: 'Все курсы',
-		allStatuses: 'Все статусы',
 		notSet: 'Не задано',
 		noRoom: 'Без аудитории',
 		unassigned: 'Не назначен',
@@ -804,8 +803,9 @@ export const ru: TranslationsOf<typeof uz> = {
 			course: 'Курс',
 			teacher: 'Преподаватель',
 			room: 'Аудитория',
+			branch: 'Филиал',
 			schedule: 'Расписание',
-			enrolled: 'Зачислено',
+			seats: 'Места',
 			capacity: 'Вместимость',
 			status: 'Статус',
 		},
@@ -897,29 +897,39 @@ export const ru: TranslationsOf<typeof uz> = {
 		},
 		detail: {
 			notFound: 'Группа не найдена.',
+			notFoundDescription: 'Проверьте ссылку или вернитесь к списку групп.',
+			actionsLabel: 'Действия с группой',
 			tab: {
-				overview: 'Обзор',
-				roster: 'Состав',
-				sessions: 'Занятия',
+				students: 'Ученики',
+				schedule: 'Занятия',
 			},
 			stat: {
-				enrolled: 'Зачислено',
-				capacity: 'Вместимость',
-				sessions: 'Занятия',
 				duration: 'Длительность',
 			},
 		},
 		roster: {
-			title: 'Список',
+			title: 'Ученики',
 			rowActionsAria: 'Действия с зачислением',
-			enrolledSummary: '{{filled}} зачислено',
+			seatsOf: 'Занято {{filled}} из {{capacity}} мест',
+			headcount_one: '{{count}} ученик',
+			headcount_few: '{{count}} ученика',
+			headcount_many: '{{count}} учеников',
+			headcount_other: '{{count}} учеников',
+			past_one: '{{count}} прошлый ученик',
+			past_few: '{{count}} прошлых ученика',
+			past_many: '{{count}} прошлых учеников',
+			past_other: '{{count}} прошлых учеников',
+			pastHint: 'Отчисленные, завершившие и переведённые зачисления.',
+			openStudentAria: 'Открыть профиль {{name}}',
 			enrolledOn: 'зачислен {{date}}',
 			enroll: 'Зачислить учеников',
+			enrollAction: 'Зачислить',
+			enrollCount: 'Зачислить ({{count}})',
+			loadingStudents: 'Загрузка учеников…',
 			enrollSearchHint: 'Найдите активных учеников и добавьте их в эту группу.',
 			enrollDescription:
 				'Зачислите активных учеников, чтобы сформировать состав группы.',
 			emptyTitle: 'Учеников пока нет',
-			emptyFiltered: 'Нет зачислений с этим статусом.',
 			noMatchingStudents: 'Подходящих учеников нет.',
 			startDateHint:
 				'День, когда ученик фактически начал. Это задаёт его годовщину биллинга, поэтому укажите прошлую дату, если добавляете его с опозданием.',
@@ -950,7 +960,25 @@ export const ru: TranslationsOf<typeof uz> = {
 			emptyTitle: 'Занятий пока нет',
 			emptyDescription:
 				'Задайте группе дату начала, дату окончания и недельное расписание, чтобы создать занятия.',
+			emptyFiltered: 'В этом разделе занятий нет.',
 			detailTitle: 'Детали занятия',
+			filter: {
+				upcoming: 'Предстоящие',
+				past: 'Прошедшие',
+				cancelled: 'Отменённые',
+			},
+			restore: {
+				action: 'Восстановить занятие',
+				confirm: 'Восстановить',
+				done: 'Занятие восстановлено',
+				hint: 'Занятие вернётся в расписание, а занятость аудитории и преподавателя будет проверена заново.',
+			},
+			topic: {
+				action: 'Указать тему',
+				confirm: 'Сохранить тему',
+				done: 'Тема сохранена',
+				placeholder: 'например, практика чтения',
+			},
 			column: {
 				date: 'Дата',
 				start: 'Начало',
@@ -966,7 +994,8 @@ export const ru: TranslationsOf<typeof uz> = {
 				confirm: 'Отменить занятие',
 				reasonPlaceholder: 'например, преподаватель занят, праздник…',
 				done: 'Занятие отменено',
-				warning: 'Зачисленные ученики будут уведомлены. Это нельзя отменить.',
+				warning:
+					'Зачисленные ученики получат уведомление. Занятие можно восстановить позже, но уведомление уже не отозвать.',
 				reasonRequired: 'Причина *',
 			},
 			reschedule: {
@@ -991,7 +1020,27 @@ export const ru: TranslationsOf<typeof uz> = {
 			drop: 'Отчислить',
 			reschedule: 'Перенести',
 			substitute: 'Замена',
+			gradingScale: 'Шкала оценивания',
 			saveGradingScale: 'Сохранить шкалу оценивания',
+			markActive: 'Отметить активной',
+			markCompleted: 'Отметить завершённой',
+			cancelGroup: 'Отменить группу',
+			viewInvoices: 'Счета этой группы',
+		},
+		statusChange: {
+			done: 'Статус группы обновлён',
+			COMPLETED: {
+				title: 'Отметить группу завершённой?',
+				description:
+					'Все ещё не проведённые занятия будут отменены, а зачисленные ученики получат уведомление. Прошедшие занятия, посещаемость и оценки сохранятся. Это нельзя отменить.',
+				confirm: 'Отметить завершённой',
+			},
+			CANCELLED: {
+				title: 'Отменить эту группу?',
+				description:
+					'Все ещё не проведённые занятия будут отменены, а зачисленные ученики получат уведомление. Прошедшие занятия, посещаемость и оценки сохранятся. Это нельзя отменить.',
+				confirm: 'Отменить группу',
+			},
 		},
 		schedule: {
 			title: 'Расписание',
@@ -1034,13 +1083,20 @@ export const ru: TranslationsOf<typeof uz> = {
 			title: 'Счета',
 			description: 'Выставленные ученикам счета и их статус',
 			searchPlaceholder: 'Поиск по счёту или ученику…',
-			generate: 'Сформировать счета',
 			create: 'Создать счёт',
 			loadError: 'Не удалось загрузить счета. Обновите страницу.',
 			emptyFiltered: 'Нет счетов по этому фильтру.',
 			created: 'Счёт создан',
 			back: 'Назад к счетам',
 			notFound: 'Счёт не найден.',
+			filters: {
+				title: 'Фильтры',
+				group: 'Группа',
+				rangeBoth: '{{from}} – {{to}}',
+				rangeFrom: 'С {{from}}',
+				rangeTo: 'До {{to}}',
+				remove: 'Убрать фильтр: {{filter}}',
+			},
 			column: {
 				invoice: 'Счёт',
 				student: 'Ученик',
@@ -1071,14 +1127,6 @@ export const ru: TranslationsOf<typeof uz> = {
 				qty: 'Кол-во',
 				unit: 'Цена',
 				amount: 'Сумма',
-			},
-			generateDialog: {
-				title: 'Сформировать счета',
-				description:
-					'Счета будут созданы для активных зачислений за выбранный период. Уже выставленные не дублируются.',
-				period: 'Период',
-				confirm: 'Сформировать',
-				done: 'Создано счетов: {{count}}',
 			},
 			form: {
 				title: 'Создать счёт',
@@ -1275,13 +1323,7 @@ export const ru: TranslationsOf<typeof uz> = {
 			amountPlaceholder: 'например, 1 300 000',
 		},
 		generate: {
-			generated: 'Создано',
 			totalInvoiced: 'Всего выставлено',
-			prorated: 'Пропорционально',
-			skippedAlreadyInvoiced: 'Пропущено — счёт уже выставлен',
-			skippedNoFeePlan: 'Пропущено — нет тарифного плана',
-			skippedNoSessions: 'Пропущено — в этом периоде не было занятий',
-			skippedSuspended: 'Пропущено — приостановлено весь период',
 		},
 		discountExtra: {
 			promoCode: 'Промокод',
@@ -1319,9 +1361,6 @@ export const ru: TranslationsOf<typeof uz> = {
 			current: 'Текущая',
 			manage: 'Управлять',
 			close: 'Закрыть',
-			done: 'Готово',
-			runAnotherPeriod: 'Запустить другой период',
-			generateMonthly: 'Сформировать месячные счета',
 			issueInvoice: 'Выставить счёт',
 			applyWalletCredit: 'Применить средства кошелька',
 			void: 'Аннулировать',
@@ -1442,32 +1481,6 @@ export const ru: TranslationsOf<typeof uz> = {
 			loadError: 'Не удалось загрузить группы. Обновите страницу.',
 			loadingGroups: 'Загрузка групп…',
 		},
-		generateExtra: {
-			failed: 'Не удалось сгенерировать счета',
-			titleAnniversary: 'Сгенерировать счета к оплате',
-			descAnniversary:
-				'Выставляет счёт каждому ученику, чей собственный цикл начался, но ещё не был выставлен. Каждый ученик выставляется за свой период — тот, что начался в годовщину зачисления — поэтому месяц выбирать не нужно.',
-			descPostpaid:
-				'Выставляет выбранный месяц по факту, после того как он полностью прошёл — этот единый запуск покрывает и повременную месячную часть, и часть по проведённым занятиям.',
-			descPrepaid: 'Выставляет выбранный месяц заранее, до его начала.',
-			consumedMonth: 'Отработанный месяц',
-			billingMonth: 'Месяц выставления',
-			hintAnniversary:
-				'Ночной запуск уже делает это. Используйте, чтобы наверстать после простоя — ученики, которым уже выставлен счёт за текущий цикл, не затрагиваются.',
-			hintPostpaid:
-				'Генерирует счета для зачислений, отработанных в {{period}}. Существующие счета за период не затрагиваются.',
-			hintPrepaid:
-				'Генерирует счета за {{period}}, заранее. Существующие счета за период не затрагиваются.',
-			resultTitle: 'Счета сгенерированы за {{period}}',
-			invoicesCreated_one: 'создан {{count}} счёт',
-			invoicesCreated_other: 'создано {{count}} счетов',
-			proratedSuffix_one: ' ({{count}} пропорциональный)',
-			proratedSuffix_other: ' ({{count}} пропорциональных)',
-			errorsTitle_one: '{{count}} зачисление не удалось сгенерировать',
-			errorsTitle_other: '{{count}} зачислений не удалось сгенерировать',
-			errorsDescription:
-				'Остальная часть запуска завершена — они были пропущены, а не выставлены. Запустите снова, чтобы повторить; причину смотрите в логах сервера.',
-		},
 		policyPage: {
 			managedDescription:
 				'Эта политика управляет каждым счётом вашего центра, поэтому её настраивает команда Cohort, а не меняют здесь. Чтобы запросить изменение, обратитесь в поддержку — оно вступит в силу со следующего запуска биллинга и никогда не изменит уже выставленные счета.',
@@ -1476,7 +1489,9 @@ export const ru: TranslationsOf<typeof uz> = {
 		},
 		pickerExtra: {
 			selectGroup: 'Выберите группу…',
+			allGroups: 'Все группы',
 			selectStudent: 'Выберите ученика…',
+			allStudents: 'Все ученики',
 		},
 		paymentDetail: {
 			dateTime: 'Дата и время',

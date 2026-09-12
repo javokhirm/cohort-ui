@@ -45,7 +45,6 @@ import {
 } from '../schemas/group-form.schema';
 import { ScheduleRuleFields } from '../components/ScheduleRuleFields';
 import { GradingScaleFields } from '../components/GradingScaleFields';
-import { GradingScaleSection } from '../components/GradingScaleSection';
 import { SessionPreviewCard } from '../components/SessionPreviewCard';
 
 /** Every section on this page wears the same card shell. */
@@ -117,7 +116,6 @@ function GroupFields({
 	mode,
 	formId,
 	onSubmit,
-	gradingSection,
 	extraSection,
 	actions,
 }: {
@@ -125,12 +123,6 @@ function GroupFields({
 	/** Id the page's submit button targets with `form={formId}`. */
 	formId: string;
 	onSubmit: React.FormEventHandler<HTMLFormElement>;
-	/** The grading-scale editor. On create it's part of this form
-	 * (`GradingScaleFields`, submitted as `gradingConfig`); on edit it's a
-	 * self-contained section wired to the separate, immutable grading-config
-	 * endpoint — injected by the caller, which has the group id, and rendered
-	 * outside the `<form>` so its own inputs and Save can't submit this one. */
-	gradingSection?: React.ReactNode;
 	/** Edit-only sections (e.g. Status) that need `EditGroupFormValues`'s wider
 	 * field set — injected by the caller so this component can stay on the
 	 * shared `CreateGroupFormValues` shape. */
@@ -284,8 +276,6 @@ function GroupFields({
 
 					{extraSection}
 				</form>
-
-				{mode === 'edit' && gradingSection}
 
 				{actions}
 			</div>
@@ -454,7 +444,6 @@ function EditGroupForm({
 				mode="edit"
 				formId="edit-group-form"
 				onSubmit={(e) => void form.handleSubmit(onSubmit)(e)}
-				gradingSection={<GradingScaleSection groupId={group.id} />}
 				extraSection={
 					<FormSection
 						title={t('form.section.status')}

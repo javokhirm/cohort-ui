@@ -732,7 +732,6 @@ export const en: TranslationsOf<typeof uz> = {
 		updated: 'Group updated',
 		searchPlaceholder: 'Search by name or code…',
 		allCourses: 'All courses',
-		allStatuses: 'All statuses',
 		notSet: 'Not set',
 		noRoom: 'No room',
 		unassigned: 'Unassigned',
@@ -778,8 +777,9 @@ export const en: TranslationsOf<typeof uz> = {
 			course: 'Course',
 			teacher: 'Teacher',
 			room: 'Room',
+			branch: 'Branch',
 			schedule: 'Schedule',
-			enrolled: 'Enrolled',
+			seats: 'Seats',
 			capacity: 'Capacity',
 			status: 'Status',
 		},
@@ -866,28 +866,34 @@ export const en: TranslationsOf<typeof uz> = {
 		},
 		detail: {
 			notFound: 'Group not found.',
+			notFoundDescription: 'Check the link, or go back to the groups list.',
+			actionsLabel: 'Group actions',
 			tab: {
-				overview: 'Overview',
-				roster: 'Roster',
-				sessions: 'Sessions',
+				students: 'Students',
+				schedule: 'Schedule',
 			},
 			stat: {
-				enrolled: 'Enrolled',
-				capacity: 'Capacity',
-				sessions: 'Sessions',
 				duration: 'Duration',
 			},
 		},
 		roster: {
-			title: 'Roster',
+			title: 'Students',
 			rowActionsAria: 'Enrollment actions',
-			enrolledSummary: '{{filled}} enrolled',
+			seatsOf: '{{filled}} of {{capacity}} seats taken',
+			headcount_one: '{{count}} student',
+			headcount_other: '{{count}} students',
+			past_one: '{{count}} past student',
+			past_other: '{{count}} past students',
+			pastHint: 'Dropped, completed and transferred enrollments.',
+			openStudentAria: "Open {{name}}'s profile",
 			enrolledOn: 'enrolled {{date}}',
 			enroll: 'Enroll students',
+			enrollAction: 'Enroll',
+			enrollCount: 'Enroll ({{count}})',
+			loadingStudents: 'Loading students…',
 			enrollSearchHint: 'Search active students and add them to this group.',
 			enrollDescription: "Enroll active students to build this group's roster.",
 			emptyTitle: 'No students enrolled',
-			emptyFiltered: 'No enrollments with this status.',
 			noMatchingStudents: 'No matching students.',
 			startDateHint:
 				'The day the student actually started. This sets their billing anniversary, so back-date it if you are adding them late.',
@@ -918,7 +924,25 @@ export const en: TranslationsOf<typeof uz> = {
 			emptyTitle: 'No sessions yet',
 			emptyDescription:
 				'Set a start date, end date and weekly schedule on the group to generate sessions.',
+			emptyFiltered: 'No classes in this view.',
 			detailTitle: 'Session details',
+			filter: {
+				upcoming: 'Upcoming',
+				past: 'Past',
+				cancelled: 'Cancelled',
+			},
+			restore: {
+				action: 'Restore session',
+				confirm: 'Restore',
+				done: 'Session restored',
+				hint: 'Puts the class back on the schedule and re-checks room and teacher availability.',
+			},
+			topic: {
+				action: 'Set topic',
+				confirm: 'Save topic',
+				done: 'Topic saved',
+				placeholder: 'e.g. Reading practice',
+			},
 			column: {
 				date: 'Date',
 				start: 'Start',
@@ -934,7 +958,8 @@ export const en: TranslationsOf<typeof uz> = {
 				confirm: 'Cancel session',
 				reasonPlaceholder: 'e.g. Teacher unavailable, public holiday…',
 				done: 'Session cancelled',
-				warning: "Enrolled students will be notified. This can't be undone.",
+				warning:
+					'Enrolled students will be notified. You can restore the class later, but the notification cannot be recalled.',
 				reasonRequired: 'Reason *',
 			},
 			reschedule: {
@@ -959,7 +984,27 @@ export const en: TranslationsOf<typeof uz> = {
 			drop: 'Drop',
 			reschedule: 'Reschedule',
 			substitute: 'Substitute',
+			gradingScale: 'Grading scale',
 			saveGradingScale: 'Save grading scale',
+			markActive: 'Mark as active',
+			markCompleted: 'Mark as completed',
+			cancelGroup: 'Cancel group',
+			viewInvoices: 'Invoices for this group',
+		},
+		statusChange: {
+			done: 'Group status updated',
+			COMPLETED: {
+				title: 'Mark this group as completed?',
+				description:
+					'Every class that has not been held yet will be cancelled and enrolled students will be notified. Past classes, attendance and marks are kept. This cannot be undone.',
+				confirm: 'Mark completed',
+			},
+			CANCELLED: {
+				title: 'Cancel this group?',
+				description:
+					'Every class that has not been held yet will be cancelled and enrolled students will be notified. Past classes, attendance and marks are kept. This cannot be undone.',
+				confirm: 'Cancel group',
+			},
 		},
 		schedule: {
 			title: 'Schedule',
@@ -1002,13 +1047,20 @@ export const en: TranslationsOf<typeof uz> = {
 			title: 'Invoices',
 			description: 'Invoices issued to students and their status',
 			searchPlaceholder: 'Search invoice or student…',
-			generate: 'Generate invoices',
 			create: 'Create invoice',
 			loadError: 'Failed to load invoices. Please refresh.',
 			emptyFiltered: 'No invoices match this filter.',
 			created: 'Invoice created',
 			back: 'Back to invoices',
 			notFound: 'Invoice not found.',
+			filters: {
+				title: 'Filters',
+				group: 'Group',
+				rangeBoth: '{{from}} – {{to}}',
+				rangeFrom: 'From {{from}}',
+				rangeTo: 'Until {{to}}',
+				remove: 'Remove filter: {{filter}}',
+			},
 			column: {
 				invoice: 'Invoice',
 				student: 'Student',
@@ -1039,14 +1091,6 @@ export const en: TranslationsOf<typeof uz> = {
 				qty: 'Qty',
 				unit: 'Unit',
 				amount: 'Amount',
-			},
-			generateDialog: {
-				title: 'Generate invoices',
-				description:
-					'Invoices are created for active enrollments in the selected period. Already-issued ones are not duplicated.',
-				period: 'Period',
-				confirm: 'Generate',
-				done: '{{count}} invoices generated',
 			},
 			form: {
 				title: 'Create invoice',
@@ -1243,13 +1287,7 @@ export const en: TranslationsOf<typeof uz> = {
 			amountPlaceholder: 'e.g. 1 300 000',
 		},
 		generate: {
-			generated: 'Generated',
 			totalInvoiced: 'Total invoiced',
-			prorated: 'Prorated',
-			skippedAlreadyInvoiced: 'Skipped — already invoiced',
-			skippedNoFeePlan: 'Skipped — no fee plan',
-			skippedNoSessions: 'Skipped — no sessions consumed this period',
-			skippedSuspended: 'Skipped — suspended for the full period',
 		},
 		discountExtra: {
 			promoCode: 'Promo code',
@@ -1287,9 +1325,6 @@ export const en: TranslationsOf<typeof uz> = {
 			current: 'Current',
 			manage: 'Manage',
 			close: 'Close',
-			done: 'Done',
-			runAnotherPeriod: 'Run another period',
-			generateMonthly: 'Generate monthly invoices',
 			issueInvoice: 'Issue invoice',
 			applyWalletCredit: 'Apply wallet credit',
 			void: 'Void',
@@ -1408,32 +1443,6 @@ export const en: TranslationsOf<typeof uz> = {
 			loadError: 'Failed to load groups. Please refresh.',
 			loadingGroups: 'Loading groups…',
 		},
-		generateExtra: {
-			failed: 'Failed to generate invoices',
-			titleAnniversary: 'Generate due invoices',
-			descAnniversary:
-				'Bills every student whose own cycle has started but has not been invoiced yet. Each student is billed for their own period — the one that began on their enrollment anniversary — so there is no month to choose.',
-			descPostpaid:
-				'Bills the selected month in arrears, after it has fully elapsed — this single run covers both the time-based monthly leg and the consumption-based per-session leg.',
-			descPrepaid: 'Bills the selected month in advance, before it starts.',
-			consumedMonth: 'Consumed month',
-			billingMonth: 'Billing month',
-			hintAnniversary:
-				'The nightly run already does this. Use it to catch up after downtime — students already invoiced for their current cycle are left untouched.',
-			hintPostpaid:
-				'Generates invoices for enrollments consumed in {{period}}. Existing invoices for the period are left untouched.',
-			hintPrepaid:
-				'Generates invoices for {{period}}, in advance. Existing invoices for the period are left untouched.',
-			resultTitle: 'Invoices generated for {{period}}',
-			invoicesCreated_one: '{{count}} invoice created',
-			invoicesCreated_other: '{{count}} invoices created',
-			proratedSuffix_one: ' ({{count}} prorated)',
-			proratedSuffix_other: ' ({{count}} prorated)',
-			errorsTitle_one: '{{count}} enrollment failed to generate',
-			errorsTitle_other: '{{count}} enrollments failed to generate',
-			errorsDescription:
-				'The rest of the run completed — these were skipped, not billed. Re-run to retry them; check the server logs for the cause.',
-		},
 		policyPage: {
 			managedDescription:
 				'This policy drives every invoice your center issues, so it is configured by the Cohort team rather than changed here. Contact support to request a change — it takes effect from your next billing run and never alters invoices that have already been issued.',
@@ -1442,7 +1451,9 @@ export const en: TranslationsOf<typeof uz> = {
 		},
 		pickerExtra: {
 			selectGroup: 'Select group…',
+			allGroups: 'All groups',
 			selectStudent: 'Select student…',
+			allStudents: 'All students',
 		},
 		paymentDetail: {
 			dateTime: 'Date & time',

@@ -141,7 +141,7 @@ function EnrollForm({
 				<div className="h-64 overflow-y-auto rounded-lg border">
 					{isLoading ? (
 						<div className="p-4 text-sm text-muted-foreground">
-							Loading students…
+							{t('roster.loadingStudents')}
 						</div>
 					) : students.length === 0 ? (
 						<div className="p-6 text-center text-sm text-muted-foreground">
@@ -202,7 +202,9 @@ function EnrollForm({
 					}
 				>
 					{enrollStudents.isPending && <Spinner className="mr-2 size-4" />}
-					Enroll {selected.length > 0 ? `(${selected.length})` : ''}
+					{selected.length > 0
+						? t('roster.enrollCount', { count: selected.length })
+						: t('roster.enrollAction')}
 				</Button>
 			</DialogFooter>
 		</>

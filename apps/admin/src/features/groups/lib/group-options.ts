@@ -8,6 +8,7 @@ import {
 	type GroupStatus,
 	type ScheduleDay,
 	type ScheduleRule,
+	type SessionCalendarItem,
 	type SessionStatus,
 } from '../api/groups.queries';
 import { GRADING_CONFIG_TYPES, type GradingType } from '../api/grading-config.queries';
@@ -46,6 +47,62 @@ export const GROUP_STATUS_OPTIONS = (
 	Object.keys(GROUP_STATUS_TONES) as GroupStatus[]
 ).map((value) => ({ value }));
 
+/**
+ * The status changes the group screen offers, per current status.
+ *
+ * The server accepts any status on `PATCH /manage/groups/:id` — it enforces no
+ * transition table — but entering `COMPLETED`/`CANCELLED` cancels every class
+ * the group has not held yet (api-reference.md §3.7), and leaving that state
+ * does **not** bring those classes back. So the UI treats a terminal group as
+ * final rather than offering a way out that silently loses the calendar; the
+ * edit form's raw status select stays as the deliberate escape hatch.
+ */
+export const GROUP_STATUS_TRANSITIONS: Record<GroupStatus, GroupStatus[]> = {
+	PLANNED: ['ACTIVE', 'COMPLETED', 'CANCELLED'],
+	ACTIVE: ['COMPLETED', 'CANCELLED'],
+	COMPLETED: [],
+	CANCELLED: [],
+};
+
+/** Whether entering `status` ends the group and closes its calendar. */
+export function isTerminalGroupStatus(status: GroupStatus): boolean {
+	return status === 'COMPLETED' || status === 'CANCELLED';
+}
+
+// ─── Capacity ─────────────────────────────────────────────────────────────────
+
+/**
+ * Whether an enrollment occupies a seat. A `SUSPENDED` enrollment keeps its
+ * seat — it counts against capacity and blocks re-enrolling the same student
+ * (api-reference.md §3.8) — so it is "occupied" alongside `ACTIVE`.
+ *
+ * This is deliberately **not** `GroupDetail.activeEnrollmentsCount`, which
+ * counts `status = 'ACTIVE'` only and therefore disagrees with the capacity
+ * rule the same server enforces. Seat figures are derived from the enrollment
+ * list so the page shows one number with one meaning.
+ */
+export function occupiesSeat(status: EnrollmentStatus): boolean {
+	return status === 'ACTIVE' || status === 'SUSPENDED';
+}
+
+/** `12/15`, or just the headcount when the group has no capacity set. */
+export function capacityLabel(filled: number, capacity: number | null): string {
+	return capacity === null ? String(filled) : `${filled}/${capacity}`;
+}
+
+/** Amber as the group approaches full, red once it is — pressure read off the color. */
+export function capacityToneClass(filled: number, capacity: number | null): string {
+	if (capacity === null || capacity <= 0) return 'text-foreground';
+	if (filled >= capacity) return 'text-tone-red-fg';
+	return filled / capacity > 0.85 ? 'text-tone-amber-fg' : 'text-foreground';
+}
+
+/** Seats filled as a 0–100 percentage; `0` when the group has no capacity. */
+export function capacityPercent(filled: number, capacity: number | null): number {
+	if (capacity === null || capacity <= 0) return 0;
+	return Math.min(100, Math.round((filled / capacity) * 100));
+}
+
 // ─── Grading scale ────────────────────────────────────────────────────────────
 
 /** Segmented scale-type options for the grading control. */
@@ -64,20 +121,6 @@ export function gradingPreview(t: GroupsT, type: GradingType, maxPoints: string)
 }
 
 // ─── Enrollment status ──────────────────────────────────────────────────────
-
-export const ENROLLMENT_STATUSES: EnrollmentStatus[] = [
-	'ACTIVE',
-	'SUSPENDED',
-	'DROPPED',
-	'COMPLETED',
-	'TRANSFERRED',
-];
-
-/** Status filter chips for a roster/enrollments list (maps to `?status=`). */
-export const ENROLLMENT_STATUS_FILTERS: { value: EnrollmentStatus | undefined }[] = [
-	{ value: undefined },
-	...ENROLLMENT_STATUSES.map((value) => ({ value })),
-];
 
 /**
  * Server-enforced transitions for `PATCH /manage/enrollments/:id` (400 on a
@@ -108,6 +151,47 @@ export const SESSION_STATUS_FILTERS: { value: SessionStatus | undefined }[] = [
 	{ value: 'COMPLETED' },
 	{ value: 'CANCELLED' },
 ];
+
+/** The three views a group's own class list is split into. */
+export const SESSION_VIEWS = ['upcoming', 'past', 'cancelled'] as const;
+export type SessionView = (typeof SESSION_VIEWS)[number];
+
+/**
+ * Split a group's classes into the three questions an admin actually asks —
+ * what's next, what already ran, what got called off — each already sorted for
+ * reading: upcoming soonest-first, the other two most-recent-first.
+ *
+ * Partitioned client-side rather than through the endpoint's `?from=&to=&status=`
+ * on purpose: the chips carry counts, which needs the whole set anyway, and a
+ * single group's calendar is bounded (tens of rows), so one cached fetch beats
+ * three and makes switching views instant.
+ *
+ * `today` is a local `YYYY-MM-DD` (see {@link toYmd}); a class scheduled for
+ * today counts as upcoming until the day is over.
+ */
+export function partitionSessions(
+	sessions: SessionCalendarItem[],
+	today: string,
+): Record<SessionView, SessionCalendarItem[]> {
+	const byStart = (a: SessionCalendarItem, b: SessionCalendarItem) =>
+		`${a.sessionDate}${a.startTime}`.localeCompare(`${b.sessionDate}${b.startTime}`);
+
+	const cancelled: SessionCalendarItem[] = [];
+	const upcoming: SessionCalendarItem[] = [];
+	const past: SessionCalendarItem[] = [];
+
+	for (const session of sessions) {
+		if (session.status === 'CANCELLED') cancelled.push(session);
+		else if (session.sessionDate >= today) upcoming.push(session);
+		else past.push(session);
+	}
+
+	return {
+		upcoming: upcoming.sort(byStart),
+		past: past.sort(byStart).reverse(),
+		cancelled: cancelled.sort(byStart).reverse(),
+	};
+}
 
 // ─── Schedule days ──────────────────────────────────────────────────────────
 

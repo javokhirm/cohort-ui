@@ -1,7 +1,15 @@
 import { useEffect, useState } from 'react';
 import { Search } from 'lucide-react';
 
-import { Button, cn, Input, Popover, PopoverContent, PopoverTrigger } from '@repo/ui';
+import {
+	Button,
+	cn,
+	Input,
+	Popover,
+	PopoverContent,
+	PopoverTrigger,
+	Separator,
+} from '@repo/ui';
 import { useT } from '@repo/i18n';
 import { useAppT } from '@/locales';
 
@@ -10,11 +18,22 @@ import { useStudent, useStudents } from '@/features/people/api/students.queries'
 interface StudentPickerProps {
 	value: number | undefined;
 	onChange: (studentId: number) => void;
+	/**
+	 * Makes the selection clearable — pass it wherever the picker is a filter, so
+	 * the only way out of a choice isn't resetting every other filter too. Omit it
+	 * on a required form field, where an empty value is not a valid state.
+	 */
+	onClear?: () => void;
 	disabled?: boolean;
 }
 
 /** Searchable single-select student picker — no `Combobox` primitive exists yet in `@repo/ui`. */
-export function StudentPicker({ value, onChange, disabled }: StudentPickerProps) {
+export function StudentPicker({
+	value,
+	onChange,
+	onClear,
+	disabled,
+}: StudentPickerProps) {
 	const t = useAppT('billing');
 	const tc = useT('common');
 	const [open, setOpen] = useState(false);
@@ -36,6 +55,12 @@ export function StudentPicker({ value, onChange, disabled }: StudentPickerProps)
 
 	function pick(id: number) {
 		onChange(id);
+		setOpen(false);
+		setInput('');
+	}
+
+	function clear() {
+		onClear?.();
 		setOpen(false);
 		setInput('');
 	}
@@ -71,6 +96,18 @@ export function StudentPicker({ value, onChange, disabled }: StudentPickerProps)
 						autoFocus
 					/>
 				</div>
+				{onClear && value != null && (
+					<>
+						<button
+							type="button"
+							onClick={clear}
+							className="w-full px-3 py-2 text-left text-sm text-muted-foreground hover:bg-muted"
+						>
+							{t('pickerExtra.allStudents')}
+						</button>
+						<Separator />
+					</>
+				)}
 				<div className="max-h-64 overflow-y-auto p-1">
 					{isLoading ? (
 						<div className="px-3 py-4 text-sm text-muted-foreground">

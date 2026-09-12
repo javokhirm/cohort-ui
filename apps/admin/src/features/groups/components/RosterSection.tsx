@@ -1,5 +1,15 @@
-import { useState } from 'react';
-import { MoreHorizontal, Pause, Plus, RotateCcw, UserMinus, Users } from 'lucide-react';
+import { useState, type KeyboardEvent } from 'react';
+import { useNavigate } from '@tanstack/react-router';
+import {
+	ChevronDown,
+	ChevronRight,
+	MoreHorizontal,
+	Pause,
+	Plus,
+	RotateCcw,
+	UserMinus,
+	Users,
+} from 'lucide-react';
 
 import {
 	Button,
@@ -17,11 +27,7 @@ import {
 	DropdownMenuTrigger,
 	EmptyState,
 	Label,
-	Select,
-	SelectContent,
-	SelectItem,
-	SelectTrigger,
-	SelectValue,
+	Separator,
 	Skeleton,
 	Spinner,
 	StatusBadge,
@@ -34,92 +40,57 @@ import { useStatusLabel, useT } from '@repo/i18n';
 import { useAppT } from '@/locales';
 
 import { Can } from '@/components/Can';
-import {
-	useGroupEnrollments,
-	type Enrollment,
-	type EnrollmentStatus,
-} from '../api/groups.queries';
+import { useGroupEnrollments, type Enrollment } from '../api/groups.queries';
 import { useUpdateEnrollment } from '../api/groups.mutations';
-import { ENROLLMENT_STATUS_FILTERS, ENROLLMENT_TRANSITIONS } from '../lib/group-options';
+import { ENROLLMENT_TRANSITIONS, occupiesSeat } from '../lib/group-options';
 import { EnrollStudentsDialog } from './EnrollStudentsDialog';
-
-const ALL_STATUSES = 'all';
 
 interface RosterSectionProps {
 	groupId: number;
 	capacity: number | null;
 }
 
+/**
+ * The group's students — the screen's landing view, because "who is in this
+ * group" is the question it is opened for.
+ *
+ * Current students (`ACTIVE` + `SUSPENDED` — the ones holding a seat) are the
+ * list; the ones who left are collapsed behind one row. That replaces a
+ * six-option status dropdown that sat in the section heading: a roster is ~20
+ * people, so the only split that earns its place is still-here vs gone.
+ */
 export function RosterSection({ groupId, capacity }: RosterSectionProps) {
 	const t = useAppT('groups');
 	const tc = useT('common');
-	const statusLabel = useStatusLabel();
-	const { data: enrollments = [], isLoading } = useGroupEnrollments(groupId);
+	const { data: enrollments = [], isLoading, isError } = useGroupEnrollments(groupId);
 	const [enrollOpen, setEnrollOpen] = useState(false);
+	const [pastOpen, setPastOpen] = useState(false);
 	const [dropTarget, setDropTarget] = useState<Enrollment | null>(null);
 	const [suspendTarget, setSuspendTarget] = useState<Enrollment | null>(null);
 	const [reactivateTarget, setReactivateTarget] = useState<Enrollment | null>(null);
-	const [statusFilter, setStatusFilter] = useState<EnrollmentStatus | undefined>(
-		undefined,
-	);
 
-	// A SUSPENDED enrollment keeps its seat — it still counts against capacity and
-	// blocks re-enrolling the same student, so it counts as "occupied" alongside ACTIVE.
-	const occupiesSeat = (e: Enrollment) =>
-		e.status === 'ACTIVE' || e.status === 'SUSPENDED';
-	const activeCount = enrollments.filter(occupiesSeat).length;
-	const enrolledIds = enrollments.filter(occupiesSeat).map((e) => e.studentId);
-	const visibleEnrollments = statusFilter
-		? enrollments.filter((e) => e.status === statusFilter)
-		: enrollments;
+	const current = enrollments.filter((e) => occupiesSeat(e.status));
+	const past = enrollments.filter((e) => !occupiesSeat(e.status));
+	const enrolledIds = current.map((e) => e.studentId);
+
+	const enrollButton = (
+		<Can permission="enrollment.create">
+			<Button size="sm" onClick={() => setEnrollOpen(true)}>
+				<Plus className="mr-1.5 size-4" />
+				{t('roster.enroll')}
+			</Button>
+		</Can>
+	);
 
 	return (
 		<div className="flex flex-col gap-3">
-			<div className="flex items-center justify-between">
-				<h2 className="text-sm font-semibold">
-					{t('roster.title')}{' '}
-					<span className="text-muted-foreground">
-						·{' '}
-						{t('roster.enrolledSummary', {
-							filled:
-								capacity != null
-									? `${activeCount}/${capacity}`
-									: activeCount,
-						})}
-					</span>
-				</h2>
-				<div className="flex items-center gap-2">
-					<Select
-						value={statusFilter ?? ALL_STATUSES}
-						onValueChange={(v) =>
-							setStatusFilter(
-								v === ALL_STATUSES ? undefined : (v as EnrollmentStatus),
-							)
-						}
-					>
-						<SelectTrigger className="h-9 w-36" size="sm">
-							<SelectValue placeholder={t('allStatuses')} />
-						</SelectTrigger>
-						<SelectContent>
-							{ENROLLMENT_STATUS_FILTERS.map((f) => (
-								<SelectItem
-									key={f.value ?? ALL_STATUSES}
-									value={f.value ?? ALL_STATUSES}
-								>
-									{f.value
-										? t(`enrollmentStatus.${f.value}`)
-										: tc('state.all')}
-								</SelectItem>
-							))}
-						</SelectContent>
-					</Select>
-					<Can permission="enrollment.create">
-						<Button size="sm" onClick={() => setEnrollOpen(true)}>
-							<Plus className="mr-1.5 size-4" />
-							{t('roster.enroll')}
-						</Button>
-					</Can>
-				</div>
+			<div className="flex flex-wrap items-center justify-between gap-2">
+				<span className="text-sm text-muted-foreground">
+					{capacity != null
+						? t('roster.seatsOf', { filled: current.length, capacity })
+						: t('roster.headcount', { count: current.length })}
+				</span>
+				{enrollButton}
 			</div>
 
 			{isLoading ? (
@@ -130,110 +101,78 @@ export function RosterSection({ groupId, capacity }: RosterSectionProps) {
 						</div>
 					))}
 				</Card>
+			) : isError ? (
+				<Card className="py-0">
+					<EmptyState
+						icon={<Users />}
+						title={tc('table.error')}
+						description={tc('table.errorHint')}
+					/>
+				</Card>
 			) : enrollments.length === 0 ? (
 				<Card className="py-0">
 					<EmptyState
 						icon={<Users />}
 						title={t('roster.emptyTitle')}
 						description={t('roster.enrollDescription')}
-						action={
-							<Can permission="enrollment.create">
-								<Button size="sm" onClick={() => setEnrollOpen(true)}>
-									<Plus className="mr-1.5 size-4" />
-									{t('roster.enroll')}
-								</Button>
-							</Can>
-						}
+						action={enrollButton}
 					/>
 				</Card>
-			) : visibleEnrollments.length === 0 ? (
-				<Card className="px-4 py-6 text-center text-sm text-muted-foreground">
-					{t('roster.emptyFiltered')}
-				</Card>
 			) : (
-				<Card className="gap-0 divide-y divide-border py-0">
-					{visibleEnrollments.map((e) => {
-						const transitions = ENROLLMENT_TRANSITIONS[e.status];
-						const canReactivate = transitions.includes('ACTIVE');
-						const canSuspend = transitions.includes('SUSPENDED');
-						const canDrop = transitions.includes('DROPPED');
-						const hasActions = canReactivate || canSuspend || canDrop;
-						return (
-							<div
-								key={e.id}
-								className="flex items-center justify-between gap-4 px-4 py-3"
+				<>
+					{current.length > 0 && (
+						<Card className="gap-0 divide-y divide-border py-0">
+							{current.map((e) => (
+								<EnrollmentRow
+									key={e.id}
+									enrollment={e}
+									onDrop={setDropTarget}
+									onSuspend={setSuspendTarget}
+									onReactivate={setReactivateTarget}
+								/>
+							))}
+						</Card>
+					)}
+
+					{past.length > 0 && (
+						<Card className="gap-0 py-0">
+							<button
+								type="button"
+								onClick={() => setPastOpen((o) => !o)}
+								aria-expanded={pastOpen}
+								className="flex w-full items-center gap-2 px-4 py-3 text-left text-sm text-muted-foreground transition-colors hover:bg-muted"
 							>
-								<div className="flex flex-col">
-									<span className="text-sm font-medium">
-										{e.studentName}
-									</span>
-									<span className="font-mono text-xs text-muted-foreground">
-										{e.studentCode} ·{' '}
-										{t('roster.enrolledOn', {
-											date: formatDate(e.enrolledAt),
-										})}
-									</span>
-								</div>
-								<div className="flex items-center gap-3">
-									<StatusBadge kind="enrollment" status={e.status}>
-										{statusLabel('enrollment', e.status)}
-									</StatusBadge>
-									{hasActions && (
-										<Can permission="enrollment.update">
-											<DropdownMenu>
-												<DropdownMenuTrigger asChild>
-													<Button
-														variant="ghost"
-														size="sm"
-														className="size-8 p-0"
-														aria-label={t(
-															'roster.rowActionsAria',
-														)}
-													>
-														<MoreHorizontal className="size-4" />
-													</Button>
-												</DropdownMenuTrigger>
-												<DropdownMenuContent align="end">
-													{canReactivate && (
-														<DropdownMenuItem
-															onClick={() =>
-																setReactivateTarget(e)
-															}
-														>
-															<RotateCcw />
-															{t('actions.reactivate')}
-														</DropdownMenuItem>
-													)}
-													{canSuspend && (
-														<DropdownMenuItem
-															onClick={() =>
-																setSuspendTarget(e)
-															}
-														>
-															<Pause />
-															{t('actions.suspend')}
-														</DropdownMenuItem>
-													)}
-													{canDrop && (
-														<DropdownMenuItem
-															variant="destructive"
-															onClick={() =>
-																setDropTarget(e)
-															}
-														>
-															<UserMinus />
-															{t('actions.drop')}
-														</DropdownMenuItem>
-													)}
-												</DropdownMenuContent>
-											</DropdownMenu>
-										</Can>
-									)}
-								</div>
-							</div>
-						);
-					})}
-				</Card>
+								{pastOpen ? (
+									<ChevronDown className="size-4 shrink-0" />
+								) : (
+									<ChevronRight className="size-4 shrink-0" />
+								)}
+								<span className="font-medium">
+									{t('roster.past', { count: past.length })}
+								</span>
+								<span className="hidden truncate text-xs sm:block">
+									· {t('roster.pastHint')}
+								</span>
+							</button>
+							{pastOpen && (
+								<>
+									<Separator />
+									<div className="divide-y divide-border">
+										{past.map((e) => (
+											<EnrollmentRow
+												key={e.id}
+												enrollment={e}
+												onDrop={setDropTarget}
+												onSuspend={setSuspendTarget}
+												onReactivate={setReactivateTarget}
+											/>
+										))}
+									</div>
+								</>
+							)}
+						</Card>
+					)}
+				</>
 			)}
 
 			<EnrollStudentsDialog
@@ -260,6 +199,124 @@ export function RosterSection({ groupId, capacity }: RosterSectionProps) {
 				enrollment={reactivateTarget}
 				onClose={() => setReactivateTarget(null)}
 			/>
+		</div>
+	);
+}
+
+// ─── Row ──────────────────────────────────────────────────────────────────────
+
+/**
+ * One student. The whole row opens their profile — the roster used to be a dead
+ * end, with no way through to the student an admin had just spotted on it.
+ *
+ * `role="button"` rather than a real `<button>`: the row contains the actions
+ * menu trigger, and a button inside a button is invalid markup.
+ */
+function EnrollmentRow({
+	enrollment,
+	onDrop,
+	onSuspend,
+	onReactivate,
+}: {
+	enrollment: Enrollment;
+	onDrop: (e: Enrollment) => void;
+	onSuspend: (e: Enrollment) => void;
+	onReactivate: (e: Enrollment) => void;
+}) {
+	const t = useAppT('groups');
+	const statusLabel = useStatusLabel();
+	const navigate = useNavigate();
+
+	const transitions = ENROLLMENT_TRANSITIONS[enrollment.status];
+	const canReactivate = transitions.includes('ACTIVE');
+	const canSuspend = transitions.includes('SUSPENDED');
+	const canDrop = transitions.includes('DROPPED');
+	const hasActions = canReactivate || canSuspend || canDrop;
+
+	const open = () =>
+		void navigate({
+			to: '/students/$id',
+			params: { id: String(enrollment.studentId) },
+		});
+
+	const onKeyDown = (event: KeyboardEvent<HTMLDivElement>) => {
+		if (event.key !== 'Enter' && event.key !== ' ') return;
+		event.preventDefault();
+		open();
+	};
+
+	return (
+		<div
+			role="button"
+			tabIndex={0}
+			onClick={open}
+			onKeyDown={onKeyDown}
+			aria-label={t('roster.openStudentAria', { name: enrollment.studentName })}
+			className="flex cursor-pointer items-center justify-between gap-4 px-4 py-3 transition-colors hover:bg-muted focus-visible:outline-2 focus-visible:-outline-offset-2 focus-visible:outline-ring"
+		>
+			<div className="flex min-w-0 flex-col">
+				<span className="truncate text-sm font-medium">
+					{enrollment.studentName}
+				</span>
+				<span className="font-mono text-xs text-muted-foreground">
+					{enrollment.studentCode}
+				</span>
+			</div>
+			<div className="flex shrink-0 items-center gap-3">
+				<span className="hidden text-xs text-muted-foreground sm:block">
+					{t('roster.enrolledOn', { date: formatDate(enrollment.enrolledAt) })}
+				</span>
+				<StatusBadge kind="enrollment" status={enrollment.status}>
+					{statusLabel('enrollment', enrollment.status)}
+				</StatusBadge>
+				{hasActions && (
+					<Can permission="enrollment.update">
+						{/* Stops a menu click from also opening the student. */}
+						<div onClick={(event) => event.stopPropagation()}>
+							<DropdownMenu>
+								<DropdownMenuTrigger asChild>
+									<Button
+										variant="ghost"
+										size="sm"
+										className="size-8 p-0"
+										aria-label={t('roster.rowActionsAria')}
+									>
+										<MoreHorizontal className="size-4" />
+									</Button>
+								</DropdownMenuTrigger>
+								<DropdownMenuContent align="end">
+									{canReactivate && (
+										<DropdownMenuItem
+											onClick={() => onReactivate(enrollment)}
+										>
+											<RotateCcw />
+											{t('actions.reactivate')}
+										</DropdownMenuItem>
+									)}
+									{canSuspend && (
+										<DropdownMenuItem
+											onClick={() => onSuspend(enrollment)}
+										>
+											<Pause />
+											{t('actions.suspend')}
+										</DropdownMenuItem>
+									)}
+									{canDrop && (
+										<DropdownMenuItem
+											variant="destructive"
+											onClick={() => onDrop(enrollment)}
+										>
+											<UserMinus />
+											{t('actions.drop')}
+										</DropdownMenuItem>
+									)}
+								</DropdownMenuContent>
+							</DropdownMenu>
+						</div>
+					</Can>
+				)}
+				<ChevronRight className="size-4 shrink-0 text-muted-foreground/50" />
+			</div>
 		</div>
 	);
 }
@@ -399,6 +456,7 @@ function SuspendStudentDialog({
 					: ''
 			}
 			confirmLabel={t('roster.suspend.confirm')}
+			cancelLabel={tc('action.cancel')}
 			loading={updateEnrollment.isPending}
 			onConfirm={() => void onSuspend()}
 		/>
@@ -446,6 +504,7 @@ function ReactivateStudentDialog({
 					: ''
 			}
 			confirmLabel={t('roster.reactivate.confirm')}
+			cancelLabel={tc('action.cancel')}
 			loading={updateEnrollment.isPending}
 			onConfirm={() => void onReactivate()}
 		/>

@@ -756,7 +756,6 @@ export const uz = {
 		updated: 'Guruh yangilandi',
 		searchPlaceholder: 'Nomi yoki kodi boʻyicha qidirish…',
 		allCourses: 'Barcha kurslar',
-		allStatuses: 'Barcha holatlar',
 		notSet: 'Belgilanmagan',
 		noRoom: 'Xona yoʻq',
 		unassigned: 'Biriktirilmagan',
@@ -802,8 +801,9 @@ export const uz = {
 			course: 'Kurs',
 			teacher: 'Oʻqituvchi',
 			room: 'Xona',
+			branch: 'Filial',
 			schedule: 'Jadval',
-			enrolled: 'Qabul qilingan',
+			seats: 'Oʻrinlar',
 			capacity: 'Sigʻimi',
 			status: 'Holati',
 		},
@@ -892,30 +892,37 @@ export const uz = {
 		},
 		detail: {
 			notFound: 'Guruh topilmadi.',
+			notFoundDescription:
+				'Havolani tekshirib koʻring yoki guruhlar roʻyxatiga qayting.',
+			actionsLabel: 'Guruh amallari',
 			tab: {
-				overview: 'Umumiy',
-				roster: 'Roʻyxat',
-				sessions: 'Darslar',
+				students: 'Oʻquvchilar',
+				schedule: 'Darslar',
 			},
 			stat: {
-				enrolled: 'Qabul qilingan',
-				capacity: 'Sigʻimi',
-				sessions: 'Darslar',
 				duration: 'Davomiyligi',
 			},
 		},
 		roster: {
-			title: 'Roʻyxat',
+			title: 'Oʻquvchilar',
 			rowActionsAria: 'Qabul amallari',
-			enrolledSummary: '{{filled}} qabul qilingan',
+			seatsOf: '{{capacity}} oʻrindan {{filled}} tasi band',
+			headcount_one: '{{count}} oʻquvchi',
+			headcount_other: '{{count}} oʻquvchi',
+			past_one: '{{count}} oldingi oʻquvchi',
+			past_other: '{{count}} oldingi oʻquvchi',
+			pastHint: 'Chiqarilgan, yakunlagan va koʻchirilgan qabullar.',
+			openStudentAria: '{{name}} profilini ochish',
 			enrolledOn: 'qabul qilingan {{date}}',
 			enroll: 'Oʻquvchilarni qabul qilish',
+			enrollAction: 'Qabul qilish',
+			enrollCount: 'Qabul qilish ({{count}})',
+			loadingStudents: 'Oʻquvchilar yuklanmoqda…',
 			enrollSearchHint:
 				'Faol oʻquvchilarni qidiring va ularni ushbu guruhga qoʻshing.',
 			enrollDescription:
 				'Bu guruh roʻyxatini shakllantirish uchun faol oʻquvchilarni qabul qiling.',
 			emptyTitle: 'Hali oʻquvchi qabul qilinmagan',
-			emptyFiltered: 'Bu holatdagi qabullar yoʻq.',
 			noMatchingStudents: 'Mos oʻquvchi topilmadi.',
 			startDateHint:
 				'Oʻquvchi haqiqatda boshlagan kun. Bu ularning billing sanasini belgilaydi, shuning uchun ularni kech qoʻshsangiz, sanani orqaga suring.',
@@ -946,7 +953,25 @@ export const uz = {
 			emptyTitle: 'Hali darslar yoʻq',
 			emptyDescription:
 				'Darslarni yaratish uchun guruhga boshlanish sanasi, tugash sanasi va haftalik jadval belgilang.',
+			emptyFiltered: 'Bu koʻrinishda darslar yoʻq.',
 			detailTitle: 'Dars tafsilotlari',
+			filter: {
+				upcoming: 'Kelgusi',
+				past: 'Oʻtgan',
+				cancelled: 'Bekor qilingan',
+			},
+			restore: {
+				action: 'Darsni tiklash',
+				confirm: 'Tiklash',
+				done: 'Dars tiklandi',
+				hint: 'Dars jadvalga qaytariladi va xona hamda oʻqituvchi bandligi qayta tekshiriladi.',
+			},
+			topic: {
+				action: 'Mavzuni belgilash',
+				confirm: 'Mavzuni saqlash',
+				done: 'Mavzu saqlandi',
+				placeholder: 'masalan, Oʻqish mashqi',
+			},
 			column: {
 				date: 'Sana',
 				start: 'Boshlanishi',
@@ -963,7 +988,7 @@ export const uz = {
 				reasonPlaceholder: 'masalan, oʻqituvchi band, bayram kuni…',
 				done: 'Dars bekor qilindi',
 				warning:
-					'Qabul qilingan oʻquvchilarga xabar beriladi. Buni ortga qaytarib boʻlmaydi.',
+					'Qabul qilingan oʻquvchilarga xabar beriladi. Darsni keyinroq tiklash mumkin, lekin yuborilgan xabarni qaytarib boʻlmaydi.',
 				reasonRequired: 'Sabab *',
 			},
 			reschedule: {
@@ -988,7 +1013,27 @@ export const uz = {
 			drop: 'Chiqarish',
 			reschedule: 'Koʻchirish',
 			substitute: 'Oʻrinbosar',
+			gradingScale: 'Baholash shkalasi',
 			saveGradingScale: 'Baholash shkalasini saqlash',
+			markActive: 'Faol deb belgilash',
+			markCompleted: 'Yakunlangan deb belgilash',
+			cancelGroup: 'Guruhni bekor qilish',
+			viewInvoices: 'Bu guruh invoyslari',
+		},
+		statusChange: {
+			done: 'Guruh holati yangilandi',
+			COMPLETED: {
+				title: 'Guruh yakunlangan deb belgilansinmi?',
+				description:
+					'Hali oʻtilmagan barcha darslar bekor qilinadi va qabul qilingan oʻquvchilarga xabar beriladi. Oʻtgan darslar, davomat va baholar saqlanadi. Buni ortga qaytarib boʻlmaydi.',
+				confirm: 'Yakunlangan deb belgilash',
+			},
+			CANCELLED: {
+				title: 'Guruh bekor qilinsinmi?',
+				description:
+					'Hali oʻtilmagan barcha darslar bekor qilinadi va qabul qilingan oʻquvchilarga xabar beriladi. Oʻtgan darslar, davomat va baholar saqlanadi. Buni ortga qaytarib boʻlmaydi.',
+				confirm: 'Guruhni bekor qilish',
+			},
 		},
 		schedule: {
 			title: 'Dars jadvali',
@@ -1031,13 +1076,20 @@ export const uz = {
 			title: 'Invoyslar',
 			description: 'Oʻquvchilarga chiqarilgan invoyslar va ularning holati',
 			searchPlaceholder: 'Invoys yoki oʻquvchi boʻyicha qidirish…',
-			generate: 'Invoyslarni yaratish',
 			create: 'Invoys yaratish',
 			loadError: 'Invoyslarni yuklab boʻlmadi. Sahifani yangilang.',
 			emptyFiltered: 'Bu filtrga mos invoys topilmadi.',
 			created: 'Invoys yaratildi',
 			back: 'Invoyslarga qaytish',
 			notFound: 'Invoys topilmadi.',
+			filters: {
+				title: 'Filtrlar',
+				group: 'Guruh',
+				rangeBoth: '{{from}} – {{to}}',
+				rangeFrom: '{{from}} dan boshlab',
+				rangeTo: '{{to}} gacha',
+				remove: 'Filtrni olib tashlash: {{filter}}',
+			},
 			column: {
 				invoice: 'Invoys',
 				student: 'Oʻquvchi',
@@ -1068,14 +1120,6 @@ export const uz = {
 				qty: 'Soni',
 				unit: 'Narxi',
 				amount: 'Summa',
-			},
-			generateDialog: {
-				title: 'Invoyslarni yaratish',
-				description:
-					'Tanlangan davr uchun faol qabullarga invoyslar yaratiladi. Allaqachon chiqarilganlari takrorlanmaydi.',
-				period: 'Davr',
-				confirm: 'Yaratish',
-				done: '{{count}} ta invoys yaratildi',
 			},
 			form: {
 				title: 'Invoys yaratish',
@@ -1272,13 +1316,7 @@ export const uz = {
 			amountPlaceholder: 'masalan, 1 300 000',
 		},
 		generate: {
-			generated: 'Yaratilgan',
 			totalInvoiced: 'Jami hisoblangan',
-			prorated: 'Qismli hisoblangan',
-			skippedAlreadyInvoiced: 'Oʻtkazib yuborildi — allaqachon chiqarilgan',
-			skippedNoFeePlan: 'Oʻtkazib yuborildi — toʻlov rejasi yoʻq',
-			skippedNoSessions: 'Oʻtkazib yuborildi — bu davrda dars boʻlmagan',
-			skippedSuspended: 'Oʻtkazib yuborildi — butun davr toʻxtatilgan',
 		},
 		discountExtra: {
 			promoCode: 'Promo-kod',
@@ -1316,9 +1354,6 @@ export const uz = {
 			current: 'Joriy',
 			manage: 'Boshqarish',
 			close: 'Yopish',
-			done: 'Tayyor',
-			runAnotherPeriod: 'Boshqa davrni ishga tushirish',
-			generateMonthly: 'Oylik invoyslarni yaratish',
 			issueInvoice: 'Invoysni chiqarish',
 			applyWalletCredit: 'Hamyon mablagʻini qoʻllash',
 			void: 'Bekor qilish',
@@ -1438,32 +1473,6 @@ export const uz = {
 			loadError: 'Guruhlarni yuklab boʻlmadi. Sahifani yangilang.',
 			loadingGroups: 'Guruhlar yuklanmoqda…',
 		},
-		generateExtra: {
-			failed: 'Invoyslarni yaratib boʻlmadi',
-			titleAnniversary: 'Muddati kelgan invoyslarni yaratish',
-			descAnniversary:
-				'Oʻz davri boshlangan, lekin hali hisob chiqarilmagan har bir oʻquvchiga invoys chiqaradi. Har bir oʻquvchi oʻz davri — qabul yilligida boshlangan davr — uchun hisoblanadi, shuning uchun oy tanlanmaydi.',
-			descPostpaid:
-				'Tanlangan oyni toʻliq oʻtgach hisoblaydi — bu bitta ishga tushirish ham vaqtga asoslangan oylik qismini, ham dars sarfiga asoslangan qismini qamrab oladi.',
-			descPrepaid: 'Tanlangan oyni boshlanishidan oldin, oldindan hisoblaydi.',
-			consumedMonth: 'Sarflangan oy',
-			billingMonth: 'Hisob-kitob oyi',
-			hintAnniversary:
-				'Tungi ishga tushirish buni allaqachon bajaradi. Undan uzilishdan keyin yetib olish uchun foydalaning — joriy davri uchun allaqachon hisob chiqarilgan oʻquvchilar tegilmaydi.',
-			hintPostpaid:
-				'{{period}} da sarflangan qabullar uchun invoyslar yaratadi. Bu davr uchun mavjud invoyslar tegilmaydi.',
-			hintPrepaid:
-				'{{period}} uchun oldindan invoyslar yaratadi. Bu davr uchun mavjud invoyslar tegilmaydi.',
-			resultTitle: '{{period}} uchun invoyslar yaratildi',
-			invoicesCreated_one: '{{count}} ta invoys yaratildi',
-			invoicesCreated_other: '{{count}} ta invoys yaratildi',
-			proratedSuffix_one: ' ({{count}} ta qismli)',
-			proratedSuffix_other: ' ({{count}} ta qismli)',
-			errorsTitle_one: '{{count}} ta qabulda yaratib boʻlmadi',
-			errorsTitle_other: '{{count}} ta qabulda yaratib boʻlmadi',
-			errorsDescription:
-				'Qolgan ishga tushirish yakunlandi — bular oʻtkazib yuborildi, hisoblanmadi. Qayta ishga tushirib koʻring; sabab uchun server jurnallarini tekshiring.',
-		},
 		policyPage: {
 			managedDescription:
 				'Bu siyosat markazingiz chiqaradigan har bir invoysni boshqaradi, shuning uchun u shu yerda emas, Cohort jamoasi tomonidan sozlanadi. Oʻzgartirish uchun qoʻllab-quvvatlashga murojaat qiling — u keyingi hisob-kitob ishga tushishidan boshlab kuchga kiradi va allaqachon chiqarilgan invoyslarni oʻzgartirmaydi.',
@@ -1472,7 +1481,9 @@ export const uz = {
 		},
 		pickerExtra: {
 			selectGroup: 'Guruhni tanlang…',
+			allGroups: 'Barcha guruhlar',
 			selectStudent: 'Oʻquvchini tanlang…',
+			allStudents: 'Barcha oʻquvchilar',
 		},
 		paymentDetail: {
 			dateTime: 'Sana va vaqt',

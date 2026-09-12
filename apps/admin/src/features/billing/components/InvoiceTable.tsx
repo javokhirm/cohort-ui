@@ -1,3 +1,5 @@
+import type { ReactNode } from 'react';
+
 import { cn, DataTable, StatusBadge, type ColumnDef } from '@repo/ui';
 import { formatDate, formatPrice } from '@repo/utils';
 import { useStatusLabel } from '@repo/i18n';
@@ -9,13 +11,23 @@ interface InvoiceTableProps {
 	invoices: InvoiceResponse[];
 	isLoading?: boolean;
 	onRowClick?: (invoice: InvoiceResponse) => void;
+	/**
+	 * Replaces the default "nothing matched" copy. The page passes one that
+	 * offers to clear the filters, since only the page knows which are applied.
+	 */
+	emptyState?: ReactNode;
 }
 
 function isVoid(invoice: InvoiceResponse) {
 	return invoice.status === 'VOID';
 }
 
-export function InvoiceTable({ invoices, isLoading, onRowClick }: InvoiceTableProps) {
+export function InvoiceTable({
+	invoices,
+	isLoading,
+	onRowClick,
+	emptyState,
+}: InvoiceTableProps) {
 	const statusLabel = useStatusLabel();
 	const t = useAppT('billing');
 	const columns: ColumnDef<InvoiceResponse>[] = [
@@ -112,6 +124,16 @@ export function InvoiceTable({ invoices, isLoading, onRowClick }: InvoiceTablePr
 			size: 110,
 		},
 		{
+			accessorKey: 'issueDate',
+			header: t('invoices.column.issued'),
+			cell: ({ getValue }) => (
+				<span className="text-sm text-muted-foreground">
+					{formatDate(getValue<string>())}
+				</span>
+			),
+			size: 120,
+		},
+		{
 			accessorKey: 'dueDate',
 			header: t('invoices.column.due'),
 			cell: ({ getValue }) => (
@@ -132,9 +154,11 @@ export function InvoiceTable({ invoices, isLoading, onRowClick }: InvoiceTablePr
 			getRowClassName={(row) => (isVoid(row) ? 'opacity-60' : undefined)}
 			onRowClick={onRowClick}
 			emptyState={
-				<div className="py-16 text-center text-sm text-muted-foreground">
-					{t('invoices.emptyFiltered')}
-				</div>
+				emptyState ?? (
+					<div className="py-16 text-center text-sm text-muted-foreground">
+						{t('invoices.emptyFiltered')}
+					</div>
+				)
 			}
 			className="rounded-none border-0"
 		/>
