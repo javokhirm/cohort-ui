@@ -291,30 +291,36 @@ export function InvoiceListPage() {
 										}
 									/>
 								</FilterField>
-								<FilterField
-									label={t('misc.issuedFrom')}
-									htmlFor="invoice-from"
-								>
-									<DatePicker
-										id="invoice-from"
-										value={from}
-										maxDate={to}
-										onChange={(value) =>
-											patchFilters({ from: value })
-										}
-									/>
-								</FilterField>
-								<FilterField
-									label={t('misc.issuedTo')}
-									htmlFor="invoice-to"
-								>
-									<DatePicker
-										id="invoice-to"
-										value={to}
-										minDate={from}
-										onChange={(value) => patchFilters({ to: value })}
-									/>
-								</FilterField>
+								<div className="flex gap-3">
+									<FilterField
+										label={t('misc.issuedFrom')}
+										htmlFor="invoice-from"
+										className="flex-1"
+									>
+										<DatePicker
+											id="invoice-from"
+											value={from}
+											maxDate={to}
+											onChange={(value) =>
+												patchFilters({ from: value })
+											}
+										/>
+									</FilterField>
+									<FilterField
+										label={t('misc.issuedTo')}
+										htmlFor="invoice-to"
+										className="flex-1"
+									>
+										<DatePicker
+											id="invoice-to"
+											value={to}
+											minDate={from}
+											onChange={(value) =>
+												patchFilters({ to: value })
+											}
+										/>
+									</FilterField>
+								</div>
 								<FilterField
 									label={t('misc.dueBefore')}
 									htmlFor="invoice-due-before"
