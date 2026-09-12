@@ -64,8 +64,8 @@ function SheetContent({
 				{...props}
 			>
 				{children}
-				<SheetPrimitive.Close className="absolute top-4 right-4 rounded-sm opacity-70 transition-opacity hover:opacity-100 focus-visible:outline-none focus-visible:ring-[3px] focus-visible:ring-ring/40 disabled:pointer-events-none [&_svg]:size-4 [&_svg]:shrink-0">
-					<X />
+				<SheetPrimitive.Close className="absolute top-4 right-4 rounded-sm opacity-70 transition-opacity hover:opacity-100 focus-visible:outline-none focus-visible:ring-[3px] focus-visible:ring-ring/40 disabled:pointer-events-none">
+					<X className="size-6 cursor-pointer shrink-0" />
 					<span className="sr-only">Close</span>
 				</SheetPrimitive.Close>
 			</SheetPrimitive.Content>

@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { useNavigate, useSearch } from '@tanstack/react-router';
-import { Check, Download, Lock } from 'lucide-react';
+import { Check, Lock } from 'lucide-react';
 
 import {
 	Button,
@@ -15,7 +15,7 @@ import {
 	SelectValue,
 	StatCard,
 } from '@repo/ui';
-import { formatMoney } from '@repo/utils';
+import { formatPriceCompact } from '@repo/utils';
 
 import { usePermissions } from '@/features/auth/hooks';
 import { useStaffList } from '@/features/hr/api/staff.queries';
@@ -26,7 +26,6 @@ import type { PayrollRowStatus } from '../api/keys';
 import { FinalizePeriodDialog } from '../components/FinalizePeriodDialog';
 import { PayrollPeriodTable } from '../components/PayrollPeriodTable';
 import { PeriodSelector } from '../components/PeriodSelector';
-import { buildPayrollCsv, downloadCsv } from '../lib/export-csv';
 import { currentMonth, formatMonthLabel } from '../lib/month';
 import { useAppT } from '@/locales';
 
@@ -65,7 +64,7 @@ export function PayrollPage() {
 	const summary = data?.summary;
 	const periodFinalized = data?.periodStatus === 'FINALIZED';
 	const statValue = (amount: number | undefined) =>
-		amount == null ? '—' : formatMoney(amount);
+		amount == null ? '—' : formatPriceCompact(amount);
 
 	function handleMonthChange(value: string) {
 		void navigate({
@@ -89,26 +88,15 @@ export function PayrollPage() {
 		});
 	}
 
-	function handleExport() {
-		downloadCsv(`payroll-${month}.csv`, buildPayrollCsv(rows));
-	}
-
 	return (
 		<div className="mx-auto flex max-w-7xl flex-col gap-6">
 			<PageHeader
 				title={t('title')}
 				description={`${formatMonthLabel(month)} · ${t('headerSubtitle')}`}
+				className="sm:items-start"
 				actions={
 					<div className="flex flex-wrap items-center gap-2">
 						<PeriodSelector month={month} onMonthChange={handleMonthChange} />
-						<Button
-							variant="outline"
-							onClick={handleExport}
-							disabled={rows.length === 0}
-						>
-							<Download className="mr-1.5 size-4" />
-							{t('export')}
-						</Button>
 						{periodFinalized ? (
 							<div className="flex h-9 items-center gap-1.5 rounded-lg border border-border bg-muted px-3 text-sm font-semibold text-muted-foreground">
 								<Check className="size-4" />
@@ -129,7 +117,7 @@ export function PayrollPage() {
 				}
 			/>
 
-			<div className="grid grid-cols-1 gap-4 sm:grid-cols-3">
+			<div className="grid grid-cols-2 gap-3 sm:grid-cols-3 sm:gap-4">
 				<StatCard
 					label={t('stat.totalComputed')}
 					value={statValue(summary?.totalComputed)}

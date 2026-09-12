@@ -3,10 +3,10 @@ import { useNavigate, useSearch } from '@tanstack/react-router';
 import { X } from 'lucide-react';
 
 import {
+	ActiveFilterChips,
 	Button,
 	Card,
 	DatePicker,
-	Label,
 	PageHeader,
 	Pagination,
 	SearchFilterBar,
@@ -15,10 +15,15 @@ import {
 	SelectItem,
 	SelectTrigger,
 	SelectValue,
+	type ActiveFilterChip,
 } from '@repo/ui';
+import { formatDate } from '@repo/utils';
 import { useStatusLabel, useT } from '@repo/i18n';
 import { useAppT } from '@/locales';
 
+import { FilterField } from '@/components/FilterField';
+import { FilterSheet } from '@/components/FilterSheet';
+import { useStudent } from '@/features/people/api/students.queries';
 import { usePaymentList } from '../api/payments.queries';
 import type { PaymentListFilters } from '../api/keys';
 import { PAYMENT_METHOD_OPTIONS, PAYMENT_STATUS_FILTERS } from '../lib/payment-options';
@@ -28,6 +33,12 @@ import { StudentPicker } from '../components/StudentPicker';
 
 const PAGE_SIZE = 20;
 const ALL = 'all';
+
+/** The scope filters — everything the toolbar narrows by except the status chips. */
+type PaymentScopeFilters = Pick<
+	PaymentListFilters,
+	'method' | 'studentId' | 'from' | 'to'
+>;
 
 export function PaymentListPage() {
 	const t = useAppT('billing');
@@ -46,6 +57,14 @@ export function PaymentListPage() {
 		from: '/_authed/payments',
 	});
 
+	/** The filter sheet's pending edits — only reaches the URL on Apply. */
+	const [draft, setDraft] = useState<PaymentScopeFilters>({
+		method,
+		studentId,
+		from,
+		to,
+	});
+
 	const filters: PaymentListFilters = {
 		page,
 		limit: PAGE_SIZE,
@@ -60,7 +79,13 @@ export function PaymentListPage() {
 	const payments = data?.rows ?? [];
 	const total = data?.total ?? 0;
 
-	const hasExtraFilters = method != null || studentId != null || !!from || !!to;
+	const { data: selectedStudent } = useStudent(studentId ?? 0);
+
+	function patchFilters(patch: Partial<PaymentScopeFilters>) {
+		void navigate({
+			search: (prev) => ({ ...prev, ...patch, page: undefined }),
+		});
+	}
 
 	function handleStatusChange(value: (typeof PAYMENT_STATUS_FILTERS)[number]['value']) {
 		void navigate({
@@ -68,46 +93,102 @@ export function PaymentListPage() {
 		});
 	}
 
-	function handleMethodChange(value: string) {
+	/** One meaning of "clear", everywhere it is offered: nothing left narrowing the list. */
+	function handleClearFilters() {
 		void navigate({
-			search: (prev) => ({
-				...prev,
-				method:
-					value === ALL
-						? undefined
-						: (value as NonNullable<PaymentListFilters['method']>),
-				page: undefined,
-			}),
+			search: () => ({}),
 		});
 	}
 
-	function handleStudentChange(value: number | undefined) {
-		void navigate({
-			search: (prev) => ({ ...prev, studentId: value, page: undefined }),
+	/** Resyncs the sheet's draft from applied state whenever it opens, so a cancelled edit never lingers. */
+	function handleFilterSheetOpenChange(open: boolean) {
+		if (open) {
+			setDraft({ method, studentId, from, to });
+		}
+	}
+
+	function handleApplyFilters() {
+		patchFilters(draft);
+	}
+
+	/** Clears the sheet's draft only — still requires Apply to take effect. */
+	function handleResetDraft() {
+		setDraft({
+			method: undefined,
+			studentId: undefined,
+			from: undefined,
+			to: undefined,
 		});
 	}
 
-	function handleDateChange(field: 'from' | 'to', value: string) {
-		void navigate({
-			search: (prev) => ({ ...prev, [field]: value || undefined, page: undefined }),
-		});
-	}
-
-	function handleClearExtraFilters() {
-		void navigate({
-			search: (prev) => ({
-				...prev,
-				method: undefined,
-				studentId: undefined,
-				from: undefined,
-				to: undefined,
-				page: undefined,
-			}),
-		});
-	}
+	const draftActive =
+		draft.method != null || draft.studentId != null || !!draft.from || !!draft.to;
 
 	function handlePage(newPage: number) {
 		void navigate({ search: (prev) => ({ ...prev, page: newPage }) });
+	}
+
+	/**
+	 * One chip per applied scope filter. The paid-date range is a single chip
+	 * even though it is two controls — the count on the Filters trigger is taken
+	 * from this list, so the badge and the chips can never disagree.
+	 */
+	const chips: ActiveFilterChip[] = [];
+	const toChip = (
+		id: string,
+		label: string,
+		value: string,
+		onRemove: () => void,
+	): ActiveFilterChip => ({
+		id,
+		label,
+		value,
+		removeLabel: t('payments.filters.remove', { filter: label }),
+		onRemove,
+	});
+
+	if (studentId != null) {
+		chips.push(
+			toChip(
+				'student',
+				t('payments.column.student'),
+				selectedStudent
+					? `${selectedStudent.user.firstName} ${selectedStudent.user.lastName}`
+					: tc('state.loading'),
+				() => patchFilters({ studentId: undefined }),
+			),
+		);
+	}
+
+	if (method != null) {
+		chips.push(
+			toChip(
+				'method',
+				t('payments.column.method'),
+				t(`paymentMethod.${method}`),
+				() => patchFilters({ method: undefined }),
+			),
+		);
+	}
+
+	const paidRange =
+		from && to
+			? t('payments.filters.rangeBoth', {
+					from: formatDate(from),
+					to: formatDate(to),
+				})
+			: from
+				? t('payments.filters.rangeFrom', { from: formatDate(from) })
+				: to
+					? t('payments.filters.rangeTo', { to: formatDate(to) })
+					: null;
+
+	if (paidRange) {
+		chips.push(
+			toChip('paid', t('payments.column.date'), paidRange, () =>
+				patchFilters({ from: undefined, to: undefined }),
+			),
+		);
 	}
 
 	return (
@@ -127,79 +208,118 @@ export function PaymentListPage() {
 						active: status === f.value,
 						onClick: () => handleStatusChange(f.value),
 					}))}
+					actions={
+						<FilterSheet
+							label={t('payments.filters.title')}
+							count={chips.length}
+							onOpenChange={handleFilterSheetOpenChange}
+							onApply={handleApplyFilters}
+							resetAction={
+								draftActive && (
+									<Button
+										type="button"
+										variant="ghost"
+										size="sm"
+										onClick={handleResetDraft}
+									>
+										<X className="mr-1.5 size-3.5" />
+										{t('misc.clearFilters')}
+									</Button>
+								)
+							}
+						>
+							<FilterField label={t('payments.column.method')}>
+								<Select
+									value={draft.method ?? ALL}
+									onValueChange={(value) =>
+										setDraft((prev) => ({
+											...prev,
+											method:
+												value === ALL
+													? undefined
+													: (value as NonNullable<
+															PaymentListFilters['method']
+														>),
+										}))
+									}
+								>
+									<SelectTrigger className="w-full" size="sm">
+										<SelectValue
+											placeholder={t('payments.allMethods')}
+										/>
+									</SelectTrigger>
+									<SelectContent>
+										<SelectItem value={ALL}>
+											{t('payments.allMethods')}
+										</SelectItem>
+										{PAYMENT_METHOD_OPTIONS.map((o) => (
+											<SelectItem key={o.value} value={o.value}>
+												{t(`paymentMethod.${o.value}`)}
+											</SelectItem>
+										))}
+									</SelectContent>
+								</Select>
+							</FilterField>
+							<FilterField label={t('payments.column.student')}>
+								<StudentPicker
+									value={draft.studentId}
+									onChange={(value) =>
+										setDraft((prev) => ({
+											...prev,
+											studentId: value,
+										}))
+									}
+									onClear={() =>
+										setDraft((prev) => ({
+											...prev,
+											studentId: undefined,
+										}))
+									}
+								/>
+							</FilterField>
+							<div className="flex gap-3">
+								<FilterField
+									label={t('misc.paidFrom')}
+									htmlFor="payment-from"
+									className="flex-1"
+								>
+									<DatePicker
+										id="payment-from"
+										value={draft.from}
+										maxDate={draft.to}
+										onChange={(value) =>
+											setDraft((prev) => ({ ...prev, from: value }))
+										}
+									/>
+								</FilterField>
+								<FilterField
+									label={t('misc.paidTo')}
+									htmlFor="payment-to"
+									className="flex-1"
+								>
+									<DatePicker
+										id="payment-to"
+										value={draft.to}
+										minDate={draft.from}
+										onChange={(value) =>
+											setDraft((prev) => ({ ...prev, to: value }))
+										}
+									/>
+								</FilterField>
+							</div>
+						</FilterSheet>
+					}
 				/>
 
-				<div className="flex flex-wrap items-end gap-4">
-					<div className="flex flex-col gap-1.5">
-						<Label className="text-xs text-muted-foreground">
-							{t('payments.column.method')}
-						</Label>
-						<Select value={method ?? ALL} onValueChange={handleMethodChange}>
-							<SelectTrigger className="h-9 w-44" size="sm">
-								<SelectValue placeholder={t('payments.allMethods')} />
-							</SelectTrigger>
-							<SelectContent>
-								<SelectItem value={ALL}>
-									{t('payments.allMethods')}
-								</SelectItem>
-								{PAYMENT_METHOD_OPTIONS.map((o) => (
-									<SelectItem key={o.value} value={o.value}>
-										{t(`paymentMethod.${o.value}`)}
-									</SelectItem>
-								))}
-							</SelectContent>
-						</Select>
-					</div>
-					<div className="flex flex-col gap-1.5">
-						<Label className="text-xs text-muted-foreground">
-							{t('payments.column.student')}
-						</Label>
-						<div className="w-56">
-							<StudentPicker
-								value={studentId}
-								onChange={handleStudentChange}
-							/>
-						</div>
-					</div>
-					<div className="flex flex-col gap-1.5">
-						<Label
-							htmlFor="payment-from"
-							className="text-xs text-muted-foreground"
-						>
-							{t('misc.paidFrom')}
-						</Label>
-						<DatePicker
-							id="payment-from"
-							value={from}
-							onChange={(value) => handleDateChange('from', value ?? '')}
-							className="h-9 w-37.5"
-						/>
-					</div>
-					<div className="flex flex-col gap-1.5">
-						<Label
-							htmlFor="payment-to"
-							className="text-xs text-muted-foreground"
-						>
-							{t('misc.paidTo')}
-						</Label>
-						<DatePicker
-							id="payment-to"
-							value={to}
-							onChange={(value) => handleDateChange('to', value ?? '')}
-							className="h-9 w-37.5"
-						/>
-					</div>
-					{hasExtraFilters && (
-						<Button
-							variant="ghost"
-							size="sm"
-							onClick={handleClearExtraFilters}
-						>
+				<ActiveFilterChips
+					chips={chips}
+					action={
+						<Button variant="ghost" size="sm" onClick={handleClearFilters}>
 							<X className="mr-1.5 size-3.5" />
 							{t('misc.clearFilters')}
 						</Button>
-					)}
-				</div>
+					}
+				/>
 
 				{isError && (
 					<div className="rounded-lg border border-destructive/30 bg-destructive/5 px-4 py-3 text-sm text-destructive">

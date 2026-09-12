@@ -1117,6 +1117,13 @@ export const en: TranslationsOf<typeof uz> = {
 			loadError: 'Failed to load payments. Please refresh.',
 			emptyFiltered: 'No payments match this filter.',
 			detailTitle: 'Payment details',
+			filters: {
+				title: 'Filters',
+				rangeBoth: '{{from}} – {{to}}',
+				rangeFrom: 'From {{from}}',
+				rangeTo: 'Until {{to}}',
+				remove: 'Remove filter: {{filter}}',
+			},
 			column: {
 				payment: 'Payment',
 				student: 'Student',
@@ -1524,7 +1531,6 @@ export const en: TranslationsOf<typeof uz> = {
 		unfinalize: 'Unfinalize',
 		markAsPaid: 'Mark as paid',
 		record: 'Record',
-		export: 'Export',
 		allStaff: 'All staff',
 		howCalculated: 'How this is calculated',
 		paid: 'Paid',

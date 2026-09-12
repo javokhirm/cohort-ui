@@ -1146,6 +1146,13 @@ export const uz = {
 			loadError: 'Toʻlovlarni yuklab boʻlmadi. Sahifani yangilang.',
 			emptyFiltered: 'Bu filtrga mos toʻlov topilmadi.',
 			detailTitle: 'Toʻlov tafsilotlari',
+			filters: {
+				title: 'Filtrlar',
+				rangeBoth: '{{from}} – {{to}}',
+				rangeFrom: '{{from}} dan boshlab',
+				rangeTo: '{{to}} gacha',
+				remove: 'Filtrni olib tashlash: {{filter}}',
+			},
 			column: {
 				payment: 'Toʻlov',
 				student: 'Oʻquvchi',
@@ -1554,7 +1561,6 @@ export const uz = {
 		unfinalize: 'Yakunlashni bekor qilish',
 		markAsPaid: 'Toʻlangan deb belgilash',
 		record: 'Qayd etish',
-		export: 'Eksport',
 		allStaff: 'Barcha xodimlar',
 		howCalculated: 'Bu qanday hisoblanadi',
 		paid: 'Toʻlangan',

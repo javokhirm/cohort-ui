@@ -19,7 +19,7 @@ interface ActiveFilterChipsProps extends React.ComponentProps<'div'> {
 
 /**
  * The row of removable chips naming every filter currently narrowing a list —
- * the readable counterpart to a <FilterPopover/> that has the controls hidden.
+ * the readable counterpart to a <FilterSheet/> that has the controls hidden.
  *
  * It exists so a filtered list is never unexplained: a user who lands on one by
  * deep link can see what is being applied, drop any single filter without

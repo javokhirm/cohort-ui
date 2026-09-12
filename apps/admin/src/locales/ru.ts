@@ -1153,6 +1153,13 @@ export const ru: TranslationsOf<typeof uz> = {
 			loadError: 'Не удалось загрузить платежи. Обновите страницу.',
 			emptyFiltered: 'Нет платежей по этому фильтру.',
 			detailTitle: 'Детали платежа',
+			filters: {
+				title: 'Фильтры',
+				rangeBoth: '{{from}} – {{to}}',
+				rangeFrom: 'С {{from}}',
+				rangeTo: 'До {{to}}',
+				remove: 'Убрать фильтр: {{filter}}',
+			},
 			column: {
 				payment: 'Платёж',
 				student: 'Ученик',
@@ -1562,7 +1569,6 @@ export const ru: TranslationsOf<typeof uz> = {
 		unfinalize: 'Отменить утверждение',
 		markAsPaid: 'Отметить выплаченной',
 		record: 'Записать',
-		export: 'Экспорт',
 		allStaff: 'Все сотрудники',
 		howCalculated: 'Как это рассчитано',
 		paid: 'Оплачено',

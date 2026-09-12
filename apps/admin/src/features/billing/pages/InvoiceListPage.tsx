@@ -17,13 +17,13 @@ import {
 	TooltipTrigger,
 	type ActiveFilterChip,
 } from '@repo/ui';
-import { formatDate, formatPrice } from '@repo/utils';
+import { formatDate, formatPriceCompact } from '@repo/utils';
 import { useStatusLabel, useT } from '@repo/i18n';
 import { useAppT } from '@/locales';
 
 import { Can } from '@/components/Can';
 import { FilterField } from '@/components/FilterField';
-import { FilterPopover } from '@/components/FilterPopover';
+import { FilterSheet } from '@/components/FilterSheet';
 import { useGroup } from '@/features/groups/api/groups.queries';
 import { useStudent } from '@/features/people/api/students.queries';
 import { useInvoiceList, useInvoiceSummary } from '../api/invoices.queries';
@@ -61,6 +61,15 @@ export function InvoiceListPage() {
 
 	const [createOpen, setCreateOpen] = useState(false);
 
+	/** The filter sheet's pending edits — only reaches the URL on Apply. */
+	const [draft, setDraft] = useState<InvoiceScopeFilters>({
+		studentId,
+		groupId,
+		from,
+		to,
+		dueBefore,
+	});
+
 	const filters: InvoiceListFilters = {
 		page,
 		limit: PAGE_SIZE,
@@ -91,7 +100,7 @@ export function InvoiceListPage() {
 	const { data: summary, isLoading: isSummaryLoading } =
 		useInvoiceSummary(summaryFilters);
 	const statValue = (amount: number) =>
-		isSummaryLoading ? '—' : `${formatPrice(amount)} UZS`;
+		isSummaryLoading ? '—' : formatPriceCompact(amount);
 
 	const { data: selectedStudent } = useStudent(studentId ?? 0);
 	const { data: selectedGroup } = useGroup(groupId ?? 0);
@@ -114,6 +123,35 @@ export function InvoiceListPage() {
 			search: () => ({}),
 		});
 	}
+
+	/** Resyncs the sheet's draft from applied state whenever it opens, so a cancelled edit never lingers. */
+	function handleFilterSheetOpenChange(open: boolean) {
+		if (open) {
+			setDraft({ studentId, groupId, from, to, dueBefore });
+		}
+	}
+
+	function handleApplyFilters() {
+		patchFilters(draft);
+	}
+
+	/** Clears the sheet's draft only — still requires Apply to take effect. */
+	function handleResetDraft() {
+		setDraft({
+			studentId: undefined,
+			groupId: undefined,
+			from: undefined,
+			to: undefined,
+			dueBefore: undefined,
+		});
+	}
+
+	const draftActive =
+		draft.studentId != null ||
+		draft.groupId != null ||
+		!!draft.from ||
+		!!draft.to ||
+		!!draft.dueBefore;
 
 	function handlePage(newPage: number) {
 		void navigate({ search: (prev) => ({ ...prev, page: newPage }) });
@@ -209,7 +247,7 @@ export function InvoiceListPage() {
 				}
 			/>
 
-			<div className="grid grid-cols-1 gap-4 sm:grid-cols-3">
+			<div className="grid grid-cols-2 gap-3 sm:grid-cols-3 sm:gap-4">
 				<StatCard
 					label={t('generate.totalInvoiced')}
 					value={statValue(summary?.totalInvoiced ?? 0)}
@@ -244,39 +282,50 @@ export function InvoiceListPage() {
 					}))}
 					actions={
 						<>
-							<FilterPopover
+							<FilterSheet
 								label={t('invoices.filters.title')}
 								count={chips.length}
-								footer={
-									<Button
-										variant="ghost"
-										size="sm"
-										onClick={handleClearFilters}
-									>
-										<X className="mr-1.5 size-3.5" />
-										{t('misc.clearFilters')}
-									</Button>
+								onOpenChange={handleFilterSheetOpenChange}
+								onApply={handleApplyFilters}
+								resetAction={
+									draftActive && (
+										<Button
+											type="button"
+											variant="ghost"
+											size="sm"
+											onClick={handleResetDraft}
+										>
+											<X className="mr-1.5 size-3.5" />
+											{t('misc.clearFilters')}
+										</Button>
+									)
 								}
 							>
 								<FilterField label={t('invoices.column.student')}>
 									<StudentPicker
-										value={studentId}
+										value={draft.studentId}
 										onChange={(value) =>
-											patchFilters({ studentId: value })
+											setDraft((prev) => ({ ...prev, studentId: value }))
 										}
 										onClear={() =>
-											patchFilters({ studentId: undefined })
+											setDraft((prev) => ({
+												...prev,
+												studentId: undefined,
+											}))
 										}
 									/>
 								</FilterField>
 								<FilterField label={t('invoices.filters.group')}>
 									<GroupPicker
-										value={groupId}
+										value={draft.groupId}
 										onChange={(value) =>
-											patchFilters({ groupId: value })
+											setDraft((prev) => ({ ...prev, groupId: value }))
 										}
 										onClear={() =>
-											patchFilters({ groupId: undefined })
+											setDraft((prev) => ({
+												...prev,
+												groupId: undefined,
+											}))
 										}
 									/>
 								</FilterField>
@@ -288,10 +337,10 @@ export function InvoiceListPage() {
 									>
 										<DatePicker
 											id="invoice-from"
-											value={from}
-											maxDate={to}
+											value={draft.from}
+											maxDate={draft.to}
 											onChange={(value) =>
-												patchFilters({ from: value })
+												setDraft((prev) => ({ ...prev, from: value }))
 											}
 										/>
 									</FilterField>
@@ -302,10 +351,10 @@ export function InvoiceListPage() {
 									>
 										<DatePicker
 											id="invoice-to"
-											value={to}
-											minDate={from}
+											value={draft.to}
+											minDate={draft.from}
 											onChange={(value) =>
-												patchFilters({ to: value })
+												setDraft((prev) => ({ ...prev, to: value }))
 											}
 										/>
 									</FilterField>
@@ -316,13 +365,13 @@ export function InvoiceListPage() {
 								>
 									<DatePicker
 										id="invoice-due-before"
-										value={dueBefore}
+										value={draft.dueBefore}
 										onChange={(value) =>
-											patchFilters({ dueBefore: value })
+											setDraft((prev) => ({ ...prev, dueBefore: value }))
 										}
 									/>
 								</FilterField>
-							</FilterPopover>
+							</FilterSheet>
 							<Tooltip>
 								<TooltipTrigger asChild>
 									<span className="inline-flex">
