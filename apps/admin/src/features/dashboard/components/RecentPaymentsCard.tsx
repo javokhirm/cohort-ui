@@ -1,9 +1,11 @@
+import { useState } from 'react';
 import { Wallet } from 'lucide-react';
 
 import { EmptyState, Separator } from '@repo/ui';
 import { formatPriceCompact, formatRelative } from '@repo/utils';
 
 import { usePaymentList } from '@/features/billing/api/payments.queries';
+import { PaymentDetailSheet } from '@/features/billing/components/PaymentDetailSheet';
 
 import { PanelSkeleton } from './DashboardSkeletons';
 import { PanelCard } from './PanelCard';
@@ -23,47 +25,68 @@ export function RecentPaymentsCard() {
 		status: 'SUCCEEDED',
 		limit: 5,
 	});
+	const [selectedPaymentId, setSelectedPaymentId] = useState<number | null>(null);
 
 	if (isLoading) return <PanelSkeleton />;
 	if (isError || !data)
 		return <PanelError title={t('card.recentPayments')} onRetry={refetch} />;
 
 	return (
-		<PanelCard title={t('card.recentPayments')} flush>
-			{data.rows.length === 0 ? (
-				<EmptyState
-					icon={<Wallet />}
-					title={t('card.noPaymentsTitle')}
-					description={t('card.noPaymentsDescription')}
-				/>
-			) : (
-				<ul>
-					{data.rows.map((payment, i) => (
-						<li key={payment.id}>
-							{i > 0 && <Separator />}
-							<div className="flex items-center gap-4 px-5 py-3">
-								<span className="flex size-9 shrink-0 items-center justify-center rounded-lg bg-tone-green-bg text-tone-green-fg">
-									<Wallet className="size-4" />
-								</span>
-								<div className="min-w-0 flex-1">
-									<p className="truncate text-sm font-medium">
-										{payment.studentName}
-									</p>
-									<p className="truncate text-xs text-muted-foreground">
-										{methodLabel(payment.method)}
-										{payment.paidAt
-											? ` · ${formatRelative(payment.paidAt)}`
-											: ''}
-									</p>
+		<>
+			<PanelCard title={t('card.recentPayments')} flush>
+				{data.rows.length === 0 ? (
+					<EmptyState
+						icon={<Wallet />}
+						title={t('card.noPaymentsTitle')}
+						description={t('card.noPaymentsDescription')}
+					/>
+				) : (
+					<ul>
+						{data.rows.map((payment, i) => (
+							<li key={payment.id}>
+								{i > 0 && <Separator />}
+								<div
+									role="button"
+									tabIndex={0}
+									onClick={() => setSelectedPaymentId(payment.id)}
+									onKeyDown={(e) => {
+										if (e.key === 'Enter' || e.key === ' ') {
+											e.preventDefault();
+											setSelectedPaymentId(payment.id);
+										}
+									}}
+									className="flex cursor-pointer items-center gap-4 px-5 py-3 hover:bg-muted/50"
+								>
+									<span className="flex size-9 shrink-0 items-center justify-center rounded-lg bg-tone-green-bg text-tone-green-fg">
+										<Wallet className="size-4" />
+									</span>
+									<div className="min-w-0 flex-1">
+										<p className="truncate text-sm font-medium">
+											{payment.studentName}
+										</p>
+										<p className="truncate text-xs text-muted-foreground">
+											{methodLabel(payment.method)}
+											{payment.paidAt
+												? ` · ${formatRelative(payment.paidAt)}`
+												: ''}
+										</p>
+									</div>
+									<span className="shrink-0 text-sm font-semibold tabular-nums text-tone-green-fg">
+										{formatPriceCompact(payment.amount)}
+									</span>
 								</div>
-								<span className="shrink-0 text-sm font-semibold tabular-nums text-tone-green-fg">
-									{formatPriceCompact(payment.amount)}
-								</span>
-							</div>
-						</li>
-					))}
-				</ul>
-			)}
-		</PanelCard>
+							</li>
+						))}
+					</ul>
+				)}
+			</PanelCard>
+			<PaymentDetailSheet
+				paymentId={selectedPaymentId}
+				open={selectedPaymentId != null}
+				onOpenChange={(open) => {
+					if (!open) setSelectedPaymentId(null);
+				}}
+			/>
+		</>
 	);
 }
