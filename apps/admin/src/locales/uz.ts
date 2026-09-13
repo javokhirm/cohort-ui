@@ -327,7 +327,6 @@ export const uz = {
 		description: 'Oʻquvchilar yozuvlari, qabullar va balanslarni boshqarish',
 		add: 'Oʻquvchi qoʻshish',
 		searchPlaceholder: 'Ism yoki kod boʻyicha qidirish…',
-		export: 'Eksport',
 		created: 'Oʻquvchi qoʻshildi',
 		updated: 'Oʻquvchi yangilandi',
 		column: {

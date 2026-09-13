@@ -320,7 +320,6 @@ export const ru: TranslationsOf<typeof uz> = {
 		description: 'Управление карточками учеников, зачислениями и балансами',
 		add: 'Добавить ученика',
 		searchPlaceholder: 'Поиск по имени или коду…',
-		export: 'Экспорт',
 		created: 'Ученик добавлен',
 		updated: 'Ученик обновлён',
 		column: {

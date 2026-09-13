@@ -306,7 +306,6 @@ export const en: TranslationsOf<typeof uz> = {
 		description: 'Manage student records, enrollments and balances',
 		add: 'Add student',
 		searchPlaceholder: 'Search name or code…',
-		export: 'Export',
 		created: 'Student added successfully',
 		updated: 'Student updated',
 		column: {

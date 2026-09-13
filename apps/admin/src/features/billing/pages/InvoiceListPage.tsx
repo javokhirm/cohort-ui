@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { useNavigate, useSearch } from '@tanstack/react-router';
-import { Download, Plus, SearchX, X } from 'lucide-react';
+import { Plus, SearchX, X } from 'lucide-react';
 
 import {
 	ActiveFilterChips,
@@ -12,9 +12,6 @@ import {
 	Pagination,
 	SearchFilterBar,
 	StatCard,
-	Tooltip,
-	TooltipContent,
-	TooltipTrigger,
 	type ActiveFilterChip,
 } from '@repo/ui';
 import { formatDate, formatPriceCompact } from '@repo/utils';
@@ -281,126 +278,111 @@ export function InvoiceListPage() {
 						onClick: () => handleStatusChange(f.value),
 					}))}
 					actions={
-						<>
-							<FilterSheet
-								label={t('invoices.filters.title')}
-								count={chips.length}
-								onOpenChange={handleFilterSheetOpenChange}
-								onApply={handleApplyFilters}
-								resetAction={
-									draftActive && (
-										<Button
-											type="button"
-											variant="ghost"
-											size="sm"
-											onClick={handleResetDraft}
-										>
-											<X className="mr-1.5 size-3.5" />
-											{t('misc.clearFilters')}
-										</Button>
-									)
-								}
-							>
-								<FilterField label={t('invoices.column.student')}>
-									<StudentPicker
-										value={draft.studentId}
-										onChange={(value) =>
-											setDraft((prev) => ({
-												...prev,
-												studentId: value,
-											}))
-										}
-										onClear={() =>
-											setDraft((prev) => ({
-												...prev,
-												studentId: undefined,
-											}))
-										}
-									/>
-								</FilterField>
-								<FilterField label={t('invoices.filters.group')}>
-									<GroupPicker
-										value={draft.groupId}
-										onChange={(value) =>
-											setDraft((prev) => ({
-												...prev,
-												groupId: value,
-											}))
-										}
-										onClear={() =>
-											setDraft((prev) => ({
-												...prev,
-												groupId: undefined,
-											}))
-										}
-									/>
-								</FilterField>
-								<div className="flex gap-3">
-									<FilterField
-										label={t('misc.issuedFrom')}
-										htmlFor="invoice-from"
-										className="flex-1"
+						<FilterSheet
+							label={t('invoices.filters.title')}
+							count={chips.length}
+							onOpenChange={handleFilterSheetOpenChange}
+							onApply={handleApplyFilters}
+							resetAction={
+								draftActive && (
+									<Button
+										type="button"
+										variant="ghost"
+										size="sm"
+										onClick={handleResetDraft}
 									>
-										<DatePicker
-											id="invoice-from"
-											value={draft.from}
-											maxDate={draft.to}
-											onChange={(value) =>
-												setDraft((prev) => ({
-													...prev,
-													from: value,
-												}))
-											}
-										/>
-									</FilterField>
-									<FilterField
-										label={t('misc.issuedTo')}
-										htmlFor="invoice-to"
-										className="flex-1"
-									>
-										<DatePicker
-											id="invoice-to"
-											value={draft.to}
-											minDate={draft.from}
-											onChange={(value) =>
-												setDraft((prev) => ({
-													...prev,
-													to: value,
-												}))
-											}
-										/>
-									</FilterField>
-								</div>
+										<X className="mr-1.5 size-3.5" />
+										{t('misc.clearFilters')}
+									</Button>
+								)
+							}
+						>
+							<FilterField label={t('invoices.column.student')}>
+								<StudentPicker
+									value={draft.studentId}
+									onChange={(value) =>
+										setDraft((prev) => ({
+											...prev,
+											studentId: value,
+										}))
+									}
+									onClear={() =>
+										setDraft((prev) => ({
+											...prev,
+											studentId: undefined,
+										}))
+									}
+								/>
+							</FilterField>
+							<FilterField label={t('invoices.filters.group')}>
+								<GroupPicker
+									value={draft.groupId}
+									onChange={(value) =>
+										setDraft((prev) => ({
+											...prev,
+											groupId: value,
+										}))
+									}
+									onClear={() =>
+										setDraft((prev) => ({
+											...prev,
+											groupId: undefined,
+										}))
+									}
+								/>
+							</FilterField>
+							<div className="flex gap-3">
 								<FilterField
-									label={t('misc.dueBefore')}
-									htmlFor="invoice-due-before"
+									label={t('misc.issuedFrom')}
+									htmlFor="invoice-from"
+									className="flex-1"
 								>
 									<DatePicker
-										id="invoice-due-before"
-										value={draft.dueBefore}
+										id="invoice-from"
+										value={draft.from}
+										maxDate={draft.to}
 										onChange={(value) =>
 											setDraft((prev) => ({
 												...prev,
-												dueBefore: value,
+												from: value,
 											}))
 										}
 									/>
 								</FilterField>
-							</FilterSheet>
-							<Tooltip>
-								<TooltipTrigger asChild>
-									<span className="inline-flex">
-										<Button variant="outline" disabled>
-											<Download className="mr-1.5 size-4" />
-											{tc('action.export')}
-										</Button>
-									</span>
-								</TooltipTrigger>
-								<TooltipContent>
-									{t('invoiceExtra.notAvailableYet')}
-								</TooltipContent>
-							</Tooltip>
-						</>
+								<FilterField
+									label={t('misc.issuedTo')}
+									htmlFor="invoice-to"
+									className="flex-1"
+								>
+									<DatePicker
+										id="invoice-to"
+										value={draft.to}
+										minDate={draft.from}
+										onChange={(value) =>
+											setDraft((prev) => ({
+												...prev,
+												to: value,
+											}))
+										}
+									/>
+								</FilterField>
+							</div>
+							<FilterField
+								label={t('misc.dueBefore')}
+								htmlFor="invoice-due-before"
+							>
+								<DatePicker
+									id="invoice-due-before"
+									value={draft.dueBefore}
+									onChange={(value) =>
+										setDraft((prev) => ({
+											...prev,
+											dueBefore: value,
+										}))
+									}
+								/>
+							</FilterField>
+						</FilterSheet>
 					}
 				/>
 

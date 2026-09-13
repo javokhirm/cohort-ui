@@ -2,7 +2,7 @@ import { useState } from 'react';
 
 import { Button, PageHeader, Pagination, SearchFilterBar } from '@repo/ui';
 import { useStatusLabel, useT } from '@repo/i18n';
-import { Download, Plus } from 'lucide-react';
+import { Plus } from 'lucide-react';
 
 import { Can } from '@/components/Can';
 import { useAppT } from '@/locales';
@@ -83,12 +83,6 @@ export function StudentListPage() {
 						active: statusFilter === tab.value,
 						onClick: () => handleStatusChange(tab.value),
 					}))}
-					actions={
-						<Button variant="outline" size="sm" disabled>
-							<Download className="mr-1.5 size-4" />
-							{t('export')}
-						</Button>
-					}
 				/>
 
 				<div className="overflow-hidden rounded-xl border border-border bg-card">
