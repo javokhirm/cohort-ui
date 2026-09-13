@@ -517,16 +517,20 @@ const groupEditRoute = createRoute({
 });
 
 type SessionStatusSearch = 'SCHEDULED' | 'COMPLETED' | 'CANCELLED';
-type ScheduleViewSearch = 'week' | 'month';
+type ScheduleViewSearch = 'week' | 'month' | 'rooms';
+/** Which rooms the room view lists; in the URL so a filtered day is shareable. */
+type RoomFilterSearch = 'all' | 'booked' | 'conflicts';
 
 interface ScheduleSearch {
 	date?: string;
 	status?: SessionStatusSearch;
 	view?: ScheduleViewSearch;
+	roomFilter?: RoomFilterSearch;
 }
 
 const SESSION_STATUSES: SessionStatusSearch[] = ['SCHEDULED', 'COMPLETED', 'CANCELLED'];
-const SCHEDULE_VIEWS: ScheduleViewSearch[] = ['week', 'month'];
+const SCHEDULE_VIEWS: ScheduleViewSearch[] = ['week', 'month', 'rooms'];
+const ROOM_FILTERS: RoomFilterSearch[] = ['all', 'booked', 'conflicts'];
 
 const scheduleRoute = createRoute({
 	getParentRoute: () => authedRoute,
@@ -535,6 +539,7 @@ const scheduleRoute = createRoute({
 	validateSearch: (search: Record<string, unknown>): ScheduleSearch => {
 		const status = search.status;
 		const view = search.view;
+		const roomFilter = search.roomFilter;
 		const date =
 			typeof search.date === 'string' && /^\d{4}-\d{2}-\d{2}$/.test(search.date)
 				? search.date
@@ -546,6 +551,9 @@ const scheduleRoute = createRoute({
 				: undefined,
 			view: SCHEDULE_VIEWS.includes(view as ScheduleViewSearch)
 				? (view as ScheduleViewSearch)
+				: undefined,
+			roomFilter: ROOM_FILTERS.includes(roomFilter as RoomFilterSearch)
+				? (roomFilter as RoomFilterSearch)
 				: undefined,
 		};
 	},

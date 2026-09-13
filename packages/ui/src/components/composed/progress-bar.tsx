@@ -39,7 +39,7 @@ function ProgressBar({
 		<div
 			data-slot="progress-bar"
 			className={cn(
-				'w-full overflow-hidden rounded-full bg-muted',
+				'w-full overflow-hidden rounded-full border border-border bg-muted',
 				size === 'sm' ? 'h-1.5' : 'h-2.5',
 				className,
 			)}

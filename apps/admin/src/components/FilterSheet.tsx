@@ -77,7 +77,9 @@ export function FilterSheet({
 				<SlidersHorizontal className="mr-1.5 size-4" />
 				{label}
 				{active && (
-					<Badge className="ml-1.5 h-5 min-w-5 px-1 tabular-nums">{count}</Badge>
+					<Badge className="ml-1.5 h-5 min-w-5 px-1 tabular-nums">
+						{count}
+					</Badge>
 				)}
 			</Button>
 			<FormSheet

@@ -305,7 +305,10 @@ export function InvoiceListPage() {
 									<StudentPicker
 										value={draft.studentId}
 										onChange={(value) =>
-											setDraft((prev) => ({ ...prev, studentId: value }))
+											setDraft((prev) => ({
+												...prev,
+												studentId: value,
+											}))
 										}
 										onClear={() =>
 											setDraft((prev) => ({
@@ -319,7 +322,10 @@ export function InvoiceListPage() {
 									<GroupPicker
 										value={draft.groupId}
 										onChange={(value) =>
-											setDraft((prev) => ({ ...prev, groupId: value }))
+											setDraft((prev) => ({
+												...prev,
+												groupId: value,
+											}))
 										}
 										onClear={() =>
 											setDraft((prev) => ({
@@ -340,7 +346,10 @@ export function InvoiceListPage() {
 											value={draft.from}
 											maxDate={draft.to}
 											onChange={(value) =>
-												setDraft((prev) => ({ ...prev, from: value }))
+												setDraft((prev) => ({
+													...prev,
+													from: value,
+												}))
 											}
 										/>
 									</FilterField>
@@ -354,7 +363,10 @@ export function InvoiceListPage() {
 											value={draft.to}
 											minDate={draft.from}
 											onChange={(value) =>
-												setDraft((prev) => ({ ...prev, to: value }))
+												setDraft((prev) => ({
+													...prev,
+													to: value,
+												}))
 											}
 										/>
 									</FilterField>
@@ -367,7 +379,10 @@ export function InvoiceListPage() {
 										id="invoice-due-before"
 										value={draft.dueBefore}
 										onChange={(value) =>
-											setDraft((prev) => ({ ...prev, dueBefore: value }))
+											setDraft((prev) => ({
+												...prev,
+												dueBefore: value,
+											}))
 										}
 									/>
 								</FilterField>
