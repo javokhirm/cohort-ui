@@ -174,23 +174,6 @@ function AddGuardianForm({
 							</FormItem>
 						)}
 					/>
-					<FormField
-						control={form.control}
-						name="canPickup"
-						render={({ field }) => (
-							<FormItem className="flex flex-row items-center justify-between gap-4">
-								<span className="text-sm font-medium text-foreground">
-									{t('detail.guardians.pickupLabel')}
-								</span>
-								<FormControl>
-									<Switch
-										checked={field.value}
-										onCheckedChange={field.onChange}
-									/>
-								</FormControl>
-							</FormItem>
-						)}
-					/>
 				</FieldGroup>
 
 				<DialogFooter className="mt-2">

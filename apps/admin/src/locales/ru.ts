@@ -408,7 +408,6 @@ export const ru: TranslationsOf<typeof uz> = {
 				added: 'Представитель добавлен',
 				addFailed: 'Не удалось добавить представителя',
 				primaryLabel: 'Основной представитель',
-				pickupLabel: 'Может забирать ученика',
 				primary: 'Основной',
 				pickup: 'Может забирать',
 				removeConfirm: 'Убрать {{name}} из представителей?',

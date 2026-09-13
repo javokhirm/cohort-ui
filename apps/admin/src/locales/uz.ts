@@ -415,7 +415,6 @@ export const uz = {
 				added: 'Vasiy qoʻshildi',
 				addFailed: 'Vasiyni qoʻshib boʻlmadi',
 				primaryLabel: 'Asosiy vasiy',
-				pickupLabel: 'Oʻquvchini olib ketishi mumkin',
 				primary: 'Asosiy',
 				pickup: 'Olib ketishi mumkin',
 				removeConfirm: '{{name}} vasiylikdan olib tashlansinmi?',

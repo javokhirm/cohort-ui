@@ -394,7 +394,6 @@ export const en: TranslationsOf<typeof uz> = {
 				added: 'Guardian added',
 				addFailed: 'Could not add the guardian',
 				primaryLabel: 'Primary guardian',
-				pickupLabel: 'Can pick up the student',
 				primary: 'Primary',
 				pickup: 'Pickup OK',
 				removeConfirm: 'Remove {{name}} as guardian?',
