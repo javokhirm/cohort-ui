@@ -78,7 +78,7 @@ export function UserDetailPage() {
 							</StatusBadge>
 						</div>
 						<div className="flex flex-wrap items-center gap-3 text-sm text-muted-foreground">
-							<span>{user.phone}</span>
+							{user.phone && <span>{user.phone}</span>}
 							{user.email && <span>{user.email}</span>}
 						</div>
 					</div>

@@ -113,7 +113,7 @@ function AddGuardianForm({
 		try {
 			await addGuardian.mutateAsync({
 				studentId,
-				phone: values.guardianPhone,
+				phone: values.guardianPhone || undefined,
 				firstName,
 				lastName,
 				relation: values.guardianRelation,

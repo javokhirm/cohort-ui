@@ -38,7 +38,8 @@ export interface TeachStudentGuardian {
 	guardianUserId: number;
 	firstName: string;
 	lastName: string;
-	phone: string;
+	/** `null` when the center holds no number for this guardian. */
+	phone: string | null;
 	relation: GuardianRelation;
 	isPrimary: boolean;
 }

@@ -8,13 +8,17 @@ import type { useAppT } from '@/locales';
 type PeopleT = ReturnType<typeof useAppT<'people'>>;
 
 /**
- * Student form schemas. Factories rather than module constants because their
- * messages are user-facing — a literal captured at module load would never
- * re-translate on a language switch (conventions.md §7). Callers memoise on the
- * translator.
+ * A phone that may be left blank but must be well-formed when filled.
+ *
+ * Students authenticate with their `studentCode`, not a number, and guardians
+ * have no login at all — so the backend made `phone` optional for both
+ * (api-reference §3.3). Plenty of learners are minors with no number of their
+ * own, and a household often shares one across siblings and parents.
  */
-export function phoneField(t: Translator<'validation'>) {
-	return z.string().min(1, t('required')).regex(UZ_PHONE_REGEX, t('phoneInvalid'));
+export function optionalPhoneField(t: Translator<'validation'>) {
+	return z
+		.union([z.literal(''), z.string().regex(UZ_PHONE_REGEX, t('phoneInvalid'))])
+		.optional();
 }
 
 function optionalPasswordField(t: Translator<'validation'>) {
@@ -39,7 +43,7 @@ export function guardianNameField(t: Translator<'validation'>, tp: PeopleT) {
 }
 
 export function createStudentSchema(t: Translator<'validation'>, tp: PeopleT) {
-	const phone = phoneField(t);
+	const phone = optionalPhoneField(t);
 	const guardianName = guardianNameField(t, tp);
 
 	return z
@@ -73,6 +77,10 @@ export function createStudentSchema(t: Translator<'validation'>, tp: PeopleT) {
 				});
 			}
 
+			// The guardian's number is optional too — a parent reachable only
+			// through the other parent needs none — but a filled-in one must be
+			// valid. Their NAME stays required: without a phone there is no key to
+			// match an existing person on, so the guardian is always someone new.
 			const phoneResult = phone.safeParse(values.guardianPhone ?? '');
 			if (!phoneResult.success) {
 				ctx.addIssue({
@@ -90,7 +98,7 @@ export function editStudentSchema(t: Translator<'validation'>) {
 		lastName: z.string().min(1, t('required')),
 		dateOfBirth: z.string().optional(),
 		gender: z.enum(['M', 'F', 'O']).optional(),
-		phone: phoneField(t),
+		phone: optionalPhoneField(t),
 		email: z.union([z.literal(''), z.email(t('emailInvalid'))]).optional(),
 		branchId: z.number({ error: t('required') }).min(1, t('required')),
 		address: z.string().optional(),

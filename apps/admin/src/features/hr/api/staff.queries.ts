@@ -20,7 +20,11 @@ export interface StaffUser {
 	id: number;
 	firstName: string;
 	lastName: string;
-	phone: string;
+	/**
+	 * Always set in practice for staff — they sign in with it — but the column is
+	 * nullable platform-wide, so treat it as optional when rendering.
+	 */
+	phone: string | null;
 	email: string | null;
 	avatarUrl: string | null;
 }

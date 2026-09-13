@@ -31,7 +31,7 @@ export interface StudentUser {
 	id: number;
 	firstName: string;
 	lastName: string;
-	phone: string;
+	phone: string | null;
 	email: string | null;
 	avatarUrl: string | null;
 }

@@ -62,7 +62,7 @@ export interface TenantMemberView {
 	joinedAt: string | null;
 	user: {
 		id: number;
-		phone: string;
+		phone: string | null;
 		email: string | null;
 		firstName: string;
 		lastName: string;

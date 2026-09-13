@@ -12,7 +12,8 @@ export interface CreateStudentInput {
 	branchId: number;
 	firstName: string;
 	lastName: string;
-	phone: string;
+	/** Optional: students sign in with their `studentCode`, not a phone. */
+	phone?: string;
 	email?: string;
 	dateOfBirth?: string;
 	gender?: 'M' | 'F' | 'O';
@@ -24,7 +25,8 @@ export interface UpdateStudentInput {
 	id: number;
 	firstName?: string;
 	lastName?: string;
-	phone?: string;
+	/** `null` clears it. */
+	phone?: string | null;
 	/** `null` clears it. */
 	email?: string | null;
 	branchId?: number;
@@ -38,7 +40,11 @@ export interface UpdateStudentInput {
 
 export interface AddGuardianInput {
 	studentId: number;
-	phone: string;
+	/**
+	 * Optional: a guardian has no login, so this is contact data. Omitting it
+	 * always creates a new person, so `firstName`/`lastName` become required.
+	 */
+	phone?: string;
 	firstName?: string;
 	lastName?: string;
 	relation: 'mother' | 'father' | 'guardian';

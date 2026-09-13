@@ -102,8 +102,12 @@ function StudentHeader({ studentId, onEdit }: { studentId: number; onEdit: () =>
 							<span>{student.studentCode}</span>
 							<span>·</span>
 							<span>{branchName}</span>
-							<span>·</span>
-							<span>{student.user.phone}</span>
+							{student.user.phone && (
+								<>
+									<span>·</span>
+									<span>{student.user.phone}</span>
+								</>
+							)}
 						</div>
 					</div>
 				</div>
@@ -289,7 +293,7 @@ function GuardiansTab({ studentId }: { studentId: number }) {
 											)}
 										</div>
 										<div className="mt-0.5 text-sm text-muted-foreground">
-											{g.user.phone}
+											{g.user.phone ?? '—'}
 										</div>
 									</div>
 								</div>

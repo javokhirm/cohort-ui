@@ -72,7 +72,7 @@ function EditStaffForm({
 	const toDefaults = (s: StaffResponse): EditStaffFormValues => ({
 		firstName: s.user.firstName,
 		lastName: s.user.lastName,
-		phone: s.user.phone,
+		phone: s.user.phone ?? '',
 		email: s.user.email ?? '',
 		position: s.position ?? '',
 		employmentType: s.employmentType,

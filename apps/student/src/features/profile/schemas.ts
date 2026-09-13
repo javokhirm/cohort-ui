@@ -6,12 +6,16 @@ import type { Translator } from '@repo/i18n';
 /**
  * The Profile screen's two editable contact fields.
  *
- * Both are required rather than optional: `PATCH /student/me` has no way to *clear*
- * either one (`phone` isn't nullable on `UpdateIdentityInput`; `email`'s
+ * `phone` may be left blank: students authenticate with their `studentCode`, so
+ * the number is contact data and the backend allows it to be absent or cleared
+ * (api-reference §5.1). A blank one is sent as `null`. `email` stays required —
+ * `PATCH /student/me` has no way to clear it.
  */
 export function contactSchema(t: Translator<'validation'>) {
 	return z.object({
-		phone: z.string().min(1, t('required')).regex(UZ_PHONE_REGEX, t('phoneInvalid')),
+		phone: z
+			.union([z.literal(''), z.string().regex(UZ_PHONE_REGEX, t('phoneInvalid'))])
+			.optional(),
 		email: z
 			.string()
 			.trim()

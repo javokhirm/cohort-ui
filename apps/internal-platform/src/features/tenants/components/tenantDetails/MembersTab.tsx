@@ -77,7 +77,7 @@ function buildColumns(
 			header: t('column.contact'),
 			cell: ({ row }) => (
 				<span className="text-sm text-muted-foreground">
-					{row.original.user.phone}
+					{row.original.user.phone ?? '—'}
 					{row.original.user.email && (
 						<span className="ml-1 text-xs">· {row.original.user.email}</span>
 					)}

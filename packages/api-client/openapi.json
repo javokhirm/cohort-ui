@@ -4,7 +4,17 @@
     "/api/v1/public/auth/login": {
       "post": {
         "operationId": "AuthController_login",
-        "parameters": [],
+        "parameters": [
+          {
+            "name": "x-client-app",
+            "required": false,
+            "in": "header",
+            "description": "Client app the request comes from (`admin` | `teacher`). When set, a user holding none of that app's roles is refused with 403 FORBIDDEN_ROLE.",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
         "requestBody": {
           "required": true,
           "content": {
@@ -18,6 +28,9 @@
         "responses": {
           "200": {
             "description": ""
+          },
+          "429": {
+            "description": "Rate limit exceeded (see Retry-After)"
           }
         },
         "summary": "Authenticate with phone + password; the tenant is the user's education center",
@@ -43,6 +56,9 @@
         "responses": {
           "200": {
             "description": ""
+          },
+          "429": {
+            "description": "Rate limit exceeded (see Retry-After)"
           }
         },
         "summary": "Authenticate a student with studentCode + password (the code identifies the tenant)",
@@ -68,6 +84,9 @@
         "responses": {
           "200": {
             "description": ""
+          },
+          "429": {
+            "description": "Rate limit exceeded (see Retry-After)"
           }
         },
         "summary": "Exchange a valid refresh token for a new JWT pair",
@@ -91,6 +110,34 @@
         ]
       }
     },
+    "/api/v1/public/platform-leads": {
+      "post": {
+        "operationId": "PlatformLeadsController_create",
+        "parameters": [],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CreatePlatformLeadDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": ""
+          },
+          "429": {
+            "description": "Rate limit exceeded (see Retry-After)"
+          }
+        },
+        "summary": "Capture a lead from an unauthenticated public source",
+        "tags": [
+          "Public / Platform Leads"
+        ]
+      }
+    },
     "/api/v1/public/super-admin/auth/login": {
       "post": {
         "operationId": "SuperAdminAuthController_login",
@@ -108,6 +155,9 @@
         "responses": {
           "200": {
             "description": ""
+          },
+          "429": {
+            "description": "Rate limit exceeded (see Retry-After)"
           }
         },
         "summary": "Step 1: verify operator email + password and email an OTP",
@@ -133,6 +183,9 @@
         "responses": {
           "200": {
             "description": ""
+          },
+          "429": {
+            "description": "Rate limit exceeded (see Retry-After)"
           }
         },
         "summary": "Step 2: verify the OTP and issue a JWT pair",
@@ -158,6 +211,9 @@
         "responses": {
           "200": {
             "description": ""
+          },
+          "429": {
+            "description": "Rate limit exceeded (see Retry-After)"
           }
         },
         "summary": "Exchange a valid super-admin refresh token for a new JWT pair",
@@ -269,6 +325,113 @@
         "summary": "Update the authenticated operator's language preference",
         "tags": [
           "Super Admin / Profile"
+        ]
+      }
+    },
+    "/api/v1/super-admin/platform-leads": {
+      "get": {
+        "operationId": "PlatformLeadsAdminController_list",
+        "parameters": [
+          {
+            "name": "page",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "minimum": 1,
+              "default": 1,
+              "type": "number"
+            }
+          },
+          {
+            "name": "limit",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "minimum": 1,
+              "maximum": 100,
+              "default": 20,
+              "type": "number"
+            }
+          },
+          {
+            "name": "search",
+            "required": false,
+            "in": "query",
+            "description": "Free-text over name, email, phone and center name",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "source",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "example": "WEBSITE",
+              "type": "string"
+            }
+          },
+          {
+            "name": "from",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "format": "date-time",
+              "type": "string"
+            }
+          },
+          {
+            "name": "to",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "format": "date-time",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Leads across every source (source/search/date filters)",
+        "tags": [
+          "Super Admin / Platform Leads"
+        ]
+      }
+    },
+    "/api/v1/super-admin/platform-leads/{id}": {
+      "get": {
+        "operationId": "PlatformLeadsAdminController_detail",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "number"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "A single lead",
+        "tags": [
+          "Super Admin / Platform Leads"
         ]
       }
     },
@@ -2139,6 +2302,141 @@
         "summary": "MRR trend time series (6m / 12m / 24m)",
         "tags": [
           "Super Admin / Dashboard"
+        ]
+      }
+    },
+    "/api/v1/super-admin/notification-settings/sms": {
+      "get": {
+        "operationId": "PlatformNotificationSettingsController_getStatus",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "The platform's shared Eskiz account: provider, sender, configured?",
+        "tags": [
+          "Super Admin / Notifications"
+        ]
+      }
+    },
+    "/api/v1/super-admin/notification-settings/sms/balance": {
+      "get": {
+        "description": "Returns a null amount when the provider exposes no balance endpoint or is unreachable — a gateway outage must not break the console screen.",
+        "operationId": "PlatformNotificationSettingsController_getBalance",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Remaining balance on the platform account",
+        "tags": [
+          "Super Admin / Notifications"
+        ]
+      }
+    },
+    "/api/v1/super-admin/notification-settings/sms/test": {
+      "post": {
+        "description": "Bypasses the rules engine and the outbox. Credential failures come back as `success: false` with a translated reason, never a 5xx.",
+        "operationId": "PlatformNotificationSettingsController_test",
+        "parameters": [],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/TestSmsDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": ""
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Send a test message through the platform account",
+        "tags": [
+          "Super Admin / Notifications"
+        ]
+      }
+    },
+    "/api/v1/super-admin/notification-templates/defaults": {
+      "get": {
+        "description": "Read-only — defaults are never edited over the API, only in the codebase.",
+        "operationId": "PlatformNotificationTemplatesController_listDefaults",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "The code-owned default SMS templates",
+        "tags": [
+          "Super Admin / Notifications"
+        ]
+      }
+    },
+    "/api/v1/super-admin/notification-templates/moderation": {
+      "get": {
+        "description": "Refreshed from the gateway on read — it never calls back. Empty when the platform account has no configured credentials.",
+        "operationId": "PlatformNotificationTemplatesController_moderationStatus",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "SMS gateway moderation status for the platform account",
+        "tags": [
+          "Super Admin / Notifications"
+        ]
+      }
+    },
+    "/api/v1/super-admin/notification-templates/moderation/sync": {
+      "post": {
+        "description": "Reconciles against the account’s existing templates first and submits only what is missing — safe to press repeatedly. Zeroed counts when the platform account has no configured credentials.",
+        "operationId": "PlatformNotificationTemplatesController_syncModeration",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Submit the platform’s default SMS copy to the gateway for moderation",
+        "tags": [
+          "Super Admin / Notifications"
         ]
       }
     },
@@ -4774,6 +5072,49 @@
         ]
       }
     },
+    "/api/v1/manage/schedule/rooms": {
+      "get": {
+        "operationId": "ScheduleController_rooms",
+        "parameters": [
+          {
+            "name": "branchIds",
+            "required": false,
+            "in": "query",
+            "description": "Filter to these branch ids (comma-separated or repeated); must be within your branch scope",
+            "schema": {
+              "type": "array",
+              "items": {
+                "type": "number"
+              }
+            }
+          },
+          {
+            "name": "date",
+            "required": true,
+            "in": "query",
+            "description": "Required. The calendar day to lay out.",
+            "schema": {
+              "example": "2025-06-02",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Room allocation: one day's classes laid out by room, with free rooms, booked minutes and double-bookings",
+        "tags": [
+          "Manage / Schedule"
+        ]
+      }
+    },
     "/api/v1/manage/enrollments/{id}": {
       "get": {
         "operationId": "EnrollmentsController_findOne",
@@ -7303,6 +7644,954 @@
         ]
       }
     },
+    "/api/v1/manage/notification-templates": {
+      "get": {
+        "operationId": "NotificationTemplatesController_list",
+        "parameters": [
+          {
+            "name": "page",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "minimum": 1,
+              "default": 1,
+              "type": "number"
+            }
+          },
+          {
+            "name": "limit",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "minimum": 1,
+              "maximum": 100,
+              "default": 20,
+              "type": "number"
+            }
+          },
+          {
+            "name": "code",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "channel",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "type": "string",
+              "enum": [
+                "SMS",
+                "TELEGRAM",
+                "EMAIL",
+                "PUSH"
+              ]
+            }
+          },
+          {
+            "name": "locale",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "type": "string",
+              "enum": [
+                "uz",
+                "ru",
+                "en"
+              ]
+            }
+          },
+          {
+            "name": "isActive",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "type": "boolean"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "List notification templates (paginated, filterable)",
+        "tags": [
+          "Manage / Notification Templates"
+        ]
+      },
+      "post": {
+        "operationId": "NotificationTemplatesController_create",
+        "parameters": [],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CreateNotificationTemplateDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": ""
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Create a notification template",
+        "tags": [
+          "Manage / Notification Templates"
+        ]
+      }
+    },
+    "/api/v1/manage/notification-templates/preview": {
+      "post": {
+        "operationId": "NotificationTemplatesController_preview",
+        "parameters": [],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/PreviewNotificationTemplateDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": ""
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Render a draft body against sample values (no send, no save)",
+        "tags": [
+          "Manage / Notification Templates"
+        ]
+      }
+    },
+    "/api/v1/manage/notification-templates/moderation": {
+      "get": {
+        "description": "Uzbek SMS gateways deliver only pre-approved text. Every default template and every customization is submitted for moderation on save; this reports what the gateway has decided. Refreshed from the gateway on read — it never calls back. Empty when the center has no resolvable SMS credentials.",
+        "operationId": "NotificationTemplatesController_moderationStatus",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "SMS gateway moderation status for this center’s message copy",
+        "tags": [
+          "Manage / Notification Templates"
+        ]
+      }
+    },
+    "/api/v1/manage/notification-templates/moderation/sync": {
+      "post": {
+        "description": "Reconciles the code-owned default templates against the templates the gateway account already holds and submits only what is missing — a text the gateway already has verbatim is adopted, never resubmitted, so this is safe to press repeatedly. Returns zeroed counts when the center has no resolvable SMS credentials.",
+        "operationId": "NotificationTemplatesController_syncModeration",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Submit this center’s default SMS copy to the gateway for moderation",
+        "tags": [
+          "Manage / Notification Templates"
+        ]
+      }
+    },
+    "/api/v1/manage/notification-templates/{id}": {
+      "get": {
+        "operationId": "NotificationTemplatesController_findOne",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "number"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Get one notification template",
+        "tags": [
+          "Manage / Notification Templates"
+        ]
+      },
+      "patch": {
+        "operationId": "NotificationTemplatesController_update",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "number"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/UpdateNotificationTemplateDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Update a notification template",
+        "tags": [
+          "Manage / Notification Templates"
+        ]
+      },
+      "delete": {
+        "description": "Messages already sent from it keep their rendered copy — the outbox is an audit record of what was actually sent.",
+        "operationId": "NotificationTemplatesController_remove",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "number"
+            }
+          }
+        ],
+        "responses": {
+          "204": {
+            "description": ""
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Soft-delete a notification template",
+        "tags": [
+          "Manage / Notification Templates"
+        ]
+      }
+    },
+    "/api/v1/manage/notification-triggers": {
+      "get": {
+        "operationId": "NotificationRulesController_listTriggers",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "List the available notification triggers (localized)",
+        "tags": [
+          "Manage / Notification Rules"
+        ]
+      }
+    },
+    "/api/v1/manage/notification-rules": {
+      "get": {
+        "operationId": "NotificationRulesController_list",
+        "parameters": [
+          {
+            "name": "page",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "minimum": 1,
+              "default": 1,
+              "type": "number"
+            }
+          },
+          {
+            "name": "limit",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "minimum": 1,
+              "maximum": 100,
+              "default": 20,
+              "type": "number"
+            }
+          },
+          {
+            "name": "trigger",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "type": "string",
+              "enum": [
+                "INVOICE_ISSUED",
+                "INVOICE_DUE_SOON",
+                "INVOICE_OVERDUE",
+                "PAYMENT_RECEIVED",
+                "LATE_FEE_APPLIED",
+                "ENROLLMENT_SUSPENDED",
+                "ENROLLMENT_REACTIVATED",
+                "ENROLLMENT_AUTO_CANCELLED",
+                "STUDENT_ABSENT",
+                "RESULTS_PUBLISHED",
+                "STUDENT_WELCOME",
+                "SUBSCRIPTION_EXPIRING",
+                "SUBSCRIPTION_EXPIRED",
+                "SUBSCRIPTION_RENEWED"
+              ]
+            }
+          },
+          {
+            "name": "channel",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "type": "string",
+              "enum": [
+                "SMS",
+                "TELEGRAM",
+                "EMAIL",
+                "PUSH"
+              ]
+            }
+          },
+          {
+            "name": "branchId",
+            "required": false,
+            "in": "query",
+            "description": "Omit for all rules; `null` for tenant-wide rules only",
+            "schema": {
+              "nullable": true,
+              "type": "number"
+            }
+          },
+          {
+            "name": "isActive",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "type": "boolean"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "List notification rules (paginated, filterable)",
+        "tags": [
+          "Manage / Notification Rules"
+        ]
+      },
+      "post": {
+        "operationId": "NotificationRulesController_create",
+        "parameters": [],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CreateNotificationRuleDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": ""
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Create a notification rule",
+        "tags": [
+          "Manage / Notification Rules"
+        ]
+      }
+    },
+    "/api/v1/manage/notification-rules/{id}": {
+      "get": {
+        "operationId": "NotificationRulesController_findOne",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "number"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Get one notification rule",
+        "tags": [
+          "Manage / Notification Rules"
+        ]
+      },
+      "patch": {
+        "description": "`trigger` cannot be changed: it determines the rule's legal audiences, offset and template variables. Delete and recreate instead.",
+        "operationId": "NotificationRulesController_update",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "number"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/UpdateNotificationRuleDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Update a notification rule",
+        "tags": [
+          "Manage / Notification Rules"
+        ]
+      },
+      "delete": {
+        "description": "Prefer the toggle to silence a rule — deleting loses the configuration. Notifications it already produced are unaffected.",
+        "operationId": "NotificationRulesController_remove",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "number"
+            }
+          }
+        ],
+        "responses": {
+          "204": {
+            "description": ""
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Soft-delete a notification rule",
+        "tags": [
+          "Manage / Notification Rules"
+        ]
+      }
+    },
+    "/api/v1/manage/notification-rules/{id}/toggle": {
+      "patch": {
+        "operationId": "NotificationRulesController_toggle",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "number"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ToggleNotificationRuleDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Enable or disable a notification rule",
+        "tags": [
+          "Manage / Notification Rules"
+        ]
+      }
+    },
+    "/api/v1/manage/notifications": {
+      "get": {
+        "operationId": "NotificationsController_list",
+        "parameters": [
+          {
+            "name": "page",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "minimum": 1,
+              "default": 1,
+              "type": "number"
+            }
+          },
+          {
+            "name": "limit",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "minimum": 1,
+              "maximum": 100,
+              "default": 20,
+              "type": "number"
+            }
+          },
+          {
+            "name": "status",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "type": "string",
+              "enum": [
+                "QUEUED",
+                "SENDING",
+                "SENT",
+                "DELIVERED",
+                "FAILED"
+              ]
+            }
+          },
+          {
+            "name": "channel",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "type": "string",
+              "enum": [
+                "SMS",
+                "TELEGRAM",
+                "EMAIL",
+                "PUSH"
+              ]
+            }
+          },
+          {
+            "name": "recipientUserId",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "type": "number"
+            }
+          },
+          {
+            "name": "ruleId",
+            "required": false,
+            "in": "query",
+            "description": "Only messages produced by this rule",
+            "schema": {
+              "type": "number"
+            }
+          },
+          {
+            "name": "from",
+            "required": false,
+            "in": "query",
+            "description": "Inclusive lower bound on createdAt (ISO)",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "to",
+            "required": false,
+            "in": "query",
+            "description": "Inclusive upper bound on createdAt (ISO)",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "List sent/queued notifications (paginated, filterable)",
+        "tags": [
+          "Manage / Notifications"
+        ]
+      },
+      "post": {
+        "description": "Exactly one recipient scope: recipientUserIds OR recipientGroupId OR recipientBranchId. One notification row is created per resolved recipient and queued for dispatch.",
+        "operationId": "NotificationsController_send",
+        "parameters": [],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/SendNotificationDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": ""
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Manual send / broadcast",
+        "tags": [
+          "Manage / Notifications"
+        ]
+      }
+    },
+    "/api/v1/manage/notifications/stats": {
+      "get": {
+        "operationId": "NotificationsController_stats",
+        "parameters": [
+          {
+            "name": "from",
+            "required": false,
+            "in": "query",
+            "description": "Inclusive lower bound on createdAt (ISO)",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "to",
+            "required": false,
+            "in": "query",
+            "description": "Inclusive upper bound on createdAt (ISO)",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Aggregate delivery counts and billable SMS segments",
+        "tags": [
+          "Manage / Notifications"
+        ]
+      }
+    },
+    "/api/v1/manage/notifications/{id}": {
+      "get": {
+        "operationId": "NotificationsController_findOne",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "number"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Get one notification, with its payload and failure reason",
+        "tags": [
+          "Manage / Notifications"
+        ]
+      }
+    },
+    "/api/v1/manage/notifications/{id}/retry": {
+      "post": {
+        "operationId": "NotificationsController_retry",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "number"
+            }
+          }
+        ],
+        "responses": {
+          "201": {
+            "description": ""
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Re-queue a failed notification for another attempt",
+        "tags": [
+          "Manage / Notifications"
+        ]
+      }
+    },
+    "/api/v1/manage/notification-settings": {
+      "get": {
+        "description": "Channels with no stored row are returned as disabled defaults rather than omitted, so the console can render a complete list.",
+        "operationId": "NotificationSettingsController_list",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Settings for every channel",
+        "tags": [
+          "Manage / Notification Settings"
+        ]
+      }
+    },
+    "/api/v1/manage/notification-settings/{channel}": {
+      "get": {
+        "operationId": "NotificationSettingsController_findOne",
+        "parameters": [
+          {
+            "name": "channel",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "One channel's settings",
+        "tags": [
+          "Manage / Notification Settings"
+        ]
+      },
+      "put": {
+        "description": "An upsert, because the row is a singleton per (tenant, channel). Omit `credentials` to leave stored secrets untouched; pass null to clear them and fall back to the platform account.",
+        "operationId": "NotificationSettingsController_upsert",
+        "parameters": [
+          {
+            "name": "channel",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/UpsertChannelSettingDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Create or replace a channel's settings",
+        "tags": [
+          "Manage / Notification Settings"
+        ]
+      }
+    },
+    "/api/v1/manage/notification-settings/{channel}/test": {
+      "post": {
+        "operationId": "NotificationSettingsController_test",
+        "parameters": [
+          {
+            "name": "channel",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/TestChannelDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": ""
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Send a test message to verify the configuration",
+        "tags": [
+          "Manage / Notification Settings"
+        ]
+      }
+    },
+    "/api/v1/manage/notification-settings/{channel}/balance": {
+      "get": {
+        "description": "Returns a null amount when the provider exposes no balance endpoint or is unreachable — a gateway outage must not break the settings screen.",
+        "operationId": "NotificationSettingsController_balance",
+        "parameters": [
+          {
+            "name": "channel",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Remaining provider balance for the account in effect",
+        "tags": [
+          "Manage / Notification Settings"
+        ]
+      }
+    },
     "/api/v1/teach/sessions": {
       "get": {
         "operationId": "MySessionsController_calendar",
@@ -9496,6 +10785,41 @@
           "refreshToken"
         ]
       },
+      "CreatePlatformLeadDto": {
+        "type": "object",
+        "properties": {
+          "name": {
+            "type": "string",
+            "example": "Alisher Karimov"
+          },
+          "email": {
+            "type": "string",
+            "example": "alisher@markaz.uz"
+          },
+          "phone": {
+            "type": "string",
+            "example": "+998901234567"
+          },
+          "centerName": {
+            "type": "string",
+            "example": "Bilim Plus"
+          },
+          "message": {
+            "type": "string",
+            "description": "Free-text note from the submitter."
+          },
+          "source": {
+            "type": "string",
+            "example": "WEBSITE",
+            "description": "Where this lead was captured — the caller identifies itself."
+          }
+        },
+        "required": [
+          "name",
+          "email",
+          "source"
+        ]
+      },
       "SuperAdminLoginDto": {
         "type": "object",
         "properties": {
@@ -10050,6 +11374,24 @@
           }
         }
       },
+      "TestSmsDto": {
+        "type": "object",
+        "properties": {
+          "phone": {
+            "type": "string",
+            "example": "+998901234567",
+            "description": "Uzbek number, E.164 or local. Format is checked by the service, which answers with a localized reason."
+          },
+          "message": {
+            "type": "string",
+            "description": "Custom test body. Defaults to a localized standard message.",
+            "maxLength": 300
+          }
+        },
+        "required": [
+          "phone"
+        ]
+      },
       "ChangeMyPasswordDto": {
         "type": "object",
         "properties": {
@@ -10078,7 +11420,7 @@
           "phone": {
             "type": "string",
             "example": "+998901234567",
-            "description": "E.164 phone number"
+            "description": "E.164 phone number. Optional: students sign in with their studentCode, so a minor with no number of their own needs no entry here."
           },
           "email": {
             "type": "string"
@@ -10106,8 +11448,7 @@
         "required": [
           "branchId",
           "firstName",
-          "lastName",
-          "phone"
+          "lastName"
         ]
       },
       "UpdateStudentDto": {
@@ -10125,7 +11466,7 @@
           "phone": {
             "type": "string",
             "example": "+998901234567",
-            "description": "E.164 phone number"
+            "description": "E.164 phone number. Optional: students sign in with their studentCode, so a minor with no number of their own needs no entry here."
           },
           "email": {
             "type": "string"
@@ -10172,15 +11513,15 @@
           "phone": {
             "type": "string",
             "example": "+998901234567",
-            "description": "E.164 phone number"
+            "description": "E.164 phone number. Optional: a guardian has no login of their own, so this is contact data rather than a credential."
           },
           "firstName": {
             "type": "string",
-            "description": "Required only when phone is a new user"
+            "description": "Required unless phone is a known user"
           },
           "lastName": {
             "type": "string",
-            "description": "Required only when phone is a new user"
+            "description": "Required unless phone is a known user"
           },
           "relation": {
             "type": "string",
@@ -10200,7 +11541,6 @@
           }
         },
         "required": [
-          "phone",
           "relation"
         ]
       },
@@ -11640,6 +12980,381 @@
             "type": "string"
           }
         }
+      },
+      "PreviewNotificationTemplateDto": {
+        "type": "object",
+        "properties": {
+          "body": {
+            "type": "string",
+            "maxLength": 4000
+          },
+          "variables": {
+            "type": "object",
+            "additionalProperties": true,
+            "example": {
+              "studentName": "Ali Valiyev",
+              "amount": "450000"
+            }
+          }
+        },
+        "required": [
+          "body"
+        ]
+      },
+      "NotificationTemplateCode": {
+        "type": "string",
+        "enum": [
+          "INVOICE_ISSUED",
+          "INVOICE_DUE",
+          "INVOICE_OVERDUE",
+          "LATE_FEE_APPLIED",
+          "ENROLLMENT_SUSPENDED",
+          "ENROLLMENT_REACTIVATED",
+          "ENROLLMENT_AUTO_CANCELLED",
+          "ABSENCE_ALERT",
+          "WELCOME",
+          "PAYMENT_RECEIVED",
+          "SCHEDULE_CHANGE",
+          "RESULTS_PUBLISHED",
+          "SUBSCRIPTION_EXPIRING",
+          "SUBSCRIPTION_EXPIRED",
+          "SUBSCRIPTION_RENEWED"
+        ],
+        "description": "Known codes drive the rules engine; a center may also define its own for manual broadcasts."
+      },
+      "CreateNotificationTemplateDto": {
+        "type": "object",
+        "properties": {
+          "code": {
+            "description": "Known codes drive the rules engine; a center may also define its own for manual broadcasts.",
+            "example": "INVOICE_DUE",
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/NotificationTemplateCode"
+              }
+            ]
+          },
+          "channel": {
+            "type": "string",
+            "enum": [
+              "SMS",
+              "TELEGRAM",
+              "EMAIL",
+              "PUSH"
+            ]
+          },
+          "locale": {
+            "type": "string",
+            "enum": [
+              "uz",
+              "ru",
+              "en"
+            ],
+            "default": "uz"
+          },
+          "subject": {
+            "type": "string",
+            "nullable": true,
+            "description": "EMAIL channel only"
+          },
+          "body": {
+            "type": "string",
+            "description": "Body with {{variable}} placeholders. Variables are validated against the code's trigger — an unknown one is rejected rather than rendering empty.",
+            "example": "Cohort: {{studentName}} uchun {{amount}} to'lov {{dueDate}}.",
+            "maxLength": 4000
+          },
+          "isActive": {
+            "type": "boolean",
+            "default": true
+          }
+        },
+        "required": [
+          "code",
+          "channel",
+          "body"
+        ]
+      },
+      "UpdateNotificationTemplateDto": {
+        "type": "object",
+        "properties": {
+          "code": {
+            "type": "string"
+          },
+          "channel": {
+            "type": "string",
+            "enum": [
+              "SMS",
+              "TELEGRAM",
+              "EMAIL",
+              "PUSH"
+            ]
+          },
+          "locale": {
+            "type": "string",
+            "enum": [
+              "uz",
+              "ru",
+              "en"
+            ]
+          },
+          "subject": {
+            "type": "string",
+            "nullable": true
+          },
+          "body": {
+            "type": "string",
+            "maxLength": 4000
+          },
+          "isActive": {
+            "type": "boolean"
+          }
+        }
+      },
+      "CreateNotificationRuleDto": {
+        "type": "object",
+        "properties": {
+          "trigger": {
+            "type": "string",
+            "enum": [
+              "INVOICE_ISSUED",
+              "INVOICE_DUE_SOON",
+              "INVOICE_OVERDUE",
+              "PAYMENT_RECEIVED",
+              "LATE_FEE_APPLIED",
+              "ENROLLMENT_SUSPENDED",
+              "ENROLLMENT_REACTIVATED",
+              "ENROLLMENT_AUTO_CANCELLED",
+              "STUDENT_ABSENT",
+              "RESULTS_PUBLISHED",
+              "STUDENT_WELCOME",
+              "SUBSCRIPTION_EXPIRING",
+              "SUBSCRIPTION_EXPIRED",
+              "SUBSCRIPTION_RENEWED"
+            ],
+            "description": "The business moment to react to. Immutable after creation — see PATCH."
+          },
+          "channels": {
+            "type": "array",
+            "example": [
+              "SMS"
+            ],
+            "description": "At least one channel. Duplicates are rejected. Only channels Cohort can currently deliver on are accepted — a rule on any other would queue messages that are never sent and never fail.",
+            "items": {
+              "type": "string",
+              "enum": [
+                "SMS"
+              ]
+            }
+          },
+          "audience": {
+            "type": "string",
+            "enum": [
+              "STUDENT",
+              "PRIMARY_GUARDIAN",
+              "STUDENT_AND_GUARDIAN",
+              "BILLING_CONTACTS"
+            ],
+            "description": "Must be one of the audiences the trigger allows — see GET /manage/notification-triggers."
+          },
+          "templateCode": {
+            "type": "string",
+            "description": "Template code to render. Defaults to the trigger's default code."
+          },
+          "offsetDays": {
+            "type": "number",
+            "nullable": true,
+            "example": -3,
+            "description": "Days relative to the anchor date: negative = before, 0 = on the day, positive = after. Required for SCHEDULED triggers, rejected for EVENT ones."
+          },
+          "branchId": {
+            "type": "number",
+            "nullable": true,
+            "description": "Null = applies tenant-wide"
+          },
+          "isActive": {
+            "type": "boolean",
+            "default": true
+          }
+        },
+        "required": [
+          "trigger",
+          "channels",
+          "audience"
+        ]
+      },
+      "UpdateNotificationRuleDto": {
+        "type": "object",
+        "properties": {
+          "channels": {
+            "type": "array",
+            "items": {
+              "type": "string",
+              "enum": [
+                "SMS"
+              ]
+            }
+          },
+          "audience": {
+            "type": "string",
+            "enum": [
+              "STUDENT",
+              "PRIMARY_GUARDIAN",
+              "STUDENT_AND_GUARDIAN",
+              "BILLING_CONTACTS"
+            ]
+          },
+          "templateCode": {
+            "type": "string"
+          },
+          "offsetDays": {
+            "type": "number",
+            "nullable": true
+          },
+          "branchId": {
+            "type": "number",
+            "nullable": true
+          },
+          "isActive": {
+            "type": "boolean"
+          }
+        }
+      },
+      "ToggleNotificationRuleDto": {
+        "type": "object",
+        "properties": {
+          "isActive": {
+            "type": "boolean",
+            "description": "true = the rule sends; false = configured but silenced"
+          }
+        },
+        "required": [
+          "isActive"
+        ]
+      },
+      "SendNotificationDto": {
+        "type": "object",
+        "properties": {
+          "channel": {
+            "type": "string",
+            "enum": [
+              "SMS"
+            ],
+            "description": "Only channels Cohort can currently deliver on. A broadcast on any other would queue rows nothing drains."
+          },
+          "templateId": {
+            "type": "number",
+            "nullable": true,
+            "description": "Render from this template, or supply a raw `body`."
+          },
+          "body": {
+            "type": "string",
+            "description": "Required when no templateId is given. Supports {{variables}}.",
+            "maxLength": 4000
+          },
+          "recipientUserIds": {
+            "description": "Specific users. One of userIds / groupId / branchId.",
+            "type": "array",
+            "items": {
+              "type": "number"
+            }
+          },
+          "recipientGroupId": {
+            "type": "number",
+            "description": "All actively enrolled students in a group"
+          },
+          "recipientBranchId": {
+            "type": "number",
+            "description": "All active students in a branch"
+          },
+          "variables": {
+            "type": "object",
+            "additionalProperties": true,
+            "example": {
+              "groupName": "IELTS Morning A"
+            }
+          },
+          "scheduledAt": {
+            "type": "string",
+            "description": "ISO datetime. Omit to send as soon as possible."
+          }
+        },
+        "required": [
+          "channel"
+        ]
+      },
+      "ChannelCredentialsDto": {
+        "type": "object",
+        "properties": {
+          "login": {
+            "type": "string",
+            "description": "Eskiz account email"
+          },
+          "password": {
+            "type": "string",
+            "description": "Eskiz account password. Encrypted at rest."
+          }
+        },
+        "required": [
+          "login",
+          "password"
+        ]
+      },
+      "UpsertChannelSettingDto": {
+        "type": "object",
+        "properties": {
+          "isEnabled": {
+            "type": "boolean",
+            "description": "Channel-wide master switch. false silences every rule on this channel at once without editing any of them."
+          },
+          "provider": {
+            "type": "string",
+            "nullable": true,
+            "example": "eskiz",
+            "description": "Gateway adapter key. Null = the platform default."
+          },
+          "senderName": {
+            "type": "string",
+            "nullable": true,
+            "description": "Sender nickname shown to the recipient. Must be registered with the provider against whichever account is in effect. Null = platform default."
+          },
+          "credentials": {
+            "nullable": true,
+            "description": "The center's own gateway account. Omit to leave stored credentials untouched; null to clear them and fall back to the platform account.",
+            "type": "object",
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/ChannelCredentialsDto"
+              }
+            ]
+          },
+          "dailyLimit": {
+            "type": "number",
+            "nullable": true,
+            "minimum": 1,
+            "description": "Safety cap on messages per day. Over the cap, rows wait for the next day rather than failing. Null = uncapped."
+          }
+        },
+        "required": [
+          "isEnabled"
+        ]
+      },
+      "TestChannelDto": {
+        "type": "object",
+        "properties": {
+          "phone": {
+            "type": "string",
+            "example": "+998901234567",
+            "description": "Uzbek number, E.164 or local. Format is checked by the service, which answers with a localized reason."
+          },
+          "message": {
+            "type": "string",
+            "description": "Custom test body. Defaults to a localized standard message.",
+            "maxLength": 300
+          }
+        },
+        "required": [
+          "phone"
+        ]
       },
       "UpdateSessionTopicDto": {
         "type": "object",

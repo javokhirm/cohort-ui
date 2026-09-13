@@ -20,7 +20,8 @@ import { contactSchema, type ContactInput } from '@/features/profile/schemas';
 import { useAppT } from '@/locales';
 
 interface ContactCardProps {
-	phone: string;
+	/** `null` when the student has no number on file — both fields are optional. */
+	phone: string | null;
 	email: string | null;
 }
 
@@ -32,7 +33,7 @@ export function ContactCard({ phone, email }: ContactCardProps) {
 	const tValidation = useT('validation');
 	const mutation = useUpdateMyProfile();
 
-	const stored: ContactInput = { phone, email: email ?? '' };
+	const stored: ContactInput = { phone: phone ?? '', email: email ?? '' };
 	const form = useForm<ContactInput>({
 		resolver: zodResolver(contactSchema(tValidation)),
 		defaultValues: stored,
@@ -45,7 +46,11 @@ export function ContactCard({ phone, email }: ContactCardProps) {
 		const valid = await form.trigger(name);
 		if (!valid) return;
 		try {
-			await mutation.mutateAsync({ [name]: value });
+			// A blanked phone means "remove it", which the endpoint expresses as
+			// null — an empty string would fail its E.164 check.
+			await mutation.mutateAsync({
+				[name]: name === 'phone' && !value ? null : value,
+			});
 			form.resetField(name, { defaultValue: value });
 			toast.success(t('savedTitle'), { description: t('savedDescription') });
 		} catch (error) {

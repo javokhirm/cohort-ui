@@ -10,7 +10,8 @@ import { profileKeys } from '@/features/profile/api/profile.queries';
  * `api/preferences.ts`), which owns the language switch for the whole app.
  */
 export interface UpdateMyProfileInput {
-	phone?: string;
+	/** `null` clears the number — students sign in with their `studentCode`. */
+	phone?: string | null;
 	email?: string;
 	avatarUrl?: string;
 }

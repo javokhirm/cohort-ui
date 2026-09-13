@@ -15,7 +15,8 @@ export interface ManageProfile {
 	firstName: string;
 	lastName: string;
 	email: string | null;
-	phone: string;
+	/** `null` when the center holds no number for this person. */
+	phone: string | null;
 	avatarUrl: string | null;
 	/** Role names from the access token (e.g. `['OWNER']`). */
 	roles: string[];

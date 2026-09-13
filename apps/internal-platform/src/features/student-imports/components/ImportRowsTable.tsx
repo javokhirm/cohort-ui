@@ -34,7 +34,7 @@ function buildColumns(
 					<div className="flex flex-col">
 						<span className="text-sm font-medium">{name || '—'}</span>
 						<span className="font-mono text-xs text-muted-foreground">
-							{raw.phone}
+							{raw.phone || '—'}
 						</span>
 					</div>
 				);
