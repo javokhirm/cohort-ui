@@ -44,6 +44,7 @@ and the route guards.
 
 ```
 POST /api/v1/public/auth/login           { phone, password }          → AuthResult
+POST /api/v1/public/auth/student/login   { studentCode, password }    → AuthResult
 POST /api/v1/public/auth/refresh         { refreshToken }             → AuthResult   (token in the BODY)
 POST /api/v1/public/auth/forgot-password { phone }                    → 200 (always; no enumeration)
 POST /api/v1/public/auth/reset-password  { phone, otp, newPassword }  → 200
@@ -54,6 +55,19 @@ POST /api/v1/public/auth/reset-password  { phone, otp, newPassword }  → 200
 > The refresh token is sent in the **JSON body** as `refreshToken` (the backend extracts it
 > from the body, not the `Authorization` header). Login authenticates with `phone` +
 > `password`; the tenant is derived server-side from the user's single membership.
+
+> **Phone login is not for every role.** `users.phone` is neither unique nor required
+> platform-wide — a household shares one number across siblings and their guardians — so
+> `/auth/login` resolves a phone only among the accounts that actually sign in with one:
+> every role **except** `STUDENT` and `PARENT`. The **student app** authenticates with
+> `studentCode` + password at `/auth/student/login`; parents have no auth surface yet. A
+> number shared between a teacher and their child resolves to the teacher, and a phone that
+> maps to no login account fails as `INVALID_CREDENTIALS` like a wrong password.
+>
+> The practical consequences for forms: `phone` is **optional** on student and guardian
+> create/edit, and may come back `null` on any user-shaped response — render it
+> defensively. It stays **required** for staff, and granting a back-office role to someone
+> without one is refused (`LOGIN_PHONE_REQUIRED`).
 
 ---
 

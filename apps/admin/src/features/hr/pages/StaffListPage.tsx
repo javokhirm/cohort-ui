@@ -21,12 +21,14 @@ export function StaffListPage() {
 	const navigate = useNavigate({ from: '/staff' });
 	const { page = 1, search: searchParam, role } = useSearch({ from: '/_authed/staff' });
 
+	// The input stays local and is debounced into the URL. `replace`, because
+	// refining a search term is not a place you navigate to: pushing would bury
+	// the screen the admin came from under one entry per keystroke and leave
+	// Back walking through half-typed queries. It also makes this the only
+	// writer of `search` — the role and page handlers carry it through `prev` —
+	// so the URL cannot change it under the input, and no sync-back is needed.
 	const [inputValue, setInputValue] = useState(searchParam ?? '');
 	const [addOpen, setAddOpen] = useState(false);
-
-	useEffect(() => {
-		setInputValue(searchParam ?? '');
-	}, [searchParam]);
 
 	useEffect(() => {
 		const timer = setTimeout(() => {
@@ -34,6 +36,7 @@ export function StaffListPage() {
 			if (trimmed === (searchParam || undefined)) return;
 			void navigate({
 				search: (prev) => ({ ...prev, search: trimmed, page: undefined }),
+				replace: true,
 			});
 		}, 350);
 		return () => clearTimeout(timer);

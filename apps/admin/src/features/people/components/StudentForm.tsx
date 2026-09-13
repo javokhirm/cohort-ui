@@ -1,7 +1,7 @@
 import { useEffect, useMemo, useState } from 'react';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
-import { Plus, X } from 'lucide-react';
+import { isApiError } from '@repo/api-client';
 import { toast } from '@repo/ui';
 
 import {
@@ -25,18 +25,21 @@ import { useAppT } from '@/locales';
 import {
 	createStudentSchema,
 	editStudentSchema,
-	splitFullName,
 	type CreateStudentFormValues,
 	type EditStudentFormValues,
 } from '../schemas/student-form.schema';
 import { useBranchStore } from '@/store/branchStore';
-import { useGroups, type Student } from '../api/students.queries';
+import { useGroups, useStudentGuardians, type Student } from '../api/students.queries';
 import {
 	useCreateStudent,
 	useUpdateStudent,
 	useEnrollStudent,
 	useAddGuardian,
+	type AddGuardianInput,
 } from '../api/students.mutations';
+import { buildAddGuardianInput } from '../lib/guardian-input';
+import { ConnectedGuardiansSummary } from './ConnectedGuardiansSummary';
+import { GuardianPhoneField } from './GuardianPhoneField';
 
 interface CreateProps {
 	mode: 'create';
@@ -59,12 +62,6 @@ type StudentFormProps = CreateProps | EditProps;
  * switch re-translates every dropdown (conventions.md §7).
  */
 const GENDER_OPTIONS = [{ value: 'M' }, { value: 'F' }] as const;
-
-const GUARDIAN_RELATION_OPTIONS = [
-	{ value: 'father' },
-	{ value: 'mother' },
-	{ value: 'guardian' },
-] as const;
 
 const STUDENT_STATUS_OPTIONS = [
 	{ value: 'ACTIVE' },
@@ -98,21 +95,17 @@ function CreateStudentForm({
 			phone: '',
 			branchId: defaultBranchId,
 			address: '',
-			hasGuardian: false,
 			guardianName: '',
 			guardianPhone: '',
-			guardianRelation: 'father',
+			guardianRelation: undefined,
+			guardianLookupState: 'idle',
+			connectedGuardianUserId: undefined,
 		},
 	});
 
-	const hasGuardian = form.watch('hasGuardian');
-
-	function handleRemoveGuardian() {
-		form.setValue('hasGuardian', false);
-		form.resetField('guardianName');
-		form.resetField('guardianPhone');
-		form.resetField('guardianRelation');
-	}
+	const guardianPhone = form.watch('guardianPhone') ?? '';
+	const guardianRelation = form.watch('guardianRelation');
+	const connectedGuardianUserId = form.watch('connectedGuardianUserId');
 
 	const selectedBranchId = form.watch('branchId');
 	const { data: groupsPage } = useGroups(
@@ -138,7 +131,7 @@ function CreateStudentForm({
 				branchId: values.branchId,
 				firstName: values.firstName,
 				lastName: values.lastName,
-				phone: values.phone,
+				phone: values.phone || undefined,
 				dateOfBirth: values.dateOfBirth || undefined,
 				gender: values.gender,
 				address: values.address || undefined,
@@ -148,19 +141,22 @@ function CreateStudentForm({
 			return;
 		}
 
-		if (values.hasGuardian) {
-			const { firstName: gFirst, lastName: gLast } = splitFullName(
-				values.guardianName ?? '',
-			);
-			await addGuardian.mutateAsync({
-				studentId,
-				phone: values.guardianPhone ?? '',
-				firstName: gFirst,
-				lastName: gLast,
-				relation: values.guardianRelation ?? 'guardian',
-				isPrimary: true,
-				canPickup: true,
-			});
+		// The student exists now, so the guardian link can be written. A phone
+		// the tenant already knows resolves to that same person server-side, so
+		// this never mints a second guardian for a household of siblings.
+		if (values.guardianPhone) {
+			try {
+				await addGuardian.mutateAsync(
+					buildAddGuardianInput(studentId, values, { isPrimary: true }),
+				);
+			} catch (err) {
+				// The student is already created — surface the guardian failure
+				// instead of failing the whole flow, or the operator would
+				// re-submit and hit STUDENT_ALREADY_EXISTS.
+				toast.error(
+					isApiError(err) ? err.message : t('detail.guardians.addFailed'),
+				);
+			}
 		}
 
 		if (values.groupId) {
@@ -239,58 +235,24 @@ function CreateStudentForm({
 					</FieldGroup>
 				</FormSection>
 
-				{/* GUARDIAN — optional, hidden until the user opts in */}
-				{hasGuardian ? (
-					<FormSection
-						title={t('form.section.guardian')}
-						actions={
-							<Button
-								type="button"
-								variant="ghost"
-								size="sm"
-								onClick={handleRemoveGuardian}
-							>
-								<X className="mr-1 size-3.5" />
-								{t('form.removeGuardian')}
-							</Button>
+				{/* GUARDIAN — driven entirely by the phone: leave it blank and the
+				    student is created with no guardian at all. */}
+				<FormSection title={t('form.section.guardian')}>
+					<GuardianPhoneField
+						control={form.control}
+						setValue={form.setValue}
+						phone={guardianPhone}
+						relation={guardianRelation}
+						connectedGuardianUserId={connectedGuardianUserId}
+						onConnect={(guardianUserId) =>
+							// No student to link to yet — record the confirmation
+							// and write the link right after the student is created.
+							form.setValue('connectedGuardianUserId', guardianUserId, {
+								shouldValidate: true,
+							})
 						}
-					>
-						<FieldGroup>
-							<div className="grid grid-cols-2 gap-3">
-								<FormInput
-									control={form.control}
-									name="guardianName"
-									label={t('form.field.guardianName')}
-									placeholder={t('form.field.guardianNamePlaceholder')}
-								/>
-								<FormSelect
-									control={form.control}
-									name="guardianRelation"
-									label={t('form.field.relation')}
-									options={GUARDIAN_RELATION_OPTIONS.map((o) => ({
-										value: o.value,
-										label: t(`relation.${o.value}`),
-									}))}
-								/>
-							</div>
-							<FormPhoneInput
-								control={form.control}
-								name="guardianPhone"
-								label={t('form.field.guardianPhone')}
-							/>
-						</FieldGroup>
-					</FormSection>
-				) : (
-					<Button
-						type="button"
-						variant="outline"
-						onClick={() => form.setValue('hasGuardian', true)}
-						className="w-full border-dashed"
-					>
-						<Plus className="mr-1.5 size-4" />
-						{t('form.addGuardian')}
-					</Button>
-				)}
+					/>
+				</FormSection>
 
 				{/* INITIAL ENROLLMENT — the student bills on the group's course plan. */}
 				{groups.length > 0 && (
@@ -326,7 +288,7 @@ function EditStudentForm({
 	const t = useAppT('people');
 	const tv = useT('validation');
 	const statusLabel = useStatusLabel();
-	const schema = useMemo(() => editStudentSchema(tv), [tv]);
+	const schema = useMemo(() => editStudentSchema(tv, t), [tv, t]);
 
 	const form = useForm<EditStudentFormValues>({
 		resolver: zodResolver(schema),
@@ -335,12 +297,17 @@ function EditStudentForm({
 			lastName: student.user.lastName,
 			dateOfBirth: student.dateOfBirth ?? '',
 			gender: student.gender ?? undefined,
-			phone: student.user.phone,
+			phone: student.user.phone ?? '',
 			email: student.user.email ?? '',
 			branchId: student.branchId,
 			address: '',
 			status: student.status,
 			password: '',
+			guardianName: '',
+			guardianPhone: '',
+			guardianRelation: undefined,
+			guardianLookupState: 'idle',
+			connectedGuardianUserId: undefined,
 		},
 	});
 
@@ -350,27 +317,74 @@ function EditStudentForm({
 			lastName: student.user.lastName,
 			dateOfBirth: student.dateOfBirth ?? '',
 			gender: student.gender ?? undefined,
-			phone: student.user.phone,
+			phone: student.user.phone ?? '',
 			email: student.user.email ?? '',
 			branchId: student.branchId,
 			address: '',
 			status: student.status,
 			password: '',
+			guardianName: '',
+			guardianPhone: '',
+			guardianRelation: undefined,
+			guardianLookupState: 'idle',
+			connectedGuardianUserId: undefined,
 		});
 	}, [student, form]);
 
+	const guardianPhone = form.watch('guardianPhone') ?? '';
+	const guardianRelation = form.watch('guardianRelation');
+	const connectedGuardianUserId = form.watch('connectedGuardianUserId');
+
+	// The student's own detail response already carries `guardians`; the query
+	// keeps the list live after a connect made from this very form.
+	const { data: guardians = student.guardians ?? [] } = useStudentGuardians(student.id);
+	const linkedGuardianUserIds = guardians.map((g) => g.guardianUserId);
+
 	const updateStudent = useUpdateStudent();
+	const addGuardian = useAddGuardian();
 
 	useEffect(() => {
-		onPendingChange(updateStudent.isPending);
-	}, [updateStudent.isPending, onPendingChange]);
+		onPendingChange(updateStudent.isPending || addGuardian.isPending);
+	}, [updateStudent.isPending, addGuardian.isPending, onPendingChange]);
+
+	/**
+	 * Link a guardian and report the outcome. Shared by the Connect button (the
+	 * student exists, so confirming can link there and then) and by submit (the
+	 * new-guardian path, which has nothing to link until the operator saves).
+	 */
+	async function linkGuardian(input: AddGuardianInput): Promise<boolean> {
+		try {
+			await addGuardian.mutateAsync(input);
+			return true;
+		} catch (err) {
+			toast.error(isApiError(err) ? err.message : t('detail.guardians.addFailed'));
+			return false;
+		}
+	}
+
+	async function handleConnect() {
+		const values = form.getValues();
+		const linked = await linkGuardian(
+			buildAddGuardianInput(student.id, values, {
+				isPrimary: guardians.length === 0,
+			}),
+		);
+		if (!linked) return;
+
+		toast.success(t('detail.guardians.added'));
+		// The guardian now shows in the connected list above, so clear the field
+		form.setValue('guardianPhone', '');
+		form.setValue('guardianName', '');
+		form.setValue('guardianRelation', undefined);
+		form.setValue('connectedGuardianUserId', undefined);
+	}
 
 	async function onSubmit(values: EditStudentFormValues) {
 		await updateStudent.mutateAsync({
 			id: student.id,
 			firstName: values.firstName.trim(),
 			lastName: values.lastName.trim(),
-			phone: values.phone,
+			phone: values.phone ? values.phone : null,
 			email: values.email ? values.email : null,
 			branchId: values.branchId,
 			dateOfBirth: values.dateOfBirth || undefined,
@@ -379,6 +393,18 @@ function EditStudentForm({
 			status: values.status,
 			password: values.password || undefined,
 		});
+
+		// A guardian left in the form is one the operator described but never
+		// connected — the new-person path. An existing match is connected by its
+		// own button, which clears these fields, so it cannot be re-sent here.
+		if (values.guardianPhone && values.connectedGuardianUserId == null) {
+			await linkGuardian(
+				buildAddGuardianInput(student.id, values, {
+					isPrimary: guardians.length === 0,
+				}),
+			);
+		}
+
 		toast.success(t('updated'));
 		onSuccess();
 	}
@@ -460,6 +486,24 @@ function EditStudentForm({
 					</FieldGroup>
 				</FormSection>
 
+				{/* GUARDIAN — who is already connected, plus a phone field to
+				    connect another without creating a duplicate. */}
+				<FormSection title={t('form.section.guardian')}>
+					<div className="flex flex-col gap-3">
+						<ConnectedGuardiansSummary guardians={guardians} />
+						<GuardianPhoneField
+							control={form.control}
+							setValue={form.setValue}
+							phone={guardianPhone}
+							relation={guardianRelation}
+							connectedGuardianUserId={connectedGuardianUserId}
+							connecting={addGuardian.isPending}
+							linkedGuardianUserIds={linkedGuardianUserIds}
+							onConnect={handleConnect}
+						/>
+					</div>
+				</FormSection>
+
 				{/* ACCESS */}
 				<FormSection title={t('form.section.access')}>
 					<FieldGroup>
@@ -512,7 +556,6 @@ export function StudentForm(props: StudentFormProps) {
 			open={open}
 			onOpenChange={onOpenChange}
 			title={mode === 'create' ? t('form.addTitle') : t('form.editTitle')}
-			description={t('form.requiredHint')}
 			footer={
 				<>
 					<Button type="button" variant="outline" onClick={handleSuccess}>

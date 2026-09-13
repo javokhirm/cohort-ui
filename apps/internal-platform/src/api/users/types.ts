@@ -8,7 +8,8 @@ export interface UserTenantSummary {
 
 export interface UserDirectoryRow {
 	id: number;
-	phone: string;
+	/** `null` for a person the platform holds no number for (see `UserDetailView`). */
+	phone: string | null;
 	email: string | null;
 	firstName: string;
 	lastName: string;
@@ -29,7 +30,12 @@ export interface UserMembershipDetail {
 
 export interface UserDetailView {
 	id: number;
-	phone: string;
+	/**
+	 * `null` when no number is on file. Only accounts that sign in by phone are
+	 * guaranteed one; students authenticate with a `studentCode` and parents not
+	 * at all.
+	 */
+	phone: string | null;
 	email: string | null;
 	firstName: string;
 	lastName: string;
@@ -43,7 +49,7 @@ export interface UserDetailView {
 
 export interface UserSummaryView {
 	id: number;
-	phone: string;
+	phone: string | null;
 	email: string | null;
 	firstName: string;
 	lastName: string;

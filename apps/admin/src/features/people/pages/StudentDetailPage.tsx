@@ -1,6 +1,6 @@
 import { useState } from 'react';
-import { Link } from '@tanstack/react-router';
-import { ArrowLeft, Edit, MessageSquare, Plus, Trash2 } from 'lucide-react';
+import { Link, useNavigate, useSearch } from '@tanstack/react-router';
+import { Edit, MessageSquare, Plus, Trash2, Users } from 'lucide-react';
 
 import {
 	ActionsMenu,
@@ -8,6 +8,8 @@ import {
 	Card,
 	CardContent,
 	DataTable,
+	EmptyState,
+	PageNav,
 	Select,
 	SelectContent,
 	SelectItem,
@@ -27,6 +29,7 @@ import { formatDate } from '@repo/utils';
 import { useStatusLabel, useT } from '@repo/i18n';
 
 import { Can } from '@/components/Can';
+import { useGoBack } from '@/hooks/useGoBack';
 import { useAppT } from '@/locales';
 import { usePermissions } from '@/features/auth/hooks';
 import { StandingDiscountCell } from '@/features/billing';
@@ -38,6 +41,7 @@ import {
 } from '../api/students.queries';
 import type { Guardian, Enrollment } from '../api/students.queries';
 import { useRemoveGuardian } from '../api/students.mutations';
+import { AddGuardianDialog } from '../components/AddGuardianDialog';
 import { BillingTab } from '../components/BillingTab';
 import { GradesTab } from '../components/GradesTab';
 import { PerformanceTab } from '../components/PerformanceTab';
@@ -98,8 +102,12 @@ function StudentHeader({ studentId, onEdit }: { studentId: number; onEdit: () =>
 							<span>{student.studentCode}</span>
 							<span>·</span>
 							<span>{branchName}</span>
-							<span>·</span>
-							<span>{student.user.phone}</span>
+							{student.user.phone && (
+								<>
+									<span>·</span>
+									<span>{student.user.phone}</span>
+								</>
+							)}
 						</div>
 					</div>
 				</div>
@@ -184,6 +192,7 @@ function GuardiansTab({ studentId }: { studentId: number }) {
 	const t = useAppT('people');
 	const { data: guardians = [], isLoading } = useStudentGuardians(studentId);
 	const removeGuardian = useRemoveGuardian();
+	const [addOpen, setAddOpen] = useState(false);
 
 	function handleRemove(guardian: Guardian) {
 		if (
@@ -195,12 +204,30 @@ function GuardiansTab({ studentId }: { studentId: number }) {
 		)
 			return;
 		removeGuardian.mutate(
-			{ studentId, guardianId: guardian.id },
+			{ studentId, guardianId: guardian.guardianUserId },
 			{
 				onSuccess: () => toast.success(t('detail.guardians.removed')),
 			},
 		);
 	}
+
+	const addButton = (
+		<Can permission="student.guardian.manage">
+			<Button size="sm" onClick={() => setAddOpen(true)}>
+				<Plus className="mr-1.5 size-4" />
+				{t('detail.guardians.add')}
+			</Button>
+		</Can>
+	);
+
+	const dialog = (
+		<AddGuardianDialog
+			studentId={studentId}
+			isFirstGuardian={guardians.length === 0}
+			open={addOpen}
+			onOpenChange={setAddOpen}
+		/>
+	);
 
 	if (isLoading) {
 		return (
@@ -214,66 +241,78 @@ function GuardiansTab({ studentId }: { studentId: number }) {
 
 	if (guardians.length === 0) {
 		return (
-			<div className="flex min-h-32 items-center justify-center rounded-xl border text-sm text-muted-foreground">
-				{t('detail.guardians.empty')}
+			<div className="flex flex-col gap-3">
+				<Card className="py-0">
+					<EmptyState
+						icon={<Users />}
+						title={t('detail.guardians.empty')}
+						description={t('detail.guardians.emptyDescription')}
+						action={addButton}
+					/>
+				</Card>
+				{dialog}
 			</div>
 		);
 	}
 
 	return (
-		<div className="rounded-xl border bg-card">
-			{guardians.map((g, i) => {
-				const initials =
-					`${g.user.firstName[0] ?? ''}${g.user.lastName[0] ?? ''}`.toUpperCase();
-				const relationLabel = t(
-					`relation.${g.relation as 'father' | 'mother' | 'guardian'}`,
-				);
-				return (
-					<div key={g.id}>
-						{i > 0 && <Separator />}
-						<div className="flex items-center justify-between p-4">
-							<div className="flex items-center gap-3">
-								<div className="flex size-9 shrink-0 items-center justify-center rounded-full bg-muted text-xs font-semibold">
-									{initials}
-								</div>
-								<div>
-									<div className="flex items-center gap-3">
-										<span className="text-xs font-semibold text-muted-foreground">
-											{relationLabel}
-										</span>
-										<span className="font-medium">
-											{g.user.firstName} {g.user.lastName}
-										</span>
-										{g.isPrimary && (
-											<StatusBadge tone="indigo">
-												{t('detail.guardians.primary')}
-											</StatusBadge>
-										)}
-										{g.canPickup && (
-											<StatusBadge tone="green">
-												{t('detail.guardians.pickup')}
-											</StatusBadge>
-										)}
+		<div className="flex flex-col gap-3">
+			<div className="flex justify-end">{addButton}</div>
+			<div className="rounded-xl border bg-card">
+				{guardians.map((g, i) => {
+					const initials =
+						`${g.user.firstName[0] ?? ''}${g.user.lastName[0] ?? ''}`.toUpperCase();
+					const relationLabel = t(
+						`relation.${g.relation as 'father' | 'mother' | 'guardian'}`,
+					);
+					return (
+						<div key={g.id}>
+							{i > 0 && <Separator />}
+							<div className="flex items-center justify-between p-4">
+								<div className="flex items-center gap-3">
+									<div className="flex size-9 shrink-0 items-center justify-center rounded-full bg-muted text-xs font-semibold">
+										{initials}
 									</div>
-									<div className="mt-0.5 text-sm text-muted-foreground">
-										{g.user.phone}
+									<div>
+										<div className="flex items-center gap-3">
+											<span className="text-xs font-semibold text-muted-foreground">
+												{relationLabel}
+											</span>
+											<span className="font-medium">
+												{g.user.firstName} {g.user.lastName}
+											</span>
+											{g.isPrimary && (
+												<StatusBadge tone="indigo">
+													{t('detail.guardians.primary')}
+												</StatusBadge>
+											)}
+											{g.canPickup && (
+												<StatusBadge tone="green">
+													{t('detail.guardians.pickup')}
+												</StatusBadge>
+											)}
+										</div>
+										<div className="mt-0.5 text-sm text-muted-foreground">
+											{g.user.phone ?? '—'}
+										</div>
 									</div>
 								</div>
+								<Can permission="student.guardian.manage">
+									<Button
+										variant="ghost"
+										size="sm"
+										className="text-muted-foreground hover:text-destructive"
+										onClick={() => handleRemove(g)}
+									>
+										<Trash2 className="size-4" />
+									</Button>
+								</Can>
 							</div>
-							<Can permission="student.guardian.manage">
-								<Button
-									variant="ghost"
-									size="sm"
-									className="text-muted-foreground hover:text-destructive"
-									onClick={() => handleRemove(g)}
-								>
-									<Trash2 className="size-4" />
-								</Button>
-							</Can>
 						</div>
-					</div>
-				);
-			})}
+					);
+				})}
+			</div>
+			{dialog}
 		</div>
 	);
 }
@@ -421,28 +460,74 @@ function WalletTab({ studentId }: { studentId: number }) {
 	return <WalletSection studentId={studentId} />;
 }
 
+/** Mirrors the `tab` union validated on the route. */
+type StudentTab =
+	| 'overview'
+	| 'guardians'
+	| 'enrollments'
+	| 'performance'
+	| 'grades'
+	| 'billing'
+	| 'wallet';
+
 interface StudentDetailPageProps {
 	studentId: number;
 }
 
 export function StudentDetailPage({ studentId }: StudentDetailPageProps) {
 	const t = useAppT('people');
+	const tc = useT('common');
+	const navigate = useNavigate();
+	const { tab } = useSearch({ from: '/_authed/students/$id' });
+	const { can, permissionsLoaded } = usePermissions();
 	const [editOpen, setEditOpen] = useState(false);
 	const { data: student } = useStudent(studentId);
+	// A student is opened from the list, from a lead, and from a group roster,
+	// so Back follows history; the list is only the fallback for a direct hit.
+	const goBack = useGoBack({ to: '/students' });
+
+	const fullName = student
+		? `${student.user.firstName} ${student.user.lastName}`.trim()
+		: undefined;
+
+	// Wallet is the one tab behind a permission, so `?tab=wallet` in a shared
+	// link can name a tab this viewer has neither a trigger nor a body for —
+	// which would render the strip with nothing selected under it. Fail open
+	// while the catalog is still loading, as the sidebar does.
+	const activeTab =
+		tab === 'wallet' && permissionsLoaded && !can('wallet.read')
+			? 'overview'
+			: (tab ?? 'overview');
 
 	return (
 		<div className="mx-auto flex max-w-7xl flex-col gap-5">
-			<Link
-				to="/students"
-				className="flex w-fit items-center gap-1.5 text-sm text-muted-foreground hover:text-foreground"
-			>
-				<ArrowLeft className="size-3.5" />
-				{t('detail.back')}
-			</Link>
+			<PageNav
+				onBack={goBack}
+				backLabel={tc('action.back')}
+				crumbs={[
+					{ label: t('title'), link: <Link to="/students" /> },
+					// Falls back to the code while the profile loads, so the
+					// trail never collapses and then jumps a row taller.
+					{ label: fullName || `#${studentId}` },
+				]}
+			/>
 
 			<StudentHeader studentId={studentId} onEdit={() => setEditOpen(true)} />
 
-			<Tabs defaultValue="overview" variant="underline">
+			<Tabs
+				value={activeTab}
+				onValueChange={(next) =>
+					void navigate({
+						to: '/students/$id',
+						params: { id: String(studentId) },
+						search: {
+							tab: next === 'overview' ? undefined : (next as StudentTab),
+						},
+						replace: true,
+					})
+				}
+				variant="underline"
+			>
 				<TabsList>
 					<TabsTrigger value="overview">{t('detail.tab.overview')}</TabsTrigger>
 					<TabsTrigger value="guardians">

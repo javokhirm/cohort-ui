@@ -2,7 +2,6 @@ import { useEffect, useMemo, useState } from 'react';
 import { Link, useNavigate } from '@tanstack/react-router';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
-import { ArrowLeft } from 'lucide-react';
 
 import {
 	Button,
@@ -14,6 +13,7 @@ import {
 	Input,
 	Label,
 	PageHeader,
+	PageNav,
 	Skeleton,
 	Spinner,
 	toast,
@@ -22,6 +22,7 @@ import { formatDate } from '@repo/utils';
 import { useStatusLabel, useT } from '@repo/i18n';
 
 import { FormSection } from '@/components/FormSection';
+import { useGoBack } from '@/hooks/useGoBack';
 import { useAppT } from '@/locales';
 
 import { useStaffMember, type StaffResponse } from '../api/staff.queries';
@@ -71,7 +72,7 @@ function EditStaffForm({
 	const toDefaults = (s: StaffResponse): EditStaffFormValues => ({
 		firstName: s.user.firstName,
 		lastName: s.user.lastName,
-		phone: s.user.phone,
+		phone: s.user.phone ?? '',
 		email: s.user.email ?? '',
 		position: s.position ?? '',
 		employmentType: s.employmentType,
@@ -228,27 +229,57 @@ export function StaffEditPage({ staffId }: StaffEditPageProps) {
 	const { data: staff, isLoading, isError } = useStaffMember(staffId);
 	const [isPending, setIsPending] = useState(false);
 
+	// `replace`, so the form this member was saved from is not left sitting
+	// behind their profile for the next Back press to walk into.
 	function goToDetail() {
 		void navigate({
 			to: '/staff/$staffId',
 			params: { staffId: String(staffId) },
+			replace: true,
 		});
 	}
 
-	const backLink = (
-		<Link
-			to="/staff"
-			className="flex w-fit items-center gap-1.5 text-sm text-muted-foreground hover:text-foreground"
-		>
-			<ArrowLeft className="size-3.5" />
-			{t('detail.back')}
-		</Link>
+	// The profile is what this form edits, so it is where a cold-opened edit URL
+	// belongs — but only while there is a profile to go to. The not-found branch
+	// aims at the list instead, rather than at a member that does not resolve.
+	const goBack = useGoBack({
+		to: '/staff/$staffId',
+		params: { staffId: String(staffId) },
+	});
+	const goBackToList = useGoBack({ to: '/staff' });
+
+	const fullName = staff
+		? `${staff.user.firstName} ${staff.user.lastName}`.trim()
+		: undefined;
+
+	// The trail keeps its shape in every state, so the header does not reflow as
+	// the member loads; only the middle crumb's text fills in.
+	const pageNav = (onBack: () => void, linkToMember = true) => (
+		<PageNav
+			onBack={onBack}
+			backLabel={tc('action.back')}
+			crumbs={[
+				{ label: t('title'), link: <Link to="/staff" /> },
+				{
+					label: fullName || `#${staffId}`,
+					...(linkToMember && {
+						link: (
+							<Link
+								to="/staff/$staffId"
+								params={{ staffId: String(staffId) }}
+							/>
+						),
+					}),
+				},
+				{ label: tc('action.edit') },
+			]}
+		/>
 	);
 
 	if (isLoading) {
 		return (
 			<div className="mx-auto flex max-w-3xl flex-col gap-5">
-				{backLink}
+				{pageNav(goBack)}
 				<div className="flex flex-col gap-2">
 					<Skeleton className="h-7 w-48" />
 					<Skeleton className="h-4 w-56" />
@@ -261,7 +292,7 @@ export function StaffEditPage({ staffId }: StaffEditPageProps) {
 	if (isError || !staff) {
 		return (
 			<div className="mx-auto flex max-w-3xl flex-col gap-5">
-				{backLink}
+				{pageNav(goBackToList, false)}
 				<div className="flex min-h-40 items-center justify-center rounded-xl border text-sm text-muted-foreground">
 					{t('detail.notFound')}
 				</div>
@@ -269,11 +300,9 @@ export function StaffEditPage({ staffId }: StaffEditPageProps) {
 		);
 	}
 
-	const fullName = `${staff.user.firstName} ${staff.user.lastName}`.trim();
-
 	return (
 		<div className="mx-auto flex max-w-3xl flex-col gap-5">
-			{backLink}
+			{pageNav(goBack)}
 			<PageHeader title={t('form.editTitle')} description={fullName} />
 
 			<EditStaffForm

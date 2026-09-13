@@ -32,7 +32,6 @@ export const uz = {
 		updated: 'Filial yangilandi',
 		submitCreate: 'Filial yaratish',
 		submitUpdate: 'Oʻzgarishlarni saqlash',
-		requiredHint: '* bilan belgilangan maydonlar majburiy',
 		section: {
 			identity: 'Asosiy maʼlumotlar',
 			location: 'Manzil va aloqa',
@@ -81,7 +80,6 @@ export const uz = {
 		seats_other: '{{count}} oʻrin',
 		created: 'Xona qoʻshildi',
 		updated: 'Xona yangilandi',
-		requiredHint: '* bilan belgilangan maydonlar majburiy',
 		field: {
 			name: 'Xona nomi *',
 			namePlaceholder: 'masalan, 204-xona',
@@ -108,7 +106,6 @@ export const uz = {
 		emptyFiltered: 'Bu filtrga mos kurs topilmadi.',
 		created: 'Kurs qoʻshildi',
 		updated: 'Kurs yangilandi',
-		requiredHint: '* bilan belgilangan maydonlar majburiy',
 		/** `branchId: null` — the course is shared across every branch. */
 		shared: 'Umumiy',
 		sharedOption: 'Umumiy — barcha filiallar',
@@ -144,7 +141,6 @@ export const uz = {
 		planChangeWarning:
 			'Rejani oʻzgartirsangiz, bu kurs guruhlarining kelgusi barcha invoyslari qayta narxlanadi. Allaqachon chiqarilgan invoyslar oʻz rejasida qoladi.',
 		detail: {
-			back: 'Kurslarga qaytish',
 			notFound: 'Kurs topilmadi.',
 			statLevel: 'Daraja',
 			statDuration: 'Standart davomiyligi',
@@ -168,7 +164,6 @@ export const uz = {
 		edit: 'Xarajatni tahrirlash',
 		submitCreate: 'Xarajatni yozish',
 		submitUpdate: 'Oʻzgarishlarni saqlash',
-		requiredHint: '* bilan belgilangan maydonlar majburiy',
 		loadError: 'Xarajatlarni yuklab boʻlmadi. Sahifani yangilang.',
 		emptyFiltered: 'Bu filtrga mos xarajat topilmadi.',
 		totalThisPeriod: 'Shu davr uchun jami',
@@ -305,7 +300,6 @@ export const uz = {
 		},
 		addSheet: {
 			title: 'Lid qoʻshish',
-			requiredHint: '* bilan belgilangan maydonlar majburiy',
 			submit: 'Lid qoʻshish',
 		},
 		field: {
@@ -351,10 +345,7 @@ export const uz = {
 		form: {
 			addTitle: 'Oʻquvchi qoʻshish',
 			editTitle: 'Oʻquvchini tahrirlash',
-			requiredHint: '* bilan belgilangan maydonlar majburiy',
 			save: 'Oʻquvchini saqlash',
-			addGuardian: 'Vasiy qoʻshish',
-			removeGuardian: 'Olib tashlash',
 			section: {
 				personal: 'Shaxsiy maʼlumotlar',
 				contact: 'Aloqa',
@@ -370,7 +361,7 @@ export const uz = {
 				lastNamePlaceholder: 'masalan, Rustamov',
 				dateOfBirth: 'Tugʻilgan sana',
 				gender: 'Jinsi',
-				phone: 'Telefon *',
+				phone: 'Telefon',
 				branch: 'Filial *',
 				email: 'Elektron pochta',
 				emailPlaceholder: 'ism@example.uz',
@@ -378,8 +369,8 @@ export const uz = {
 				addressPlaceholder: 'Koʻcha, tuman, shahar',
 				guardianName: 'Vasiy F.I.Sh. *',
 				guardianNamePlaceholder: 'masalan, Rustam Olimov',
-				relation: 'Qarindoshligi',
-				guardianPhone: 'Vasiy telefoni *',
+				guardianPhone: 'Ota-ona / vasiy telefoni',
+				relationRequired: 'Qarindoshligi *',
 				group: 'Guruh',
 				studentStatus: 'Oʻquvchi holati',
 				password: 'Parol',
@@ -388,10 +379,27 @@ export const uz = {
 			passwordHint: 'Joriy parolni saqlab qolish uchun boʻsh qoldiring.',
 			validation: {
 				guardianFullName: 'Ism va familiyani toʻliq kiriting',
+				guardianChecking: 'Telefon raqami tekshirilmoqda…',
+				guardianAlreadyConnected: 'Bu vasiy ushbu oʻquvchiga allaqachon ulangan.',
+				guardianConfirmRequired:
+					'Bu raqam allaqachon roʻyxatda. Vasiyni ulang yoki raqamni oʻchiring.',
+			},
+			guardianLookup: {
+				checking: 'Tekshirilmoqda…',
+				foundTitle: 'Mavjud vasiy topildi',
+				foundDescription: 'Bu vasiy tizimda allaqachon roʻyxatdan oʻtgan.',
+				foundNonGuardian:
+					'Bu raqam markazdagi mavjud shaxsga tegishli. Ulash yangi yozuv yaratmaydi.',
+				connectedStudents: 'Ulangan oʻquvchilar:',
+				connectPrompt: 'Shu vasiyni ushbu oʻquvchiga ulaymizmi?',
+				connectAction: 'Vasiyni ulash',
+				connected: 'Vasiy ulandi',
+				alreadyConnected: 'Allaqachon ulangan',
+				notFound: 'Bu raqam boʻyicha vasiy topilmadi.',
+				newTitle: 'Yangi vasiy',
 			},
 		},
 		detail: {
-			back: 'Oʻquvchilarga qaytish',
 			actionsLabel: 'Oʻquvchi amallari',
 			action: {
 				edit: 'Tahrirlash',
@@ -416,6 +424,13 @@ export const uz = {
 			},
 			guardians: {
 				empty: 'Vasiylar biriktirilmagan',
+				emptyDescription:
+					'Davomat, toʻlovlar va favqulodda holatlar boʻyicha bogʻlanish uchun ota-ona yoki vasiy qoʻshing.',
+				add: 'Vasiy qoʻshish',
+				addDescription: 'Oʻquvchi profiliga ota-ona yoki vasiyni bogʻlang.',
+				added: 'Vasiy qoʻshildi',
+				addFailed: 'Vasiyni qoʻshib boʻlmadi',
+				primaryLabel: 'Asosiy vasiy',
 				primary: 'Asosiy',
 				pickup: 'Olib ketishi mumkin',
 				removeConfirm: '{{name}} vasiylikdan olib tashlansinmi?',
@@ -574,7 +589,6 @@ export const uz = {
 		form: {
 			addTitle: 'Xodim qoʻshish',
 			editTitle: 'Xodimni tahrirlash',
-			requiredHint: '* bilan belgilangan maydonlar majburiy',
 			section: {
 				profile: 'Profil',
 				contact: 'Aloqa',
@@ -609,7 +623,6 @@ export const uz = {
 				'Ish haqi saqlangandan soʻng — xodimning «Ish haqi» boʻlimida sozlanadi («Ish haqi modelini oʻzgartirish»).',
 		},
 		detail: {
-			back: 'Xodimlarga qaytish',
 			notFound: 'Xodim topilmadi.',
 			actionsLabel: 'Xodim amallari',
 			action: {
@@ -749,8 +762,6 @@ export const uz = {
 		description: 'Sinf guruhlari — oʻqituvchi, xona, sigʻim va haftalik jadval',
 		create: 'Guruh yaratish',
 		edit: 'Guruhni tahrirlash',
-		back: 'Guruhlarga qaytish',
-		backToGroup: '{{name}}ga qaytish',
 		created: 'Guruh yaratildi',
 		updated: 'Guruh yangilandi',
 		searchPlaceholder: 'Nomi yoki kodi boʻyicha qidirish…',
@@ -1117,7 +1128,6 @@ export const uz = {
 			loadError: 'Invoyslarni yuklab boʻlmadi. Sahifani yangilang.',
 			emptyFiltered: 'Bu filtrga mos invoys topilmadi.',
 			created: 'Invoys yaratildi',
-			back: 'Invoyslarga qaytish',
 			notFound: 'Invoys topilmadi.',
 			filters: {
 				title: 'Filtrlar',
@@ -1160,7 +1170,6 @@ export const uz = {
 			},
 			form: {
 				title: 'Invoys yaratish',
-				requiredHint: '* bilan belgilangan maydonlar majburiy',
 				student: 'Oʻquvchi *',
 				studentPlaceholder: 'Oʻquvchini tanlang',
 				issueDate: 'Chiqarilgan sana *',
@@ -1235,7 +1244,6 @@ export const uz = {
 			emptyFiltered: 'Bu filtrga mos reja topilmadi.',
 			created: 'Toʻlov rejasi yaratildi',
 			updated: 'Toʻlov rejasi yangilandi',
-			requiredHint: '* bilan belgilangan maydonlar majburiy',
 			groupsTitle: 'Ushbu rejadagi guruhlar',
 			groupsEmpty: 'Bu rejada hali guruhlar yoʻq.',
 			column: {
@@ -1266,7 +1274,6 @@ export const uz = {
 			emptyFiltered: 'Bu filtrga mos chegirma topilmadi.',
 			created: 'Chegirma yaratildi',
 			updated: 'Chegirma yangilandi',
-			requiredHint: '* bilan belgilangan maydonlar majburiy',
 			field: {
 				name: 'Chegirma nomi *',
 				namePlaceholder: 'masalan, Aka-uka chegirmasi',
@@ -1589,7 +1596,6 @@ export const uz = {
 	},
 	payroll: {
 		title: 'Ish haqi',
-		back: 'Ish haqiga qaytish',
 		live: 'Joriy',
 		finalized: 'Yakunlangan',
 		finalizePeriod: 'Davrni yakunlash',

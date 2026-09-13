@@ -33,8 +33,11 @@ export interface StudentMe {
 	id: number;
 	firstName: string;
 	lastName: string;
-	/** The login identifier. Read-only here: only an admin may change it. */
-	phone: string;
+	/**
+	 * Contact data, not a credential — students sign in with their `studentCode`
+	 * — so it is editable here and may be `null`.
+	 */
+	phone: string | null;
 	email: string | null;
 	avatarUrl: string | null;
 	preferredLanguage: Locale | null;

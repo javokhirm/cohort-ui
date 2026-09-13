@@ -108,7 +108,6 @@ export function AddLeadSheet({ open, onOpenChange }: AddLeadSheetProps) {
 			open={open}
 			onOpenChange={onOpenChange}
 			title={t('addSheet.title')}
-			description={t('addSheet.requiredHint')}
 			footer={
 				<>
 					<Button

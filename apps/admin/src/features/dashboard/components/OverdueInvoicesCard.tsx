@@ -61,7 +61,11 @@ export function OverdueInvoicesCard() {
 						return (
 							<li key={invoice.id}>
 								{i > 0 && <Separator />}
-								<div className="flex items-center gap-4 px-5 py-3">
+								<Link
+									to="/invoices/$id"
+									params={{ id: String(invoice.id) }}
+									className="flex items-center gap-3 px-5 py-3 hover:bg-muted/50"
+								>
 									<div className="min-w-0 flex-1">
 										<p className="truncate text-sm font-medium">
 											{invoice.studentName}
@@ -79,7 +83,7 @@ export function OverdueInvoicesCard() {
 											{t('overdueDays', { count: days })}
 										</p>
 									</div>
-								</div>
+								</Link>
 							</li>
 						);
 					})}

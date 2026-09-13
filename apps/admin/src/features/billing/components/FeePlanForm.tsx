@@ -301,7 +301,6 @@ export function FeePlanForm(props: FeePlanFormProps) {
 			open={open}
 			onOpenChange={onOpenChange}
 			title={mode === 'create' ? t('feePlans.addSheet') : t('feePlans.edit')}
-			description={t('feePlans.requiredHint')}
 			footer={
 				<>
 					<Button type="button" variant="outline" onClick={handleClose}>

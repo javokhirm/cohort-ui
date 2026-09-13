@@ -346,7 +346,6 @@ export function BranchForm(props: BranchFormProps) {
 			open={open}
 			onOpenChange={onOpenChange}
 			title={mode === 'create' ? t('add') : t('edit')}
-			description={t('requiredHint')}
 			footer={
 				<>
 					<Button type="button" variant="outline" onClick={handleClose}>

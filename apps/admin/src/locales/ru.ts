@@ -17,7 +17,6 @@ export const ru: TranslationsOf<typeof uz> = {
 		updated: 'Филиал обновлён',
 		submitCreate: 'Создать филиал',
 		submitUpdate: 'Сохранить изменения',
-		requiredHint: 'Поля со знаком * обязательны',
 		section: {
 			identity: 'Основные данные',
 			location: 'Адрес и контакты',
@@ -67,7 +66,6 @@ export const ru: TranslationsOf<typeof uz> = {
 		seats_other: '{{count}} мест',
 		created: 'Аудитория добавлена',
 		updated: 'Аудитория обновлена',
-		requiredHint: 'Поля со знаком * обязательны',
 		field: {
 			name: 'Название аудитории *',
 			namePlaceholder: 'например, Аудитория 204',
@@ -94,7 +92,6 @@ export const ru: TranslationsOf<typeof uz> = {
 		emptyFiltered: 'Нет курсов по этому фильтру.',
 		created: 'Курс добавлен',
 		updated: 'Курс обновлён',
-		requiredHint: 'Поля со знаком * обязательны',
 		shared: 'Общий',
 		sharedOption: 'Общий — все филиалы',
 		weeksShort_one: '{{count}} нед.',
@@ -135,7 +132,6 @@ export const ru: TranslationsOf<typeof uz> = {
 		planChangeWarning:
 			'Смена плана пересчитает все будущие счета групп этого курса. Уже выставленные счета сохранят исходный план.',
 		detail: {
-			back: 'Назад к курсам',
 			notFound: 'Курс не найден.',
 			statLevel: 'Уровень',
 			statDuration: 'Длительность по умолчанию',
@@ -158,7 +154,6 @@ export const ru: TranslationsOf<typeof uz> = {
 		edit: 'Редактировать расход',
 		submitCreate: 'Записать расход',
 		submitUpdate: 'Сохранить изменения',
-		requiredHint: 'Поля со знаком * обязательны',
 		loadError: 'Не удалось загрузить расходы. Обновите страницу.',
 		emptyFiltered: 'Нет расходов по этому фильтру.',
 		totalThisPeriod: 'Итого за период',
@@ -298,7 +293,6 @@ export const ru: TranslationsOf<typeof uz> = {
 		},
 		addSheet: {
 			title: 'Добавить лид',
-			requiredHint: 'Поля со знаком * обязательны',
 			submit: 'Добавить лид',
 		},
 		field: {
@@ -344,10 +338,7 @@ export const ru: TranslationsOf<typeof uz> = {
 		form: {
 			addTitle: 'Добавить ученика',
 			editTitle: 'Редактировать ученика',
-			requiredHint: 'Поля со знаком * обязательны',
 			save: 'Сохранить ученика',
-			addGuardian: 'Добавить представителя',
-			removeGuardian: 'Убрать',
 			section: {
 				personal: 'Личные данные',
 				contact: 'Контакты',
@@ -363,7 +354,7 @@ export const ru: TranslationsOf<typeof uz> = {
 				lastNamePlaceholder: 'например, Рустамов',
 				dateOfBirth: 'Дата рождения',
 				gender: 'Пол',
-				phone: 'Телефон *',
+				phone: 'Телефон',
 				branch: 'Филиал *',
 				email: 'Эл. почта',
 				emailPlaceholder: 'name@example.uz',
@@ -371,8 +362,8 @@ export const ru: TranslationsOf<typeof uz> = {
 				addressPlaceholder: 'Улица, район, город',
 				guardianName: 'ФИО представителя *',
 				guardianNamePlaceholder: 'например, Рустам Олимов',
-				relation: 'Степень родства',
-				guardianPhone: 'Телефон представителя *',
+				guardianPhone: 'Телефон родителя / представителя',
+				relationRequired: 'Степень родства *',
 				group: 'Группа',
 				studentStatus: 'Статус ученика',
 				password: 'Пароль',
@@ -381,10 +372,28 @@ export const ru: TranslationsOf<typeof uz> = {
 			passwordHint: 'Оставьте пустым, чтобы сохранить текущий пароль.',
 			validation: {
 				guardianFullName: 'Укажите имя и фамилию полностью',
+				guardianChecking: 'Проверяем номер телефона…',
+				guardianAlreadyConnected:
+					'Этот представитель уже подключён к данному ученику.',
+				guardianConfirmRequired:
+					'Этот номер уже зарегистрирован. Подключите представителя или очистите номер.',
+			},
+			guardianLookup: {
+				checking: 'Проверяем…',
+				foundTitle: 'Найден существующий представитель',
+				foundDescription: 'Этот представитель уже зарегистрирован в системе.',
+				foundNonGuardian:
+					'Этот номер принадлежит человеку, который уже есть в центре. Подключение не создаст новую запись.',
+				connectedStudents: 'Подключённые ученики:',
+				connectPrompt: 'Подключить этого представителя к ученику?',
+				connectAction: 'Подключить представителя',
+				connected: 'Представитель подключён',
+				alreadyConnected: 'Уже подключён',
+				notFound: 'Представитель с таким номером не найден.',
+				newTitle: 'Новый представитель',
 			},
 		},
 		detail: {
-			back: 'Назад к ученикам',
 			actionsLabel: 'Действия с учеником',
 			action: {
 				edit: 'Редактировать',
@@ -409,6 +418,13 @@ export const ru: TranslationsOf<typeof uz> = {
 			},
 			guardians: {
 				empty: 'Представители не привязаны',
+				emptyDescription:
+					'Добавьте родителя или представителя, чтобы с ним можно было связаться по посещаемости, оплате и в экстренных случаях.',
+				add: 'Добавить представителя',
+				addDescription: 'Привяжите родителя или представителя к профилю ученика.',
+				added: 'Представитель добавлен',
+				addFailed: 'Не удалось добавить представителя',
+				primaryLabel: 'Основной представитель',
 				primary: 'Основной',
 				pickup: 'Может забирать',
 				removeConfirm: 'Убрать {{name}} из представителей?',
@@ -573,7 +589,6 @@ export const ru: TranslationsOf<typeof uz> = {
 		form: {
 			addTitle: 'Добавить сотрудника',
 			editTitle: 'Редактировать сотрудника',
-			requiredHint: 'Поля со знаком * обязательны',
 			section: {
 				profile: 'Профиль',
 				contact: 'Контакты',
@@ -608,7 +623,6 @@ export const ru: TranslationsOf<typeof uz> = {
 				'Оплата настраивается после сохранения — во вкладке «Зарплата» сотрудника («Изменить модель оплаты»).',
 		},
 		detail: {
-			back: 'Назад к сотрудникам',
 			notFound: 'Сотрудник не найден.',
 			actionsLabel: 'Действия с сотрудником',
 			action: {
@@ -749,8 +763,6 @@ export const ru: TranslationsOf<typeof uz> = {
 			'Учебные группы — преподаватель, аудитория, вместимость и расписание',
 		create: 'Создать группу',
 		edit: 'Редактировать группу',
-		back: 'Назад к группам',
-		backToGroup: 'Назад к {{name}}',
 		created: 'Группа создана',
 		updated: 'Группа обновлена',
 		searchPlaceholder: 'Поиск по названию или коду…',
@@ -1125,7 +1137,6 @@ export const ru: TranslationsOf<typeof uz> = {
 			loadError: 'Не удалось загрузить счета. Обновите страницу.',
 			emptyFiltered: 'Нет счетов по этому фильтру.',
 			created: 'Счёт создан',
-			back: 'Назад к счетам',
 			notFound: 'Счёт не найден.',
 			filters: {
 				title: 'Фильтры',
@@ -1168,7 +1179,6 @@ export const ru: TranslationsOf<typeof uz> = {
 			},
 			form: {
 				title: 'Создать счёт',
-				requiredHint: 'Поля со знаком * обязательны',
 				student: 'Ученик *',
 				studentPlaceholder: 'Выберите ученика',
 				issueDate: 'Дата выставления *',
@@ -1243,7 +1253,6 @@ export const ru: TranslationsOf<typeof uz> = {
 			emptyFiltered: 'Нет планов по этому фильтру.',
 			created: 'Тарифный план создан',
 			updated: 'Тарифный план обновлён',
-			requiredHint: 'Поля со знаком * обязательны',
 			groupsTitle: 'Группы на этом плане',
 			groupsEmpty: 'На этом плане пока нет групп.',
 			column: {
@@ -1274,7 +1283,6 @@ export const ru: TranslationsOf<typeof uz> = {
 			emptyFiltered: 'Нет скидок по этому фильтру.',
 			created: 'Скидка создана',
 			updated: 'Скидка обновлена',
-			requiredHint: 'Поля со знаком * обязательны',
 			field: {
 				name: 'Название скидки *',
 				namePlaceholder: 'например, Скидка для братьев и сестёр',
@@ -1598,7 +1606,6 @@ export const ru: TranslationsOf<typeof uz> = {
 	},
 	payroll: {
 		title: 'Зарплата',
-		back: 'Назад к зарплате',
 		live: 'Текущая',
 		finalized: 'Утверждена',
 		finalizePeriod: 'Утвердить период',

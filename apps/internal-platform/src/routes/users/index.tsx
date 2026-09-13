@@ -59,7 +59,7 @@ function buildColumns(t: ReturnType<typeof useAppT<'users'>>): ColumnDef<UserRow
 			header: t('column.phone'),
 			cell: ({ getValue }) => (
 				<span className="text-sm tabular-nums text-muted-foreground">
-					{getValue<string>()}
+					{getValue<string | null>() ?? '—'}
 				</span>
 			),
 		},

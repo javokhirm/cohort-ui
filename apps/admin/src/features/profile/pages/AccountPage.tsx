@@ -54,7 +54,10 @@ export function AccountPage() {
 								label={t('fullName')}
 								value={fullName || '—'}
 							/>
-							<ReadOnlyField label={t('phone')} value={profile.phone} />
+							<ReadOnlyField
+								label={t('phone')}
+								value={profile.phone ?? '—'}
+							/>
 							<ReadOnlyField
 								label={t('email')}
 								value={profile.email ?? '—'}

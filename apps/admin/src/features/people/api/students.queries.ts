@@ -3,6 +3,7 @@ import { keepPreviousData, useQuery } from '@tanstack/react-query';
 import { manageApi } from '@/api/apiClient';
 import { useActiveBranchIds } from '@/store/branchStore';
 import type { PaginatedResult } from '@repo/api-client';
+import { isValidUzPhone } from '@repo/utils';
 
 import {
 	peopleKeys,
@@ -31,7 +32,7 @@ export interface StudentUser {
 	id: number;
 	firstName: string;
 	lastName: string;
-	phone: string;
+	phone: string | null;
 	email: string | null;
 	avatarUrl: string | null;
 }
@@ -63,6 +64,25 @@ export interface Guardian {
 	isPrimary: boolean;
 	canPickup: boolean;
 	user: StudentUser;
+}
+
+/** One student a looked-up guardian is already connected to. */
+export interface GuardianLinkedStudent {
+	studentId: number;
+	studentCode: string;
+	firstName: string;
+	lastName: string;
+	relation: 'mother' | 'father' | 'guardian';
+	isPrimary: boolean;
+}
+
+export interface GuardianLookup {
+	found: boolean;
+	guardian: {
+		user: StudentUser;
+		isGuardian: boolean;
+		students: GuardianLinkedStudent[];
+	} | null;
 }
 
 export interface Enrollment {
@@ -246,6 +266,16 @@ export function useStudentGuardians(studentId: number) {
 		queryKey: peopleKeys.studentGuardians(studentId),
 		queryFn: () => manageApi.get<Guardian[]>(`/students/${studentId}/guardians`),
 		enabled: studentId > 0,
+	});
+}
+
+export function useGuardianLookup(phone: string) {
+	const enabled = isValidUzPhone(phone);
+	return useQuery({
+		queryKey: peopleKeys.guardianLookup(phone),
+		queryFn: () => manageApi.get<GuardianLookup>('/guardians', { params: { phone } }),
+		enabled,
+		staleTime: 30_000,
 	});
 }
 

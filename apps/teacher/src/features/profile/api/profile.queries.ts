@@ -12,7 +12,11 @@ export interface TeacherProfile {
 	firstName: string;
 	lastName: string;
 	email: string | null;
-	phone: string;
+	/**
+	 * Always set in practice — teachers sign in with it — but the column is
+	 * nullable platform-wide, so render it defensively.
+	 */
+	phone: string | null;
 	avatarUrl: string | null;
 	/** Role names — always includes `TEACHER`. */
 	roles: string[];

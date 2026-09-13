@@ -42,7 +42,8 @@ export interface OperatorProfile {
 	firstName: string;
 	lastName: string;
 	email: string | null;
-	phone: string;
+	/** `null` when no number is on file (the column is nullable platform-wide). */
+	phone: string | null;
 	/** Role names from the access token — always includes `SUPER_ADMIN`. */
 	roles: string[];
 }

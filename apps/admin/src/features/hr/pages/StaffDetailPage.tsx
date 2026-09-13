@@ -1,14 +1,6 @@
 import { useState } from 'react';
-import { Link, useNavigate } from '@tanstack/react-router';
-import {
-	ArrowLeft,
-	Building2,
-	Edit,
-	KeyRound,
-	Mail,
-	MessageSquare,
-	Phone,
-} from 'lucide-react';
+import { Link, useNavigate, useSearch } from '@tanstack/react-router';
+import { Building2, Edit, KeyRound, Mail, MessageSquare, Phone } from 'lucide-react';
 
 import {
 	ActionsMenu,
@@ -16,6 +8,7 @@ import {
 	Card,
 	CardContent,
 	DetailRows,
+	PageNav,
 	Separator,
 	Skeleton,
 	StatusBadge,
@@ -26,8 +19,9 @@ import {
 	toast,
 } from '@repo/ui';
 import { formatDate, formatMoney } from '@repo/utils';
-import { useStatusLabel } from '@repo/i18n';
+import { useStatusLabel, useT } from '@repo/i18n';
 
+import { useGoBack } from '@/hooks/useGoBack';
 import { useAppT } from '@/locales';
 import { usePermissions } from '@/features/auth/hooks';
 import { usePayrollHistory } from '@/features/payroll/api/payroll.queries';
@@ -262,24 +256,35 @@ function ActivityTab() {
 
 // ─── Page ─────────────────────────────────────────────────────────────────────
 
+/** Mirrors the `tab` union validated on the route. */
+type StaffTab = 'overview' | 'roles' | 'payroll' | 'activity';
+
 interface StaffDetailPageProps {
 	staffId: number;
 }
 
 export function StaffDetailPage({ staffId }: StaffDetailPageProps) {
 	const t = useAppT('hr');
+	const tc = useT('common');
 	const navigate = useNavigate();
+	const { tab } = useSearch({ from: '/_authed/staff/$staffId' });
 	const { data: staff, isLoading, isError } = useStaffMember(staffId);
+	const goBack = useGoBack({ to: '/staff' });
+
+	const fullName = staff
+		? `${staff.user.firstName} ${staff.user.lastName}`.trim()
+		: undefined;
 
 	return (
 		<div className="mx-auto flex max-w-7xl flex-col gap-5">
-			<Link
-				to="/staff"
-				className="flex w-fit items-center gap-1.5 text-sm text-muted-foreground hover:text-foreground"
-			>
-				<ArrowLeft className="size-3.5" />
-				{t('detail.back')}
-			</Link>
+			<PageNav
+				onBack={goBack}
+				backLabel={tc('action.back')}
+				crumbs={[
+					{ label: t('title'), link: <Link to="/staff" /> },
+					{ label: fullName || `#${staffId}` },
+				]}
+			/>
 
 			{isLoading ? (
 				<div className="rounded-xl border bg-card p-5">
@@ -307,7 +312,23 @@ export function StaffDetailPage({ staffId }: StaffDetailPageProps) {
 						}
 					/>
 
-					<Tabs defaultValue="overview" variant="underline">
+					<Tabs
+						value={tab ?? 'overview'}
+						onValueChange={(next) =>
+							void navigate({
+								to: '/staff/$staffId',
+								params: { staffId: String(staff.id) },
+								search: {
+									tab:
+										next === 'overview'
+											? undefined
+											: (next as StaffTab),
+								},
+								replace: true,
+							})
+						}
+						variant="underline"
+					>
 						<TabsList>
 							<TabsTrigger value="overview">
 								{t('detail.tab.overview')}

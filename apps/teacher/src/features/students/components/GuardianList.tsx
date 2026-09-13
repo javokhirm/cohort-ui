@@ -75,12 +75,16 @@ export function GuardianList({ studentId }: GuardianListProps) {
 							)}
 						</div>
 						<div className="truncate text-[12px] text-muted-foreground">
-							<a
-								href={`tel:${guardian.phone}`}
-								className="tabular-nums hover:underline"
-							>
-								{guardian.phone}
-							</a>
+							{guardian.phone ? (
+								<a
+									href={`tel:${guardian.phone}`}
+									className="tabular-nums hover:underline"
+								>
+									{guardian.phone}
+								</a>
+							) : (
+								<span className="tabular-nums">—</span>
+							)}
 							{' · '}
 							{relationLabel(guardian.relation)}
 						</div>

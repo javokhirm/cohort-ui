@@ -1,15 +1,19 @@
 import { Link, useNavigate, useSearch } from '@tanstack/react-router';
-import { ArrowLeft, CalendarDays } from 'lucide-react';
+import { CalendarDays } from 'lucide-react';
 
 import {
 	Button,
 	EmptyState,
+	PageNav,
 	Skeleton,
 	Tabs,
 	TabsContent,
 	TabsList,
 	TabsTrigger,
 } from '@repo/ui';
+import { useT } from '@repo/i18n';
+
+import { useGoBack } from '@/hooks/useGoBack';
 import { useAppT } from '@/locales';
 
 import { useGroup } from '../api/groups.queries';
@@ -40,18 +44,21 @@ interface GroupDetailPageProps {
  */
 export function GroupDetailPage({ groupId }: GroupDetailPageProps) {
 	const t = useAppT('groups');
+	const tc = useT('common');
 	const navigate = useNavigate();
 	const { tab } = useSearch({ from: '/_authed/groups/$groupId' });
 	const { data: group, isLoading, isError } = useGroup(groupId);
+	const goBack = useGoBack({ to: '/groups' });
 
 	const back = (
-		<Link
-			to="/groups"
-			className="flex w-fit items-center gap-1.5 text-sm text-muted-foreground hover:text-foreground"
-		>
-			<ArrowLeft className="size-3.5" />
-			{t('back')}
-		</Link>
+		<PageNav
+			onBack={goBack}
+			backLabel={tc('action.back')}
+			crumbs={[
+				{ label: t('title'), link: <Link to="/groups" /> },
+				{ label: group?.name ?? `#${groupId}` },
+			]}
+		/>
 	);
 
 	if (isLoading) {
@@ -75,12 +82,8 @@ export function GroupDetailPage({ groupId }: GroupDetailPageProps) {
 						title={t('detail.notFound')}
 						description={t('detail.notFoundDescription')}
 						action={
-							<Button
-								variant="outline"
-								size="sm"
-								onClick={() => void navigate({ to: '/groups' })}
-							>
-								{t('back')}
+							<Button variant="outline" size="sm" onClick={goBack}>
+								{tc('action.back')}
 							</Button>
 						}
 					/>
@@ -94,6 +97,7 @@ export function GroupDetailPage({ groupId }: GroupDetailPageProps) {
 			to: '/groups/$groupId',
 			params: { groupId: String(group.id) },
 			search: { tab: next === 'students' ? undefined : (next as GroupTab) },
+			replace: true,
 		});
 
 	return (

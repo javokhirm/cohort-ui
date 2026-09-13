@@ -329,7 +329,6 @@ export function ExpenseForm(props: ExpenseFormProps) {
 			open={open}
 			onOpenChange={onOpenChange}
 			title={mode === 'create' ? t('addSheet') : t('edit')}
-			description={t('requiredHint')}
 			footer={
 				<>
 					<Button type="button" variant="outline" onClick={handleClose}>
