@@ -7,6 +7,7 @@ import { useAppT } from '@/locales';
 
 import { tenantInitials, useVisibleNavGroups } from './nav';
 import { NavButton } from './NavButton';
+import { NavSection } from './NavSection';
 
 interface SidebarProps {
 	collapsed: boolean;
@@ -80,14 +81,23 @@ export function Sidebar({ collapsed }: SidebarProps) {
 								{t(`group.${group.label}`)}
 							</span>
 						</div>
-						{group.items.map((item) => (
-							<NavButton
-								key={item.id}
-								item={item}
-								active={pathname === item.href}
-								collapsed={collapsed}
-							/>
-						))}
+						{group.items.map((item) =>
+							item.items ? (
+								<NavSection
+									key={item.id}
+									item={item}
+									pathname={pathname}
+									collapsed={collapsed}
+								/>
+							) : (
+								<NavButton
+									key={item.id}
+									item={item}
+									active={pathname === item.href}
+									collapsed={collapsed}
+								/>
+							),
+						)}
 					</div>
 				))}
 			</nav>

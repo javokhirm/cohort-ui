@@ -212,22 +212,30 @@ export function hhmm(time: string): string {
 	return time.slice(0, 5);
 }
 
+/** Minutes since midnight for a backend time (`HH:mm[:ss]`). */
+export function timeToMinutes(time: string): number {
+	const [h = 0, m = 0] = hhmm(time).split(':').map(Number);
+	return h * 60 + m;
+}
+
+/** "1h 30m" from a minute count; "—" when the span is empty or backwards. */
+export function formatDuration(t: GroupsT, minutes: number): string {
+	if (minutes <= 0) return '—';
+	const h = Math.floor(minutes / 60);
+	const m = minutes % 60;
+	if (h === 0) return t('duration.minutes', { minutes: m });
+	return m === 0
+		? t('duration.hours', { hours: h })
+		: t('duration.hoursMinutes', { hours: h, minutes: m });
+}
+
 /** "1h 30m" — a session's duration, computed from its start/end time. */
 export function formatSessionDuration(
 	t: GroupsT,
 	startTime: string,
 	endTime: string,
 ): string {
-	const [sh = 0, sm = 0] = hhmm(startTime).split(':').map(Number);
-	const [eh = 0, em = 0] = hhmm(endTime).split(':').map(Number);
-	const mins = eh * 60 + em - (sh * 60 + sm);
-	if (mins <= 0) return '—';
-	const h = Math.floor(mins / 60);
-	const m = mins % 60;
-	if (h === 0) return t('duration.minutes', { minutes: m });
-	return m === 0
-		? t('duration.hours', { hours: h })
-		: t('duration.hoursMinutes', { hours: h, minutes: m });
+	return formatDuration(t, timeToMinutes(endTime) - timeToMinutes(startTime));
 }
 
 /**

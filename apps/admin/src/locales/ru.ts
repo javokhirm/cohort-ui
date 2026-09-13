@@ -320,7 +320,6 @@ export const ru: TranslationsOf<typeof uz> = {
 		description: 'Управление карточками учеников, зачислениями и балансами',
 		add: 'Добавить ученика',
 		searchPlaceholder: 'Поиск по имени или коду…',
-		export: 'Экспорт',
 		created: 'Ученик добавлен',
 		updated: 'Ученик обновлён',
 		column: {
@@ -1043,13 +1042,52 @@ export const ru: TranslationsOf<typeof uz> = {
 			},
 		},
 		schedule: {
-			title: 'Расписание',
-			description: 'Календарь занятий по всем группам',
 			loadError: 'Не удалось загрузить расписание. Обновите страницу.',
-			view: {
-				week: 'Неделя',
-				month: 'Месяц',
+			week: {
+				title: 'Расписание на неделю',
+				description:
+					'Календарь занятий по всем группам с понедельника по воскресенье',
 			},
+			month: {
+				title: 'Расписание на месяц',
+				description:
+					'Загруженность каждого дня месяца — выберите день, чтобы открыть его неделю',
+			},
+			rooms: {
+				title: 'Занятость кабинетов',
+				description: 'Занятость кабинетов на выбранный день',
+				roomColumn: 'Кабинет',
+				unassigned: 'Кабинет не назначен',
+				conflict: 'Двойное бронирование',
+				overCapacity: 'Превышена вместимость',
+				retired: 'Не активен',
+				now: 'Сейчас',
+				students_one: '{{count}} ученик',
+				students_few: '{{count}} ученика',
+				students_many: '{{count}} учеников',
+				students_other: '{{count}} учеников',
+				filter: {
+					all: 'Все кабинеты',
+					booked: 'Занятые',
+					conflicts: 'Конфликты',
+				},
+				summary: {
+					inUse: 'Кабинеты в работе',
+					classes: 'Занятия',
+					conflicts: 'Конфликты',
+					conflictsHint: 'Пересекающиеся занятия в одном кабинете',
+					allClear: 'Конфликтов нет',
+					unplaced: 'Без кабинета',
+					unplacedHint: 'Назначьте кабинет этим занятиям',
+				},
+				emptyTitle: 'В выбранных филиалах нет кабинетов',
+				emptyDescription:
+					'Измените выбор филиалов или добавьте кабинет на странице «Кабинеты».',
+				noMatchTitle: 'Под этот фильтр кабинетов нет',
+				noMatchDescription: 'Выберите другой фильтр или посмотрите все кабинеты.',
+				loadError: 'Не удалось загрузить занятость кабинетов. Обновите страницу.',
+			},
+			today: 'Сегодня',
 			monthYear: '{{month}} {{year}}',
 			sessionCount_one: '{{count}} занятие',
 			sessionCount_other: '{{count}} занятий',
@@ -1153,6 +1191,13 @@ export const ru: TranslationsOf<typeof uz> = {
 			loadError: 'Не удалось загрузить платежи. Обновите страницу.',
 			emptyFiltered: 'Нет платежей по этому фильтру.',
 			detailTitle: 'Детали платежа',
+			filters: {
+				title: 'Фильтры',
+				rangeBoth: '{{from}} – {{to}}',
+				rangeFrom: 'С {{from}}',
+				rangeTo: 'До {{to}}',
+				remove: 'Убрать фильтр: {{filter}}',
+			},
 			column: {
 				payment: 'Платёж',
 				student: 'Ученик',
@@ -1562,7 +1607,6 @@ export const ru: TranslationsOf<typeof uz> = {
 		unfinalize: 'Отменить утверждение',
 		markAsPaid: 'Отметить выплаченной',
 		record: 'Записать',
-		export: 'Экспорт',
 		allStaff: 'Все сотрудники',
 		howCalculated: 'Как это рассчитано',
 		paid: 'Оплачено',

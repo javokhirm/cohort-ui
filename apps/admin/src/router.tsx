@@ -36,7 +36,9 @@ import { GroupsRoute } from '@/routes/_authed.groups';
 import { GroupCreateRoute } from '@/routes/_authed.groups.new';
 import { GroupDetailRoute } from '@/routes/_authed.groups.$id';
 import { GroupEditRoute } from '@/routes/_authed.groups.$id.edit';
-import { ScheduleRoute } from '@/routes/_authed.schedule';
+import { WeeklyScheduleRoute } from '@/routes/_authed.schedule.week';
+import { MonthlyScheduleRoute } from '@/routes/_authed.schedule.month';
+import { RoomAvailabilityRoute } from '@/routes/_authed.schedule.rooms';
 import { PayrollRoute } from '@/routes/_authed.payroll';
 import { PayrollDetailRoute } from '@/routes/_authed.payroll.$staffId';
 import { ExpensesRoute } from '@/routes/_authed.expenses';
@@ -517,39 +519,86 @@ const groupEditRoute = createRoute({
 });
 
 type SessionStatusSearch = 'SCHEDULED' | 'COMPLETED' | 'CANCELLED';
-type ScheduleViewSearch = 'week' | 'month';
+/** Which rooms the room screen lists; in the URL so a filtered day is shareable. */
+type RoomFilterSearch = 'all' | 'booked' | 'conflicts';
 
-interface ScheduleSearch {
+/** Shared by the two calendar screens — they differ only in the range they draw. */
+interface ScheduleCalendarSearch {
 	date?: string;
 	status?: SessionStatusSearch;
-	view?: ScheduleViewSearch;
+}
+
+interface RoomAvailabilitySearch {
+	date?: string;
+	roomFilter?: RoomFilterSearch;
 }
 
 const SESSION_STATUSES: SessionStatusSearch[] = ['SCHEDULED', 'COMPLETED', 'CANCELLED'];
-const SCHEDULE_VIEWS: ScheduleViewSearch[] = ['week', 'month'];
+const ROOM_FILTERS: RoomFilterSearch[] = ['all', 'booked', 'conflicts'];
 
-const scheduleRoute = createRoute({
+function validateScheduleCalendarSearch(
+	search: Record<string, unknown>,
+): ScheduleCalendarSearch {
+	const status = search.status;
+	return {
+		date:
+			typeof search.date === 'string' && ISO_DATE_SEARCH.test(search.date)
+				? search.date
+				: undefined,
+		status: SESSION_STATUSES.includes(status as SessionStatusSearch)
+			? (status as SessionStatusSearch)
+			: undefined,
+	};
+}
+
+/**
+ * `/schedule` is not a screen — the three views it used to multiplex are three
+ * destinations now, each named in the sidebar. The bare path stays as a redirect
+ * so old links (and the `?view=` ones that preceded them) still land somewhere
+ * sensible rather than 404ing.
+ */
+const scheduleIndexRoute = createRoute({
 	getParentRoute: () => authedRoute,
 	path: '/schedule',
+	beforeLoad: () => {
+		requirePermission('session.read');
+		throw redirect({ to: '/schedule/week' });
+	},
+});
+
+const scheduleWeekRoute = createRoute({
+	getParentRoute: () => authedRoute,
+	path: '/schedule/week',
 	beforeLoad: () => requirePermission('session.read'),
-	validateSearch: (search: Record<string, unknown>): ScheduleSearch => {
-		const status = search.status;
-		const view = search.view;
-		const date =
-			typeof search.date === 'string' && /^\d{4}-\d{2}-\d{2}$/.test(search.date)
-				? search.date
-				: undefined;
+	validateSearch: validateScheduleCalendarSearch,
+	component: WeeklyScheduleRoute,
+});
+
+const scheduleMonthRoute = createRoute({
+	getParentRoute: () => authedRoute,
+	path: '/schedule/month',
+	beforeLoad: () => requirePermission('session.read'),
+	validateSearch: validateScheduleCalendarSearch,
+	component: MonthlyScheduleRoute,
+});
+
+const scheduleRoomsRoute = createRoute({
+	getParentRoute: () => authedRoute,
+	path: '/schedule/rooms',
+	beforeLoad: () => requirePermission('session.read'),
+	validateSearch: (search: Record<string, unknown>): RoomAvailabilitySearch => {
+		const roomFilter = search.roomFilter;
 		return {
-			date,
-			status: SESSION_STATUSES.includes(status as SessionStatusSearch)
-				? (status as SessionStatusSearch)
-				: undefined,
-			view: SCHEDULE_VIEWS.includes(view as ScheduleViewSearch)
-				? (view as ScheduleViewSearch)
+			date:
+				typeof search.date === 'string' && ISO_DATE_SEARCH.test(search.date)
+					? search.date
+					: undefined,
+			roomFilter: ROOM_FILTERS.includes(roomFilter as RoomFilterSearch)
+				? (roomFilter as RoomFilterSearch)
 				: undefined,
 		};
 	},
-	component: ScheduleRoute,
+	component: RoomAvailabilityRoute,
 });
 
 type PayrollStatusSearch = 'LIVE' | 'FINALIZED' | 'PAID';
@@ -730,7 +779,10 @@ const routeTree = rootRoute.addChildren([
 		groupNewRoute,
 		groupDetailRoute,
 		groupEditRoute,
-		scheduleRoute,
+		scheduleIndexRoute,
+		scheduleWeekRoute,
+		scheduleMonthRoute,
+		scheduleRoomsRoute,
 		payrollRoute,
 		payrollDetailRoute,
 		expensesRoute,

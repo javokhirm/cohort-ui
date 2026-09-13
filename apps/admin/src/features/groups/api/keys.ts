@@ -18,6 +18,12 @@ export interface SessionCalendarFilters {
 	status?: string;
 }
 
+export interface RoomScheduleFilters {
+	/** The single day to lay out, `YYYY-MM-DD`. */
+	date: string;
+	branchIds?: number[];
+}
+
 export const groupsKeys = {
 	all: ['groups'] as const,
 
@@ -35,4 +41,6 @@ export const groupsKeys = {
 	sessionCalendar: (filters: SessionCalendarFilters) =>
 		[...groupsKeys.sessions(), 'calendar', filters] as const,
 	sessionDetail: (id: number) => [...groupsKeys.sessions(), 'detail', id] as const,
+	roomSchedule: (filters: RoomScheduleFilters) =>
+		[...groupsKeys.sessions(), 'room-schedule', filters] as const,
 };

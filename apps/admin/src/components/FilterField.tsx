@@ -11,7 +11,7 @@ interface FilterFieldProps {
 }
 
 /**
- * One labelled control in a filter surface — a <FilterPopover/> body, or a
+ * One labelled control in a filter surface — a <FilterSheet/> body, or a
  * filter row. Exists so the label/control stack is written once rather than
  * repeated per filter, and so every filter on every screen sizes its label the
  * same way.

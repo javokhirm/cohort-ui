@@ -327,7 +327,6 @@ export const uz = {
 		description: 'Oʻquvchilar yozuvlari, qabullar va balanslarni boshqarish',
 		add: 'Oʻquvchi qoʻshish',
 		searchPlaceholder: 'Ism yoki kod boʻyicha qidirish…',
-		export: 'Eksport',
 		created: 'Oʻquvchi qoʻshildi',
 		updated: 'Oʻquvchi yangilandi',
 		column: {
@@ -1036,13 +1035,51 @@ export const uz = {
 			},
 		},
 		schedule: {
-			title: 'Dars jadvali',
-			description: 'Barcha guruhlar boʻyicha darslar kalendari',
 			loadError: 'Jadvalni yuklab boʻlmadi. Sahifani yangilang.',
-			view: {
-				week: 'Hafta',
-				month: 'Oy',
+			week: {
+				title: 'Haftalik jadval',
+				description:
+					'Barcha guruhlar boʻyicha dushanbadan yakshanbagacha darslar',
 			},
+			month: {
+				title: 'Oylik jadval',
+				description:
+					'Oyning har bir kuni qanchalik band — haftasini ochish uchun kunni tanlang',
+			},
+			rooms: {
+				title: 'Xonalar bandligi',
+				description: 'Tanlangan kun uchun xonalar bandligi',
+				roomColumn: 'Xona',
+				unassigned: 'Xona biriktirilmagan',
+				conflict: 'Ikki marta band qilingan',
+				overCapacity: 'Sigʻimdan oshgan',
+				retired: 'Faol emas',
+				now: 'Hozir',
+				students_one: '{{count}} oʻquvchi',
+				students_other: '{{count}} oʻquvchi',
+				filter: {
+					all: 'Barcha xonalar',
+					booked: 'Band',
+					conflicts: 'Ziddiyatlar',
+				},
+				summary: {
+					inUse: 'Band xonalar',
+					classes: 'Darslar',
+					conflicts: 'Ziddiyatlar',
+					conflictsHint: 'Bir xonada ustma-ust darslar',
+					allClear: 'Ziddiyat yoʻq',
+					unplaced: 'Joylashtirilmagan',
+					unplacedHint: 'Bu darslarga xona biriktiring',
+				},
+				emptyTitle: 'Tanlangan filiallarda xona yoʻq',
+				emptyDescription:
+					'Filial tanlovini oʻzgartiring yoki Xonalar sahifasida xona qoʻshing.',
+				noMatchTitle: 'Bu filtrga mos xona yoʻq',
+				noMatchDescription:
+					'Boshqa filtrni tanlang yoki barcha xonalarni koʻring.',
+				loadError: 'Xonalar bandligini yuklab boʻlmadi. Sahifani yangilang.',
+			},
+			today: 'Bugun',
 			monthYear: '{{month}} {{year}}',
 			sessionCount_one: '{{count}} ta dars',
 			sessionCount_other: '{{count}} ta dars',
@@ -1146,6 +1183,13 @@ export const uz = {
 			loadError: 'Toʻlovlarni yuklab boʻlmadi. Sahifani yangilang.',
 			emptyFiltered: 'Bu filtrga mos toʻlov topilmadi.',
 			detailTitle: 'Toʻlov tafsilotlari',
+			filters: {
+				title: 'Filtrlar',
+				rangeBoth: '{{from}} – {{to}}',
+				rangeFrom: '{{from}} dan boshlab',
+				rangeTo: '{{to}} gacha',
+				remove: 'Filtrni olib tashlash: {{filter}}',
+			},
 			column: {
 				payment: 'Toʻlov',
 				student: 'Oʻquvchi',
@@ -1554,7 +1598,6 @@ export const uz = {
 		unfinalize: 'Yakunlashni bekor qilish',
 		markAsPaid: 'Toʻlangan deb belgilash',
 		record: 'Qayd etish',
-		export: 'Eksport',
 		allStaff: 'Barcha xodimlar',
 		howCalculated: 'Bu qanday hisoblanadi',
 		paid: 'Toʻlangan',

@@ -34,9 +34,9 @@ interface GroupDetailPageProps {
  * things two and three times, and its enrolled figure could disagree with the
  * roster's. Everything the tab held now lives in the header, exactly once.
  *
- * The active tab lives in `?tab=`, like the teacher console's group screen and
- * this app's own `/schedule?view=`: an admin who opens a student from the roster
- * or edits the group and comes back should land where they were.
+ * The active tab lives in `?tab=`, like the teacher console's group screen: an
+ * admin who opens a student from the roster or edits the group and comes back
+ * should land where they were.
  */
 export function GroupDetailPage({ groupId }: GroupDetailPageProps) {
 	const t = useAppT('groups');

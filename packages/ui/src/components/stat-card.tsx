@@ -38,10 +38,12 @@ function StatCard({
 }: StatCardProps) {
 	return (
 		<Card className={cn('gap-0 py-0', className)} {...props}>
-			<div className="flex items-start justify-between gap-3 p-5">
-				<div className="flex flex-col gap-2">
-					<span className="text-sm text-muted-foreground">{label}</span>
-					<span className="text-2xl font-bold tabular-nums tracking-tight">
+			<div className="flex items-start justify-between gap-2 p-3 sm:gap-3 sm:p-5">
+				<div className="flex min-w-0 flex-col gap-1 sm:gap-2">
+					<span className="truncate text-xs text-muted-foreground sm:text-sm">
+						{label}
+					</span>
+					<span className="truncate text-lg font-bold tabular-nums tracking-tight sm:text-2xl">
 						{value}
 					</span>
 					{(delta || hint) && (
@@ -63,7 +65,7 @@ function StatCard({
 					)}
 				</div>
 				{icon && (
-					<span className="flex size-9 shrink-0 items-center justify-center rounded-lg bg-tone-indigo-bg text-tone-indigo-fg [&>svg]:size-4">
+					<span className="flex size-7 shrink-0 items-center justify-center rounded-lg bg-tone-indigo-bg text-tone-indigo-fg [&>svg]:size-3.5 sm:size-9 sm:[&>svg]:size-4">
 						{icon}
 					</span>
 				)}
