@@ -1,13 +1,22 @@
 import { useState } from 'react';
 import { Link } from '@tanstack/react-router';
-import { ArrowLeft, Undo2, Wallet } from 'lucide-react';
+import { Undo2, Wallet } from 'lucide-react';
 
-import { Button, Card, ConfirmDialog, Skeleton, StatusBadge, toast } from '@repo/ui';
+import {
+	Button,
+	Card,
+	ConfirmDialog,
+	PageNav,
+	Skeleton,
+	StatusBadge,
+	toast,
+} from '@repo/ui';
 import { isApiError } from '@repo/api-client';
 import { formatDate, formatMoney } from '@repo/utils';
-import { useStatusLabel } from '@repo/i18n';
+import { useStatusLabel, useT } from '@repo/i18n';
 
 import { usePermissions } from '@/features/auth/hooks';
+import { useGoBack } from '@/hooks/useGoBack';
 
 import { usePayrollStaffPeriod } from '../api/payroll.queries';
 import type { PayrollStaffPeriodResponse } from '../api/payroll.queries';
@@ -211,18 +220,26 @@ interface PayrollDetailPageProps {
 
 export function PayrollDetailPage({ staffId, month }: PayrollDetailPageProps) {
 	const t = useAppT('payroll');
+	const tc = useT('common');
 	const { data: period, isLoading, isError } = usePayrollStaffPeriod(month, staffId);
+	// A period is opened from the payroll table and from a staff profile's
+	// payroll tab. The fallback carries the month so a link opened cold lands on
+	// the period being looked at rather than on the current one.
+	const goBack = useGoBack({ to: '/payroll', search: { month } });
 
 	return (
 		<div className="mx-auto flex max-w-6xl flex-col gap-4">
-			<Link
-				to="/payroll"
-				search={{ month }}
-				className="flex w-fit items-center gap-1.5 text-sm text-muted-foreground hover:text-foreground"
-			>
-				<ArrowLeft className="size-3.5" />
-				{t('back')}
-			</Link>
+			<PageNav
+				onBack={goBack}
+				backLabel={tc('action.back')}
+				crumbs={[
+					{
+						label: t('title'),
+						link: <Link to="/payroll" search={{ month }} />,
+					},
+					{ label: period?.staffName ?? formatMonthLabel(month) },
+				]}
+			/>
 
 			{isLoading ? (
 				<>

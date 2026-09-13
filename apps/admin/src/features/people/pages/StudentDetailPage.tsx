@@ -1,6 +1,6 @@
 import { useState } from 'react';
-import { Link } from '@tanstack/react-router';
-import { ArrowLeft, Edit, MessageSquare, Plus, Trash2 } from 'lucide-react';
+import { Link, useNavigate, useSearch } from '@tanstack/react-router';
+import { Edit, MessageSquare, Plus, Trash2 } from 'lucide-react';
 
 import {
 	ActionsMenu,
@@ -8,6 +8,7 @@ import {
 	Card,
 	CardContent,
 	DataTable,
+	PageNav,
 	Select,
 	SelectContent,
 	SelectItem,
@@ -27,6 +28,7 @@ import { formatDate } from '@repo/utils';
 import { useStatusLabel, useT } from '@repo/i18n';
 
 import { Can } from '@/components/Can';
+import { useGoBack } from '@/hooks/useGoBack';
 import { useAppT } from '@/locales';
 import { usePermissions } from '@/features/auth/hooks';
 import { StandingDiscountCell } from '@/features/billing';
@@ -421,28 +423,74 @@ function WalletTab({ studentId }: { studentId: number }) {
 	return <WalletSection studentId={studentId} />;
 }
 
+/** Mirrors the `tab` union validated on the route. */
+type StudentTab =
+	| 'overview'
+	| 'guardians'
+	| 'enrollments'
+	| 'performance'
+	| 'grades'
+	| 'billing'
+	| 'wallet';
+
 interface StudentDetailPageProps {
 	studentId: number;
 }
 
 export function StudentDetailPage({ studentId }: StudentDetailPageProps) {
 	const t = useAppT('people');
+	const tc = useT('common');
+	const navigate = useNavigate();
+	const { tab } = useSearch({ from: '/_authed/students/$id' });
+	const { can, permissionsLoaded } = usePermissions();
 	const [editOpen, setEditOpen] = useState(false);
 	const { data: student } = useStudent(studentId);
+	// A student is opened from the list, from a lead, and from a group roster,
+	// so Back follows history; the list is only the fallback for a direct hit.
+	const goBack = useGoBack({ to: '/students' });
+
+	const fullName = student
+		? `${student.user.firstName} ${student.user.lastName}`.trim()
+		: undefined;
+
+	// Wallet is the one tab behind a permission, so `?tab=wallet` in a shared
+	// link can name a tab this viewer has neither a trigger nor a body for —
+	// which would render the strip with nothing selected under it. Fail open
+	// while the catalog is still loading, as the sidebar does.
+	const activeTab =
+		tab === 'wallet' && permissionsLoaded && !can('wallet.read')
+			? 'overview'
+			: (tab ?? 'overview');
 
 	return (
 		<div className="mx-auto flex max-w-7xl flex-col gap-5">
-			<Link
-				to="/students"
-				className="flex w-fit items-center gap-1.5 text-sm text-muted-foreground hover:text-foreground"
-			>
-				<ArrowLeft className="size-3.5" />
-				{t('detail.back')}
-			</Link>
+			<PageNav
+				onBack={goBack}
+				backLabel={tc('action.back')}
+				crumbs={[
+					{ label: t('title'), link: <Link to="/students" /> },
+					// Falls back to the code while the profile loads, so the
+					// trail never collapses and then jumps a row taller.
+					{ label: fullName || `#${studentId}` },
+				]}
+			/>
 
 			<StudentHeader studentId={studentId} onEdit={() => setEditOpen(true)} />
 
-			<Tabs defaultValue="overview" variant="underline">
+			<Tabs
+				value={activeTab}
+				onValueChange={(next) =>
+					void navigate({
+						to: '/students/$id',
+						params: { id: String(studentId) },
+						search: {
+							tab: next === 'overview' ? undefined : (next as StudentTab),
+						},
+						replace: true,
+					})
+				}
+				variant="underline"
+			>
 				<TabsList>
 					<TabsTrigger value="overview">{t('detail.tab.overview')}</TabsTrigger>
 					<TabsTrigger value="guardians">

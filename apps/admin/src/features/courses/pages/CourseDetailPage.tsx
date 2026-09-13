@@ -1,11 +1,12 @@
 import { useState } from 'react';
 import { Link } from '@tanstack/react-router';
-import { ArrowLeft, BookOpen, CalendarDays, Edit } from 'lucide-react';
+import { BookOpen, CalendarDays, Edit } from 'lucide-react';
 
-import { Button, Card, Separator, Skeleton, StatusBadge } from '@repo/ui';
+import { Button, Card, PageNav, Separator, Skeleton, StatusBadge } from '@repo/ui';
 import { useT } from '@repo/i18n';
 
 import { Can } from '@/components/Can';
+import { useGoBack } from '@/hooks/useGoBack';
 import { useAppT } from '@/locales';
 import { useCourse, useCourseGroups, type CourseGroup } from '../api/courses.queries';
 import type { CourseResponse } from '../api/courses.queries';
@@ -170,20 +171,23 @@ interface CourseDetailPageProps {
 
 export function CourseDetailPage({ courseId }: CourseDetailPageProps) {
 	const t = useAppT('courses');
+	const tc = useT('common');
 	const [editOpen, setEditOpen] = useState(false);
 	const { data: course, isLoading, isError } = useCourse(courseId);
 	const { data: groupsData } = useCourseGroups(courseId);
 	const activeGroups = groupsData?.total ?? 0;
+	const goBack = useGoBack({ to: '/courses' });
 
 	return (
 		<div className="mx-auto flex max-w-7xl flex-col gap-5">
-			<Link
-				to="/courses"
-				className="flex w-fit items-center gap-1.5 text-sm text-muted-foreground hover:text-foreground"
-			>
-				<ArrowLeft className="size-3.5" />
-				{t('detail.back')}
-			</Link>
+			<PageNav
+				onBack={goBack}
+				backLabel={tc('action.back')}
+				crumbs={[
+					{ label: t('title'), link: <Link to="/courses" /> },
+					{ label: course?.name ?? `#${courseId}` },
+				]}
+			/>
 
 			{isLoading ? (
 				<div className="rounded-xl border bg-card p-5">

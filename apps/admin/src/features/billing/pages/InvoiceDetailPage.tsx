@@ -1,7 +1,6 @@
 import { useState } from 'react';
 import { Link } from '@tanstack/react-router';
 import {
-	ArrowLeft,
 	BadgePercent,
 	Download,
 	Edit,
@@ -15,6 +14,7 @@ import {
 	Button,
 	Card,
 	ConfirmDialog,
+	PageNav,
 	Separator,
 	Skeleton,
 	StatusBadge,
@@ -32,6 +32,7 @@ import {
 import { isApiError } from '@repo/api-client';
 import { formatDate, formatPrice } from '@repo/utils';
 import { useStatusLabel, useT } from '@repo/i18n';
+import { useGoBack } from '@/hooks/useGoBack';
 import { useAppT } from '@/locales';
 
 import { Can } from '@/components/Can';
@@ -390,7 +391,9 @@ interface InvoiceDetailPageProps {
 
 export function InvoiceDetailPage({ invoiceId }: InvoiceDetailPageProps) {
 	const t = useAppT('billing');
+	const tc = useT('common');
 	const { data: invoice, isLoading, isError } = useInvoice(invoiceId);
+	const goBack = useGoBack({ to: '/invoices' });
 
 	const [editOpen, setEditOpen] = useState(false);
 	const [paymentOpen, setPaymentOpen] = useState(false);
@@ -423,13 +426,17 @@ export function InvoiceDetailPage({ invoiceId }: InvoiceDetailPageProps) {
 
 	return (
 		<div className="mx-auto flex max-w-6xl flex-col gap-5">
-			<Link
-				to="/invoices"
-				className="flex w-fit items-center gap-1.5 text-sm text-muted-foreground hover:text-foreground"
-			>
-				<ArrowLeft className="size-3.5" />
-				{t('invoices.back')}
-			</Link>
+			<PageNav
+				onBack={goBack}
+				backLabel={tc('action.back')}
+				crumbs={[
+					{ label: t('invoices.title'), link: <Link to="/invoices" /> },
+					// An invoice is opened from the list, the dashboard's overdue
+					// card and a payment's sheet, so the number is the only crumb
+					// that reads the same from all three.
+					{ label: invoice?.invoiceNumber ?? `#${invoiceId}` },
+				]}
+			/>
 
 			{isLoading ? (
 				<Skeleton className="h-40 rounded-xl" />

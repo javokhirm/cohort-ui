@@ -135,7 +135,6 @@ export const ru: TranslationsOf<typeof uz> = {
 		planChangeWarning:
 			'Смена плана пересчитает все будущие счета групп этого курса. Уже выставленные счета сохранят исходный план.',
 		detail: {
-			back: 'Назад к курсам',
 			notFound: 'Курс не найден.',
 			statLevel: 'Уровень',
 			statDuration: 'Длительность по умолчанию',
@@ -384,7 +383,6 @@ export const ru: TranslationsOf<typeof uz> = {
 			},
 		},
 		detail: {
-			back: 'Назад к ученикам',
 			actionsLabel: 'Действия с учеником',
 			action: {
 				edit: 'Редактировать',
@@ -608,7 +606,6 @@ export const ru: TranslationsOf<typeof uz> = {
 				'Оплата настраивается после сохранения — во вкладке «Зарплата» сотрудника («Изменить модель оплаты»).',
 		},
 		detail: {
-			back: 'Назад к сотрудникам',
 			notFound: 'Сотрудник не найден.',
 			actionsLabel: 'Действия с сотрудником',
 			action: {
@@ -749,8 +746,6 @@ export const ru: TranslationsOf<typeof uz> = {
 			'Учебные группы — преподаватель, аудитория, вместимость и расписание',
 		create: 'Создать группу',
 		edit: 'Редактировать группу',
-		back: 'Назад к группам',
-		backToGroup: 'Назад к {{name}}',
 		created: 'Группа создана',
 		updated: 'Группа обновлена',
 		searchPlaceholder: 'Поиск по названию или коду…',
@@ -1125,7 +1120,6 @@ export const ru: TranslationsOf<typeof uz> = {
 			loadError: 'Не удалось загрузить счета. Обновите страницу.',
 			emptyFiltered: 'Нет счетов по этому фильтру.',
 			created: 'Счёт создан',
-			back: 'Назад к счетам',
 			notFound: 'Счёт не найден.',
 			filters: {
 				title: 'Фильтры',
@@ -1598,7 +1592,6 @@ export const ru: TranslationsOf<typeof uz> = {
 	},
 	payroll: {
 		title: 'Зарплата',
-		back: 'Назад к зарплате',
 		live: 'Текущая',
 		finalized: 'Утверждена',
 		finalizePeriod: 'Утвердить период',

@@ -2,6 +2,7 @@
 export * from './components/alert';
 export * from './components/avatar';
 export * from './components/badge';
+export * from './components/breadcrumb';
 export * from './components/button';
 export * from './components/calendar';
 export * from './components/card';
@@ -60,6 +61,7 @@ export * from './components/composed/phone-input';
 export * from './components/composed/search-filter-bar';
 // Layout utilities
 export * from './components/composed/accent-card';
+export * from './components/composed/page-nav';
 
 // ─── Shell — app layout components ───────────────────────────────────────────
 export * from './components/shell/app-sidebar';

@@ -113,17 +113,84 @@ const dashboardRoute = createRoute({
 	component: DashboardPage,
 });
 
+type StudentStatusSearch = 'ALL' | 'ACTIVE' | 'INACTIVE' | 'GRADUATED' | 'SUSPENDED';
+
+const STUDENT_STATUSES: StudentStatusSearch[] = [
+	'ALL',
+	'ACTIVE',
+	'INACTIVE',
+	'GRADUATED',
+	'SUSPENDED',
+];
+
+interface StudentSearch {
+	page?: number;
+	search?: string;
+	status?: StudentStatusSearch;
+}
+
 const studentsRoute = createRoute({
 	getParentRoute: () => authedRoute,
 	path: '/students',
 	beforeLoad: () => requirePermission('student.read'),
+	// Page, search and status live in the URL like every other list, so coming
+	// back from a student — via the screen's Back control or the browser's own
+	// gesture — lands on the page and filter that was left, not on page 1.
+	validateSearch: (search: Record<string, unknown>): StudentSearch => {
+		const page = Number(search.page);
+		const status = search.status;
+		const term = search.search;
+		return {
+			page: Number.isFinite(page) && page > 0 ? page : undefined,
+			search: typeof term === 'string' && term.trim() ? term : undefined,
+			// `ACTIVE` is the screen's default view and is normalised away, so
+			// `/students` and `/students?status=ACTIVE` stay one URL.
+			status:
+				STUDENT_STATUSES.includes(status as StudentStatusSearch) &&
+				status !== 'ACTIVE'
+					? (status as StudentStatusSearch)
+					: undefined,
+		};
+	},
 	component: StudentsRoute,
 });
+
+type StudentTabSearch =
+	| 'overview'
+	| 'guardians'
+	| 'enrollments'
+	| 'performance'
+	| 'grades'
+	| 'billing'
+	| 'wallet';
+
+const STUDENT_TABS: StudentTabSearch[] = [
+	'overview',
+	'guardians',
+	'enrollments',
+	'performance',
+	'grades',
+	'billing',
+	'wallet',
+];
 
 const studentDetailRoute = createRoute({
 	getParentRoute: () => authedRoute,
 	path: '/students/$id',
 	beforeLoad: () => requirePermission('student.read'),
+	// The open tab is URL state, as on the group screen: an admin who opens an
+	// invoice from the billing tab and comes back should land on billing, not
+	// be dropped back to the overview. `overview` is the default and is
+	// normalised away so the bare URL stays canonical.
+	validateSearch: (search: Record<string, unknown>): { tab?: StudentTabSearch } => {
+		const tab = search.tab;
+		return {
+			tab:
+				STUDENT_TABS.includes(tab as StudentTabSearch) && tab !== 'overview'
+					? (tab as StudentTabSearch)
+					: undefined,
+		};
+	},
 	component: () => {
 		const { id } = studentDetailRoute.useParams();
 		return <StudentDetailRoute id={id} />;
@@ -157,10 +224,25 @@ const staffRoute = createRoute({
 	component: StaffRoute,
 });
 
+type StaffTabSearch = 'overview' | 'roles' | 'payroll' | 'activity';
+
+const STAFF_TABS: StaffTabSearch[] = ['overview', 'roles', 'payroll', 'activity'];
+
 const staffDetailRoute = createRoute({
 	getParentRoute: () => authedRoute,
 	path: '/staff/$staffId',
 	beforeLoad: () => requirePermission('staff.read'),
+	// Tab in the URL, like the student and group screens — a round trip out to
+	// the payroll period and back reopens the payroll tab it was launched from.
+	validateSearch: (search: Record<string, unknown>): { tab?: StaffTabSearch } => {
+		const tab = search.tab;
+		return {
+			tab:
+				STAFF_TABS.includes(tab as StaffTabSearch) && tab !== 'overview'
+					? (tab as StaffTabSearch)
+					: undefined,
+		};
+	},
 	component: () => {
 		const { staffId } = staffDetailRoute.useParams();
 		return <StaffDetailRoute id={staffId} />;

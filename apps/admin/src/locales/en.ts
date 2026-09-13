@@ -126,7 +126,6 @@ export const en: TranslationsOf<typeof uz> = {
 		planChangeWarning:
 			"Changing the plan re-prices every future invoice for this course's groups. Invoices already issued keep their original plan.",
 		detail: {
-			back: 'Back to courses',
 			notFound: 'Course not found.',
 			statLevel: 'Level',
 			statDuration: 'Default duration',
@@ -370,7 +369,6 @@ export const en: TranslationsOf<typeof uz> = {
 			},
 		},
 		detail: {
-			back: 'Back to students',
 			actionsLabel: 'Student actions',
 			action: {
 				edit: 'Edit',
@@ -587,7 +585,6 @@ export const en: TranslationsOf<typeof uz> = {
 				'Pay is configured after saving — from the member\'s Payroll tab ("Change pay model").',
 		},
 		detail: {
-			back: 'Back to staff',
 			notFound: 'Staff member not found.',
 			actionsLabel: 'Staff actions',
 			action: {
@@ -725,8 +722,6 @@ export const en: TranslationsOf<typeof uz> = {
 		description: 'Class groups — teacher, room, capacity and weekly schedule',
 		create: 'Create group',
 		edit: 'Edit group',
-		back: 'Back to groups',
-		backToGroup: 'Back to {{name}}',
 		created: 'Group created',
 		updated: 'Group updated',
 		searchPlaceholder: 'Search by name or code…',
@@ -1086,7 +1081,6 @@ export const en: TranslationsOf<typeof uz> = {
 			loadError: 'Failed to load invoices. Please refresh.',
 			emptyFiltered: 'No invoices match this filter.',
 			created: 'Invoice created',
-			back: 'Back to invoices',
 			notFound: 'Invoice not found.',
 			filters: {
 				title: 'Filters',
@@ -1557,7 +1551,6 @@ export const en: TranslationsOf<typeof uz> = {
 	},
 	payroll: {
 		title: 'Payroll',
-		back: 'Back to payroll',
 		live: 'Live',
 		finalized: 'Finalized',
 		finalizePeriod: 'Finalize period',

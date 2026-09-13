@@ -144,7 +144,6 @@ export const uz = {
 		planChangeWarning:
 			'Rejani oʻzgartirsangiz, bu kurs guruhlarining kelgusi barcha invoyslari qayta narxlanadi. Allaqachon chiqarilgan invoyslar oʻz rejasida qoladi.',
 		detail: {
-			back: 'Kurslarga qaytish',
 			notFound: 'Kurs topilmadi.',
 			statLevel: 'Daraja',
 			statDuration: 'Standart davomiyligi',
@@ -391,7 +390,6 @@ export const uz = {
 			},
 		},
 		detail: {
-			back: 'Oʻquvchilarga qaytish',
 			actionsLabel: 'Oʻquvchi amallari',
 			action: {
 				edit: 'Tahrirlash',
@@ -609,7 +607,6 @@ export const uz = {
 				'Ish haqi saqlangandan soʻng — xodimning «Ish haqi» boʻlimida sozlanadi («Ish haqi modelini oʻzgartirish»).',
 		},
 		detail: {
-			back: 'Xodimlarga qaytish',
 			notFound: 'Xodim topilmadi.',
 			actionsLabel: 'Xodim amallari',
 			action: {
@@ -749,8 +746,6 @@ export const uz = {
 		description: 'Sinf guruhlari — oʻqituvchi, xona, sigʻim va haftalik jadval',
 		create: 'Guruh yaratish',
 		edit: 'Guruhni tahrirlash',
-		back: 'Guruhlarga qaytish',
-		backToGroup: '{{name}}ga qaytish',
 		created: 'Guruh yaratildi',
 		updated: 'Guruh yangilandi',
 		searchPlaceholder: 'Nomi yoki kodi boʻyicha qidirish…',
@@ -1117,7 +1112,6 @@ export const uz = {
 			loadError: 'Invoyslarni yuklab boʻlmadi. Sahifani yangilang.',
 			emptyFiltered: 'Bu filtrga mos invoys topilmadi.',
 			created: 'Invoys yaratildi',
-			back: 'Invoyslarga qaytish',
 			notFound: 'Invoys topilmadi.',
 			filters: {
 				title: 'Filtrlar',
@@ -1589,7 +1583,6 @@ export const uz = {
 	},
 	payroll: {
 		title: 'Ish haqi',
-		back: 'Ish haqiga qaytish',
 		live: 'Joriy',
 		finalized: 'Yakunlangan',
 		finalizePeriod: 'Davrni yakunlash',

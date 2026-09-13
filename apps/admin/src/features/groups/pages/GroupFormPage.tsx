@@ -2,7 +2,6 @@ import { useEffect, useMemo, useRef, useState } from 'react';
 import { FormProvider, useForm, useFormContext } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { Link, useNavigate } from '@tanstack/react-router';
-import { ArrowLeft } from 'lucide-react';
 
 import {
 	Button,
@@ -12,6 +11,7 @@ import {
 	FormInput,
 	FormSelect,
 	PageHeader,
+	PageNav,
 	Spinner,
 	toast,
 	type SelectOption,
@@ -19,6 +19,7 @@ import {
 import { isApiError } from '@repo/api-client';
 import { type Translator, useT } from '@repo/i18n';
 
+import { useGoBack } from '@/hooks/useGoBack';
 import { useAppT } from '@/locales';
 
 import { FormSection } from '@/components/FormSection';
@@ -534,25 +535,29 @@ export function GroupFormPage(props: GroupFormPageProps) {
 	const [isPending, setIsPending] = useState(false);
 	const formId = props.mode === 'create' ? 'create-group-form' : 'edit-group-form';
 
-	function goToGroups() {
-		void navigate({ to: '/groups' });
+	// `replace` on both: the form is a step, not a destination, so it should not
+	// sit in history for Back to walk into after the group is saved.
+	function goToGroup(groupId: number) {
+		void navigate({
+			to: '/groups/$groupId',
+			params: { groupId: String(groupId) },
+			replace: true,
+		});
 	}
 
-	function goToGroup(groupId: number) {
-		void navigate({ to: '/groups/$groupId', params: { groupId: String(groupId) } });
-	}
+	// Cancel and the back control mean the same thing — abandon this form and
+	// return — so they are the same action rather than two rules to keep in step.
+	const goBack = useGoBack(
+		props.mode === 'create'
+			? { to: '/groups' }
+			: { to: '/groups/$groupId', params: { groupId: String(props.group.id) } },
+	);
 
 	// Rendered inside the field column, so Save sits under the fields it saves
 	// rather than out beside the session preview.
 	const actions = (
 		<div className="flex justify-end gap-2">
-			<Button
-				type="button"
-				variant="outline"
-				onClick={
-					props.mode === 'create' ? goToGroups : () => goToGroup(props.group.id)
-				}
-			>
+			<Button type="button" variant="outline" onClick={goBack}>
 				{tc('action.cancel')}
 			</Button>
 			<Button type="submit" form={formId} disabled={isPending}>
@@ -564,20 +569,31 @@ export function GroupFormPage(props: GroupFormPageProps) {
 
 	return (
 		<div className="mx-auto flex max-w-6xl flex-col gap-5">
-			<Link
-				{...(props.mode === 'create'
-					? { to: '/groups' as const }
-					: {
-							to: '/groups/$groupId' as const,
-							params: { groupId: String(props.group.id) },
-						})}
-				className="flex w-fit items-center gap-1.5 text-sm text-muted-foreground hover:text-foreground"
-			>
-				<ArrowLeft className="size-3.5" />
-				{props.mode === 'create'
-					? t('back')
-					: t('backToGroup', { name: props.group.name })}
-			</Link>
+			<PageNav
+				onBack={goBack}
+				backLabel={tc('action.back')}
+				crumbs={[
+					{ label: t('title'), link: <Link to="/groups" /> },
+					// Editing nests one level deeper than creating: the group it
+					// edits is a crumb of its own, and a way back to it.
+					...(props.mode === 'create'
+						? [{ label: tc('action.create') }]
+						: [
+								{
+									label: props.group.name,
+									link: (
+										<Link
+											to="/groups/$groupId"
+											params={{
+												groupId: String(props.group.id),
+											}}
+										/>
+									),
+								},
+								{ label: tc('action.edit') },
+							]),
+				]}
+			/>
 
 			<PageHeader title={props.mode === 'create' ? t('create') : t('edit')} />
 
