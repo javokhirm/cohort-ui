@@ -1007,18 +1007,20 @@ export const en: TranslationsOf<typeof uz> = {
 			},
 		},
 		schedule: {
-			title: 'Schedule',
-			description: 'Session calendar across all groups',
 			loadError: 'Failed to load the schedule. Please refresh.',
-			view: {
-				week: 'Week',
-				month: 'Month',
-				rooms: 'Rooms',
+			week: {
+				title: 'Weekly Schedule',
+				description: 'Session calendar across all groups, Monday to Sunday',
+			},
+			month: {
+				title: 'Monthly Schedule',
+				description:
+					'How busy each day of the month is — pick a day to open its week',
 			},
 			rooms: {
+				title: 'Room Availability',
 				description: 'Room occupancy for the selected day',
 				roomColumn: 'Room',
-				free: 'Free',
 				unassigned: 'No room assigned',
 				conflict: 'Double-booked',
 				overCapacity: 'Over capacity',

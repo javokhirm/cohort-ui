@@ -10,8 +10,6 @@ interface RoomScheduleRoomLabelProps {
 	row: AllocationRow;
 	/** Only worth a branch name when the selection actually spans branches. */
 	showBranch: boolean;
-	/** Pass any value to show the free/occupied line; omit to leave it out. */
-	windowMinutes?: number;
 }
 
 /**
@@ -19,11 +17,7 @@ interface RoomScheduleRoomLabelProps {
  * the day it is carrying, and whether it needs attention. Shared by the desktop
  * timeline and the mobile list so the two never describe a room differently.
  */
-export function RoomScheduleRoomLabel({
-	row,
-	showBranch,
-	windowMinutes,
-}: RoomScheduleRoomLabelProps) {
+export function RoomScheduleRoomLabel({ row, showBranch }: RoomScheduleRoomLabelProps) {
 	const t = useAppT('groups');
 	const tr = useAppT('rooms');
 	const statusLabel = useStatusLabel();
@@ -70,12 +64,6 @@ export function RoomScheduleRoomLabel({
 			{meta && (
 				<span className="truncate text-[11px] text-muted-foreground" title={meta}>
 					{meta}
-				</span>
-			)}
-
-			{windowMinutes != null && !unplaced && row.blocks.length === 0 && (
-				<span className="text-[11px] font-medium text-tone-green-fg">
-					{t('schedule.rooms.free')}
 				</span>
 			)}
 		</div>

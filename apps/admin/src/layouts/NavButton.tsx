@@ -16,6 +16,13 @@ interface NavButtonProps {
 	 * components — the row's anatomy is identical either way.
 	 */
 	size?: 'compact' | 'touch';
+	/**
+	 * A sub-destination inside an expandable section ({@link NavSection}). Tucks
+	 * the icon slot in so the row sits under its parent's label rather than
+	 * competing with it. Never combined with `collapsed` — the collapsed rail
+	 * flattens sections instead of indenting them.
+	 */
+	nested?: boolean;
 	/** Fired after navigating — the drawer closes itself with this. */
 	onNavigate?: () => void;
 }
@@ -30,6 +37,7 @@ export function NavButton({
 	active,
 	collapsed = false,
 	size = 'compact',
+	nested = false,
 	onNavigate,
 }: NavButtonProps) {
 	const navigate = useNavigate();
@@ -49,6 +57,7 @@ export function NavButton({
 			className={cn(
 				'flex w-full items-center overflow-hidden rounded-md transition-colors',
 				size === 'touch' ? 'h-11 text-sm' : 'h-9 text-[13px]',
+				nested && (size === 'touch' ? 'h-10' : 'h-8 text-[12.5px]'),
 				active
 					? 'bg-sidebar-accent font-semibold text-sidebar-accent-foreground'
 					: 'text-muted-foreground hover:bg-muted hover:text-foreground',
@@ -58,12 +67,21 @@ export function NavButton({
 			<span
 				className={cn(
 					'flex shrink-0 items-center justify-center transition-[width] duration-220 ease-in-out',
-					collapsed ? 'w-full' : size === 'touch' ? 'w-11' : 'w-9',
+					collapsed
+						? 'w-full'
+						: nested
+							? size === 'touch'
+								? 'w-9'
+								: 'w-7'
+							: size === 'touch'
+								? 'w-11'
+								: 'w-9',
 				)}
 			>
 				<Icon
 					className={cn(
-						'size-4 shrink-0',
+						'shrink-0',
+						nested ? 'size-3.5' : 'size-4',
 						active ? 'text-sidebar-primary' : 'text-muted-foreground',
 					)}
 				/>

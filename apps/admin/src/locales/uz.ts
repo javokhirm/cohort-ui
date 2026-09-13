@@ -1036,18 +1036,21 @@ export const uz = {
 			},
 		},
 		schedule: {
-			title: 'Dars jadvali',
-			description: 'Barcha guruhlar boʻyicha darslar kalendari',
 			loadError: 'Jadvalni yuklab boʻlmadi. Sahifani yangilang.',
-			view: {
-				week: 'Hafta',
-				month: 'Oy',
-				rooms: 'Xonalar',
+			week: {
+				title: 'Haftalik jadval',
+				description:
+					'Barcha guruhlar boʻyicha dushanbadan yakshanbagacha darslar',
+			},
+			month: {
+				title: 'Oylik jadval',
+				description:
+					'Oyning har bir kuni qanchalik band — haftasini ochish uchun kunni tanlang',
 			},
 			rooms: {
+				title: 'Xonalar bandligi',
 				description: 'Tanlangan kun uchun xonalar bandligi',
 				roomColumn: 'Xona',
-				free: 'Boʻsh',
 				unassigned: 'Xona biriktirilmagan',
 				conflict: 'Ikki marta band qilingan',
 				overCapacity: 'Sigʻimdan oshgan',

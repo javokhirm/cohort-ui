@@ -35,7 +35,7 @@ export function TodaySessionsCard() {
 			flush
 			headerRight={
 				<Link
-					to="/schedule"
+					to="/schedule/week"
 					className="text-sm font-medium text-primary hover:underline"
 				>
 					{t('viewCalendar')}

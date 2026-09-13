@@ -38,11 +38,7 @@ export function RoomScheduleList({
 						<RoomScheduleRoomLabel row={row} showBranch={showBranch} />
 					</div>
 
-					{row.blocks.length === 0 ? (
-						<p className="px-3 py-3 text-xs text-muted-foreground">
-							{t('schedule.rooms.free')}
-						</p>
-					) : (
+					{row.blocks.length > 0 && (
 						<ul className="divide-y divide-border">
 							{row.blocks.map(({ booking }) => {
 								const { tone } = resolveStatus('session', booking.status);

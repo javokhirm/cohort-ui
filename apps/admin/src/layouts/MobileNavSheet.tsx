@@ -8,6 +8,7 @@ import { useAppT } from '@/locales';
 
 import { tenantInitials, useVisibleNavGroups } from './nav';
 import { NavButton } from './NavButton';
+import { NavSection } from './NavSection';
 
 interface MobileNavSheetProps {
 	open: boolean;
@@ -74,15 +75,25 @@ export function MobileNavSheet({ open, onOpenChange }: MobileNavSheetProps) {
 									{t(`group.${group.label}`)}
 								</span>
 							</div>
-							{group.items.map((item) => (
-								<NavButton
-									key={item.id}
-									item={item}
-									active={pathname === item.href}
-									size="touch"
-									onNavigate={() => onOpenChange(false)}
-								/>
-							))}
+							{group.items.map((item) =>
+								item.items ? (
+									<NavSection
+										key={item.id}
+										item={item}
+										pathname={pathname}
+										size="touch"
+										onNavigate={() => onOpenChange(false)}
+									/>
+								) : (
+									<NavButton
+										key={item.id}
+										item={item}
+										active={pathname === item.href}
+										size="touch"
+										onNavigate={() => onOpenChange(false)}
+									/>
+								),
+							)}
 						</div>
 					))}
 				</nav>

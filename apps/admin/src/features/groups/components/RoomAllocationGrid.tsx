@@ -108,11 +108,7 @@ export function RoomAllocationGrid({
 					>
 						{/* Opaque, so it covers the track it scrolls over. */}
 						<div className="sticky left-0 z-20 flex w-52 shrink-0 flex-col justify-center border-r border-border bg-card px-3 py-2">
-							<RoomScheduleRoomLabel
-								row={row}
-								showBranch={showBranch}
-								windowMinutes={window.endMin - window.startMin}
-							/>
+							<RoomScheduleRoomLabel row={row} showBranch={showBranch} />
 						</div>
 
 						<div
@@ -146,75 +142,61 @@ export function RoomAllocationGrid({
 								/>
 							)}
 
-							{row.blocks.length === 0 ? (
-								<div className="flex h-full items-center px-3 text-xs text-muted-foreground">
-									{t('schedule.rooms.free')}
-								</div>
-							) : (
-								row.blocks.map((block) => {
-									const { booking } = block;
-									const { tone } = resolveStatus(
-										'session',
-										booking.status,
-									);
-									const accent = TONE_ACCENT_CLASSES[tone];
-									const { left, width } = blockGeometry(block, window);
-									const label = details(block);
-									return (
-										<Tooltip key={booking.sessionId}>
-											<TooltipTrigger asChild>
-												<button
-													type="button"
-													onClick={() =>
-														onSessionClick?.(
-															booking.sessionId,
-														)
-													}
-													aria-label={label}
-													className={cn(
-														'absolute z-10 overflow-hidden rounded-md border-l-[3px] px-2 py-1 text-left transition-[filter,box-shadow] hover:brightness-95',
-														'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring',
-														accent.bg,
-														accent.borderLeft,
-														booking.conflict &&
-															'ring-2 ring-destructive',
-														booking.status === 'CANCELLED' &&
-															'opacity-60 line-through decoration-1',
-													)}
-													style={{
-														left,
-														width,
-														top: block.lane * LANE_HEIGHT + 4,
-														height: BLOCK_HEIGHT,
-													}}
-												>
-													<span className="flex items-center gap-1 text-[10px] font-semibold tabular-nums text-muted-foreground">
-														{booking.conflict && (
-															<AlertTriangle className="size-3 shrink-0 text-destructive" />
-														)}
-														{booking.overCapacity && (
-															<Users className="size-3 shrink-0 text-tone-amber-fg" />
-														)}
-														<span className="truncate">
-															{booking.startTime}–
-															{booking.endTime}
-														</span>
-													</span>
-													<span className="block truncate text-[11px] font-semibold text-foreground">
-														{booking.groupName}
-													</span>
-												</button>
-											</TooltipTrigger>
-											<TooltipContent
-												side="top"
-												className="max-w-xs"
+							{row.blocks.map((block) => {
+								const { booking } = block;
+								const { tone } = resolveStatus('session', booking.status);
+								const accent = TONE_ACCENT_CLASSES[tone];
+								const { left, width } = blockGeometry(block, window);
+								const label = details(block);
+								return (
+									<Tooltip key={booking.sessionId}>
+										<TooltipTrigger asChild>
+											<button
+												type="button"
+												onClick={() =>
+													onSessionClick?.(booking.sessionId)
+												}
+												aria-label={label}
+												className={cn(
+													'absolute z-10 overflow-hidden rounded-md border-l-[3px] px-2 py-1 text-left transition-[filter,box-shadow] hover:brightness-95',
+													'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring',
+													accent.bg,
+													accent.borderLeft,
+													booking.conflict &&
+														'ring-2 ring-destructive',
+													booking.status === 'CANCELLED' &&
+														'opacity-60 line-through decoration-1',
+												)}
+												style={{
+													left,
+													width,
+													top: block.lane * LANE_HEIGHT + 4,
+													height: BLOCK_HEIGHT,
+												}}
 											>
-												{label}
-											</TooltipContent>
-										</Tooltip>
-									);
-								})
-							)}
+												<span className="flex items-center gap-1 text-[10px] font-semibold tabular-nums text-muted-foreground">
+													{booking.conflict && (
+														<AlertTriangle className="size-3 shrink-0 text-destructive" />
+													)}
+													{booking.overCapacity && (
+														<Users className="size-3 shrink-0 text-tone-amber-fg" />
+													)}
+													<span className="truncate">
+														{booking.startTime}–
+														{booking.endTime}
+													</span>
+												</span>
+												<span className="block truncate text-[11px] font-semibold text-foreground">
+													{booking.groupName}
+												</span>
+											</button>
+										</TooltipTrigger>
+										<TooltipContent side="top" className="max-w-xs">
+											{label}
+										</TooltipContent>
+									</Tooltip>
+								);
+							})}
 						</div>
 					</div>
 				))}

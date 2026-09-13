@@ -4,6 +4,7 @@ import {
 	Building2,
 	CalendarClock,
 	CalendarDays,
+	CalendarRange,
 	CreditCard,
 	DoorOpen,
 	FileText,
@@ -42,6 +43,9 @@ export type NavItemKey =
 	| 'rooms'
 	| 'groups'
 	| 'schedule'
+	| 'weeklySchedule'
+	| 'monthlySchedule'
+	| 'roomAvailability'
 	| 'invoices'
 	| 'payments'
 	| 'feePlans'
@@ -61,6 +65,16 @@ export type NavItemDef = {
 	badge?: string;
 	/** Permission(s) that reveal this item — any-of. Mirrors the route guard. */
 	permission: PermissionRequirement;
+	/**
+	 * Sub-destinations, rendered as an expandable section under this item.
+	 *
+	 * Only one level deep, deliberately: a parent with children is a *section
+	 * header*, not a destination — its `href` exists so the rail can highlight
+	 * the section and so the path still resolves, but picking the parent opens
+	 * the section rather than navigating. Nesting further would need a flyout
+	 * inside a flyout on the collapsed rail, which no destination here earns.
+	 */
+	items?: NavItemDef[];
 };
 
 export type NavGroupDef = {
@@ -147,8 +161,34 @@ export const NAV_GROUPS: NavGroupDef[] = [
 				id: 'schedule',
 				label: 'schedule',
 				Icon: CalendarClock,
+				// Not a screen — `/schedule` redirects to the weekly view. It is
+				// here so the section reads as one destination in the rail and so
+				// an old link still highlights the right group.
 				href: '/schedule',
 				permission: 'session.read',
+				items: [
+					{
+						id: 'schedule-week',
+						label: 'weeklySchedule',
+						Icon: CalendarRange,
+						href: '/schedule/week',
+						permission: 'session.read',
+					},
+					{
+						id: 'schedule-month',
+						label: 'monthlySchedule',
+						Icon: CalendarDays,
+						href: '/schedule/month',
+						permission: 'session.read',
+					},
+					{
+						id: 'schedule-rooms',
+						label: 'roomAvailability',
+						Icon: DoorOpen,
+						href: '/schedule/rooms',
+						permission: 'session.read',
+					},
+				],
 			},
 			// {
 			// 	id: 'attendance',
@@ -306,7 +346,17 @@ export function useVisibleNavGroups(): NavGroupDef[] {
 
 	return NAV_GROUPS.map((group) => ({
 		...group,
-		items: group.items.filter((item) => can(item.permission)),
+		items: group.items
+			.filter((item) => can(item.permission))
+			// Sub-items are gated independently, then a section left with no
+			// child it may show is dropped whole — a parent is a header, so an
+			// empty one would be a dead row.
+			.map((item) =>
+				item.items
+					? { ...item, items: item.items.filter((sub) => can(sub.permission)) }
+					: item,
+			)
+			.filter((item) => !item.items || item.items.length > 0),
 	})).filter((group) => group.items.length > 0);
 }
 
