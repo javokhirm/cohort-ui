@@ -32,7 +32,6 @@ export const uz = {
 		updated: 'Filial yangilandi',
 		submitCreate: 'Filial yaratish',
 		submitUpdate: 'Oʻzgarishlarni saqlash',
-		requiredHint: '* bilan belgilangan maydonlar majburiy',
 		section: {
 			identity: 'Asosiy maʼlumotlar',
 			location: 'Manzil va aloqa',
@@ -81,7 +80,6 @@ export const uz = {
 		seats_other: '{{count}} oʻrin',
 		created: 'Xona qoʻshildi',
 		updated: 'Xona yangilandi',
-		requiredHint: '* bilan belgilangan maydonlar majburiy',
 		field: {
 			name: 'Xona nomi *',
 			namePlaceholder: 'masalan, 204-xona',
@@ -108,7 +106,6 @@ export const uz = {
 		emptyFiltered: 'Bu filtrga mos kurs topilmadi.',
 		created: 'Kurs qoʻshildi',
 		updated: 'Kurs yangilandi',
-		requiredHint: '* bilan belgilangan maydonlar majburiy',
 		/** `branchId: null` — the course is shared across every branch. */
 		shared: 'Umumiy',
 		sharedOption: 'Umumiy — barcha filiallar',
@@ -167,7 +164,6 @@ export const uz = {
 		edit: 'Xarajatni tahrirlash',
 		submitCreate: 'Xarajatni yozish',
 		submitUpdate: 'Oʻzgarishlarni saqlash',
-		requiredHint: '* bilan belgilangan maydonlar majburiy',
 		loadError: 'Xarajatlarni yuklab boʻlmadi. Sahifani yangilang.',
 		emptyFiltered: 'Bu filtrga mos xarajat topilmadi.',
 		totalThisPeriod: 'Shu davr uchun jami',
@@ -304,7 +300,6 @@ export const uz = {
 		},
 		addSheet: {
 			title: 'Lid qoʻshish',
-			requiredHint: '* bilan belgilangan maydonlar majburiy',
 			submit: 'Lid qoʻshish',
 		},
 		field: {
@@ -350,7 +345,6 @@ export const uz = {
 		form: {
 			addTitle: 'Oʻquvchi qoʻshish',
 			editTitle: 'Oʻquvchini tahrirlash',
-			requiredHint: '* bilan belgilangan maydonlar majburiy',
 			save: 'Oʻquvchini saqlash',
 			addGuardian: 'Vasiy qoʻshish',
 			removeGuardian: 'Olib tashlash',
@@ -414,6 +408,14 @@ export const uz = {
 			},
 			guardians: {
 				empty: 'Vasiylar biriktirilmagan',
+				emptyDescription:
+					'Davomat, toʻlovlar va favqulodda holatlar boʻyicha bogʻlanish uchun ota-ona yoki vasiy qoʻshing.',
+				add: 'Vasiy qoʻshish',
+				addDescription: 'Oʻquvchi profiliga ota-ona yoki vasiyni bogʻlang.',
+				added: 'Vasiy qoʻshildi',
+				addFailed: 'Vasiyni qoʻshib boʻlmadi',
+				primaryLabel: 'Asosiy vasiy',
+				pickupLabel: 'Oʻquvchini olib ketishi mumkin',
 				primary: 'Asosiy',
 				pickup: 'Olib ketishi mumkin',
 				removeConfirm: '{{name}} vasiylikdan olib tashlansinmi?',
@@ -572,7 +574,6 @@ export const uz = {
 		form: {
 			addTitle: 'Xodim qoʻshish',
 			editTitle: 'Xodimni tahrirlash',
-			requiredHint: '* bilan belgilangan maydonlar majburiy',
 			section: {
 				profile: 'Profil',
 				contact: 'Aloqa',
@@ -1154,7 +1155,6 @@ export const uz = {
 			},
 			form: {
 				title: 'Invoys yaratish',
-				requiredHint: '* bilan belgilangan maydonlar majburiy',
 				student: 'Oʻquvchi *',
 				studentPlaceholder: 'Oʻquvchini tanlang',
 				issueDate: 'Chiqarilgan sana *',
@@ -1229,7 +1229,6 @@ export const uz = {
 			emptyFiltered: 'Bu filtrga mos reja topilmadi.',
 			created: 'Toʻlov rejasi yaratildi',
 			updated: 'Toʻlov rejasi yangilandi',
-			requiredHint: '* bilan belgilangan maydonlar majburiy',
 			groupsTitle: 'Ushbu rejadagi guruhlar',
 			groupsEmpty: 'Bu rejada hali guruhlar yoʻq.',
 			column: {
@@ -1260,7 +1259,6 @@ export const uz = {
 			emptyFiltered: 'Bu filtrga mos chegirma topilmadi.',
 			created: 'Chegirma yaratildi',
 			updated: 'Chegirma yangilandi',
-			requiredHint: '* bilan belgilangan maydonlar majburiy',
 			field: {
 				name: 'Chegirma nomi *',
 				namePlaceholder: 'masalan, Aka-uka chegirmasi',

@@ -239,7 +239,6 @@ export function StaffForm({ open, onOpenChange }: StaffFormProps) {
 			open={open}
 			onOpenChange={onOpenChange}
 			title={t('form.addTitle')}
-			description={t('form.requiredHint')}
 			footer={
 				<>
 					<Button type="button" variant="outline" onClick={handleClose}>

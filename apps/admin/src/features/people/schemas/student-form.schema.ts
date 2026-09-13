@@ -13,7 +13,7 @@ type PeopleT = ReturnType<typeof useAppT<'people'>>;
  * re-translate on a language switch (conventions.md §7). Callers memoise on the
  * translator.
  */
-function phoneField(t: Translator<'validation'>) {
+export function phoneField(t: Translator<'validation'>) {
 	return z.string().min(1, t('required')).regex(UZ_PHONE_REGEX, t('phoneInvalid'));
 }
 
@@ -29,7 +29,7 @@ function optionalPasswordField(t: Translator<'validation'>) {
 		.optional();
 }
 
-function guardianNameField(t: Translator<'validation'>, tp: PeopleT) {
+export function guardianNameField(t: Translator<'validation'>, tp: PeopleT) {
 	return z
 		.string()
 		.min(2, t('required'))

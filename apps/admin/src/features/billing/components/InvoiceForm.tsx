@@ -494,7 +494,7 @@ export function InvoiceForm(props: InvoiceFormProps) {
 			}
 			description={
 				mode === 'create'
-					? t('invoices.form.requiredHint')
+					? ''
 					: t('invoiceForm.editDescription')
 			}
 			maxWidth="lg"

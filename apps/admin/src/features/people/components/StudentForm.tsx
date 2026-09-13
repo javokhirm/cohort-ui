@@ -512,7 +512,6 @@ export function StudentForm(props: StudentFormProps) {
 			open={open}
 			onOpenChange={onOpenChange}
 			title={mode === 'create' ? t('form.addTitle') : t('form.editTitle')}
-			description={t('form.requiredHint')}
 			footer={
 				<>
 					<Button type="button" variant="outline" onClick={handleSuccess}>

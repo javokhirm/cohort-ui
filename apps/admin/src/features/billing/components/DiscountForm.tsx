@@ -295,7 +295,6 @@ export function DiscountForm(props: DiscountFormProps) {
 			open={open}
 			onOpenChange={onOpenChange}
 			title={mode === 'create' ? t('discounts.add') : t('discounts.edit')}
-			description={t('feePlans.requiredHint')}
 			footer={
 				<>
 					<Button type="button" variant="outline" onClick={handleClose}>

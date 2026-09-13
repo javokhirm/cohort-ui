@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { Link, useNavigate, useSearch } from '@tanstack/react-router';
-import { Edit, MessageSquare, Plus, Trash2 } from 'lucide-react';
+import { Edit, MessageSquare, Plus, Trash2, Users } from 'lucide-react';
 
 import {
 	ActionsMenu,
@@ -8,6 +8,7 @@ import {
 	Card,
 	CardContent,
 	DataTable,
+	EmptyState,
 	PageNav,
 	Select,
 	SelectContent,
@@ -40,6 +41,7 @@ import {
 } from '../api/students.queries';
 import type { Guardian, Enrollment } from '../api/students.queries';
 import { useRemoveGuardian } from '../api/students.mutations';
+import { AddGuardianDialog } from '../components/AddGuardianDialog';
 import { BillingTab } from '../components/BillingTab';
 import { GradesTab } from '../components/GradesTab';
 import { PerformanceTab } from '../components/PerformanceTab';
@@ -186,6 +188,7 @@ function GuardiansTab({ studentId }: { studentId: number }) {
 	const t = useAppT('people');
 	const { data: guardians = [], isLoading } = useStudentGuardians(studentId);
 	const removeGuardian = useRemoveGuardian();
+	const [addOpen, setAddOpen] = useState(false);
 
 	function handleRemove(guardian: Guardian) {
 		if (
@@ -204,6 +207,24 @@ function GuardiansTab({ studentId }: { studentId: number }) {
 		);
 	}
 
+	const addButton = (
+		<Can permission="student.guardian.manage">
+			<Button size="sm" onClick={() => setAddOpen(true)}>
+				<Plus className="mr-1.5 size-4" />
+				{t('detail.guardians.add')}
+			</Button>
+		</Can>
+	);
+
+	const dialog = (
+		<AddGuardianDialog
+			studentId={studentId}
+			isFirstGuardian={guardians.length === 0}
+			open={addOpen}
+			onOpenChange={setAddOpen}
+		/>
+	);
+
 	if (isLoading) {
 		return (
 			<div className="flex flex-col gap-3">
@@ -216,66 +237,78 @@ function GuardiansTab({ studentId }: { studentId: number }) {
 
 	if (guardians.length === 0) {
 		return (
-			<div className="flex min-h-32 items-center justify-center rounded-xl border text-sm text-muted-foreground">
-				{t('detail.guardians.empty')}
+			<div className="flex flex-col gap-3">
+				<Card className="py-0">
+					<EmptyState
+						icon={<Users />}
+						title={t('detail.guardians.empty')}
+						description={t('detail.guardians.emptyDescription')}
+						action={addButton}
+					/>
+				</Card>
+				{dialog}
 			</div>
 		);
 	}
 
 	return (
-		<div className="rounded-xl border bg-card">
-			{guardians.map((g, i) => {
-				const initials =
-					`${g.user.firstName[0] ?? ''}${g.user.lastName[0] ?? ''}`.toUpperCase();
-				const relationLabel = t(
-					`relation.${g.relation as 'father' | 'mother' | 'guardian'}`,
-				);
-				return (
-					<div key={g.id}>
-						{i > 0 && <Separator />}
-						<div className="flex items-center justify-between p-4">
-							<div className="flex items-center gap-3">
-								<div className="flex size-9 shrink-0 items-center justify-center rounded-full bg-muted text-xs font-semibold">
-									{initials}
-								</div>
-								<div>
-									<div className="flex items-center gap-3">
-										<span className="text-xs font-semibold text-muted-foreground">
-											{relationLabel}
-										</span>
-										<span className="font-medium">
-											{g.user.firstName} {g.user.lastName}
-										</span>
-										{g.isPrimary && (
-											<StatusBadge tone="indigo">
-												{t('detail.guardians.primary')}
-											</StatusBadge>
-										)}
-										{g.canPickup && (
-											<StatusBadge tone="green">
-												{t('detail.guardians.pickup')}
-											</StatusBadge>
-										)}
+		<div className="flex flex-col gap-3">
+			<div className="flex justify-end">{addButton}</div>
+			<div className="rounded-xl border bg-card">
+				{guardians.map((g, i) => {
+					const initials =
+						`${g.user.firstName[0] ?? ''}${g.user.lastName[0] ?? ''}`.toUpperCase();
+					const relationLabel = t(
+						`relation.${g.relation as 'father' | 'mother' | 'guardian'}`,
+					);
+					return (
+						<div key={g.id}>
+							{i > 0 && <Separator />}
+							<div className="flex items-center justify-between p-4">
+								<div className="flex items-center gap-3">
+									<div className="flex size-9 shrink-0 items-center justify-center rounded-full bg-muted text-xs font-semibold">
+										{initials}
 									</div>
-									<div className="mt-0.5 text-sm text-muted-foreground">
-										{g.user.phone}
+									<div>
+										<div className="flex items-center gap-3">
+											<span className="text-xs font-semibold text-muted-foreground">
+												{relationLabel}
+											</span>
+											<span className="font-medium">
+												{g.user.firstName} {g.user.lastName}
+											</span>
+											{g.isPrimary && (
+												<StatusBadge tone="indigo">
+													{t('detail.guardians.primary')}
+												</StatusBadge>
+											)}
+											{g.canPickup && (
+												<StatusBadge tone="green">
+													{t('detail.guardians.pickup')}
+												</StatusBadge>
+											)}
+										</div>
+										<div className="mt-0.5 text-sm text-muted-foreground">
+											{g.user.phone}
+										</div>
 									</div>
 								</div>
+								<Can permission="student.guardian.manage">
+									<Button
+										variant="ghost"
+										size="sm"
+										className="text-muted-foreground hover:text-destructive"
+										onClick={() => handleRemove(g)}
+									>
+										<Trash2 className="size-4" />
+									</Button>
+								</Can>
 							</div>
-							<Can permission="student.guardian.manage">
-								<Button
-									variant="ghost"
-									size="sm"
-									className="text-muted-foreground hover:text-destructive"
-									onClick={() => handleRemove(g)}
-								>
-									<Trash2 className="size-4" />
-								</Button>
-							</Can>
 						</div>
-					</div>
-				);
-			})}
+					);
+				})}
+			</div>
+			{dialog}
 		</div>
 	);
 }

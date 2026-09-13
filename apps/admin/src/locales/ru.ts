@@ -17,7 +17,6 @@ export const ru: TranslationsOf<typeof uz> = {
 		updated: 'Филиал обновлён',
 		submitCreate: 'Создать филиал',
 		submitUpdate: 'Сохранить изменения',
-		requiredHint: 'Поля со знаком * обязательны',
 		section: {
 			identity: 'Основные данные',
 			location: 'Адрес и контакты',
@@ -67,7 +66,6 @@ export const ru: TranslationsOf<typeof uz> = {
 		seats_other: '{{count}} мест',
 		created: 'Аудитория добавлена',
 		updated: 'Аудитория обновлена',
-		requiredHint: 'Поля со знаком * обязательны',
 		field: {
 			name: 'Название аудитории *',
 			namePlaceholder: 'например, Аудитория 204',
@@ -94,7 +92,6 @@ export const ru: TranslationsOf<typeof uz> = {
 		emptyFiltered: 'Нет курсов по этому фильтру.',
 		created: 'Курс добавлен',
 		updated: 'Курс обновлён',
-		requiredHint: 'Поля со знаком * обязательны',
 		shared: 'Общий',
 		sharedOption: 'Общий — все филиалы',
 		weeksShort_one: '{{count}} нед.',
@@ -157,7 +154,6 @@ export const ru: TranslationsOf<typeof uz> = {
 		edit: 'Редактировать расход',
 		submitCreate: 'Записать расход',
 		submitUpdate: 'Сохранить изменения',
-		requiredHint: 'Поля со знаком * обязательны',
 		loadError: 'Не удалось загрузить расходы. Обновите страницу.',
 		emptyFiltered: 'Нет расходов по этому фильтру.',
 		totalThisPeriod: 'Итого за период',
@@ -297,7 +293,6 @@ export const ru: TranslationsOf<typeof uz> = {
 		},
 		addSheet: {
 			title: 'Добавить лид',
-			requiredHint: 'Поля со знаком * обязательны',
 			submit: 'Добавить лид',
 		},
 		field: {
@@ -343,7 +338,6 @@ export const ru: TranslationsOf<typeof uz> = {
 		form: {
 			addTitle: 'Добавить ученика',
 			editTitle: 'Редактировать ученика',
-			requiredHint: 'Поля со знаком * обязательны',
 			save: 'Сохранить ученика',
 			addGuardian: 'Добавить представителя',
 			removeGuardian: 'Убрать',
@@ -407,6 +401,14 @@ export const ru: TranslationsOf<typeof uz> = {
 			},
 			guardians: {
 				empty: 'Представители не привязаны',
+				emptyDescription:
+					'Добавьте родителя или представителя, чтобы с ним можно было связаться по посещаемости, оплате и в экстренных случаях.',
+				add: 'Добавить представителя',
+				addDescription: 'Привяжите родителя или представителя к профилю ученика.',
+				added: 'Представитель добавлен',
+				addFailed: 'Не удалось добавить представителя',
+				primaryLabel: 'Основной представитель',
+				pickupLabel: 'Может забирать ученика',
 				primary: 'Основной',
 				pickup: 'Может забирать',
 				removeConfirm: 'Убрать {{name}} из представителей?',
@@ -571,7 +573,6 @@ export const ru: TranslationsOf<typeof uz> = {
 		form: {
 			addTitle: 'Добавить сотрудника',
 			editTitle: 'Редактировать сотрудника',
-			requiredHint: 'Поля со знаком * обязательны',
 			section: {
 				profile: 'Профиль',
 				contact: 'Контакты',
@@ -1162,7 +1163,6 @@ export const ru: TranslationsOf<typeof uz> = {
 			},
 			form: {
 				title: 'Создать счёт',
-				requiredHint: 'Поля со знаком * обязательны',
 				student: 'Ученик *',
 				studentPlaceholder: 'Выберите ученика',
 				issueDate: 'Дата выставления *',
@@ -1237,7 +1237,6 @@ export const ru: TranslationsOf<typeof uz> = {
 			emptyFiltered: 'Нет планов по этому фильтру.',
 			created: 'Тарифный план создан',
 			updated: 'Тарифный план обновлён',
-			requiredHint: 'Поля со знаком * обязательны',
 			groupsTitle: 'Группы на этом плане',
 			groupsEmpty: 'На этом плане пока нет групп.',
 			column: {
@@ -1268,7 +1267,6 @@ export const ru: TranslationsOf<typeof uz> = {
 			emptyFiltered: 'Нет скидок по этому фильтру.',
 			created: 'Скидка создана',
 			updated: 'Скидка обновлена',
-			requiredHint: 'Поля со знаком * обязательны',
 			field: {
 				name: 'Название скидки *',
 				namePlaceholder: 'например, Скидка для братьев и сестёр',

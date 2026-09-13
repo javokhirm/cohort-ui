@@ -17,7 +17,6 @@ export const en: TranslationsOf<typeof uz> = {
 		updated: 'Branch updated',
 		submitCreate: 'Create branch',
 		submitUpdate: 'Save changes',
-		requiredHint: 'Fields marked * are required',
 		section: {
 			identity: 'Identity',
 			location: 'Location & contact',
@@ -65,7 +64,6 @@ export const en: TranslationsOf<typeof uz> = {
 		seats_other: '{{count}} seats',
 		created: 'Room added',
 		updated: 'Room updated',
-		requiredHint: 'Fields marked * are required',
 		field: {
 			name: 'Room name *',
 			namePlaceholder: 'e.g. Room 204',
@@ -92,7 +90,6 @@ export const en: TranslationsOf<typeof uz> = {
 		emptyFiltered: 'No courses match this filter.',
 		created: 'Course added',
 		updated: 'Course updated',
-		requiredHint: 'Fields marked * are required',
 		shared: 'Shared',
 		sharedOption: 'Shared — all branches',
 		weeksShort_one: '{{count}} wk',
@@ -148,7 +145,6 @@ export const en: TranslationsOf<typeof uz> = {
 		edit: 'Edit expense',
 		submitCreate: 'Record expense',
 		submitUpdate: 'Save changes',
-		requiredHint: 'Fields marked * are required',
 		loadError: 'Failed to load expenses. Please refresh.',
 		emptyFiltered: 'No expenses match this filter.',
 		totalThisPeriod: 'Total this period',
@@ -283,7 +279,6 @@ export const en: TranslationsOf<typeof uz> = {
 		},
 		addSheet: {
 			title: 'Add lead',
-			requiredHint: 'Fields marked * are required',
 			submit: 'Add lead',
 		},
 		field: {
@@ -329,7 +324,6 @@ export const en: TranslationsOf<typeof uz> = {
 		form: {
 			addTitle: 'Add student',
 			editTitle: 'Edit student',
-			requiredHint: 'Fields marked * are required',
 			save: 'Save student',
 			addGuardian: 'Add guardian',
 			removeGuardian: 'Remove',
@@ -393,6 +387,14 @@ export const en: TranslationsOf<typeof uz> = {
 			},
 			guardians: {
 				empty: 'No guardians linked',
+				emptyDescription:
+					'Add a parent or guardian so they can be reached about attendance, billing, and emergencies.',
+				add: 'Add guardian',
+				addDescription: "Link a parent or guardian to this student's profile.",
+				added: 'Guardian added',
+				addFailed: 'Could not add the guardian',
+				primaryLabel: 'Primary guardian',
+				pickupLabel: 'Can pick up the student',
 				primary: 'Primary',
 				pickup: 'Pickup OK',
 				removeConfirm: 'Remove {{name}} as guardian?',
@@ -550,7 +552,6 @@ export const en: TranslationsOf<typeof uz> = {
 		form: {
 			addTitle: 'Add staff member',
 			editTitle: 'Edit staff member',
-			requiredHint: 'Fields marked * are required',
 			section: {
 				profile: 'Profile',
 				contact: 'Contact',
@@ -1123,7 +1124,6 @@ export const en: TranslationsOf<typeof uz> = {
 			},
 			form: {
 				title: 'Create invoice',
-				requiredHint: 'Fields marked * are required',
 				student: 'Student *',
 				studentPlaceholder: 'Select a student',
 				issueDate: 'Issue date *',
@@ -1198,7 +1198,6 @@ export const en: TranslationsOf<typeof uz> = {
 			emptyFiltered: 'No plans match this filter.',
 			created: 'Fee plan created',
 			updated: 'Fee plan updated',
-			requiredHint: 'Fields marked * are required',
 			groupsTitle: 'Groups on this plan',
 			groupsEmpty: 'No groups are on this plan yet.',
 			column: {
@@ -1229,7 +1228,6 @@ export const en: TranslationsOf<typeof uz> = {
 			emptyFiltered: 'No discounts match this filter.',
 			created: 'Discount created',
 			updated: 'Discount updated',
-			requiredHint: 'Fields marked * are required',
 			field: {
 				name: 'Discount name *',
 				namePlaceholder: 'e.g. Sibling discount',
