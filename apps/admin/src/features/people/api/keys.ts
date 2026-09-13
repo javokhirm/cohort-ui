@@ -50,6 +50,9 @@ export const peopleKeys = {
 		[...peopleKeys.students(), id, 'invoices', page] as const,
 	studentWallet: (id: number) => [...peopleKeys.students(), id, 'wallet'] as const,
 
+	guardianLookup: (phone: string) =>
+		[...peopleKeys.all, 'guardians', 'lookup', phone] as const,
+
 	groups: (filters?: { branchIds?: number[]; status?: string }) =>
 		[...peopleKeys.all, 'groups', filters] as const,
 };

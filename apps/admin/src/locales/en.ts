@@ -325,8 +325,6 @@ export const en: TranslationsOf<typeof uz> = {
 			addTitle: 'Add student',
 			editTitle: 'Edit student',
 			save: 'Save student',
-			addGuardian: 'Add guardian',
-			removeGuardian: 'Remove',
 			section: {
 				personal: 'Personal',
 				contact: 'Contact',
@@ -350,8 +348,8 @@ export const en: TranslationsOf<typeof uz> = {
 				addressPlaceholder: 'Street, district, city',
 				guardianName: 'Guardian name *',
 				guardianNamePlaceholder: 'e.g. Rustam Olimov',
-				relation: 'Relation',
-				guardianPhone: 'Guardian phone',
+				guardianPhone: 'Parent / Guardian phone',
+				relationRequired: 'Relation *',
 				group: 'Group',
 				studentStatus: 'Student status',
 				password: 'Password',
@@ -360,6 +358,25 @@ export const en: TranslationsOf<typeof uz> = {
 			passwordHint: 'Leave blank to keep the current password.',
 			validation: {
 				guardianFullName: 'Please enter both first and last name',
+				guardianChecking: 'Checking the phone number…',
+				guardianAlreadyConnected:
+					'This guardian is already connected to this student.',
+				guardianConfirmRequired:
+					'This number is already registered. Connect the guardian or clear the number.',
+			},
+			guardianLookup: {
+				checking: 'Checking…',
+				foundTitle: 'Existing guardian found',
+				foundDescription: 'This guardian is already registered in the system.',
+				foundNonGuardian:
+					'This number belongs to someone the center already knows. Connecting will not create a new record.',
+				connectedStudents: 'Connected students:',
+				connectPrompt: 'Connect this guardian to this student?',
+				connectAction: 'Connect guardian',
+				connected: 'Guardian connected',
+				alreadyConnected: 'Already connected',
+				notFound: 'No existing guardian found for this number.',
+				newTitle: 'New guardian',
 			},
 		},
 		detail: {

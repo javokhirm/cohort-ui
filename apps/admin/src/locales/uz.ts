@@ -346,8 +346,6 @@ export const uz = {
 			addTitle: 'Oʻquvchi qoʻshish',
 			editTitle: 'Oʻquvchini tahrirlash',
 			save: 'Oʻquvchini saqlash',
-			addGuardian: 'Vasiy qoʻshish',
-			removeGuardian: 'Olib tashlash',
 			section: {
 				personal: 'Shaxsiy maʼlumotlar',
 				contact: 'Aloqa',
@@ -371,8 +369,8 @@ export const uz = {
 				addressPlaceholder: 'Koʻcha, tuman, shahar',
 				guardianName: 'Vasiy F.I.Sh. *',
 				guardianNamePlaceholder: 'masalan, Rustam Olimov',
-				relation: 'Qarindoshligi',
-				guardianPhone: 'Vasiy telefoni',
+				guardianPhone: 'Ota-ona / vasiy telefoni',
+				relationRequired: 'Qarindoshligi *',
 				group: 'Guruh',
 				studentStatus: 'Oʻquvchi holati',
 				password: 'Parol',
@@ -381,6 +379,24 @@ export const uz = {
 			passwordHint: 'Joriy parolni saqlab qolish uchun boʻsh qoldiring.',
 			validation: {
 				guardianFullName: 'Ism va familiyani toʻliq kiriting',
+				guardianChecking: 'Telefon raqami tekshirilmoqda…',
+				guardianAlreadyConnected: 'Bu vasiy ushbu oʻquvchiga allaqachon ulangan.',
+				guardianConfirmRequired:
+					'Bu raqam allaqachon roʻyxatda. Vasiyni ulang yoki raqamni oʻchiring.',
+			},
+			guardianLookup: {
+				checking: 'Tekshirilmoqda…',
+				foundTitle: 'Mavjud vasiy topildi',
+				foundDescription: 'Bu vasiy tizimda allaqachon roʻyxatdan oʻtgan.',
+				foundNonGuardian:
+					'Bu raqam markazdagi mavjud shaxsga tegishli. Ulash yangi yozuv yaratmaydi.',
+				connectedStudents: 'Ulangan oʻquvchilar:',
+				connectPrompt: 'Shu vasiyni ushbu oʻquvchiga ulaymizmi?',
+				connectAction: 'Vasiyni ulash',
+				connected: 'Vasiy ulandi',
+				alreadyConnected: 'Allaqachon ulangan',
+				notFound: 'Bu raqam boʻyicha vasiy topilmadi.',
+				newTitle: 'Yangi vasiy',
 			},
 		},
 		detail: {

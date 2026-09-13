@@ -339,8 +339,6 @@ export const ru: TranslationsOf<typeof uz> = {
 			addTitle: 'Добавить ученика',
 			editTitle: 'Редактировать ученика',
 			save: 'Сохранить ученика',
-			addGuardian: 'Добавить представителя',
-			removeGuardian: 'Убрать',
 			section: {
 				personal: 'Личные данные',
 				contact: 'Контакты',
@@ -364,8 +362,8 @@ export const ru: TranslationsOf<typeof uz> = {
 				addressPlaceholder: 'Улица, район, город',
 				guardianName: 'ФИО представителя *',
 				guardianNamePlaceholder: 'например, Рустам Олимов',
-				relation: 'Степень родства',
-				guardianPhone: 'Телефон представителя',
+				guardianPhone: 'Телефон родителя / представителя',
+				relationRequired: 'Степень родства *',
 				group: 'Группа',
 				studentStatus: 'Статус ученика',
 				password: 'Пароль',
@@ -374,6 +372,25 @@ export const ru: TranslationsOf<typeof uz> = {
 			passwordHint: 'Оставьте пустым, чтобы сохранить текущий пароль.',
 			validation: {
 				guardianFullName: 'Укажите имя и фамилию полностью',
+				guardianChecking: 'Проверяем номер телефона…',
+				guardianAlreadyConnected:
+					'Этот представитель уже подключён к данному ученику.',
+				guardianConfirmRequired:
+					'Этот номер уже зарегистрирован. Подключите представителя или очистите номер.',
+			},
+			guardianLookup: {
+				checking: 'Проверяем…',
+				foundTitle: 'Найден существующий представитель',
+				foundDescription: 'Этот представитель уже зарегистрирован в системе.',
+				foundNonGuardian:
+					'Этот номер принадлежит человеку, который уже есть в центре. Подключение не создаст новую запись.',
+				connectedStudents: 'Подключённые ученики:',
+				connectPrompt: 'Подключить этого представителя к ученику?',
+				connectAction: 'Подключить представителя',
+				connected: 'Представитель подключён',
+				alreadyConnected: 'Уже подключён',
+				notFound: 'Представитель с таким номером не найден.',
+				newTitle: 'Новый представитель',
 			},
 		},
 		detail: {

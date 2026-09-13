@@ -14,10 +14,7 @@ import {
 	Form,
 	FormControl,
 	FormField,
-	FormInput,
 	FormItem,
-	FormPhoneInput,
-	FormSelect,
 	Spinner,
 	Switch,
 	toast,
@@ -28,18 +25,13 @@ import { useT } from '@repo/i18n';
 import { useAppT } from '@/locales';
 
 import { useAddGuardian } from '../api/students.mutations';
+import { useStudentGuardians } from '../api/students.queries';
+import { buildAddGuardianInput } from '../lib/guardian-input';
 import {
 	addGuardianSchema,
 	type AddGuardianFormValues,
 } from '../schemas/add-guardian.schema';
-import { splitFullName } from '../schemas/student-form.schema';
-
-/** Option tables hold values only — labels resolve at render (conventions.md §7). */
-const GUARDIAN_RELATION_OPTIONS = [
-	{ value: 'father' },
-	{ value: 'mother' },
-	{ value: 'guardian' },
-] as const;
+import { GuardianPhoneField } from './GuardianPhoneField';
 
 interface AddGuardianDialogProps {
 	studentId: number;
@@ -100,26 +92,31 @@ function AddGuardianForm({
 		defaultValues: {
 			guardianName: '',
 			guardianPhone: '',
-			guardianRelation: 'father',
+			guardianRelation: undefined,
+			guardianLookupState: 'idle',
+			connectedGuardianUserId: undefined,
 			isPrimary: isFirstGuardian,
 			canPickup: true,
 		},
 	});
 
+	const guardianPhone = form.watch('guardianPhone') ?? '';
+	const guardianRelation = form.watch('guardianRelation');
+	const connectedGuardianUserId = form.watch('connectedGuardianUserId');
+
+	const { data: guardians = [] } = useStudentGuardians(studentId);
+	const linkedGuardianUserIds = guardians.map((g) => g.guardianUserId);
+
 	const addGuardian = useAddGuardian();
 
 	async function onSubmit(values: AddGuardianFormValues) {
-		const { firstName, lastName } = splitFullName(values.guardianName);
 		try {
-			await addGuardian.mutateAsync({
-				studentId,
-				phone: values.guardianPhone || undefined,
-				firstName,
-				lastName,
-				relation: values.guardianRelation,
-				isPrimary: values.isPrimary,
-				canPickup: values.canPickup,
-			});
+			await addGuardian.mutateAsync(
+				buildAddGuardianInput(studentId, values, {
+					isPrimary: values.isPrimary,
+					canPickup: values.canPickup,
+				}),
+			);
 			toast.success(t('detail.guardians.added'));
 			onClose();
 		} catch (err) {
@@ -133,28 +130,20 @@ function AddGuardianForm({
 				onSubmit={(e) => void form.handleSubmit(onSubmit)(e)}
 				className="flex flex-col gap-4"
 			>
-				<FieldGroup>
-					<FormInput
-						control={form.control}
-						name="guardianName"
-						label={t('form.field.guardianName')}
-						placeholder={t('form.field.guardianNamePlaceholder')}
-					/>
-					<FormSelect
-						control={form.control}
-						name="guardianRelation"
-						label={t('form.field.relation')}
-						options={GUARDIAN_RELATION_OPTIONS.map((o) => ({
-							value: o.value,
-							label: t(`relation.${o.value}`),
-						}))}
-					/>
-					<FormPhoneInput
-						control={form.control}
-						name="guardianPhone"
-						label={t('form.field.guardianPhone')}
-					/>
-				</FieldGroup>
+				<GuardianPhoneField
+					control={form.control}
+					setValue={form.setValue}
+					phone={guardianPhone}
+					relation={guardianRelation}
+					connectedGuardianUserId={connectedGuardianUserId}
+					linkedGuardianUserIds={linkedGuardianUserIds}
+					allowPhonelessGuardian
+					onConnect={(guardianUserId) =>
+						form.setValue('connectedGuardianUserId', guardianUserId, {
+							shouldValidate: true,
+						})
+					}
+				/>
 
 				<FieldGroup>
 					<FormField

@@ -204,7 +204,7 @@ function GuardiansTab({ studentId }: { studentId: number }) {
 		)
 			return;
 		removeGuardian.mutate(
-			{ studentId, guardianId: guardian.id },
+			{ studentId, guardianId: guardian.guardianUserId },
 			{
 				onSuccess: () => toast.success(t('detail.guardians.removed')),
 			},
