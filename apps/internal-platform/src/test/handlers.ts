@@ -730,7 +730,7 @@ export const MOCK_ROLES = [
 	},
 	{
 		id: 6,
-		name: 'PARENT',
+		name: 'STUDENT_GUARDIAN',
 		description: 'Parent portal access',
 		isSystem: true,
 		editable: false,
