@@ -34,10 +34,10 @@ import {
 	useCreateStudent,
 	useUpdateStudent,
 	useEnrollStudent,
-	useCreateGuardian,
-	useLinkGuardian,
+	useAddGuardian,
+	type AddGuardianInput,
 } from '../api/students.mutations';
-import { buildCreateGuardianInput, buildLinkGuardianInput } from '../lib/guardian-input';
+import { buildAddGuardianInput } from '../lib/guardian-input';
 import { ConnectedGuardiansSummary } from './ConnectedGuardiansSummary';
 import { GuardianPhoneField } from './GuardianPhoneField';
 
@@ -114,15 +114,11 @@ function CreateStudentForm({
 	const groups = groupsPage?.rows ?? [];
 
 	const createStudent = useCreateStudent();
-	const createGuardian = useCreateGuardian();
-	const linkGuardian = useLinkGuardian();
+	const addGuardian = useAddGuardian();
 	const enrollStudent = useEnrollStudent();
 
 	const isPending =
-		createStudent.isPending ||
-		createGuardian.isPending ||
-		linkGuardian.isPending ||
-		enrollStudent.isPending;
+		createStudent.isPending || addGuardian.isPending || enrollStudent.isPending;
 
 	useEffect(() => {
 		onPendingChange(isPending);
@@ -145,22 +141,14 @@ function CreateStudentForm({
 			return;
 		}
 
-		// The student exists now, so the guardian link can be written. A
-		// confirmed match (the operator clicked Connect on the phone lookup)
-		// links that person by id; otherwise this describes a brand-new one.
+		// The student exists now, so the guardian link can be written. A phone
+		// the tenant already knows resolves to that same person server-side, so
+		// this never mints a second guardian for a household of siblings.
 		if (values.guardianPhone) {
 			try {
-				if (values.connectedGuardianUserId != null) {
-					await linkGuardian.mutateAsync(
-						buildLinkGuardianInput(studentId, values.connectedGuardianUserId, values, {
-							isPrimary: true,
-						}),
-					);
-				} else {
-					await createGuardian.mutateAsync(
-						buildCreateGuardianInput(studentId, values, { isPrimary: true }),
-					);
-				}
+				await addGuardian.mutateAsync(
+					buildAddGuardianInput(studentId, values, { isPrimary: true }),
+				);
 			} catch (err) {
 				// The student is already created — surface the guardian failure
 				// instead of failing the whole flow, or the operator would
@@ -353,41 +341,35 @@ function EditStudentForm({
 	const linkedGuardianUserIds = guardians.map((g) => g.guardianUserId);
 
 	const updateStudent = useUpdateStudent();
-	const createGuardian = useCreateGuardian();
-	const linkGuardian = useLinkGuardian();
+	const addGuardian = useAddGuardian();
 
 	useEffect(() => {
-		onPendingChange(
-			updateStudent.isPending || createGuardian.isPending || linkGuardian.isPending,
-		);
-	}, [
-		updateStudent.isPending,
-		createGuardian.isPending,
-		linkGuardian.isPending,
-		onPendingChange,
-	]);
+		onPendingChange(updateStudent.isPending || addGuardian.isPending);
+	}, [updateStudent.isPending, addGuardian.isPending, onPendingChange]);
 
 	/**
-	 * The student exists, so a confirmed match links immediately — no name to
-	 * send, only the id `GuardianPhoneField` resolved and the operator confirmed.
+	 * Link a guardian and report the outcome. Shared by the Connect button (the
+	 * student exists, so confirming can link there and then) and by submit (the
+	 * new-guardian path, which has nothing to link until the operator saves).
 	 */
-	async function handleConnect(guardianUserId: number) {
-		const relation = form.getValues('guardianRelation');
-		if (!relation) return; // the schema already requires it before Connect shows
-
+	async function linkGuardian(input: AddGuardianInput): Promise<boolean> {
 		try {
-			await linkGuardian.mutateAsync(
-				buildLinkGuardianInput(
-					student.id,
-					guardianUserId,
-					{ guardianRelation: relation },
-					{ isPrimary: guardians.length === 0 },
-				),
-			);
+			await addGuardian.mutateAsync(input);
+			return true;
 		} catch (err) {
 			toast.error(isApiError(err) ? err.message : t('detail.guardians.addFailed'));
-			return;
+			return false;
 		}
+	}
+
+	async function handleConnect() {
+		const values = form.getValues();
+		const linked = await linkGuardian(
+			buildAddGuardianInput(student.id, values, {
+				isPrimary: guardians.length === 0,
+			}),
+		);
+		if (!linked) return;
 
 		toast.success(t('detail.guardians.added'));
 		// The guardian now shows in the connected list above, so clear the field
@@ -412,20 +394,15 @@ function EditStudentForm({
 			password: values.password || undefined,
 		});
 
-		// A guardian left in the form with no confirmed match is one the operator
-		// described but never connected — the new-person path. An existing match
-		// is connected by its own button above, which clears these fields, so it
-		// cannot reach here.
+		// A guardian left in the form is one the operator described but never
+		// connected — the new-person path. An existing match is connected by its
+		// own button, which clears these fields, so it cannot be re-sent here.
 		if (values.guardianPhone && values.connectedGuardianUserId == null) {
-			try {
-				await createGuardian.mutateAsync(
-					buildCreateGuardianInput(student.id, values, {
-						isPrimary: guardians.length === 0,
-					}),
-				);
-			} catch (err) {
-				toast.error(isApiError(err) ? err.message : t('detail.guardians.addFailed'));
-			}
+			await linkGuardian(
+				buildAddGuardianInput(student.id, values, {
+					isPrimary: guardians.length === 0,
+				}),
+			);
 		}
 
 		toast.success(t('updated'));
@@ -520,7 +497,7 @@ function EditStudentForm({
 							phone={guardianPhone}
 							relation={guardianRelation}
 							connectedGuardianUserId={connectedGuardianUserId}
-							connecting={linkGuardian.isPending}
+							connecting={addGuardian.isPending}
 							linkedGuardianUserIds={linkedGuardianUserIds}
 							onConnect={handleConnect}
 						/>

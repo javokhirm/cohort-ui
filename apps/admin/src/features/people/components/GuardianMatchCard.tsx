@@ -47,9 +47,7 @@ export function GuardianMatchCard({
 				<UserCheck className="mt-0.5 size-4 shrink-0 text-muted-foreground" />
 				<div className="flex flex-col gap-1">
 					<span className="text-sm font-semibold">
-						{match.isGuardian
-							? t('form.guardianLookup.foundTitle')
-							: t('form.guardianLookup.foundTitleNonGuardian')}
+						{t('form.guardianLookup.foundTitle')}
 					</span>
 					<span className="text-sm font-medium">{fullName}</span>
 					<span className="text-sm text-muted-foreground">

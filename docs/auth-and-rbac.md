@@ -59,7 +59,7 @@ POST /api/v1/public/auth/reset-password  { phone, otp, newPassword }  → 200
 > **Phone login is not for every role.** `users.phone` is neither unique nor required
 > platform-wide — a household shares one number across siblings and their guardians — so
 > `/auth/login` resolves a phone only among the accounts that actually sign in with one:
-> every role **except** `STUDENT` and `STUDENT_GUARDIAN`. The **student app** authenticates with
+> every role **except** `STUDENT` and `PARENT`. The **student app** authenticates with
 > `studentCode` + password at `/auth/student/login`; parents have no auth surface yet. A
 > number shared between a teacher and their child resolves to the teacher, and a phone that
 > maps to no login account fails as `INVALID_CREDENTIALS` like a wrong password.
@@ -123,7 +123,7 @@ direction: `auth → api-client` (never the reverse).
 
 ## 5. Roles & permissions in the UI
 
-The backend has system roles `OWNER, ADMIN, MANAGER, TEACHER, STUDENT, STUDENT_GUARDIAN, SUPER_ADMIN`
+The backend has system roles `OWNER, ADMIN, MANAGER, TEACHER, STUDENT, PARENT, SUPER_ADMIN`
 (tenants may add custom roles — **don't assume the role set is closed**) and a stable catalog
 of permission codes (e.g. `student.create`, `invoice.void`, `attendance.mark`,
 `payroll.approve`, …).
