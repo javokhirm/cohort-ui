@@ -387,6 +387,7 @@ export const uz = {
 			guardianLookup: {
 				checking: 'Tekshirilmoqda…',
 				foundTitle: 'Mavjud vasiy topildi',
+				foundTitleNonGuardian: 'Mavjud yozuv topildi',
 				foundDescription: 'Bu vasiy tizimda allaqachon roʻyxatdan oʻtgan.',
 				foundNonGuardian:
 					'Bu raqam markazdagi mavjud shaxsga tegishli. Ulash yangi yozuv yaratmaydi.',

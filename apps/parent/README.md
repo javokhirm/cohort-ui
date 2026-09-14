@@ -1,7 +1,7 @@
 # Parent Web App
 
 The self-service console for **guardians**. It will serve the **`/api/v1/portal/*`** backend
-surface (plus `/api/v1/public/*` for auth) for the **PARENT** role.
+surface (plus `/api/v1/public/*` for auth) for the **STUDENT_GUARDIAN** role.
 
 > **Status: shell only.** The backend has not built the `/portal` surface yet
 > (`cohort-be/src/api/` ships `manage`, `public`, `super-admin`, `teach`). This app is a
@@ -44,7 +44,7 @@ role-gated surface, phone-first, no `<Can>` gating):
    Scope the storage keys to `cohort.parent.*`.
 2. Restore the boot gate in `App.tsx` so route guards see a settled session.
 3. Add `/login`, `/forbidden` and a guarded layout route to `router.tsx`, rejecting any
-   session without `PARENT`.
+   session without `STUDENT_GUARDIAN`.
 4. Add feature folders under `src/features/` named after the backend domains, and a
    namespace per feature in `src/locales/uz.ts` (then `ru`, `en`).
 5. Put the selected child in Zustand and in **every** query key that sends `?studentId=` —

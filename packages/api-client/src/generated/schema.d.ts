@@ -1211,8 +1211,8 @@ export interface paths {
         /** List a student's guardians */
         get: operations["StudentsController_listGuardians"];
         put?: never;
-        /** Link a guardian to a student */
-        post: operations["StudentsController_addGuardian"];
+        /** Create a brand-new guardian and link them to a student */
+        post: operations["StudentsController_createGuardian"];
         delete?: never;
         options?: never;
         head?: never;
@@ -1228,7 +1228,8 @@ export interface paths {
         };
         get?: never;
         put?: never;
-        post?: never;
+        /** Link an already-known guardian (from GET /manage/guardians?phone=) to a student */
+        post: operations["StudentsController_linkGuardian"];
         /** Unlink a guardian from a student */
         delete: operations["StudentsController_removeGuardian"];
         options?: never;
@@ -1415,6 +1416,23 @@ export interface paths {
         };
         /** List a student's published results, newest exam first */
         get: operations["StudentsController_listResults"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/manage/guardians": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Resolve the person a phone number identifies in this tenant */
+        get: operations["GuardiansController_lookup"];
         put?: never;
         post?: never;
         delete?: never;
@@ -4020,16 +4038,22 @@ export interface components {
             /** @description Overwrites the student's login password. */
             password?: string;
         };
-        AddGuardianDto: {
+        CreateGuardianDto: {
             /**
-             * @description E.164 phone number. Optional: a guardian has no login of their own, so this is contact data rather than a credential.
+             * @description E.164 phone number. Optional: a guardian has no login of their own, so this is contact data rather than a credential. If this already identifies someone in this tenant, the request is rejected (409) instead of reusing their identity — connect them via the link-existing-guardian endpoint.
              * @example +998901234567
              */
             phone?: string;
-            /** @description Required unless phone is a known user */
-            firstName?: string;
-            /** @description Required unless phone is a known user */
-            lastName?: string;
+            firstName: string;
+            lastName: string;
+            /** @enum {string} */
+            relation: "mother" | "father" | "guardian";
+            /** @default false */
+            isPrimary: boolean;
+            /** @default true */
+            canPickup: boolean;
+        };
+        LinkGuardianDto: {
             /** @enum {string} */
             relation: "mother" | "father" | "guardian";
             /** @default false */
@@ -4843,10 +4867,10 @@ export interface components {
         };
         UpdateMyProfileDto: {
             /**
-             * @description E.164 phone number
+             * @description E.164 phone number. Send null to clear it.
              * @example +998901234567
              */
-            phone?: string;
+            phone?: string | null;
             email?: string;
             /** @description From a prior file upload. */
             avatarUrl?: string;
@@ -6607,7 +6631,7 @@ export interface operations {
             };
         };
     };
-    StudentsController_addGuardian: {
+    StudentsController_createGuardian: {
         parameters: {
             query?: never;
             header?: never;
@@ -6618,7 +6642,31 @@ export interface operations {
         };
         requestBody: {
             content: {
-                "application/json": components["schemas"]["AddGuardianDto"];
+                "application/json": components["schemas"]["CreateGuardianDto"];
+            };
+        };
+        responses: {
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    StudentsController_linkGuardian: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: number;
+                guardianId: number;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["LinkGuardianDto"];
             };
         };
         responses: {
@@ -6880,6 +6928,26 @@ export interface operations {
             path: {
                 id: number;
             };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    GuardiansController_lookup: {
+        parameters: {
+            query: {
+                /** @description E.164 phone number to resolve within the caller’s tenant. */
+                phone: string;
+            };
+            header?: never;
+            path?: never;
             cookie?: never;
         };
         requestBody?: never;

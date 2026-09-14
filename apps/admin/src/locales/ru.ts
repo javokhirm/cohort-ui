@@ -381,6 +381,7 @@ export const ru: TranslationsOf<typeof uz> = {
 			guardianLookup: {
 				checking: 'Проверяем…',
 				foundTitle: 'Найден существующий представитель',
+				foundTitleNonGuardian: 'Найдена существующая запись',
 				foundDescription: 'Этот представитель уже зарегистрирован в системе.',
 				foundNonGuardian:
 					'Этот номер принадлежит человеку, который уже есть в центре. Подключение не создаст новую запись.',
