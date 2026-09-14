@@ -16,6 +16,7 @@ import {
 	Receipt,
 	SlidersHorizontal,
 	Tag,
+	Users,
 	Wallet,
 } from 'lucide-react';
 import type { LucideIcon } from 'lucide-react';
@@ -38,6 +39,7 @@ export type NavItemKey =
 	| 'dashboard'
 	| 'leads'
 	| 'students'
+	| 'guardians'
 	| 'staff'
 	| 'courses'
 	| 'rooms'
@@ -122,6 +124,13 @@ export const NAV_GROUPS: NavGroupDef[] = [
 				label: 'students',
 				Icon: GraduationCap,
 				href: '/students',
+				permission: 'student.read',
+			},
+			{
+				id: 'guardians',
+				label: 'guardians',
+				Icon: Users,
+				href: '/guardians',
 				permission: 'student.read',
 			},
 			{

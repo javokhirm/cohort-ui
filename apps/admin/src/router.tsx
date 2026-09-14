@@ -19,6 +19,7 @@ import { ForbiddenPage } from '@/routes/forbidden';
 import { SubscriptionRoute } from '@/routes/subscription';
 import { StudentsRoute } from '@/routes/_authed.students';
 import { StudentDetailRoute } from '@/routes/_authed.students.$id';
+import { GuardiansRoute } from '@/routes/_authed.guardians';
 import { StaffRoute } from '@/routes/_authed.staff';
 import { StaffDetailRoute } from '@/routes/_authed.staff.$id';
 import { StaffEditRoute } from '@/routes/_authed.staff.$id.edit';
@@ -153,6 +154,26 @@ const studentsRoute = createRoute({
 		};
 	},
 	component: StudentsRoute,
+});
+
+interface GuardianSearch {
+	page?: number;
+	search?: string;
+}
+
+const guardiansRoute = createRoute({
+	getParentRoute: () => authedRoute,
+	path: '/guardians',
+	beforeLoad: () => requirePermission('student.read'),
+	validateSearch: (search: Record<string, unknown>): GuardianSearch => {
+		const page = Number(search.page);
+		const term = search.search;
+		return {
+			page: Number.isFinite(page) && page > 0 ? page : undefined,
+			search: typeof term === 'string' && term.trim() ? term : undefined,
+		};
+	},
+	component: GuardiansRoute,
 });
 
 type StudentTabSearch =
@@ -843,6 +864,7 @@ const routeTree = rootRoute.addChildren([
 		dashboardRoute,
 		studentsRoute,
 		studentDetailRoute,
+		guardiansRoute,
 		staffRoute,
 		staffDetailRoute,
 		staffEditRoute,

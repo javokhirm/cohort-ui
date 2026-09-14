@@ -7,3 +7,6 @@ export { PaymentListPage } from './pages/PaymentListPage';
 
 /** Standing per-enrollment discount cell — dropped into the student Enrollments tab. */
 export { StandingDiscountCell } from './components/StandingDiscountCell';
+
+/** Searchable student picker — reused by the Guardians page's link-student flow. */
+export { StudentPicker } from './components/StudentPicker';

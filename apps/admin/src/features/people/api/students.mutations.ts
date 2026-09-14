@@ -136,6 +136,10 @@ export function useLinkGuardian() {
 			void qc.invalidateQueries({
 				queryKey: peopleKeys.studentGuardians(variables.studentId),
 			});
+			// Also reused from the Guardians page's own detail sheet (linking a
+			// student from the guardian's side), which reads this same link
+			// through `peopleKeys.guardian`/`guardianList`.
+			void qc.invalidateQueries({ queryKey: peopleKeys.guardians() });
 		},
 	});
 }
@@ -154,6 +158,8 @@ export function useRemoveGuardian() {
 			void qc.invalidateQueries({
 				queryKey: peopleKeys.studentGuardians(variables.studentId),
 			});
+			// Also reused from the Guardians page's own detail sheet.
+			void qc.invalidateQueries({ queryKey: peopleKeys.guardians() });
 		},
 	});
 }

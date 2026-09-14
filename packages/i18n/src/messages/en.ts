@@ -138,6 +138,7 @@ export const en = {
 			dashboard: 'Dashboard',
 			leads: 'Leads / Pipeline',
 			students: 'Students',
+			guardians: 'Guardians',
 			staff: 'Staff & HR',
 			courses: 'Courses',
 			rooms: 'Rooms',

@@ -1,6 +1,9 @@
 import type { CreateGuardianInput, LinkGuardianInput } from '../api/students.mutations';
 import { splitFullName } from '../schemas/student-form.schema';
 
+/** `studentGuardians.relation` (api-reference.md, Appendix A). */
+export const GUARDIAN_RELATIONS = ['mother', 'father', 'guardian'] as const;
+
 /** The guardian fields every form that can connect a guardian collects. */
 interface GuardianFormValues {
 	guardianPhone?: string;
