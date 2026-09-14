@@ -24,9 +24,9 @@ import { useT } from '@repo/i18n';
 
 import { useAppT } from '@/locales';
 
-import { useAddGuardian } from '../api/students.mutations';
+import { useCreateGuardian, useLinkGuardian } from '../api/students.mutations';
 import { useStudentGuardians } from '../api/students.queries';
-import { buildAddGuardianInput } from '../lib/guardian-input';
+import { buildCreateGuardianInput, buildLinkGuardianInput } from '../lib/guardian-input';
 import {
 	addGuardianSchema,
 	type AddGuardianFormValues,
@@ -107,16 +107,27 @@ function AddGuardianForm({
 	const { data: guardians = [] } = useStudentGuardians(studentId);
 	const linkedGuardianUserIds = guardians.map((g) => g.guardianUserId);
 
-	const addGuardian = useAddGuardian();
+	const createGuardian = useCreateGuardian();
+	const linkGuardian = useLinkGuardian();
+	const isPending = createGuardian.isPending || linkGuardian.isPending;
 
 	async function onSubmit(values: AddGuardianFormValues) {
 		try {
-			await addGuardian.mutateAsync(
-				buildAddGuardianInput(studentId, values, {
-					isPrimary: values.isPrimary,
-					canPickup: values.canPickup,
-				}),
-			);
+			if (values.connectedGuardianUserId != null) {
+				await linkGuardian.mutateAsync(
+					buildLinkGuardianInput(studentId, values.connectedGuardianUserId, values, {
+						isPrimary: values.isPrimary,
+						canPickup: values.canPickup,
+					}),
+				);
+			} else {
+				await createGuardian.mutateAsync(
+					buildCreateGuardianInput(studentId, values, {
+						isPrimary: values.isPrimary,
+						canPickup: values.canPickup,
+					}),
+				);
+			}
 			toast.success(t('detail.guardians.added'));
 			onClose();
 		} catch (err) {
@@ -170,12 +181,12 @@ function AddGuardianForm({
 						type="button"
 						variant="outline"
 						onClick={onClose}
-						disabled={addGuardian.isPending}
+						disabled={isPending}
 					>
 						{tc('action.cancel')}
 					</Button>
-					<Button type="submit" disabled={addGuardian.isPending}>
-						{addGuardian.isPending && <Spinner className="mr-2 size-4" />}
+					<Button type="submit" disabled={isPending}>
+						{isPending && <Spinner className="mr-2 size-4" />}
 						{t('detail.guardians.add')}
 					</Button>
 				</DialogFooter>

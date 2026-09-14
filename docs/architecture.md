@@ -54,7 +54,7 @@ shipped surfaces, and `student` + `parent` exist as **empty shells**. Each reuse
 package unchanged, which is the whole point of doing the package split.
 
 > **The mapping is one-way, not one-to-one.** `/api/v1/portal/*` is gated
-> `TenantRoleGuard(['STUDENT', 'PARENT'])` and backs **two** apps: a learner sees _their_
+> `TenantRoleGuard(['STUDENT', 'STUDENT_GUARDIAN'])` and backs **two** apps: a learner sees _their_
 > schedule, a guardian watches _their children's_, and the multi-child model
 > (`GET /children`, `?studentId=`) is meaningless in the student app. Two shells beat one
 > app branching on role at every screen. Each app narrows the surface to its own role at

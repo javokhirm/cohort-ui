@@ -170,7 +170,7 @@ and `parent` exists as an empty shell:
 | `internal-platform` (now) | `/api/v1/super-admin/*` | SUPER_ADMIN           | `internal.cohort.uz` |
 | `teacher` (now)           | `/api/v1/teach/*`       | TEACHER               | `teach.cohort.uz`    |
 | `student` (now)           | `/api/v1/student/*`     | STUDENT               | `student.cohort.uz`  |
-| `parent` (shell only)     | `/api/v1/portal/*`      | PARENT                | `parent.cohort.uz`   |
+| `parent` (shell only)     | `/api/v1/portal/*`      | STUDENT_GUARDIAN                | `parent.cohort.uz`   |
 
 > The `/api/v1/teach/*` surface is **shipped** (schedule, groups, attendance,
 > assessments, materials, student profiles, grading scales) — the teacher app is
@@ -181,12 +181,12 @@ and `parent` exists as an empty shell:
 > `cohort-be/src/api/student/` (`/api/v1/student/*`, `STUDENT` role only) is now real,
 > shipped code — `manage`, `public`, `super-admin`, `teach` and `student` all exist under
 > `cohort-be/src/api/`. It replaces what `docs/api-reference.md` §5 used to describe as
-> `/api/v1/portal/*`: the student surface is student-only (no `PARENT` role, no
+> `/api/v1/portal/*`: the student surface is student-only (no `STUDENT_GUARDIAN` role, no
 > `?studentId=`/child-switcher concepts) and mirrors `TeachApi()`'s guard chain exactly,
 > including **no `/student/me` boot fetch** — the login/refresh `user` summary is the
 > whole session. See [apps/student/CLAUDE.md](apps/student/CLAUDE.md).
 >
-> **`parent` remains a scaffold.** `/api/v1/portal/*` for the `PARENT` role
+> **`parent` remains a scaffold.** `/api/v1/portal/*` for the `STUDENT_GUARDIAN` role
 > (`?studentId=`, `GET /children`, a child switcher) has not been built — that app holds
 > the shell and one placeholder page, with no auth and no api-client. Do not add screens
 > or data hooks there until the endpoints exist — see

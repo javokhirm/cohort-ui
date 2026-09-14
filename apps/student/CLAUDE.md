@@ -8,11 +8,11 @@ The student app is the self-service console for **learners**. It targets the **`
 
 ## The surface superseded `/portal` — this app is student-only
 
-`cohort-be/docs/api-reference.md` §5 originally speced a shared `/api/v1/portal/*` surface gated `TenantRoleGuard(['STUDENT', 'PARENT'])`. What shipped instead is `/api/v1/student/*` (`cohort-be/src/api/student/`), gated `TenantRoleGuard(['STUDENT'])` only — see that module's own docblock for the rationale. Consequences:
+`cohort-be/docs/api-reference.md` §5 originally speced a shared `/api/v1/portal/*` surface gated `TenantRoleGuard(['STUDENT', 'STUDENT_GUARDIAN'])`. What shipped instead is `/api/v1/student/*` (`cohort-be/src/api/student/`), gated `TenantRoleGuard(['STUDENT'])` only — see that module's own docblock for the rationale. Consequences:
 
-- **This app is STUDENT-only**, at the API level, not just by convention. There is no `PARENT` role on this surface to reject.
+- **This app is STUDENT-only**, at the API level, not just by convention. There is no `STUDENT_GUARDIAN` role on this surface to reject.
 - **There are no multi-child concepts** — no `?studentId=`, no `GET /children`, no child switcher. A student _is_ the subject.
-- [`apps/parent`](../parent) is a separate, still-unbuilt scaffold targeting `/api/v1/portal/*` for the `PARENT` role, whenever that surface is built. It is a sibling, not a dependency — never import from it.
+- [`apps/parent`](../parent) is a separate, still-unbuilt scaffold targeting `/api/v1/portal/*` for the `STUDENT_GUARDIAN` role, whenever that surface is built. It is a sibling, not a dependency — never import from it.
 - **Do not build a shared "portal" package** for the two apps without the engineer (root CLAUDE.md "stop and ask"). If real duplication appears, the answer is promotion to `@repo/ui` or `@repo/utils`, decided by the engineer — not a new package invented here.
 
 ---
