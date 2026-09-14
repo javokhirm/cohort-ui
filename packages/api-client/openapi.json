@@ -2996,7 +2996,7 @@
         ]
       },
       "post": {
-        "operationId": "StudentsController_addGuardian",
+        "operationId": "StudentsController_createGuardian",
         "parameters": [
           {
             "name": "id",
@@ -3012,7 +3012,7 @@
           "content": {
             "application/json": {
               "schema": {
-                "$ref": "#/components/schemas/AddGuardianDto"
+                "$ref": "#/components/schemas/CreateGuardianDto"
               }
             }
           }
@@ -3027,13 +3027,58 @@
             "bearer": []
           }
         ],
-        "summary": "Link a guardian to a student",
+        "summary": "Create a brand-new guardian and link them to a student",
         "tags": [
           "Manage / Students"
         ]
       }
     },
     "/api/v1/manage/students/{id}/guardians/{guardianId}": {
+      "post": {
+        "operationId": "StudentsController_linkGuardian",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "number"
+            }
+          },
+          {
+            "name": "guardianId",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "number"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/LinkGuardianDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": ""
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Link an already-known guardian (from GET /manage/guardians?phone=) to a student",
+        "tags": [
+          "Manage / Students"
+        ]
+      },
       "delete": {
         "operationId": "StudentsController_removeGuardian",
         "parameters": [
@@ -3592,6 +3637,37 @@
         "summary": "List a student's published results, newest exam first",
         "tags": [
           "Manage / Students"
+        ]
+      }
+    },
+    "/api/v1/manage/guardians": {
+      "get": {
+        "operationId": "GuardiansController_lookup",
+        "parameters": [
+          {
+            "name": "phone",
+            "required": true,
+            "in": "query",
+            "description": "E.164 phone number to resolve within the caller’s tenant.",
+            "schema": {
+              "example": "+998901234567",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Resolve the person a phone number identifies in this tenant",
+        "tags": [
+          "Manage / Guardians"
         ]
       }
     },
@@ -11507,22 +11583,46 @@
           }
         }
       },
-      "AddGuardianDto": {
+      "CreateGuardianDto": {
         "type": "object",
         "properties": {
           "phone": {
             "type": "string",
             "example": "+998901234567",
-            "description": "E.164 phone number. Optional: a guardian has no login of their own, so this is contact data rather than a credential."
+            "description": "E.164 phone number. Optional: a guardian has no login of their own, so this is contact data rather than a credential. If this already identifies someone in this tenant, the request is rejected (409) instead of reusing their identity — connect them via the link-existing-guardian endpoint."
           },
           "firstName": {
-            "type": "string",
-            "description": "Required unless phone is a known user"
+            "type": "string"
           },
           "lastName": {
-            "type": "string",
-            "description": "Required unless phone is a known user"
+            "type": "string"
           },
+          "relation": {
+            "type": "string",
+            "enum": [
+              "mother",
+              "father",
+              "guardian"
+            ]
+          },
+          "isPrimary": {
+            "type": "boolean",
+            "default": false
+          },
+          "canPickup": {
+            "type": "boolean",
+            "default": true
+          }
+        },
+        "required": [
+          "firstName",
+          "lastName",
+          "relation"
+        ]
+      },
+      "LinkGuardianDto": {
+        "type": "object",
+        "properties": {
           "relation": {
             "type": "string",
             "enum": [
@@ -13621,7 +13721,8 @@
           "phone": {
             "type": "string",
             "example": "+998901234567",
-            "description": "E.164 phone number"
+            "description": "E.164 phone number. Send null to clear it.",
+            "nullable": true
           },
           "email": {
             "type": "string"

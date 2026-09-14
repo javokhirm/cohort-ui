@@ -38,15 +38,33 @@ export interface UpdateStudentInput {
 	password?: string;
 }
 
-export interface AddGuardianInput {
+/**
+ * `POST /students/:studentId/guardians` — create a BRAND-NEW guardian.
+ *
+ * `firstName`/`lastName` are always required: this endpoint never resolves
+ * `phone` to an existing person. When `phone` already identifies someone this
+ * tenant knows, the request 409s instead — connect that person explicitly via
+ * {@link LinkGuardianInput}.
+ */
+export interface CreateGuardianInput {
 	studentId: number;
-	/**
-	 * Optional: a guardian has no login, so this is contact data. Omitting it
-	 * always creates a new person, so `firstName`/`lastName` become required.
-	 */
+	/** Optional: a guardian has no login, so this is contact data. */
 	phone?: string;
-	firstName?: string;
-	lastName?: string;
+	firstName: string;
+	lastName: string;
+	relation: 'mother' | 'father' | 'guardian';
+	isPrimary?: boolean;
+	canPickup?: boolean;
+}
+
+/**
+ * `POST /students/:studentId/guardians/:guardianUserId` — link an
+ * ALREADY-KNOWN guardian (from `GET /guardians?phone=`, confirmed by the
+ * operator) to a student. No name/phone: this never creates or edits a person.
+ */
+export interface LinkGuardianInput {
+	studentId: number;
+	guardianUserId: number;
 	relation: 'mother' | 'father' | 'guardian';
 	isPrimary?: boolean;
 	canPickup?: boolean;
@@ -93,11 +111,27 @@ export function useDeleteStudent() {
 	});
 }
 
-export function useAddGuardian() {
+export function useCreateGuardian() {
 	const qc = useQueryClient();
 	return useMutation({
-		mutationFn: ({ studentId, ...body }: AddGuardianInput) =>
+		mutationFn: ({ studentId, ...body }: CreateGuardianInput) =>
 			manageApi.post<Guardian>(`/students/${studentId}/guardians`, body),
+		onSuccess: (_data, variables) => {
+			void qc.invalidateQueries({
+				queryKey: peopleKeys.studentGuardians(variables.studentId),
+			});
+		},
+	});
+}
+
+export function useLinkGuardian() {
+	const qc = useQueryClient();
+	return useMutation({
+		mutationFn: ({ studentId, guardianUserId, ...body }: LinkGuardianInput) =>
+			manageApi.post<Guardian>(
+				`/students/${studentId}/guardians/${guardianUserId}`,
+				body,
+			),
 		onSuccess: (_data, variables) => {
 			void qc.invalidateQueries({
 				queryKey: peopleKeys.studentGuardians(variables.studentId),
