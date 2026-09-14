@@ -367,6 +367,7 @@ export const en: TranslationsOf<typeof uz> = {
 			guardianLookup: {
 				checking: 'Checking…',
 				foundTitle: 'Existing guardian found',
+				foundTitleNonGuardian: 'Existing record found',
 				foundDescription: 'This guardian is already registered in the system.',
 				foundNonGuardian:
 					'This number belongs to someone the center already knows. Connecting will not create a new record.',
