@@ -1882,7 +1882,7 @@ export const ru: TranslationsOf<typeof uz> = {
 	subscription: {
 		menuLabel: 'Подписка',
 		pageTitle: 'Подписка',
-		pageDescription: 'План Cohort вашего центра, история платежей и продление',
+		pageDescription: 'План Cohort вашего центра и его продление',
 		loadError: 'Не удалось загрузить данные подписки. Обновите страницу.',
 		state: {
 			TRIALING: 'Пробный период',
@@ -1898,23 +1898,7 @@ export const ru: TranslationsOf<typeof uz> = {
 			ANNUAL: 'Ежегодно',
 		},
 		method: {
-			CLICK: 'Click',
 			PAYME: 'Payme',
-			UZUM: 'Uzum',
-			BANK_TRANSFER: 'Банковский перевод',
-			CASH: 'Наличные',
-		},
-		invoiceStatus: {
-			PAID: 'Оплачен',
-			UNPAID: 'Не оплачен',
-			FAILED: 'Ошибка',
-			REFUNDED: 'Возвращён',
-		},
-		paymentStatus: {
-			PENDING: 'Ожидается',
-			SUCCEEDED: 'Успешно',
-			FAILED: 'Ошибка',
-			REFUNDED: 'Возвращён',
 		},
 		banner: {
 			message:
@@ -1942,26 +1926,11 @@ export const ru: TranslationsOf<typeof uz> = {
 			maxStudents: 'Количество учеников',
 			maxBranches: 'Количество филиалов',
 		},
-		history: {
-			invoicesTab: 'Счета',
-			paymentsTab: 'Платежи',
-			invoiceEmpty: 'Счетов пока нет',
-			paymentEmpty: 'Платежей пока нет',
-			column: {
-				code: 'Номер',
-				plan: 'План',
-				period: 'Период',
-				amount: 'Сумма',
-				status: 'Статус',
-				issued: 'Выставлен',
-				method: 'Способ',
-				paidAt: 'Дата оплаты',
-			},
-		},
 		renew: {
 			upgrade: 'Управление планом',
-			dialogTitle: 'Продление подписки',
-			dialogDescription: 'Выберите способ оплаты и подтвердите продление.',
+			dialogTitle: 'Оплата подписки',
+			dialogDescription:
+				'Оплата проходит на странице Payme и только на полную сумму.',
 			keepPlan: 'Остаться на текущем плане',
 			changePlan: 'Сменить план',
 			plan: 'План',
@@ -1970,18 +1939,19 @@ export const ru: TranslationsOf<typeof uz> = {
 			quoteAmount: 'Сумма к оплате',
 			restartedNote: 'Срок действия истёк, поэтому новый период начнётся сегодня.',
 			estimatedNote:
-				'Ориентировочная сумма — итоговая цена подтвердится после отправки.',
-			submit: 'Начать продление',
-			failed: 'Не удалось начать продление',
-			successTitle: 'Продление начато',
-			successDescription:
-				'Завершите оплату — доступ восстановится автоматически после подтверждения платежа.',
-			invoiceCode: 'Номер счёта',
-			idempotencyKey: 'Идентификатор платежа',
-			copyKey: 'Скопировать',
-			copied: 'Скопировано',
-			waitingForPayment: 'Ожидание подтверждения платежа…',
-			checkStatus: 'Проверить статус',
+				'Ориентировочная сумма — итоговая цена подтвердится после начала оплаты.',
+			submit: 'Оплатить через Payme',
+			failed: 'Не удалось начать оплату',
+			unavailable: 'Оплата через Payme сейчас недоступна. Попробуйте позже.',
+			awaitingTitle: 'Ожидание подтверждения платежа',
+			awaitingDescription:
+				'Завершите оплату в окне Payme. Как только Payme подтвердит платёж, доступ восстановится автоматически.',
+			doNotClose: 'Это окно нельзя закрыть до подтверждения платежа.',
+			popupBlocked: 'Браузер заблокировал окно Payme — откройте его кнопкой ниже.',
+			reopenCheckout: 'Открыть страницу Payme',
+			timedOutTitle: 'Подтверждение пока не пришло',
+			timedOutDescription:
+				'Payme ещё не подтвердил платёж. Если вы уже оплатили, доступ восстановится автоматически сразу после подтверждения.',
 			accessRestored: 'Доступ восстановлен',
 		},
 	},

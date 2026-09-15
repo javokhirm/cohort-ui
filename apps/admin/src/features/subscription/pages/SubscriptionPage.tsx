@@ -1,5 +1,4 @@
 import { useState } from 'react';
-import { Copy } from 'lucide-react';
 
 import {
 	Alert,
@@ -9,14 +8,8 @@ import {
 	CardContent,
 	CardHeader,
 	CardTitle,
-	Pagination,
 	PageHeader,
 	Skeleton,
-	Spinner,
-	Tabs,
-	TabsContent,
-	TabsList,
-	TabsTrigger,
 	toast,
 } from '@repo/ui';
 import type { SubscriptionAccessView } from '@repo/api-client';
@@ -27,31 +20,23 @@ import { Can } from '@/components/Can';
 import { useAppT } from '@/locales';
 
 import type { RenewSubscriptionResult } from '../api/subscription.mutations';
-import {
-	useSubscription,
-	useSubscriptionInvoices,
-	useSubscriptionPayments,
-} from '../api/subscription.queries';
+import { useSubscription } from '../api/subscription.queries';
 import { PlanFeaturesList } from '../components/PlanFeaturesList';
 import { RenewSubscriptionDialog } from '../components/RenewSubscriptionDialog';
-import { SubscriptionInvoicesTable } from '../components/SubscriptionInvoicesTable';
-import { SubscriptionPaymentsTable } from '../components/SubscriptionPaymentsTable';
 import { SubscriptionStateBadge } from '../components/SubscriptionStateBadge';
 
-const PAGE_SIZE = 10;
-
+/**
+ * The center's own subscription: what it is on, and — through the payment
+ * modal — how to renew it. Invoices and payment history deliberately are not
+ * here: the platform's ledger of what a center paid belongs to Super Admin, and
+ * this app never shows a center its own subscription payments.
+ */
 export function SubscriptionPage() {
 	const t = useAppT('subscription');
 	const tc = useT('common');
 
-	const [renewOpen, setRenewOpen] = useState(false);
-	const [pendingResult, setPendingResult] = useState<RenewSubscriptionResult | null>(
-		null,
-	);
-	// A just-started renewal hasn't restored access yet. Cleared by
-	// `onAccessRestored` below — never optimistically (§5) — once a fresh read
-	// confirms it, which is also what stops the poll.
-	const isPending = pendingResult != null;
+	const [payOpen, setPayOpen] = useState(false);
+	const [intent, setIntent] = useState<RenewSubscriptionResult | null>(null);
 
 	const {
 		data: subscription,
@@ -59,40 +44,21 @@ export function SubscriptionPage() {
 		isError,
 		refetch,
 	} = useSubscription({
-		poll: isPending,
-		onAccessRestored: () => {
-			setPendingResult(null);
+		// Poll only while the modal is up holding a started payment — closing it
+		// is the admin saying they are done waiting here. The settlement itself
+		// is unaffected: the webhook restores access server-side either way.
+		awaitingPeriodEnd: payOpen ? (intent?.invoice.periodEnd ?? null) : null,
+		onSettled: () => {
+			closePayment();
 			toast.success(t('renew.accessRestored'));
 		},
 	});
 
-	// History (invoices + payments) is only relevant when managing an active
-	// subscription. When access is blocked the page is the full-screen renewal
-	// gate — show only the renew CTA and its details, and skip the fetches.
 	const hasAccess = subscription?.hasAccess ?? false;
 
-	const [invoicePage, setInvoicePage] = useState(1);
-	const [paymentPage, setPaymentPage] = useState(1);
-	const invoicesQuery = useSubscriptionInvoices(
-		{ page: invoicePage, limit: PAGE_SIZE },
-		hasAccess,
-	);
-	const paymentsQuery = useSubscriptionPayments(
-		{ page: paymentPage, limit: PAGE_SIZE },
-		hasAccess,
-	);
-
-	function handleRenewed(result: RenewSubscriptionResult) {
-		setPendingResult(result);
-	}
-
-	async function copyIdempotencyKey(key: string) {
-		try {
-			await navigator.clipboard.writeText(key);
-			toast.success(t('renew.copied'));
-		} catch {
-			/* clipboard permission denied — nothing actionable to recover with */
-		}
+	function closePayment() {
+		setPayOpen(false);
+		setIntent(null);
 	}
 
 	return (
@@ -118,79 +84,26 @@ export function SubscriptionPage() {
 
 			{subscription && (
 				<>
-					{pendingResult && (
-						<PendingPaymentCard
-							result={pendingResult}
-							polling={isPending}
-							onCheckStatus={() => void refetch()}
-							onCopyKey={() =>
-								void copyIdempotencyKey(pendingResult.idempotencyKey)
-							}
-						/>
-					)}
-
 					{hasAccess ? (
 						<ActiveSubscriptionCard
 							subscription={subscription}
-							onRenew={() => setRenewOpen(true)}
+							onRenew={() => setPayOpen(true)}
 						/>
 					) : (
 						<BlockedSubscriptionCard
 							subscription={subscription}
-							onRenew={() => setRenewOpen(true)}
+							onRenew={() => setPayOpen(true)}
 						/>
 					)}
 
-					{hasAccess && (
-						<Card className="gap-0 overflow-hidden py-0">
-							<Tabs defaultValue="invoices" className="gap-0">
-								<div className="border-b border-border p-4">
-									<TabsList>
-										<TabsTrigger value="invoices">
-											{t('history.invoicesTab')}
-										</TabsTrigger>
-										<TabsTrigger value="payments">
-											{t('history.paymentsTab')}
-										</TabsTrigger>
-									</TabsList>
-								</div>
-								<TabsContent value="invoices" className="mt-0">
-									<SubscriptionInvoicesTable
-										invoices={invoicesQuery.data?.rows ?? []}
-										isLoading={invoicesQuery.isLoading}
-									/>
-									<div className="border-t border-border px-4 py-3">
-										<Pagination
-											page={invoicePage}
-											pageSize={PAGE_SIZE}
-											total={invoicesQuery.data?.total ?? 0}
-											onPageChange={setInvoicePage}
-										/>
-									</div>
-								</TabsContent>
-								<TabsContent value="payments" className="mt-0">
-									<SubscriptionPaymentsTable
-										payments={paymentsQuery.data?.rows ?? []}
-										isLoading={paymentsQuery.isLoading}
-									/>
-									<div className="border-t border-border px-4 py-3">
-										<Pagination
-											page={paymentPage}
-											pageSize={PAGE_SIZE}
-											total={paymentsQuery.data?.total ?? 0}
-											onPageChange={setPaymentPage}
-										/>
-									</div>
-								</TabsContent>
-							</Tabs>
-						</Card>
-					)}
-
 					<RenewSubscriptionDialog
-						open={renewOpen}
-						onOpenChange={setRenewOpen}
+						open={payOpen}
+						onOpenChange={(open) =>
+							open ? setPayOpen(true) : closePayment()
+						}
 						subscription={subscription}
-						onRenewed={handleRenewed}
+						intent={intent}
+						onStarted={setIntent}
 					/>
 				</>
 			)}
@@ -347,85 +260,6 @@ function BlockedSubscriptionCard({
 						{t('blocked.renew')}
 					</Button>
 				</Can>
-			</CardContent>
-		</Card>
-	);
-}
-
-function PendingPaymentCard({
-	result,
-	polling,
-	onCheckStatus,
-	onCopyKey,
-}: {
-	result: RenewSubscriptionResult;
-	polling: boolean;
-	onCheckStatus: () => void;
-	onCopyKey: () => void;
-}) {
-	const t = useAppT('subscription');
-
-	return (
-		<Card>
-			<CardHeader>
-				<CardTitle className="text-base">{t('renew.successTitle')}</CardTitle>
-			</CardHeader>
-			<CardContent className="flex flex-col gap-3 text-sm">
-				<p className="text-muted-foreground">{t('renew.successDescription')}</p>
-
-				<div className="grid grid-cols-1 gap-3 rounded-lg border border-border p-3.5 sm:grid-cols-2">
-					<div className="flex flex-col gap-0.5">
-						<span className="text-xs text-muted-foreground">
-							{t('renew.invoiceCode')}
-						</span>
-						<span className="font-mono font-semibold">
-							{result.invoice.code}
-						</span>
-					</div>
-					<div className="flex flex-col gap-0.5">
-						<span className="text-xs text-muted-foreground">
-							{t('history.column.amount')}
-						</span>
-						<span className="font-semibold tabular-nums">
-							{formatPrice(result.payment.amount)} {result.payment.currency}
-						</span>
-					</div>
-					<div className="col-span-1 flex flex-col gap-0.5 sm:col-span-2">
-						<span className="text-xs text-muted-foreground">
-							{t('renew.idempotencyKey')}
-						</span>
-						<div className="flex items-center gap-2">
-							<span className="truncate font-mono text-xs">
-								{result.idempotencyKey}
-							</span>
-							<Button
-								type="button"
-								size="icon"
-								variant="ghost"
-								className="size-6 shrink-0"
-								aria-label={t('renew.copyKey')}
-								onClick={onCopyKey}
-							>
-								<Copy className="size-3.5" />
-							</Button>
-						</div>
-					</div>
-				</div>
-
-				<div className="flex items-center justify-between gap-3">
-					<span className="flex items-center gap-2 text-muted-foreground">
-						{polling && <Spinner className="size-3.5" />}
-						{t('renew.waitingForPayment')}
-					</span>
-					<Button
-						type="button"
-						size="sm"
-						variant="outline"
-						onClick={onCheckStatus}
-					>
-						{t('renew.checkStatus')}
-					</Button>
-				</div>
 			</CardContent>
 		</Card>
 	);
