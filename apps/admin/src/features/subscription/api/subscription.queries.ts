@@ -1,10 +1,9 @@
 import { useEffect, useRef } from 'react';
-import { keepPreviousData, useQuery } from '@tanstack/react-query';
+import { useQuery } from '@tanstack/react-query';
 
 import {
 	subscriptionKeys,
 	type BillingInterval,
-	type PaginatedResult,
 	type SubscriptionAccessView,
 } from '@repo/api-client';
 
@@ -14,51 +13,70 @@ import { useSessionStore } from '@/store/sessionStore';
 const POLL_INTERVAL_MS = 4000;
 
 /**
+ * Whether the server's own `currentPeriodEnd` has reached the period a pending
+ * renewal bought. Settlement writes `subscription.currentPeriodEnd =
+ * invoice.periodEnd`, so this is exactly "the payment landed" — and both sides
+ * are server timestamps, never the client clock (which must never be used to
+ * second-guess expiry).
+ */
+function hasReachedPeriod(
+	view: SubscriptionAccessView | undefined,
+	periodEnd: string,
+): boolean {
+	if (!view?.currentPeriodEnd) return false;
+	return Date.parse(view.currentPeriodEnd) >= Date.parse(periodEnd);
+}
+
+/**
  * The live access state — the same value `SubscriptionGuard` enforces. Also
  * the single writer that keeps the session store's `subscription` fresh past
- * boot, so a renewal's restored access clears the global block without a
- * page reload.
+ * boot, so a settled payment's restored access clears the global block without
+ * a page reload.
  *
- * Pass `poll: true` while waiting for a just-started renewal to settle (§5 —
- * never optimistic, only a fresh read unblocks). The stop condition lives in
- * `refetchInterval`'s function form, reading the query's own last-known data,
- * and `onAccessRestored` fires exactly once (ref-guarded) when that read
- * confirms `hasAccess` — the caller's cue to drop its own pending-payment
- * state. Neither needs a local "am I still polling" flag synced from an
- * effect.
+ * Pass `awaitingPeriodEnd` — the `periodEnd` of the invoice a just-started
+ * renewal issued — while waiting for Payme to settle it. The stop condition
+ * lives in `refetchInterval`'s function form, reading the query's own
+ * last-known data, and `onSettled` fires exactly once (ref-guarded) when a
+ * fresh read confirms the period moved — the caller's cue to drop its pending
+ * payment state. `hasAccess` cannot be that signal: renewing before the period
+ * lapses starts with access already granted, so it would read as settled the
+ * instant the poll began.
  */
 export function useSubscription(options?: {
-	poll?: boolean;
-	onAccessRestored?: () => void;
+	awaitingPeriodEnd?: string | null;
+	onSettled?: () => void;
 }) {
 	const setSubscription = useSessionStore((s) => s.setSubscription);
-	const shouldPoll = options?.poll ?? false;
-	const onAccessRestored = options?.onAccessRestored;
+	const awaitingPeriodEnd = options?.awaitingPeriodEnd ?? null;
+	const onSettled = options?.onSettled;
 	const query = useQuery({
 		queryKey: subscriptionKeys.current(),
 		queryFn: () => manageApi.get<SubscriptionAccessView>('/subscription'),
 		refetchInterval: (q) => {
-			if (!shouldPoll) return false;
-			return q.state.data?.hasAccess ? false : POLL_INTERVAL_MS;
+			if (!awaitingPeriodEnd) return false;
+			return hasReachedPeriod(q.state.data, awaitingPeriodEnd)
+				? false
+				: POLL_INTERVAL_MS;
 		},
 	});
-	const hasAccess = query.data?.hasAccess;
 
 	useEffect(() => {
 		if (query.data) setSubscription(query.data);
 	}, [query.data, setSubscription]);
 
-	const restoredRef = useRef(false);
+	const settled =
+		awaitingPeriodEnd != null && hasReachedPeriod(query.data, awaitingPeriodEnd);
+	const settledRef = useRef(false);
 	useEffect(() => {
-		if (!shouldPoll) {
-			restoredRef.current = false;
+		if (!awaitingPeriodEnd) {
+			settledRef.current = false;
 			return;
 		}
-		if (hasAccess && !restoredRef.current) {
-			restoredRef.current = true;
-			onAccessRestored?.();
+		if (settled && !settledRef.current) {
+			settledRef.current = true;
+			onSettled?.();
 		}
-	}, [shouldPoll, hasAccess, onAccessRestored]);
+	}, [awaitingPeriodEnd, settled, onSettled]);
 
 	return query;
 }
@@ -104,78 +122,6 @@ export function useSubscriptionPlans(enabled: boolean) {
 	return useQuery({
 		queryKey: subscriptionKeys.plans(),
 		queryFn: () => manageApi.get<SubscriptionPlan[]>('/subscription/plans'),
-		enabled,
-	});
-}
-
-export type SubscriptionInvoiceStatus = 'PAID' | 'UNPAID' | 'FAILED' | 'REFUNDED';
-
-/** `GET /manage/subscription/invoices` row — the period history: one row per purchased billing period. */
-export interface SubscriptionInvoice {
-	id: number;
-	code: string;
-	tierName: string;
-	subscriptionTierId: number;
-	billingInterval: BillingInterval;
-	unitPrice: number;
-	amount: number;
-	currency: string;
-	status: SubscriptionInvoiceStatus;
-	issueDate: string;
-	periodStart: string;
-	periodEnd: string;
-	paidAt: string | null;
-	createdAt: string;
-}
-
-export function useSubscriptionInvoices(
-	params: { page: number; limit: number },
-	enabled = true,
-) {
-	return useQuery({
-		queryKey: subscriptionKeys.invoices(params),
-		queryFn: () =>
-			manageApi.getPaginated<SubscriptionInvoice>('/subscription/invoices', {
-				params,
-			}) as Promise<PaginatedResult<SubscriptionInvoice>>,
-		placeholderData: keepPreviousData,
-		enabled,
-	});
-}
-
-export type SubscriptionPaymentStatus = 'PENDING' | 'SUCCEEDED' | 'FAILED' | 'REFUNDED';
-export type SubscriptionPaymentMethod =
-	'CLICK' | 'PAYME' | 'UZUM' | 'BANK_TRANSFER' | 'CASH';
-
-/** `GET /manage/subscription/payments` row — the money history: many over the center's lifetime. */
-export interface SubscriptionPayment {
-	id: number;
-	subscriptionInvoiceId: number | null;
-	invoiceCode: string | null;
-	amount: number;
-	currency: string;
-	method: SubscriptionPaymentMethod;
-	provider: string | null;
-	providerTxnId: string | null;
-	status: SubscriptionPaymentStatus;
-	paidAt: string | null;
-	failureReason: string | null;
-	refundedAt: string | null;
-	refundedAmount: number | null;
-	createdAt: string;
-}
-
-export function useSubscriptionPayments(
-	params: { page: number; limit: number },
-	enabled = true,
-) {
-	return useQuery({
-		queryKey: subscriptionKeys.payments(params),
-		queryFn: () =>
-			manageApi.getPaginated<SubscriptionPayment>('/subscription/payments', {
-				params,
-			}) as Promise<PaginatedResult<SubscriptionPayment>>,
-		placeholderData: keepPreviousData,
 		enabled,
 	});
 }

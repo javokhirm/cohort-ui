@@ -1831,7 +1831,7 @@ export const en: TranslationsOf<typeof uz> = {
 	subscription: {
 		menuLabel: 'Subscription',
 		pageTitle: 'Subscription',
-		pageDescription: "Your center's Cohort plan, billing history and renewal",
+		pageDescription: "Your center's Cohort plan and its renewal",
 		loadError: 'Failed to load subscription data. Please refresh.',
 		state: {
 			TRIALING: 'Trialing',
@@ -1847,23 +1847,7 @@ export const en: TranslationsOf<typeof uz> = {
 			ANNUAL: 'Annual',
 		},
 		method: {
-			CLICK: 'Click',
 			PAYME: 'Payme',
-			UZUM: 'Uzum',
-			BANK_TRANSFER: 'Bank transfer',
-			CASH: 'Cash',
-		},
-		invoiceStatus: {
-			PAID: 'Paid',
-			UNPAID: 'Unpaid',
-			FAILED: 'Failed',
-			REFUNDED: 'Refunded',
-		},
-		paymentStatus: {
-			PENDING: 'Pending',
-			SUCCEEDED: 'Succeeded',
-			FAILED: 'Failed',
-			REFUNDED: 'Refunded',
 		},
 		banner: {
 			message:
@@ -1891,26 +1875,10 @@ export const en: TranslationsOf<typeof uz> = {
 			maxStudents: 'Students',
 			maxBranches: 'Branches',
 		},
-		history: {
-			invoicesTab: 'Invoices',
-			paymentsTab: 'Payments',
-			invoiceEmpty: 'No invoices yet',
-			paymentEmpty: 'No payments yet',
-			column: {
-				code: 'Number',
-				plan: 'Plan',
-				period: 'Period',
-				amount: 'Amount',
-				status: 'Status',
-				issued: 'Issued',
-				method: 'Method',
-				paidAt: 'Paid at',
-			},
-		},
 		renew: {
 			upgrade: 'Manage plan',
-			dialogTitle: 'Renew subscription',
-			dialogDescription: 'Choose a payment method and confirm the renewal.',
+			dialogTitle: 'Pay for your subscription',
+			dialogDescription: 'Payment is completed on Payme, for the full amount only.',
 			keepPlan: 'Keep current plan',
 			changePlan: 'Change plan',
 			plan: 'Plan',
@@ -1918,18 +1886,21 @@ export const en: TranslationsOf<typeof uz> = {
 			method: 'Payment method',
 			quoteAmount: 'Amount due',
 			restartedNote: 'The period had lapsed, so the new one starts today.',
-			estimatedNote: 'Estimated — the final price is confirmed after you submit.',
-			submit: 'Start renewal',
-			failed: 'Could not start the renewal',
-			successTitle: 'Renewal started',
-			successDescription:
-				'Complete the payment — access restores automatically once it settles.',
-			invoiceCode: 'Invoice number',
-			idempotencyKey: 'Payment reference',
-			copyKey: 'Copy',
-			copied: 'Copied',
-			waitingForPayment: 'Waiting for payment confirmation…',
-			checkStatus: 'Check status',
+			estimatedNote:
+				'Estimated — the final price is confirmed once the payment starts.',
+			submit: 'Pay with Payme',
+			failed: 'Could not start the payment',
+			unavailable: 'Paying with Payme is unavailable right now. Try again later.',
+			awaitingTitle: 'Waiting for payment confirmation',
+			awaitingDescription:
+				'Finish the payment in the Payme window. Access is restored automatically as soon as Payme confirms it.',
+			doNotClose: 'This window stays open until the payment is confirmed.',
+			popupBlocked:
+				'Your browser blocked the Payme window — open it with the button below.',
+			reopenCheckout: 'Open the Payme page',
+			timedOutTitle: 'No confirmation yet',
+			timedOutDescription:
+				'Payme has not confirmed the payment yet. If you have already paid, access is restored automatically as soon as it settles.',
 			accessRestored: 'Access restored',
 		},
 	},

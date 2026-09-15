@@ -1869,7 +1869,7 @@ export const uz = {
 	subscription: {
 		menuLabel: 'Obuna',
 		pageTitle: 'Obuna',
-		pageDescription: 'Markazingizning Cohort rejasi, toʻlov tarixi va yangilash',
+		pageDescription: 'Markazingizning Cohort rejasi va uni yangilash',
 		loadError: 'Obuna maʼlumotlarini yuklab boʻlmadi. Sahifani yangilang.',
 		state: {
 			TRIALING: 'Sinov muddati',
@@ -1885,23 +1885,7 @@ export const uz = {
 			ANNUAL: 'Yillik',
 		},
 		method: {
-			CLICK: 'Click',
 			PAYME: 'Payme',
-			UZUM: 'Uzum',
-			BANK_TRANSFER: 'Bank oʻtkazmasi',
-			CASH: 'Naqd',
-		},
-		invoiceStatus: {
-			PAID: 'Toʻlangan',
-			UNPAID: 'Toʻlanmagan',
-			FAILED: 'Muvaffaqiyatsiz',
-			REFUNDED: 'Qaytarilgan',
-		},
-		paymentStatus: {
-			PENDING: 'Kutilmoqda',
-			SUCCEEDED: 'Muvaffaqiyatli',
-			FAILED: 'Muvaffaqiyatsiz',
-			REFUNDED: 'Qaytarilgan',
 		},
 		banner: {
 			message:
@@ -1930,26 +1914,11 @@ export const uz = {
 			maxStudents: 'Oʻquvchilar soni',
 			maxBranches: 'Filiallar soni',
 		},
-		history: {
-			invoicesTab: 'Invoyslar',
-			paymentsTab: 'Toʻlovlar',
-			invoiceEmpty: 'Hali invoyslar yoʻq',
-			paymentEmpty: 'Hali toʻlovlar yoʻq',
-			column: {
-				code: 'Raqami',
-				plan: 'Reja',
-				period: 'Davr',
-				amount: 'Summa',
-				status: 'Holati',
-				issued: 'Chiqarilgan',
-				method: 'Usuli',
-				paidAt: 'Toʻlangan sana',
-			},
-		},
 		renew: {
 			upgrade: 'Rejani boshqarish',
-			dialogTitle: 'Obunani yangilash',
-			dialogDescription: 'Toʻlov usulini tanlang va yangilashni tasdiqlang.',
+			dialogTitle: 'Obuna uchun toʻlov',
+			dialogDescription:
+				'Toʻlov Payme sahifasida, faqat toʻliq summada amalga oshiriladi.',
 			keepPlan: 'Joriy rejada qolish',
 			changePlan: 'Rejani oʻzgartirish',
 			plan: 'Reja',
@@ -1958,18 +1927,21 @@ export const uz = {
 			quoteAmount: 'Toʻlov summasi',
 			restartedNote: 'Muddat oʻtib ketgani uchun yangi davr bugundan boshlanadi.',
 			estimatedNote:
-				'Taxminiy summa — yakuniy narx yuborilgandan keyin tasdiqlanadi.',
-			submit: 'Yangilashni boshlash',
-			failed: 'Yangilashni boshlab boʻlmadi',
-			successTitle: 'Yangilash boshlandi',
-			successDescription:
-				'Toʻlovni yakunlang — kirish huquqi toʻlov tasdiqlangach avtomatik tiklanadi.',
-			invoiceCode: 'Invoys raqami',
-			idempotencyKey: 'Toʻlov identifikatori',
-			copyKey: 'Nusxalash',
-			copied: 'Nusxalandi',
-			waitingForPayment: 'Toʻlov tasdiqlanishini kutmoqda…',
-			checkStatus: 'Holatni tekshirish',
+				'Taxminiy summa — yakuniy narx toʻlov boshlangandan keyin tasdiqlanadi.',
+			submit: 'Payme orqali toʻlash',
+			failed: 'Toʻlovni boshlab boʻlmadi',
+			unavailable:
+				'Payme orqali toʻlov hozircha mavjud emas. Keyinroq qayta urinib koʻring.',
+			awaitingTitle: 'Toʻlov tasdiqlanishini kutmoqda',
+			awaitingDescription:
+				'Toʻlovni Payme oynasida yakunlang. Payme tasdiqlashi bilan kirish huquqi avtomatik tiklanadi.',
+			doNotClose: 'Toʻlov tasdiqlanmaguncha bu oyna yopilmaydi.',
+			popupBlocked:
+				'Brauzer Payme oynasini blokladi — uni quyidagi tugma orqali oching.',
+			reopenCheckout: 'Payme sahifasini ochish',
+			timedOutTitle: 'Tasdiq hali kelmadi',
+			timedOutDescription:
+				'Paymeʼdan tasdiq hali kelmadi. Agar toʻlovni amalga oshirgan boʻlsangiz, u tasdiqlangach kirish huquqi avtomatik tiklanadi.',
 			accessRestored: 'Kirish huquqi tiklandi',
 		},
 	},

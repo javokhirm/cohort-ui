@@ -1,6 +1,9 @@
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
+import { ExternalLink } from 'lucide-react';
 
 import {
+	Alert,
+	AlertDescription,
 	Button,
 	Dialog,
 	DialogContent,
@@ -32,54 +35,160 @@ import { useAppT } from '@/locales';
 
 import {
 	useRenewSubscription,
+	type RenewSubscriptionInput,
 	type RenewSubscriptionResult,
 } from '../api/subscription.mutations';
-import {
-	useSubscriptionPlans,
-	useSubscriptionQuote,
-	type SubscriptionPaymentMethod,
-} from '../api/subscription.queries';
+import { useSubscriptionPlans, useSubscriptionQuote } from '../api/subscription.queries';
+import { openCheckoutWindow, submitCheckoutForm } from '../lib/payme-checkout';
 
-const PAYMENT_METHODS: SubscriptionPaymentMethod[] = ['CLICK', 'PAYME', 'UZUM'];
 const INTERVALS: BillingInterval[] = ['MONTHLY', 'ANNUAL'];
+
+/**
+ * How long the dialog stays locked waiting for Payme. Past it the flow is no
+ * longer "active" — an abandoned checkout must not strand the admin in a modal
+ * with no way out, and the settlement still lands on its own whenever it
+ * arrives (the webhook restores access server-side regardless of this screen).
+ */
+const SETTLEMENT_TIMEOUT_MS = 10 * 60 * 1000;
 
 interface RenewSubscriptionDialogProps {
 	open: boolean;
 	onOpenChange: (open: boolean) => void;
 	subscription: SubscriptionAccessView;
-	onRenewed: (result: RenewSubscriptionResult) => void;
+	/**
+	 * The started payment. Owned by the page because it also drives the
+	 * settlement poll there; `null` until the admin commits.
+	 */
+	intent: RenewSubscriptionResult | null;
+	onStarted: (intent: RenewSubscriptionResult) => void;
 }
 
+/**
+ * The whole payment flow: pick what to buy, hand off to Payme, wait for the
+ * settlement. Deliberately a modal and not a route — the admin never leaves the
+ * subscription screen, and **while the payment is in flight the modal is
+ * locked**: no close button, no Esc, no click-outside. It closes when the
+ * server confirms the period moved, or once we stop waiting.
+ */
 export function RenewSubscriptionDialog({
 	open,
 	onOpenChange,
 	subscription,
-	onRenewed,
+	intent,
+	onStarted,
 }: RenewSubscriptionDialogProps) {
+	const t = useAppT('subscription');
+	// Which payment we gave up waiting for, by its settlement key — so a second
+	// attempt starts its own wait without an effect resetting a boolean.
+	const [timedOutKey, setTimedOutKey] = useState<string | null>(null);
+	const [popupBlocked, setPopupBlocked] = useState(false);
+	const renew = useRenewSubscription();
+
+	const timedOut = intent != null && timedOutKey === intent.idempotencyKey;
+	const locked = renew.isPending || (intent != null && !timedOut);
+
+	useEffect(() => {
+		if (!intent) return;
+		const key = intent.idempotencyKey;
+		const timer = window.setTimeout(() => setTimedOutKey(key), SETTLEMENT_TIMEOUT_MS);
+		return () => window.clearTimeout(timer);
+	}, [intent]);
+
+	async function handleSubmit(input: RenewSubscriptionInput) {
+		// Opened here, inside the click — after the await below the gesture is
+		// spent and the browser blocks the tab.
+		const checkoutWindow = openCheckoutWindow();
+		setPopupBlocked(checkoutWindow == null);
+		try {
+			const result = await renew.mutateAsync(input);
+			if (!result.checkoutForm && !result.checkoutUrl) {
+				// The invoice exists but Payme isn't configured for this
+				// deployment, so nothing can settle it. Better an unpaid invoice
+				// (same as an abandoned checkout) than a locked wait that can
+				// never end.
+				checkoutWindow?.close();
+				toast.error(t('renew.unavailable'));
+				return;
+			}
+			onStarted(result);
+			if (checkoutWindow) sendToCheckout(checkoutWindow, result);
+		} catch (err) {
+			checkoutWindow?.close();
+			toast.error(isApiError(err) ? err.message : t('renew.failed'));
+		}
+	}
+
+	/** Re-opens checkout from a fresh click, for a blocked or closed tab. */
+	function handleReopen() {
+		if (!intent) return;
+		const checkoutWindow = openCheckoutWindow();
+		setPopupBlocked(checkoutWindow == null);
+		if (checkoutWindow) sendToCheckout(checkoutWindow, intent);
+	}
+
 	return (
-		<Dialog open={open} onOpenChange={onOpenChange}>
-			<DialogContent>
-				{/* Mounts fresh on each open, so its picker state resets without an effect. */}
-				{open && (
-					<RenewForm
-						subscription={subscription}
+		<Dialog
+			open={open}
+			onOpenChange={(next) => {
+				if (!next && locked) return;
+				onOpenChange(next);
+			}}
+		>
+			<DialogContent
+				showCloseButton={!locked}
+				onEscapeKeyDown={(e) => {
+					if (locked) e.preventDefault();
+				}}
+				onInteractOutside={(e) => {
+					if (locked) e.preventDefault();
+				}}
+			>
+				{intent ? (
+					<AwaitingPayment
+						intent={intent}
+						timedOut={timedOut}
+						popupBlocked={popupBlocked}
+						onReopen={handleReopen}
 						onClose={() => onOpenChange(false)}
-						onRenewed={onRenewed}
 					/>
+				) : (
+					/* Mounts fresh on each open, so its picker state resets without an effect. */
+					open && (
+						<RenewForm
+							subscription={subscription}
+							isSubmitting={renew.isPending}
+							onSubmit={handleSubmit}
+							onCancel={() => onOpenChange(false)}
+						/>
+					)
 				)}
 			</DialogContent>
 		</Dialog>
 	);
 }
 
+/** Prefers the POST form — it is the only one carrying the fiscal receipt detail. */
+function sendToCheckout(
+	checkoutWindow: Window,
+	intent: Pick<RenewSubscriptionResult, 'checkoutForm' | 'checkoutUrl'>,
+): void {
+	if (intent.checkoutForm) {
+		submitCheckoutForm(intent.checkoutForm);
+	} else if (intent.checkoutUrl) {
+		checkoutWindow.location.href = intent.checkoutUrl;
+	}
+}
+
 function RenewForm({
 	subscription,
-	onClose,
-	onRenewed,
+	isSubmitting,
+	onSubmit,
+	onCancel,
 }: {
 	subscription: SubscriptionAccessView;
-	onClose: () => void;
-	onRenewed: (result: RenewSubscriptionResult) => void;
+	isSubmitting: boolean;
+	onSubmit: (input: RenewSubscriptionInput) => void;
+	onCancel: () => void;
 }) {
 	const t = useAppT('subscription');
 	const tc = useT('common');
@@ -89,12 +198,10 @@ function RenewForm({
 	const [billingInterval, setBillingInterval] = useState<BillingInterval>(
 		subscription.billingInterval ?? 'MONTHLY',
 	);
-	const [method, setMethod] = useState<SubscriptionPaymentMethod>('CLICK');
 
 	const { data: quote, isLoading: isQuoteLoading } = useSubscriptionQuote(!changePlan);
 	const { data: plans = [], isLoading: isPlansLoading } =
 		useSubscriptionPlans(changePlan);
-	const renew = useRenewSubscription();
 
 	const selectedPlan = plans.find((p) => p.id === planId);
 	const estimatedAmount = selectedPlan
@@ -103,23 +210,16 @@ function RenewForm({
 			: selectedPlan.priceAnnual
 		: null;
 
-	async function handleSubmit(e: React.FormEvent) {
+	function handleSubmit(e: React.FormEvent) {
 		e.preventDefault();
-		try {
-			const result = await renew.mutateAsync({
-				method,
-				subscriptionTierId: changePlan ? (planId ?? undefined) : undefined,
-				billingInterval: changePlan ? billingInterval : undefined,
-			});
-			onClose();
-			onRenewed(result);
-		} catch (err) {
-			toast.error(isApiError(err) ? err.message : t('renew.failed'));
-		}
+		onSubmit({
+			subscriptionTierId: changePlan ? (planId ?? undefined) : undefined,
+			billingInterval: changePlan ? billingInterval : undefined,
+		});
 	}
 
 	return (
-		<form onSubmit={(e) => void handleSubmit(e)} className="flex flex-col gap-5">
+		<form onSubmit={handleSubmit} className="flex flex-col gap-5">
 			<DialogHeader>
 				<DialogTitle>{t('renew.dialogTitle')}</DialogTitle>
 				<DialogDescription>{t('renew.dialogDescription')}</DialogDescription>
@@ -231,42 +331,112 @@ function RenewForm({
 				)}
 			</div>
 
-			<div className="flex flex-col gap-1.5">
-				<Label>{t('renew.method')}</Label>
-				<RadioGroup
-					value={method}
-					onValueChange={(v) => setMethod(v as SubscriptionPaymentMethod)}
-					className="grid grid-cols-2 gap-2 sm:grid-cols-3"
-				>
-					{PAYMENT_METHODS.map((m) => (
-						<Label
-							key={m}
-							className="flex cursor-pointer items-center gap-2 rounded-lg border border-border p-2.5 text-sm has-data-[state=checked]:border-primary"
-						>
-							<RadioGroupItem value={m} />
-							{t(`method.${m}`)}
-						</Label>
-					))}
-				</RadioGroup>
+			{/* Payme is the only gateway on offer, so this states the method
+			    rather than asking for it — there is nothing to choose. */}
+			<div className="flex items-center justify-between gap-2 text-sm">
+				<span className="text-muted-foreground">{t('renew.method')}</span>
+				<span className="font-semibold">{t('method.PAYME')}</span>
 			</div>
 
 			<DialogFooter>
 				<Button
 					type="button"
 					variant="outline"
-					onClick={onClose}
-					disabled={renew.isPending}
+					onClick={onCancel}
+					disabled={isSubmitting}
 				>
 					{tc('action.cancel')}
 				</Button>
 				<Button
 					type="submit"
-					disabled={renew.isPending || (changePlan && planId == null)}
+					disabled={isSubmitting || (changePlan && planId == null)}
 				>
-					{renew.isPending && <Spinner className="mr-2 size-4" />}
+					{isSubmitting && <Spinner className="mr-2 size-4" />}
 					{t('renew.submit')}
 				</Button>
 			</DialogFooter>
 		</form>
+	);
+}
+
+/**
+ * The locked half of the flow. Shows what is being paid and waits — access is
+ * restored by the settlement webhook, never by anything this screen does, so
+ * there is nothing here to confirm or retry, only the checkout tab to re-open.
+ */
+function AwaitingPayment({
+	intent,
+	timedOut,
+	popupBlocked,
+	onReopen,
+	onClose,
+}: {
+	intent: RenewSubscriptionResult;
+	timedOut: boolean;
+	popupBlocked: boolean;
+	onReopen: () => void;
+	onClose: () => void;
+}) {
+	const t = useAppT('subscription');
+	const tc = useT('common');
+
+	return (
+		<div className="flex flex-col gap-5">
+			<DialogHeader>
+				<DialogTitle>
+					{t(timedOut ? 'renew.timedOutTitle' : 'renew.awaitingTitle')}
+				</DialogTitle>
+				<DialogDescription>
+					{t(
+						timedOut
+							? 'renew.timedOutDescription'
+							: 'renew.awaitingDescription',
+					)}
+				</DialogDescription>
+			</DialogHeader>
+
+			<div className="flex flex-col gap-2 rounded-lg border border-border bg-muted/40 p-3.5 text-sm">
+				<div className="flex items-center justify-between">
+					<span className="text-muted-foreground">
+						{t('renew.quoteAmount')}
+					</span>
+					<span className="font-semibold tabular-nums">
+						{formatPrice(intent.payment.amount)} {intent.payment.currency}
+					</span>
+				</div>
+				<div className="flex items-center justify-between text-xs text-muted-foreground">
+					<span>{t('active.period')}</span>
+					<span>
+						{formatDate(intent.invoice.periodStart)} –{' '}
+						{formatDate(intent.invoice.periodEnd)}
+					</span>
+				</div>
+			</div>
+
+			{popupBlocked && (
+				<Alert variant="warning">
+					<AlertDescription>{t('renew.popupBlocked')}</AlertDescription>
+				</Alert>
+			)}
+
+			{!timedOut && (
+				<p className="flex items-center gap-2 text-sm text-muted-foreground">
+					<Spinner className="size-3.5 shrink-0" />
+					{t('renew.doNotClose')}
+				</p>
+			)}
+
+			<DialogFooter>
+				<Button type="button" variant="outline" onClick={onReopen}>
+					<ExternalLink className="mr-2 size-4" />
+					{t('renew.reopenCheckout')}
+				</Button>
+				{timedOut && (
+					<Button type="button" onClick={onClose}>
+						{tc('action.close')}
+					</Button>
+				)}
+			</DialogFooter>
+		</div>
 	);
 }
