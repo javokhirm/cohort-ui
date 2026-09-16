@@ -275,6 +275,9 @@ importers:
 
   apps/student:
     dependencies:
+      '@fullstory/browser':
+        specifier: ^2.0.8
+        version: 2.0.8
       '@hookform/resolvers':
         specifier: ^5.4.0
         version: 5.4.0(react-hook-form@7.81.0(react@19.2.7))
@@ -348,6 +351,9 @@ importers:
 
   apps/teacher:
     dependencies:
+      '@fullstory/browser':
+        specifier: ^2.0.8
+        version: 2.0.8
       '@hookform/resolvers':
         specifier: ^5.4.0
         version: 5.4.0(react-hook-form@7.81.0(react@19.2.7))
