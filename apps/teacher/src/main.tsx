@@ -9,6 +9,7 @@ import './styles/globals.css';
 import './lib/env'; // validate env at boot — throws with a clear message if invalid
 import { queryClient } from './api/queryClient';
 import { initAppLocales } from './locales';
+import { initFullStory } from './lib/third-party/fullstory';
 import { App } from './App';
 
 initTheme({ storageKey: 'cohort.teacher.theme' });
@@ -17,6 +18,7 @@ initTheme({ storageKey: 'cohort.teacher.theme' });
 initI18n({ storageKey: 'cohort.teacher.locale' });
 // Feature-screen catalogs — must follow initI18n, which creates the resource store.
 initAppLocales();
+initFullStory();
 
 createRoot(document.getElementById('root')!).render(
 	<StrictMode>
