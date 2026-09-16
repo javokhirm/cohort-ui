@@ -5,6 +5,7 @@ import type { SubscriptionAccessView, SubscriptionBlockDetails } from '@repo/api
 
 import type { AuthResult, AuthUserSummary } from '@/lib/auth/types';
 import { clearStoredRefreshToken, setStoredRefreshToken } from '@/lib/auth/tokenStorage';
+import { clearIdentity, identify } from '@/lib/third-party/fullstory';
 
 /** `unknown` until the boot refresh resolves — the router waits for this. */
 export type SessionStatus = 'unknown' | 'authenticated' | 'anonymous';
@@ -64,6 +65,7 @@ export const useSessionStore = create<SessionState>((set) => ({
 		// user → tenant → localStorage → 'uz': the server already applied the
 		// tenant fallback, so a non-null value here is the student's own choice.
 		setLocale(result.user.preferredLanguage);
+		identify(result.user);
 		set((state) => ({
 			accessToken: result.accessToken,
 			user: result.user,
@@ -76,16 +78,19 @@ export const useSessionStore = create<SessionState>((set) => ({
 		}));
 	},
 	setSubscriptionBlock: (details) => set({ subscriptionBlock: details }),
-	setAnonymous: () =>
+	setAnonymous: () => {
+		clearIdentity();
 		set({
 			accessToken: null,
 			user: null,
 			status: 'anonymous',
 			subscription: null,
 			subscriptionBlock: null,
-		}),
+		});
+	},
 	clear: () => {
 		clearStoredRefreshToken();
+		clearIdentity();
 		set({
 			accessToken: null,
 			user: null,
