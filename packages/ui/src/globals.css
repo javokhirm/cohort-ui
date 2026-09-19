@@ -91,6 +91,22 @@
 	--tone-orange-fg: #ea580c;
 	--tone-yellow-bg: #fef9c3;
 	--tone-yellow-fg: #a16207;
+
+	/* Toast surfaces — a toast floats above page content, so it needs an opaque
+	   fill and its own border; the tone tokens above only carry bg/fg and turn
+	   translucent in dark mode. Consumed by the `Toaster` host. */
+	--toast-success-bg: var(--tone-green-bg);
+	--toast-success-fg: var(--tone-green-fg);
+	--toast-success-border: #bbf7d0;
+	--toast-error-bg: var(--tone-red-bg);
+	--toast-error-fg: var(--tone-red-fg);
+	--toast-error-border: #fecaca;
+	--toast-warning-bg: var(--tone-amber-bg);
+	--toast-warning-fg: var(--tone-amber-fg);
+	--toast-warning-border: #fde68a;
+	--toast-info-bg: var(--tone-blue-bg);
+	--toast-info-fg: var(--tone-blue-fg);
+	--toast-info-border: #bfdbfe;
 }
 
 .dark {
@@ -153,6 +169,21 @@
 	--tone-orange-fg: #fb923c;
 	--tone-yellow-bg: rgba(234, 179, 8, 0.17);
 	--tone-yellow-fg: #facc15;
+
+	/* Toast surfaces — the tone tints above, flattened onto `--popover` so a
+	   toast stays opaque over whatever it floats on. */
+	--toast-success-bg: #153737;
+	--toast-success-fg: var(--tone-green-fg);
+	--toast-success-border: #18523f;
+	--toast-error-bg: #362233;
+	--toast-error-fg: var(--tone-red-fg);
+	--toast-error-border: #592936;
+	--toast-warning-bg: #39322a;
+	--toast-warning-fg: var(--tone-amber-fg);
+	--toast-warning-border: #5b4624;
+	--toast-info-bg: #1a2d52;
+	--toast-info-fg: var(--tone-blue-fg);
+	--toast-info-border: #203d6f;
 }
 
 @theme inline {
