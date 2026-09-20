@@ -38,7 +38,6 @@ export interface StaffResponse {
 	id: number;
 	staffCode: string;
 	branchId: number;
-	branch: { id: number; name: string } | null;
 	position: string | null;
 	department: string | null;
 	specialization: string[];
@@ -46,8 +45,6 @@ export interface StaffResponse {
 	status: StaffStatus;
 	hireDate: string | null;
 	roles: string[];
-	groupsCount: number;
-	weeklyHours: number;
 	user: StaffUser;
 }
 

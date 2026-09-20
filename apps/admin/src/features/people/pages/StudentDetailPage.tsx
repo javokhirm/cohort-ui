@@ -7,6 +7,7 @@ import {
 	Button,
 	Card,
 	CardContent,
+	ConfirmDialog,
 	DataTable,
 	EmptyState,
 	PageNav,
@@ -44,6 +45,7 @@ import { useRemoveGuardian } from '../api/students.mutations';
 import { AddGuardianDialog } from '../components/AddGuardianDialog';
 import { BillingTab } from '../components/BillingTab';
 import { GradesTab } from '../components/GradesTab';
+import { GuardianDetailSheet } from '../components/GuardianDetailSheet';
 import { PerformanceTab } from '../components/PerformanceTab';
 import { StudentForm } from '../components/StudentForm';
 import { WalletSection } from '../components/WalletSection';
@@ -190,23 +192,22 @@ function OverviewTab({ studentId }: { studentId: number }) {
 
 function GuardiansTab({ studentId }: { studentId: number }) {
 	const t = useAppT('people');
+	const tc = useT('common');
 	const { data: guardians = [], isLoading } = useStudentGuardians(studentId);
 	const removeGuardian = useRemoveGuardian();
 	const [addOpen, setAddOpen] = useState(false);
+	const [viewGuardianId, setViewGuardianId] = useState<number | null>(null);
+	const [removeTarget, setRemoveTarget] = useState<Guardian | null>(null);
 
-	function handleRemove(guardian: Guardian) {
-		if (
-			!confirm(
-				t('detail.guardians.removeConfirm', {
-					name: `${guardian.user.firstName} ${guardian.user.lastName}`,
-				}),
-			)
-		)
-			return;
+	function handleRemoveConfirm() {
+		if (!removeTarget) return;
 		removeGuardian.mutate(
-			{ studentId, guardianId: guardian.guardianUserId },
+			{ studentId, guardianId: removeTarget.guardianUserId },
 			{
-				onSuccess: () => toast.success(t('detail.guardians.removed')),
+				onSuccess: () => {
+					toast.success(t('detail.guardians.removed'));
+					setRemoveTarget(null);
+				},
 			},
 		);
 	}
@@ -226,6 +227,35 @@ function GuardiansTab({ studentId }: { studentId: number }) {
 			isFirstGuardian={guardians.length === 0}
 			open={addOpen}
 			onOpenChange={setAddOpen}
+		/>
+	);
+
+	const detailSheet = (
+		<GuardianDetailSheet
+			guardianId={viewGuardianId}
+			open={viewGuardianId != null}
+			onOpenChange={(open) => {
+				if (!open) setViewGuardianId(null);
+			}}
+		/>
+	);
+
+	const removeDialog = (
+		<ConfirmDialog
+			open={removeTarget != null}
+			onOpenChange={(open) => {
+				if (!open) setRemoveTarget(null);
+			}}
+			title={t('detail.guardians.removeConfirm', {
+				name: removeTarget
+					? `${removeTarget.user.firstName} ${removeTarget.user.lastName}`
+					: '',
+			})}
+			confirmLabel={t('detail.guardians.remove')}
+			cancelLabel={tc('action.cancel')}
+			variant="destructive"
+			loading={removeGuardian.isPending}
+			onConfirm={handleRemoveConfirm}
 		/>
 	);
 
@@ -268,7 +298,10 @@ function GuardiansTab({ studentId }: { studentId: number }) {
 					return (
 						<div key={g.id}>
 							{i > 0 && <Separator />}
-							<div className="flex items-center justify-between p-4">
+							<div
+								className="flex cursor-pointer items-center justify-between p-4 hover:bg-muted/50"
+								onClick={() => setViewGuardianId(g.guardianUserId)}
+							>
 								<div className="flex items-center gap-3">
 									<div className="flex size-9 shrink-0 items-center justify-center rounded-full bg-muted text-xs font-semibold">
 										{initials}
@@ -302,7 +335,10 @@ function GuardiansTab({ studentId }: { studentId: number }) {
 										variant="ghost"
 										size="sm"
 										className="text-muted-foreground hover:text-destructive"
-										onClick={() => handleRemove(g)}
+										onClick={(e) => {
+											e.stopPropagation();
+											setRemoveTarget(g);
+										}}
 									>
 										<Trash2 className="size-4" />
 									</Button>
@@ -313,6 +349,8 @@ function GuardiansTab({ studentId }: { studentId: number }) {
 				})}
 			</div>
 			{dialog}
+			{detailSheet}
+			{removeDialog}
 		</div>
 	);
 }

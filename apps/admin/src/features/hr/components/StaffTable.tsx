@@ -81,15 +81,6 @@ export function StaffTable({ staff, isLoading }: StaffTableProps) {
 			size: 160,
 		},
 		{
-			id: 'branch',
-			header: t('column.branch'),
-			cell: ({ row }) => (
-				<span className="text-sm text-muted-foreground">
-					{row.original.branch?.name ?? '—'}
-				</span>
-			),
-		},
-		{
 			accessorKey: 'status',
 			header: t('column.status'),
 			cell: ({ getValue }) => (
@@ -98,21 +89,6 @@ export function StaffTable({ staff, isLoading }: StaffTableProps) {
 				</StatusBadge>
 			),
 			size: 112,
-		},
-		{
-			id: 'load',
-			header: t('column.load'),
-			cell: ({ row }) => {
-				const { groupsCount, weeklyHours } = row.original;
-				if (groupsCount === 0) {
-					return <span className="text-sm text-muted-foreground">—</span>;
-				}
-				return (
-					<span className="text-sm text-muted-foreground">
-						{t('loadValue', { count: groupsCount, hours: weeklyHours })}
-					</span>
-				);
-			},
 		},
 	];
 

@@ -16,7 +16,6 @@ import {
 	Receipt,
 	SlidersHorizontal,
 	Tag,
-	Users,
 	Wallet,
 } from 'lucide-react';
 import type { LucideIcon } from 'lucide-react';
@@ -39,7 +38,6 @@ export type NavItemKey =
 	| 'dashboard'
 	| 'leads'
 	| 'students'
-	| 'guardians'
 	| 'staff'
 	| 'courses'
 	| 'rooms'
@@ -86,7 +84,7 @@ export type NavGroupDef = {
 };
 
 /**
- * The console's whole navigation — seventeen destinations in seven groups,
+ * The console's whole navigation — sixteen destinations in seven groups,
  * driving the desktop sidebar rail and the phone drawer from one list so the
  * two chromes can never drift apart. Labels are catalog keys, translated at
  * render; each item carries the permission that reveals it.
@@ -124,13 +122,6 @@ export const NAV_GROUPS: NavGroupDef[] = [
 				label: 'students',
 				Icon: GraduationCap,
 				href: '/students',
-				permission: 'student.read',
-			},
-			{
-				id: 'guardians',
-				label: 'guardians',
-				Icon: Users,
-				href: '/guardians',
 				permission: 'student.read',
 			},
 			{

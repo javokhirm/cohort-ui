@@ -139,7 +139,6 @@ export const ru = {
 			dashboard: 'Дашборд',
 			leads: 'Лиды / Воронка',
 			students: 'Ученики',
-			guardians: 'Родители / Опекуны',
 			staff: 'Сотрудники и HR',
 			courses: 'Курсы',
 			rooms: 'Кабинеты',
