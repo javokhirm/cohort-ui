@@ -434,6 +434,7 @@ export const uz = {
 				primaryLabel: 'Asosiy vasiy',
 				primary: 'Asosiy',
 				pickup: 'Olib ketishi mumkin',
+				remove: 'Olib tashlash',
 				removeConfirm: '{{name}} vasiylikdan olib tashlansinmi?',
 				removed: 'Vasiy olib tashlandi',
 			},
@@ -552,28 +553,11 @@ export const uz = {
 			},
 		},
 		guardiansPage: {
-			title: 'Ota-onalar / Vasiylar',
-			description:
-				'Barcha ota-ona va vasiylarni koʻrish, tahrirlash hamda oʻquvchilarga bogʻlash',
-			searchPlaceholder: 'Ism yoki telefon boʻyicha qidirish…',
-			column: {
-				guardian: 'Vasiy',
-				phone: 'Telefon',
-				students: 'Bogʻlangan oʻquvchilar',
-				actions: 'Amallar',
-			},
 			noStudents: 'Bogʻlangan oʻquvchi yoʻq',
-			moreStudents_one: '+{{count}} yana',
-			moreStudents_other: '+{{count}} yana',
-			empty: 'Vasiylar topilmadi',
-			emptyDescription: 'Hali hech qanday vasiy qoʻshilmagan.',
-			emptyFiltered: 'Qidiruvga mos vasiy topilmadi',
 			detail: {
 				title: 'Vasiy maʼlumotlari',
-				actionsLabel: 'Vasiy amallari',
 				edit: 'Tahrirlash',
 				save: 'Saqlash',
-				cancel: 'Bekor qilish',
 				saved: 'Maʼlumotlar yangilandi',
 				saveFailed: 'Yangilab boʻlmadi',
 				field: {
@@ -587,12 +571,6 @@ export const uz = {
 				unlinkConfirm: '{{name}} bilan bogʻlanish uzilsinmi?',
 				unlinked: 'Bogʻlanish uzildi',
 				unlinkFailed: 'Bogʻlanishni uzib boʻlmadi',
-				delete: 'Vasiyni oʻchirish',
-				deleteConfirmTitle: 'Vasiy butunlay oʻchirilsinmi?',
-				deleteConfirmDescription:
-					'{{name}} barcha oʻquvchilardan uziladi va tizimdan olib tashlanadi. Bu amalni bekor qilib boʻlmaydi.',
-				deleted: 'Vasiy oʻchirildi',
-				deleteFailed: 'Vasiyni oʻchirib boʻlmadi',
 			},
 			linkDialog: {
 				title: 'Oʻquvchi bogʻlash',
@@ -635,13 +613,8 @@ export const uz = {
 			employee: 'Xodim kodi',
 			name: 'F.I.Sh.',
 			role: 'Roli',
-			branch: 'Filial',
 			status: 'Holati',
-			load: 'Dars yuklamasi',
 		},
-		/** "{{count}} guruh · {{hours}} soat/hafta" */
-		loadValue_one: '{{count}} guruh · {{hours}} soat/hafta',
-		loadValue_other: '{{count}} guruh · {{hours}} soat/hafta',
 		form: {
 			addTitle: 'Xodim qoʻshish',
 			editTitle: 'Xodimni tahrirlash',
@@ -698,13 +671,10 @@ export const uz = {
 			row: {
 				phone: 'Telefon',
 				email: 'Elektron pochta',
-				branch: 'Filial',
 				contract: 'Shartnoma turi',
 				joined: 'Ishga kirgan sana',
-				weeklyLoad: 'Haftalik yuklama',
 				subjects: 'Fanlar',
 			},
-			weeklyHours: '{{count}} soat / hafta',
 			recentPayslips: 'Soʻngi hisob varaqalari',
 			noPayslips: 'Hali hisob varaqalari yoʻq',
 			net: 'Sof: {{amount}}',
@@ -724,6 +694,9 @@ export const uz = {
 			revoked: 'Rol bekor qilindi',
 			granted: 'Rol berildi',
 			alreadyHeld: 'Bu rol allaqachon shu filialda berilgan.',
+			addBranch: 'Filial qoʻshish',
+			revokeBranch: '{{branch}} filialidagi ruxsatni bekor qilish',
+			grantPartial: '{{count}} ta filialda berilmadi: {{reason}}',
 			revokeConfirm: {
 				title: 'Bu rol bekor qilinsinmi?',
 				description:
@@ -739,7 +712,9 @@ export const uz = {
 				rolePlaceholder: 'Rolni tanlang',
 				loading: 'Yuklanmoqda…',
 				branch: 'Filial',
+				branches: 'Filiallar',
 				submit: 'Rol berish',
+				submitCount: '{{count}} ta filialga berish',
 			},
 		},
 		password: {

@@ -21,14 +21,6 @@ export interface StudentPerformanceFilters {
 	status?: 'PRESENT' | 'ABSENT' | 'LATE' | 'EXCUSED';
 }
 
-/** Filters for `GET /manage/guardians` in its list mode (no `phone`). */
-export interface GuardianListFilters {
-	page?: number;
-	limit?: number;
-	/** Matches firstName, lastName, phone. */
-	search?: string;
-}
-
 export const peopleKeys = {
 	all: ['people'] as const,
 
@@ -61,12 +53,12 @@ export const peopleKeys = {
 	guardianLookup: (phone: string) =>
 		[...peopleKeys.all, 'guardians', 'lookup', phone] as const,
 
-	// The Guardians directory page — a separate branch from `guardianLookup`
-	// above (the per-student add-guardian phone check), so invalidating one
-	// never refetches the other.
+	// A single guardian's detail view, opened from the student-detail Guardians
+	// tab — a separate branch from `guardianLookup` above (the per-student
+	// add-guardian phone check). The tab's link/unlink mutations invalidate
+	// this whole branch so an already-open guardian-detail sheet picks up the
+	// change.
 	guardians: () => [...peopleKeys.all, 'guardians', 'directory'] as const,
-	guardianList: (filters: GuardianListFilters) =>
-		[...peopleKeys.guardians(), 'list', filters] as const,
 	guardian: (id: number) => [...peopleKeys.guardians(), 'detail', id] as const,
 
 	groups: (filters?: { branchIds?: number[]; status?: string }) =>

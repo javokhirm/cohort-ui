@@ -160,7 +160,6 @@ export const uz = {
 			dashboard: 'Boshqaruv paneli',
 			leads: 'Lidlar / Voronka',
 			students: 'Oʻquvchilar',
-			guardians: 'Ota-onalar / Vasiylar',
 			staff: 'Xodimlar va HR',
 			courses: 'Kurslar',
 			rooms: 'Xonalar',

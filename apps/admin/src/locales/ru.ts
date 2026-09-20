@@ -428,6 +428,7 @@ export const ru: TranslationsOf<typeof uz> = {
 				primaryLabel: 'Основной представитель',
 				primary: 'Основной',
 				pickup: 'Может забирать',
+				remove: 'Убрать',
 				removeConfirm: 'Убрать {{name}} из представителей?',
 				removed: 'Представитель убран',
 			},
@@ -551,28 +552,11 @@ export const ru: TranslationsOf<typeof uz> = {
 			},
 		},
 		guardiansPage: {
-			title: 'Родители / Опекуны',
-			description:
-				'Просмотр, редактирование и привязка родителей и опекунов к ученикам',
-			searchPlaceholder: 'Поиск по имени или телефону…',
-			column: {
-				guardian: 'Опекун',
-				phone: 'Телефон',
-				students: 'Привязанные ученики',
-				actions: 'Действия',
-			},
 			noStudents: 'Нет привязанных учеников',
-			moreStudents_one: 'ещё +{{count}}',
-			moreStudents_other: 'ещё +{{count}}',
-			empty: 'Опекуны не найдены',
-			emptyDescription: 'Пока не добавлено ни одного опекуна.',
-			emptyFiltered: 'По запросу опекун не найден',
 			detail: {
 				title: 'Данные опекуна',
-				actionsLabel: 'Действия с опекуном',
 				edit: 'Редактировать',
 				save: 'Сохранить',
-				cancel: 'Отмена',
 				saved: 'Данные обновлены',
 				saveFailed: 'Не удалось обновить',
 				field: {
@@ -586,12 +570,6 @@ export const ru: TranslationsOf<typeof uz> = {
 				unlinkConfirm: 'Отвязать {{name}}?',
 				unlinked: 'Связь удалена',
 				unlinkFailed: 'Не удалось отвязать',
-				delete: 'Удалить опекуна',
-				deleteConfirmTitle: 'Удалить опекуна полностью?',
-				deleteConfirmDescription:
-					'{{name}} будет отвязан от всех учеников и удалён из системы. Это действие нельзя отменить.',
-				deleted: 'Опекун удалён',
-				deleteFailed: 'Не удалось удалить опекуна',
 			},
 			linkDialog: {
 				title: 'Привязать ученика',
@@ -634,14 +612,8 @@ export const ru: TranslationsOf<typeof uz> = {
 			employee: 'Табельный номер',
 			name: 'ФИО',
 			role: 'Роль',
-			branch: 'Филиал',
 			status: 'Статус',
-			load: 'Учебная нагрузка',
 		},
-		loadValue_one: '{{count}} группа · {{hours}} ч/нед',
-		loadValue_few: '{{count}} группы · {{hours}} ч/нед',
-		loadValue_many: '{{count}} групп · {{hours}} ч/нед',
-		loadValue_other: '{{count}} групп · {{hours}} ч/нед',
 		form: {
 			addTitle: 'Добавить сотрудника',
 			editTitle: 'Редактировать сотрудника',
@@ -698,13 +670,10 @@ export const ru: TranslationsOf<typeof uz> = {
 			row: {
 				phone: 'Телефон',
 				email: 'Эл. почта',
-				branch: 'Филиал',
 				contract: 'Тип договора',
 				joined: 'Дата приёма',
-				weeklyLoad: 'Недельная нагрузка',
 				subjects: 'Предметы',
 			},
-			weeklyHours: '{{count}} ч / неделю',
 			recentPayslips: 'Последние расчётные листы',
 			noPayslips: 'Расчётных листов пока нет',
 			net: 'К выплате: {{amount}}',
@@ -724,6 +693,9 @@ export const ru: TranslationsOf<typeof uz> = {
 			revoked: 'Роль отозвана',
 			granted: 'Роль выдана',
 			alreadyHeld: 'Эта роль уже выдана в этом филиале.',
+			addBranch: 'Добавить филиал',
+			revokeBranch: 'Отозвать доступ к филиалу {{branch}}',
+			grantPartial: 'Не выдано в {{count}} филиалах: {{reason}}',
 			revokeConfirm: {
 				title: 'Отозвать эту роль?',
 				description:
@@ -739,7 +711,9 @@ export const ru: TranslationsOf<typeof uz> = {
 				rolePlaceholder: 'Выберите роль',
 				loading: 'Загрузка…',
 				branch: 'Филиал',
+				branches: 'Филиалы',
 				submit: 'Выдать роль',
+				submitCount: 'Выдать в {{count}} филиалах',
 			},
 		},
 		password: {

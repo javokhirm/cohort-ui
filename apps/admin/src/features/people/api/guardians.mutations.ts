@@ -20,17 +20,6 @@ export function useUpdateGuardian() {
 			manageApi.patch<GuardianCandidate>(`/guardians/${id}`, body),
 		onSuccess: (_data, variables) => {
 			void qc.invalidateQueries({ queryKey: peopleKeys.guardian(variables.id) });
-			void qc.invalidateQueries({ queryKey: peopleKeys.guardians() });
-		},
-	});
-}
-
-export function useDeleteGuardian() {
-	const qc = useQueryClient();
-	return useMutation({
-		mutationFn: (id: number) => manageApi.delete(`/guardians/${id}`),
-		onSuccess: () => {
-			void qc.invalidateQueries({ queryKey: peopleKeys.guardians() });
 		},
 	});
 }

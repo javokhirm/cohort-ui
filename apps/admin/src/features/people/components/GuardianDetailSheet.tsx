@@ -1,7 +1,7 @@
 import { useMemo, useState } from 'react';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { useForm } from 'react-hook-form';
-import { Plus, Trash2 } from 'lucide-react';
+import { Pencil, Plus, Trash2 } from 'lucide-react';
 
 import {
 	Button,
@@ -38,28 +38,17 @@ interface GuardianDetailSheetProps {
 	guardianId: number | null;
 	open: boolean;
 	onOpenChange: (open: boolean) => void;
-	/** Which view the sheet opens on — set to 'edit' when opened from a row's edit action. */
-	initialMode?: 'view' | 'edit';
 }
 
 export function GuardianDetailSheet({
 	guardianId,
 	open,
 	onOpenChange,
-	initialMode = 'view',
 }: GuardianDetailSheetProps) {
 	const t = useAppT('people');
 	const { data: guardian, isLoading } = useGuardian(open ? (guardianId ?? 0) : 0);
-	const [editing, setEditing] = useState(initialMode === 'edit');
+	const [editing, setEditing] = useState(false);
 	const [linkOpen, setLinkOpen] = useState(false);
-
-	// Re-sync `editing` to `initialMode` whenever the sheet (re)opens — adjusted
-	// during render rather than an effect, per https://react.dev/learn/you-might-not-need-an-effect#adjusting-some-state-when-a-prop-changes.
-	const [prevOpen, setPrevOpen] = useState(open);
-	if (open !== prevOpen) {
-		setPrevOpen(open);
-		if (open) setEditing(initialMode === 'edit');
-	}
 
 	function handleOpenChange(next: boolean) {
 		if (!next) setEditing(false);
@@ -92,8 +81,20 @@ export function GuardianDetailSheet({
 					) : (
 						<div className="flex flex-col gap-4">
 							<div className="rounded-xl border bg-card p-4">
-								<div className="flex size-11 shrink-0 items-center justify-center rounded-full bg-primary/10 text-sm font-bold text-primary">
-									{`${guardian.user.firstName[0] ?? ''}${guardian.user.lastName[0] ?? ''}`.toUpperCase()}
+								<div className="flex items-start justify-between">
+									<div className="flex size-11 shrink-0 items-center justify-center rounded-full bg-primary/10 text-sm font-bold text-primary">
+										{`${guardian.user.firstName[0] ?? ''}${guardian.user.lastName[0] ?? ''}`.toUpperCase()}
+									</div>
+									<Can permission="student.guardian.manage">
+										<Button
+											variant="ghost"
+											size="sm"
+											aria-label={t('guardiansPage.detail.edit')}
+											onClick={() => setEditing(true)}
+										>
+											<Pencil className="size-4" />
+										</Button>
+									</Can>
 								</div>
 								<div className="mt-3">
 									<div className="text-base font-bold">{fullName}</div>

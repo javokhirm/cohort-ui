@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { Link, useNavigate, useSearch } from '@tanstack/react-router';
-import { Building2, Edit, KeyRound, Mail, MessageSquare, Phone } from 'lucide-react';
+import { Edit, KeyRound, Mail, MessageSquare, Phone } from 'lucide-react';
 
 import {
 	ActionsMenu,
@@ -43,9 +43,7 @@ function StaffHeader({ staff, onEdit }: { staff: StaffResponse; onEdit: () => vo
 		`${staff.user.firstName?.[0] ?? ''}${staff.user.lastName?.[0] ?? ''}`.toUpperCase();
 	const role = primaryRole(staff.roles);
 	const fullName = `${staff.user.firstName} ${staff.user.lastName}`;
-	const subtitle = [staff.position, staff.staffCode, staff.branch?.name]
-		.filter(Boolean)
-		.join(' · ');
+	const subtitle = [staff.position, staff.staffCode].filter(Boolean).join(' · ');
 
 	return (
 		<div className="rounded-xl border bg-card p-5">
@@ -135,11 +133,6 @@ function OverviewTab({ staff }: { staff: StaffResponse }) {
 								value: staff.user.email ?? '—',
 								icon: <Mail />,
 							},
-							{
-								label: t('detail.row.branch'),
-								value: staff.branch?.name ?? '—',
-								icon: <Building2 />,
-							},
 						]}
 					/>
 				</CardContent>
@@ -157,12 +150,6 @@ function OverviewTab({ staff }: { staff: StaffResponse }) {
 							{
 								label: t('detail.row.joined'),
 								value: staff.hireDate ? formatDate(staff.hireDate) : '—',
-							},
-							{
-								label: t('detail.row.weeklyLoad'),
-								value: t('detail.weeklyHours', {
-									count: staff.weeklyHours,
-								}),
 							},
 							{ label: t('detail.row.subjects'), value: subjects },
 						]}

@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { Plus, ShieldCheck, Trash2 } from 'lucide-react';
+import { Plus, ShieldCheck, X } from 'lucide-react';
 
 import {
 	Badge,
@@ -20,6 +20,21 @@ import { useAppT } from '@/locales';
 import { useRevokeRole } from '../api/roles.mutations';
 import { useUserRoleAssignments, type RoleAssignment } from '../api/roles.queries';
 import { GrantRoleDialog } from './GrantRoleDialog';
+
+/**
+ * Collapse the flat assignment list into one entry per role, each carrying the
+ * branches it was granted at. Insertion-ordered, so the server's `id ASC` order
+ * decides which role heads the list.
+ */
+function groupByRole(assignments: RoleAssignment[]): [string, RoleAssignment[]][] {
+	const byRole = new Map<string, RoleAssignment[]>();
+	for (const assignment of assignments) {
+		const grants = byRole.get(assignment.roleName) ?? [];
+		grants.push(assignment);
+		byRole.set(assignment.roleName, grants);
+	}
+	return [...byRole.entries()];
+}
 
 interface RolesSectionProps {
 	/** `staff.user.id` — role grants hang off the user, not the staff record. */
@@ -99,47 +114,65 @@ export function RolesSection({ userId, staffName }: RolesSectionProps) {
 				</Card>
 			) : (
 				<Card className="gap-0 divide-y divide-border py-0">
-					{assignments.map((assignment) => (
-						<div
-							key={assignment.id}
-							className="flex items-center justify-between gap-4 px-4 py-3"
-						>
-							<div className="flex flex-col">
-								<span className="text-sm font-medium">
-									{statusLabel('role', assignment.roleName)}
-								</span>
-								<span className="text-xs text-muted-foreground">
-									{assignment.branchName ?? t('roles.allBranches')}{' '}
-									{t('roles.grantedOn', {
-										date: formatDate(assignment.createdAt),
-									})}
-								</span>
-							</div>
-							<div className="flex items-center gap-3">
-								{!assignment.isActive && (
-									<Badge variant="outline" className="text-xs">
-										{tc('state.inactive')}
+					{groupByRole(assignments).map(([roleName, grants]) => (
+						<div key={roleName} className="flex flex-col gap-2 px-4 py-3">
+							<span className="text-sm font-medium">
+								{statusLabel('role', roleName)}
+							</span>
+							{/*
+							 * One chip per branch: a staff member's branch access IS
+							 * their set of grants, so this is the list of branches
+							 * they can reach with this role. Each chip removes only
+							 * its own grant, leaving the others intact.
+							 */}
+							<div className="flex flex-wrap items-center gap-1.5">
+								{grants.map((assignment) => (
+									<Badge
+										key={assignment.id}
+										variant={assignment.isActive ? 'secondary' : 'outline'}
+										className="gap-1 py-1 pl-2.5 pr-1 font-normal"
+										title={t('roles.grantedOn', {
+											date: formatDate(assignment.createdAt),
+										})}
+									>
+										<span className={assignment.isActive ? '' : 'line-through'}>
+											{assignment.branchName ?? t('roles.allBranches')}
+										</span>
+										{/*
+										 * OWNER/SUPER_ADMIN revocation is refused by the
+										 * server: transferring ownership is a platform
+										 * operation. Offering the button would only
+										 * produce a 403.
+										 */}
+										<Can permission="role.assign">
+											{roleName !== 'OWNER' && roleName !== 'SUPER_ADMIN' && (
+												<Button
+													variant="ghost"
+													size="icon"
+													className="size-4 hover:bg-transparent"
+													aria-label={t('roles.revokeBranch', {
+														branch:
+															assignment.branchName ??
+															t('roles.allBranches'),
+													})}
+													onClick={() => setRevokeTarget(assignment)}
+												>
+													<X className="size-3" />
+												</Button>
+											)}
+										</Can>
 									</Badge>
-								)}
-								{/*
-								 * OWNER/SUPER_ADMIN revocation is refused by the server:
-								 * transferring ownership is a platform operation. Offering
-								 * the button would only produce a 403.
-								 */}
+								))}
 								<Can permission="role.assign">
-									{assignment.roleName !== 'OWNER' &&
-										assignment.roleName !== 'SUPER_ADMIN' && (
-											<Button
-												variant="ghost"
-												size="sm"
-												onClick={() =>
-													setRevokeTarget(assignment)
-												}
-											>
-												<Trash2 className="mr-1.5 size-3.5" />
-												{t('roles.revoke')}
-											</Button>
-										)}
+									<Button
+										variant="ghost"
+										size="sm"
+										className="h-6 px-2 text-xs text-muted-foreground"
+										onClick={() => setGrantOpen(true)}
+									>
+										<Plus className="mr-1 size-3" />
+										{t('roles.addBranch')}
+									</Button>
 								</Can>
 							</div>
 						</div>
